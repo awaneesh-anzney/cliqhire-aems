@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
     return (
         <>
-            <div className="flex flex-col w-full h-full py-2 px-2 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col w-full h-full py-2 px-2 space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="relative overflow-hidden rounded-[2rem] bg-brand text-white p-6 shadow-xl shadow-brand/20">
                     <div className="absolute top-0 right-0 -mr-16 -mt-16 opacity-20 pointer-events-none">
                         <svg width="300" height="300" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
