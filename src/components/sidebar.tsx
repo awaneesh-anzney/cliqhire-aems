@@ -53,7 +53,7 @@ const menuItems = [
   // { name: "Inbox", icon: MessageSquare, href: "/inbox", permission: "INBOX" },
   // { name: "Account & Finance", icon: DollarSign, href: "/finance", permission: "FINANCE" },
   // { name: "Reports", icon: BarChart, href: "/reports", permission: "REPORTS" },
-  // { name: "Settings", icon: Settings, href: "/settings", permission: "SETTINGS" },
+  { name: "Settings", icon: Settings, href: "/settings", permission: "SETTINGS" },
   { name: "Administration", icon: Lock, href: "/admin", permission: "ADMIN" },
 ];
 
