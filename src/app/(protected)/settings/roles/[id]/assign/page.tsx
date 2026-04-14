@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { api } from "@/lib/axios-config"
 import { ArrowLeft } from "lucide-react"
+import { roleService } from "@/services/roleService"
 
 interface User {
   _id: string
@@ -63,9 +64,10 @@ export default function AssignUsersPage() {
     setAssigning(true)
 
     try {
-      await api.put(`/api/rbac/roles/${roleId}/users`, {
-        userIds: selectedUserIds
-      })
+      // Step 5 API update: Assign role to each user via PUT /api/users/:id/role
+      await Promise.all(
+        selectedUserIds.map((userId) => roleService.assignRoleToUser(userId, roleId))
+      )
       router.push("/settings")
     } catch (error) {
       console.error("Error assigning users:", error)
@@ -98,7 +100,7 @@ export default function AssignUsersPage() {
                   </p>
                 </div>
                 <div className="text-sm font-medium">
-                  {selectedUserIds.length} Default Users Selected
+                  {selectedUserIds.length} Users Selected
                 </div>
               </div>
 

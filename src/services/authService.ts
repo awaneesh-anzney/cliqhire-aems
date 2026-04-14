@@ -10,7 +10,8 @@ const authApi = axios.create({
 
 // Types for authentication data
 export interface RegisterUserData {
-  name: string;
+  firstName:string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -86,7 +87,8 @@ class AuthService {
     try {
       // Create payload with plain passwords
       const payload = {
-        name: userData.name,
+        firstName: userData.firstName,
+        lastName:userData.lastName,
         email: userData.email,
         password: userData.password,
         confirmPassword: userData.confirmPassword,

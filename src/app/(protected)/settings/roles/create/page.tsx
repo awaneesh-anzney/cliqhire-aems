@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { api } from "@/lib/axios-config"
 import { ArrowLeft } from "lucide-react"
+import { roleService } from "@/services/roleService"
 
 const MODULES = [
   "TODAY_TASKS", 
@@ -26,6 +26,7 @@ const MODULES = [
 export default function CreateRolePage() {
   const router = useRouter()
   const [name, setName] = useState("")
+  const [displayName, setDisplayName] = useState("")
   const [description, setDescription] = useState("")
   const [permissionMatrix, setPermissionMatrix] = useState<Record<string, any>>(() => {
     const initial: Record<string, any> = {}
@@ -52,10 +53,11 @@ export default function CreateRolePage() {
     setIsLoading(true)
 
     try {
-      await api.post('/api/rbac/roles', {
+      await roleService.createRole({
         name,
+        displayName: displayName || name,
         description,
-        permissionMatrix
+        permissions: permissionMatrix
       })
       router.push("/settings")
     } catch (error) {
@@ -82,12 +84,22 @@ export default function CreateRolePage() {
           <form onSubmit={handleSubmit} className="space-y-8 bg-card text-card-foreground p-6 rounded-lg border shadow-sm">
             <div className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Role Name</Label>
+                <Label htmlFor="name">System Name (Reference)</Label>
                 <Input
                   id="name"
-                  placeholder="e.g. Recruitment Manager"
+                  placeholder="e.g. RECRUITMENT_MANAGER"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => setName(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="displayName">Display Name</Label>
+                <Input
+                  id="displayName"
+                  placeholder="e.g. Recruitment Manager"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
                   required
                 />
               </div>

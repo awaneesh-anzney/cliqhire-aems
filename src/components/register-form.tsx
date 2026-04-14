@@ -20,7 +20,8 @@ import { authService, RegisterUserData } from "@/services/authService"
 import { toast } from "sonner"
 
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").nonempty("Name is required"),
+  firstName: z.string().min(2, "Name must be at least 2 characters").nonempty("firstName is required"),
+  lastName:z.string().min(2),
   email: z.string().email("Please enter a valid email address").nonempty("Email is required"),
   password: z.string().min(6, "Password must be at least 6 characters").nonempty("Password is required"),
   confirmPassword: z.string().nonempty("Please confirm your password"),
@@ -42,7 +43,8 @@ export function RegisterForm({
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName:"",
       email: "",
       password: "",
       confirmPassword: "",
@@ -55,7 +57,8 @@ export function RegisterForm({
 
       // Prepare data for the service
       const userData: RegisterUserData = {
-        name: values.name,
+        firstName:values.firstName,
+        lastName: values.lastName,
         email: values.email,
         password: values.password,
         confirmPassword: values.confirmPassword,
@@ -91,14 +94,33 @@ export function RegisterForm({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name="name"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <Input
-                      placeholder="Full Name"
+                      placeholder="First Name"
+                      className="w-full pl-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      placeholder="LastName"
                       className="w-full pl-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
                       {...field}
                     />
