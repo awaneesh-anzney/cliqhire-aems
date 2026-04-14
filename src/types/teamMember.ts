@@ -63,6 +63,8 @@ export interface CreateTeamMemberData {
   department?: string;
   specialization?: string;
   teamRole: string;
+  roleId?: string;
+  password?: string;
   avatar?: string;
   gender?: string;
 }

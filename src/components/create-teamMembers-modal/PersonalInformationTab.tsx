@@ -1,12 +1,13 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CreateTeamMemberData, TeamMemberStatus } from '@/types/teamMember';
+import { CreateTeamMemberData } from '@/types/teamMember';
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "@/styles/phone-input-override.css";
+import { useRoles } from '@/hooks/useRoles';
 
 interface PersonalInformationTabProps {
   formData: CreateTeamMemberData;
@@ -14,44 +15,35 @@ interface PersonalInformationTabProps {
   errors: Record<string, string>;
 }
 
-const departmentOptions = [
-  "Technical Recruiting",
-  "Executive Search",
-  "Talent Acquisition",
-  "HR",
-  "Sales",
-  "Marketing",
-  "Operations"
-];
-
-const teamRoleOptions = [
-  "ADMIN",
-  "HIRING_MANAGER",
-  "TEAM_LEAD",
-  "RECRUITER",
-  "HEAD_HUNTER",
-  "SALES_TEAM"
-];
-
-const statusOptions: { value: TeamMemberStatus; label: string }[] = [
-  { value: "Active", label: "Active" },
-  { value: "Inactive", label: "Inactive" },
-  { value: "On Leave", label: "On Leave" },
-  { value: "Terminated", label: "Terminated" },
-];
-
 export function PersonalInformationTab({ formData, setFormData, errors }: PersonalInformationTabProps) {
+  const { roles, loading: rolesLoading, fetchRoles } = useRoles();
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
   const handleInputChange = (field: keyof CreateTeamMemberData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleRoleSelect = (roleId: string) => {
+    const selectedRole = roles.find(r => r._id === roleId || r.id === roleId);
+    if (selectedRole) {
+      setFormData(prev => ({
+        ...prev,
+        roleId: roleId,
+        teamRole: selectedRole.name
+      }));
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">First Name <span className="text-red-500">*</span></Label>
+    <div className="space-y-6 pt-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
           <Input
-            id="name"
+            id="firstName"
             value={formData.firstName}
             onChange={(e) => handleInputChange('firstName', e.target.value)}
             placeholder="Enter First Name"
@@ -60,17 +52,17 @@ export function PersonalInformationTab({ formData, setFormData, errors }: Person
           {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
         </div>
 
-         <div>
-          <Label htmlFor="name"> Last Name </Label>
+         <div className="space-y-2">
+          <Label htmlFor="lastName"> Last Name </Label>
           <Input
-            id="name"
+            id="lastName"
             value={formData.lastName}
             onChange={(e) => handleInputChange('lastName', e.target.value)}
             placeholder="Enter Last Name"
           />
         </div>
 
-        <div className='mr-2'>
+        <div className="space-y-2">
           <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
           <Input
             id="email"
@@ -83,24 +75,40 @@ export function PersonalInformationTab({ formData, setFormData, errors }: Person
           {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
         </div>
 
-        <div className='ml-2'>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
+          <Input
+            id="password"
+            type="password"
+            value={formData.password || ""}
+            onChange={(e) => handleInputChange('password', e.target.value)}
+            placeholder="Set a password"
+            className={errors.password ? 'border-red-500' : ''}
+          />
+          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="teamRole">Team Role <span className="text-red-500">*</span></Label>
-          <Select value={formData.teamRole} onValueChange={(value) => handleInputChange('teamRole', value)}>
+          <Select value={formData.roleId || ""} onValueChange={handleRoleSelect}>
             <SelectTrigger className={errors.teamRole ? 'border-red-500' : ''}>
-              <SelectValue placeholder="Select team role" />
+              <SelectValue placeholder={rolesLoading ? "Loading roles..." : "Select team role"} />
             </SelectTrigger>
             <SelectContent>
-              {teamRoleOptions.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {role}
-                </SelectItem>
-              ))}
+              {roles.map((role) => {
+                const id = role._id || role.id;
+                return (
+                  <SelectItem key={id as string} value={id as string}>
+                    {role.displayName || role.name}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
           {errors.teamRole && <p className="text-red-500 text-sm mt-1">{errors.teamRole}</p>}
         </div>
 
-        <div className='mr-2'>
+        <div className="space-y-2">
           <Label htmlFor="phone">Phone Number</Label>
           <PhoneInput
             country={"sa"}
@@ -114,48 +122,6 @@ export function PersonalInformationTab({ formData, setFormData, errors }: Person
             countryCodeEditable={false}
             autoFormat={true}
           />
-        </div>
-
-        <div className='ml-2'>
-          <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={(value: TeamMemberStatus) => handleInputChange('status', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((status) => (
-                <SelectItem key={status.value} value={status.value}>
-                  {status.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className='mr-2'>
-          <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
-            value={formData.location}
-            onChange={(e) => handleInputChange('location', e.target.value)}
-            placeholder="Enter location"
-          />
-        </div>
-
-        <div className='mr-2'>
-          <Label htmlFor="department">Department</Label>
-          <Select value={formData.department} onValueChange={(value) => handleInputChange('department', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select department" />
-            </SelectTrigger>
-            <SelectContent>
-              {departmentOptions.map((dept) => (
-                <SelectItem key={dept} value={dept}>
-                  {dept}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
     </div>
