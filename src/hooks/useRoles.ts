@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { roleService, Role } from '@/services/roleService';
+import { roleService, Role, ModulePermissions } from '@/services/roleService';
+import { toast } from 'sonner';
 
 export function useRoles() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -10,20 +11,8 @@ export function useRoles() {
     setLoading(true);
     setError(null);
     try {
-      const data = await roleService.getRoles();
-      
-      let fetchedRoles: Role[] = [];
-      if (Array.isArray(data)) {
-        fetchedRoles = data;
-      } else if (data?.data && Array.isArray(data.data)) {
-        fetchedRoles = data.data;
-      } else if (data?.data?.roles && Array.isArray(data.data.roles)) {
-        fetchedRoles = data.data.roles;
-      } else if (data?.roles && Array.isArray(data.roles)) {
-        fetchedRoles = data.roles;
-      }
-      
-      setRoles(fetchedRoles);
+      const res = await roleService.getRoles();
+      setRoles(res?.data ?? []);
     } catch (err: any) {
       console.error('Error fetching roles:', err);
       setError(err);
@@ -33,23 +22,42 @@ export function useRoles() {
     }
   }, []);
 
-  const createRole = async (data: Partial<Role>) => {
-    try {
-      const newRole = await roleService.createRole(data);
-      await fetchRoles(); // Refresh
-      return newRole;
-    } catch (err) {
-      throw err;
-    }
+  const createRole = async (data: {
+    name: string;
+    description?: string;
+    permissions?: Record<string, Partial<ModulePermissions>>;
+  }) => {
+    const res = await roleService.createRole(data);
+    await fetchRoles();
+    return res;
+  };
+
+  const updateRole = async (id: string, data: { name?: string; description?: string }) => {
+    const res = await roleService.updateRole(id, data);
+    await fetchRoles();
+    return res;
+  };
+
+  const updatePermissions = async (
+    id: string,
+    data: { set?: Record<string, Partial<ModulePermissions>>; remove?: string[] }
+  ) => {
+    const res = await roleService.updatePermissions(id, data);
+    await fetchRoles();
+    return res;
   };
 
   const deleteRole = async (id: string) => {
-    try {
-      await roleService.deleteRole(id);
-      await fetchRoles(); // Refresh list after deleting
-    } catch (err) {
-      throw err;
+    const res = await roleService.deleteRole(id);
+    if (res.success) {
+      await fetchRoles();
     }
+    return res;
+  };
+
+  const assignRoleToUser = async (roleId: string, userId: string) => {
+    const res = await roleService.assignRoleToUser(roleId, userId);
+    return res;
   };
 
   return {
@@ -58,6 +66,9 @@ export function useRoles() {
     error,
     fetchRoles,
     createRole,
-    deleteRole
+    updateRole,
+    updatePermissions,
+    deleteRole,
+    assignRoleToUser,
   };
 }
