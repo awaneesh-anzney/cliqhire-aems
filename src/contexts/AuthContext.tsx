@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { authService, User } from '@/services/authService';
 import { taskService, Task } from '@/services/taskService';
+import { roleService } from '@/services/roleService';
 import { initializeAuth } from '@/lib/axios-config';
 import { useRouter } from 'next/navigation';
 import { Loader } from 'lucide-react';
@@ -81,6 +82,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Initialize axios authentication after successful login
         await initializeAuth();
+        
+        // Immediately trigger myPermission API as requested
+        try {
+          await roleService.getMyPermissions();
+        } catch (error) {
+          console.error('AuthContext: Error fetching myPermissions on login:', error);
+        }
         
         // Do not fetch or set tasks during login
         setTasks([]);

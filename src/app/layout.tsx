@@ -4,6 +4,7 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { PermissionProvider } from "@/contexts/PermissionContext"
 import '@/lib/axios-config'; // Initialize global axios interceptors
 import { QueryProvider } from "@/contexts/query-provider";
 
@@ -27,10 +28,12 @@ export default function RootLayout({
       <body className={inter.className } suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <QueryProvider>
-              <Toaster />
-              {children}
-            </QueryProvider>
+            <PermissionProvider>
+              <QueryProvider>
+                <Toaster />
+                {children}
+              </QueryProvider>
+            </PermissionProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

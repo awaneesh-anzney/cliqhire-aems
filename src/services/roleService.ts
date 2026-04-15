@@ -45,5 +45,11 @@ export const roleService = {
   updateUserCustomPermissions: async (userId: string, customPermissions: string[]) => {
     const response = await api.put(`/api/users/${userId}/permissions`, { customPermissions });
     return response.data;
+  },
+
+  // GET /api/roles/my-permissions
+  getMyPermissions: async () => {
+    const response = await api.get('/api/roles/my-permissions');
+    return response.data;
   }
 };
