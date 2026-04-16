@@ -3,23 +3,54 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Shield, Users, Plus, Check, X, Eye, Edit2, Trash2, Settings2,
+  Shield,
+  Users,
+  Plus,
+  Check,
+  X,
+  Eye,
+  Edit2,
+  Trash2,
+  Settings2,
+  ChevronRight,
+  Search,
+  MoreHorizontal,
+  Zap,
+  Lock,
+  Globe,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useRoles } from "@/hooks/useRoles";
 import { Role, ModulePermissions } from "@/services/roleService";
 import { PERMISSION_MODULES } from "@/lib/sidebarModules";
@@ -28,7 +59,14 @@ import { toast } from "sonner";
 type ActionKey = "view" | "create" | "edit" | "delete";
 const ACTIONS: ActionKey[] = ["view", "create", "edit", "delete"];
 
-// ─── Permission Dialog (Edit permissions of a role) ────────────────────────────
+const ACTION_COLORS: Record<ActionKey, string> = {
+  view: "text-sky-600 bg-sky-50 border-sky-200",
+  create: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  edit: "text-amber-600 bg-amber-50 border-amber-200",
+  delete: "text-red-600 bg-red-50 border-red-200",
+};
+
+// ─── Permission Matrix Dialog ─────────────────────────────────────────────────
 function PermissionDialog({
   role,
   onClose,
@@ -40,64 +78,52 @@ function PermissionDialog({
 }) {
   const [saving, setSaving] = useState(false);
 
-  // Build matrix from existing permissions or from sidebar modules
   const buildMatrix = () => {
-    const matrix: Record<string, Record<ActionKey, boolean>> = {};
+    const m: Record<string, Record<ActionKey, boolean>> = {};
     PERMISSION_MODULES.forEach((mod) => {
-      const existing = role.permissions?.[mod.moduleKey];
-      matrix[mod.moduleKey] = {
-        view: existing?.view ?? false,
-        create: existing?.create ?? false,
-        edit: existing?.edit ?? false,
-        delete: existing?.delete ?? false,
+      const ex = role.permissions?.[mod.moduleKey];
+      m[mod.moduleKey] = {
+        view: ex?.view ?? false,
+        create: ex?.create ?? false,
+        edit: ex?.edit ?? false,
+        delete: ex?.delete ?? false,
       };
     });
-    return matrix;
+    return m;
   };
 
-  const [matrix, setMatrix] = useState<Record<string, Record<ActionKey, boolean>>>(buildMatrix);
+  const [matrix, setMatrix] = useState(buildMatrix);
 
-  const toggle = (moduleKey: string, action: ActionKey, checked: boolean) =>
-    setMatrix((prev) => ({
-      ...prev,
-      [moduleKey]: { ...prev[moduleKey], [action]: checked },
-    }));
-
-  const toggleRow = (moduleKey: string, checked: boolean) =>
-    setMatrix((prev) => ({
-      ...prev,
-      [moduleKey]: { view: checked, create: checked, edit: checked, delete: checked },
-    }));
-
-  const toggleColumn = (action: ActionKey, checked: boolean) =>
-    setMatrix((prev) => {
-      const next = { ...prev };
-      PERMISSION_MODULES.forEach((mod) => {
-        next[mod.moduleKey] = { ...next[mod.moduleKey], [action]: checked };
+  const toggle = (mk: string, a: ActionKey, v: boolean) =>
+    setMatrix((p) => ({ ...p, [mk]: { ...p[mk], [a]: v } }));
+  const toggleRow = (mk: string, v: boolean) =>
+    setMatrix((p) => ({ ...p, [mk]: { view: v, create: v, edit: v, delete: v } }));
+  const toggleCol = (a: ActionKey, v: boolean) =>
+    setMatrix((p) => {
+      const n = { ...p };
+      PERMISSION_MODULES.forEach((m) => {
+        n[m.moduleKey] = { ...n[m.moduleKey], [a]: v };
       });
-      return next;
+      return n;
     });
 
-  const isRowChecked = (moduleKey: string) => ACTIONS.every((a) => matrix[moduleKey]?.[a]);
-  const isColChecked = (action: ActionKey) => PERMISSION_MODULES.every((mod) => matrix[mod.moduleKey]?.[action]);
+  const isRowAll = (mk: string) => ACTIONS.every((a) => matrix[mk]?.[a]);
+  const isColAll = (a: ActionKey) => PERMISSION_MODULES.every((m) => matrix[m.moduleKey]?.[a]);
+  const isRowAny = (mk: string) => ACTIONS.some((a) => matrix[mk]?.[a]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const set: Record<string, Partial<ModulePermissions>> = {};
       const remove: string[] = [];
-
       PERMISSION_MODULES.forEach((mod) => {
         const perms = matrix[mod.moduleKey];
-        const hasAny = Object.values(perms).some(Boolean);
-        if (hasAny) {
+        if (Object.values(perms).some(Boolean)) {
           set[mod.moduleKey] = perms;
         } else if (role.permissions?.[mod.moduleKey]) {
-          // was enabled before, now all false → remove
           remove.push(mod.moduleKey);
         }
       });
-
       await onSave(set, remove);
       onClose();
     } finally {
@@ -105,68 +131,113 @@ function PermissionDialog({
     }
   };
 
+  const totalEnabled = PERMISSION_MODULES.filter((m) => isRowAny(m.moduleKey)).length;
+
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Settings2 className="h-5 w-5" /> Edit Permissions — {role.name}
-          </DialogTitle>
-          <DialogDescription>
-            Module permissions update karo. Sidebar routes se automatically derive hote hain.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center">
+              <Settings2 className="h-5 w-5 text-brand" />
+            </div>
+            <div>
+              <DialogTitle className="text-base font-semibold text-slate-800">
+                Edit Permissions — <span className="text-brand">{role.name}</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                {totalEnabled} of {PERMISSION_MODULES.length} modules active
+              </DialogDescription>
+            </div>
+          </div>
+        </div>
 
-        <div className="overflow-auto flex-1 mt-2">
-          <table className="w-full text-sm border rounded-lg overflow-hidden">
-            <thead>
-              <tr className="bg-slate-50 border-b">
-                <th className="text-left px-4 py-3 font-medium text-slate-600 w-48">Module</th>
-                {ACTIONS.map((action) => (
-                  <th key={action} className="text-center px-4 py-3 font-medium text-slate-600 capitalize">
-                    <div className="flex flex-col items-center gap-1.5">
-                      {action}
+        {/* Table */}
+        <div className="overflow-auto flex-1">
+          <table className="w-full text-sm border-collapse">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="text-left px-5 py-3 font-semibold text-slate-600 w-44 text-xs uppercase tracking-wide">
+                  Module
+                </th>
+                {ACTIONS.map((a) => (
+                  <th key={a} className="text-center px-4 py-3 w-28">
+                    <div className="flex flex-col items-center gap-2">
+                      <span
+                        className={`text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${ACTION_COLORS[a]}`}
+                      >
+                        {a}
+                      </span>
                       <Checkbox
-                        checked={isColChecked(action)}
-                        onCheckedChange={(c) => toggleColumn(action, !!c)}
-                        className="h-3.5 w-3.5"
+                        checked={isColAll(a)}
+                        onCheckedChange={(v) => toggleCol(a, !!v)}
+                        className="h-3.5 w-3.5 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
+                        title={`Toggle all ${a}`}
                       />
                     </div>
                   </th>
                 ))}
-                <th className="text-center px-4 py-3 font-medium text-slate-600">All</th>
+                <th className="text-center px-4 py-3 w-20 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  All
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {PERMISSION_MODULES.map((mod) => (
-                <tr key={mod.moduleKey} className="hover:bg-slate-50/70">
-                  <td className="px-4 py-3 font-medium text-slate-700">{mod.name}</td>
-                  {ACTIONS.map((action) => (
-                    <td key={action} className="text-center px-4 py-3">
-                      <Checkbox
-                        checked={matrix[mod.moduleKey]?.[action] ?? false}
-                        onCheckedChange={(c) => toggle(mod.moduleKey, action, !!c)}
-                        className="data-[state=checked]:bg-brand data-[state=checked]:border-brand"
+            <tbody>
+              {PERMISSION_MODULES.map((mod, i) => {
+                const rowActive = isRowAny(mod.moduleKey);
+                return (
+                  <tr
+                    key={mod.moduleKey}
+                    className={`border-b border-slate-100 transition-colors ${
+                      rowActive ? "bg-brand/[0.02]" : "hover:bg-slate-50/60"
+                    }`}
+                  >
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`h-1.5 w-1.5 rounded-full shrink-0 ${rowActive ? "bg-brand" : "bg-slate-300"}`}
+                        />
+                        <span
+                          className={`text-sm font-medium ${rowActive ? "text-slate-800" : "text-slate-500"}`}
+                        >
+                          {mod.name}
+                        </span>
+                      </div>
+                    </td>
+                    {ACTIONS.map((a) => (
+                      <td key={a} className="text-center px-4 py-3">
+                        <Checkbox
+                          checked={matrix[mod.moduleKey]?.[a] ?? false}
+                          onCheckedChange={(v) => toggle(mod.moduleKey, a, !!v)}
+                          className="h-4 w-4 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
+                        />
+                      </td>
+                    ))}
+                    <td className="text-center px-4 py-3">
+                      <Switch
+                        checked={isRowAll(mod.moduleKey)}
+                        onCheckedChange={(v) => toggleRow(mod.moduleKey, v)}
+                        className="data-[state=checked]:bg-brand scale-90"
                       />
                     </td>
-                  ))}
-                  <td className="text-center px-4 py-3">
-                    <Switch
-                      checked={isRowChecked(mod.moduleKey)}
-                      onCheckedChange={(c) => toggleRow(mod.moduleKey, c)}
-                      className="data-[state=checked]:bg-brand"
-                    />
-                  </td>
-                </tr>
-              ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
 
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-brand hover:bg-brand/90">
-            {saving ? "Saving..." : "Save Permissions"}
+        <DialogFooter className="px-6 py-4 border-t bg-slate-50/80">
+          <Button variant="outline" onClick={onClose} disabled={saving} className="h-9">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="h-9 bg-brand hover:bg-brand/90 text-white"
+          >
+            {saving ? "Saving…" : "Save Permissions"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -189,7 +260,10 @@ function EditRoleDialog({
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim()) { toast.error("Role name required"); return; }
+    if (!name.trim()) {
+      toast.error("Role name is required");
+      return;
+    }
     setSaving(true);
     try {
       await onSave(name.trim(), description.trim());
@@ -203,35 +277,54 @@ function EditRoleDialog({
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Role</DialogTitle>
-          <DialogDescription>Naam aur description update karo.</DialogDescription>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center">
+              <Edit2 className="h-4 w-4 text-brand" />
+            </div>
+            <DialogTitle>Edit Role</DialogTitle>
+          </div>
+          <DialogDescription>Update the role name and description.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label>Role Name</Label>
+            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              Role Name
+            </Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={role.isSystem}
               placeholder="Role name"
+              className="h-10"
             />
             {role.isSystem && (
-              <p className="text-xs text-slate-400">System role ka naam nahi badal sakta.</p>
+              <p className="text-xs text-amber-600 flex items-center gap-1.5">
+                <Lock className="h-3 w-3" /> System role naam change nahi ho sakta
+              </p>
             )}
           </div>
           <div className="space-y-1.5">
-            <Label>Description</Label>
+            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              Description
+            </Label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description"
+              placeholder="What can this role do?"
+              className="h-10"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-brand hover:bg-brand/90">
-            {saving ? "Saving..." : "Save"}
+          <Button variant="outline" onClick={onClose} disabled={saving} className="h-9">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="h-9 bg-brand hover:bg-brand/90 text-white"
+          >
+            {saving ? "Saving…" : "Save Changes"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -242,74 +335,283 @@ function EditRoleDialog({
 // ─── View Permissions Dialog ───────────────────────────────────────────────────
 function ViewPermissionsDialog({ role, onClose }: { role: Role; onClose: () => void }) {
   const perms = role.permissions ?? {};
+  const enabledCount = PERMISSION_MODULES.filter((m) => {
+    const mp = perms[m.moduleKey];
+    return mp && Object.values(mp).some(Boolean);
+  }).length;
 
-  // Show all sidebar modules, with role's current values
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{role.name} — Permissions</DialogTitle>
-          <DialogDescription>Is role ke module-wise permissions.</DialogDescription>
-        </DialogHeader>
-        <div className="mt-3 border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-5 bg-slate-50 px-4 py-2 text-xs font-medium text-slate-600">
-            <div>Module</div>
-            <div className="text-center">View</div>
-            <div className="text-center">Create</div>
-            <div className="text-center">Edit</div>
-            <div className="text-center">Delete</div>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <div className="px-6 py-5 border-b bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center">
+              <Eye className="h-5 w-5 text-brand" />
+            </div>
+            <div>
+              <DialogTitle className="text-base font-semibold">{role.name}</DialogTitle>
+              <DialogDescription className="text-xs">
+                {enabledCount} of {PERMISSION_MODULES.length} modules enabled
+              </DialogDescription>
+            </div>
           </div>
-          <div className="divide-y">
-            {PERMISSION_MODULES.map((mod) => {
-              const mp = perms[mod.moduleKey];
-              return (
-                <div key={mod.moduleKey} className="grid grid-cols-5 items-center px-4 py-2.5 hover:bg-slate-50/70">
-                  <div className="text-sm font-medium text-slate-700">{mod.name}</div>
-                  {ACTIONS.map((action) => (
-                    <div key={action} className="flex justify-center">
-                      {mp?.[action] ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <X className="h-4 w-4 text-slate-200" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
+        </div>
+        <div className="overflow-auto flex-1">
+          <table className="w-full text-sm border-collapse">
+            <thead className="sticky top-0">
+              <tr className="bg-slate-50 border-b">
+                <th className="text-left px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500 w-44">
+                  Module
+                </th>
+                {ACTIONS.map((a) => (
+                  <th key={a} className="text-center px-4 py-2.5 w-24">
+                    <span
+                      className={`text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${ACTION_COLORS[a]}`}
+                    >
+                      {a}
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {PERMISSION_MODULES.map((mod) => {
+                const mp = perms[mod.moduleKey];
+                const hasAny = mp && Object.values(mp).some(Boolean);
+                return (
+                  <tr
+                    key={mod.moduleKey}
+                    className={`border-b border-slate-100 ${hasAny ? "" : "opacity-40"}`}
+                  >
+                    <td className="px-5 py-2.5 font-medium text-slate-700 flex items-center gap-2">
+                      <div
+                        className={`h-1.5 w-1.5 rounded-full ${hasAny ? "bg-brand" : "bg-slate-300"}`}
+                      />
+                      {mod.name}
+                    </td>
+                    {ACTIONS.map((a) => (
+                      <td key={a} className="text-center px-4 py-2.5">
+                        {mp?.[a] ? (
+                          <Check className="h-4 w-4 text-emerald-500 mx-auto" />
+                        ) : (
+                          <X className="h-3.5 w-3.5 text-slate-200 mx-auto" />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="px-6 py-4 border-t bg-slate-50">
+          <Button variant="outline" onClick={onClose} className="h-9">
+            Close
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
-export default function page() {
-  const { roles, loading, fetchRoles, updateRole, updatePermissions, deleteRole } = useRoles();
+// ─── Role Card ────────────────────────────────────────────────────────────────
+function RoleCard({
+  role,
+  onEdit,
+  onPermissions,
+  onDelete,
+}: {
+  role: Role;
+  onEdit: () => void;
+  onPermissions: () => void;
+  onDelete: () => void;
+}) {
+  const [viewOpen, setViewOpen] = useState(false);
+  const perms = role.permissions ?? {};
+  const enabledMods = PERMISSION_MODULES.filter((m) => {
+    const mp = perms[m.moduleKey];
+    return mp && Object.values(mp).some(Boolean);
+  });
+  const totalPerms = Object.values(perms).reduce((sum, mp) => {
+    return sum + Object.values(mp).filter(Boolean).length;
+  }, 0);
 
-  const [viewRole, setViewRole] = useState<Role | null>(null);
+  return (
+    <>
+      <div className="group bg-white rounded-xl border border-slate-200 hover:border-brand/40 hover:shadow-md shadow-sm transition-all duration-200 flex flex-col overflow-hidden">
+        {/* Top strip — color indicator */}
+        <div
+          className={`h-1 w-full ${role.isSystem ? "bg-gradient-to-r from-slate-400 to-slate-500" : "bg-gradient-to-r from-brand to-brand/60"}`}
+        />
+
+        <div className="p-5 flex-1 flex flex-col">
+          {/* Header row */}
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${role.isSystem ? "bg-slate-100" : "bg-brand/10"}`}
+              >
+                {role.isSystem ? (
+                  <Globe className="h-4 w-4 text-slate-500" />
+                ) : (
+                  <Shield className="h-4 w-4 text-brand" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-sm font-semibold text-slate-800 truncate leading-tight">
+                  {role.name}
+                </h3>
+                {role.isSystem && (
+                  <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">
+                    System Role
+                  </span>
+                )}
+              </div>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem onClick={() => setViewOpen(true)} className="gap-2 text-xs">
+                  <Eye className="h-3.5 w-3.5" /> View Permissions
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onEdit} className="gap-2 text-xs">
+                  <Edit2 className="h-3.5 w-3.5" /> Edit Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onPermissions} className="gap-2 text-xs">
+                  <Settings2 className="h-3.5 w-3.5" /> Edit Permissions
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="gap-2 text-xs">
+                  <Link href={`/settings/roles/${role._id || role.id}/assign`}>
+                    <Users className="h-3.5 w-3.5" /> Assign Users
+                  </Link>
+                </DropdownMenuItem>
+                {!role.isSystem && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={onDelete}
+                      className="gap-2 text-xs text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete Role
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Description */}
+          {role.description && (
+            <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+              {role.description}
+            </p>
+          )}
+
+          {/* Stats row */}
+          <div className="flex items-center gap-3 mb-3 text-xs text-slate-500">
+            <span className="flex items-center gap-1">
+              <Zap className="h-3 w-3 text-brand" />
+              <strong className="text-slate-700">{totalPerms}</strong> permissions
+            </span>
+            <span className="text-slate-300">•</span>
+            <span className="flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              <strong className="text-slate-700">{role.userCount ?? 0}</strong> users
+            </span>
+          </div>
+
+          {/* Module chips */}
+          {enabledMods.length > 0 ? (
+            <div className="flex flex-wrap gap-1 mb-4">
+              {enabledMods.slice(0, 4).map((m) => (
+                <span
+                  key={m.moduleKey}
+                  className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-brand/8 text-brand border border-brand/15"
+                >
+                  {m.name}
+                </span>
+              ))}
+              {enabledMods.length > 4 && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500">
+                  +{enabledMods.length - 4}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="mb-4 flex items-center gap-1.5 text-xs text-slate-400">
+              <AlertTriangle className="h-3 w-3 text-amber-400" /> No permissions set
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex gap-2 mt-auto pt-3 border-t border-slate-100">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 h-8 text-xs gap-1.5 hover:border-brand hover:text-brand"
+              onClick={() => setViewOpen(true)}
+            >
+              <Eye className="h-3.5 w-3.5" /> View
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1 h-8 text-xs gap-1.5 bg-brand hover:bg-brand/90 text-white"
+              onClick={onPermissions}
+            >
+              <Settings2 className="h-3.5 w-3.5" /> Permissions
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {viewOpen && <ViewPermissionsDialog role={role} onClose={() => setViewOpen(false)} />}
+    </>
+  );
+}
+
+// ─── Main Settings Page ───────────────────────────────────────────────────────
+export default function SettingsRolesPage() {
+  const { roles, loading, fetchRoles, updateRole, updatePermissions, deleteRole } = useRoles();
+  const [search, setSearch] = useState("");
   const [editRole, setEditRole] = useState<Role | null>(null);
   const [permRole, setPermRole] = useState<Role | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Role | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => { fetchRoles(); }, [fetchRoles]);
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
+  const filtered = roles.filter(
+    (r) =>
+      r.name.toLowerCase().includes(search.toLowerCase()) ||
+      (r.description ?? "").toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const systemRoles = filtered.filter((r) => r.isSystem);
+  const customRoles = filtered.filter((r) => !r.isSystem);
 
   const handleUpdateName = async (name: string, description: string) => {
     if (!editRole) return;
-    const id = editRole._id || editRole.id!;
-    await updateRole(id, { name, description });
+    await updateRole(editRole._id || editRole.id!, { name, description });
     toast.success("Role updated");
   };
 
   const handleUpdatePermissions = async (
     set: Record<string, Partial<ModulePermissions>>,
-    remove: string[]
+    remove: string[],
   ) => {
     if (!permRole) return;
-    const id = permRole._id || permRole.id!;
-    await updatePermissions(id, { set, remove });
+    await updatePermissions(permRole._id || permRole.id!, { set, remove });
     toast.success("Permissions saved");
   };
 
@@ -317,13 +619,9 @@ export default function page() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const id = deleteTarget._id || deleteTarget.id!;
-      const res = await deleteRole(id);
-      if (res.success) {
-        toast.success(`Role "${deleteTarget.name}" deleted`);
-      } else {
-        toast.error(res.message);
-      }
+      const res = await deleteRole(deleteTarget._id || deleteTarget.id!);
+      if (res.success) toast.success(`"${deleteTarget.name}" deleted`);
+      else toast.error(res.message);
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Delete failed");
     } finally {
@@ -333,143 +631,135 @@ export default function page() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50">
-      <div className="border-b bg-white">
-        <div className="flex h-16 items-center px-4 justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-brand" />
-            <h1 className="text-xl font-semibold">Roles & Permissions</h1>
+    <div className="min-h-screen bg-slate-50/60">
+      {/* Page Header */}
+      <div className="bg-white border-b sticky top-0 z-20">
+        <div className="px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center">
+              <Shield className="h-5 w-5 text-brand" />
+            </div>
+            <div>
+              <h1 className="text-base font-semibold text-slate-800">Roles & Permissions</h1>
+              <p className="text-xs text-slate-500">
+                {roles.length} total roles • {roles.filter((r) => !r.isSystem).length} custom
+              </p>
+            </div>
           </div>
-          <Button asChild className="bg-brand hover:bg-brand/90">
-            <Link href="/settings/roles/create">
-              <Plus className="mr-2 h-4 w-4" /> Create Role
-            </Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <Input
+                placeholder="Search roles…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 h-9 w-56 text-sm"
+              />
+            </div>
+            <Button
+              asChild
+              className="h-9 bg-brand hover:bg-brand/90 text-white gap-2 text-xs font-medium"
+            >
+              <Link href="/settings/roles/create">
+                <Plus className="h-4 w-4" /> Create Role
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 py-6 px-4">
-        <div className="mx-auto w-full max-w-7xl">
-          {loading ? (
-            <div className="text-center text-slate-500 py-12">Loading roles...</div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {roles.map((role) => {
-                const roleId = role._id || role.id;
-                const perms = role.permissions ?? {};
-                const enabledModules = PERMISSION_MODULES.filter((mod) => {
-                  const mp = perms[mod.moduleKey];
-                  return mp && Object.values(mp).some(Boolean);
-                });
-
-                return (
-                  <Card key={roleId as string} className="flex flex-col shadow-sm hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-brand shrink-0" />
-                          {role.name}
-                          {role.isSystem && (
-                            <Badge variant="outline" className="ml-1 text-xs">System</Badge>
-                          )}
-                        </CardTitle>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost" size="icon"
-                            className="h-7 w-7 text-slate-400 hover:text-slate-700"
-                            onClick={() => setEditRole(role)}
-                            title="Edit name/description"
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </Button>
-                          {!role.isSystem && (
-                            <Button
-                              variant="ghost" size="icon"
-                              className="h-7 w-7 text-red-400 hover:text-red-600"
-                              onClick={() => setDeleteTarget(role)}
-                              title="Delete role"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      <CardDescription className="text-xs mt-1">{role.description}</CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="flex-1 space-y-3">
-                      <div className="flex items-center justify-between text-xs text-slate-500">
-                        <span>{enabledModules.length} modules enabled</span>
-                        {role.userCount !== undefined && (
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" /> {role.userCount} users
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Mini permission dots */}
-                      {enabledModules.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {enabledModules.slice(0, 5).map((mod) => (
-                            <span
-                              key={mod.moduleKey}
-                              className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand/10 text-brand"
-                            >
-                              {mod.name}
-                            </span>
-                          ))}
-                          {enabledModules.length > 5 && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
-                              +{enabledModules.length - 5} more
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          variant="outline" size="sm"
-                          className="flex-1 h-8 text-xs"
-                          onClick={() => setViewRole(role)}
-                        >
-                          <Eye className="mr-1.5 h-3.5 w-3.5" /> View
-                        </Button>
-                        <Button
-                          variant="outline" size="sm"
-                          className="flex-1 h-8 text-xs border-brand text-brand hover:bg-brand/5"
-                          onClick={() => setPermRole(role)}
-                        >
-                          <Settings2 className="mr-1.5 h-3.5 w-3.5" /> Permissions
-                        </Button>
-                        <Button
-                          variant="outline" size="sm"
-                          className="flex-1 h-8 text-xs"
-                          asChild
-                        >
-                          <Link href={`/settings/roles/${roleId}/assign`}>
-                            <Users className="mr-1.5 h-3.5 w-3.5" /> Assign
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-
-              {!roles.length && !loading && (
-                <div className="col-span-full text-center p-12 text-slate-400 border rounded-xl bg-white">
-                  <Shield className="h-10 w-10 mx-auto mb-3 text-slate-300" />
-                  <p className="font-medium text-slate-600">No roles found</p>
-                  <p className="text-sm mt-1">Create your first custom role to get started.</p>
+      <div className="px-6 py-6 max-w-7xl mx-auto">
+        {loading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl border border-slate-200 h-52 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Custom Roles */}
+            {customRoles.length > 0 && (
+              <section className="mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                    Custom Roles
+                  </h2>
+                  <div className="h-px flex-1 bg-slate-200" />
+                  <Badge variant="secondary" className="text-xs">
+                    {customRoles.length}
+                  </Badge>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {customRoles.map((role) => (
+                    <RoleCard
+                      key={role._id || role.id}
+                      role={role}
+                      onEdit={() => setEditRole(role)}
+                      onPermissions={() => setPermRole(role)}
+                      onDelete={() => setDeleteTarget(role)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* System Roles */}
+            {systemRoles.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                    System Roles
+                  </h2>
+                  <div className="h-px flex-1 bg-slate-200" />
+                  <Badge variant="secondary" className="text-xs">
+                    {systemRoles.length}
+                  </Badge>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {systemRoles.map((role) => (
+                    <RoleCard
+                      key={role._id || role.id}
+                      role={role}
+                      onEdit={() => setEditRole(role)}
+                      onPermissions={() => setPermRole(role)}
+                      onDelete={() => setDeleteTarget(role)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {!filtered.length && (
+              <div className="text-center py-20">
+                <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-7 w-7 text-slate-300" />
+                </div>
+                <p className="text-slate-600 font-medium">No roles found</p>
+                <p className="text-slate-400 text-sm mt-1">
+                  {search
+                    ? `No results for "${search}"`
+                    : "Create your first custom role to get started."}
+                </p>
+                {!search && (
+                  <Button
+                    asChild
+                    className="mt-4 h-9 bg-brand hover:bg-brand/90 text-white gap-2 text-xs"
+                  >
+                    <Link href="/settings/roles/create">
+                      <Plus className="h-4 w-4" /> Create Role
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Dialogs */}
-      {viewRole && <ViewPermissionsDialog role={viewRole} onClose={() => setViewRole(null)} />}
       {editRole && (
         <EditRoleDialog
           role={editRole}
@@ -488,9 +778,15 @@ export default function page() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Role "{deleteTarget?.name}"?</AlertDialogTitle>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-500" />
+              </div>
+              <AlertDialogTitle>Delete "{deleteTarget?.name}"?</AlertDialogTitle>
+            </div>
             <AlertDialogDescription>
-              Agar koi user is role pe assigned hai toh delete nahi hoga. Ye action undo nahi ho sakta.
+              Agar koi user is role pe assigned hai toh delete nahi hoga. Ye action undo nahi ho
+              sakta.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -500,7 +796,7 @@ export default function page() {
               disabled={deleting}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              {deleting ? "Deleting..." : "Delete Role"}
+              {deleting ? "Deleting…" : "Delete Role"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

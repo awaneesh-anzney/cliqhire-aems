@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { roleService, Role, ModulePermissions } from '@/services/roleService';
-import { toast } from 'sonner';
+import { useState, useCallback } from "react";
+import { roleService, Role, ModulePermissions } from "@/services/roleService";
+import { toast } from "sonner";
 
 export function useRoles() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -14,7 +14,7 @@ export function useRoles() {
       const res = await roleService.getRoles();
       setRoles(res?.data ?? []);
     } catch (err: any) {
-      console.error('Error fetching roles:', err);
+      console.error("Error fetching roles:", err);
       setError(err);
       setRoles([]);
     } finally {
@@ -40,7 +40,7 @@ export function useRoles() {
 
   const updatePermissions = async (
     id: string,
-    data: { set?: Record<string, Partial<ModulePermissions>>; remove?: string[] }
+    data: { set?: Record<string, Partial<ModulePermissions>>; remove?: string[] },
   ) => {
     const res = await roleService.updatePermissions(id, data);
     await fetchRoles();

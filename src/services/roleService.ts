@@ -1,4 +1,4 @@
-import { api } from '@/lib/axios-config';
+import { api } from "@/lib/axios-config";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,7 +75,7 @@ export const roleService = {
     search?: string;
     isSystem?: boolean;
   }): Promise<RolesListResponse> => {
-    const response = await api.get('/api/roles', { params });
+    const response = await api.get("/api/roles", { params });
     return response.data;
   },
 
@@ -97,7 +97,7 @@ export const roleService = {
     description?: string;
     permissions?: Record<string, Partial<ModulePermissions>>;
   }): Promise<RoleDetailResponse> => {
-    const response = await api.post('/api/roles', data);
+    const response = await api.post("/api/roles", data);
     return response.data;
   },
 
@@ -107,7 +107,7 @@ export const roleService = {
    */
   updateRole: async (
     id: string,
-    data: { name?: string; description?: string }
+    data: { name?: string; description?: string },
   ): Promise<RoleDetailResponse> => {
     const response = await api.put(`/api/roles/${id}`, data);
     return response.data;
@@ -123,7 +123,7 @@ export const roleService = {
     data: {
       set?: Record<string, Partial<ModulePermissions>>;
       remove?: string[];
-    }
+    },
   ): Promise<RoleDetailResponse> => {
     const response = await api.patch(`/api/roles/${id}/permissions`, data);
     return response.data;
@@ -132,7 +132,9 @@ export const roleService = {
   /**
    * DELETE /api/roles/:id
    */
-  deleteRole: async (id: string): Promise<{ success: boolean; message: string; affectedUsers?: number }> => {
+  deleteRole: async (
+    id: string,
+  ): Promise<{ success: boolean; message: string; affectedUsers?: number }> => {
     const response = await api.delete(`/api/roles/${id}`);
     return response.data;
   },
@@ -150,7 +152,7 @@ export const roleService = {
    * GET /api/roles/my-permissions
    */
   getMyPermissions: async (): Promise<MyPermissionsResponse> => {
-    const response = await api.get('/api/roles/my-permissions');
+    const response = await api.get("/api/roles/my-permissions");
     return response.data;
   },
 };

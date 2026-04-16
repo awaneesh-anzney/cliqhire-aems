@@ -2,18 +2,27 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Mail, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Shield, Mail, UserCheck, Zap, Globe, Check, X } from "lucide-react";
 import { TeamMember } from "@/types/teamMember";
 import { roleService, Role, ModulePermissions } from "@/services/roleService";
 import { PERMISSION_MODULES } from "@/lib/sidebarModules";
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
 
 type ActionKey = "view" | "create" | "edit" | "delete";
 const ACTIONS: ActionKey[] = ["view", "create", "edit", "delete"];
@@ -36,11 +45,8 @@ export function UserPermissionDialog({
   const [loadingRoles, setLoadingRoles] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Fetch all roles on open
   useEffect(() => {
-    if (open) {
-      fetchRoles();
-    }
+    if (open) fetchRoles();
   }, [open]);
 
   const fetchRoles = async () => {
@@ -62,7 +68,8 @@ export function UserPermissionDialog({
     }
     setSaving(true);
     try {
-      // PUT /api/roles/:roleId/assign/:userId
+      // PUT /api/roles/:roleId/assign/:userId — dono IDs URL mein hain
+      // userId = AuthUser._id ya User(profile)._id — backend dono accept karta hai
       const res = await roleService.assignRoleToUser(selectedRoleId, user._id);
       toast.success(res.message || "Role assigned successfully");
       onPermissionsUpdated?.();
@@ -74,99 +81,153 @@ export function UserPermissionDialog({
     }
   };
 
+  const selectedRole = roles.find((r) => r._id === selectedRoleId);
+
+  const enabledMods = selectedRole
+    ? PERMISSION_MODULES.filter((m) => {
+        const mp = selectedRole.permissions?.[m.moduleKey];
+        return mp && Object.values(mp).some(Boolean);
+      })
+    : [];
+
+  const totalPerms = selectedRole
+    ? Object.values(selectedRole.permissions ?? {}).reduce(
+        (sum, mp) => sum + Object.values(mp).filter(Boolean).length,
+        0,
+      )
+    : 0;
+
   if (!user) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Assign Role — {user.firstName} {user.lastName}
-          </DialogTitle>
-          <DialogDescription>
-            Is user ko ek role assign karo. Role ke permissions automatically apply honge.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-2">
-          {/* User Info */}
-          <div className="p-3 rounded-lg bg-slate-50 border text-sm space-y-1.5">
-            <div className="flex items-center gap-2 text-slate-600">
-              <Mail className="h-3.5 w-3.5" />
-              <span>{user.email}</span>
+      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center shrink-0">
+              <span className="text-sm font-bold text-brand">
+                {user.firstName?.[0]?.toUpperCase()}
+                {user.lastName?.[0]?.toUpperCase()}
+              </span>
             </div>
-            {user.phone && (
-              <div className="flex items-center gap-2 text-slate-500 text-xs">
-                <User className="h-3.5 w-3.5" />
-                <span>{user.phone}</span>
+            <div>
+              <DialogTitle className="text-sm font-semibold text-slate-800">
+                {user.firstName} {user.lastName}
+              </DialogTitle>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5">
+                <Mail className="h-3 w-3" /> {user.email}
               </div>
-            )}
+            </div>
           </div>
+        </div>
 
-          {/* Role Select */}
-          <div className="space-y-1.5">
-            <Label>Select Role</Label>
+        <div className="px-6 py-5 space-y-5">
+          {/* Role selector */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide flex items-center gap-1.5">
+              <Shield className="h-3.5 w-3.5 text-brand" /> Assign Role
+            </Label>
             <Select
               value={selectedRoleId}
               onValueChange={setSelectedRoleId}
               disabled={loadingRoles || saving}
             >
-              <SelectTrigger>
-                <SelectValue placeholder={loadingRoles ? "Loading roles..." : "Choose a role"} />
+              <SelectTrigger className="h-10">
+                <SelectValue
+                  placeholder={loadingRoles ? "Loading roles…" : "Choose a role to assign"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {roles.map((role) => (
                   <SelectItem key={role._id} value={role._id}>
                     <div className="flex items-center gap-2">
+                      {role.isSystem ? (
+                        <Globe className="h-3.5 w-3.5 text-slate-400" />
+                      ) : (
+                        <Shield className="h-3.5 w-3.5 text-brand" />
+                      )}
                       <span>{role.name}</span>
                       {role.isSystem && (
-                        <span className="text-xs text-slate-400">(System)</span>
+                        <span className="text-xs text-slate-400 ml-0.5">(System)</span>
                       )}
                     </div>
                   </SelectItem>
                 ))}
+                {!loadingRoles && roles.length === 0 && (
+                  <div className="px-2 py-3 text-xs text-slate-400 text-center">
+                    No roles found. Create roles in Settings first.
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Show selected role's module summary */}
-          {selectedRoleId && (() => {
-            const role = roles.find((r) => r._id === selectedRoleId);
-            if (!role?.permissions) return null;
-            const enabled = PERMISSION_MODULES.filter((mod) => {
-              const mp = role.permissions![mod.moduleKey];
-              return mp && Object.values(mp).some(Boolean);
-            });
-            if (enabled.length === 0) return null;
-            return (
-              <div className="space-y-1.5">
-                <Label className="text-xs text-slate-500">Modules with access</Label>
-                <div className="flex flex-wrap gap-1.5">
-                  {enabled.map((mod) => (
-                    <span
-                      key={mod.moduleKey}
-                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand/10 text-brand"
-                    >
-                      {mod.name}
-                    </span>
-                  ))}
+          {/* Role preview */}
+          {selectedRole && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-600">Role Preview</span>
+                <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <Zap className="h-3 w-3 text-brand" />
+                  <span>{totalPerms} permissions</span>
                 </div>
               </div>
-            );
-          })()}
+
+              {enabledMods.length > 0 ? (
+                <div className="p-3">
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {enabledMods.map((mod) => {
+                      const mp = selectedRole.permissions?.[mod.moduleKey];
+                      const actions = ACTIONS.filter((a) => mp?.[a]);
+                      return (
+                        <div
+                          key={mod.moduleKey}
+                          className="bg-white rounded-md border border-slate-200 px-2.5 py-2"
+                        >
+                          <p className="text-[11px] font-semibold text-slate-700 mb-1">
+                            {mod.name}
+                          </p>
+                          <div className="flex gap-1 flex-wrap">
+                            {actions.map((a) => (
+                              <span
+                                key={a}
+                                className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand/10 text-brand"
+                              >
+                                {a}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="px-4 py-6 text-center text-xs text-slate-400">
+                  This role has no permissions configured.
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+        <DialogFooter className="px-6 py-4 border-t bg-slate-50/80 gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+            className="h-9"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={saving || !selectedRoleId}
-            className="bg-brand hover:bg-brand/90"
+            className="h-9 bg-brand hover:bg-brand/90 text-white gap-2"
           >
-            {saving ? "Assigning..." : "Assign Role"}
+            <UserCheck className="h-3.5 w-3.5" />
+            {saving ? "Assigning…" : "Assign Role"}
           </Button>
         </DialogFooter>
       </DialogContent>

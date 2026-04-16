@@ -66,9 +66,7 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
     if (!permissions) return false;
 
     const mp =
-      permissions[module] ??
-      permissions[module.toLowerCase()] ??
-      permissions[module.toUpperCase()];
+      permissions[module] ?? permissions[module.toLowerCase()] ?? permissions[module.toUpperCase()];
 
     if (!mp) return false;
     return mp[action] === true;
@@ -76,7 +74,14 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
 
   return (
     <PermissionContext.Provider
-      value={{ permissions, roleId, roleName, loading, hasPermission, refreshPermissions: fetchPermissions }}
+      value={{
+        permissions,
+        roleId,
+        roleName,
+        loading,
+        hasPermission,
+        refreshPermissions: fetchPermissions,
+      }}
     >
       {children}
     </PermissionContext.Provider>
