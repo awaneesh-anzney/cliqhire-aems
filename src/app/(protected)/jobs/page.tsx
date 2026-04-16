@@ -387,7 +387,7 @@ export default function JobsPage() {
                           />
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm font-medium w-[200px]">
+                      <TableCell className="text-sm font-medium w-52">
                         <span
                           className="font-medium text-slate-900 hover:text-brand hover:underline cursor-pointer transition-colors block"
                           onClick={() => router.push(`/jobs/${job._id}`)}
@@ -395,7 +395,7 @@ export default function JobsPage() {
                           {job.jobId || "N/A"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-sm font-medium w-[200px]">
+                      <TableCell className="text-sm font-medium w-52">
                         <span
                           className="font-medium text-slate-900 hover:text-brand hover:underline cursor-pointer transition-colors block"
                           onClick={() => router.push(`/jobs/${job._id}`)}

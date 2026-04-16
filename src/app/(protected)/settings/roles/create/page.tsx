@@ -195,7 +195,7 @@ export default function CreateRolePage() {
                           <span className={`text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${ACTION_META[a].color}`}>
                             {a}
                           </span>
-                          <p className="text-[10px] text-slate-400 mt-1">{ACTION_META[a].desc}</p>
+                          <p className="text-xs text-slate-400 mt-1">{ACTION_META[a].desc}</p>
                         </div>
                         <Checkbox
                           checked={isColAll(a)}

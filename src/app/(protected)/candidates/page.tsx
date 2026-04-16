@@ -221,7 +221,7 @@ export default function CandidatesPage() {
                         {candidate.profileId || "N/A"}
                       </span>
                     }</TableCell>
-                    <TableCell className="text-sm font-medium w-[200px]">
+                    <TableCell className="text-sm font-medium w-52">
                       <span
                         className="font-medium text-slate-900 hover:text-brand hover:underline cursor-pointer transition-colors block"
                         onClick={() => candidate._id && router.push(`/candidates/${candidate._id}`)}

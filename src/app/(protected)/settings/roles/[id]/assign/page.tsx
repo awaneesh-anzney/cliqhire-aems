@@ -184,7 +184,7 @@ export default function AssignUsersPage() {
               <p className="text-sm">{search ? `No results for "${search}"` : "No users found"}</p>
             </div>
           ) : (
-            <div className="divide-y max-h-[420px] overflow-y-auto">
+            <div className="divide-y max-h-96 overflow-y-auto">
               {filtered.map((user) => {
                 const displayName =
                   user.name || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Unknown";
@@ -197,8 +197,8 @@ export default function AssignUsersPage() {
                     onClick={() => setSelectedUserId(isSelected ? null : user._id)}
                     className={`flex items-center gap-3.5 px-5 py-3.5 cursor-pointer transition-all ${
                       isSelected
-                        ? "bg-brand/5 border-l-[3px] border-l-brand"
-                        : "border-l-[3px] border-l-transparent hover:bg-slate-50"
+                        ? "bg-brand/5 border-l-4 border-l-brand"
+                        : "border-l-4 border-l-transparent hover:bg-slate-50"
                     }`}
                   >
                     <div

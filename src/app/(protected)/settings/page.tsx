@@ -512,7 +512,7 @@ function RoleCard({
                   {role.name}
                 </h3>
                 {role.isSystem && (
-                  <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">
+                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
                     System Role
                   </span>
                 )}
@@ -585,13 +585,13 @@ function RoleCard({
               {enabledMods.slice(0, 4).map((m) => (
                 <span
                   key={m.moduleKey}
-                  className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-brand/8 text-brand border border-brand/15"
+                  className="text-xs font-medium px-1.5 py-0.5 rounded-md bg-brand/8 text-brand border border-brand/15"
                 >
                   {m.name}
                 </span>
               ))}
               {enabledMods.length > 4 && (
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500">
+                <span className="text-xs font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500">
                   +{enabledMods.length - 4}
                 </span>
               )}

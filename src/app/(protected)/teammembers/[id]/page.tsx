@@ -146,13 +146,13 @@ export default function TeamMemberDetailsPage() {
 
   if (isLoadingUser) {
     return (
-      <div className="p-6 space-y-6 max-w-5xl mx-auto w-full">
+      <div className="p-3 space-y-3 w-full max-w-[1600px] mx-auto">
         <div className="h-10 w-32 bg-slate-200 animate-pulse rounded-md" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="md:col-span-1 space-y-3">
             <div className="h-[300px] w-full bg-slate-200 animate-pulse rounded-xl" />
           </div>
-          <div className="md:col-span-2 space-y-6">
+          <div className="md:col-span-3 space-y-3">
             <div className="h-[200px] w-full bg-slate-200 animate-pulse rounded-xl" />
             <div className="h-[400px] w-full bg-slate-200 animate-pulse rounded-xl" />
           </div>
@@ -163,11 +163,11 @@ export default function TeamMemberDetailsPage() {
 
   if (!user) {
     return (
-      <div className="p-6 text-center text-slate-500 py-24 flex flex-col items-center">
+      <div className="p-3 text-center text-slate-500 py-32` flex flex-col items-center">
         <AlertTriangle className="h-12 w-12 text-amber-500 mb-4" />
         <h2 className="text-xl font-semibold text-slate-800">Team Member Not Found</h2>
         <p className="mt-2 text-sm max-w-md mx-auto">The user you are looking for might have been removed or does not exist.</p>
-        <Button onClick={() => router.push("/teammembers")} className="mt-6">Back to Team Members</Button>
+        <Button onClick={() => router.push("/teammembers")} className="mt-2">Back to Team Members</Button>
       </div>
     );
   }
@@ -181,191 +181,230 @@ export default function TeamMemberDetailsPage() {
   }) : [];
 
   return (
-    <div className="min-h-[calc(100vh-20px)] bg-slate-50/60 pb-2">
-      {/* Top Header */}
-      <div className="bg-white border-b sticky top-0 z-20">
-        <div className="p-2 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push("/teammembers")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center">
-              <UserIcon className="h-4 w-4 text-brand" />
+    <div className="min-h-screen bg-slate-50/50 flex flex-col">
+      {/* Dynamic Header */}
+      <div className="bg-white border-b sticky top-0 z-30 px-6 py-3 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9 rounded-full hover:bg-slate-100 transition-colors" 
+            onClick={() => router.push("/teammembers")}
+          >
+            <ArrowLeft className="h-5 w-5 text-slate-600" />
+          </Button>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold text-slate-900 leading-none">
+              {isEditing ? "Editing Profile" : `${user.firstName} ${user.lastName}`}
+            </h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs font-medium text-slate-500">Team Member Profile</span>
+              <span className="h-1 w-1 rounded-full bg-slate-300" />
+              <span className="text-xs text-brand font-semibold underline underline-offset-2">{user.email}</span>
             </div>
-            <h1 className="text-base font-semibold text-slate-800">Profile Details</h1>
           </div>
+        </div>
+        <div className="flex items-center gap-3">
           <TeamMemberStatusBadge
              id={user._id}
              status={user.status}
              onStatusChange={handleStatusChange}
            />
+           {!isEditing ? (
+             <Button 
+               variant="outline" 
+               className="h-9 px-4 text-sm font-medium gap-2 border-slate-200 hover:border-brand hover:text-brand transition-all shadow-sm"
+               onClick={handleEditToggle}
+             >
+               <Edit2 className="h-4 w-4" />
+               Edit Profile
+             </Button>
+           ) : (
+             <div className="flex items-center gap-2">
+               <Button 
+                 variant="ghost" 
+                 className="h-9 px-4 text-sm font-medium text-slate-600"
+                 onClick={handleEditToggle}
+               >
+                 Cancel
+               </Button>
+               <Button 
+                 className="h-9 px-4 text-sm font-medium bg-brand hover:bg-brand/90 text-white shadow-sm flex items-center gap-2"
+                 onClick={handleEditSubmit}
+                 disabled={editMutation.isPending}
+               >
+                 {editMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                 Save Changes
+               </Button>
+             </div>
+           )}
         </div>
       </div>
 
-      <div className="px-[24px] pt-[24px] pb-[48px] max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-[24px]">
-        
-        {/* Left Column: Personal Info */}
-        <div className="md:col-span-1 space-y-[24px]">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden relative">
-            {/* Header / Basic Info */}
-            <div className="p-[24px] text-center border-b border-slate-100 bg-slate-50/50 relative group">
-              {!isEditing ? (
-                 <Button 
-                   variant="ghost" 
-                   size="icon" 
-                   onClick={handleEditToggle}
-                   className="absolute top-[12px] right-[12px] h-8 w-8 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-brand hover:bg-white border rounded-md shadow-sm bg-white"
-                 >
-                   <Edit2 className="h-3.5 w-3.5" />
-                 </Button>
-              ) : (
-                <div className="absolute top-[12px] right-[12px] flex gap-[6px]">
-                   <Button 
-                     variant="outline" 
-                     size="icon" 
-                     onClick={handleEditToggle}
-                     className="h-8 w-8 text-slate-500 hover:text-red-500 bg-white"
-                   >
-                     <X className="h-3.5 w-3.5" />
-                   </Button>
-                   <Button 
-                     onClick={handleEditSubmit} 
-                     disabled={editMutation.isPending}
-                     className="h-8 px-3 text-xs bg-brand hover:bg-brand/90 text-white shadow-sm flex items-center gap-[4px]"
-                   >
-                     {editMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                     Save
-                   </Button>
-                </div>
-              )}
-
-              <div className="mx-auto h-24 w-24 rounded-full bg-brand/10 text-brand flex items-center justify-center text-3xl font-bold shadow-inner mb-[16px]">
-                {user.firstName?.[0]?.toUpperCase()}{user.lastName?.[0]?.toUpperCase()}
-              </div>
-              
-              {!isEditing ? (
-                <>
-                  <h2 className="text-xl font-bold text-slate-800">{user.firstName} {user.lastName}</h2>
-                  <p className="text-sm text-slate-500 mt-[4px] font-medium">{user.teamRole ? user.teamRole.replace(/_/g, ' ') : "No Role Assigned"}</p>
-                </>
-              ) : (
-                <div className="space-y-[8px] mt-[16px]">
-                  <div className="grid grid-cols-2 gap-[8px]">
-                    <Input 
-                      value={editForm.firstName} 
-                      onChange={e => setEditForm({...editForm, firstName: e.target.value})} 
-                      className="h-9 text-sm text-center" 
-                      placeholder="First Name" 
-                    />
-                    <Input 
-                      value={editForm.lastName} 
-                      onChange={e => setEditForm({...editForm, lastName: e.target.value})} 
-                      className="h-9 text-sm text-center" 
-                      placeholder="Last Name" 
-                    />
+      {/* Main Content Area */}
+      <main className="flex-1 w-full max-w-[1600px] mx-auto p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          {/* Left Panel: Identity & Quick Info */}
+          <div className="lg:col-span-4 xl:col-span-3 space-y-6">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden pb-4">
+              {/* Profile Avatar Section */}
+              <div className="p-8 text-center bg-gradient-to-b from-slate-50 to-white">
+                <div className="relative inline-block group">
+                  <div className="h-32 w-32 rounded-full bg-brand/5 border-2 border-white shadow-xl flex items-center justify-center text-4xl font-black text-brand ring-4 ring-slate-50">
+                    {user.firstName?.[0]?.toUpperCase()}{user.lastName?.[0]?.toUpperCase()}
                   </div>
-                  <p className="text-xs text-slate-400 font-medium">Role assignment is managed on the right</p>
+                  <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-emerald-500 border-4 border-white shadow-lg flex items-center justify-center">
+                    <Check className="h-3.5 w-3.5 text-white" />
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Detailed Info */}
-            <div className="p-[24px] space-y-[20px]">
-              <div className="flex items-start gap-[12px] group relative">
-                <div className="mt-0.5 bg-slate-100 p-1.5 rounded-md text-slate-500">
-                  <Mail className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-[2px]">Email</p>
-                  {!isEditing ? (
-                    <p className="text-sm font-medium text-slate-800 truncate" title={user.email}>{user.email || "N/A"}</p>
-                  ) : (
-                    <Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="h-8 text-sm px-2 w-full mt-1" type="email" />
-                  )}
-                </div>
+                
+                {!isEditing ? (
+                  <div className="mt-5">
+                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">{user.firstName} {user.lastName}</h2>
+                    <p className="text-sm font-semibold text-brand mt-1 uppercase tracking-wider">
+                      {user.teamRole ? user.teamRole.replace(/_/g, ' ') : "Unassigned Role"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3 mt-6">
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-xs font-bold text-slate-400 uppercase ml-1">First Name</label>
+                      <Input 
+                        value={editForm.firstName} 
+                        onChange={e => setEditForm({...editForm, firstName: e.target.value})} 
+                        className="h-10 text-sm focus-visible:ring-brand/30" 
+                        placeholder="First Name" 
+                      />
+                    </div>
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-xs font-bold text-slate-400 uppercase ml-1">Last Name</label>
+                      <Input 
+                        value={editForm.lastName} 
+                        onChange={e => setEditForm({...editForm, lastName: e.target.value})} 
+                        className="h-10 text-sm focus-visible:ring-brand/30" 
+                        placeholder="Last Name" 
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-start gap-[12px]">
-                <div className="mt-0.5 bg-slate-100 p-1.5 rounded-md text-slate-500">
-                  <Phone className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-[2px]">Phone</p>
-                  {!isEditing ? (
-                    <p className="text-sm font-medium text-slate-800">{user.phone || "N/A"}</p>
-                  ) : (
-                    <Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="h-8 text-sm px-2 w-full mt-1" type="tel" />
-                  )}
-                </div>
+              {/* Contact Details List */}
+              <div className="px-6 py-2 space-y-1">
+                 <div className="group p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                      <Mail className="h-3 w-3" /> Email Address
+                    </p>
+                    {!isEditing ? (
+                      <p className="text-sm font-medium text-slate-800 truncate" title={user.email}>{user.email || "Not Provided"}</p>
+                    ) : (
+                      <Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="h-9 text-sm px-3 w-full bg-slate-50 border-none focus-visible:ring-brand/20" type="email" />
+                    )}
+                 </div>
+
+                 <div className="group p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                      <Phone className="h-3 w-3" /> Phone Number
+                    </p>
+                    {!isEditing ? (
+                      <p className="text-sm font-medium text-slate-800">{user.phone || "Not Provided"}</p>
+                    ) : (
+                      <Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="h-9 text-sm px-3 w-full bg-slate-50 border-none focus-visible:ring-brand/20" type="tel" />
+                    )}
+                 </div>
+
+                 <div className="group p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                      <MapPin className="h-3 w-3" /> Work Location
+                    </p>
+                    {!isEditing ? (
+                      <p className="text-sm font-medium text-slate-800">{user.location || "Office / Remote"}</p>
+                    ) : (
+                      <Input value={editForm.location} onChange={e => setEditForm({...editForm, location: e.target.value})} className="h-9 text-sm px-3 w-full bg-slate-50 border-none focus-visible:ring-brand/20" />
+                    )}
+                 </div>
+
+                 <div className="group p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                      <Briefcase className="h-3 w-3" /> Total Experience
+                    </p>
+                    {!isEditing ? (
+                      <p className="text-sm font-medium text-slate-800">{user.experience || "N/A"}</p>
+                    ) : (
+                      <Input value={editForm.experience} onChange={e => setEditForm({...editForm, experience: e.target.value})} className="h-9 text-sm px-3 w-full bg-slate-50 border-none focus-visible:ring-brand/20" />
+                    )}
+                 </div>
               </div>
 
-              <div className="flex items-start gap-[12px]">
-                <div className="mt-0.5 bg-slate-100 p-1.5 rounded-md text-slate-500">
-                  <MapPin className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-[2px]">Location</p>
-                  {!isEditing ? (
-                    <p className="text-sm font-medium text-slate-800">{user.location || "N/A"}</p>
-                  ) : (
-                    <Input value={editForm.location} onChange={e => setEditForm({...editForm, location: e.target.value})} className="h-8 text-sm px-2 w-full mt-1" />
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-[12px]">
-                <div className="mt-0.5 bg-slate-100 p-1.5 rounded-md text-slate-500">
-                  <Briefcase className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-[2px]">Experience</p>
-                  {!isEditing ? (
-                    <p className="text-sm font-medium text-slate-800">{user.experience || "N/A"}</p>
-                  ) : (
-                    <Input value={editForm.experience} onChange={e => setEditForm({...editForm, experience: e.target.value})} className="h-8 text-sm px-2 w-full mt-1" />
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-[12px]">
-                <div className="mt-0.5 bg-slate-100 p-1.5 rounded-md text-slate-500">
-                  <Calendar className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-[2px]">Created At</p>
-                  <p className="text-sm font-medium text-slate-800">
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
-                  </p>
-                </div>
+              <div className="mx-6 mt-4 pt-4 border-t border-slate-100">
+                 <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-400 font-medium tracking-tight">Onboarded On</span>
+                    <span className="text-xs text-slate-600 font-bold">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}</span>
+                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Column: Roles & Permissions */}
-        <div className="md:col-span-2 space-y-[24px]">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-[24px] py-[16px] border-b border-slate-100 flex items-center gap-[12px]">
-              <Shield className="h-5 w-5 text-brand" />
-              <h3 className="font-semibold text-slate-800">User Role & Permissions</h3>
+          {/* Right Panel: Role Management & Matrix */}
+          <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+            
+            {/* Quick Stats / Breadth */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="h-10 w-10 rounded-xl bg-brand/5 flex items-center justify-center text-brand">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Current Role</p>
+                  <p className="text-sm font-bold text-slate-800">{user.teamRole?.replace(/_/g, ' ') || "None"}</p>
+                </div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+                  <Zap className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Actions</p>
+                  <p className="text-sm font-bold text-slate-800">{totalPerms} Operations</p>
+                </div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+                  <Check className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Module Access</p>
+                  <p className="text-sm font-bold text-slate-800">{enabledMods.length} Active Modules</p>
+                </div>
+              </div>
             </div>
-            <div className="p-[24px]">
-              <div className="space-y-[16px] max-w-sm mb-[32px]">
-                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wide block">
-                  Assign Team Role
-                </label>
-                <div className="flex items-center gap-[12px]">
+
+            {/* Role Config Section */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
+              <div className="px-6 py-5 border-b border-slate-100 bg-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-md">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 tracking-tight">Authority & Permissions</h3>
+                    <p className="text-xs text-slate-500 font-medium">Manage user role and view effective capabilities.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-xl border border-slate-100 self-start md:self-center">
                   <Select value={selectedRoleId} onValueChange={setSelectedRoleId} disabled={isLoadingRoles || assignRoleMutation.isPending}>
-                    <SelectTrigger className="h-10 flex-1">
-                      <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select Role"} />
+                    <SelectTrigger className="h-10 w-60 bg-white border-slate-200 focus:ring-brand/10 transition-all font-medium">
+                      <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select New Role"} />
                     </SelectTrigger>
                     <SelectContent>
                       {roles.map(role => (
                         <SelectItem key={role._id || role.id} value={(role._id || role.id) as string}>
                            <div className="flex items-center gap-2">
-                            {role.isSystem ? <Globe className="h-3 w-3 text-slate-400" /> : <Shield className="h-3 w-3 text-brand" />}
-                            <span>{role.name}</span>
-                            {role.isSystem && <span className="text-[10px] text-slate-400 ml-1">(System)</span>}
+                            <div className={`h-2 w-2 rounded-full ${role.isSystem ? 'bg-slate-300' : 'bg-brand'}`} />
+                            <span className="text-sm">{role.name}</span>
+                            {role.isSystem && <span className="text-[9px] font-black text-slate-400 uppercase ml-1">System</span>}
                            </div>
                         </SelectItem>
                       ))}
@@ -374,73 +413,89 @@ export default function TeamMemberDetailsPage() {
                   <Button 
                     onClick={handleSaveRole} 
                     disabled={!selectedRoleId || assignRoleMutation.isPending || user.roleId === selectedRoleId} 
-                    className="h-10 bg-brand hover:bg-brand/90 text-white"
+                    className="h-10 px-4 bg-slate-900 hover:bg-black text-white rounded-lg transition-transform active:scale-95 shadow-sm font-bold text-xs uppercase tracking-widest"
                   >
-                    {assignRoleMutation.isPending ? "Saving..." : "Save Role"}
+                    {assignRoleMutation.isPending ? "Assigning..." : "Assign Role"}
                   </Button>
                 </div>
-                {user.roleId === selectedRoleId && selectedRoleId && (
-                 <p className="text-xs text-emerald-600 flex items-center gap-1 mt-2">
-                   <Check className="h-3 w-3" /> This role is currently assigned
-                 </p>
-                )}
               </div>
 
-              {/* Role Preview Card */}
-              {loadingRoleDetails ? (
-                <div className="text-center py-[40px]">
-                  <div className="h-4 w-[128px] bg-slate-200 animate-pulse rounded mx-auto mb-[8px]" />
-                  <p className="text-xs text-slate-400">Fetching permission details...</p>
-                </div>
-              ) : selectedRole ? (
-                <div className="rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden">
-                  <div className="px-[20px] py-[16px] border-b border-slate-200 bg-white flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-sm text-slate-800">Role Capabilities Preview</h4>
-                      <p className="text-xs text-slate-500 mt-[2px]">Showing effective permissions for {selectedRole.name}</p>
-                    </div>
-                    <div className="flex items-center gap-[6px] px-[10px] py-[4px] rounded-md bg-brand/10 text-brand text-xs font-semibold">
-                      <Zap className="h-3.5 w-3.5" />
-                      {totalPerms} Active Permissions
-                    </div>
+              {/* Matrix Layout */}
+              <div className="flex-1 p-8">
+                {loadingRoleDetails ? (
+                  <div className="h-full flex flex-col items-center justify-center py-24">
+                    <Loader2 className="h-10 w-10 text-brand animate-spin" />
+                    <p className="text-sm font-bold text-slate-800 mt-5">Fetching Role DNA...</p>
+                    <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest">Validating permission matrix</p>
                   </div>
+                ) : selectedRole ? (
+                  <div className="space-y-8">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Effective Access Matrix</h4>
+                        <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                        <span className="text-xs font-bold text-brand uppercase tracking-wider">{selectedRole.name}</span>
+                      </div>
+                      <div className="text-xs font-black text-slate-400 uppercase tracking-widest">AEMS Internal Sec</div>
+                    </div>
 
-                  {enabledMods.length > 0 ? (
-                    <div className="p-[20px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[12px]">
-                      {enabledMods.map(mod => {
-                        const mp = selectedRole.permissions?.[mod.moduleKey];
-                        const actions = ACTIONS.filter((a) => mp?.[a]);
-                        return (
-                          <div key={mod.moduleKey} className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm hover:border-brand/30 transition-colors">
-                            <p className="text-xs font-bold text-slate-700 mb-2 truncate" title={mod.name}>{mod.name}</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {actions.map(a => (
-                                <span key={a} className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border bg-slate-50 text-slate-600 border-slate-200">
-                                  {a}
-                                </span>
-                              ))}
+                    {enabledMods.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                        {enabledMods.map(mod => {
+                          const mp = selectedRole.permissions?.[mod.moduleKey];
+                          const actions = ACTIONS.filter((a) => mp?.[a]);
+                          return (
+                            <div key={mod.moduleKey} className="group bg-slate-50/50 rounded-2xl p-5 border border-slate-100 hover:border-brand/40 hover:bg-white hover:shadow-xl hover:shadow-brand/5 transition-all duration-300">
+                               <div className="flex items-center justify-between mb-4">
+                                  <p className="text-sm font-bold text-slate-800 tracking-tight group-hover:text-brand transition-colors">{mod.name}</p>
+                                  <div className="h-7 w-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-[10px] font-black group-hover:bg-brand group-hover:text-white transition-all">
+                                    {actions.length}
+                                  </div>
+                               </div>
+                               <div className="flex flex-wrap gap-1.5">
+                                  {ACTIONS.map(a => (
+                                    <div 
+                                      key={a} 
+                                      className={`
+                                        text-[9px] uppercase font-black px-2 py-1 rounded-full border transition-all
+                                        ${mp?.[a] 
+                                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm' 
+                                          : 'bg-slate-50 text-slate-300 border-slate-100 opacity-60'}
+                                      `}
+                                    >
+                                      {a}
+                                    </div>
+                                  ))}
+                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="h-full py-20 text-center flex flex-col items-center justify-center">
+                        <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-5">
+                           <Shield className="h-10 w-10 text-slate-300" />
+                        </div>
+                        <h4 className="text-lg font-bold text-slate-900">Zero Capabilities Detected</h4>
+                        <p className="text-sm text-slate-500 max-w-xs mx-auto mt-2">This role grants no access to system modules. Users assigned this role will have base dashboard visibility only.</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="h-full py-24 flex flex-col items-center justify-center text-center">
+                    <div className="relative">
+                       <Zap className="h-20 w-20 text-slate-100 animate-pulse" />
+                       <Shield className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-slate-200" />
                     </div>
-                  ) : (
-                    <div className="px-6 py-10 text-center flex flex-col items-center justify-center">
-                      <Shield className="h-8 w-8 text-slate-300 mb-3" />
-                      <p className="text-sm font-medium text-slate-600">No capabilities configured</p>
-                      <p className="text-xs text-slate-400 mt-1">This role grants no access to system modules.</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                   <p className="text-sm text-slate-500">Select a role above to preview capabilities</p>
-                </div>
-              )}
+                    <h3 className="text-lg font-bold text-slate-800 mt-6">Interface Ready</h3>
+                    <p className="text-sm text-slate-500 mt-2">Select a role from the top controls to simulate and assign effective permissions.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
