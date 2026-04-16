@@ -82,17 +82,23 @@ export default function TeamMemberDetailsPage() {
 
   // Effects
   useEffect(() => {
-    if (user && roles.length > 0) {
+    if (user && roles.length > 0 && !selectedRoleId) {
       if (user.roleId) {
         setSelectedRoleId(user.roleId);
       } else if (user.teamRole || user.role) {
-        const matchedRole = roles.find(r => r.name === user.teamRole || r.name === user.role);
-        if (matchedRole && typeof matchedRole._id === 'string') {
-          setSelectedRoleId(matchedRole._id);
+        const targetName = (user.teamRole || user.role || "").toLowerCase().replace(/_/g, ' ');
+        const matchedRole = roles.find(r => 
+          r.name.toLowerCase() === targetName || 
+          r.name.toLowerCase().replace(/_/g, ' ') === targetName ||
+          (r.id && r.id === user.roleId)
+        );
+        
+        if (matchedRole && (matchedRole._id || matchedRole.id)) {
+          setSelectedRoleId((matchedRole._id || matchedRole.id) as string);
         }
       }
     }
-  }, [user, roles]);
+  }, [user, roles, selectedRoleId]);
 
   useEffect(() => {
     if (selectedRoleId) {
@@ -172,7 +178,9 @@ export default function TeamMemberDetailsPage() {
     );
   }
 
-  const selectedRole = fullRole ?? roles.find((r) => r._id === selectedRoleId);
+  const selectedRole = fullRole && (fullRole._id === selectedRoleId || fullRole.id === selectedRoleId) ? fullRole : null;
+  const isStatsLoading = loadingRoleDetails || (!!selectedRoleId && !selectedRole);
+
   const totalPerms = selectedRole ? Object.values(selectedRole.permissions ?? {}).reduce((sum, mp) => sum + Object.values(mp).filter(Boolean).length, 0) : 0;
   
   const enabledMods = selectedRole ? PERMISSION_MODULES.filter((m) => {
@@ -360,22 +368,40 @@ export default function TeamMemberDetailsPage() {
                   <p className="text-sm font-bold text-slate-800">{user.teamRole?.replace(/_/g, ' ') || "None"}</p>
                 </div>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
                   <Zap className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Actions</p>
-                  <p className="text-sm font-bold text-slate-800">{totalPerms} Operations</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Operations</p>
+                  <div className="flex items-baseline gap-1">
+                    {isStatsLoading ? (
+                      <div className="h-6 w-8 bg-slate-100 animate-pulse rounded" />
+                    ) : (
+                      <>
+                        <p className="text-xl font-black text-slate-900">{totalPerms}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">Actions</p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
-                  <Check className="h-5 w-5" />
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <Shield className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Module Access</p>
-                  <p className="text-sm font-bold text-slate-800">{enabledMods.length} Active Modules</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Permissions</p>
+                  <div className="flex items-baseline gap-1">
+                    {isStatsLoading ? (
+                      <div className="h-6 w-8 bg-slate-100 animate-pulse rounded" />
+                    ) : (
+                      <>
+                        <p className="text-xl font-black text-slate-900">{enabledMods.length}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">Modules</p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
