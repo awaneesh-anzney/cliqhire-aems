@@ -42,12 +42,40 @@ export function UserPermissionDialog({
 }: UserPermissionDialogProps) {
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string>("");
+  const [fullRole, setFullRole] = useState<Role | null>(null);
   const [loadingRoles, setLoadingRoles] = useState(false);
+  const [loadingRoleDetails, setLoadingRoleDetails] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) fetchRoles();
   }, [open]);
+
+  useEffect(() => {
+    if (user && user.roleId) {
+      setSelectedRoleId(user.roleId);
+    } else if (user && user.role) {
+      // Find roleId by searching roles for the matching role name
+      const matchedRole = roles.find(r => r.name === user.role || r.name === user.teamRole);
+      if (matchedRole && typeof matchedRole._id === 'string') {
+          setSelectedRoleId(matchedRole._id);
+      }
+    }
+  }, [user, roles]);
+
+  useEffect(() => {
+    if (selectedRoleId) {
+      setLoadingRoleDetails(true);
+      roleService.getRoleById(selectedRoleId).then(res => {
+         if (res.success && res.data) {
+           setFullRole(res.data);
+         }
+         setLoadingRoleDetails(false);
+      }).catch(() => setLoadingRoleDetails(false));
+    } else {
+      setFullRole(null);
+    }
+  }, [selectedRoleId]);
 
   const fetchRoles = async () => {
     setLoadingRoles(true);
@@ -81,7 +109,7 @@ export function UserPermissionDialog({
     }
   };
 
-  const selectedRole = roles.find((r) => r._id === selectedRoleId);
+  const selectedRole = fullRole ?? roles.find((r) => r._id === selectedRoleId);
 
   const enabledMods = selectedRole
     ? PERMISSION_MODULES.filter((m) => {
@@ -164,7 +192,9 @@ export function UserPermissionDialog({
           </div>
 
           {/* Role preview */}
-          {selectedRole && (
+          {loadingRoleDetails ? (
+             <div className="text-center text-xs text-slate-500 py-6">Loading role permissions...</div>
+          ) : selectedRole ? (
             <div className="rounded-lg border border-slate-200 bg-slate-50/60 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-600">Role Preview</span>
@@ -209,7 +239,7 @@ export function UserPermissionDialog({
                 </div>
               )}
             </div>
-          )}
+          ) : null}
         </div>
 
         <DialogFooter className="px-6 py-4 border-t bg-slate-50/80 gap-2">

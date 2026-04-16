@@ -52,7 +52,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRoles } from "@/hooks/useRoles";
-import { Role, ModulePermissions } from "@/services/roleService";
+import { roleService, Role, ModulePermissions } from "@/services/roleService";
 import { PERMISSION_MODULES } from "@/lib/sidebarModules";
 import { toast } from "sonner";
 
@@ -77,11 +77,13 @@ function PermissionDialog({
   onSave: (set: Record<string, Partial<ModulePermissions>>, remove: string[]) => Promise<void>;
 }) {
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [fullRole, setFullRole] = useState<Role | null>(null);
 
-  const buildMatrix = () => {
+  const buildMatrix = (r?: Role) => {
     const m: Record<string, Record<ActionKey, boolean>> = {};
     PERMISSION_MODULES.forEach((mod) => {
-      const ex = role.permissions?.[mod.moduleKey];
+      const ex = r?.permissions?.[mod.moduleKey];
       m[mod.moduleKey] = {
         view: ex?.view ?? false,
         create: ex?.create ?? false,
@@ -92,7 +94,20 @@ function PermissionDialog({
     return m;
   };
 
-  const [matrix, setMatrix] = useState(buildMatrix);
+  const [matrix, setMatrix] = useState(() => buildMatrix());
+
+  useEffect(() => {
+    const id = role._id || role.id;
+    if (id) {
+      roleService.getRoleById(id).then((res) => {
+        if (res.success && res.data) {
+          setFullRole(res.data);
+          setMatrix(buildMatrix(res.data));
+        }
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    }
+  }, [role]);
 
   const toggle = (mk: string, a: ActionKey, v: boolean) =>
     setMatrix((p) => ({ ...p, [mk]: { ...p[mk], [a]: v } }));
@@ -132,6 +147,16 @@ function PermissionDialog({
   };
 
   const totalEnabled = PERMISSION_MODULES.filter((m) => isRowAny(m.moduleKey)).length;
+
+  if (loading) {
+    return (
+      <Dialog open onOpenChange={onClose}>
+        <DialogContent className="max-w-md p-6 text-center text-slate-500">
+          Loading permissions...
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -334,11 +359,36 @@ function EditRoleDialog({
 
 // ─── View Permissions Dialog ───────────────────────────────────────────────────
 function ViewPermissionsDialog({ role, onClose }: { role: Role; onClose: () => void }) {
-  const perms = role.permissions ?? {};
+  const [loading, setLoading] = useState(true);
+  const [fullRole, setFullRole] = useState<Role | null>(null);
+
+  useEffect(() => {
+    const id = role._id || role.id;
+    if (id) {
+      roleService.getRoleById(id).then((res) => {
+        if (res.success && res.data) {
+          setFullRole(res.data);
+        }
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    }
+  }, [role]);
+
+  const perms = fullRole?.permissions ?? role.permissions ?? {};
   const enabledCount = PERMISSION_MODULES.filter((m) => {
     const mp = perms[m.moduleKey];
     return mp && Object.values(mp).some(Boolean);
   }).length;
+
+  if (loading) {
+    return (
+      <Dialog open onOpenChange={onClose}>
+        <DialogContent className="max-w-sm p-6 text-center text-slate-500">
+          Loading permissions...
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open onOpenChange={onClose}>
