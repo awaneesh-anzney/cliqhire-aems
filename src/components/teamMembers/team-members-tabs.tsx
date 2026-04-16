@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 import { TeamMemberStatusBadge } from "@/components/teamMembers/team-status-badge";
 import { RegisterUserDialog } from "@/components/teamMembers/register-user-dialog";
-import ViewEditTeamMemberDialog from "@/components/teamMembers/ViewEditTeamMemberDialog";
 import { DeleteTeamMemberDialog } from "@/components/teamMembers/delete-team-member-dialog";
 import { getTeamMembers, deleteTeamMember } from "@/services/teamMembersService";
 import { TeamMember, TeamMemberStatus } from "@/types/teamMember";
@@ -124,8 +123,6 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
   const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [teamMemberToDelete, setTeamMemberToDelete] = useState<TeamMember | null>(null);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [teamMemberToView, setTeamMemberToView] = useState<TeamMember | null>(null);
 
   // React Query setup
   const queryClient = useQueryClient();
@@ -160,12 +157,6 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
       };
     });
     // Do not refetch here; mutation in TeamMemberStatusBadge will invalidate once
-  };
-
-  const handleViewTeamMember = (teamMemberId: string) => {
-    const member = dataTeamMembers.find((tm) => tm._id === teamMemberId) || null;
-    setTeamMemberToView(member);
-    setViewDialogOpen(true);
   };
 
   const handleRegisterUser = (teamMember: TeamMember) => {
@@ -344,13 +335,6 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
               <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
-                  handleViewTeamMember(teamMember._id);
-                }}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
                   handleRegisterUser(teamMember);
                 }}>
                   <UserCheck className="mr-2 h-4 w-4" />
@@ -486,24 +470,6 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
         teamMemberName={teamMemberToDelete?.firstName + " " + teamMemberToDelete?.lastName || ""}
         onConfirm={confirmDeleteTeamMember}
         isLoading={deleteMutation.isPending}
-      />
-      <ViewEditTeamMemberDialog
-        open={viewDialogOpen}
-        onOpenChange={setViewDialogOpen}
-        teamMember={teamMemberToView}
-        onUpdated={(updated) => {
-          queryClient.setQueryData(["teamMembers"], (oldData: any) => {
-            if (!oldData?.teamMembers) return oldData;
-            return {
-              ...oldData,
-              teamMembers: oldData.teamMembers.map((tm: TeamMember) =>
-                tm._id === updated._id ? updated : tm
-              ),
-            };
-          });
-          // Ensure fresh data from server
-          queryClient.invalidateQueries({ queryKey: ["teamMembers"] });
-        }}
       />
     </div>
   );

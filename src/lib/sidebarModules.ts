@@ -24,7 +24,6 @@ export const SIDEBAR_MODULES: SidebarModule[] = [
   { name: "Head Hunter", href: "/headhunter", moduleKey: "headhunter" },
   { name: "Temp Candidates", href: "/tem-candidates", moduleKey: "tem_candidates" },
   { name: "Team Members", href: "/teammembers", moduleKey: "teams" },
-  { name: "User Access", href: "/user-access", moduleKey: "roles" },
   { name: "Settings", href: "/settings", moduleKey: "settings" },
   { name: "Administration", href: "/admin", moduleKey: "admin" },
 ];

@@ -29,15 +29,18 @@ export const getTeamMembers = async (filters?: TeamMemberFilters): Promise<{ tea
 export const getTeamMemberById = async (id: string): Promise<TeamMember> => {
   try { 
     const response = await api.get(`/api/users/${id}`);
-    if (response.data && response.data.status === 'success') {
-      const teamMember = response.data.data.user || response.data.data || response.data;
-      return teamMember;
-    }
-    
-    // If the response doesn't have a status field, try to extract data directly
     if (response.data) {
-      const teamMember = response.data.user || response.data;
-      return teamMember;
+      // Handle { success: true, data: { ... } } format
+      if (response.data.success === true) {
+        return response.data.data?.user || response.data.data || response.data;
+      }
+      // Handle { status: 'success', data: { ... } } format
+      if (response.data.status === 'success') {
+        return response.data.data?.user || response.data.data || response.data;
+      }
+      
+      // Fallbacks
+      return response.data.data?.user || response.data.data || response.data.user || response.data;
     }
     
     throw new Error(response.data?.message || 'Failed to fetch team member');
