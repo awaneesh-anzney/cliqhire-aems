@@ -23,7 +23,7 @@ export default function TeamMemberDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const teamMemberId = params.id as string;
+  const teamMemberId = params?.id as string;
 
   const [selectedRoleId, setSelectedRoleId] = useState<string>("");
   const [fullRole, setFullRole] = useState<Role | null>(null);

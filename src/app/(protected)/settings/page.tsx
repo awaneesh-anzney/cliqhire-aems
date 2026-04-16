@@ -832,7 +832,7 @@ export default function SettingsRolesPage() {
               <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center">
                 <Trash2 className="h-5 w-5 text-red-500" />
               </div>
-              <AlertDialogTitle>Delete "{deleteTarget?.name}"?</AlertDialogTitle>
+              <AlertDialogTitle>Delete &quot;{deleteTarget?.name}&quot;?</AlertDialogTitle>
             </div>
             <AlertDialogDescription>
               Agar koi user is role pe assigned hai toh delete nahi hoga. Ye action undo nahi ho

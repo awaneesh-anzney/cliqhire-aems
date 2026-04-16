@@ -26,6 +26,7 @@ export interface TeamMember {
   performanceRating?: number;
   activeJobs?: number;
   completedPlacements?: number;
+  roleId?: string;
 }
 
 export type TeamMemberStatus = "Active" | "Inactive" | "On Leave" | "Terminated";
