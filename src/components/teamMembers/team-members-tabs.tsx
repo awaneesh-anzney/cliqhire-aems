@@ -21,9 +21,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TeamMemberStatusBadge } from "@/components/teamMembers/team-status-badge";
-import { RegisterUserDialog } from "@/components/teamMembers/register-user-dialog";
 import { DeleteTeamMemberDialog } from "@/components/teamMembers/delete-team-member-dialog";
 import { getTeamMembers, deleteTeamMember } from "@/services/teamMembersService";
+import { roleService } from "@/services/roleService";
 import { TeamMember, TeamMemberStatus } from "@/types/teamMember";
 
 interface TeamMembersTabsProps {
@@ -38,7 +38,7 @@ const headerArr = [
   "Phone",
   "Location",
   "Experience",
-  "Team Role",
+  "User Role",
   "Status",
   "Actions",
 ];
@@ -119,8 +119,6 @@ const formatTeamRoleDisplay = (role: string): string => {
 
 export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersTabsProps) {
   const [activeTab, setActiveTab] = useState("all");
-  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
-  const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [teamMemberToDelete, setTeamMemberToDelete] = useState<TeamMember | null>(null);
 
@@ -134,6 +132,12 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
     staleTime: 30_000,
   });
   const dataTeamMembers: TeamMember[] = data?.teamMembers ?? [];
+
+  const { data: rolesRes } = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => roleService.getRoles(),
+  });
+  const roles = rolesRes?.data ?? [];
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteTeamMember(id),
@@ -159,16 +163,6 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
     // Do not refetch here; mutation in TeamMemberStatusBadge will invalidate once
   };
 
-  const handleRegisterUser = (teamMember: TeamMember) => {
-    setSelectedTeamMember(teamMember);
-    setRegisterDialogOpen(true);
-  };
-
-  const handleCloseRegisterDialog = () => {
-    setRegisterDialogOpen(false);
-    setSelectedTeamMember(null);
-  };
-
   const handleDeleteTeamMember = (teamMember: TeamMember) => {
     setTeamMemberToDelete(teamMember);
     setDeleteDialogOpen(true);
@@ -186,74 +180,38 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
 
 
 
-  // Get counts for each role
-  const getCountByRole = (role: string) => {
-    const normalize = (r?: string) => {
-      const base = (r || "").toLowerCase().replace(/\s+/g, "_");
-      if (["admin", "administrator"].includes(base)) return "admin";
-      if (["hiring_manager", "hiring", "hir"].includes(base)) return "hiring_manager";
-      if (["team_lead", "lead"].includes(base)) return "team_lead";
-      if (["recruiter", "recruiters", "rec"].includes(base)) return "recruiter";
-      if (["head_hunter", "head_enter", "headenter"].includes(base)) return "head_hunter";
-      if (["sales_team", "sales"].includes(base)) return "sales_team";
-      return base;
-    };
-    const target = normalize(role);
-    return dataTeamMembers.filter(member =>
-      normalize(member.teamRole) === target ||
-      normalize((member as any).role) === target
-    ).length;
-  };
-
   // Filter team members based on active tab
   const getFilteredTeamMembers = () => {
-    switch (activeTab) {
-      case "all":
-        return dataTeamMembers;
-      case "admin":
-        return dataTeamMembers.filter(member =>
-          member.teamRole === "ADMIN" ||
-          member.teamRole === "Admin" ||
-          (member as any).role === "Admin" ||
-          (member as any).role === "ADMIN" ||
-          (member as any).role === "Administrator"
-        );
-      case "hiring-manager":
-        return dataTeamMembers.filter(member =>
-          member.teamRole === "HIRING_MANAGER" ||
-          member.teamRole === "Hiring Manager" ||
-          member.role === "Hiring Manager"
-        );
-      case "team-lead":
-        return dataTeamMembers.filter(member =>
-          member.teamRole === "TEAM_LEAD" ||
-          member.teamRole === "Team Lead" ||
-          member.role === "Team Lead"
-        );
-      case "recruiters":
-        return dataTeamMembers.filter(member =>
-          member.teamRole === "RECRUITER" ||
-          member.teamRole === "Recruiters" ||
-          member.role === "Recruiters"
-        );
-      case "sales-team":
-        return dataTeamMembers.filter(member =>
-          member.teamRole === "SALES_TEAM" ||
-          member.teamRole === "Sales Team" ||
-          member.role === "Sales Team"
-        );
-      case "head-enter":
-        return dataTeamMembers.filter(member =>
-          member.teamRole === "HEAD_HUNTER" ||
-          member.teamRole === "Head Enter" ||
-          member.role === "HEAD_HUNTER"
-        );
-      default:
-        return dataTeamMembers;
-    }
+    if (activeTab === "all") return dataTeamMembers;
+    
+    // activeTab corresponds to role._id
+    const selectedRole = roles.find(r => (r._id || r.id) === activeTab);
+    if (!selectedRole) return dataTeamMembers;
+
+    return dataTeamMembers.filter(member => {
+      // User might be assigned via roleId directly, or we fall back to teamRole string match
+      if (member.roleId === selectedRole._id || member.roleId === selectedRole.id) return true;
+      
+      const roleName = selectedRole.name.toLowerCase();
+      const memberRole1 = (member.teamRole || "").toLowerCase();
+      const memberRole2 = (member.role || "").toLowerCase();
+      
+      return memberRole1 === roleName || memberRole2 === roleName;
+    });
   };
 
   const filteredTeamMembers = getFilteredTeamMembers();
+
+  // Helper to count members by dynamic role
+  const getCountByRole = (roleItem: any) => {
+    return dataTeamMembers.filter(member => {
+      if (member.roleId === roleItem._id || member.roleId === roleItem.id) return true;
+      const roleName = roleItem.name.toLowerCase();
+      const memberRole1 = (member.teamRole || "").toLowerCase();
+      const memberRole2 = (member.role || "").toLowerCase();
+      return memberRole1 === roleName || memberRole2 === roleName;
+    }).length;
+  };
 
   const renderTeamMembersTable = (members: TeamMember[]) => {
     if (isLoading) {
@@ -333,13 +291,6 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
-                  handleRegisterUser(teamMember);
-                }}>
-                  <UserCheck className="mr-2 h-4 w-4" />
-                  Register User
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
@@ -360,109 +311,35 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
 
   return (
     <div className="flex flex-col h-full">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col min-h-0">
-        <TabsList className="flex border-b border-slate-200 w-full rounded-none justify-start h-12 bg-white px-2 shrink-0 overflow-x-auto">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col min-h-0 bg-white shadow-sm rounded-xl border border-slate-200">
+        <TabsList className="flex border-b border-slate-200 w-full rounded-t-xl justify-start h-14 bg-slate-50/50 px-2 shrink-0 overflow-x-auto gap-2">
           <TabsTrigger
             value="all"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand text-slate-500 hover:text-slate-900 data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 border-b-2 border-transparent transition-colors"
+            className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-slate-200 data-[state=active]:shadow-sm data-[state=active]:text-brand text-slate-500 hover:text-slate-900 rounded-lg flex items-center gap-2 h-10 px-4 transition-all mt-2"
           >
             <Users className="h-4 w-4" />
-            All
-            <Badge variant="secondary" className="ml-1 text-xs">
+            All Team Members
+            <Badge variant="secondary" className="ml-1 text-[10px] h-5 px-1.5 bg-slate-100 text-slate-600">
               {dataTeamMembers.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="admin"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand text-slate-500 hover:text-slate-900 data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 border-b-2 border-transparent transition-colors"
-          >
-            <Shield className="h-4 w-4" />
-            Admin
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {getCountByRole("ADMIN")}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="hiring-manager"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand text-slate-500 hover:text-slate-900 data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 border-b-2 border-transparent transition-colors"
-          >
-            <UserCheck className="h-4 w-4" />
-            Hiring Manager
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {getCountByRole("HIRING_MANAGER")}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="team-lead"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand text-slate-500 hover:text-slate-900 data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 border-b-2 border-transparent transition-colors"
-          >
-            <UserCog className="h-4 w-4" />
-            Team Lead
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {getCountByRole("TEAM_LEAD")}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="recruiters"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand text-slate-500 hover:text-slate-900 data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 border-b-2 border-transparent transition-colors"
-          >
-            <Users className="h-4 w-4" />
-            Recruiters
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {getCountByRole("RECRUITER")}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="sales-team"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand text-slate-500 hover:text-slate-900 data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 border-b-2 border-transparent transition-colors"
-          >
-            <Users className="h-4 w-4" />
-            Sales Team
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {getCountByRole("SALES_TEAM")}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="head-enter"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand text-slate-500 hover:text-slate-900 data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 border-b-2 border-transparent transition-colors"
-          >
-            <Crown className="h-4 w-4" />
-            Head Hunter
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {getCountByRole("HEAD_HUNTER")}
             </Badge>
           </TabsTrigger>
         </TabsList>
 
-        {["all", "admin", "hiring-manager", "team-lead", "recruiters", "sales-team", "head-enter"].map((tabValue) => (
-          <TabsContent key={tabValue} value={tabValue} className="p-0 mt-0 flex-1 overflow-auto relative">
-            <Table>
-              <TableHeader>
-                <TableRow className="sticky top-0 z-40 bg-slate-50 border-b border-slate-200 hover:bg-slate-50 text-slate-700">
-                  {headerArr.map((header, index) => (
-                    <TableHead key={index}>{header}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {renderTeamMembersTable(filteredTeamMembers)}
-              </TableBody>
-            </Table>
-          </TabsContent>
-        ))}
+        <TabsContent value="all" className="p-0 mt-0 flex-1 overflow-auto relative rounded-b-xl bg-white">
+          <Table>
+            <TableHeader>
+              <TableRow className="sticky top-0 z-40 bg-white border-b border-slate-200 hover:bg-white text-slate-600 shadow-sm">
+                {headerArr.map((header, index) => (
+                  <TableHead key={index} className="h-12 text-xs font-semibold uppercase tracking-wider">{header}</TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {renderTeamMembersTable(filteredTeamMembers)}
+            </TableBody>
+          </Table>
+        </TabsContent>
       </Tabs>
-
-      {
-        selectedTeamMember && (
-          <RegisterUserDialog
-            isOpen={registerDialogOpen}
-            onClose={handleCloseRegisterDialog}
-            teamMemberId={selectedTeamMember._id}
-            teamMemberName={selectedTeamMember.firstName + " " + selectedTeamMember.lastName}
-            teamMemberEmail={selectedTeamMember.email}
-          />
-        )
-      }
 
       <DeleteTeamMemberDialog
         open={deleteDialogOpen}

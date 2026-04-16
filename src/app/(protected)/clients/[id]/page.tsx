@@ -35,6 +35,7 @@ import { ClientStageBadge } from "@/components/client-stage-badge";
 import { ClientStageStatusBadge } from "@/components/client-stage-status-badge";
 import { EmailTemplatesContent } from "@/components/clients/email-templates";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/contexts/PermissionContext";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   Dialog,
@@ -106,19 +107,13 @@ export default function ClientPage({ params }: PageProps) {
   const [downloadFilename, setDownloadFilename] = useState<string | null>(null);
   const [selectedPositionId, setSelectedPositionId] = useState<string>("");
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === "ADMIN";
-  let finalPermissions =
-    user?.permissions && user.permissions.length > 0
-      ? user.permissions
-      : user?.defaultPermissions || [];
-  if (!isAdmin && !finalPermissions.includes("TODAY_TASKS")) {
-    finalPermissions = [...finalPermissions, "TODAY_TASKS"];
-  }
-  const canViewClients =
-    isAdmin || finalPermissions.includes("CLIENTS_VIEW") || finalPermissions.includes("CLIENTS");
-  const canModifyClients = isAdmin || finalPermissions.includes("CLIENTS_MODIFY");
-  const canDeleteClients = isAdmin || finalPermissions.includes("CLIENTS_DELETE");
-  const canModifyJobs = isAdmin || finalPermissions.includes("JOBS_MODIFY");
+
+  const canViewClients = isAdmin || hasPermission("clients", "view");
+  const canModifyClients = isAdmin || hasPermission("clients", "create") || hasPermission("clients", "edit");
+  const canDeleteClients = isAdmin || hasPermission("clients", "delete");
+  const canModifyJobs = isAdmin || hasPermission("jobs", "edit");
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);

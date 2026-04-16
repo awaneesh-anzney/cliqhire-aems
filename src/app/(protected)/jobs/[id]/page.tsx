@@ -11,6 +11,7 @@ import { AddExistingCandidateDialog } from "@/components/common/add-existing-can
 import { useAuth } from "@/contexts/AuthContext";
 import { LinkedInPostDialog } from "@/components/jobs/linkedin-post-dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 interface PageProps {
   params: { id: string };
@@ -22,17 +23,11 @@ export default function JobPage({ params }: PageProps) {
   const [reloadToken, setReloadToken] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("summary");
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === "ADMIN";
-  let finalPermissions =
-    user?.permissions && user.permissions.length > 0
-      ? user.permissions
-      : user?.defaultPermissions || [];
-  if (!isAdmin && !finalPermissions.includes("TODAY_TASKS")) {
-    finalPermissions = [...finalPermissions, "TODAY_TASKS"];
-  }
-  const canViewJobs =
-    isAdmin || finalPermissions.includes("JOBS_VIEW") || finalPermissions.includes("JOBS");
-  const canModifyJobs = isAdmin || finalPermissions.includes("JOBS_MODIFY");
+
+  const canViewJobs = isAdmin || hasPermission("jobs", "view");
+  const canModifyJobs = isAdmin || hasPermission("jobs", "edit");
 
   const queryClient = useQueryClient();
   const {

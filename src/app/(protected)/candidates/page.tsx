@@ -18,6 +18,7 @@ import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import CandidateFilter, { CandidateStatus as FilterStatus } from "@/components/candidates/CandidateFilter";
 import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
 import { useExportCandidates } from "@/hooks/useExportCandidates";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 const columsArr = [
   "Profile ID",
@@ -33,14 +34,12 @@ const columsArr = [
 
 export default function CandidatesPage() {
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  let finalPermissions = (user?.permissions && user.permissions.length > 0) ? user.permissions : (user?.defaultPermissions || []);
-  if (!isAdmin && !finalPermissions.includes('TODAY_TASKS')) {
-    finalPermissions = [...finalPermissions, 'TODAY_TASKS'];
-  }
-  const canViewCandidates = isAdmin || finalPermissions.includes('CANDIDATE_VIEW') || finalPermissions.includes('CANDIDATE');
-  const canModifyCandidates = isAdmin || finalPermissions.includes('CANDIDATE_MODIFY');
-  const canDeleteCandidates = isAdmin || finalPermissions.includes('CANDIDATE_DELETE');
+
+  const canViewCandidates = isAdmin || hasPermission('candidates', 'view');
+  const canModifyCandidates = isAdmin || hasPermission('candidates', 'create') || hasPermission('candidates', 'edit');
+  const canDeleteCandidates = isAdmin || hasPermission('candidates', 'delete');
   const router = useRouter();
   const queryClient = useQueryClient();
   const { mutateAsync: exportCandidatesMutation } = useExportCandidates();

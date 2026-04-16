@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
 import { useExportClients } from "@/hooks/useExportClients";
 import { useClients } from "@/hooks/useClient";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 const columnsArr = [
   "", // Empty header for the checkbox column
@@ -67,14 +68,13 @@ interface Filters {
 
 export default function ClientsPage() {
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  let finalPermissions = (user?.permissions && user.permissions.length > 0) ? user.permissions : (user?.defaultPermissions || []);
-  if (!isAdmin && !finalPermissions.includes('TODAY_TASKS')) {
-    finalPermissions = [...finalPermissions, 'TODAY_TASKS'];
-  }
-  const canViewClients = isAdmin || finalPermissions.includes('CLIENTS_VIEW') || finalPermissions.includes('CLIENTS');
-  const canModifyClients = isAdmin || finalPermissions.includes('CLIENTS_MODIFY');
-  const canDeleteClients = isAdmin || finalPermissions.includes('CLIENTS_DELETE');
+
+  const canViewClients = isAdmin || hasPermission("clients", "view");
+  const canModifyClients = isAdmin || hasPermission("clients", "create") || hasPermission("clients", "edit");
+  const canDeleteClients = isAdmin || hasPermission("clients", "delete");
+
   const [open, setOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterName, setFilterName] = useState("");

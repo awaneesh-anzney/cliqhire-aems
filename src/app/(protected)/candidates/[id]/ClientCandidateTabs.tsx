@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { initializeAuth } from '@/lib/axios-config';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 interface Tab {
   label: string;
@@ -77,14 +78,12 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
   });
 
   // Permission checks after hooks
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  let finalPermissions = (user?.permissions && user.permissions.length > 0) ? user.permissions : (user?.defaultPermissions || []);
-  if (!isAdmin && !finalPermissions.includes('TODAY_TASKS')) {
-    finalPermissions = [...finalPermissions, 'TODAY_TASKS'];
-  }
-  const canViewCandidates = isAdmin || finalPermissions.includes('CANDIDATE_VIEW') || finalPermissions.includes('CANDIDATE');
-  const canModifyCandidates = isAdmin || finalPermissions.includes('CANDIDATE_MODIFY');
-  const canDeleteCandidates = isAdmin || finalPermissions.includes('CANDIDATE_DELETE');
+
+  const canViewCandidates = isAdmin || hasPermission('candidates', 'view');
+  const canModifyCandidates = isAdmin || hasPermission('candidates', 'create') || hasPermission('candidates', 'edit');
+  const canDeleteCandidates = isAdmin || hasPermission('candidates', 'delete');
 
   if (!canViewCandidates) {
     return (

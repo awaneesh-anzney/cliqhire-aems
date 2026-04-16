@@ -14,15 +14,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/use-debounce"; // Assuming we have or will use a simple inline debounce if not available.
 // Actually let's just implement inline debounce logic with useState to avoid missing imports
 import { useEffect } from "react";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 export function RecruiterPipeline() {
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  let finalPermissions = (user?.permissions && user.permissions.length > 0) ? user.permissions : (user?.defaultPermissions || []);
-  if (!isAdmin && !finalPermissions.includes('TODAY_TASKS')) {
-    finalPermissions = [...finalPermissions, 'TODAY_TASKS'];
-  }
-  const canViewPipeline = isAdmin || finalPermissions.includes('RECRUITMENT_PIPELINE_VIEW') || finalPermissions.includes('RECRUITMENT_PIPELINE');
+
+  const canViewPipeline = isAdmin || hasPermission('pipeline', 'view');
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");

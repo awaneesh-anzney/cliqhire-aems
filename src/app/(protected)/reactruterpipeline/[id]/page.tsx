@@ -23,17 +23,16 @@ import { InterviewDetailsDialog } from "@/components/Recruiter-Pipeline/intervie
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 const Page = () => {
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  let finalPermissions = (user?.permissions && user.permissions.length > 0) ? user.permissions : (user?.defaultPermissions || []);
-  if (!isAdmin && !finalPermissions.includes('TODAY_TASKS')) {
-    finalPermissions = [...finalPermissions, 'TODAY_TASKS'];
-  }
-  const canViewPipeline = isAdmin || finalPermissions.includes('RECRUITMENT_PIPELINE_VIEW') || finalPermissions.includes('RECRUITMENT_PIPELINE');
-  const canModifyPipeline = isAdmin || finalPermissions.includes('RECRUITMENT_PIPELINE_MODIFY');
-  const canDeletePipeline = isAdmin || finalPermissions.includes('RECRUITMENT_PIPELINE_DELETE');
+  
+  const canViewPipeline = isAdmin || hasPermission('pipeline', 'view');
+  const canModifyPipeline = isAdmin || hasPermission('pipeline', 'create') || hasPermission('pipeline', 'edit');
+  const canDeletePipeline = isAdmin || hasPermission('pipeline', 'delete');
   const params = useParams();
   const id = (params as any)?.id as string;
   const router = useRouter();

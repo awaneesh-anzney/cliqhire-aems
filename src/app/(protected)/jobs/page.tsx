@@ -47,6 +47,7 @@ import JobsFilter from "@/components/jobs/JobsFilter";
 import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
 import { useExportJobs } from "@/hooks/useExportJobs";
 import { useJobs, useUpdateJobStage, useDeleteJob } from "@/hooks/useJobs";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 const columsArr = [
   "Job ID",
@@ -90,14 +91,13 @@ function ConfirmStageChangeDialog({
 
 export default function JobsPage() {
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  let finalPermissions = (user?.permissions && user.permissions.length > 0) ? user.permissions : (user?.defaultPermissions || []);
-  if (!isAdmin && !finalPermissions.includes('TODAY_TASKS')) {
-    finalPermissions = [...finalPermissions, 'TODAY_TASKS'];
-  }
-  const canViewJobs = isAdmin || finalPermissions.includes('JOBS_VIEW') || finalPermissions.includes('JOBS');
-  const canModifyJobs = isAdmin || finalPermissions.includes('JOBS_MODIFY');
-  const canDeleteJobs = isAdmin || finalPermissions.includes('JOBS_DELETE');
+
+  const canViewJobs = isAdmin || hasPermission('jobs', 'view');
+  const canModifyJobs = isAdmin || hasPermission('jobs', 'create') || hasPermission('jobs', 'edit');
+  const canDeleteJobs = isAdmin || hasPermission('jobs', 'delete');
+
   const [open, setOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterPositionName, setFilterPositionName] = useState("");
