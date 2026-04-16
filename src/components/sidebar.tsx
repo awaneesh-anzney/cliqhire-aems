@@ -15,6 +15,8 @@ import {
   ListTodo,
   UserRoundSearch,
   UserPlus,
+  ShieldUser,
+  UserLock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,19 +37,19 @@ import { SIDEBAR_MODULES } from "@/lib/sidebarModules";
 
 // Map moduleKey → lucide icon
 const MODULE_ICONS: Record<string, React.ElementType> = {
-  home:           Home,
-  today_tasks:    ListTodo,
-  clients:        Building2,
-  jobs:           Briefcase,
-  candidates:     Users,
-  pipeline:       Route,
-  recruiter:      UserPlus,
-  headhunter:     UserRoundSearch,
+  home: Home,
+  today_tasks: ListTodo,
+  clients: Building2,
+  jobs: Briefcase,
+  candidates: UserLock,
+  pipeline: Route,
+  recruiter: UserPlus,
+  headhunter: UserRoundSearch,
   tem_candidates: Users,
-  teams:          Users,
-  roles:          LockKeyhole,
-  settings:       Settings,
-  admin:          Lock,
+  users: ShieldUser,
+  // roles:          LockKeyhole,
+  settings: Settings,
+  admin: Lock,
 };
 
 export function Sidebar() {
@@ -58,11 +60,7 @@ export function Sidebar() {
   const isAdmin = user?.role === "ADMIN";
 
   return (
-    <UISidebar
-      collapsible="icon"
-      className="border-r bg-sidebar"
-      data-variant="sidebar"
-    >
+    <UISidebar collapsible="icon" className="border-r bg-sidebar" data-variant="sidebar">
       <SidebarHeader className="pt-6 pb-2 px-6 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pt-6 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center">
         <div className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center">
           <div className="flex shrink-0 items-center justify-center rounded-lg bg-brand p-1.5 text-white shadow-sm shadow-brand/20">
@@ -108,7 +106,7 @@ export function Sidebar() {
                           "group h-11 transition-all duration-200 ease-out rounded-lg relative ring-offset-0 px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full",
                           active
                             ? "bg-brand/10 text-brand font-medium data-[active=true]:bg-brand/10 data-[active=true]:text-brand hover:bg-brand/10 hover:text-brand"
-                            : "text-slate-500 hover:bg-brand/5 hover:text-brand"
+                            : "text-slate-500 hover:bg-brand/5 hover:text-brand",
                         )}
                       >
                         <Link
@@ -122,9 +120,7 @@ export function Sidebar() {
                             <Icon
                               className={cn(
                                 "h-[18px] w-[18px] shrink-0 transition-colors",
-                                active
-                                  ? "text-brand"
-                                  : "text-slate-400 group-hover:text-brand/80"
+                                active ? "text-brand" : "text-slate-400 group-hover:text-brand/80",
                               )}
                             />
                             <span className="text-[14.5px] font-medium tracking-wide group-data-[collapsible=icon]:hidden whitespace-nowrap overflow-hidden transition-all">

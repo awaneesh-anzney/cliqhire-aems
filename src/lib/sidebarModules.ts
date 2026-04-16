@@ -21,10 +21,10 @@ export const SIDEBAR_MODULES: SidebarModule[] = [
   { name: "Candidates",           href: "/candidates",           moduleKey: "candidates" },
   { name: "Recruitment Pipeline", href: "/reactruterpipeline",   moduleKey: "pipeline" },
   { name: "Recruiter",            href: "/recruiter",            moduleKey: "recruiter" },
-  { name: "Head Hunter",          href: "/headhunter",           moduleKey: "headhunter" },
+//   { name: "Head Hunter",          href: "/headhunter",           moduleKey: "headhunter" },
   { name: "Temp Candidates",      href: "/tem-candidates",       moduleKey: "tem_candidates" },
-  { name: "Team Members",         href: "/teammembers",          moduleKey: "teams" },
-  { name: "User Access",          href: "/user-access",          moduleKey: "roles" },
+  { name: "Users",         href: "/teammembers",          moduleKey: "users" },
+//   { name: "User Access",          href: "/user-access",          moduleKey: "roles" },
   { name: "Settings",             href: "/settings",             moduleKey: "settings" },
   { name: "Administration",       href: "/admin",                moduleKey: "admin" },
 ];
