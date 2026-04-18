@@ -152,7 +152,8 @@ export default function TeamMemberDetailsPage() {
 
   if (isLoadingUser) {
     return (
-      <div className="p-3 space-y-3 w-full max-w-[1600px] mx-auto">
+      <div className="p-3 space-y-3 w-full mx-auto">
+
         <div className="h-10 w-32 bg-slate-200 animate-pulse rounded-md" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="md:col-span-1 space-y-3">
@@ -250,7 +251,8 @@ export default function TeamMemberDetailsPage() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[1600px] mx-auto p-6">
+      <main className="flex-1 w-full mx-auto p-4 md:p-6 lg:p-8">
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Left Panel: Identity & Quick Info */}
@@ -373,35 +375,35 @@ export default function TeamMemberDetailsPage() {
                   <Zap className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Operations</p>
-                  <div className="flex items-baseline gap-1">
-                    {isStatsLoading ? (
-                      <div className="h-6 w-8 bg-slate-100 animate-pulse rounded" />
-                    ) : (
-                      <>
-                        <p className="text-xl font-black text-slate-900">{totalPerms}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Actions</p>
-                      </>
-                    )}
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Permissions</p>
+                    <div className="flex items-baseline gap-1">
+                      {isStatsLoading ? (
+                        <div className="h-6 w-8 bg-slate-100 animate-pulse rounded" />
+                      ) : (
+                        <>
+                          <p className="text-xl font-black text-slate-900">{totalPerms}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Actions</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
-                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                  <Shield className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Permissions</p>
-                  <div className="flex items-baseline gap-1">
-                    {isStatsLoading ? (
-                      <div className="h-6 w-8 bg-slate-100 animate-pulse rounded" />
-                    ) : (
-                      <>
-                        <p className="text-xl font-black text-slate-900">{enabledMods.length}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Modules</p>
-                      </>
-                    )}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Shield className="h-5 w-5" />
                   </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Modules Access</p>
+                    <div className="flex items-baseline gap-1">
+                      {isStatsLoading ? (
+                        <div className="h-6 w-8 bg-slate-100 animate-pulse rounded" />
+                      ) : (
+                        <>
+                          <p className="text-xl font-black text-slate-900">{enabledMods.length}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Modules</p>
+                        </>
+                      )}
+                    </div>
                 </div>
               </div>
             </div>

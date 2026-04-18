@@ -11,7 +11,7 @@ const ContractOverview = ({
 }) => {
   return (
     <div className="space-y-4">
-      {lineOfBusiness.map((lineOfBusiness) => (
+      {(lineOfBusiness || []).map((lineOfBusiness) => (
         <div
           key={lineOfBusiness}
           className="flex items-center justify-between border p-4 rounded-lg"
