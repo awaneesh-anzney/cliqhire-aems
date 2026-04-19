@@ -1,11 +1,73 @@
 import { api } from '@/lib/axios-config';
 
-export interface StageFieldUpdate {
-  fields: Record<string, any>;
-  notes?: string;
+// =========================
+// Recruiter Pipeline Service (Updated API v2)
+// =========================
+
+export interface PipelineStage {
+  templateId?: string;
+  name: string;
+  order: number;
+  color?: string;
+  isTerminal: boolean;
+  allowedStatuses: string[];
+  defaultStatus: string;
+  responsiblePosition?: string;
 }
 
-export interface StageFieldUpdateResponse {
+export interface StageHistory {
+  _id?: string;
+  stage: string;
+  status: string;
+  movedBy?: string;
+  movedAt: string;
+  notes?: string;
+  data?: Record<string, any>;
+}
+
+export interface PipelineCandidate {
+  candidateId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+  currentStage: string;
+  currentStatus: string;
+  priority?: string;
+  addedAt: string;
+  lastUpdated?: string;
+  stageHistory?: StageHistory[];
+  rejectionHistory?: any[];
+}
+
+export interface Pipeline {
+  _id: string;
+  status: string;
+  priority?: string;
+  totalCandidates?: number;
+  activeCandidates?: number;
+  completedCandidates?: number;
+  stages?: PipelineStage[];
+  candidates?: PipelineCandidate[];
+  jobId?: {
+    _id: string;
+    jobTitle: string;
+    jobId?: string;
+    client?: { name: string; email?: string };
+    jobTeamMembers?: any[];
+  };
+  createdAt?: string;
+}
+
+export interface StageFieldUpdate {
+  status?: string;
+  notes?: string;
+  data?: Record<string, any>;
+}
+
+export interface StageUpdateResponse {
   success: boolean;
   message: string;
   data?: any;
@@ -13,181 +75,336 @@ export interface StageFieldUpdateResponse {
 }
 
 export class RecruiterPipelineService {
+  // ─── Pipeline CRUD ───────────────────────────────────────────
+
   /**
-   * Update stage fields for a specific candidate in a pipeline
-   * @param pipelineId - The ID of the pipeline
-   * @param candidateId - The ID of the candidate
-   * @param stageName - The stage name (Sourcing, Screening, Client Review, Interview, Verification, Onboarding, Hired)
-   * @param updateData - The fields to update and optional notes
-   * @returns Promise with the update response
+   * Create pipeline manually for a job
    */
-  static async updateStageFields(
-    pipelineId: string,
-    candidateId: string,
-    stageName: string,
-    updateData: StageFieldUpdate
-  ): Promise<StageFieldUpdateResponse> {
+  static async createPipeline(
+    jobId: string,
+    priority?: string,
+    notes?: string
+  ): Promise<StageUpdateResponse> {
     try {
-      const response = await api.patch(
-        `/api/recruiter-pipeline/${pipelineId}/candidate/${candidateId}/stage/${encodeURIComponent(stageName)}/fields`,
-        updateData
-      );
-      return {
-        success: true,
-        message: 'Stage fields updated successfully',
-        data: response.data
-      };
+      const response = await api.post('/api/recruiter-pipeline/create', { jobId, priority, notes });
+      return { success: true, message: 'Pipeline created', data: response.data };
     } catch (error: any) {
-      console.error('Error updating stage fields:', error);
-      console.error('Error details:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-      
       return {
         success: false,
-        message: 'Failed to update stage fields',
-        error: error.response?.data?.message || error.message || 'Unknown error occurred'
+        message: 'Failed to create pipeline',
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
   /**
-   * Get stage fields for a specific candidate in a pipeline
-   * @param pipelineId - The ID of the pipeline
-   * @param candidateId - The ID of the candidate
-   * @param stageName - The stage name
-   * @returns Promise with the stage fields data
+   * Get pipelines visible to the current user (role-scoped)
    */
-  static async getStageFields(
+  static async getMyPipelines(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    priority?: string;
+  }): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.get('/api/recruiter-pipeline/my', { params });
+      return { success: true, message: 'Pipelines fetched', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to fetch pipelines',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Get all pipelines (admin sees all)
+   */
+  static async getAllPipelines(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.get('/api/recruiter-pipeline', { params });
+      return { success: true, message: 'Pipelines fetched', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to fetch pipelines',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Get a single pipeline with full detail (stages + candidates)
+   */
+  static async getPipelineEntry(pipelineId: string): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.get(`/api/recruiter-pipeline/entry/${pipelineId}`);
+      return { success: true, message: 'Pipeline fetched', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to fetch pipeline',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Update pipeline status
+   */
+  static async updatePipelineStatus(
     pipelineId: string,
-    candidateId: string,
-    stageName: string
-  ): Promise<StageFieldUpdateResponse> {
+    status: 'Active' | 'On Hold' | 'Completed' | 'Cancelled'
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.patch(`/api/recruiter-pipeline/${pipelineId}/status`, { status });
+      return { success: true, message: 'Status updated', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to update status',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Delete a pipeline
+   */
+  static async deletePipeline(pipelineId: string): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.delete(`/api/recruiter-pipeline/${pipelineId}`);
+      return { success: true, message: 'Pipeline deleted', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to delete pipeline',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Get allowed statuses for all stages in a pipeline
+   */
+  static async getPipelineStatuses(pipelineId: string): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.get(`/api/recruiter-pipeline/${pipelineId}/statuses`);
+      return { success: true, message: 'Statuses fetched', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to fetch statuses',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Get allowed statuses for a specific stage
+   */
+  static async getStageStatuses(pipelineId: string, stageName: string): Promise<StageUpdateResponse> {
     try {
       const response = await api.get(
-        `/api/recruiter-pipeline/${pipelineId}/candidate/${candidateId}/stage/${encodeURIComponent(stageName)}/fields`
+        `/api/recruiter-pipeline/${pipelineId}/statuses/${encodeURIComponent(stageName)}`
       );
-      return {
-        success: true,
-        message: 'Stage fields retrieved successfully',
-        data: response.data
-      };
+      return { success: true, message: 'Stage statuses fetched', data: response.data };
     } catch (error: any) {
-      console.error('Error fetching stage fields:', error);
-      console.error('Error details:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-      
       return {
         success: false,
-        message: 'Failed to fetch stage fields',
-        error: error.response?.data?.message || error.message || 'Unknown error occurred'
+        message: 'Failed to fetch stage statuses',
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
+  // ─── Candidate Management ────────────────────────────────────
+
   /**
-   * Get all candidates in a pipeline
-   * @param pipelineId - The ID of the pipeline
-   * @returns Promise with the candidates data
+   * Add a candidate to a pipeline
    */
-  static async getPipelineCandidates(pipelineId: string): Promise<StageFieldUpdateResponse> {
+  static async addCandidateToPipeline(
+    pipelineId: string,
+    candidateId: string,
+    options?: { priority?: string; notes?: string; initialStage?: string }
+  ): Promise<StageUpdateResponse> {
     try {
-      const response = await api.get(`/api/recruiter-pipeline/${pipelineId}/candidates`);
-
-      return {
-        success: true,
-        message: 'Pipeline candidates retrieved successfully',
-        data: response.data
-      };
+      const response = await api.post(`/api/recruiter-pipeline/${pipelineId}/candidates`, {
+        candidateId,
+        ...options,
+      });
+      return { success: true, message: 'Candidate added', data: response.data };
     } catch (error: any) {
-      console.error('Error fetching pipeline candidates:', error);
-      
       return {
         success: false,
-        message: 'Failed to fetch pipeline candidates',
-        error: error.response?.data?.message || error.message || 'Unknown error occurred'
+        message: 'Failed to add candidate',
+        error: error.response?.data?.message || error.message,
       };
     }
   }
 
   /**
-   * Move a candidate to a different stage
-   * @param pipelineId - The ID of the pipeline
-   * @param candidateId - The ID of the candidate
-   * @param newStage - The new stage name
-   * @param notes - Optional notes for the stage change
-   * @returns Promise with the move response
+   * Get a single candidate's detail in a pipeline
+   */
+  static async getCandidateInPipeline(
+    pipelineId: string,
+    candidateId: string
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.get(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}`
+      );
+      return { success: true, message: 'Candidate fetched', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to fetch candidate',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Move candidate to a different stage
+   * Stage name must match pipeline.stages[].name exactly
    */
   static async moveCandidateToStage(
     pipelineId: string,
     candidateId: string,
-    newStage: string,
-    notes?: string
-  ): Promise<StageFieldUpdateResponse> {
+    stage: string,
+    status?: string,
+    notes?: string,
+    data?: Record<string, any>
+  ): Promise<StageUpdateResponse> {
     try {
       const response = await api.patch(
-        `/api/recruiter-pipeline/${pipelineId}/candidate/${candidateId}/move`,
-        {
-          newStage,
-          notes
-        }
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/stage`,
+        { stage, status, notes, data }
       );
-      return {
-        success: true,
-        message: 'Candidate moved to new stage successfully',
-        data: response.data
-      };
+      return { success: true, message: 'Candidate moved', data: response.data };
     } catch (error: any) {
-      console.error('Error moving candidate to stage:', error);
-      console.error('Error details:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-      
       return {
         success: false,
-        message: 'Failed to move candidate to new stage',
-        error: error.response?.data?.message || error.message || 'Unknown error occurred'
+        message: error.response?.data?.message || 'Failed to move candidate',
+        error: error.response?.data?.message || error.message,
+        data: error.response?.data,
       };
     }
   }
 
   /**
-   * Get current pipeline entry data for debugging
-   * @param pipelineId - The ID of the pipeline
-   * @returns Promise with the pipeline data
+   * Update stage data / status without changing stage
    */
-  static async getPipelineEntry(pipelineId: string): Promise<StageFieldUpdateResponse> {
+  static async updateStageData(
+    pipelineId: string,
+    candidateId: string,
+    update: StageFieldUpdate
+  ): Promise<StageUpdateResponse> {
     try {
-      const response = await api.get(`/api/recruiter-pipeline/${pipelineId}`);
-      return {
-        success: true,
-        message: 'Pipeline entry retrieved successfully',
-        data: response.data
-      };
+      const response = await api.patch(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/stage-data`,
+        update
+      );
+      return { success: true, message: 'Stage data updated', data: response.data };
     } catch (error: any) {
-      console.error('Error fetching pipeline entry:', error);
-      console.error('Error details:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-      
       return {
         success: false,
-        message: 'Failed to fetch pipeline entry',
-        error: error.response?.data?.message || error.message || 'Unknown error occurred'
+        message: 'Failed to update stage data',
+        error: error.response?.data?.message || error.message,
       };
     }
+  }
+
+  /**
+   * Get full stage history of a candidate
+   */
+  static async getCandidateHistory(
+    pipelineId: string,
+    candidateId: string
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.get(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/history`
+      );
+      return { success: true, message: 'History fetched', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to fetch history',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Reject a candidate (moves to Disqualified stage)
+   */
+  static async rejectCandidate(
+    pipelineId: string,
+    candidateId: string,
+    rejectionReason: string,
+    feedback?: string,
+    canReapply?: boolean,
+    reapplyDate?: string
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.patch(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/reject`,
+        { rejectionReason, feedback, canReapply, reapplyDate }
+      );
+      return { success: true, message: 'Candidate rejected', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to reject candidate',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  /**
+   * Remove candidate from pipeline
+   */
+  static async removeCandidateFromPipeline(
+    pipelineId: string,
+    candidateId: string
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.delete(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}`
+      );
+      return { success: true, message: 'Candidate removed', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: 'Failed to remove candidate',
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+
+  // ─── Legacy compat (for existing hooks that reference old method names) ─
+
+  /** @deprecated Use updateStageData instead */
+  static async updateStageFields(
+    pipelineId: string,
+    candidateId: string,
+    _stageName: string,
+    updateData: { fields: Record<string, any>; notes?: string }
+  ): Promise<StageUpdateResponse> {
+    return this.updateStageData(pipelineId, candidateId, {
+      data: updateData.fields,
+      notes: updateData.notes,
+    });
+  }
+
+  /** @deprecated Use getPipelineEntry instead */
+  static async getPipelineCandidates(pipelineId: string): Promise<StageUpdateResponse> {
+    return this.getPipelineEntry(pipelineId);
   }
 }

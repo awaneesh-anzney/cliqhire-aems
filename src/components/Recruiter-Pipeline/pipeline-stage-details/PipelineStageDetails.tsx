@@ -4,30 +4,32 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { 
-  Target, 
-  Clock, 
-  Edit3, 
-  Check, 
-  X, 
-  Loader2 
-} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Target, Clock, Edit3, Check, X, Loader2 } from "lucide-react";
 import { RecruiterPipelineService } from "@/services/recruiterPipelineService";
 import { toast } from "sonner";
-import { getStageFields, getStageColor, formatDateForDisplay, formatDateTimeForDisplay, StageField } from "./stage-fields";
-import { mapUIStageToBackendStage } from "../dummy-data";
+import {
+  getStageFields,
+  getStageColor,
+  formatDateForDisplay,
+  formatDateTimeForDisplay,
+  StageField,
+} from "./stage-fields";
 import { renderFieldInput } from "./field-inputs";
 
-// Helper function to get stage key from stage name
+// Helper to get stage key from stage name (for local state only)
 const getStageKey = (stageName: string): string => {
-  let stageKey = stageName.toLowerCase().replace(/\s+/g, '');
-  
-  // Special handling for "Client Review" -> "clientScreening"
-  if (stageName === "Client Review") {
-    stageKey = "clientScreening";
-  }
-  
+  let stageKey = stageName.toLowerCase().replace(/\s+/g, "");
+  if (stageName === "Client Review") stageKey = "clientScreening";
   return stageKey;
 };
 
@@ -40,35 +42,32 @@ interface PipelineStageDetailsProps {
   canModify?: boolean;
 }
 
-export function PipelineStageDetails({ 
-  candidate, 
-  selectedStage, 
+export function PipelineStageDetails({
+  candidate,
+  selectedStage,
   onStageSelect,
   onUpdateCandidate,
   pipelineId,
-  canModify = true
+  canModify = true,
 }: PipelineStageDetailsProps) {
   const [isEditingStage, setIsEditingStage] = useState(false);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  
-  // Ensure confirm dialog is closed on unmount
+
   React.useEffect(() => {
     return () => setShowConfirmDialog(false);
   }, []);
-  
+
   if (!candidate) return null;
-  
-  // Use selectedStage if provided, otherwise fallback to currentStage or default
+
   const displayStage = selectedStage || candidate.currentStage || "Sourcing";
-  
   const stageFields = getStageFields(displayStage, candidate);
 
   const handleEditAll = () => {
     setIsEditingStage(true);
     const initialValues: Record<string, string> = {};
-    stageFields.forEach(field => {
+    stageFields.forEach((field) => {
       const val = field.value?.toString() || "";
       initialValues[field.key] = val === "Not set" ? "" : val;
     });
@@ -76,238 +75,164 @@ export function PipelineStageDetails({
   };
 
   const handleUpdateFieldValue = (key: string, value: string) => {
-    setEditValues(prev => ({
-      ...prev,
-      [key]: value
-    }));
+    setEditValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSaveAll = () => {
     if (!canModify) {
-      toast.error('You do not have permission to modify the recruitment pipeline.');
+      toast.error("You do not have permission to modify the recruitment pipeline.");
       return;
     }
-    // Show confirmation dialog before bulk saving
     setShowConfirmDialog(true);
   };
 
   const handleConfirmSave = async () => {
-    const hasApiIntegration = pipelineId && candidate.id;
-    
-    // Create an object with only the fields that were actually modified or at least present in editValues
-    // We update all fields from editValues bulk.
+    const candidateId = candidate.id || candidate._id || candidate.candidateId?._id;
+    const hasApiIntegration = pipelineId && candidateId;
+
     const updatedFields: Record<string, any> = {};
     Object.entries(editValues).forEach(([key, val]) => {
-      if (val === "" || val === "Not set") {
-        updatedFields[key] = null;
-      } else {
-        updatedFields[key] = val;
-      }
+      updatedFields[key] = val === "" || val === "Not set" ? null : val;
     });
 
     if (!hasApiIntegration) {
-      // Update local mode
-      console.warn("API integration not available - updating locally only");
-      
+      // Local-only update
       const stageKey = getStageKey(displayStage);
       const updatedCandidate = {
         ...candidate,
-        [stageKey]: {
-          ...candidate[stageKey],
-          ...updatedFields
-        }
+        [stageKey]: { ...candidate[stageKey], ...updatedFields },
       };
       onUpdateCandidate?.(updatedCandidate);
-      
-      toast.success(`Stage details updated locally`);
+      toast.success("Stage details updated locally");
       setIsEditingStage(false);
       setShowConfirmDialog(false);
       return;
     }
 
     setIsUpdating(true);
-    
     try {
+      // ── NEW API: PATCH /api/recruiter-pipeline/:pipelineId/candidates/:candidateId/stage-data
       const stageKey = getStageKey(displayStage);
       const existingStageData = candidate[stageKey] || {};
-      
-      // Prepare the update data for all fields
-      const updateData = {
-        fields: {
-          ...existingStageData, // Preserve any existing fields not rendered
-          ...updatedFields      // Overwrite with all updated fields
-        },
-        notes: `Bulk updated stage details for ${displayStage}`
-      };
 
-      const backendStage = mapUIStageToBackendStage(displayStage);
-      const response = await RecruiterPipelineService.updateStageFields(
-        pipelineId,
-        candidate.id,
-        backendStage,
-        updateData
+      const response = await RecruiterPipelineService.updateStageData(
+        pipelineId!,
+        candidateId,
+        {
+          data: { ...existingStageData, ...updatedFields },
+          notes: `Bulk updated stage details for ${displayStage}`,
+        }
       );
 
-      if (response.success) {
-        // Update local state
-        const updatedCandidate = {
-          ...candidate,
-          [stageKey]: {
-            ...candidate[stageKey],
-            ...updatedFields
-          }
-        };
-        onUpdateCandidate?.(updatedCandidate);
-        
-        toast.success(`Stage details updated successfully`);
-        setIsEditingStage(false);
-      } else {
-        toast.error(response.error || "Failed to update details");
+      if (!response.success) {
+        throw new Error(response.error || "Update failed");
       }
-    } catch (error) {
-      console.error("Error updating details:", error);
-      toast.error("An error occurred while updating the details");
+
+      // Optimistically update local state
+      const stageKeyLocal = getStageKey(displayStage);
+      const updatedCandidate = {
+        ...candidate,
+        [stageKeyLocal]: {
+          ...candidate[stageKeyLocal],
+          ...updatedFields,
+        },
+      };
+      onUpdateCandidate?.(updatedCandidate);
+
+      toast.success(`${displayStage} stage details saved`);
+      setIsEditingStage(false);
+      setShowConfirmDialog(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save stage details");
     } finally {
       setIsUpdating(false);
-      setShowConfirmDialog(false);
     }
   };
 
-  const handleCancelSave = () => {
-    setShowConfirmDialog(false);
+  const renderFieldValue = (field: StageField) => {
+    if (field.type === "date") return formatDateForDisplay(field.value?.toString() || "");
+    if (field.type === "datetime") return formatDateTimeForDisplay(field.value?.toString() || "");
+    return field.value?.toString() || "Not set";
   };
-
-  const handleCancelEdit = () => {
-    setIsEditingStage(false);
-    setEditValues({});
-  };
-
-  const hasApiIntegration = pipelineId && candidate.id;
 
   return (
-    <Card className="w-full bg-white shadow-sm border border-gray-100">
-      <CardHeader className="pb-4">
+    <Card className="w-full">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-              <Target className="h-5 w-5 text-blue-500 mr-2" />
-              Stage Details: {displayStage}
-            </CardTitle>
-            {!hasApiIntegration && (
-              <Badge variant="secondary" className="text-xs">
-                Local Mode
-              </Badge>
-            )}
+            <Target className="h-4 w-4 text-gray-500" />
+            <CardTitle className="text-sm font-semibold">{displayStage} Details</CardTitle>
+            <Badge className={`text-xs ${getStageColor(displayStage)}`}>{displayStage}</Badge>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge 
-              variant="outline" 
-              className={`${getStageColor(displayStage)} font-medium mr-2`}
-            >
-              {displayStage}
-            </Badge>
-            {!isEditingStage && canModify && displayStage === candidate.currentStage && stageFields.length > 0 && (
-              <Button size="sm" variant="outline" onClick={handleEditAll} className="h-8">
-                <Edit3 className="h-3.5 w-3.5 mr-2" /> Edit Details
+          {canModify && !isEditingStage && stageFields.length > 0 && (
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleEditAll}>
+              <Edit3 className="h-3 w-3 mr-1" /> Edit All
+            </Button>
+          )}
+          {isEditingStage && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setIsEditingStage(false)}
+              >
+                <X className="h-3 w-3 mr-1" /> Cancel
               </Button>
-            )}
-          </div>
+              <Button
+                size="sm"
+                className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={handleSaveAll}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Check className="h-3 w-3 mr-1" />
+                )}
+                Save
+              </Button>
+            </div>
+          )}
         </div>
       </CardHeader>
-      
-      <CardContent>
-        {displayStage !== candidate.currentStage && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-blue-600" />
-              <p className="text-sm text-blue-800">
-                Viewing previous stage data. This stage is in read-only mode. Only the current stage ({candidate.currentStage}) can be edited.
-              </p>
-            </div>
-          </div>
-        )}
-        
-        {stageFields.length > 0 ? (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {stageFields.map((field, index) => (
-                <div key={index} className="flex flex-col space-y-2 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:shadow-sm transition-shadow duration-200">
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${field.color} shadow-sm`}>
-                      {React.cloneElement(field.icon as React.ReactElement, { className: 'h-3.5 w-3.5' })}
-                    </div>
-                    <p className="text-sm font-medium text-gray-900">{field.label}</p>
-                    {/* Optional indicator could go here */}
-                  </div>
-                  
-                  <div className="flex-1">
-                    {isEditingStage ? (
-                      <div className="mt-1">
-                        {renderFieldInput(
-                          field, 
-                          editValues[field.key] || "", 
-                          (val) => handleUpdateFieldValue(field.key, val)
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-600 break-words mt-1">
-                        {field.type === 'date' && field.value ? (
-                          formatDateForDisplay(field.value.toString())
-                        ) : field.type === 'datetime' && field.value ? (
-                          formatDateTimeForDisplay(field.value.toString())
-                        ) : typeof field.value === 'string' && field.value.startsWith('http') ? (
-                          <a 
-                            href={field.value} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline transition-colors duration-200"
-                          >
-                            View Link
-                          </a>
-                        ) : (
-                          field.value || <span className="text-gray-400 italic">Not set</span>
-                        )}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
 
-            {isEditingStage && (
-              <div className="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-gray-100">
-                <Button variant="outline" onClick={handleCancelEdit} disabled={isUpdating}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveAll} disabled={isUpdating} className="bg-blue-600 hover:bg-blue-700">
-                  <Check className="h-4 w-4 mr-2" />
-                  Save Changes
-                </Button>
-              </div>
-            )}
+      <CardContent className="space-y-3">
+        {stageFields.length === 0 ? (
+          <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4 mr-2" />
+            No fields for {displayStage} stage
           </div>
         ) : (
-          <div className="text-center py-8">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="h-6 w-6 text-gray-400" />
+          stageFields.map((field) => (
+            <div key={field.key} className="flex items-start gap-3">
+              <div className={`p-1.5 rounded-md shrink-0 ${field.color}`}>{field.icon}</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground mb-0.5">{field.label}</p>
+                {isEditingStage ? (
+                  renderFieldInput(field, editValues[field.key] ?? "", handleUpdateFieldValue)
+                ) : (
+                  <p className="text-sm font-medium truncate">{renderFieldValue(field)}</p>
+                )}
+              </div>
             </div>
-            <p className="text-gray-500 text-sm">No details available for this stage</p>
-          </div>
+          ))
         )}
       </CardContent>
-      
-      {/* Confirmation Dialog */}
+
+      {/* Confirm save dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Update</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Updates</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to update all modified fields for this stage?
+              Save all changes to the <strong>{displayStage}</strong> stage? This will update the
+              candidate's stage data in the pipeline.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelSave}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               onClick={handleConfirmSave}
               disabled={isUpdating}
               className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -315,10 +240,10 @@ export function PipelineStageDetails({
               {isUpdating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  Saving…
                 </>
               ) : (
-                'Confirm Updates'
+                "Confirm Updates"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -327,4 +252,3 @@ export function PipelineStageDetails({
     </Card>
   );
 }
-
