@@ -202,12 +202,16 @@ export const getPipelineStageStatuses = async (pipelineId: string): Promise<any>
  */
 export const addCandidateToPipeline = async (
   pipelineId: string,
-  request: AddCandidateToPipelineRequest
+  candidateId: string,
+  options?: { priority?: string; notes?: string; initialStage?: string }
 ): Promise<AddJobToPipelineResponse> => {
   try {
     const response = await api.post(
       `/api/recruiter-pipeline/${pipelineId}/candidates`,
-      request
+      {
+        candidateId,  // ✅ string ko JSON object mein wrap kiya
+        ...options,
+      }
     );
     return response.data;
   } catch (error: any) {

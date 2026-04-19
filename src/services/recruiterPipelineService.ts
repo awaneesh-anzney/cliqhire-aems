@@ -234,10 +234,16 @@ export class RecruiterPipelineService {
     options?: { priority?: string; notes?: string; initialStage?: string }
   ): Promise<StageUpdateResponse> {
     try {
-      const response = await api.post(`/api/recruiter-pipeline/${pipelineId}/candidates`, {
-        candidateId,
+      const requestBody = {
+        candidateId,           // ✅ JSON object ke andar bhej raha hai
         ...options,
-      });
+      };
+
+      const response = await api.post(
+        `/api/recruiter-pipeline/${pipelineId}/candidates`,
+        requestBody,           // ✅ Axios automatically Content-Type: application/json lagata hai
+      );
+
       return { success: true, message: 'Candidate added', data: response.data };
     } catch (error: any) {
       return {
