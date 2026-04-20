@@ -32,11 +32,19 @@ export interface PipelineListItem {
   activeCandidates: number;
   completedCandidates: number;
   droppedCandidates?: number;
+  createdAt?: string;
+  updatedAt?: string;
   jobId: {
     _id: string;
     jobTitle: string;
     jobId?: string;
-    client?: { name: string };
+    client?: { 
+      _id: string;
+      name: string;
+    };
+    location?: string;
+    jobType?: string;
+    deadlineByClient?: string | null;
     jobTeamMembers?: any[];
   };
 }

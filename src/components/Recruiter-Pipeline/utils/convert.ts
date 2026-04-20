@@ -26,11 +26,11 @@ export const convertPipelineListDataToJob = (
   return {
     id: (pipelineData as any)._id,
     title: (pipelineData as any).jobId?.jobTitle || "Untitled Job",
-    clientName: (pipelineData as any).jobId?.clientName || "Unknown Client",
+    clientName: (pipelineData as any).jobId?.client?.name || (pipelineData as any).jobId?.clientName || "Unknown Client",
     location: (pipelineData as any).jobId?.location || "Location not specified",
     salaryRange: formatSalaryRange(),
     headcount: (pipelineData as any).jobId?.numberOfPositions || 1,
-    jobType: (pipelineData as any).jobId?.jobType || "Full-time",
+    jobType: (pipelineData as any).jobId?.jobType || "full time",
     isExpanded,
     jobId: (pipelineData as any).jobId,
     candidates: [],
