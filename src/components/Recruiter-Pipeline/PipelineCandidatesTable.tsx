@@ -126,10 +126,10 @@ export function PipelineCandidatesTable({
               })()}
             </TableCell>
             <TableCell className="text-sm text-gray-700">
-              {(job as any).jobId?.jobTeamInfo?.hiringManager?.name || "Not assigned"}
+              {job.hiringManagerName || "Not assigned"}
             </TableCell>
             <TableCell className="text-sm text-gray-700">
-              {(job as any).jobId?.jobTeamInfo?.recruiter?.name || "Not assigned"}
+              {job.recruiterName || "Not assigned"}
             </TableCell>
             <TableCell>
               <DropdownMenu modal={false}>

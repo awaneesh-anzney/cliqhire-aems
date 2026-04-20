@@ -119,6 +119,11 @@ export interface Job {
   // Recruiter information
   recruiterName?: string;
   recruiterEmail?: string;
+  // Hiring manager information
+  hiringManagerName?: string;
+  hiringManagerEmail?: string;
+  // Job team members from API
+  jobTeamMembers?: any[];
   // Job ID object containing job details and team info
   jobId?: {
     _id?: string;

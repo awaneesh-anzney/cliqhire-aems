@@ -33,7 +33,9 @@ function getStageDataFromHistory(
  * Maps new API v2 pipeline entry to UI Job type used across the Recruiter Pipeline
  */
 export function mapEntryToJob(entry: any): Job {
+  console.log('DEBUG: Raw API entry:', entry);
   const jobData: any = entry.jobId || {};
+  console.log('DEBUG: Job data:', jobData);
 
   const salaryMin = jobData?.salaryRange?.min ?? jobData?.minimumSalary;
   const salaryMax = jobData?.salaryRange?.max ?? jobData?.maximumSalary;
@@ -43,10 +45,12 @@ export function mapEntryToJob(entry: any): Job {
       ? `${salaryMin}-${salaryMax} ${salaryCurrency}`
       : "";
 
-  // ── Support both v1 (candidateIdArray) and v2 (candidates) shape ──────
-  const rawCandidates: any[] = entry.candidates || entry.candidateIdArray || [];
+  // ── Support both v1 (candidateIdArray), v2 (candidates), and new structure (candidates.data)
+  const rawCandidates: any[] = entry.candidates?.data || entry.candidates || entry.candidateIdArray || [];
+  console.log('DEBUG: Raw candidates:', rawCandidates);
 
   const candidates: Candidate[] = rawCandidates.map((c: any) => {
+    console.log('DEBUG: Processing candidate:', c);
     // v2: candidateId is a populated object with _id, firstName, lastName, etc.
     // v1: candidateId may be a plain string or partially populated
     const candidateInfo = c?.candidateId || {};
@@ -57,8 +61,9 @@ export function mapEntryToJob(entry: any): Job {
     const lastName = candidateInfo?.lastName || "";
     const fullName =
       candidateInfo?.name ||
+      candidateInfo?.fullName ||
       `${firstName} ${lastName}`.trim() ||
-      "Unknown";
+      `Candidate ${candidateInfo?._id?.slice(-6) || 'Unknown'}`;
 
     // Extract stage-specific data from stageHistory (v2) or flat fields (v1)
     const stageHistory: any[] = c?.stageHistory || [];
@@ -145,9 +150,23 @@ export function mapEntryToJob(entry: any): Job {
   });
 
   // ── Dynamic stages from pipeline (v2) ─────────────────────────────────
-  const dynamicStages = (entry.stages || []).map((s: any) => s.name).filter(Boolean);
+  const dynamicStages = (entry.stages || []).map((s: any) => mapBackendStageToUIStage(s.name)).filter(Boolean);
 
-  return {
+  // Extract hiring managers and recruiters from jobTeamMembers
+  console.log('DEBUG: jobTeamMembers raw:', jobData?.jobTeamMembers);
+  
+  const hiringManagers = jobData?.jobTeamMembers
+    ?.filter((member: any) => member.position === 'hiringManager')
+    ?.flatMap((member: any) => member.users || []) || [];
+  
+  const recruiters = jobData?.jobTeamMembers
+    ?.filter((member: any) => member.position === 'recruiter')
+    ?.flatMap((member: any) => member.users || []) || [];
+
+  console.log('DEBUG: Extracted hiring managers:', hiringManagers);
+  console.log('DEBUG: Extracted recruiters:', recruiters);
+
+  const mappedJob = {
     id: entry._id,
     title: jobData?.jobTitle || "",
     clientName: (jobData as any)?.client?.name || "",
@@ -178,7 +197,18 @@ export function mapEntryToJob(entry: any): Job {
 
     // Team (from jobTeamMembers in v2)
     jobTeamMembers: jobData?.jobTeamMembers || [],
-    recruiterName: entry.recruiterId?.name,
-    recruiterEmail: entry.recruiterId?.email,
+    recruiterName: recruiters[0]?.firstName && recruiters[0]?.lastName 
+      ? `${recruiters[0].firstName} ${recruiters[0].lastName}` 
+      : recruiters[0]?.name || entry.recruiterId?.name,
+    recruiterEmail: recruiters[0]?.email || entry.recruiterId?.email,
+    hiringManagerName: hiringManagers[0]?.firstName && hiringManagers[0]?.lastName
+      ? `${hiringManagers[0].firstName} ${hiringManagers[0].lastName}`
+      : hiringManagers[0]?.name || "No HM Found",
+    hiringManagerEmail: hiringManagers[0]?.email,
   } as Job;
+  
+  console.log('DEBUG: Final hiringManagerName:', mappedJob.hiringManagerName);
+  console.log('DEBUG: Final recruiterName:', mappedJob.recruiterName);
+  console.log('DEBUG: Final mapped job:', mappedJob);
+  return mappedJob;
 }

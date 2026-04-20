@@ -17,6 +17,11 @@ export function PipelineJobHeader({ job, onAddCandidate }: Props) {
   const [isFormLinkCopied, setIsFormLinkCopied] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
+  console.log('DEBUG: PipelineJobHeader job data:', job);
+  console.log('DEBUG: Hiring manager:', job.hiringManagerName);
+  console.log('DEBUG: Recruiter:', job.recruiterName);
+  console.log('DEBUG: Job team members:', job.jobTeamMembers);
+
   const handleCopyCandidateFormLink = async () => {
     const path = `${window.location.origin}/candidate?job=${encodeURIComponent(job.title)}`;
     try {
@@ -78,6 +83,31 @@ export function PipelineJobHeader({ job, onAddCandidate }: Props) {
                 <Users className="h-4 w-4 text-purple-500" />
                 <span>{job.totalCandidates || job.candidates.length} candidates</span>
               </div>
+              {job.jobTeamMembers && job.jobTeamMembers.length > 0 ? (
+                job.jobTeamMembers.map((member: any) => (
+                  <div key={member.position} className="flex items-center space-x-1">
+                    <span className="text-xs font-medium text-gray-500">{member.position === 'hiringManager' ? 'HM' : member.position === 'recruiter' ? 'Rec' : member.positionLabel}:</span>
+                    <span className="text-xs text-gray-700">
+                      {member.users?.map((u: any) => 
+                        u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.name || u.email || 'Unknown')
+                      ).join(", ") || 'Not assigned'}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs font-medium text-gray-500">HM:</span>
+                    <span className="text-xs text-gray-700">{job.hiringManagerName || 'No HM'}</span>
+                  </div>
+                  {job.recruiterName && (
+                    <div className="flex items-center space-x-1">
+                      <span className="text-xs font-medium text-gray-500">Rec:</span>
+                      <span className="text-xs text-gray-700">{job.recruiterName}</span>
+                    </div>
+                  )}
+                </>
+              )}
               {job.jobId?.stage && (
                 <Badge
                   variant="outline"

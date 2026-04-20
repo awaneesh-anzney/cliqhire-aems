@@ -65,6 +65,91 @@ export interface GetAllPipelineEntriesResponse {
   message?: string;
 }
 
+export interface GetPipelineEntryResponse {
+  success: boolean;
+  data: {
+    _id: string;
+    jobId: {
+      _id: string;
+      jobId?: string;
+      jobTitle: string;
+      client?: { 
+        _id: string;
+        name: string;
+      };
+      location?: string;
+      jobType?: string;
+      deadlineByClient?: string | null;
+      jobTeamMembers?: Array<{
+        position: string;
+        positionLabel: string;
+        users: Array<{
+          _id: string;
+          firstName: string;
+          lastName: string;
+          email: string;
+          teamRole: string;
+        }>;
+        addedAt: string;
+      }>;
+    };
+    stages: Array<{
+      templateId: string;
+      name: string;
+      order: number;
+      color: string;
+      description: string;
+      isTerminal: boolean;
+      allowedStatuses: string[];
+      defaultStatus: string;
+      responsiblePosition: string | null;
+    }>;
+    status: string;
+    priority?: string;
+    totalCandidates: number;
+    activeCandidates: number;
+    completedCandidates: number;
+    droppedCandidates?: number;
+    createdAt: string;
+    updatedAt: string;
+    candidates: {
+      data: Array<{
+        candidateId: {
+          _id: string;
+          status: string;
+          phone: string;
+          email: string;
+          name?: string;
+          firstName?: string;
+          lastName?: string;
+        };
+        currentStage: string;
+        currentStatus: string;
+        priority?: string;
+        notes: string;
+        addedAt: string;
+        lastUpdated: string;
+        createdAt: string;
+        updatedAt: string;
+      }>;
+      pagination: {
+        currentPage: number;
+        totalPages: number;
+        total: number;
+        limit: number;
+        hasNextPage: boolean;
+        hasPrevPage: boolean;
+      };
+      filters: {
+        stage: string | null;
+        currentStatus: string | null;
+        priority: string | null;
+      };
+    };
+  };
+  message?: string;
+}
+
 export interface StageData {
   screeningDate?: string;
   screeningNotes?: string;
@@ -78,7 +163,7 @@ export interface StageData {
 }
 
 export interface UpdateCandidateStageRequest {
-  stage: string;         // Must match pipeline.stages[].name exactly
+  stage?: string;         // Must match pipeline.stages[].name exactly
   status?: string;       // Must be in stage.allowedStatuses
   notes?: string;
   data?: Record<string, any>;
@@ -129,9 +214,19 @@ export const createPipelineForJob = async (
 /**
  * Get pipeline entry detail — includes stages[], candidates[], job info
  */
-export const getPipelineEntry = async (pipelineId: string): Promise<any> => {
+export const getPipelineEntry = async (
+  pipelineId: string,
+  options?: { page?: number; limit?: number; stage?: string; currentStatus?: string; priority?: string }
+): Promise<any> => {
   try {
-    const response = await api.get(`/api/recruiter-pipeline/entry/${pipelineId}`);
+    const params: any = {};
+    if (options?.page) params.page = options.page;
+    if (options?.limit) params.limit = options.limit;
+    if (options?.stage) params.stage = options.stage;
+    if (options?.currentStatus) params.currentStatus = options.currentStatus;
+    if (options?.priority) params.priority = options.priority;
+    
+    const response = await api.get(`/api/recruiter-pipeline/entry/${pipelineId}`, { params });
     return response.data;
   } catch (error: any) {
     console.error('Error fetching pipeline entry:', error);
@@ -280,6 +375,18 @@ export const updateCandidateStageData = async (
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Failed to update stage data');
   }
+};
+
+/**
+ * Update candidate status within the current stage.
+ * This is an alias for updateCandidateStageData for better semantic clarity.
+ */
+export const updateCandidateStatus = async (
+  pipelineId: string,
+  candidateId: string,
+  update: { status?: string; notes?: string; data?: Record<string, any> }
+): Promise<UpdateCandidateStageResponse> => {
+  return updateCandidateStageData(pipelineId, candidateId, update);
 };
 
 /**

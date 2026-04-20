@@ -37,10 +37,18 @@ const Page = () => {
   const id = (params as any)?.id as string;
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  // Filter state for stage filtering - declare before query
+  const [selectedStageFilter, setSelectedStageFilter] = useState<string | null>(null);
+
   const { data: job, isLoading: loading, error, refetch } = useQuery<Job | null>({
-    queryKey: ["pipeline", id],
+    queryKey: ["pipeline", id, selectedStageFilter],
     queryFn: async () => {
-      const res = await getPipelineEntry(id);
+      const res = await getPipelineEntry(id, {
+        page: 1,
+        limit: 50,
+        stage: selectedStageFilter || undefined,
+      });
       const entry = res.data;
       const mappedJob = mapEntryToJob(entry);
       return mappedJob as Job;
@@ -137,9 +145,7 @@ const Page = () => {
     newStatus: null,
   });
 
-  // Filter state for stage filtering
-  const [selectedStageFilter, setSelectedStageFilter] = useState<string | null>(null);
-
+  
   // Data loading is handled by React Query
 
   // Handler functions
@@ -186,7 +192,7 @@ const Page = () => {
       try {
         const backendStage = mapUIStageToBackendStage(stageChangeDialog.newStage);
         await updateCandidateStage(id, stageChangeDialog.candidate.id, {
-          newStage: backendStage,
+          stage: backendStage,
         });
         // Refresh the job data
         await queryClient.invalidateQueries({ queryKey: ["pipeline", id] });
@@ -216,7 +222,7 @@ const Page = () => {
     try {
       const backendStage = mapUIStageToBackendStage('Interview');
       await updateCandidateStage(id, candidate.id, {
-        newStage: backendStage,
+        stage: backendStage,
         interviewDate: dateTime,
         interviewMeetingLink: meetingLink,
       });

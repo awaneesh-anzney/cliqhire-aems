@@ -14,7 +14,7 @@ export function PipelineStageFilters({ job, selectedStage, onSelectStage }: Prop
   return (
     <>
       <div className="flex flex-wrap gap-2 ml-6">
-        {pipelineStages.map((stage) => {
+        {(job.stages && job.stages.length > 0 ? job.stages : pipelineStages).map((stage) => {
           const count = job.candidates.filter((c) => c.currentStage === stage).length;
           const isActive = selectedStage === stage;
           return (
