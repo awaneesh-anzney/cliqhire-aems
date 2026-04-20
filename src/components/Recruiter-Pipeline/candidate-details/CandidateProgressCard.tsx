@@ -6,9 +6,11 @@ type Props = {
   candidate: Candidate;
   selectedStage: string | undefined;
   setSelectedStage: (stage: string | undefined) => void;
+  stages?: string[];
 };
 
-export function CandidateProgressCard({ candidate, selectedStage, setSelectedStage }: Props) {
+export function CandidateProgressCard({ candidate, selectedStage, setSelectedStage, stages: propStages }: Props) {
+  const stages = propStages && propStages.length > 0 ? propStages : pipelineStages;
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 p-4">
       <div className="w-full bg-slate-50/50 rounded-lg p-3 border border-slate-100/50">
@@ -34,27 +36,26 @@ export function CandidateProgressCard({ candidate, selectedStage, setSelectedSta
               }`}
               style={{ 
                 width: `${(() => {
-                  if (candidate.status === 'Disqualified') {
-                    const disqualificationStage = candidate.disqualified?.disqualificationStage || candidate.currentStage;
-                    return ((pipelineStages.indexOf(disqualificationStage) + 1) / pipelineStages.length) * 100;
-                  }
-                  return ((pipelineStages.indexOf(candidate.currentStage) + 1) / pipelineStages.length) * 100;
+                  const currentOrDisqualStage = candidate.status === 'Disqualified' 
+                    ? (candidate.disqualified?.disqualificationStage || candidate.currentStage)
+                    : candidate.currentStage;
+                  return ((stages.indexOf(currentOrDisqualStage) + 1) / stages.length) * 100;
                 })()}%` 
               }}
             ></div>
             
             <div className="absolute inset-0 flex items-center justify-between px-1.5">
-              {pipelineStages.map((stage, index) => {
-                const disqualificationStage = candidate.disqualified?.disqualificationStage || candidate.currentStage;
+              {stages.map((stage, index) => {
                 const isDisqualified = candidate.status === 'Disqualified';
+                const disqualificationStage = candidate.disqualified?.disqualificationStage || candidate.currentStage;
                 
                 let isCompleted, isCurrent;
                 if (isDisqualified) {
-                  const disqualificationIndex = pipelineStages.indexOf(disqualificationStage);
+                  const disqualificationIndex = stages.indexOf(disqualificationStage);
                   isCompleted = disqualificationIndex >= index;
                   isCurrent = disqualificationStage === stage;
                 } else {
-                  const currentIndex = pipelineStages.indexOf(candidate.currentStage);
+                  const currentIndex = stages.indexOf(candidate.currentStage);
                   isCompleted = currentIndex >= index;
                   isCurrent = candidate.currentStage === stage;
                 }

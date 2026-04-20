@@ -21,8 +21,8 @@ import {
   ChevronLeft,
   Loader2
 } from "lucide-react";
-import { getPipelineEntry, updateCandidateStage, updateCandidateStatus } from "@/services/recruitmentPipelineService";
-import { mapEntryToJob } from "@/components/Recruiter-Pipeline/pipeline-mapper";
+import { getPipelineCandidateDetails, updateCandidateStage, updateCandidateStatus } from "@/services/recruitmentPipelineService";
+import { mapPipelineCandidateResponse } from "@/components/Recruiter-Pipeline/pipeline-mapper";
 import { PipelineStageDetails } from "@/components/Recruiter-Pipeline/pipeline-stage-details/PipelineStageDetails";
 import { useAuth } from "@/contexts/AuthContext";
 import { type Job, type Candidate, pipelineStages, mapUIStageToBackendStage } from "@/components/Recruiter-Pipeline/dummy-data";
@@ -57,15 +57,17 @@ export default function CandidatePipelineDetailsPage() {
     : (user?.defaultPermissions || []);
   const canModifyPipeline = isAdmin || finalPermissions.includes('RECRUITMENT_PIPELINE_MODIFY');
 
-  const { data: job, isLoading, error } = useQuery<Job | null>({
-    queryKey: ["pipeline", pipelineId],
+  const { data, isLoading, error } = useQuery<{ job: Job; candidate: Candidate } | null>({
+    queryKey: ["pipeline", pipelineId, "candidate", candidateId],
     queryFn: async () => {
-      const res = await getPipelineEntry(pipelineId);
-      const mappedJob = mapEntryToJob(res.data);
-      return mappedJob as Job;
+      const res = await getPipelineCandidateDetails(pipelineId, candidateId);
+      return mapPipelineCandidateResponse(res.data);
     },
-    enabled: !!pipelineId,
+    enabled: !!pipelineId && !!candidateId,
   });
+
+  const job = data?.job;
+  const candidate = data?.candidate;
 
   const [selectedStage, setSelectedStage] = useState<string | undefined>(undefined);
 
@@ -268,32 +270,19 @@ export default function CandidatePipelineDetailsPage() {
     );
   }
 
-  if (error || !job) {
+  if (error || !job || !candidate) {
     return (
       <div className="p-8">
         <Button variant="outline" onClick={() => router.back()} className="mb-4">
           <ChevronLeft className="h-4 w-4 mr-1" /> Back to Pipeline
         </Button>
-        <div className="text-red-600">Failed to load pipeline or candidate data.</div>
-      </div>
-    );
-  }
-
-  const candidate = job.candidates.find(c => c.id === candidateId);
-
-  if (!candidate) {
-    return (
-      <div className="p-8">
-        <Button variant="outline" onClick={() => router.back()} className="mb-4">
-          <ChevronLeft className="h-4 w-4 mr-1" /> Back to Pipeline
-        </Button>
-        <div className="text-red-600">Candidate not found in this pipeline.</div>
+        <div className="text-red-600">Failed to load pipeline or candidate data. Probably the candidate does not exist in this pipeline.</div>
       </div>
     );
   }
 
   const handleUpdateCandidate = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId] });
+    await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId, "candidate", candidateId] });
   };
 
   return (
@@ -318,6 +307,7 @@ export default function CandidatePipelineDetailsPage() {
           candidate={candidate} 
           selectedStage={selectedStage} 
           setSelectedStage={setSelectedStage} 
+          stages={job.stages}
         />
         
         <CandidateDisqualificationCard candidate={candidate} />

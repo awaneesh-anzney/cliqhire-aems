@@ -25,6 +25,7 @@ import {
   StageField,
 } from "./stage-fields";
 import { renderFieldInput } from "./field-inputs";
+import { mapBackendStageToUIStage } from "../dummy-data";
 
 // Helper to get stage key from stage name (for local state only)
 const getStageKey = (stageName: string): string => {
@@ -155,6 +156,13 @@ export function PipelineStageDetails({
     return field.value?.toString() || "Not set";
   };
 
+  const stageMoveInfo = candidate.stageHistory
+    ?.filter((h: any) => mapBackendStageToUIStage(h.stage) === displayStage)
+    .sort((a: any, b: any) => new Date(b.movedAt).getTime() - new Date(a.movedAt).getTime())[0];
+
+  const movedBy = stageMoveInfo?.movedBy?.name || "System";
+  const movedAt = stageMoveInfo?.movedAt ? formatDateTimeForDisplay(stageMoveInfo.movedAt) : null;
+
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
@@ -195,6 +203,26 @@ export function PipelineStageDetails({
             </div>
           )}
         </div>
+        {stageMoveInfo && (
+          <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground bg-slate-50 p-2 rounded-md border border-slate-100">
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold uppercase tracking-wider text-slate-400">Moved By:</span>
+              <span className="text-slate-600 font-medium">{movedBy}</span>
+            </div>
+            {movedAt && (
+              <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
+                <span className="font-semibold uppercase tracking-wider text-slate-400">Date:</span>
+                <span className="text-slate-600 font-medium">{movedAt}</span>
+              </div>
+            )}
+            {stageMoveInfo.notes && (
+              <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4 flex-1 truncate">
+                <span className="font-semibold uppercase tracking-wider text-slate-400">Notes:</span>
+                <span className="text-slate-600 font-medium italic truncate">"{stageMoveInfo.notes}"</span>
+              </div>
+            )}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-3">

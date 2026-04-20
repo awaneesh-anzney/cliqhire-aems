@@ -212,3 +212,81 @@ export function mapEntryToJob(entry: any): Job {
   console.log('DEBUG: Final mapped job:', mappedJob);
   return mappedJob;
 }
+
+/**
+ * Maps single candidate response from GET /api/recruiter-pipeline/:pid/candidates/:cid
+ */
+export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: Candidate } {
+  const candidateInfo = data.candidateId || {};
+  const firstName = candidateInfo.firstName || "";
+  const lastName = candidateInfo.lastName || "";
+  const fullName = 
+    candidateInfo.name || 
+    candidateInfo.fullName || 
+    `${firstName} ${lastName}`.trim() || 
+    `Candidate ${candidateInfo._id?.slice(-6) || 'Unknown'}`;
+
+  const stageHistory = data.stageHistory || [];
+  
+  // Extract stage-specific data from history
+  const sourcingData = getStageDataFromHistory(stageHistory, "Sourcing");
+  const screeningData = getStageDataFromHistory(stageHistory, "Screening");
+  const clientReviewData = 
+    getStageDataFromHistory(stageHistory, "Client Screening") || 
+    getStageDataFromHistory(stageHistory, "Client Review");
+  const interviewData = getStageDataFromHistory(stageHistory, "Interview");
+  const verificationData = getStageDataFromHistory(stageHistory, "Verification");
+  const onboardingData = getStageDataFromHistory(stageHistory, "Onboarding");
+  const hiredData = getStageDataFromHistory(stageHistory, "Hired");
+  const disqualifiedData = getStageDataFromHistory(stageHistory, "Disqualified");
+
+  const candidate: Candidate = {
+    id: data._id || candidateInfo._id || "",
+    name: fullName,
+    email: candidateInfo.email || "",
+    phone: candidateInfo.phone || "",
+    currentStage: mapBackendStageToUIStage(data.currentStage || "Sourcing"),
+    currentStatus: data.currentStatus || "",
+    status: data.currentStatus || "",
+    subStatus: data.currentStatus || "",
+    experience: candidateInfo.experience,
+    location: candidateInfo.location,
+    skills: candidateInfo.skills,
+    gender: candidateInfo.gender,
+    dateOfBirth: candidateInfo.dateOfBirth,
+    country: candidateInfo.country,
+    nationality: candidateInfo.nationality,
+    resume: candidateInfo.resume,
+    isTempCandidate: candidateInfo.isTempCandidate || false,
+    priority: data.priority,
+    notes: data.notes || (stageHistory.length > 0 ? stageHistory[stageHistory.length - 1].notes : ""),
+    addedAt: data.addedAt,
+    lastUpdated: data.lastUpdated,
+    stageHistory,
+    rejectionHistory: data.rejectionHistory || [],
+    sourcing: sourcingData,
+    screening: screeningData,
+    clientScreening: clientReviewData,
+    interview: interviewData,
+    verification: verificationData,
+    onboarding: onboardingData,
+    hired: hiredData,
+    disqualified: disqualifiedData,
+    source: sourcingData?.connection || "",
+    connection: sourcingData?.connection || ""
+  } as any;
+
+  const jobData = data.job || {};
+  const job: Job = {
+    id: data.pipelineId,
+    title: jobData.jobTitle || "",
+    clientName: jobData.client?.name || "",
+    location: jobData.location || "",
+    jobType: jobData.jobType || "",
+    pipelineStatus: data.pipelineStatus || "Active",
+    stages: (data.availableStages || []).map((s: any) => mapBackendStageToUIStage(s.name)),
+    stageObjects: data.availableStages || []
+  } as any;
+
+  return { job, candidate };
+}

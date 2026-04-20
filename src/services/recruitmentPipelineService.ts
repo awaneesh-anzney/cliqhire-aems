@@ -390,6 +390,24 @@ export const updateCandidateStatus = async (
 };
 
 /**
+ * Get single candidate details within a pipeline
+ */
+export const getPipelineCandidateDetails = async (
+  pipelineId: string,
+  candidateId: string
+): Promise<any> => {
+  try {
+    const response = await api.get(
+      `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching pipeline candidate details:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch candidate details');
+  }
+};
+
+/**
  * Get full stage history of a candidate
  */
 export const getCandidateHistory = async (

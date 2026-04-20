@@ -71,6 +71,23 @@ export interface Candidate {
   recruiter?: string;
   // Temp candidate flag
   isTempCandidate?: boolean;
+  // History fields
+  stageHistory?: Array<{
+    stage: string;
+    status: string;
+    movedBy?: { name: string; email: string };
+    movedAt: string;
+    notes?: string;
+    data?: any;
+  }>;
+  rejectionHistory?: Array<{
+    stage: string;
+    status: string;
+    rejectionReason: string;
+    feedback?: string;
+    rejectedAt: string;
+    rejectedBy?: { name: string; email: string };
+  }>;
 }
 
 export interface JobTeamInfo {
