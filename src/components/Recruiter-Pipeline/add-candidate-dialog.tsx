@@ -22,12 +22,12 @@ function OptionCard({ icon, title, description, onClick }: OptionCardProps) {
   return (
     <Button
       variant="outline"
-      className="h-auto flex flex-col items-center gap-4 p-8 hover:border-primary hover:bg-primary/5 transition-all duration-300 group shadow-sm hover:shadow-md border-slate-200"
+      className="h-auto flex flex-col items-center gap-4 p-8 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-300 group shadow-sm hover:shadow-md bg-white"
       onClick={onClick}
     >
-      <div className="w-16 h-16 flex items-center justify-center bg-slate-50 rounded-2xl group-hover:bg-primary/10 transition-colors duration-300">
+      <div className="w-16 h-16 flex items-center justify-center bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors duration-300">
         {React.cloneElement(icon as React.ReactElement, {
-          className: "w-8 h-8 text-slate-600 group-hover:text-primary transition-colors duration-300"
+          className: "w-8 h-8 text-primary transition-colors duration-300"
         })}
       </div>
       <div className="flex flex-col items-center gap-1">
@@ -67,9 +67,9 @@ export function AddCandidateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-8">
+      <DialogContent className="max-w-3xl p-8 border-primary/10">
         <DialogHeader className="mb-6">
-          <DialogTitle className="text-2xl font-bold text-slate-900 leading-tight">
+          <DialogTitle className="text-3xl font-black text-primary leading-tight tracking-tight">
             Add Candidate
           </DialogTitle>
           <DialogDescription className="text-slate-500 text-base mt-2">
