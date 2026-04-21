@@ -101,14 +101,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
     }
   }, [clientId, clientData]);
 
-  const countryCodes = [
-    { code: "+966", label: "+966 (Saudi Arabia)" },
-    { code: "+1", label: "+1 (USA)" },
-    { code: "+91", label: "+91 (India)" },
-    { code: "+44", label: "+44 (UK)" },
-    { code: "+86", label: "+86 (China)" },
-    { code: "+81", label: "+81 (Japan)" },
-  ];
+  const countryCodes: any[] = [];
   const positionOptions = [
     { value: "CEO", label: "CEO" },
     { value: "HR Head", label: "HR Head" },
@@ -318,7 +311,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
         gender: primaryContacts[editContactIndex].gender || "",
         email: primaryContacts[editContactIndex].email || "",
         phone: primaryContacts[editContactIndex].phone || "",
-        countryCode: primaryContacts[editContactIndex].countryCode || "+966",
+        countryCode: primaryContacts[editContactIndex].countryCode || "SA",
         position: primaryContacts[editContactIndex].position || primaryContacts[editContactIndex].designation || "",
         linkedin: primaryContacts[editContactIndex].linkedin || "",
       }
@@ -328,7 +321,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
         gender: "",
         email: "",
         phone: "",
-        countryCode: "+966",
+        countryCode: "SA",
         position: "",
         linkedin: "",
       };

@@ -38,7 +38,7 @@ const INITIAL_STATE = {
   email:             "",
   otherEmail:        "",
   phoneNumber:       "",
-  countryCode:       "+966",
+  countryCode:       "SA",
   website:           "",
   address:           "",
   countryOfBusiness: "",

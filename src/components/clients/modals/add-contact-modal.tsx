@@ -12,9 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useMemo } from "react";
-import PhoneInput from 'react-phone-input-2';
-import "react-phone-input-2/lib/style.css";
-import "@/styles/phone-input-override.css";
+import PhoneInput from "@/components/phone/Phoneinput";
 import { 
   Select, 
   SelectTrigger, 
@@ -96,7 +94,7 @@ export function AddContactModal({
     gender: initialValues?.gender ?? "",
     email: initialValues?.email ?? "",
     phone: initialValues?.phone ?? "",
-    countryCode: initialValues?.countryCode ?? "+966",
+    countryCode: initialValues?.countryCode ?? "SA",
     position: initialValues?.position ?? "",
     linkedin: initialValues?.linkedin ?? "",
     location: initialValues?.location ?? "",
@@ -115,7 +113,7 @@ export function AddContactModal({
         gender: initialValues?.gender ?? "",
         email: initialValues?.email ?? "",
         phone: initialValues?.phone ?? "",
-        countryCode: initialValues?.countryCode ?? "+966",
+        countryCode: initialValues?.countryCode ?? "SA",
         position: initialValues?.position ?? "",
         linkedin: initialValues?.linkedin ?? "",
         location: initialValues?.location ?? "",
@@ -349,11 +347,10 @@ export function AddContactModal({
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Phone Number <span className="text-primary">*</span></Label>
                         <PhoneInput
-                          country="sa"
-                          value={formData.phone}
-                          onChange={(val, data: any) => setFormData(prev => ({ ...prev, phone: val, countryCode: `+${data.dialCode}` }))}
-                          inputClass="!flex !h-11 !w-full !rounded-lg !border-slate-200 !font-bold"
-                          buttonClass="!border-slate-200 !rounded-l-lg"
+                          countryCode={formData.countryCode}
+                          onCountryCodeChange={(val) => setFormData(prev => ({ ...prev, countryCode: val }))}
+                          phoneNumber={formData.phone}
+                          onPhoneNumberChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
                         />
                       </div>
 

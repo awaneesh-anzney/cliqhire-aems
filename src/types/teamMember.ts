@@ -4,6 +4,7 @@ export interface TeamMember {
   lastName: string;
   email: string;
   phone: string;
+  countryCode?: string;
   avatar?: string;
   location: string;
   gender?: string;
@@ -56,6 +57,7 @@ export interface CreateTeamMemberData {
   lastName: string;
   email: string;
   phone: string;
+  countryCode?: string;
   location: string;
   experience: string;
   skills: string[];

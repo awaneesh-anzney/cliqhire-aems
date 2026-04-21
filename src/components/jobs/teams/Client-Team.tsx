@@ -26,14 +26,7 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
   
 
   // Use the same options as in ContactsContent
-  const countryCodes = [
-    { code: "+966", label: "+966 (Saudi Arabia)" },
-    { code: "+1", label: "+1 (USA)" },
-    { code: "+91", label: "+91 (India)" },
-    { code: "+44", label: "+44 (UK)" },
-    { code: "+86", label: "+86 (China)" },
-    { code: "+81", label: "+81 (Japan)" },
-  ];
+  const countryCodes: any[] = [];
   const positionOptions = [
     { value: "CEO", label: "CEO" },
   { value: "HR Head", label: "HR Head" },

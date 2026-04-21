@@ -35,6 +35,7 @@ import {
   Info,
   Loader2
 } from "lucide-react";
+import PhoneInput from "@/components/phone/Phoneinput";
 import { tempCandidateService } from "@/services/tempCandidateService";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ const CreateCandidateSchema = z.object({
   profileLink: z.string().min(1, "Profile Link is required"),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
+  countryCode: z.string().default("SA"),
 });
 
 export type CreateCandidateValues = z.infer<typeof CreateCandidateSchema>;
@@ -57,6 +59,7 @@ interface CreateCandidateDialogProps {
     name?: string;
     email?: string;
     phone?: string;
+    countryCode?: string;
     profileLink?: string;
   };
 }
@@ -77,6 +80,7 @@ export function CreateCandidateDialog({
       profileLink: tempCandidateData?.profileLink || "",
       email: tempCandidateData?.email || "",
       phone: tempCandidateData?.phone || "",
+      countryCode: tempCandidateData?.countryCode || "SA",
     },
   });
 
@@ -87,6 +91,7 @@ export function CreateCandidateDialog({
         profileLink: tempCandidateData.profileLink || "",
         email: tempCandidateData.email || "",
         phone: tempCandidateData.phone || "",
+        countryCode: tempCandidateData.countryCode || "SA",
       });
     }
   }, [tempCandidateData, form]);
@@ -208,14 +213,13 @@ export function CreateCandidateDialog({
                       <FormItem className="space-y-1">
                         <FormLabel className="text-xs font-black text-slate-700 uppercase tracking-wide">Phone</FormLabel>
                         <FormControl>
-                          <div className="relative group">
-                            <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
-                            <Input 
-                              placeholder="+966..." 
-                              {...field} 
-                              className="pl-10 h-10 border-slate-200 font-bold focus:border-primary shadow-sm text-sm"
-                            />
-                          </div>
+                          <PhoneInput
+                            countryCode={form.watch("countryCode")}
+                            onCountryCodeChange={(code) => form.setValue("countryCode", code)}
+                            phoneNumber={field.value}
+                            onPhoneNumberChange={(num) => field.onChange(num)}
+                            placeholder="5..."
+                          />
                         </FormControl>
                         <FormMessage className="text-[9px] font-black uppercase" />
                       </FormItem>

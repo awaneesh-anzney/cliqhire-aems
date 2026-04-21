@@ -22,9 +22,7 @@ import {
 import { TagsInput } from "@/components/tags-input";
 import { candidateService } from "@/services/candidateService";
 import { SubmissionSuccessDialog } from "@/components/common/submission-success-dialog";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import "@/styles/phone-input-override.css";
+import PhoneInput from "@/components/phone/Phoneinput";
 
 const Schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -46,6 +44,7 @@ const Schema = z.object({
   willingToRelocate: z.enum(["yes", "no"]).optional(),
   description: z.string().optional(),
   phone: z.string().min(1, "Phone is required"),
+  countryCode: z.string().default("SA"),
   email: z.string().min(1, "Email is required").email("Invalid email"),
   softSkill: z.array(z.string()).default([]),
   technicalSkill: z.array(z.string()).default([]),
@@ -66,6 +65,7 @@ const initialData: FormValues = {
   willingToRelocate: undefined,
   description: "",
   phone: "",
+  countryCode: "SA",
   email: "",
   softSkill: [],
   technicalSkill: [],
@@ -229,17 +229,12 @@ export default function ProtectedCandidateFormPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="h-4 w-4" /> Phone <span className="text-red-500">*</span></Label>
-                   <PhoneInput
-  country={"sa"}
-  value={formData.phone || ""}
-  onChange={(value) => setFormData((p) => ({ ...p, phone: value || "" }))}
-  inputClass="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full"
-  enableSearch={true}
-  preferredCountries={["sa", "us", "gb", "in"]}
-  countryCodeEditable={false}
-  autoFormat={true}
-  inputProps={{ id: "phone", name: "phone", placeholder: "Phone number", required: true }}
-/>
+                    <PhoneInput
+                      countryCode={formData.countryCode}
+                      onCountryCodeChange={(val) => setFormData((p) => ({ ...p, countryCode: val }))}
+                      phoneNumber={formData.phone}
+                      onPhoneNumberChange={(val) => setFormData((p) => ({ ...p, phone: val || "" }))}
+                    />
                   </div>
 
                   <div className="space-y-2">

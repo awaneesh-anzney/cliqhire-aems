@@ -35,9 +35,7 @@ import { useCreateCandidate } from "@/hooks/useCandidate";
 import { headhunterCandidatesService } from "@/services/headhunterCandidatesService";
 import { convertTempCandidateToReal, type ConvertTempCandidateRequest } from "@/services/recruitmentPipelineService";
 import { toast } from "sonner";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import "@/styles/phone-input-override.css";
+import PhoneInput from "@/components/phone/Phoneinput";
 import { cn } from "@/lib/utils";
 
 interface CreateCandidateFormProps {
@@ -66,6 +64,7 @@ export default function CreateCandidateForm({
   const [form, setForm] = useState({
     name: tempCandidateData?.name || "",
     phone: tempCandidateData?.phone || "",
+    countryCode: tempCandidateData?.countryCode || "SA",
     email: tempCandidateData?.email || "",
     location: tempCandidateData?.location || "",
     description: tempCandidateData?.description || "",
@@ -282,12 +281,10 @@ export default function CreateCandidateForm({
                 <div className="space-y-2">
                   <Label className="text-sm font-bold text-slate-700">Phone Number <span className="text-primary">*</span></Label>
                   <PhoneInput
-                    country={"sa"}
-                    value={form.phone}
-                    onChange={v => handleSelectChange('phone', v)}
-                    inputClass="!flex !h-11 !w-full !rounded-lg !border-slate-200 !bg-white !px-3 !py-1 !text-base !font-bold !transition-all focus:!border-primary !shadow-sm"
-                    containerClass="!w-full"
-                    buttonClass="!border-slate-200 !rounded-l-lg !bg-slate-50"
+                    countryCode={form.countryCode}
+                    onCountryCodeChange={v => handleSelectChange('countryCode', v)}
+                    phoneNumber={form.phone}
+                    onPhoneNumberChange={v => handleSelectChange('phone', v)}
                   />
                 </div>
 

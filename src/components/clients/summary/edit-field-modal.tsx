@@ -7,9 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import "@/styles/phone-input-override.css";
+import PhoneInput from "@/components/phone/Phoneinput";
 import {
   Select,
   SelectContent,
@@ -71,12 +69,8 @@ export function EditFieldModal({
             <Label htmlFor="value">{fieldName}</Label>
             {fieldName === "Client Phone Number" ? (
               <PhoneInput
-                country={"sa"}
-                value={value || "966"}
-                onChange={(val) => setValue(val || "")}
-                inputClass="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full"
-                inputProps={{ id: "value", required: true }}
-                enableSearch={true}
+                value={value}
+                onChange={setValue}
               />
             ) : isDate ? (
               <div className="relative">

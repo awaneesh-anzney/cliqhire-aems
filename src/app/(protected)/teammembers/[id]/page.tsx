@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { TeamMemberStatusBadge } from "@/components/teamMembers/team-status-badge";
+import PhoneInput from "@/components/phone/Phoneinput";
 
 type ActionKey = "view" | "create" | "edit" | "delete";
 const ACTIONS: ActionKey[] = ["view", "create", "edit", "delete"];
@@ -31,7 +32,7 @@ export default function TeamMemberDetailsPage() {
   
   // Edit variables
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: "", lastName: "", email: "", phone: "", location: "", experience: "" });
+  const [editForm, setEditForm] = useState({ firstName: "", lastName: "", email: "", phone: "", countryCode: "SA", location: "", experience: "" });
 
   // Queries
   const { data: user, isLoading: isLoadingUser } = useQuery({
@@ -135,6 +136,7 @@ export default function TeamMemberDetailsPage() {
         lastName: user.lastName || "",
         email: user.email || "",
         phone: user.phone || "",
+        countryCode: user.countryCode || "SA",
         location: user.location || "",
         experience: user.experience || "",
       });
@@ -320,7 +322,12 @@ export default function TeamMemberDetailsPage() {
                     {!isEditing ? (
                       <p className="text-sm font-medium text-slate-800">{user.phone || "Not Provided"}</p>
                     ) : (
-                      <Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="h-9 text-sm px-3 w-full bg-slate-50 border-none focus-visible:ring-brand/20" type="tel" />
+                      <PhoneInput
+                        countryCode={editForm.countryCode}
+                        onCountryCodeChange={(code) => setEditForm({ ...editForm, countryCode: code })}
+                        phoneNumber={editForm.phone}
+                        onPhoneNumberChange={(val) => setEditForm({ ...editForm, phone: val })}
+                      />
                     )}
                  </div>
 

@@ -1,4 +1,5 @@
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
+import PhoneInput from "@/components/phone/Phoneinput";
 
 interface ContactDetailsTabProps {
   form:     ClientForm;
@@ -41,26 +42,14 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 col-span-2 md:col-span-1">
         <label className="text-xs text-muted-foreground">Phone *</label>
-        <div className="flex gap-2">
-          <select
-            value={form.countryCode}
-            onChange={e => setField("countryCode", e.target.value)}
-            className="h-9 border rounded-md px-2 text-sm w-24"
-          >
-            <option value="+966">+966</option>
-            <option value="+91">+91</option>
-            <option value="+1">+1</option>
-          </select>
-          <input
-            type="text"
-            value={form.phoneNumber}
-            onChange={e => setField("phoneNumber", e.target.value)}
-            placeholder="5XXXXXXXX"
-            className="h-9 border rounded-md px-2 text-sm flex-1"
-          />
-        </div>
+        <PhoneInput
+          countryCode={form.countryCode}
+          onCountryCodeChange={(code) => setField("countryCode", code)}
+          phoneNumber={form.phoneNumber}
+          onPhoneNumberChange={(phone) => setField("phoneNumber", phone)}
+        />
       </div>
 
       <div className="flex flex-col gap-1">

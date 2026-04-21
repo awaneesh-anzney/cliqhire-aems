@@ -24,9 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PrimaryContact } from "@/components/create-client-modal/type";
 import { countryCodes, positionOptions } from "./constants";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import "@/styles/phone-input-override.css";
+import PhoneInput from "@/components/phone/Phoneinput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { primaryContactSchema, PrimaryContactFormData } from "./schema";
@@ -55,7 +53,7 @@ export function ContactModal({
       gender: "",
       email: "",
       phone: "",
-      countryCode: "+966",
+      countryCode: "SA",
       designation: "",
       linkedin: "",
       isPrimary: true,
@@ -175,22 +173,12 @@ export function ContactModal({
                       Phone<span className="text-red-700">*</span>
                     </FormLabel>
                     <FormControl>
-                                             <PhoneInput
-                         country={"sa"}
-                         value={field.value || ""}
-                         onChange={(value, country) => {
-                           field.onChange(value || "");
-                           // Update country code when country changes
-                           if (country && typeof country === 'object' && 'dialCode' in country) {
-                             form.setValue("countryCode", `+${country.dialCode}`);
-                           }
-                         }}
-                         inputClass="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full"
-                         enableSearch={true}
-                         preferredCountries={["sa", "us", "gb", "in"]}
-                         countryCodeEditable={false}
-                         autoFormat={true}
-                       />
+                        <PhoneInput
+                          countryCode={form.watch("countryCode")}
+                          onCountryCodeChange={(code) => form.setValue("countryCode", code)}
+                          phoneNumber={field.value}
+                          onPhoneNumberChange={(value) => field.onChange(value)}
+                        />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

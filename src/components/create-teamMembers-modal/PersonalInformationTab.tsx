@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
 import { CreateTeamMemberData } from "@/types/teamMember";
-import PhoneInput from "react-phone-input-2";
+import PhoneInput from "@/components/phone/Phoneinput";
 import { useRoles } from "@/hooks/useRoles";
 
 interface PersonalInformationTabProps {
@@ -151,16 +151,10 @@ export function PersonalInformationTab({
         <div className="space-y-2">
           <Label htmlFor="phone">Phone Number</Label>
           <PhoneInput
-            country={"sa"}
-            value={formData.phone || ""}
-            onChange={(value) => {
-              handleInputChange("phone", value || "");
-            }}
-            inputClass="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full"
-            enableSearch={true}
-            preferredCountries={["in", "us", "gb", "sa"]}
-            countryCodeEditable={false}
-            autoFormat={true}
+            countryCode={formData.countryCode || "IN"}
+            onCountryCodeChange={(code) => handleInputChange("countryCode", code)}
+            phoneNumber={formData.phone || ""}
+            onPhoneNumberChange={(value) => handleInputChange("phone", value || "")}
           />
         </div>
       </div>

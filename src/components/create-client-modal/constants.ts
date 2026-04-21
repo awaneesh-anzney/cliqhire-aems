@@ -42,12 +42,8 @@ export const optionsForClient = [
   },
 ];
 
-export const countryCodes = [
-  { code: "+966", label: "+966 (Saudi Arabia)" },
-  { code: "+1", label: "+1 (USA)" },
-  { code: "+44", label: "+44 (UK)" },
-  { code: "+91", label: "+91 (India)" },
-];
+// Redundant: custom PhoneInput uses its own country list
+export const countryCodes = [];
 
 export const positionOptions = [
   { value: "CEO", label: "CEO" },
@@ -137,7 +133,7 @@ export const primaryContactInitialState = {
   gender: "",
   email: "",
   phone: "",
-  countryCode: "+966",
+  countryCode: "SA",
   designation: "",
   linkedin: "",
   isPrimary: true,

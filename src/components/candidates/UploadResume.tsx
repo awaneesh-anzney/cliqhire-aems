@@ -15,9 +15,7 @@ import { api } from "@/lib/axios-config";
 import { initializeAuth } from "@/lib/axios-config";
 import { candidateService } from "@/services/candidateService";
 import { toast } from "sonner";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import "@/styles/phone-input-override.css";
+import PhoneInput from "@/components/phone/Phoneinput";
 import { subDays } from "date-fns";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -69,6 +67,7 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
   const [form, setForm] = useState({
     name: "",
     phone: "",
+    countryCode: "SA",
     email: "",
     location: "",
     dateOfBirth: null as Date | null,
@@ -175,6 +174,7 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
     setForm({
       name: "",
       phone: "",
+      countryCode: "SA",
       email: "",
       location: "",
       dateOfBirth: null,
@@ -537,15 +537,10 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
                 Phone Number<span className="text-red-500 ml-1">*</span>
               </Label>
               <PhoneInput
-                country={"sa"}
-                value={form.phone || ""}
-                onChange={(value) => setForm((prev) => ({ ...prev, phone: value || "" }))}
-                inputClass="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full"
-                enableSearch={true}
-                preferredCountries={["sa", "us", "gb", "in"]}
-                countryCodeEditable={false}
-                autoFormat={true}
-                inputProps={{ id: "phone", name: "phone", placeholder: "Enter phone number", required: true }}
+                countryCode={form.countryCode}
+                onCountryCodeChange={(val) => setForm((prev) => ({ ...prev, countryCode: val }))}
+                phoneNumber={form.phone}
+                onPhoneNumberChange={(value) => setForm((prev) => ({ ...prev, phone: value || "" }))}
               />
             </div>
 

@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import PhoneInput from "@/components/phone/Phoneinput"
+import { Controller } from "react-hook-form"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -24,9 +26,8 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }).nonempty("Email is required"),
-  phone: z.string().min(10, {
-    message: "Phone number must be at least 10 digits.",
-  }).nonempty("Phone is required"),
+  phone: z.string().min(1, "Phone is required"),
+  countryCode: z.string().default("SA"),
   position: z.string().min(2, {
     message: "Position must be at least 2 characters.",
   }).nonempty("Position is required"),
@@ -61,6 +62,7 @@ export function ReferredByDialog({
       name: "",
       email: "",
       phone: "",
+      countryCode: "SA",
       position: "",
     },
   })
@@ -129,13 +131,18 @@ export function ReferredByDialog({
               <Label htmlFor="phone" className="flex items-center gap-1">
                 Phone <span className="text-red-500">*</span>
               </Label>
-              <Input
-                id="phone"
-                type="tel"
-                disabled={loading}
-                {...form.register("phone")}
-                className={form.formState.errors.phone ? "border-red-500" : ""}
-                placeholder="Enter phone number"
+              <Controller
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <PhoneInput
+                    countryCode={form.watch("countryCode")}
+                    onCountryCodeChange={(code) => form.setValue("countryCode", code)}
+                    phoneNumber={field.value}
+                    onPhoneNumberChange={field.onChange}
+                    disabled={loading}
+                  />
+                )}
               />
               {form.formState.errors.phone && (
                 <p className="text-sm text-red-500">

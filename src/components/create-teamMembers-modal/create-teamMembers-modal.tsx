@@ -38,9 +38,7 @@ import { CreateTeamMemberData } from "@/types/teamMember";
 import { createTeamMember } from "@/services/teamMembersService";
 import { useRoles } from "@/hooks/useRoles";
 import { toast } from "sonner";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import "@/styles/phone-input-override.css";
+import PhoneInput from "@/components/phone/Phoneinput";
 import { cn } from "@/lib/utils";
 
 interface CreateTeamMemberModalProps {
@@ -61,6 +59,7 @@ export function CreateTeamMemberModal({
     lastName: "",
     email: "",
     phone: "",
+    countryCode: "SA",
     location: "",
     experience: "",
     skills: [],
@@ -164,6 +163,7 @@ export function CreateTeamMemberModal({
         lastName: "",
         email: "",
         phone: "",
+        countryCode: "SA",
         location: "",
         experience: "",
         skills: [],
@@ -290,11 +290,10 @@ export function CreateTeamMemberModal({
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-slate-700">Phone Number</Label>
                         <PhoneInput
-                          country={"sa"}
-                          value={formData.phone}
-                          onChange={(v) => handleInputChange("phone", v)}
-                          inputClass="!flex !h-11 !w-full !rounded-lg !border-slate-200 !font-bold"
-                          buttonClass="!border-slate-200 !rounded-l-lg"
+                          countryCode={formData.countryCode || "SA"}
+                          onCountryCodeChange={(v) => handleInputChange("countryCode", v)}
+                          phoneNumber={formData.phone}
+                          onPhoneNumberChange={(v) => handleInputChange("phone", v)}
                         />
                       </div>
                     </div>

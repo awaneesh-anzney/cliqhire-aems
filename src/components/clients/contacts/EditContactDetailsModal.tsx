@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import PhoneInput from 'react-phone-input-2';
-// import 'react-phone-input-2/lib/style.css'; // Import this in your global CSS or _app.tsx if not already
+import PhoneInput from "@/components/phone/Phoneinput";
 
 interface EditContactDetailsModalProps {
   open: boolean;
@@ -26,6 +25,7 @@ const EditContactDetailsModal: React.FC<EditContactDetailsModalProps> = ({
   onSave,
 }) => {
   const [phoneNumber, setPhoneNumber] = useState(initialValues.phoneNumber || "");
+  const [countryCode, setCountryCode] = useState("SA");
   const [website, setWebsite] = useState(initialValues.website || "");
   const [emails, setEmails] = useState(initialValues.emails.join(", ") || "");
   const [linkedInProfile, setLinkedInProfile] = useState(initialValues.linkedInProfile || "");
@@ -93,18 +93,10 @@ const EditContactDetailsModal: React.FC<EditContactDetailsModalProps> = ({
           <div>
             <label className="block text-sm font-medium mb-1">Client Phone Number</label>
             <PhoneInput
-              country={"sa"}
-              value={phoneNumber}
-              onChange={setPhoneNumber}
-              inputProps={{
-                name: 'phone',
-                required: false,
-                autoFocus: false,
-              }}
-              inputClass="w-full"
-              containerClass="w-full"
-              placeholder="Enter phone number"
-              enableSearch={true}
+              countryCode={countryCode}
+              onCountryCodeChange={setCountryCode}
+              phoneNumber={phoneNumber}
+              onPhoneNumberChange={setPhoneNumber}
             />
           </div>
           <div>

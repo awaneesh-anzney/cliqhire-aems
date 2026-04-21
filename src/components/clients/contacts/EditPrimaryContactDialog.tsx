@@ -3,9 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
-import '@/styles/phone-input-override.css';
+import PhoneInput from '@/components/phone/Phoneinput';
 
 interface EditPrimaryContactDialogProps {
   open: boolean;
@@ -44,9 +42,8 @@ export function EditPrimaryContactDialog({ open, onOpenChange, contact, onSave }
     }
   }, [contact, open]);
 
-  const handlePhoneChange = (value: string, data: any) => {
+  const handlePhoneChange = (value: string) => {
     setPhone(value);
-    setCountryCode(data.dialCode);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -93,12 +90,10 @@ export function EditPrimaryContactDialog({ open, onOpenChange, contact, onSave }
           <div>
             <Label htmlFor="phone">Phone</Label>
             <PhoneInput
-              country={countryCode || "sa"}
-              value={phone}
-              onChange={handlePhoneChange}
-              inputClass="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full"
-              inputProps={{ id: 'phone', required: true }}
-              enableSearch={true}
+              countryCode={countryCode || "SA"}
+              onCountryCodeChange={setCountryCode}
+              phoneNumber={phone}
+              onPhoneNumberChange={setPhone}
             />
             {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
           </div>
