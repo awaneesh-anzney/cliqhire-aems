@@ -34,6 +34,7 @@ export interface PipelineListItem {
   droppedCandidates?: number;
   createdAt?: string;
   updatedAt?: string;
+  assignedDate?: string;
   jobId: {
     _id: string;
     jobTitle: string;
@@ -46,6 +47,7 @@ export interface PipelineListItem {
     jobType?: string;
     deadlineByClient?: string | null;
     jobTeamMembers?: any[];
+    stage?: string;
   };
 }
 
@@ -63,6 +65,27 @@ export interface GetAllPipelineEntriesResponse {
     };
   };
   message?: string;
+}
+
+export interface CandidatePipelineInfo {
+  candidateId: {
+    _id: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    phone: string;
+    location?: string;
+    resume?: string;
+    status: string;
+  };
+  currentStage: string;
+  status?: string;
+  currentStatus?: string;
+  notes?: string;
+  priority?: string;
+  addedAt?: string;
+  lastUpdated?: string;
 }
 
 export interface GetPipelineEntryResponse {
@@ -193,6 +216,22 @@ export interface AddCandidateToPipelineRequest {
   initialStage?: string;
 }
 
+export interface ConvertTempCandidateRequest {
+  name: string;
+  email: string;
+  phone: string;
+  location?: string;
+  description?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  country?: string;
+  nationality?: string;
+  educationDegree?: string;
+  willingToRelocate?: string;
+  linkedin?: string;
+  continent?: string;
+}
+
 // ─── Pipeline CRUD ────────────────────────────────────────────────────────────
 
 /**
@@ -210,6 +249,11 @@ export const createPipelineForJob = async (
     throw new Error(error.response?.data?.message || 'Failed to create pipeline');
   }
 };
+
+/**
+ * Alias for createPipelineForJob (backward compatibility)
+ */
+export const createPipeline = createPipelineForJob;
 
 /**
  * Get pipeline entry detail — includes stages[], candidates[], job info
@@ -364,7 +408,7 @@ export const updateCandidateStage = async (
 export const updateCandidateStageData = async (
   pipelineId: string,
   candidateId: string,
-  update: { status?: string; notes?: string; data?: Record<string, any> }
+  update: { status?: string; notes?: string; stage?: string; data?: Record<string, any>; [key: string]: any }
 ): Promise<UpdateCandidateStageResponse> => {
   try {
     const response = await api.patch(
@@ -384,7 +428,7 @@ export const updateCandidateStageData = async (
 export const updateCandidateStatus = async (
   pipelineId: string,
   candidateId: string,
-  update: { status?: string; notes?: string; data?: Record<string, any> }
+  update: { status?: string; notes?: string; stage?: string; data?: Record<string, any>; [key: string]: any }
 ): Promise<UpdateCandidateStageResponse> => {
   return updateCandidateStageData(pipelineId, candidateId, update);
 };
@@ -464,13 +508,59 @@ export const deleteCandidateFromPipeline = async (
   }
 };
 
+/**
+ * Convert a temp candidate to a real one within a pipeline.
+ * This will create a full candidate profile and update the pipeline entry.
+ */
+export const convertTempCandidateToReal = async (
+  pipelineId: string,
+  tempCandidateId: string,
+  candidateData: ConvertTempCandidateRequest
+): Promise<{ success: boolean; data?: any; error?: string; message?: string }> => {
+  try {
+    const response = await api.patch(
+      `/api/recruiter-pipeline/${pipelineId}/candidates/${tempCandidateId}/convert`,
+      candidateData
+    );
+    return { success: true, message: 'Candidate converted successfully', data: response.data };
+  } catch (error: any) {
+    console.error('Error converting temp candidate:', error);
+    return {
+      success: false,
+      message: 'Failed to convert candidate',
+      error: error.response?.data?.message || error.message,
+    };
+  }
+};
+
+/**
+ * Export candidates from a pipeline to Excel.
+ * If stages is empty, exports all candidates.
+ */
+export const exportCandidatesToExcel = async (
+  pipelineId: string,
+  stages: string[] = []
+): Promise<Blob> => {
+  try {
+    const response = await api.get(`/api/recruiter-pipeline/${pipelineId}/export`, {
+      params: { stages: stages.join(',') },
+      responseType: 'blob',
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error exporting pipeline candidates:', error);
+    throw new Error(error.response?.data?.message || 'Failed to export candidates');
+  }
+};
+
+
 // ─── Legacy compat aliases (used in existing components) ──────────────────────
 
 /** @deprecated use addCandidateToPipeline */
 export const addCandidateToPipelineOld = async (
   pipelineId: string,
   candidateId: string
-) => addCandidateToPipeline(pipelineId, { candidateId });
+) => addCandidateToPipeline(pipelineId, candidateId);
 
 /** @deprecated use updateCandidateStage */
 export const moveCandidateToStage = updateCandidateStage;

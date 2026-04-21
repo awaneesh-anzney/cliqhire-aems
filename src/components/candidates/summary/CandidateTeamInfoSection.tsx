@@ -33,32 +33,37 @@ export function CandidateTeamInfoSection({ candidateDetails, handleUpdateField }
   const currentRecruitmentManager = teamAssignmentData?.recruitmentManager
     ? teamAssignmentData.recruitmentManager
     : candidateDetails.recruitmentManagerId
-      ? { name: candidateDetails.recruitmentManager || "Sarah Johnson" }
-      : { name: "Sarah Johnson" };
+      ? { name: candidateDetails.recruitmentManager || "Not assigned" }
+      : null;
 
   const currentTeamLead = teamAssignmentData?.teamLead
     ? teamAssignmentData.teamLead
     : candidateDetails.teamLeadId
-      ? { name: candidateDetails.teamLead || "Mike Chen" }
-      : { name: "Mike Chen" };
+      ? { name: candidateDetails.teamLead || "Not assigned" }
+      : null;
 
   const currentRecruiter = teamAssignmentData?.recruiter
     ? teamAssignmentData.recruiter
     : candidateDetails.recruiterId
-      ? { name: candidateDetails.recruiter || "Alex Rodriguez" }
-      : { name: "Alex Rodriguez" };
+      ? { name: candidateDetails.recruiter || "Not assigned" }
+      : null;
 
   const handleTeamSelectionSave = (selections: {
     recruitmentManager?: any;
     teamLead?: any;
     recruiter?: any;
   }) => {
+    const getFullName = (m: any) => {
+      if (!m) return "";
+      return `${m.firstName || ""} ${m.lastName || ""}`.trim() || m.name || m.email || "";
+    };
+
     // Create a comprehensive team data object
     const teamData = {
       recruitmentManager: selections.recruitmentManager
         ? {
-            id: selections.recruitmentManager.id,
-            name: selections.recruitmentManager.name,
+            id: selections.recruitmentManager._id || selections.recruitmentManager.id,
+            name: getFullName(selections.recruitmentManager),
             email: selections.recruitmentManager.email,
             phone: selections.recruitmentManager.phone,
             teamSize: selections.recruitmentManager.teamSize,
@@ -66,21 +71,21 @@ export function CandidateTeamInfoSection({ candidateDetails, handleUpdateField }
         : null,
       teamLead: selections.teamLead
         ? {
-            id: selections.teamLead.id,
-            name: selections.teamLead.name,
+            id: selections.teamLead._id || selections.teamLead.id,
+            name: getFullName(selections.teamLead),
             email: selections.teamLead.email,
             phone: selections.teamLead.phone,
             teamSize: selections.teamLead.teamSize,
-            managerId: selections.teamLead.managerId,
+            managerId: selections.teamLead.manager,
           }
         : null,
       recruiter: selections.recruiter
         ? {
-            id: selections.recruiter.id,
-            name: selections.recruiter.name,
+            id: selections.recruiter._id || selections.recruiter.id,
+            name: getFullName(selections.recruiter),
             email: selections.recruiter.email,
             phone: selections.recruiter.phone,
-            teamLeadId: selections.recruiter.teamLeadId,
+            teamLeadId: selections.recruiter.manager,
           }
         : null,
       lastUpdated: new Date().toISOString(),
@@ -125,19 +130,19 @@ export function CandidateTeamInfoSection({ candidateDetails, handleUpdateField }
         <div className="space-y-3 pt-1">
           <DetailRow
             label="Recruitment Manager"
-            value={currentRecruitmentManager?.name || candidateDetails.recruitmentManager}
+            value={currentRecruitmentManager?.name || candidateDetails.recruitmentManager || "Not assigned"}
             onUpdate={() => {}} // No edit functionality
             disableInternalEdit={true} // Disable edit button
           />
           <DetailRow
             label="Team Lead"
-            value={currentTeamLead?.name || candidateDetails.teamLead}
+            value={currentTeamLead?.name || candidateDetails.teamLead || "Not assigned"}
             onUpdate={() => {}} // No edit functionality
             disableInternalEdit={true} // Disable edit button
           />
           <DetailRow
             label="Recruiter"
-            value={currentRecruiter?.name || candidateDetails.recruiter}
+            value={currentRecruiter?.name || candidateDetails.recruiter || "Not assigned"}
             onUpdate={() => {}} // No edit functionality
             disableInternalEdit={true} // Disable edit button
           />
@@ -149,9 +154,9 @@ export function CandidateTeamInfoSection({ candidateDetails, handleUpdateField }
         onClose={() => setIsTeamDialogOpen(false)}
         onSave={handleTeamSelectionSave}
         initialSelections={{
-          recruitmentManagerId: currentRecruitmentManager?.id || candidateDetails.recruitmentManagerId,
-          teamLeadId: currentTeamLead?.id || candidateDetails.teamLeadId,
-          recruiterId: currentRecruiter?.id || candidateDetails.recruiterId,
+          recruitmentManagerId: currentRecruitmentManager?.id || currentRecruitmentManager?._id || candidateDetails.recruitmentManagerId,
+          teamLeadId: currentTeamLead?.id || currentTeamLead?._id || candidateDetails.teamLeadId,
+          recruiterId: currentRecruiter?.id || currentRecruiter?._id || candidateDetails.recruiterId,
         }}
       />
     </CollapsibleSection>

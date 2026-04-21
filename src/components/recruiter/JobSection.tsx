@@ -59,8 +59,8 @@ export default function JobSection({ item }: JobSectionProps) {
               {item.jobId?.location && (
                 <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{item.jobId.location}</span>
               )}
-              {typeof item.numberOfCandidates === "number" && (
-                <span className="flex items-center gap-1"><Users className="h-4 w-4" />{item.numberOfCandidates} candidates</span>
+              {typeof item.totalCandidates === "number" && (
+                <span className="flex items-center gap-1"><Users className="h-4 w-4" />{item.totalCandidates} candidates</span>
               )}
               {item.assignedDate && (
                 <span className="flex items-center gap-1"><CalendarDays className="h-4 w-4" />Assigned {new Date(item.assignedDate).toLocaleDateString()}</span>

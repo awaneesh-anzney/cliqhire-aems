@@ -218,7 +218,7 @@ export function PipelineStageDetails({
             {stageMoveInfo.notes && (
               <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4 flex-1 truncate">
                 <span className="font-semibold uppercase tracking-wider text-slate-400">Notes:</span>
-                <span className="text-slate-600 font-medium italic truncate">"{stageMoveInfo.notes}"</span>
+                <span className="text-slate-600 font-medium italic truncate">&quot;{stageMoveInfo.notes}&quot;</span>
               </div>
             )}
           </div>
@@ -238,7 +238,7 @@ export function PipelineStageDetails({
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground mb-0.5">{field.label}</p>
                 {isEditingStage ? (
-                  renderFieldInput(field, editValues[field.key] ?? "", handleUpdateFieldValue)
+                  renderFieldInput(field, editValues[field.key] ?? "", (val) => handleUpdateFieldValue(field.key, val))
                 ) : (
                   <p className="text-sm font-medium truncate">{renderFieldValue(field)}</p>
                 )}
@@ -255,7 +255,7 @@ export function PipelineStageDetails({
             <AlertDialogTitle>Confirm Updates</AlertDialogTitle>
             <AlertDialogDescription>
               Save all changes to the <strong>{displayStage}</strong> stage? This will update the
-              candidate's stage data in the pipeline.
+              candidate&quot;s stage data in the pipeline.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

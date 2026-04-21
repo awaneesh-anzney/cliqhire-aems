@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,19 +11,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import {
-  recruitmentManagers,
-  teamLeads,
-  recruiters,
-  getTeamLeadsByManager,
-  getRecruitersByTeamLead,
-  getRecruitmentManagerById,
-  getTeamLeadById,
-  getRecruiterById,
-  type RecruitmentManager,
-  type TeamLead,
-  type Recruiter,
-} from "@/data/teamData";
+import { getTeamMembers } from "@/services/teamMembersService";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { TeamMember } from "@/types/teamMember";
+
+// Since we are removing hardcoded data, we use TeamMember type from our types
+export type RecruitmentManager = TeamMember;
+export type TeamLead = TeamMember;
+export type Recruiter = TeamMember;
 
 interface TeamSelectionDialogProps {
   open: boolean;
@@ -50,65 +46,80 @@ export function TeamSelectionDialog({
   const [selectedTeamLeadId, setSelectedTeamLeadId] = useState<string>("");
   const [selectedRecruiterId, setSelectedRecruiterId] = useState<string>("");
 
-  const [availableTeamLeads, setAvailableTeamLeads] = useState<TeamLead[]>([]);
-  const [availableRecruiters, setAvailableRecruiters] = useState<Recruiter[]>([]);
+  // Fetch all team members
+  const { data: teamData, isLoading } = useQuery({
+    queryKey: ["teamMembersForSelection"],
+    queryFn: () => getTeamMembers(),
+    enabled: open,
+  });
+
+  const allMembers = useMemo(() => teamData?.teamMembers || [], [teamData]);
+
+  // Filter members by role
+  const recruitmentManagers = useMemo(() => 
+    allMembers.filter(m => m.teamRole === "ADMIN" || m.teamRole === "HIRING_MANAGER"),
+    [allMembers]
+  );
+
+  const teamLeads = useMemo(() => 
+    allMembers.filter(m => m.teamRole === "TEAM_LEAD"),
+    [allMembers]
+  );
+
+  const recruiters = useMemo(() => 
+    allMembers.filter(m => m.teamRole === "RECRUITER"),
+    [allMembers]
+  );
+
+  // Filter team leads by selected manager if relationships exist
+  const availableTeamLeads = useMemo(() => {
+    if (!selectedManagerId) return [];
+    // If we have parent relationship in data, use it; otherwise show all team leads
+    const filtered = teamLeads.filter(tl => tl.manager === selectedManagerId);
+    return filtered.length > 0 ? filtered : teamLeads;
+  }, [selectedManagerId, teamLeads]);
+
+  // Filter recruiters by selected team lead if relationships exist
+  const availableRecruiters = useMemo(() => {
+    if (!selectedTeamLeadId) return [];
+    const filtered = recruiters.filter(r => r.manager === selectedTeamLeadId);
+    return filtered.length > 0 ? filtered : recruiters;
+  }, [selectedTeamLeadId, recruiters]);
 
   // Initialize with current selections
   useEffect(() => {
-    if (initialSelections) {
+    if (initialSelections && open && !isLoading) {
       setSelectedManagerId(initialSelections.recruitmentManagerId || "");
       setSelectedTeamLeadId(initialSelections.teamLeadId || "");
       setSelectedRecruiterId(initialSelections.recruiterId || "");
     }
-  }, [initialSelections, open]);
+  }, [initialSelections, open, isLoading]);
 
-  // Update available team leads when manager changes
+  // Reset dependent fields when parent changes
   useEffect(() => {
-    if (selectedManagerId) {
-      const teamLeadsForManager = getTeamLeadsByManager(selectedManagerId);
-      setAvailableTeamLeads(teamLeadsForManager);
-
-      // Reset team lead and recruiter if current selections are not valid
-      if (selectedTeamLeadId) {
-        const isValidTeamLead = teamLeadsForManager.some((tl) => tl.id === selectedTeamLeadId);
-        if (!isValidTeamLead) {
-          setSelectedTeamLeadId("");
-          setSelectedRecruiterId("");
-        }
+    if (selectedManagerId && availableTeamLeads.length > 0) {
+      const isValidTeamLead = availableTeamLeads.some((tl) => tl._id === selectedTeamLeadId);
+      if (!isValidTeamLead && selectedTeamLeadId) {
+        setSelectedTeamLeadId("");
+        setSelectedRecruiterId("");
       }
-    } else {
-      setAvailableTeamLeads([]);
-      setSelectedTeamLeadId("");
-      setSelectedRecruiterId("");
     }
-  }, [selectedManagerId]);
+  }, [selectedManagerId, availableTeamLeads]);
 
-  // Update available recruiters when team lead changes
   useEffect(() => {
-    if (selectedTeamLeadId) {
-      const recruitersForTeamLead = getRecruitersByTeamLead(selectedTeamLeadId);
-      setAvailableRecruiters(recruitersForTeamLead);
-
-      // Reset recruiter if current selection is not valid
-      if (selectedRecruiterId) {
-        const isValidRecruiter = recruitersForTeamLead.some((r) => r.id === selectedRecruiterId);
-        if (!isValidRecruiter) {
-          setSelectedRecruiterId("");
-        }
+    if (selectedTeamLeadId && availableRecruiters.length > 0) {
+      const isValidRecruiter = availableRecruiters.some((r) => r._id === selectedRecruiterId);
+      if (!isValidRecruiter && selectedRecruiterId) {
+        setSelectedRecruiterId("");
       }
-    } else {
-      setAvailableRecruiters([]);
-      setSelectedRecruiterId("");
     }
-  }, [selectedTeamLeadId]);
+  }, [selectedTeamLeadId, availableRecruiters]);
 
   const handleSave = () => {
     const selections = {
-      recruitmentManager: selectedManagerId
-        ? getRecruitmentManagerById(selectedManagerId)
-        : undefined,
-      teamLead: selectedTeamLeadId ? getTeamLeadById(selectedTeamLeadId) : undefined,
-      recruiter: selectedRecruiterId ? getRecruiterById(selectedRecruiterId) : undefined,
+      recruitmentManager: allMembers.find(m => m._id === selectedManagerId),
+      teamLead: allMembers.find(m => m._id === selectedTeamLeadId),
+      recruiter: allMembers.find(m => m._id === selectedRecruiterId),
     };
 
     onSave(selections);
@@ -116,7 +127,6 @@ export function TeamSelectionDialog({
   };
 
   const handleCancel = () => {
-    // Reset to initial values
     if (initialSelections) {
       setSelectedManagerId(initialSelections.recruitmentManagerId || "");
       setSelectedTeamLeadId(initialSelections.teamLeadId || "");
@@ -129,6 +139,8 @@ export function TeamSelectionDialog({
     onClose();
   };
 
+  const getMemberName = (m: TeamMember) => `${m.firstName} ${m.lastName}`.trim() || m.email;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -136,85 +148,102 @@ export function TeamSelectionDialog({
           <DialogTitle>Edit Candidate Team Assignment</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Recruitment Manager Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="recruitment-manager">Recruitment Manager</Label>
-            <Select
-              value={selectedManagerId}
-              onValueChange={(value) => setSelectedManagerId(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a Recruitment Manager" />
-              </SelectTrigger>
-              <SelectContent>
-                {recruitmentManagers.map((manager) => (
-                  <SelectItem key={manager.id} value={manager.id}>
-                    {manager.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <p className="text-sm text-muted-foreground">Loading team members...</p>
           </div>
+        ) : (
+          <div className="space-y-6 py-4">
+            {/* Recruitment Manager Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="recruitment-manager">Recruitment Manager</Label>
+              <Select
+                value={selectedManagerId}
+                onValueChange={(value) => setSelectedManagerId(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a Recruitment Manager" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recruitmentManagers.map((manager) => (
+                    <SelectItem key={manager._id} value={manager._id}>
+                      {getMemberName(manager)}
+                    </SelectItem>
+                  ))}
+                  {recruitmentManagers.length === 0 && (
+                    <div className="p-2 text-xs text-muted-foreground">No managers found</div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Team Lead Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="team-lead">Team Lead</Label>
-            <Select
-              value={selectedTeamLeadId}
-              onValueChange={(value) => setSelectedTeamLeadId(value)}
-              disabled={!selectedManagerId}
-            >
-              <SelectTrigger className={!selectedManagerId ? "opacity-50" : ""}>
-                <SelectValue
-                  placeholder={
-                    !selectedManagerId ? "Select a Recruitment Manager first" : "Select a Team Lead"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {availableTeamLeads.map((teamLead) => (
-                  <SelectItem key={teamLead.id} value={teamLead.id}>
-                    {teamLead.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Team Lead Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="team-lead">Team Lead</Label>
+              <Select
+                value={selectedTeamLeadId}
+                onValueChange={(value) => setSelectedTeamLeadId(value)}
+                disabled={!selectedManagerId}
+              >
+                <SelectTrigger className={!selectedManagerId ? "opacity-50" : ""}>
+                  <SelectValue
+                    placeholder={
+                      !selectedManagerId ? "Select a Recruitment Manager first" : "Select a Team Lead"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableTeamLeads.map((teamLead) => (
+                    <SelectItem key={teamLead._id} value={teamLead._id}>
+                      {getMemberName(teamLead)}
+                    </SelectItem>
+                  ))}
+                  {availableTeamLeads.length === 0 && selectedManagerId && (
+                    <div className="p-2 text-xs text-muted-foreground">No team leads found</div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Recruiter Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="recruiter">Recruiter</Label>
-            <Select
-              value={selectedRecruiterId}
-              onValueChange={(value) => setSelectedRecruiterId(value)}
-              disabled={!selectedTeamLeadId}
-            >
-              <SelectTrigger className={!selectedTeamLeadId ? "opacity-50" : ""}>
-                <SelectValue
-                  placeholder={
-                    !selectedTeamLeadId ? "Select a Team Lead first" : "Select a Recruiter"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {availableRecruiters.map((recruiter) => (
-                  <SelectItem key={recruiter.id} value={recruiter.id}>
-                    {recruiter.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Recruiter Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="recruiter">Recruiter</Label>
+              <Select
+                value={selectedRecruiterId}
+                onValueChange={(value) => setSelectedRecruiterId(value)}
+                disabled={!selectedTeamLeadId}
+              >
+                <SelectTrigger className={!selectedTeamLeadId ? "opacity-50" : ""}>
+                  <SelectValue
+                    placeholder={
+                      !selectedTeamLeadId ? "Select a Team Lead first" : "Select a Recruiter"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableRecruiters.map((recruiter) => (
+                    <SelectItem key={recruiter._id} value={recruiter._id}>
+                      {getMemberName(recruiter)}
+                    </SelectItem>
+                  ))}
+                  {availableRecruiters.length === 0 && selectedTeamLeadId && (
+                    <div className="p-2 text-xs text-muted-foreground">No recruiters found</div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button onClick={handleSave} disabled={isLoading}>Save Changes</Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+

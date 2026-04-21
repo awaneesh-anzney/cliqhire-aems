@@ -704,10 +704,10 @@ const CandidateSummary = ({
         </Collapsible>
 
         {/* Candidate Team Info Section */}
-        {/* <CandidateTeamInfoSection
+        <CandidateTeamInfoSection
           candidateDetails={localCandidate}
           handleUpdateField={(fieldKey) => (value) => handleSave(fieldKey, value)}
-        /> */}
+        />
       </div>
 
       {/* Edit Resume Dialog */}

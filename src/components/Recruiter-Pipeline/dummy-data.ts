@@ -183,6 +183,11 @@ export interface Job {
   clientWebsite?: string;
   clientPhone?: string;
   clientEmails?: string[];
+  // New pipeline fields
+  stages?: string[];
+  stageObjects?: any[];
+  pipelineStatus?: string;
+  jobIdString?: string;
 }
 
 export const pipelineStages = [

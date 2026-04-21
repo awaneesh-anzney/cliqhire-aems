@@ -80,7 +80,7 @@ export interface JobData {
   numberOfPositions?: number;
   jobDescriptionInternal?: string;
   // New dynamic team assignment
-  jobTeamMembers?: JobTeamMemberInput[];
+  jobTeamMembers?: JobTeamMemberInput[] | JobTeamMember[];
 }
 
 export interface Job extends JobData {
