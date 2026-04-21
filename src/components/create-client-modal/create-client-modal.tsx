@@ -159,9 +159,9 @@ export function CreateClientModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-2xl">
-        <div className="flex h-full lg:h-[700px]">
+        <div className="flex flex-col md:flex-row h-full md:h-[620px] min-h-[500px]">
           {/* Left Sidebar - Step Indicator */}
-          <div className="hidden md:flex flex-col w-64 bg-slate-50 border-r border-slate-200 p-8">
+          <div className="hidden md:flex flex-col w-52 bg-slate-50 border-r border-slate-200 p-8 shrink-0">
             <div className="mb-10">
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
