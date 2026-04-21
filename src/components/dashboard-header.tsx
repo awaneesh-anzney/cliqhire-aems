@@ -42,7 +42,11 @@ const Dashboardheader = ({
       {/* Toolbar */}
       <div className="flex items-center justify-between p-2">
         {showCreateButton ? (
-          <Button size="sm" onClick={() => setOpen(true)}>
+          <Button 
+            size="sm" 
+            onClick={() => setOpen(true)}
+            className="bg-primary hover:bg-primary/90 text-white font-bold shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+          >
             <Plus className="h-4 w-4 mr-2" />
             {buttonText}
           </Button>
@@ -117,14 +121,10 @@ const Dashboardheader = ({
               </>
             )}
           </Button>
-          {/* <Button variant="ghost" size="sm">
-              <MoreVertical className="h-4 w-4" />
-            </Button>                             */}
         </div>
       </div>
     </div>
   )
 }
-
 
 export default Dashboardheader;

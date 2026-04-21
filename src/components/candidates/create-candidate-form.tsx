@@ -1,20 +1,35 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { 
+  CalendarIcon, 
+  User, 
+  Mail, 
+  MapPin, 
+  Briefcase, 
+  GraduationCap, 
+  FileText, 
+  Upload, 
+  CheckCircle2, 
+  ChevronRight, 
+  ChevronLeft,
+  Info,
+  Building2,
+  Linkedin,
+  Globe,
+  Plus,
+  X,
+  CreditCard
+} from "lucide-react";
+import { format, subDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { CountrySelect } from "@/components/ui/country-select";
-import { Upload } from "lucide-react";
-import { subDays } from "date-fns";
-import { candidateService } from "@/services/candidateService";
 import { useCreateCandidate } from "@/hooks/useCandidate";
 import { headhunterCandidatesService } from "@/services/headhunterCandidatesService";
 import { convertTempCandidateToReal, type ConvertTempCandidateRequest } from "@/services/recruitmentPipelineService";
@@ -22,40 +37,23 @@ import { toast } from "sonner";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "@/styles/phone-input-override.css";
-import { CONTINENTS } from '@/lib/constants';
+import { cn } from "@/lib/utils";
 
 interface CreateCandidateFormProps {
   onCandidateCreated?: (candidate: any) => void;
-  showAdvanced: boolean;
-  setShowAdvanced: (value: boolean) => void;
-  onClose: () => void; // for dialog close (X)
-  goBack: () => void; // for Cancel button
-  tempCandidateData?: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    location?: string;
-    description?: string;
-    gender?: string;
-    dateOfBirth?: string;
-    country?: string;
-    nationality?: string;
-    educationDegree?: string;
-    willingToRelocate?: string;
-    linkedin?: string;
-    continent?: string;
-  };
-  // Props for temp candidate conversion
+  onClose: () => void;
+  goBack: () => void;
+  tempCandidateData?: any;
   isTempCandidateConversion?: boolean;
   pipelineId?: string;
   tempCandidateId?: string;
   isHeadhunterCreate?: boolean;
 }
 
+const TABS = ["Identity", "Experience", "Background", "Summary"] as const;
+
 export default function CreateCandidateForm({
   onCandidateCreated,
-  showAdvanced,
-  setShowAdvanced,
   onClose,
   goBack,
   tempCandidateData,
@@ -78,7 +76,6 @@ export default function CreateCandidateForm({
     willingToRelocate: tempCandidateData?.willingToRelocate || "",
     linkedin: tempCandidateData?.linkedin || "",
     continent: tempCandidateData?.continent || "",
-    // New fields from API spec
     experience: "",
     totalRelevantExperience: "",
     noticePeriod: "",
@@ -92,46 +89,14 @@ export default function CreateCandidateForm({
     skills: [] as string[],
     cv: null as File | null,
   });
+
+  const [currentTab, setCurrentTab] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [skillInput, setSkillInput] = useState("");
+  const [dobOpen, setDobOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { mutateAsync: createCandidateMutation } = useCreateCandidate();
-  const [dobOpen, setDobOpen] = useState(false);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Reset form when tempCandidateData changes
-  React.useEffect(() => {
-    if (tempCandidateData) {
-      setForm({
-        name: tempCandidateData.name || "",
-        phone: tempCandidateData.phone || "",
-        email: tempCandidateData.email || "",
-        location: tempCandidateData.location || "",
-        description: tempCandidateData.description || "",
-        gender: tempCandidateData.gender || "",
-        dateOfBirth: tempCandidateData.dateOfBirth ? new Date(tempCandidateData.dateOfBirth) : null,
-        country: tempCandidateData.country || "",
-        nationality: tempCandidateData.nationality || "",
-        educationDegree: tempCandidateData.educationDegree || "",
-        willingToRelocate: tempCandidateData.willingToRelocate || "",
-        linkedin: tempCandidateData.linkedin || "",
-        continent: tempCandidateData.continent || "",
-        experience: "",
-        totalRelevantExperience: "",
-        noticePeriod: "",
-        currentJobTitle: "",
-        previousCompanyName: "",
-        currentSalary: "",
-        currentSalaryCurrency: "INR",
-        expectedSalary: "",
-        expectedSalaryCurrency: "INR",
-        universityName: "",
-        skills: [],
-        cv: null,
-      });
-    }
-  }, [tempCandidateData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -159,628 +124,410 @@ export default function CreateCandidateForm({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file type
-      const allowedTypes = [
-        'application/pdf', 
-        'application/msword', 
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'image/png',
-        'image/jpeg',
-        'image/jpg',
-        'text/plain'
-      ];
-      
-      const fileExtension = file.name.split('.').pop()?.toLowerCase();
-      const allowedExtensions = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'txt'];
-
-      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension || "")) {
-        alert('Please select a valid file type (PDF, DOC, DOCX, PNG, JPG, JPEG, TXT)');
-        return;
-      }
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
-        return;
-      }
       setForm((prev) => ({ ...prev, cv: file }));
     }
   };
 
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
+  const validateCurrentStep = () => {
+    if (currentTab === 0) {
+      if (!form.name || !form.email || !form.phone) {
+        toast.error("Please fill in required fields (Name, Email, Phone)");
+        return false;
+      }
+    }
+    return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleNext = () => {
+    if (validateCurrentStep()) {
+      setCurrentTab(prev => Math.min(prev + 1, TABS.length - 1));
+    }
+  };
+
+  const handlePrevious = () => setCurrentTab(prev => Math.max(prev - 1, 0));
+
+  const handleSubmit = async () => {
+    if (!form.cv && !isTempCandidateConversion) {
+      toast.error("Resume upload is required");
+      return;
+    }
+
     setIsSubmitting(true);
-
     try {
-      if (!form.name) {
-        alert("Please enter candidate name");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!form.phone || !form.email) {
-        alert("Please fill in all required fields (Phone, Email)");
-        setIsSubmitting(false);
-        return;
-      }
-
       if (isTempCandidateConversion) {
-        // Handle temp candidate conversion
-        if (!pipelineId || !tempCandidateId) {
-          alert("Missing pipeline or temp candidate information");
-          setIsSubmitting(false);
-          return;
-        }
-
         const candidateData: ConvertTempCandidateRequest = {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          location: form.location,
-          description: form.description,
-          gender: form.gender,
-          dateOfBirth: form.dateOfBirth ? form.dateOfBirth.toISOString() : undefined,
-          country: form.country,
-          nationality: form.nationality,
-          educationDegree: form.educationDegree,
-          willingToRelocate: form.willingToRelocate,
-          linkedin: form.linkedin,
-          continent: form.continent,
+          ...form,
+          dateOfBirth: form.dateOfBirth?.toISOString(),
         };
-
-        const result = await convertTempCandidateToReal(pipelineId, tempCandidateId, candidateData);
-
+        const result = await convertTempCandidateToReal(pipelineId!, tempCandidateId!, candidateData);
         if (result.success) {
-          // Show success toast message
-          toast.success("Temp candidate converted to real candidate successfully!");
-
-          // Call the callback with the converted candidate
-          if (onCandidateCreated) {
-            onCandidateCreated(result.data);
-          }
-
-          // Close the modal
+          toast.success("Candidate converted successfully!");
+          onCandidateCreated?.(result.data);
           onClose();
-        } else {
-          throw new Error(result.error || result.message);
         }
       } else {
-        // Handle regular candidate creation
         const formData = new FormData();
-        // Add all form fields to FormData
         Object.keys(form).forEach(key => {
           if (key === 'cv' && form.cv) {
             formData.append('resume', form.cv);
           } else if (key === 'dateOfBirth' && form.dateOfBirth) {
             formData.append('dateOfBirth', form.dateOfBirth.toISOString());
-          } else if (key === 'skills' && form.skills.length > 0) {
-            // Append each skill or the whole array as JSON if needed
-            // Based on common practice, we append each one
-            form.skills.forEach(skill => formData.append('skills[]', skill));
-          } else if (key !== 'cv' && key !== 'dateOfBirth' && key !== 'skills') {
-            const value = (form as any)[key];
-            if (value !== null && value !== undefined && value !== "") {
-              formData.append(key, value);
-            }
+          } else if (key === 'skills') {
+            form.skills.forEach(s => formData.append('skills[]', s));
+          } else {
+            const val = (form as any)[key];
+            if (val) formData.append(key, val);
           }
         });
 
-        // Send data to backend
-        const createdCandidate = isHeadhunterCreate
+        const created = isHeadhunterCreate 
           ? await headhunterCandidatesService.createCandidate(formData)
           : await createCandidateMutation(formData);
 
-        // Call the callback with the created candidate
-        if (onCandidateCreated) {
-          onCandidateCreated(createdCandidate);
-        }
-
-        // Close the modal
+        toast.success("Candidate profile created!");
+        onCandidateCreated?.(created);
         onClose();
-
-        if (!isHeadhunterCreate) {
-          const candidateId = createdCandidate._id;
-          router.push(`/candidates/${candidateId}`);
-        }
+        if (!isHeadhunterCreate) router.push(`/candidates/${created._id}`);
       }
-
     } catch (error: any) {
-      console.error('Error creating/converting candidate:', error);
-
-      // Show error toast message
-      if (error.message) {
-        toast.error(`Failed to ${isTempCandidateConversion ? 'convert' : 'create'} candidate: ${error.message}`);
-      } else {
-        toast.error(`Failed to ${isTempCandidateConversion ? 'convert' : 'create'} candidate. Please try again.`);
-      }
+      toast.error(error.message || "Action failed");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Reset form state when canceling
-  const handleCancel = () => {
-    // Reset form to initial state
-    setForm({
-      name: "",
-      phone: "",
-      email: "",
-      location: "",
-      description: "",
-      gender: "",
-      dateOfBirth: null,
-      country: "",
-      nationality: "",
-      educationDegree: "",
-      willingToRelocate: "",
-      linkedin: "",
-      continent: "",
-      experience: "",
-      totalRelevantExperience: "",
-      noticePeriod: "",
-      currentJobTitle: "",
-      previousCompanyName: "",
-      currentSalary: "",
-      currentSalaryCurrency: "INR",
-      expectedSalary: "",
-      expectedSalaryCurrency: "INR",
-      universityName: "",
-      skills: [],
-      cv: null,
-    });
-
-    // Reset advanced options to hidden
-    setShowAdvanced(false);
-
-    // Reset date picker state
-    setDobOpen(false);
-
-    // Clear file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-
-    // Call the original goBack function
-    goBack();
-  };
-
-  const yesterday = subDays(new Date(), 1);
-
   return (
-    <>
-      <form onSubmit={handleSubmit} id="candidate-form" className="overflow-y-auto flex flex-col flex-1 min-h-0 p-2">
-        <p className="text-gray-500 text-sm mb-4">Creating candidates will allow you to fill in their details, upload resumes to their profiles, add them to jobs and much more.</p>
-        <div className="flex-1 min-h-0 flex flex-col gap-4 pr-1">
-
-          {/* Candidate Name - Required */}
-          <div className="space-y-2">
-            <Label htmlFor="name">Candidate Name<span className="text-red-500">*</span></Label>
-            <div className="relative">
-              <Input
-                id="name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                maxLength={255}
-                placeholder="Enter full name"
-                className="pr-16"
-              />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none bg-white px-0 py-1">
-                {form.name.length} / 255
-              </span>
+    <div className="flex h-full lg:h-[620px] min-h-[500px]">
+      {/* Sidebar - Step Indicator */}
+      <div className="hidden md:flex flex-col w-52 bg-slate-50 border-r border-slate-200 p-8 shrink-0">
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <User className="w-5 h-5 text-primary" />
             </div>
+            <span className="font-bold text-slate-800 text-lg tracking-tight">CliqHire</span>
           </div>
-
-          {/* Phone Number - Required */}
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number<span className="text-red-500">*</span></Label>
-            <PhoneInput
-              country={"sa"}
-              value={form.phone || ""}
-              onChange={(value) => setForm(prev => ({ ...prev, phone: value || "" }))}
-              inputClass="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full"
-              enableSearch={true}
-              preferredCountries={["sa", "us", "gb", "in"]}
-              countryCodeEditable={false}
-              autoFormat={true}
-              inputProps={{ id: "phone", name: "phone", placeholder: "Enter phone number", required: true }}
-            />
-          </div>
-
-          {/* Email - Required */}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email<span className="text-red-500">*</span></Label>
-            <div className="relative">
-              <Input
-                id="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="Enter email address"
-                maxLength={255}
-                className="pr-16"
-                required
-              />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none bg-white px-0 py-1">
-                {form.email.length} / 255
-              </span>
-            </div>
-          </div>
-
-          {/* LinkedIn Profile - Optional */}
-          <div className="space-y-2">
-            <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
-            <Input
-              id="linkedin"
-              name="linkedin"
-              value={form.linkedin}
-              onChange={handleChange}
-              placeholder="Enter LinkedIn profile URL"
-              maxLength={255}
-            />
-          </div>
-
-          {showAdvanced && (
-            <>
-              {/* Experience Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="experience">Total Experience</Label>
-                  <Input
-                    id="experience"
-                    name="experience"
-                    value={form.experience}
-                    onChange={handleChange}
-                    placeholder="e.g. 5 years"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="totalRelevantExperience">Relevant Experience</Label>
-                  <Input
-                    id="totalRelevantExperience"
-                    name="totalRelevantExperience"
-                    value={form.totalRelevantExperience}
-                    onChange={handleChange}
-                    placeholder="e.g. 3 years"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentJobTitle">Current Job Title</Label>
-                  <Input
-                    id="currentJobTitle"
-                    name="currentJobTitle"
-                    value={form.currentJobTitle}
-                    onChange={handleChange}
-                    placeholder="e.g. Senior Developer"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="previousCompanyName">Previous Company</Label>
-                  <Input
-                    id="previousCompanyName"
-                    name="previousCompanyName"
-                    value={form.previousCompanyName}
-                    onChange={handleChange}
-                    placeholder="e.g. TechCorp"
-                  />
-                </div>
-              </div>
-
-              {/* Salary Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentSalary">Current Salary</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="currentSalary"
-                      name="currentSalary"
-                      type="number"
-                      value={form.currentSalary}
-                      onChange={handleChange}
-                      placeholder="Amount"
-                    />
-                    <Select value={form.currentSalaryCurrency} onValueChange={(v) => handleSelectChange('currentSalaryCurrency', v)}>
-                      <SelectTrigger className="w-24">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="INR">INR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="SAR">SAR</SelectItem>
-                        <SelectItem value="AED">AED</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expectedSalary">Expected Salary</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="expectedSalary"
-                      name="expectedSalary"
-                      type="number"
-                      value={form.expectedSalary}
-                      onChange={handleChange}
-                      placeholder="Amount"
-                    />
-                    <Select value={form.expectedSalaryCurrency} onValueChange={(v) => handleSelectChange('expectedSalaryCurrency', v)}>
-                      <SelectTrigger className="w-24">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="INR">INR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="SAR">SAR</SelectItem>
-                        <SelectItem value="AED">AED</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="noticePeriod">Notice Period</Label>
-                  <Input
-                    id="noticePeriod"
-                    name="noticePeriod"
-                    value={form.noticePeriod}
-                    onChange={handleChange}
-                    placeholder="e.g. 30 days"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="universityName">University Name</Label>
-                  <Input
-                    id="universityName"
-                    name="universityName"
-                    value={form.universityName}
-                    onChange={handleChange}
-                    placeholder="e.g. Delhi University"
-                  />
-                </div>
-              </div>
-
-              {/* Skills Tag Input */}
-              <div className="space-y-2">
-                <Label htmlFor="skills">Skills (Press Enter to add)</Label>
-                <Input
-                  id="skills"
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyDown={handleAddSkill}
-                  placeholder="Type a skill and press Enter"
-                />
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {form.skills.map((skill) => (
-                    <div
-                      key={skill}
-                      className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs border border-blue-200"
-                    >
-                      {skill}
-                      <button
-                        type="button"
-                        onClick={() => removeSkill(skill)}
-                        className="hover:text-blue-900 font-bold"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Gender */}
-              <div className="space-y-2">
-                <Label htmlFor="gender">Gender</Label>
-                <Select onValueChange={(value) => handleSelectChange('gender', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Date of Birth */}
-              <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Popover open={dobOpen} onOpenChange={setDobOpen} modal={true}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                      onClick={() => setDobOpen(true)}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {form.dateOfBirth ? format(form.dateOfBirth, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      captionLayout="dropdown"
-                      selected={form.dateOfBirth ?? undefined}
-                      onSelect={(date) => {
-                        setForm((prev) => ({ ...prev, dateOfBirth: date ?? null }));
-                        setDobOpen(false);
-                      }}
-                      fromDate={new Date(1900, 0, 1)}
-                      toDate={yesterday}
-                      initialFocus
-                      disabled={[{ from: new Date(), to: undefined }]}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Country */}
-              <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <CountrySelect
-                  value={form.country}
-                  onChange={(val, nationality) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      country: val,
-                      ...(nationality ? { nationality } : {})
-                    }))
-                  }
-                  type="country"
-                  placeholder="Select country..."
-                />
-              </div>
-
-              {/* Nationality */}
-              <div className="space-y-2">
-                <Label htmlFor="nationality">Nationality</Label>
-                <CountrySelect
-                  value={form.nationality}
-                  onChange={(val) => setForm((prev) => ({ ...prev, nationality: val }))}
-                  type="nationality"
-                  placeholder="Select nationality..."
-                />
-                <div className="flex justify-between items-center">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    type="button"
-                    onClick={() => setForm(prev => ({ ...prev, nationality: "Open" }))}
-                    className={`text-xs h-8 px-2 border rounded-md ${form.nationality === "Open" ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : ""}`}
-                  >
-                    Set as &quot;Open&quot;
-                  </Button>
-                </div>
-              </div>
-
-              {/* Continent */}
-              <div className="space-y-2">
-                <Label htmlFor="continent">Continent</Label>
-                <CountrySelect
-                  value={form.continent}
-                  onChange={(val) => setForm((prev) => ({ ...prev, continent: val }))}
-                  type="continent"
-                  placeholder="Select continent..."
-                />
-              </div>
-
-              {/* Education Degree/Certificate */}
-              <div className="space-y-2">
-                <Label htmlFor="educationDegree">Education Degree/Certificate</Label>
-                <Input
-                  id="educationDegree"
-                  name="educationDegree"
-                  value={form.educationDegree || ""}
-                  onChange={handleChange}
-                  placeholder="e.g. Bachelor's in Computer Science"
-                  maxLength={255}
-                />
-              </div>
-
-              {/* Willing to Relocate */}
-              <div className="space-y-2">
-                <Label htmlFor="willingToRelocate">Are you willing to relocate?</Label>
-                <Select onValueChange={(value) => handleSelectChange('willingToRelocate', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="no">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Location - Optional */}
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  value={form.location}
-                  onChange={handleChange}
-                  placeholder="Enter location"
-                />
-              </div>
-
-              {/* Description - Optional */}
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (Headhunter Summary)</Label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  placeholder="Additional details about the candidate"
-                ></textarea>
-              </div>
-
-              {/* Upload CV */}
-              <div className="space-y-2">
-                <Label htmlFor="cv">Upload CV (Resume)<span className="text-red-500">*</span></Label>
-                <div
-                  className="relative border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                  onClick={handleFileClick}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    id="cv"
-                    name="cv"
-                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                  <div className="text-sm text-gray-600">
-                    {form.cv ? (
-                      <span className="text-green-600 font-medium">{form.cv.name}</span>
-                    ) : (
-                      <>
-                        <span className="font-medium text-gray-900">Click to upload</span>
-                        <br />
-                        <span className="text-gray-500">PDF, DOC, DOCX, TXT, JPG, PNG (max 5MB)</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          <button
-            type="button"
-            className="text-blue-600 text-sm font-medium flex items-center gap-1 focus:outline-none"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-          >
-            {showAdvanced ? "- Hide Advanced Options" : "+ Show Advanced Options"}
-          </button>
+          <p className="text-[10px] text-slate-400 font-black tracking-widest uppercase">Talent Acquisition</p>
         </div>
-      </form>
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button type="submit" form="candidate-form" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Continue"}
-        </Button>
-      </DialogFooter>
-    </>
+
+        <div className="space-y-8">
+          {TABS.map((tab, index) => (
+            <div key={tab} className="flex items-start gap-4">
+              <div className={`
+                w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
+                ${currentTab === index 
+                  ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110" 
+                  : (index < currentTab ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500")}
+              `}>
+                {index < currentTab ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
+              </div>
+              <div className="flex flex-col">
+                <span className={`text-sm font-bold ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
+                  {tab}
+                </span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Section {index + 1}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-auto bg-white/60 p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-start gap-2">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <p className="text-[11px] text-slate-500 leading-relaxed font-bold">
+              Profiles with detailed experience and skills get matched 3x faster.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col bg-white overflow-hidden">
+        <div className="p-8 pb-4">
+          <div className="flex justify-between items-center mb-1">
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              {currentTab === 0 ? "Identity Details" : currentTab === 1 ? "Professional Path" : currentTab === 2 ? "Candidate Background" : "Final Submission"}
+            </h2>
+            <span className="text-xs font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/20">
+              Step {currentTab + 1} of 4
+            </span>
+          </div>
+          <p className="text-slate-400 font-semibold text-sm">
+            {isTempCandidateConversion ? "Complete profile to finalize candidate onboarding." : "Onboard top talent to your specialized pipeline."}
+          </p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-4 min-h-0">
+          <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {currentTab === 0 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Full Name <span className="text-primary">*</span></Label>
+                    <div className="relative group">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                      <Input name="name" value={form.name} onChange={handleChange} placeholder="John Doe" className="pl-10 h-11 border-slate-200 focus:border-primary font-bold" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Email Address <span className="text-primary">*</span></Label>
+                    <div className="relative group">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                      <Input name="email" value={form.email} onChange={handleChange} placeholder="candidate@email.com" className="pl-10 h-11 border-slate-200 focus:border-primary font-bold" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Phone Number <span className="text-primary">*</span></Label>
+                  <PhoneInput
+                    country={"sa"}
+                    value={form.phone}
+                    onChange={v => handleSelectChange('phone', v)}
+                    inputClass="!flex !h-11 !w-full !rounded-lg !border-slate-200 !bg-white !px-3 !py-1 !text-base !font-bold !transition-all focus:!border-primary !shadow-sm"
+                    containerClass="!w-full"
+                    buttonClass="!border-slate-200 !rounded-l-lg !bg-slate-50"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">LinkedIn Profile</Label>
+                    <div className="relative group">
+                      <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                      <Input name="linkedin" value={form.linkedin} onChange={handleChange} placeholder="linkedin.com/in/..." className="pl-10 h-11 border-slate-200 font-bold" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Gender</Label>
+                    <Select value={form.gender} onValueChange={v => handleSelectChange('gender', v)}>
+                      <SelectTrigger className="h-11 border-slate-200 font-bold">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male" className="font-bold">Male</SelectItem>
+                        <SelectItem value="female" className="font-bold">Female</SelectItem>
+                        <SelectItem value="other" className="font-bold">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Date of Birth</Label>
+                  <Popover open={dobOpen} onOpenChange={setDobOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full h-11 justify-start text-left font-bold border-slate-200 px-4">
+                        <CalendarIcon className="mr-3 h-4 w-4 text-slate-300" />
+                        {form.dateOfBirth ? format(form.dateOfBirth, "PPP") : <span className="text-slate-400">Select Date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-[100]" align="start">
+                      <Calendar
+                        mode="single"
+                        captionLayout="dropdown"
+                        selected={form.dateOfBirth ?? undefined}
+                        onSelect={d => { setForm(p => ({...p, dateOfBirth: d ?? null})); setDobOpen(false); }}
+                        fromDate={new Date(1950, 0, 1)}
+                        toDate={subDays(new Date(), 1)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            )}
+
+            {currentTab === 1 && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Current Job Title</Label>
+                  <div className="relative group">
+                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                    <Input name="currentJobTitle" value={form.currentJobTitle} onChange={handleChange} placeholder="e.g. Senior Project Manager" className="pl-10 h-11 border-slate-200 font-bold" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Total Experience</Label>
+                    <Input name="experience" value={form.experience} onChange={handleChange} placeholder="e.g. 8 years" className="h-11 border-slate-200 font-bold" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Relevant Experience</Label>
+                    <Input name="totalRelevantExperience" value={form.totalRelevantExperience} onChange={handleChange} placeholder="e.g. 5 years" className="h-11 border-slate-200 font-bold" />
+                  </div>
+                </div>
+
+                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                   <Label className="text-[10px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-primary" /> Salary Expectation
+                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex gap-2">
+                      <Select value={form.expectedSalaryCurrency} onValueChange={v => handleSelectChange('expectedSalaryCurrency', v)}>
+                        <SelectTrigger className="w-20 h-11 border-slate-200 bg-white font-bold"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {["SAR", "INR", "USD", "AED", "GBP", "EUR"].map(c => <SelectItem key={c} value={c} className="font-bold">{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Input name="expectedSalary" type="number" value={form.expectedSalary} onChange={handleChange} placeholder="Expected Salary" className="h-11 border-slate-200 bg-white font-bold" />
+                    </div>
+                    <div className="flex gap-2">
+                       <Input name="noticePeriod" value={form.noticePeriod} onChange={handleChange} placeholder="Notice Period (e.g. 30 days)" className="h-11 border-slate-200 bg-white font-bold" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Key Skills <span className="text-[10px] text-slate-400 font-bold ml-2">Press Enter</span></Label>
+                  <div className="relative group">
+                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                    <Input value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={handleAddSkill} placeholder="Type skill and press Enter" className="pl-10 h-11 border-slate-200 font-bold focus:border-primary" />
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {form.skills.map(s => (
+                      <span key={s} className="px-3 py-1 bg-primary/5 text-primary text-xs font-black rounded-full border border-primary/20 flex items-center gap-2">
+                        {s} <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => removeSkill(s)} />
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentTab === 2 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="space-y-2 flex flex-col">
+                    <Label className="text-sm font-bold text-slate-700 mb-1">Current Country</Label>
+                    <CountrySelect value={form.country} onChange={v => handleSelectChange('country', v)} type="country" placeholder="Lives in..." />
+                  </div>
+                   <div className="space-y-2 flex flex-col">
+                    <Label className="text-sm font-bold text-slate-700 mb-1">Nationality</Label>
+                    <CountrySelect value={form.nationality} onChange={v => handleSelectChange('nationality', v)} type="nationality" placeholder="Passport from..." />
+                    <Button variant="ghost" size="sm" onClick={() => handleSelectChange('nationality', "Open")} className="text-[10px] font-black text-primary px-0 w-fit h-fit uppercase">Mark as Open</Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                   <Label className="text-sm font-bold text-slate-700">Education Background</Label>
+                   <div className="relative group">
+                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                    <Input name="educationDegree" value={form.educationDegree} onChange={handleChange} placeholder="e.g. Master's in Computer Science" className="pl-10 h-11 border-slate-200 font-bold" />
+                  </div>
+                  <Input name="universityName" value={form.universityName} onChange={handleChange} placeholder="University Name" className="h-11 border-slate-200 font-bold" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <div className="space-y-2 flex flex-col">
+                    <Label className="text-sm font-bold text-slate-700 mb-1">Continent</Label>
+                    <CountrySelect value={form.continent} onChange={v => handleSelectChange('continent', v)} type="continent" placeholder="Select..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Willing to Relocate?</Label>
+                    <Select value={form.willingToRelocate} onValueChange={v => handleSelectChange('willingToRelocate', v)}>
+                      <SelectTrigger className="h-11 border-slate-200 bg-white font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="yes" className="font-bold">Yes, Global</SelectItem>
+                        <SelectItem value="no" className="font-bold">No, Static</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Candidate Summary</Label>
+                  <div className="relative">
+                    <FileText className="absolute right-4 top-4 w-4 h-4 text-slate-100" />
+                    <textarea name="description" value={form.description} onChange={handleChange} rows={4} className="w-full p-4 border border-slate-200 rounded-xl font-medium text-sm focus:border-primary outline-none transition-all custom-scrollbar" placeholder="Briefly describe the candidate's main strengths..." />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentTab === 3 && (
+              <div className="space-y-8 h-full flex flex-col justify-center py-10">
+                <div className="text-center space-y-2 mb-8">
+                  <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <Upload className="w-10 h-10 text-primary animate-bounce" />
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Final Step: Attach Resume</h3>
+                  <p className="text-slate-400 font-semibold max-w-sm mx-auto">Upload the official CV to complete the professional profile.</p>
+                </div>
+
+                <div 
+                  onClick={() => fileInputRef.current?.click()} 
+                  className={cn(
+                    "border-4 border-dashed rounded-[32px] p-12 text-center transition-all cursor-pointer group relative overflow-hidden",
+                    form.cv ? "border-green-400 bg-green-50" : "border-slate-100 hover:border-primary hover:bg-primary/5 shadow-inner"
+                  )}
+                >
+                  <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" onChange={handleFileChange} />
+                  
+                  {form.cv ? (
+                    <div className="space-y-2">
+                       <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto" />
+                       <p className="text-lg font-black text-green-900 truncate px-4">{form.cv.name}</p>
+                       <p className="text-sm font-bold text-green-600">File uploaded successfully! Click to change.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex justify-center -space-x-2">
+                        <div className="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:-translate-y-1 transition-transform"><FileText className="w-5 h-5 text-slate-400" /></div>
+                        <div className="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm z-10 group-hover:-translate-y-2 transition-transform duration-300"><FileText className="w-5 h-5 text-primary" /></div>
+                        <div className="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:-translate-y-1 transition-transform"><FileText className="w-5 h-5 text-slate-400" /></div>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xl font-black text-slate-800">Drop resume here</p>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">or click to browse library</p>
+                      </div>
+                      <div className="bg-white px-4 py-2 rounded-full inline-block text-[10px] font-black text-slate-400 border border-slate-100 shadow-sm uppercase tracking-tighter">
+                        PDF, DOCX, TXT • Max 5MB
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-8 bg-slate-50 border-t flex flex-row items-center mt-auto shrink-0 transition-all">
+          <div className="flex justify-between w-full h-11 items-center">
+            <div className="flex gap-3">
+              <Button variant="ghost" onClick={isSubmitting ? undefined : goBack} className="text-slate-500 font-bold hover:bg-slate-100">
+                Cancel
+              </Button>
+              {currentTab > 0 && (
+                <Button variant="outline" onClick={handlePrevious} className="border-slate-200 font-bold bg-white px-5 shadow-sm">
+                  <ChevronLeft className="w-4 h-4 mr-2" /> Back
+                </Button>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              {currentTab === TABS.length - 1 ? (
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={isSubmitting}
+                  className="bg-primary hover:bg-primary/90 text-white px-10 font-black shadow-xl shadow-primary/30 h-11"
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                  {isSubmitting ? "Onboarding..." : "Finalize Profile"}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleNext} 
+                  className="bg-primary hover:bg-primary/90 text-white px-8 font-black shadow-xl shadow-primary/30 h-11"
+                >
+                  Continue <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
