@@ -36,16 +36,28 @@ export const CandidateDetailsDialog: React.FC<CandidateDetailsDialogProps> = ({
     const [resumeDialogOpen, setResumeDialogOpen] = React.useState(false);
     const [selectedResumeFile, setSelectedResumeFile] = React.useState<File | null>(null);
 
+const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
+    const [loadingJobs, setLoadingJobs] = React.useState(false);
+
     React.useEffect(() => {
         setLocalCandidate(candidate);
         setEditedValue("");
         setPendingField(null);
         setEditDialogOpen(false);
-    }, [candidate]);
+
+        if (candidate?.id && open) {
+            setLoadingJobs(true);
+            headhunterCandidatesService.getCandidateSubmissionJobs(candidate.id)
+                .then(jobs => setSubmissionJobs(jobs))
+                .finally(() => setLoadingJobs(false));
+        } else {
+            setSubmissionJobs([]);
+        }
+    }, [candidate, open]);
 
     if (!localCandidate) return null;
 
-    const DetailItem = ({ label, fieldKey, value, isLink = false, fullWidth = false }: { label: string; fieldKey: string; value: string | undefined; isLink?: boolean; fullWidth?: boolean }) => (
+    const DetailItem = ({ label, fieldKey, value, isLink = false, fullWidth = false }: { label: string; fieldKey: string; value: string | undefined | number; isLink?: boolean; fullWidth?: boolean }) => (
         <div className={`flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-gray-50/50 ${fullWidth ? 'col-span-2' : 'col-span-1'}`}>
             <div className="flex flex-col gap-1 overflow-hidden">
                 <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</span>
@@ -94,37 +106,71 @@ export const CandidateDetailsDialog: React.FC<CandidateDetailsDialogProps> = ({
     return (
         <>
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[700px] bg-white p-0 overflow-hidden gap-0 max-h-[85vh] flex flex-col">
+            <DialogContent className="sm:max-w-[750px] bg-white p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
                 <DialogHeader className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
-                    <DialogTitle className="text-lg font-semibold text-gray-900">Candidate Details</DialogTitle>
+                    <DialogTitle className="text-lg font-semibold text-gray-900">Candidate Details & Submissions</DialogTitle>
                 </DialogHeader>
 
-                <ScrollArea className="h-[60vh]">
-                    <div className="p-6 grid grid-cols-2 gap-4">
-                        <DetailItem label="Name" fieldKey="name" value={localCandidate.name} />
-                        <DetailItem label="Email" fieldKey="email" value={localCandidate.email} />
+                <ScrollArea className="flex-1 overflow-y-auto">
+                    <div className="p-6 space-y-6">
+                        <section>
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4 px-1">Basic Information</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <DetailItem label="Name" fieldKey="name" value={localCandidate.name} />
+                                <DetailItem label="Email" fieldKey="email" value={localCandidate.email} />
+                                <DetailItem label="Phone" fieldKey="phone" value={localCandidate.phone} />
+                                <DetailItem label="Status" fieldKey="status" value={localCandidate.status} />
+                            </div>
+                        </section>
 
-                        <DetailItem label="Phone" fieldKey="phone" value={localCandidate.phone} />
-                        <DetailItem label="Status" fieldKey="status" value={localCandidate.status} />
+                        <section>
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4 px-1">Professional Details</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <DetailItem label="Total Experience" fieldKey="experience" value={localCandidate.experience} />
+                                <DetailItem label="Current Job Title" fieldKey="currentJobTitle" value={(localCandidate as any).currentJobTitle} />
+                                <DetailItem label="Expected Salary" fieldKey="expectedSalary" value={localCandidate.expectedSalary ? `${localCandidate.expectedSalary} ${(localCandidate as any).expectedSalaryCurrency || ""}` : "N/A"} />
+                                <DetailItem label="Resume" fieldKey="resumeUrl" value={localCandidate.resumeUrl} isLink={true} />
+                                <DetailItem label="Skills" fieldKey="skills" value={formatArray((localCandidate as any).skills)} fullWidth />
+                            </div>
+                        </section>
 
-                        <DetailItem label="Location" fieldKey="location" value={localCandidate.location} />
-                        <DetailItem label="Gender" fieldKey="gender" value={localCandidate.gender} />
-
-                        <DetailItem label="Country" fieldKey="country" value={(localCandidate as any).country} />
-                        <DetailItem label="Nationality" fieldKey="nationality" value={(localCandidate as any).nationality} />
-
-                        <DetailItem label="Date of Birth" fieldKey="dateOfBirth" value={formatDate(localCandidate.dateOfBirth)} />
-                        <DetailItem label="Willing to Relocate" fieldKey="willingToRelocate" value={localCandidate.willingToRelocate} />
-
-                        <DetailItem label="Resume" fieldKey="resumeUrl" value={localCandidate.resumeUrl} isLink={true} />
-
-                        <DetailItem label="Soft Skills" fieldKey="softSkill" value={formatArray(localCandidate.softSkill)} fullWidth />
-                        <DetailItem label="Technical Skills" fieldKey="technicalSkill" value={formatArray(localCandidate.technicalSkill)} fullWidth />
-
-                        <DetailItem label="Description" fieldKey="description" value={localCandidate.description} fullWidth />
-
-
-
+                        <section>
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4 px-1">Submission History</h3>
+                            <div className="border rounded-lg overflow-hidden">
+                                {loadingJobs ? (
+                                    <div className="p-4 text-center text-sm text-gray-500 font-medium">Loading submissions...</div>
+                                ) : submissionJobs.length === 0 ? (
+                                    <div className="p-4 text-center text-sm text-gray-500 font-medium">No job submissions found</div>
+                                ) : (
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-gray-50 border-b">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left font-medium text-gray-500">Job Title</th>
+                                                <th className="px-4 py-2 text-left font-medium text-gray-500">Status</th>
+                                                <th className="px-4 py-2 text-left font-medium text-gray-500">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y">
+                                            {submissionJobs.map((sub, idx) => (
+                                                <tr key={idx}>
+                                                    <td className="px-4 py-2">{sub.jobTitle}</td>
+                                                    <td className="px-4 py-2">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                                            sub.submissionStatus === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
+                                                            sub.submissionStatus === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                                            'bg-amber-100 text-amber-700'
+                                                        }`}>
+                                                            {sub.submissionStatus}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-2 text-gray-500">{formatDate(sub.submittedAt)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                        </section>
                     </div>
                 </ScrollArea>
 

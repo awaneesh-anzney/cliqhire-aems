@@ -140,7 +140,7 @@ export function HeadhunterAddCandidateDialog({
     }
 
     try {
-      await headhunterCandidatesService.applyJobToCandidates(jobId, selectedCandidateIds);
+      await headhunterCandidatesService.submitToJob(jobId, selectedCandidateIds);
 
       const selectedCandidates = candidates.filter(candidate =>
         selectedCandidateIds.includes(candidate._id || "")

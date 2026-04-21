@@ -50,14 +50,33 @@ class HeadhunterCandidatesService {
     return Array.isArray(data) ? data : [];
   }
 
-  async applyJobToCandidates(jobId: string, candidates: string[] | string): Promise<any> {
-    const payload = Array.isArray(candidates)
-      ? { jobId, candidateIds: candidates }
-      : { jobId, candidateId: candidates };
-    const response = await api.post(`/api/headhunter-candidates/apply-job`, payload, {
+  async getCandidateSubmissionJobs(candidateId: string): Promise<any[]> {
+    const response = await api.get(`/api/headhunter-candidates/${candidateId}/jobs`);
+    const data = response.data?.data || response.data?.jobs || [];
+    return Array.isArray(data) ? data : [];
+  }
+
+  async submitToJob(jobId: string, candidateIds: string[] | string): Promise<any> {
+    const payload = Array.isArray(candidateIds)
+      ? { jobId, candidateIds }
+      : { jobId, candidateId: candidateIds };
+    const response = await api.post(`/api/headhunter-candidates/submit-to-job`, payload, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data?.data || response.data;
+  }
+
+  async getPendingApprovals(params: { jobId: string; status?: string; page?: number; limit?: number }): Promise<any> {
+    const response = await api.get(`/api/headhunter-candidates/pending-approval`, { params });
+    return response.data;
+  }
+
+  async updateSubmissionStatus(candidateId: string, jobId: string, status: "ACCEPTED" | "REJECTED", rejectionReason?: string): Promise<any> {
+    const response = await api.patch(`/api/headhunter-candidates/${candidateId}/jobs/${jobId}/status`, {
+      status,
+      rejectionReason
+    });
+    return response.data;
   }
 
   async getJobCandidates(jobId: string): Promise<any[]> {

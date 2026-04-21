@@ -4,20 +4,24 @@ import { HeadhunterPipeline } from "@/components/Headhunter-Pipeline/headhunter-
 import Dashboardheader from "@/components/dashboard-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateCandidateModal } from "@/components/candidates/create-candidate-modal";
-import { HeadhunterCandidatesTable } from "@/components/Headhunter-Pipeline/headhunter-candidates-table";
+import { HeadhunterCandidatesTable, type HeadhunterCandidate } from "@/components/Headhunter-Pipeline/headhunter-candidates-table";
 import { headhunterCandidatesService } from "@/services/headhunterCandidatesService";
 import { headhunterService } from "@/services/headhunterService";
 import { PDFViewer } from "@/components/ui/pdf-viewer";
 import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { SubmitToJobDialog } from "@/components/Headhunter-Pipeline/submit-to-job-dialog";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 import type { Job } from "@/components/Recruiter-Pipeline/dummy-data";
+import { Briefcase , Trash2 , RefreshCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const HeadhunterPage = () => {
   const [activeTab, setActiveTab] = useState("Candidates");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const { user } = useAuth();
   const userId = user?._id || (user as any)?.profile?._id || "";
 
@@ -31,13 +35,17 @@ const HeadhunterPage = () => {
   });
 
   const { data: rawCandidates, isLoading: candidatesLoading, isFetching: candidatesFetching, refetch: refetchCandidates } = useQuery({
-    queryKey: ["headhunterCandidates", userId],
-    queryFn: () => headhunterService.getHeadhunterCandidates(userId),
-    enabled: !!userId && canView,
+    queryKey: ["headhunterCandidates"],
+    queryFn: () => headhunterService.getHeadhunterCandidates(),
+    enabled: canView && !!user,
   });
 
   const candidates = useMemo(() => {
-    const list = Array.isArray(rawCandidates) ? rawCandidates : [];
+    // API v2 returns { status, data: [], totalCount... } or { data: { data: [] } }
+    const list = Array.isArray(rawCandidates) 
+      ? rawCandidates 
+      : (rawCandidates?.data || []);
+      
     return list.map((item: any) => ({
       id: item._id || item.id || "",
       name: item.name || "",
@@ -48,21 +56,22 @@ const HeadhunterPage = () => {
       location: item.location || "",
       gender: item.gender || "",
       dateOfBirth: item.dateOfBirth || undefined,
+      experience: item.experience || "",
+      currentJobTitle: item.currentJobTitle || "",
+      expectedSalary: item.expectedSalary || "",
+      expectedSalaryCurrency: item.expectedSalaryCurrency || "",
+      skills: Array.isArray(item.skills) ? item.skills : [],
+      submissionStatus: item.submissionStatus || "New",
       willingToRelocate: item.willingToRelocate || "",
       description: item.description || "",
-      softSkill: Array.isArray(item.softSkill) ? item.softSkill : [],
-      technicalSkill: Array.isArray(item.technicalSkill) ? item.technicalSkill : [],
       country: item.country || "",
       nationality: item.nationality || "",
       overallStatus: item.overallStatus || "",
       isTransferred: item.isTransferred ?? false,
       transferredToCandidateId: item.transferredToCandidateId || undefined,
-      transferredAt: item.transferredAt || undefined,
-      transferredViaAssignment: item.transferredViaAssignment || undefined,
       jobAssignments: Array.isArray(item.jobAssignments) ? item.jobAssignments : [],
       createdAt: item.createdAt || undefined,
       updatedAt: item.updatedAt || undefined,
-      stats: item.stats || undefined,
     }));
   }, [rawCandidates]);
 
@@ -99,7 +108,7 @@ const HeadhunterPage = () => {
       setSelectedRows(new Set());
     } else {
       const all = new Set<string>();
-      candidates.forEach(c => all.add(c.id));
+      candidates.forEach((c: HeadhunterCandidate) => all.add(c.id));
       setSelectedRows(all);
     }
   };
@@ -113,9 +122,9 @@ const HeadhunterPage = () => {
     const list = Array.isArray(dashboardData) ? dashboardData : (dashboardData?.jobs || []);
     
     return list.map((j: any) => {
-      // Use standard naming from recruiter mapping if possible
-      // Support both j.jobId as an ID or as an object
-      const jobId = j.jobId?._id || (typeof j.jobId === 'string' ? j.jobId : "") || j._id || "";
+      // Use j._id (MongoDB ID) for internal routing, j.jobId for display
+      const id = j._id || j.jobId?._id || "";
+      const displayId = typeof j.jobId === 'string' ? j.jobId : (j.jobId?.jobId || "");
       const jobTitle = j.jobTitle || j.title || (typeof j.jobId === 'object' ? j.jobId.jobTitle : "");
       
       // Team members might be in different formats
@@ -125,28 +134,31 @@ const HeadhunterPage = () => {
       
       const hiringManagerName = hm.fullName || [hm.firstName, hm.lastName].filter(Boolean).join(" ") || hm.name || "";
       const recruiterName = rc.fullName || [rc.firstName, rc.lastName].filter(Boolean).join(" ") || rc.name || "";
+      const clientName = j.client?.name || (typeof j.client === 'string' ? j.client : "") || (typeof j.jobId === 'object' ? j.jobId.client?.name : j.clientName || "N/A");
 
       return {
-        id: jobId,
+        id: id,
+        jobId: {
+          _id: id,
+          jobId: displayId,
+          jobTitle: jobTitle,
+          location: j.location || (typeof j.jobId === 'object' ? j.jobId.location : ""),
+          stage: j.stage || (typeof j.jobId === 'object' ? j.jobId.stage : "Open"),
+          jobType: j.jobType || (typeof j.jobId === 'object' ? j.jobId.jobType : ""),
+          jobTeamInfo: {
+            hiringManager: hiringManagerName ? { name: hiringManagerName } : undefined,
+            recruiter: recruiterName ? { name: recruiterName } : undefined,
+          },
+        },
         title: jobTitle,
-        clientName: j.client?.name || j.clientName || "",
+        clientName: clientName,
         location: j.location || (typeof j.jobId === 'object' ? j.jobId.location : ""),
         salaryRange: j.salaryRange ? `${j.salaryRange.min ?? ""} - ${j.salaryRange.max ?? ""} ${j.salaryRange.currency ?? ""}`.trim() : "",
         headcount: j.headcount || 1,
         jobType: (j.jobType || (typeof j.jobId === 'object' ? j.jobId.jobType : "") || "").replace(/-/g, " "),
         isExpanded: false,
         candidates: [],
-        jobId: {
-          _id: jobId,
-          jobTitle: jobTitle,
-          location: j.location,
-          stage: j.stage || (typeof j.jobId === 'object' ? j.jobId.stage : "Active"),
-          jobType: j.jobType,
-          jobTeamInfo: {
-            hiringManager: hiringManagerName ? { name: hiringManagerName } : undefined,
-            recruiter: recruiterName ? { name: recruiterName } : undefined,
-          },
-        },
+        totalCandidates: j.totalCandidates || 0,
       } as Job;
     });
   }, [dashboardData]);
@@ -191,6 +203,42 @@ const HeadhunterPage = () => {
             if (activeTab === "Candidates") refetchCandidates();
             else refetchDashboard();
           }}
+          rightContent={
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                disabled={selectedRows.size === 0}
+                onClick={() => setSubmitDialogOpen(true)}
+              >
+                <Briefcase className="h-4 w-4 mr-2" />
+                Submit to Job ({selectedRows.size})
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                disabled={selectedRows.size === 0}
+                onClick={handleDeleteSelected}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete ({selectedRows.size})
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (activeTab === "Candidates") refetchCandidates();
+                  else refetchDashboard();
+                }}
+                disabled={candidatesLoading || candidatesFetching || dashboardLoading || dashboardFetching}
+              >
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+          }
         />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full border-t">
           <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0">
@@ -229,6 +277,17 @@ const HeadhunterPage = () => {
           isHeadhunterCreate={true}
           onCandidateCreated={() => {
             setCreateModalOpen(false);
+            refetchCandidates();
+          }}
+        />
+
+        <SubmitToJobDialog
+          isOpen={submitDialogOpen}
+          onClose={() => setSubmitDialogOpen(false)}
+          candidateIds={Array.from(selectedRows)}
+          jobs={jobs}
+          onSuccess={() => {
+            setSelectedRows(new Set());
             refetchCandidates();
           }}
         />

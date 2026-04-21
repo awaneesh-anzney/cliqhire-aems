@@ -78,9 +78,22 @@ export default function CreateCandidateForm({
     willingToRelocate: tempCandidateData?.willingToRelocate || "",
     linkedin: tempCandidateData?.linkedin || "",
     continent: tempCandidateData?.continent || "",
+    // New fields from API spec
+    experience: "",
+    totalRelevantExperience: "",
+    noticePeriod: "",
+    currentJobTitle: "",
+    previousCompanyName: "",
+    currentSalary: "",
+    currentSalaryCurrency: "INR",
+    expectedSalary: "",
+    expectedSalaryCurrency: "INR",
+    universityName: "",
+    skills: [] as string[],
     cv: null as File | null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [skillInput, setSkillInput] = useState("");
   const router = useRouter();
   const { mutateAsync: createCandidateMutation } = useCreateCandidate();
   const [dobOpen, setDobOpen] = useState(false);
@@ -104,6 +117,17 @@ export default function CreateCandidateForm({
         willingToRelocate: tempCandidateData.willingToRelocate || "",
         linkedin: tempCandidateData.linkedin || "",
         continent: tempCandidateData.continent || "",
+        experience: "",
+        totalRelevantExperience: "",
+        noticePeriod: "",
+        currentJobTitle: "",
+        previousCompanyName: "",
+        currentSalary: "",
+        currentSalaryCurrency: "INR",
+        expectedSalary: "",
+        expectedSalaryCurrency: "INR",
+        universityName: "",
+        skills: [],
         cv: null,
       });
     }
@@ -116,6 +140,20 @@ export default function CreateCandidateForm({
 
   const handleSelectChange = (name: string, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddSkill = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && skillInput.trim()) {
+      e.preventDefault();
+      if (!form.skills.includes(skillInput.trim())) {
+        setForm(prev => ({ ...prev, skills: [...prev.skills, skillInput.trim()] }));
+      }
+      setSkillInput("");
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setForm(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,17 +249,22 @@ export default function CreateCandidateForm({
         }
       } else {
         // Handle regular candidate creation
-        // Create FormData for file upload
         const formData = new FormData();
-
         // Add all form fields to FormData
         Object.keys(form).forEach(key => {
           if (key === 'cv' && form.cv) {
             formData.append('resume', form.cv);
           } else if (key === 'dateOfBirth' && form.dateOfBirth) {
             formData.append('dateOfBirth', form.dateOfBirth.toISOString());
-          } else if (key !== 'cv' && key !== 'dateOfBirth') {
-            formData.append(key, (form as any)[key]);
+          } else if (key === 'skills' && form.skills.length > 0) {
+            // Append each skill or the whole array as JSON if needed
+            // Based on common practice, we append each one
+            form.skills.forEach(skill => formData.append('skills[]', skill));
+          } else if (key !== 'cv' && key !== 'dateOfBirth' && key !== 'skills') {
+            const value = (form as any)[key];
+            if (value !== null && value !== undefined && value !== "") {
+              formData.append(key, value);
+            }
           }
         });
 
@@ -275,6 +318,17 @@ export default function CreateCandidateForm({
       willingToRelocate: "",
       linkedin: "",
       continent: "",
+      experience: "",
+      totalRelevantExperience: "",
+      noticePeriod: "",
+      currentJobTitle: "",
+      previousCompanyName: "",
+      currentSalary: "",
+      currentSalaryCurrency: "INR",
+      expectedSalary: "",
+      expectedSalaryCurrency: "INR",
+      universityName: "",
+      skills: [],
       cv: null,
     });
 
@@ -372,6 +426,161 @@ export default function CreateCandidateForm({
 
           {showAdvanced && (
             <>
+              {/* Experience Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="experience">Total Experience</Label>
+                  <Input
+                    id="experience"
+                    name="experience"
+                    value={form.experience}
+                    onChange={handleChange}
+                    placeholder="e.g. 5 years"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="totalRelevantExperience">Relevant Experience</Label>
+                  <Input
+                    id="totalRelevantExperience"
+                    name="totalRelevantExperience"
+                    value={form.totalRelevantExperience}
+                    onChange={handleChange}
+                    placeholder="e.g. 3 years"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentJobTitle">Current Job Title</Label>
+                  <Input
+                    id="currentJobTitle"
+                    name="currentJobTitle"
+                    value={form.currentJobTitle}
+                    onChange={handleChange}
+                    placeholder="e.g. Senior Developer"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="previousCompanyName">Previous Company</Label>
+                  <Input
+                    id="previousCompanyName"
+                    name="previousCompanyName"
+                    value={form.previousCompanyName}
+                    onChange={handleChange}
+                    placeholder="e.g. TechCorp"
+                  />
+                </div>
+              </div>
+
+              {/* Salary Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentSalary">Current Salary</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="currentSalary"
+                      name="currentSalary"
+                      type="number"
+                      value={form.currentSalary}
+                      onChange={handleChange}
+                      placeholder="Amount"
+                    />
+                    <Select value={form.currentSalaryCurrency} onValueChange={(v) => handleSelectChange('currentSalaryCurrency', v)}>
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INR">INR</SelectItem>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="SAR">SAR</SelectItem>
+                        <SelectItem value="AED">AED</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expectedSalary">Expected Salary</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="expectedSalary"
+                      name="expectedSalary"
+                      type="number"
+                      value={form.expectedSalary}
+                      onChange={handleChange}
+                      placeholder="Amount"
+                    />
+                    <Select value={form.expectedSalaryCurrency} onValueChange={(v) => handleSelectChange('expectedSalaryCurrency', v)}>
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INR">INR</SelectItem>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="SAR">SAR</SelectItem>
+                        <SelectItem value="AED">AED</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="noticePeriod">Notice Period</Label>
+                  <Input
+                    id="noticePeriod"
+                    name="noticePeriod"
+                    value={form.noticePeriod}
+                    onChange={handleChange}
+                    placeholder="e.g. 30 days"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="universityName">University Name</Label>
+                  <Input
+                    id="universityName"
+                    name="universityName"
+                    value={form.universityName}
+                    onChange={handleChange}
+                    placeholder="e.g. Delhi University"
+                  />
+                </div>
+              </div>
+
+              {/* Skills Tag Input */}
+              <div className="space-y-2">
+                <Label htmlFor="skills">Skills (Press Enter to add)</Label>
+                <Input
+                  id="skills"
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyDown={handleAddSkill}
+                  placeholder="Type a skill and press Enter"
+                />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {form.skills.map((skill) => (
+                    <div
+                      key={skill}
+                      className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs border border-blue-200"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => removeSkill(skill)}
+                        className="hover:text-blue-900 font-bold"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Gender */}
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender</Label>
@@ -451,7 +660,7 @@ export default function CreateCandidateForm({
                     size="sm" 
                     type="button"
                     onClick={() => setForm(prev => ({ ...prev, nationality: "Open" }))}
-                    className={`text-xs h-8 px-2 ${form.nationality === "Open" ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : ""}`}
+                    className={`text-xs h-8 px-2 border rounded-md ${form.nationality === "Open" ? "bg-blue-50 border-blue-200 text-blue-700 font-medium" : ""}`}
                   >
                     Set as &quot;Open&quot;
                   </Button>
@@ -510,7 +719,7 @@ export default function CreateCandidateForm({
 
               {/* Description - Optional */}
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Description (Headhunter Summary)</Label>
                 <textarea
                   id="description"
                   name="description"
@@ -524,7 +733,7 @@ export default function CreateCandidateForm({
 
               {/* Upload CV */}
               <div className="space-y-2">
-                <Label htmlFor="cv">Upload CV</Label>
+                <Label htmlFor="cv">Upload CV (Resume)<span className="text-red-500">*</span></Label>
                 <div
                   className="relative border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
                   onClick={handleFileClick}

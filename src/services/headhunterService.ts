@@ -61,9 +61,13 @@ class HeadhunterService {
    * GET /api/headhunters/:userId/candidates
    * All HeadhunterCandidates submitted, filter by jobId/status
    */
-  async getHeadhunterCandidates(userId: string, params?: { jobId?: string; status?: string }): Promise<any[]> {
-    const res = await api.get(`/api/headhunters/${userId}/candidates`, { params });
-    return res.data?.data || [];
+  /**
+   * GET /api/headhunter-candidates
+   * All HeadhunterCandidates created by the logged-in user
+   */
+  async getHeadhunterCandidates(params?: { jobId?: string; status?: string; page?: number; limit?: number; search?: string }): Promise<any> {
+    const res = await api.get(`/api/headhunter-candidates`, { params });
+    return res.data;
   }
 
   /**

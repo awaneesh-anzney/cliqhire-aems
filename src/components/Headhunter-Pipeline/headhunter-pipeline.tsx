@@ -92,7 +92,8 @@ export const HeadhunterPipeline: React.FC<{ jobs?: Job[] }> = ({ jobs: incomingJ
     if (willExpand && userId) {
       setLoadingJobId(jobId);
       try {
-        const raw = await headhunterService.getHeadhunterCandidates(userId, { jobId });
+        const res = await headhunterService.getHeadhunterCandidates({ jobId });
+        const raw = res?.data || [];
         const mapped: Candidate[] = (Array.isArray(raw) ? raw : []).map((hh: any, idx: number) => ({
           id: hh.candidateId || hh._id || hh.id || hh.email || `${hh.name || ""}-${hh.phone || idx}`,
           name: hh.name || "",
@@ -133,7 +134,8 @@ export const HeadhunterPipeline: React.FC<{ jobs?: Job[] }> = ({ jobs: incomingJ
     if (!userId) return;
     setLoadingJobId(jobId);
     try {
-      const raw = await headhunterService.getHeadhunterCandidates(userId, { jobId });
+      const res = await headhunterService.getHeadhunterCandidates({ jobId });
+      const raw = res?.data || [];
       const mapped: Candidate[] = (Array.isArray(raw) ? raw : []).map((hh: any, idx: number) => ({
         id: hh.candidateId || hh._id || hh.id || hh.email || `${hh.name || ""}-${hh.phone || idx}`,
         name: hh.name || "",
