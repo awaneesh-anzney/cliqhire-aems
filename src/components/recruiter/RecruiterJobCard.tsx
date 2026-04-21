@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import type { RecruiterJob, RecruiterCandidate } from "./types"
 import { StatusBadge, type StatusOption } from "@/components/common/StatusBadge"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "../ui/button"
 import { EllipsisVertical, Eye, FileText } from 'lucide-react';
 import {
@@ -15,8 +15,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CandidateDetailsDialog } from "./CandidateDetailsDialog"
-import { updateCandidateStatusForJob } from "@/services/recruiterService"
+import { recruiterService } from "@/services/recruiterService"
+import { RecruiterPipelineService } from "@/services/recruiterPipelineService"
 import { toast } from "sonner"
+import { useQuery } from "@tanstack/react-query"
 
 type RecruiterJobCardProps = {
   job: RecruiterJob
@@ -29,6 +31,27 @@ export function RecruiterJobCard({ job, loadingJobId, onToggleExpansion }: Recru
   const [candidateStatuses, setCandidateStatuses] = useState<Record<string, StatusOption>>({})
   const [selectedCandidate, setSelectedCandidate] = useState<RecruiterCandidate | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+
+  const { data: pipelineData, isLoading: pipelineLoading } = useQuery({
+    queryKey: ["pipeline-candidates", job.pipelineId],
+    queryFn: () => RecruiterPipelineService.getPipelineEntry(job.pipelineId!),
+    enabled: !!job.pipelineId && job.isExpanded,
+  })
+
+  const candidates = useMemo(() => {
+    const rawCandidates = pipelineData?.data?.candidates || []
+    return rawCandidates.map((pc: any) => ({
+      id: pc.candidateId?._id || pc._id,
+      apiId: pc.candidateId?._id,
+      name: `${pc.candidateId?.firstName || ""} ${pc.candidateId?.lastName || ""}`.trim(),
+      email: pc.candidateId?.email,
+      phone: pc.candidateId?.phone,
+      status: pc.currentStatus || "Pending",
+      currentStage: pc.currentStage,
+      location: pc.candidateId?.location || "",
+      // Add other fields as needed
+    } as RecruiterCandidate))
+  }, [pipelineData])
 
   return (
     <Card className="p-4">
@@ -71,13 +94,17 @@ export function RecruiterJobCard({ job, loadingJobId, onToggleExpansion }: Recru
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+          {(isLoading || (job.isExpanded && pipelineLoading)) && <Loader2 className="h-4 w-4 animate-spin" />}
         </div>
       </button>
 
       {job.isExpanded && (
         <CardContent className="pt-4">
-          {job.candidates.length === 0 ? (
+          {pipelineLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : candidates.length === 0 ? (
             <div className="py-4 text-sm text-muted-foreground">No candidates added</div>
           ) : (
             <div className="rounded-md border">
@@ -94,7 +121,7 @@ export function RecruiterJobCard({ job, loadingJobId, onToggleExpansion }: Recru
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {job.candidates.map((c) => (
+                  {candidates.map((c: RecruiterCandidate) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.name}</TableCell>
                       <TableCell>{c.currentJobTitle || ""}</TableCell>
@@ -114,7 +141,7 @@ export function RecruiterJobCard({ job, loadingJobId, onToggleExpansion }: Recru
                                 toast.error("Missing candidate id for update")
                                 return;
                               }
-                              await updateCandidateStatusForJob(candidateApiId, job.id, payload)
+                              await recruiterService.updateCandidateStatusForJob(candidateApiId, job.id, payload)
                               toast.success("Status updated")
                             } catch (e) {
                               toast.error("Failed to update status")

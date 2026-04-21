@@ -26,8 +26,16 @@ export default function RecruiterPage() {
   const jobs = useMemo(() => {
     const list = dashboardData?.jobs || []
     return list.map((j: any) => ({
-      ...j,
-      isExpanded: expandedJobIds.has(j.id || j._id)
+      id: j._id,
+      title: j.jobTitle,
+      clientName: j.client?.name || "",
+      location: j.location,
+      jobType: j.jobType,
+      totalCandidates: j.pipeline?.totalCandidates || 0,
+      pipelineId: j.pipeline?.pipelineId,
+      jobId: { stage: j.stage || "" },
+      isExpanded: expandedJobIds.has(j._id),
+      candidates: [] // Candidates will be fetched or managed separately
     })) as RecruiterJob[]
   }, [dashboardData, expandedJobIds])
 

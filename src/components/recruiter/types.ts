@@ -26,4 +26,5 @@ export type RecruiterJob = {
   candidates: RecruiterCandidate[]
   jobId: { stage: string }
   totalCandidates: number
+  pipelineId?: string
 }

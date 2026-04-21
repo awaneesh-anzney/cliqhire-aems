@@ -19,10 +19,16 @@ const HeadhunterPage = () => {
   const [activeTab, setActiveTab] = useState("Candidates");
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const { user } = useAuth();
-  const userId = (user as any)?.profile?._id || user?._id || "";
+  const userId = user?._id || (user as any)?.profile?._id || "";
 
   const { hasPermission, loading: permissionsLoading } = usePermissions();
   const canView = hasPermission("Headhunter", "view");
+
+  const { data: dashboardData, isLoading: dashboardLoading, isFetching: dashboardFetching, refetch: refetchDashboard } = useQuery({
+    queryKey: ["headhunterDashboard"],
+    queryFn: () => headhunterService.getMyDashboard(),
+    enabled: canView && !!user,
+  });
 
   const { data: rawCandidates, isLoading: candidatesLoading, isFetching: candidatesFetching, refetch: refetchCandidates } = useQuery({
     queryKey: ["headhunterCandidates", userId],
@@ -102,44 +108,48 @@ const HeadhunterPage = () => {
     setShowDeleteDialog(true);
   };
 
-  const { data: jobsRaw, isLoading: jobsLoading, isFetching: jobsFetching, refetch: refetchJobs } = useQuery({
-    queryKey: ["headhunterJobs", userId],
-    queryFn: () => headhunterService.getHeadhunterJobs(userId),
-    enabled: !!userId && canView && activeTab === "Jobs",
-  });
-
   const jobs: Job[] = useMemo(() => {
-    const list = Array.isArray(jobsRaw) ? jobsRaw : [];
+    // Handle case where dashboardData might be the array itself or contain the array
+    const list = Array.isArray(dashboardData) ? dashboardData : (dashboardData?.jobs || []);
+    
     return list.map((j: any) => {
-      const hm = j?.jobTeamMembers?.hiringManager || {};
-      const rc = j?.jobTeamMembers?.recruiter || {};
-      const hiringManagerName = hm.fullName || [hm.firstName, hm.lastName].filter(Boolean).join(" ");
-      const recruiterName = rc.fullName || [rc.firstName, rc.lastName].filter(Boolean).join(" ");
+      // Use standard naming from recruiter mapping if possible
+      // Support both j.jobId as an ID or as an object
+      const jobId = j.jobId?._id || (typeof j.jobId === 'string' ? j.jobId : "") || j._id || "";
+      const jobTitle = j.jobTitle || j.title || (typeof j.jobId === 'object' ? j.jobId.jobTitle : "");
+      
+      // Team members might be in different formats
+      const teamMembers = Array.isArray(j.jobTeamMembers) ? j.jobTeamMembers : [];
+      const hm = teamMembers.find((m: any) => m.position === "hiringManager") || j.jobTeamMembers?.hiringManager || {};
+      const rc = teamMembers.find((m: any) => m.position === "recruiter") || j.jobTeamMembers?.recruiter || {};
+      
+      const hiringManagerName = hm.fullName || [hm.firstName, hm.lastName].filter(Boolean).join(" ") || hm.name || "";
+      const recruiterName = rc.fullName || [rc.firstName, rc.lastName].filter(Boolean).join(" ") || rc.name || "";
 
       return {
-        id: j.jobId || j._id || "",
-        title: j.jobTitle || "",
-        clientName: j.clientName || "",
-        location: j.location || "",
+        id: jobId,
+        title: jobTitle,
+        clientName: j.client?.name || j.clientName || "",
+        location: j.location || (typeof j.jobId === 'object' ? j.jobId.location : ""),
         salaryRange: j.salaryRange ? `${j.salaryRange.min ?? ""} - ${j.salaryRange.max ?? ""} ${j.salaryRange.currency ?? ""}`.trim() : "",
-        headcount: 1,
-        jobType: (j.jobType || "").replace(/-/g, " "),
+        headcount: j.headcount || 1,
+        jobType: (j.jobType || (typeof j.jobId === 'object' ? j.jobId.jobType : "") || "").replace(/-/g, " "),
         isExpanded: false,
         candidates: [],
         jobId: {
-          _id: j.jobId || j._id,
-          jobTitle: j.jobTitle,
+          _id: jobId,
+          jobTitle: jobTitle,
           location: j.location,
-          stage: "Active",
+          stage: j.stage || (typeof j.jobId === 'object' ? j.jobId.stage : "Active"),
           jobType: j.jobType,
           jobTeamInfo: {
-            hiringManager: hm?._id || hiringManagerName ? { _id: hm._id, name: hiringManagerName, email: hm.email } : undefined,
-            recruiter: rc?._id || recruiterName ? { _id: rc._id, name: recruiterName, email: rc.email } : undefined,
+            hiringManager: hiringManagerName ? { name: hiringManagerName } : undefined,
+            recruiter: recruiterName ? { name: recruiterName } : undefined,
           },
         },
       } as Job;
     });
-  }, [jobsRaw]);
+  }, [dashboardData]);
 
   const confirmDeleteSelected = async () => {
     if (selectedRows.size === 0) return;
@@ -171,7 +181,7 @@ const HeadhunterPage = () => {
         <Dashboardheader
           setOpen={setCreateModalOpen}
           setFilterOpen={() => {}}
-          initialLoading={candidatesLoading || candidatesFetching || jobsLoading || jobsFetching}
+          initialLoading={candidatesLoading || candidatesFetching || dashboardLoading || dashboardFetching}
           heading="Headhunter Dashboard"
           buttonText="Create Candidate"
           showCreateButton={true}
@@ -179,7 +189,7 @@ const HeadhunterPage = () => {
           onDelete={handleDeleteSelected}
           onRefresh={() => {
             if (activeTab === "Candidates") refetchCandidates();
-            else refetchJobs();
+            else refetchDashboard();
           }}
         />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full border-t">

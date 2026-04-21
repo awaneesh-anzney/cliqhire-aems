@@ -5,10 +5,14 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PipelineJobCard } from "@/components/Recruiter-Pipeline/pipeline-job-card";
 import { type Job, type Candidate } from "@/components/Recruiter-Pipeline/dummy-data";
-import { headhunterCandidatesService } from "@/services/headhunterCandidatesService";
+import { headhunterService } from "@/services/headhunterService";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const HeadhunterPipeline: React.FC<{ jobs?: Job[] }> = ({ jobs: incomingJobs = [] }) => {
   const [jobs, setJobs] = useState<Job[]>(incomingJobs);
+  const { user } = useAuth();
+  const userId = user?._id || (user as any)?.profile?._id || "";
+
   useEffect(() => {
     setJobs(incomingJobs.map(j => ({ ...j })));
   }, [incomingJobs]);
@@ -29,7 +33,7 @@ export const HeadhunterPipeline: React.FC<{ jobs?: Job[] }> = ({ jobs: incomingJ
       filteredJobs = filteredJobs.filter(job => {
         if (job.title.toLowerCase().includes(searchLower)) return true;
         if (job.clientName.toLowerCase().includes(searchLower)) return true;
-        if (job.candidates.some(candidate => candidate.name.toLowerCase().includes(searchLower))) return true;
+        if (job.candidates && job.candidates.some(candidate => candidate.name.toLowerCase().includes(searchLower))) return true;
         if (job.notes?.toLowerCase().includes(searchLower)) return true;
         return false;
       });
@@ -85,10 +89,10 @@ export const HeadhunterPipeline: React.FC<{ jobs?: Job[] }> = ({ jobs: incomingJ
     setJobs(prev => prev.map(j => (j.id === jobId ? { ...j, isExpanded: !j.isExpanded } : j)));
     const job = jobs.find(j => j.id === jobId);
     const willExpand = !(job?.isExpanded);
-    if (willExpand) {
+    if (willExpand && userId) {
       setLoadingJobId(jobId);
       try {
-        const raw = await headhunterCandidatesService.getJobCandidates(jobId);
+        const raw = await headhunterService.getHeadhunterCandidates(userId, { jobId });
         const mapped: Candidate[] = (Array.isArray(raw) ? raw : []).map((hh: any, idx: number) => ({
           id: hh.candidateId || hh._id || hh.id || hh.email || `${hh.name || ""}-${hh.phone || idx}`,
           name: hh.name || "",
@@ -126,9 +130,10 @@ export const HeadhunterPipeline: React.FC<{ jobs?: Job[] }> = ({ jobs: incomingJ
   };
 
   const refreshJobCandidates = async (jobId: string) => {
+    if (!userId) return;
     setLoadingJobId(jobId);
     try {
-      const raw = await headhunterCandidatesService.getJobCandidates(jobId);
+      const raw = await headhunterService.getHeadhunterCandidates(userId, { jobId });
       const mapped: Candidate[] = (Array.isArray(raw) ? raw : []).map((hh: any, idx: number) => ({
         id: hh.candidateId || hh._id || hh.id || hh.email || `${hh.name || ""}-${hh.phone || idx}`,
         name: hh.name || "",
