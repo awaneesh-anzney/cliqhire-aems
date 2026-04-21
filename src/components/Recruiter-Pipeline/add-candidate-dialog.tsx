@@ -14,20 +14,26 @@ import { UserPlus, Users } from "lucide-react";
 interface OptionCardProps {
   icon: React.ReactNode;
   title: string;
+  description?: string;
   onClick: () => void;
 }
 
-function OptionCard({ icon, title, onClick }: OptionCardProps) {
+function OptionCard({ icon, title, description, onClick }: OptionCardProps) {
   return (
     <Button
       variant="outline"
-      className="h-auto flex flex-col items-center gap-6 p-8 hover:border-gray-400 hover:bg-gray-200"
+      className="h-auto flex flex-col items-center gap-4 p-8 hover:border-gray-400 hover:bg-gray-200"
       onClick={onClick}
     >
       <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-lg">
         {icon}
       </div>
-      <span className="text-lg font-semibold text-gray-800">{title}</span>
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-lg font-semibold text-gray-800">{title}</span>
+        {description && (
+          <span className="text-xs text-muted-foreground font-normal">{description}</span>
+        )}
+      </div>
     </Button>
   );
 }
@@ -72,11 +78,13 @@ export function AddCandidateDialog({
           <OptionCard
             icon={<Users className="w-8 h-8 text-gray-600" />}
             title="Attach Existing Candidate"
+            description="Select from main candidate list"
             onClick={handleExistingClick}
           />
           <OptionCard
             icon={<UserPlus className="w-8 h-8 text-gray-600" />}
-            title="Add New Candidate"
+            title="Add Temporary Candidate"
+            description="No email or phone available"
             onClick={handleNewClick}
           />
         </div>
