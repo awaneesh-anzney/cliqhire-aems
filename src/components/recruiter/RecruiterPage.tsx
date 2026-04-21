@@ -1,54 +1,65 @@
 "use client"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useMemo } from "react"
 import { RecruiterSearchBar } from "@/components/recruiter/RecruiterSearchBar"
 import { RecruiterJobList } from "@/components/recruiter/RecruiterJobList"
 import { type RecruiterJob } from "@/components/recruiter/types"
 import { useQuery } from "@tanstack/react-query"
-import { getHeadhunterAssignedJobs } from "@/services/recruiterService"
+import { recruiterService } from "@/services/recruiterService"
 import { useAuth } from "@/contexts/AuthContext"
+import { usePermissions } from "@/contexts/PermissionContext"
 
 export default function RecruiterPage() {
-  const [jobs, setJobs] = useState<RecruiterJob[]>([])
   const [search, setSearch] = useState("")
   const [loadingJobId, setLoadingJobId] = useState<string | null>(null)
 
-  const { user } = useAuth()
-  const role = String(user?.role || "").toUpperCase()
-  const userId = (user?.profile?._id || user?._id || user?.id || "") as string
+  const { hasPermission, loading: permissionsLoading } = usePermissions()
+  const canView = hasPermission("Recruiter", "view")
 
-  const roleSegment =
-    role === "RECRUITER" ? "recruiter" :
-    role === "TEAM_LEAD" ? "teamLead" :
-    role === "HIRING_MANAGER" ? "hiringManager" : "hiringManager"
-
-  const { data: fetchedJobs = [], isLoading } = useQuery({
-    queryKey: ["headhunter-assigned-jobs", roleSegment, userId],
-    queryFn: () => getHeadhunterAssignedJobs(roleSegment, userId),
-    enabled: !!userId,
+  const { data: dashboardData, isLoading: dataLoading } = useQuery({
+    queryKey: ["recruiter-dashboard"],
+    queryFn: () => recruiterService.getMyDashboard(),
+    enabled: canView,
   })
 
-  useEffect(() => {
-    setJobs((fetchedJobs || []).map((j) => ({ ...j, isExpanded: false })))
-  }, [fetchedJobs])
+  const [expandedJobIds, setExpandedJobIds] = useState<Set<string>>(new Set())
 
-  const toggleJobExpansion = async (jobId: string) => {
-    const job = jobs.find((j) => j.id === jobId)
-    if (!job) return
-    const willExpand = !job.isExpanded
-    if (willExpand) {
-      setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, isExpanded: true } : j)))
-      setLoadingJobId(jobId)
-      setTimeout(() => setLoadingJobId(null), 300)
-    } else {
-      setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, isExpanded: false } : j)))
-    }
+  const jobs = useMemo(() => {
+    const list = dashboardData?.jobs || []
+    return list.map((j: any) => ({
+      ...j,
+      isExpanded: expandedJobIds.has(j.id || j._id)
+    })) as RecruiterJob[]
+  }, [dashboardData, expandedJobIds])
+
+  const toggleJobExpansion = (jobId: string) => {
+    setExpandedJobIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(jobId)) {
+        next.delete(jobId)
+      } else {
+        next.add(jobId)
+        setLoadingJobId(jobId)
+        setTimeout(() => setLoadingJobId(null), 300)
+      }
+      return next
+    })
   }
 
-  const filteredJobs = jobs.filter((j) => {
-    const title = j.title || ""
-    const client = j.clientName || ""
-    return title.toLowerCase().includes(search.toLowerCase()) || client.toLowerCase().includes(search.toLowerCase())
-  })
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((j) => {
+      const title = j.title || ""
+      const client = j.clientName || ""
+      return title.toLowerCase().includes(search.toLowerCase()) || client.toLowerCase().includes(search.toLowerCase())
+    })
+  }, [jobs, search])
+
+  if (permissionsLoading) {
+    return <div className="p-4 text-sm text-muted-foreground">Checking permissions...</div>
+  }
+
+  if (!canView) {
+    return <div className="p-4 text-sm text-red-500">You do not have permission to view this page.</div>
+  }
 
   return (
     <div className="space-y-3 p-4">
@@ -56,7 +67,7 @@ export default function RecruiterPage() {
         <RecruiterSearchBar value={search} onChange={setSearch} />
       </div>
 
-      {isLoading ? (
+      {dataLoading ? (
         <div className="py-6 text-sm text-muted-foreground">Loading jobs...</div>
       ) : filteredJobs.length === 0 ? (
         <div className="py-6 text-sm text-muted-foreground">No jobs found</div>

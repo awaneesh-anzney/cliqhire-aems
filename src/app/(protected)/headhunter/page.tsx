@@ -6,24 +6,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateCandidateModal } from "@/components/candidates/create-candidate-modal";
 import { HeadhunterCandidatesTable } from "@/components/Headhunter-Pipeline/headhunter-candidates-table";
 import { headhunterCandidatesService } from "@/services/headhunterCandidatesService";
+import { headhunterService } from "@/services/headhunterService";
 import { PDFViewer } from "@/components/ui/pdf-viewer";
 import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/contexts/PermissionContext";
 import type { Job } from "@/components/Recruiter-Pipeline/dummy-data";
 
 const HeadhunterPage = () => {
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [isRefetching, setIsRefetching] = useState(false);
   const [activeTab, setActiveTab] = useState("Candidates");
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const { data: rawData, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ["headhunterCandidates"],
-    queryFn: () => headhunterCandidatesService.getCandidates(),
+  const { user } = useAuth();
+  const userId = (user as any)?.profile?._id || user?._id || "";
+
+  const { hasPermission, loading: permissionsLoading } = usePermissions();
+  const canView = hasPermission("Headhunter", "view");
+
+  const { data: rawCandidates, isLoading: candidatesLoading, isFetching: candidatesFetching, refetch: refetchCandidates } = useQuery({
+    queryKey: ["headhunterCandidates", userId],
+    queryFn: () => headhunterService.getHeadhunterCandidates(userId),
+    enabled: !!userId && canView,
   });
+
   const candidates = useMemo(() => {
-    const list = Array.isArray(rawData) ? rawData : [];
+    const list = Array.isArray(rawCandidates) ? rawCandidates : [];
     return list.map((item: any) => ({
       id: item._id || item.id || "",
       name: item.name || "",
@@ -50,7 +58,8 @@ const HeadhunterPage = () => {
       updatedAt: item.updatedAt || undefined,
       stats: item.stats || undefined,
     }));
-  }, [rawData]);
+  }, [rawCandidates]);
+
   const [pdfViewer, setPdfViewer] = useState<{ isOpen: boolean; pdfUrl: string | null; candidateName: string | null }>({
     isOpen: false,
     pdfUrl: null,
@@ -60,12 +69,10 @@ const HeadhunterPage = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { user } = useAuth();
-  const headhunterId = (user as any)?.profile?._id || "";
-
   useEffect(() => {
     setSelectedRows(new Set());
-  }, [rawData]);
+  }, [rawCandidates]);
+
   const handleViewResume = (candidate: any) => {
     if (!candidate?.resumeUrl) return;
     setPdfViewer({ isOpen: true, pdfUrl: candidate.resumeUrl, candidateName: candidate.name || null });
@@ -96,16 +103,10 @@ const HeadhunterPage = () => {
   };
 
   const { data: jobsRaw, isLoading: jobsLoading, isFetching: jobsFetching, refetch: refetchJobs } = useQuery({
-    queryKey: ["headhunterJobsSummary", headhunterId],
-    queryFn: () => headhunterCandidatesService.getJobsSummary(headhunterId),
-    enabled: !!headhunterId && activeTab === "Jobs",
+    queryKey: ["headhunterJobs", userId],
+    queryFn: () => headhunterService.getHeadhunterJobs(userId),
+    enabled: !!userId && canView && activeTab === "Jobs",
   });
-
-  useEffect(() => {
-    if (activeTab === "Jobs" && headhunterId) {
-      refetchJobs();
-    }
-  }, [activeTab, headhunterId, refetchJobs]);
 
   const jobs: Job[] = useMemo(() => {
     const list = Array.isArray(jobsRaw) ? jobsRaw : [];
@@ -116,17 +117,17 @@ const HeadhunterPage = () => {
       const recruiterName = rc.fullName || [rc.firstName, rc.lastName].filter(Boolean).join(" ");
 
       return {
-        id: j.jobId || "",
+        id: j.jobId || j._id || "",
         title: j.jobTitle || "",
         clientName: j.clientName || "",
         location: j.location || "",
-        salaryRange: `${j?.salaryRange?.min ?? ""} - ${j?.salaryRange?.max ?? ""} ${j?.salaryRange?.currency ?? ""}`.trim(),
+        salaryRange: j.salaryRange ? `${j.salaryRange.min ?? ""} - ${j.salaryRange.max ?? ""} ${j.salaryRange.currency ?? ""}`.trim() : "",
         headcount: 1,
         jobType: (j.jobType || "").replace(/-/g, " "),
         isExpanded: false,
         candidates: [],
         jobId: {
-          _id: j.jobId,
+          _id: j.jobId || j._id,
           jobTitle: j.jobTitle,
           location: j.location,
           stage: "Active",
@@ -139,12 +140,13 @@ const HeadhunterPage = () => {
       } as Job;
     });
   }, [jobsRaw]);
+
   const confirmDeleteSelected = async () => {
     if (selectedRows.size === 0) return;
     setIsDeleting(true);
     try {
       await Promise.all(Array.from(selectedRows).map(id => headhunterCandidatesService.deleteCandidate(id)));
-      await refetch();
+      await refetchCandidates();
       toast.success(`${selectedRows.size} candidate(s) deleted successfully`);
       setSelectedRows(new Set());
     } catch (error) {
@@ -154,20 +156,30 @@ const HeadhunterPage = () => {
       setShowDeleteDialog(false);
     }
   };
+
+  if (permissionsLoading) {
+    return <div className="p-4 text-sm text-muted-foreground">Checking permissions...</div>;
+  }
+
+  if (!canView) {
+    return <div className="p-4 text-sm text-red-500">You do not have permission to view this page.</div>;
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <div className="">
         <Dashboardheader
           setOpen={setCreateModalOpen}
-          setFilterOpen={setFilterOpen}
-          initialLoading={isLoading || isFetching || isRefetching}
-          heading="Clients"
-          buttonText="Create Candiadte"
+          setFilterOpen={() => {}}
+          initialLoading={candidatesLoading || candidatesFetching || jobsLoading || jobsFetching}
+          heading="Headhunter Dashboard"
+          buttonText="Create Candidate"
           showCreateButton={true}
           selectedCount={selectedRows.size}
           onDelete={handleDeleteSelected}
           onRefresh={() => {
-            refetch();
+            if (activeTab === "Candidates") refetchCandidates();
+            else refetchJobs();
           }}
         />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full border-t">
@@ -207,7 +219,7 @@ const HeadhunterPage = () => {
           isHeadhunterCreate={true}
           onCandidateCreated={() => {
             setCreateModalOpen(false);
-            refetch();
+            refetchCandidates();
           }}
         />
 
