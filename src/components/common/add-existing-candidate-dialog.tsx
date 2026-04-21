@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,11 +18,30 @@ import {
   MultiSelectorList,
   MultiSelectorItem,
 } from "@/components/ui/multi-select";
-import { Loader2, User, Mail, X } from "lucide-react";
+import {
+  Loader2,
+  User,
+  Mail,
+  X,
+  Search,
+  UserPlus,
+  MapPin,
+  Briefcase,
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  ArrowLeft,
+  SearchIcon,
+  Plus,
+  Info,
+} from "lucide-react";
 import { candidateService, Candidate } from "@/services/candidateService";
 import { addCandidateToPipeline } from "@/services/recruitmentPipelineService";
 import { toast } from "sonner";
-import { api } from "@/lib/axios-config";
+import { cn } from "@/lib/utils";
+
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface AddExistingCandidateDialogProps {
   jobId: string;
@@ -31,25 +50,16 @@ interface AddExistingCandidateDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onCandidatesAdded?: (candidateIds: string[], candidateData?: Candidate[]) => void;
-  // New props for pipeline support
   isPipeline?: boolean;
   pipelineId?: string;
 }
 
-// Simple debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
   }, [value, delay]);
-
   return debouncedValue;
 }
 
@@ -66,139 +76,55 @@ export function AddExistingCandidateDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = typeof open === "boolean" && typeof onOpenChange === "function";
   const currentOpen = isControlled ? (open as boolean) : internalOpen;
+
   const setOpen = (value: boolean) => {
-    if (isControlled && onOpenChange) {
-      onOpenChange(value);
-    } else {
-      setInternalOpen(value);
-    }
+    if (isControlled && onOpenChange) onOpenChange(value);
+    else setInternalOpen(value);
   };
 
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
-
   const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
 
-  // Search and Pagination State
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedSearchTerm = useDebounce(searchTerm, 400);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const LIMIT = 50;
 
-  const LIMIT = 100;
-
-  const listRef = useRef<HTMLDivElement>(null);
-
-  // Helper functions
   const getCandidateDisplayName = (candidate: Candidate) => {
-    const name = candidate.name || "Unknown Candidate";
-    const jobTitle = candidate.currentJobTitle ? ` - ${candidate.currentJobTitle}` : "";
-    return `${name}${jobTitle}`;
+    return candidate.name || "Unknown Candidate";
   };
 
-  const getCandidateIdFromDisplayName = (displayName: string) => {
-    // Check both current candidates and already selected candidates to find ID
-    const candidate = candidates.find(candidate => getCandidateDisplayName(candidate) === displayName)
-      || selectedCandidates.find(candidate => getCandidateDisplayName(candidate) === displayName);
-    return candidate?._id;
-  };
-
-  const getDisplayNameFromCandidateId = (candidateId: string) => {
-    const candidate = candidates.find(candidate => candidate._id === candidateId)
-      || selectedCandidates.find(candidate => candidate._id === candidateId);
-    return candidate ? getCandidateDisplayName(candidate) : '';
-  };
-
-  const selectedCandidateDisplayNames = selectedCandidateIds.map(id => getDisplayNameFromCandidateId(id)).filter(Boolean);
+  const selectedCandidateDisplayNames = useMemo(() => {
+    return selectedCandidateIds.map(id => {
+      const c = selectedCandidates.find(cand => cand._id === id) || candidates.find(cand => cand._id === id);
+      return c ? getCandidateDisplayName(c) : '';
+    }).filter(Boolean);
+  }, [selectedCandidateIds, selectedCandidates, candidates]);
 
   const handleSelectionChange = (displayNames: string[]) => {
-    // Map display names back to IDs
-    const newSelectedIds = displayNames.map(name => getCandidateIdFromDisplayName(name)).filter(Boolean) as string[];
+    const newSelectedIds: string[] = [];
+    const newSelectedObjects: Candidate[] = [...selectedCandidates];
 
-    // Determine which candidates were added to add them to the persistent 'selectedCandidates' list
-    const addedIds = newSelectedIds.filter(id => !selectedCandidateIds.includes(id));
-    if (addedIds.length > 0) {
-      const addedCandidates = candidates.filter(c => c._id && addedIds.includes(c._id));
-      setSelectedCandidates(prev => [...prev, ...addedCandidates]);
-    }
-
-    // Determine which candidates were removed to remove them from persistent list
-    const removedIds = selectedCandidateIds.filter(id => !newSelectedIds.includes(id));
-    if (removedIds.length > 0) {
-      setSelectedCandidates(prev => prev.filter(c => c._id && !removedIds.includes(c._id)));
-    }
+    displayNames.forEach(name => {
+      const candidate = candidates.find(c => getCandidateDisplayName(c) === name)
+        || selectedCandidates.find(c => getCandidateDisplayName(c) === name);
+      if (candidate?._id) {
+        newSelectedIds.push(candidate._id);
+        if (!newSelectedObjects.find(o => o._id === candidate._id)) {
+          newSelectedObjects.push(candidate);
+        }
+      }
+    });
 
     setSelectedCandidateIds(newSelectedIds);
+    setSelectedCandidates(newSelectedObjects.filter(o => newSelectedIds.includes(o._id || "")));
   };
 
-  // Reset state when dialog opens
-  useEffect(() => {
-    if (currentOpen) {
-      // Initial fetch is handled by the useEffect watching debouncedSearchTerm/page
-      // specific logic to reset:
-      setCandidates([]);
-      setPage(1);
-      setHasMore(true);
-      setSearchTerm("");
-
-      // We need to trigger a fetch. Since page is 1 and searchTerm is "", 
-      // the below effect might not trigger re-fetch if dependencies haven't changed enough?
-      // Actually, if we just rely on `debouncedSearchTerm` and `page`, we need to make sure they trigger.
-      // But if user closes and re-opens, we want fresh data.
-      fetchCandidates(1, "", true);
-    } else {
-      setSearchTerm("");
-      setSelectedCandidateIds([]);
-      setSelectedCandidates([]); // Clear persistent selection
-    }
-  }, [currentOpen]);
-
-  // Effect for Search - Reset page when search changes
-  useEffect(() => {
-    // Avoid double fetch on open (handled by open effect) by checking if open is true
-    // But open effect does `fetchCandidates(1, "", true)`.
-    // If searchTerm changes, we want to reset page to 1.
-    if (currentOpen) {
-      setPage(1);
-    }
-  }, [debouncedSearchTerm]);
-
-  // Effect to Fetch Candidates
-  useEffect(() => {
-    if (!currentOpen) return;
-
-    // If it's a new search (page 1), we want to replace. If page > 1, append.
-    // However, react state updates are async. 
-    // We can just call fetchCandidates here.
-
-    // Only fetch if we haven't just fetched in the 'open' effect?
-    // Let's simplify: 
-    // The `fetchCandidates` function handles logic.
-    // We should call it when `page` or `debouncedSearchTerm` changes.
-    // BUT, we manually called it on open.
-    // Let's rely on this effect mainly, but ensure on-open we reset.
-
-    fetchCandidates(page, debouncedSearchTerm, page === 1);
-
-  }, [page, debouncedSearchTerm, currentOpen]);
-
-
   const fetchCandidates = async (currentPage: number, search: string, replace: boolean = false) => {
-    // If already loading and it's an infinite scroll load (not replace), prevent dupes
-    // But simpler: just set loading.
-
-    // NOTE: This effect runs on mount if dependencies match.
-    // We used a manual call in onOpen. To avoid race conditions, let's just rely on this effect
-    // and ensuring state is reset.
-    // But `setCandidates([])` in onOpen doesn't stop this effect from running with stale state if not careful.
-
-    // Ideally:
-    // onOpen -> setPage(1), setSearchTerm(""), setHasMore(true) -> triggers effect.
-
-    // We'll trust the effect. Remove the manual call in onOpen, just reset states.
     if (!currentOpen) return;
-
     setLoading(true);
     try {
       const response = await candidateService.getCandidates({
@@ -206,117 +132,68 @@ export function AddExistingCandidateDialog({
         limit: LIMIT,
         search: search
       });
-
       const newCandidates = response.candidates;
-
       setCandidates(prev => {
         if (replace) return newCandidates;
-
-        // Filter out duplicates just in case
         const existingIds = new Set(prev.map(c => c._id));
-        const uniqueNew = newCandidates.filter(c => !existingIds.has(c._id));
-        return [...prev, ...uniqueNew];
+        return [...prev, ...newCandidates.filter(c => !existingIds.has(c._id))];
       });
-
-      // Update hasMore
-      if (newCandidates.length < LIMIT) {
-        setHasMore(false);
-      } else {
-        setHasMore(true);
-      }
-
+      setHasMore(newCandidates.length === LIMIT);
     } catch (error) {
-      console.error("Error fetching candidates:", error);
-      toast.error("Failed to fetch candidates. Please try again.");
+      toast.error("Failed to load talent pool.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Scroll handler
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    // Buffer of 20px
-    if (scrollHeight - scrollTop <= clientHeight + 20) {
-      if (hasMore && !loading) {
-        setPage(prev => prev + 1);
-      }
-    }
-  };
-
-  // Just for the 'open' reset
   useEffect(() => {
     if (currentOpen) {
       setPage(1);
       setHasMore(true);
-      // Don't clear candidates immediately to avoid flash if we could keep cache, 
-      // but for "Attach Existing" fresh is better.
       setCandidates([]);
+      fetchCandidates(1, "", true);
+    } else {
+      setSearchTerm("");
+      setSelectedCandidateIds([]);
       setSelectedCandidates([]);
     }
   }, [currentOpen]);
 
+  useEffect(() => {
+    if (currentOpen && page === 1) fetchCandidates(1, debouncedSearchTerm, true);
+    else if (currentOpen) fetchCandidates(page, debouncedSearchTerm, false);
+  }, [page, debouncedSearchTerm, currentOpen]);
 
   const handleAddCandidates = async () => {
-    if (selectedCandidateIds.length === 0) {
-      toast.error("Please select at least one candidate");
-      return;
-    }
-
+    if (selectedCandidateIds.length === 0) return;
+    setLoading(true);
     try {
       if (isPipeline && pipelineId) {
-        // Use recruiter pipeline API
-        await Promise.all(selectedCandidateIds.map((candidateId) =>
-          addCandidateToPipeline(pipelineId, candidateId)
-        ));
+        await Promise.all(selectedCandidateIds.map(id => addCandidateToPipeline(pipelineId, id)));
       } else {
-        // Use regular job API
-        await Promise.all(selectedCandidateIds.map((candidateId) =>
-          candidateService.applyToJob(candidateId, jobId)
-        ));
+        await Promise.all(selectedCandidateIds.map(id => candidateService.applyToJob(id, jobId)));
       }
-
-      // Use persisted selectedCandidates instead of filtering from current (potentially filtered) list
-      // We still backup with the current candidates list just in case
-      const finalSelectedCandidates = selectedCandidates.length > 0
-        ? selectedCandidates
-        : candidates.filter(candidate => selectedCandidateIds.includes(candidate._id || ""));
-
-      toast.success(`Successfully added ${selectedCandidateIds.length} candidate(s) to ${jobTitle}`);
-
-      // Call the callback to update the UI
-      if (onCandidatesAdded) {
-        onCandidatesAdded(selectedCandidateIds, finalSelectedCandidates);
-      }
-
-      // Reset and close dialog
-      setSelectedCandidateIds([]);
-      setSelectedCandidates([]);
+      toast.success(`Attached ${selectedCandidateIds.length} candidate(s) to ${jobTitle}`);
+      onCandidatesAdded?.(selectedCandidateIds, selectedCandidates);
       setOpen(false);
     } catch (error) {
-      console.error("Error adding candidates:", error);
-      toast.error("Failed to add candidates. Please try again.");
+      toast.error("Process failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getCandidateEmail = (candidate: Candidate) => {
-    return candidate.email || "Email not specified";
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 30 && hasMore && !loading) {
+      setPage(prev => prev + 1);
+    }
   };
 
-  // Ensure trigger reliably opens the dialog
   const enhancedTrigger = trigger && React.isValidElement(trigger)
     ? React.cloneElement(trigger as React.ReactElement<any>, {
-      onClick: (e: any) => {
-        setOpen(true);
-        const orig = (trigger as any).props?.onClick;
-        if (typeof orig === "function") orig(e);
-      },
-      onMouseDown: (e: any) => {
-        setOpen(true);
-        const orig = (trigger as any).props?.onMouseDown;
-        if (typeof orig === "function") orig(e);
-      },
-      type: (trigger as any).props?.type || "button",
+      onClick: () => setOpen(true),
+      type: "button",
     })
     : trigger;
 
@@ -324,187 +201,188 @@ export function AddExistingCandidateDialog({
     <>
       {enhancedTrigger}
       <Dialog open={currentOpen} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Add Candidate
-            </DialogTitle>
-            <DialogDescription>
-              Select one or more candidates to add to <strong>{jobTitle}</strong>.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="max-h-[70vh] h-[500px] flex flex-col">
-            <div className="flex-1 min-h-0 relative">
-              <label className="text-sm font-medium mb-1 block">Search and select candidates</label>
-              <MultiSelector
-                values={selectedCandidateDisplayNames}
-                onValuesChange={handleSelectionChange}
-                className="w-full h-full flex flex-col"
-                shouldFilter={false} // Disable client-side filtering
-                onSearch={setSearchTerm}
-              >
-                <MultiSelectorTrigger className="min-h-10 shrink-0">
-                  <MultiSelectorInput
-                    placeholder="Search candidates by name or email..."
-                  />
-                </MultiSelectorTrigger>
-
-                {/* The content container */}
-                <MultiSelectorContent>
-                  <MultiSelectorList
-                    onScroll={handleScroll}
-                    className="max-h-[300px] overflow-y-auto relative"
-                  >
-                    {candidates.length > 0 ? (
-                      candidates.map((candidate) => (
-                        <MultiSelectorItem
-                          key={candidate._id}
-                          value={getCandidateDisplayName(candidate)}
-                          className="flex items-center gap-2"
-                        >
-                          <div className="flex flex-col items-start w-full">
-                            <span className="font-medium">
-                              {getCandidateDisplayName(candidate)}
-                            </span>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Mail className="h-3 w-3" />
-                              {getCandidateEmail(candidate)}
-                            </div>
-                          </div>
-                        </MultiSelectorItem>
-                      ))
-                    ) : (
-                      !loading && (
-                        <div className="p-4 text-center text-muted-foreground">
-                          {searchTerm
-                            ? "No candidates found matching your search"
-                            : "No candidates available"}
-                        </div>
-                      )
-                    )}
-
-                    {loading && (
-                      <div className="p-2 flex justify-center items-center text-sm text-muted-foreground w-full">
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        {page === 1 ? 'Loading candidates...' : 'Loading more...'}
-                      </div>
-                    )}
-                  </MultiSelectorList>
-                </MultiSelectorContent>
-              </MultiSelector>
-            </div>
-
-            {/* Detailed view of selected candidates */}
-            {selectedCandidateIds.length > 0 && (
-              <div className="mt-4 border-t pt-4 shrink-0">
-                <h3 className="text-sm font-semibold mb-3">Selected Candidate Details</h3>
-                <div className="space-y-3 max-h-[150px] overflow-y-auto">
-                  {selectedCandidateIds.map((candidateId) => {
-                    // Use persisted selectedCandidates first
-                    const candidate = selectedCandidates.find((c) => c._id === candidateId)
-                      || candidates.find((c) => c._id === candidateId);
-
-                    if (!candidate) return (
-                      <div key={candidateId} className="p-2 border rounded text-xs text-red-500">
-                        Candidate details not found (might be from previous search)
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setSelectedCandidateIds(ids => ids.filter(id => id !== candidateId));
-                            setSelectedCandidates(prev => prev.filter(c => c._id !== candidateId));
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    );
-
-                    return (
-                      <div key={candidateId} className="p-4 rounded-lg border bg-gray-50/50">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1 grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
-                                  Name:
-                                </span>
-                                <span className="text-sm font-medium">
-                                  {candidate.name || "Unnamed Candidate"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
-                                  Position:
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  {candidate.currentJobTitle || "—"}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
-                                  Email:
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  {candidate.email || "—"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
-                                  Location:
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  {candidate.location || "—"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            onClick={() => {
-                              setSelectedCandidateIds((ids) =>
-                                ids.filter((id) => id !== candidate._id),
-                              );
-                              setSelectedCandidates((prev) =>
-                                prev.filter((c) => c._id !== candidate._id),
-                              );
-                            }}
-                            variant="ghost"
-                            size="icon"
-                            className="text-red-500 hover:text-red-700 ml-2"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+        <DialogContent className="max-w-5xl p-0 overflow-hidden border-none shadow-2xl rounded-2xl h-[650px] flex flex-col">
+          <div className="bg-primary/5 p-6 border-b border-primary/10 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-inner">
+                <UserPlus className="w-6 h-6" />
               </div>
-            )}
+              <div className="flex flex-col">
+                <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Attach Talent</DialogTitle>
+                <DialogDescription className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-none flex items-center gap-1.5 pt-1">
+                  <Sparkles className="w-3 h-3 text-amber-500" /> SYNCING WITH: <span className="text-primary">{jobTitle}</span>
+                </DialogDescription>
+              </div>
+            </div>
+            <div className="hidden md:flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Talent Pool Active</span>
+            </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddCandidates}
-              disabled={selectedCandidateIds.length === 0 || loading}
-            >
-              Add{" "}
-              {selectedCandidateIds.length > 0
-                ? `${selectedCandidateIds.length} Candidate${selectedCandidateIds.length > 1 ? "s" : ""}`
-                : "Candidates"}
-            </Button>
-          </DialogFooter>
+          <div className="flex-1 flex overflow-hidden">
+            {/* Search & Selection Side (Left) */}
+            <div className="flex-1 flex flex-col p-8 border-r border-slate-100 bg-white">
+              <div className="mb-6 space-y-4">
+                <div className="space-y-1">
+                  <Label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Search Database</Label>
+                  <div className="relative group">
+                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-all" />
+                    <Input
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Find by name, role or email..."
+                      className="pl-11 h-12 border-slate-200 font-bold focus:border-primary shadow-sm rounded-xl transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="relative h-[250px] group border border-slate-100 rounded-2xl overflow-hidden focus-within:border-primary/30 transition-all">
+                  <MultiSelector
+                    values={selectedCandidateDisplayNames}
+                    onValuesChange={handleSelectionChange}
+                    className="w-full h-full flex flex-col"
+                    shouldFilter={false}
+                    onSearch={setSearchTerm}
+                  >
+                    <div className="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Available Profiles</span>
+                      {loading && <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />}
+                    </div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar" onScroll={handleScroll}>
+                      {candidates.length > 0 ? (
+                        <div className="p-2 space-y-1">
+                          {candidates.map((candidate) => (
+                            <MultiSelectorItem
+                              key={candidate._id}
+                              value={getCandidateDisplayName(candidate)}
+                              className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 cursor-pointer border border-transparent transition-all hover:border-primary/10 group/item"
+                            >
+                              <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover/item:bg-primary/20 group-hover/item:text-primary transition-colors shrink-0">
+                                <User className="w-5 h-5" />
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-black text-slate-800 line-clamp-1">{candidate.name}</span>
+                                <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold">
+                                  <Briefcase className="w-3 h-3 text-primary/60" /> {candidate.currentJobTitle || "Experience Pending"}
+                                </div>
+                                <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold">
+                                  <Mail className="w-3 h-3 text-primary/60" /> {candidate.email || "No Email"}
+                                </div>
+                              </div>
+                            </MultiSelectorItem>
+                          ))}
+                          {hasMore && !loading && (
+                            <div className="p-4 text-center">
+                              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors" onClick={() => setPage(p => p + 1)}>Scroll for more</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        !loading && (
+                          <div className="h-full flex flex-col items-center justify-center p-8 text-center gap-3">
+                            <div className="h-12 w-12 bg-slate-50 rounded-full flex items-center justify-center">
+                              <Search className="w-6 h-6 text-slate-200" />
+                            </div>
+                            <p className="text-xs font-bold text-slate-400">
+                              {searchTerm ? "No specific matches found." : "Waiting for your search..."}
+                            </p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </MultiSelector>
+                </div>
+              </div>
+
+              <div className="mt-auto pt-6 border-t border-slate-100 italic">
+                <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                  <p className="text-[10px] font-bold text-slate-500 leading-relaxed tracking-tight group-hover:text-slate-700 transition-colors uppercase">
+                    Candidates will be notified of the attachment to this job and will appear in the pipeline immediately after selection.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Queue Side (Right) */}
+            <div className="w-[350px] bg-slate-50 p-8 flex flex-col shrink-0 border-l border-slate-100">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" /> Ready to Attach
+                </h3>
+                <div className="px-2 py-0.5 bg-primary text-white text-[10px] font-black rounded-lg shadow-sm">
+                  {selectedCandidateIds.length}
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2 pb-4">
+                {selectedCandidates.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedCandidates.map((candidate) => (
+                      <div key={candidate._id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm relative group animate-in slide-in-from-right-4 duration-300">
+                        <button
+                          onClick={() => handleSelectionChange(selectedCandidateDisplayNames.filter(n => n !== getCandidateDisplayName(candidate)))}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 shadow-lg"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-900 tracking-tight mb-1">{candidate.name}</span>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                              <Briefcase className="w-3 h-3" /> {candidate.currentJobTitle || "N/A"}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                              <MapPin className="w-3 h-3" /> {candidate.location || "Remote/Global"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 rounded-3xl opacity-50">
+                    <User className="w-8 h-8 text-slate-300 mb-2" />
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Selected Queue Empty</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-6 mt-auto">
+                <Button
+                  onClick={handleAddCandidates}
+                  disabled={selectedCandidateIds.length === 0 || loading}
+                  className="w-full h-14 bg-primary hover:bg-primary/90 text-white font-black shadow-xl shadow-primary/20 rounded-2xl transition-all active:scale-[0.98] group"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                    <div className="flex items-center justify-center gap-2">
+                      {isPipeline ? "Process to Pipeline" : "Sync to Job"}
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #cbd5e1;
+        }
+      `}</style>
     </>
   );
 }
-
-
