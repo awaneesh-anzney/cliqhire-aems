@@ -7,19 +7,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Shield, Zap, CheckSquare2 } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Shield, 
+  CheckSquare2, 
+  Lock, 
+  Layout, 
+  FileCheck2, 
+  Save,
+  CheckCircle2,
+  Info
+} from "lucide-react";
 import { roleService } from "@/services/roleService";
 import { PERMISSION_MODULES } from "@/lib/sidebarModules";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type ActionKey = "view" | "create" | "edit" | "delete";
 const ACTIONS: ActionKey[] = ["view", "create", "edit", "delete"];
 
 const ACTION_META: Record<ActionKey, { label: string; color: string; desc: string }> = {
-  view:   { label: "View",   color: "text-sky-600 bg-sky-50 border-sky-200",     desc: "Can see & read" },
-  create: { label: "Create", color: "text-emerald-600 bg-emerald-50 border-emerald-200", desc: "Can add new" },
-  edit:   { label: "Edit",   color: "text-amber-600 bg-amber-50 border-amber-200", desc: "Can update" },
-  delete: { label: "Delete", color: "text-red-600 bg-red-50 border-red-200",      desc: "Can remove" },
+  view:   { label: "View",   color: "text-blue-600 bg-blue-50 border-blue-100",     desc: "Read-only access" },
+  create: { label: "Create", color: "text-emerald-600 bg-emerald-50 border-emerald-100", desc: "Allow entries" },
+  edit:   { label: "Edit",   color: "text-amber-600 bg-amber-50 border-amber-100", desc: "Modify data" },
+  delete: { label: "Delete", color: "text-red-600 bg-red-50 border-red-100",      desc: "Remove records" },
 };
 
 function buildInitialMatrix() {
@@ -93,175 +104,249 @@ export default function CreateRolePage() {
   const allOn = PERMISSION_MODULES.every(m => isRowAll(m.moduleKey));
 
   return (
-    <div className="min-h-screen bg-slate-50/60">
-      {/* Sticky header */}
-      <div className="bg-white border-b sticky top-0 z-20">
-        <div className="px-6 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost" size="icon"
-            onClick={() => router.push("/settings")}
-            className="h-9 w-9 shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
-              <Shield className="h-5 w-5 text-brand" />
-            </div>
-            <div>
-              <h1 className="text-base font-semibold text-slate-800">Create New Role</h1>
-              <p className="text-xs text-slate-500">
-                {enabledCount} modules • {totalChecked} permissions selected
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push("/settings")} className="h-9 text-xs">
-              Cancel
-            </Button>
+    <div className="min-h-screen bg-slate-50/50">
+      {/* Premium Sticky Header */}
+      <div className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-30 px-8 py-5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-6">
             <Button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="h-9 text-xs bg-brand hover:bg-brand/90 text-white gap-2"
-            >
-              {isLoading ? "Creating…" : <><Zap className="h-3.5 w-3.5" /> Create Role</>}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-6 py-6 max-w-5xl mx-auto space-y-5">
-        {/* Basic Info Card */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Role Details</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Role Name <span className="text-red-500 normal-case">*</span>
-              </Label>
-              <Input
-                placeholder="e.g. Senior Recruiter"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="h-10"
-                required
-              />
-              <p className="text-xs text-slate-400">Unique naam — frontend aur assign karte waqt dikhega</p>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Description</Label>
-              <Input
-                placeholder="What can this role do?"
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                className="h-10"
-              />
-              <p className="text-xs text-slate-400">Optional — team ke liye context</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Permission Matrix Card */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          {/* Matrix header */}
-          <div className="px-6 py-4 border-b bg-slate-50/80 flex items-center justify-between">
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500">Permission Matrix</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Modules sidebar routes se auto-derive hote hain
-              </p>
-            </div>
-            <Button
-              type="button"
               variant="outline"
-              size="sm"
-              onClick={handleSelectAll}
-              className="h-8 text-xs gap-1.5"
+              size="icon"
+              onClick={() => router.push("/settings")}
+              className="h-10 w-10 rounded-xl border-slate-200 hover:bg-slate-50 shadow-sm"
             >
-              <CheckSquare2 className="h-3.5 w-3.5" />
-              {allOn ? "Deselect All" : "Select All"}
+              <ArrowLeft className="h-4 w-4 text-slate-600" />
             </Button>
+            <div className="flex items-center gap-4 border-l pl-6 border-slate-200">
+               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-inner">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">Create Access Role</h1>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <CheckCircle2 className="w-3 h-3 text-green-500" /> {totalChecked} PERMISSIONS ACROSS {enabledCount} MODULES
+                </p>
+              </div>
+            </div>
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 bg-white">
-                  <th className="text-left px-6 py-3 font-medium text-slate-500 text-xs w-48">Module</th>
-                  {ACTIONS.map(a => (
-                    <th key={a} className="text-center px-4 py-3 w-28">
-                      <div className="flex flex-col items-center gap-2">
-                        <div>
-                          <span className={`text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${ACTION_META[a].color}`}>
-                            {a}
-                          </span>
-                          <p className="text-xs text-slate-400 mt-1">{ACTION_META[a].desc}</p>
-                        </div>
-                        <Checkbox
-                          checked={isColAll(a)}
-                          onCheckedChange={v => toggleCol(a, !!v)}
-                          className="h-4 w-4 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
-                          title={`Toggle all ${a}`}
-                        />
-                      </div>
-                    </th>
-                  ))}
-                  <th className="text-center px-4 py-3 text-xs font-medium text-slate-400 w-20">Full</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PERMISSION_MODULES.map((mod, i) => {
-                  const active = isRowAny(mod.moduleKey);
-                  return (
-                    <tr
-                      key={mod.moduleKey}
-                      className={`border-b border-slate-100 transition-colors ${
-                        active ? "bg-brand/[0.015]" : i % 2 === 0 ? "bg-white" : "bg-slate-50/30"
-                      } hover:bg-brand/[0.03]`}
-                    >
-                      <td className="px-6 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`h-2 w-2 rounded-full shrink-0 transition-colors ${active ? "bg-brand" : "bg-slate-200"}`} />
-                          <span className={`text-sm font-medium transition-colors ${active ? "text-slate-800" : "text-slate-400"}`}>
-                            {mod.name}
-                          </span>
-                        </div>
-                      </td>
-                      {ACTIONS.map(a => (
-                        <td key={a} className="text-center px-4 py-3.5">
-                          <Checkbox
-                            checked={matrix[mod.moduleKey]?.[a] ?? false}
-                            onCheckedChange={v => toggle(mod.moduleKey, a, !!v)}
-                            className="h-4 w-4 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
-                          />
-                        </td>
-                      ))}
-                      <td className="text-center px-4 py-3.5">
-                        <Switch
-                          checked={isRowAll(mod.moduleKey)}
-                          onCheckedChange={v => toggleRow(mod.moduleKey, v)}
-                          className="data-[state=checked]:bg-brand scale-90"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Footer summary */}
-          <div className="px-6 py-3 border-t bg-slate-50/80 flex items-center justify-between">
-            <p className="text-xs text-slate-400">
-              <strong className="text-brand">{totalChecked}</strong> permissions across{" "}
-              <strong className="text-slate-600">{enabledCount}</strong> modules selected
-            </p>
-            <p className="text-xs text-slate-400">
-              Baad mein Settings mein PATCH se change kar sakte ho
-            </p>
+          
+          <div className="flex items-center gap-3">
+             <Button 
+                variant="ghost" 
+                onClick={() => router.push("/settings")} 
+                className="font-bold text-slate-500 hover:bg-slate-100 px-6 h-11"
+              >
+                Discard Changes
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="h-11 px-8 font-black bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 rounded-xl gap-2 transition-all active:scale-[0.98]"
+              >
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {isLoading ? "Saving..." : "Launch Role"}
+              </Button>
           </div>
         </div>
       </div>
+
+      <div className="px-8 py-10 max-w-7xl mx-auto grid grid-cols-12 gap-8">
+        {/* Left Column: Config */}
+        <div className="col-span-12 lg:col-span-4 space-y-6">
+           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-8 sticky top-32">
+             <div className="space-y-1">
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 block">Identity & Purpose</Label>
+                <div className="space-y-6">
+                   <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Role Name <span className="text-primary">*</span></Label>
+                    <div className="relative group">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                      <Input
+                        placeholder="e.g. Talent Acquisition Manager"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        className="pl-10 h-12 border-slate-200 font-bold focus:border-primary transition-all text-sm"
+                        required
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-medium px-1">Unique identifier — displayed during assignment and in the dashboard.</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Detailed Description</Label>
+                    <textarea
+                      placeholder="Briefly describe what users under this role can execute within the platform..."
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                      className="w-full min-h-[120px] p-4 text-sm font-medium border border-slate-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all resize-none"
+                    />
+                    <p className="text-[11px] text-slate-400 font-medium px-1">Optional — provides additional context for the team.</p>
+                  </div>
+                </div>
+             </div>
+
+             <div className="pt-8 border-t border-slate-100">
+               <div className="flex items-start gap-4 p-5 bg-primary/5 rounded-2xl border border-primary/10">
+                  <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
+                    The permission matrix on the right is derived automatically from the active system modules. You can granularly control access for each route.
+                  </p>
+               </div>
+             </div>
+           </div>
+        </div>
+
+        {/* Right Column: Permission Matrix */}
+        <div className="col-span-12 lg:col-span-8">
+           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+             {/* Header */}
+             <div className="px-10 py-6 border-b flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                   <div className="p-2 bg-slate-50 rounded-lg">
+                      <Layout className="w-4 h-4 text-slate-400" />
+                   </div>
+                   <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Permission Registry</h2>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSelectAll}
+                  className="h-10 px-6 font-bold text-slate-600 rounded-xl border-slate-200 hover:bg-slate-50 gap-2 transition-all shadow-sm active:scale-95"
+                >
+                  <CheckSquare2 className="h-4 w-4" />
+                  {allOn ? "Deselect All" : "Full Access Toggle"}
+                </Button>
+             </div>
+
+             <div className="overflow-x-auto overflow-y-hidden">
+                <table className="w-full text-sm border-collapse min-w-[700px]">
+                   <thead>
+                      <tr className="bg-slate-50/50">
+                        <th className="text-left px-10 py-6 font-black text-[10px] text-slate-400 uppercase tracking-widest w-64">System Module</th>
+                        {ACTIONS.map(a => (
+                          <th key={a} className="text-center px-4 py-6 w-32">
+                             <div className="flex flex-col items-center gap-4">
+                                <div className={cn("px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-tighter shadow-sm", ACTION_META[a].color)}>
+                                   {ACTION_META[a].label}
+                                </div>
+                                <Checkbox
+                                  checked={isColAll(a)}
+                                  onCheckedChange={v => toggleCol(a, !!v)}
+                                  className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary border-slate-300 transition-all cursor-pointer"
+                                />
+                             </div>
+                          </th>
+                        ))}
+                        <th className="text-center px-6 py-6 font-black text-[10px] text-slate-400 uppercase tracking-widest">Full Control</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-100">
+                      {PERMISSION_MODULES.map((mod) => {
+                        const active = isRowAny(mod.moduleKey);
+                        const allRow = isRowAll(mod.moduleKey);
+                        return (
+                          <tr
+                            key={mod.moduleKey}
+                            className={cn(
+                              "group transition-all duration-300",
+                              active ? "bg-primary/[0.02]" : "hover:bg-slate-50/50"
+                            )}
+                          >
+                             <td className="px-10 py-5">
+                                <div className="flex items-center gap-4">
+                                   <div className={cn(
+                                     "w-2 h-10 rounded-full transition-all duration-500",
+                                     active ? "bg-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]" : "bg-slate-100"
+                                   )} />
+                                   <div className="flex flex-col">
+                                      <span className={cn(
+                                        "text-base font-bold transition-colors",
+                                        active ? "text-slate-900" : "text-slate-400"
+                                      )}>
+                                        {mod.name}
+                                      </span>
+                                      {active && <span className="text-[9px] font-black text-primary uppercase tracking-tighter">Active Permissions</span>}
+                                   </div>
+                                </div>
+                             </td>
+                             {ACTIONS.map(a => (
+                               <td key={a} className="text-center px-4 py-5">
+                                 <Checkbox
+                                   checked={matrix[mod.moduleKey]?.[a] ?? false}
+                                   onCheckedChange={v => toggle(mod.moduleKey, a, !!v)}
+                                   className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary border-slate-200 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                                 />
+                               </td>
+                             ))}
+                             <td className="text-center px-6 py-5">
+                               <div className="flex justify-center">
+                                 <Switch
+                                   checked={allRow}
+                                   onCheckedChange={v => toggleRow(mod.moduleKey, v)}
+                                   className="data-[state=checked]:bg-primary scale-90 shadow-sm"
+                                 />
+                               </div>
+                             </td>
+                          </tr>
+                        );
+                      })}
+                   </tbody>
+                </table>
+             </div>
+
+             {/* Dynamic Summary Footer */}
+             <div className="px-10 py-5 bg-slate-50 border-t flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                   <div className="flex -space-x-2">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-50 bg-primary/20 flex items-center justify-center">
+                          <FileCheck2 className="w-3 h-3 text-primary" />
+                        </div>
+                      ))}
+                   </div>
+                   <p className="text-xs font-bold text-slate-500 ml-2">
+                     <span className="text-primary">{totalChecked}</span> permissions successfully configured.
+                   </p>
+                </div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                  You can modify these permissions later in the Roles settings.
+                </p>
+             </div>
+           </div>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #cbd5e1;
+        }
+      `}</style>
     </div>
   );
 }
+
+const Loader2 = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={cn("animate-spin", className)}
+  >
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
+);
