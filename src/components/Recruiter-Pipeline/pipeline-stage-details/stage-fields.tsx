@@ -56,18 +56,33 @@ export const formatDateTimeForInput = (dateTimeString: string): string => {
   return date ? format(date, "yyyy-MM-dd'T'HH:mm") : "";
 };
 
+// Helper function to map UI stage names to backend stage names (copied from dummy-data to avoid circular dependency)
+const mapUIStageToBackendName = (uiStage: string): string => {
+  const stageMapping: Record<string, string> = {
+    "Client Review": "Client Screening",
+  };
+  return stageMapping[uiStage] || uiStage;
+};
+
 // Helper function to get stage-specific data
 const getStageData = (candidate: any, stageName: string) => {
-  // Handle different naming conventions for stage keys
-  let stageKey = stageName.toLowerCase().replace(/\s+/g, '');
+  // 1. Check if data is already flattened/mapped on the candidate object (Compatibility)
+  const legacyKey = stageName.toLowerCase().replace(/\s+/g, '');
+  const legacyData = candidate[legacyKey] || (stageName === "Client Review" ? candidate.clientScreening : null);
   
-  // Special handling for "Client Review" -> "clientScreening"
-  if (stageName === "Client Review") {
-    stageKey = "clientScreening";
-  }
+  // 2. NEW API: Search stageHistory for the latest entry with data
+  const backendStageName = mapUIStageToBackendName(stageName);
+  const historyEntries = Array.isArray(candidate.stageHistory) ? candidate.stageHistory : [];
   
-  const stageData = candidate[stageKey] || {};
-  return stageData;
+  const latestEntry = historyEntries
+    .filter((h: any) => h.stage === backendStageName || h.stage === stageName)
+    .sort((a: any, b: any) => new Date(b.movedAt).getTime() - new Date(a.movedAt).getTime())[0];
+
+  // Merge legacy for transition, but prefer history data
+  return {
+    ...(legacyData || {}),
+    ...(latestEntry?.data || {})
+  };
 };
 
 // Helper function to format date from API response

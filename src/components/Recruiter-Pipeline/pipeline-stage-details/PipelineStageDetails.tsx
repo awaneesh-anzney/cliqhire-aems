@@ -25,7 +25,11 @@ import {
   StageField,
 } from "./stage-fields";
 import { renderFieldInput } from "./field-inputs";
-import { mapBackendStageToUIStage } from "../dummy-data";
+import { 
+  mapBackendStageToUIStage, 
+  mapUIStageToBackendStage 
+} from "../dummy-data";
+import { updateCandidateStageData } from "@/services/recruitmentPipelineService";
 
 // Helper to get stage key from stage name (for local state only)
 const getStageKey = (stageName: string): string => {
@@ -88,7 +92,9 @@ export function PipelineStageDetails({
   };
 
   const handleConfirmSave = async () => {
-    const candidateId = candidate.id || candidate._id || candidate.candidateId?._id;
+    // ── Get the correct candidate ID for the API call
+    // The API response maps this to candidate.id via the pipeline-mapper
+    const candidateId = candidate.id || candidate._id;
     const hasApiIntegration = pipelineId && candidateId;
 
     const updatedFields: Record<string, any> = {};
@@ -112,21 +118,23 @@ export function PipelineStageDetails({
 
     setIsUpdating(true);
     try {
-      // ── NEW API: PATCH /api/recruiter-pipeline/:pipelineId/candidates/:candidateId/stage-data
+      // ── Using plural service with explicit stage name
+      const backendStage = mapUIStageToBackendStage(displayStage);
       const stageKey = getStageKey(displayStage);
       const existingStageData = candidate[stageKey] || {};
 
-      const response = await RecruiterPipelineService.updateStageData(
+      const response = await updateCandidateStageData(
         pipelineId!,
         candidateId,
         {
+          stage: backendStage,
           data: { ...existingStageData, ...updatedFields },
           notes: `Bulk updated stage details for ${displayStage}`,
         }
       );
 
       if (!response.success) {
-        throw new Error(response.error || "Update failed");
+        throw new Error(response.message || "Update failed");
       }
 
       // Optimistically update local state
@@ -138,7 +146,9 @@ export function PipelineStageDetails({
           ...updatedFields,
         },
       };
-      onUpdateCandidate?.(updatedCandidate);
+      
+      // Notify parent to refresh query
+      await onUpdateCandidate?.(updatedCandidate);
 
       toast.success(`${displayStage} stage details saved`);
       setIsEditingStage(false);
@@ -157,7 +167,10 @@ export function PipelineStageDetails({
   };
 
   const stageMoveInfo = candidate.stageHistory
-    ?.filter((h: any) => mapBackendStageToUIStage(h.stage) === displayStage)
+    ?.filter((h: any) => {
+      const mappedStage = mapBackendStageToUIStage(h.stage);
+      return mappedStage === displayStage;
+    })
     .sort((a: any, b: any) => new Date(b.movedAt).getTime() - new Date(a.movedAt).getTime())[0];
 
   const movedBy = stageMoveInfo?.movedBy?.name || "System";
@@ -225,26 +238,30 @@ export function PipelineStageDetails({
         )}
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent>
         {stageFields.length === 0 ? (
           <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
             <Clock className="h-4 w-4 mr-2" />
             No fields for {displayStage} stage
           </div>
         ) : (
-          stageFields.map((field) => (
-            <div key={field.key} className="flex items-start gap-3">
-              <div className={`p-1.5 rounded-md shrink-0 ${field.color}`}>{field.icon}</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground mb-0.5">{field.label}</p>
-                {isEditingStage ? (
-                  renderFieldInput(field, editValues[field.key] ?? "", (val) => handleUpdateFieldValue(field.key, val))
-                ) : (
-                  <p className="text-sm font-medium truncate">{renderFieldValue(field)}</p>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            {stageFields.map((field) => (
+              <div key={field.key} className="flex items-start gap-3">
+                <div className={`p-1.5 rounded-md shrink-0 ${field.color}`}>{field.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">{field.label}</p>
+                  {isEditingStage ? (
+                    <div className="min-h-[40px]">
+                      {renderFieldInput(field, editValues[field.key] ?? "", (val) => handleUpdateFieldValue(field.key, val))}
+                    </div>
+                  ) : (
+                    <p className="text-sm font-semibold text-slate-700 truncate">{renderFieldValue(field)}</p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </CardContent>
 
