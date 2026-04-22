@@ -23,28 +23,42 @@ export function Header() {
 
   // Determine the back navigation path and label
   const getBackNavigation = () => {
-    if (!pathname) {
-      return { path: "/", label: "Back" };
+    if (!pathname) return { path: "/", label: "Back" };
+    
+    const parts = pathname.split("/").filter(Boolean);
+    if (parts.length > 1) {
+      // If we're deep in a pipeline (e.g., .../candidate/[id]), 
+      // going "one step back" means going back to the pipeline board
+      if (pathname.includes("/candidate/") && parts.length >= 4) {
+        const parentPath = "/" + parts.slice(0, parts.length - 2).join("/");
+        return { path: parentPath, label: "Back to Pipeline" };
+      }
+
+      // Default: Remove the last segment to go "one step back"
+      const parentPath = "/" + parts.slice(0, parts.length - 1).join("/");
+      
+      // Customize label based on context
+      let label = "Back";
+      if (pathname.includes("/reactruterpipeline/")) label = "Back to Pipeline";
+      if (pathname.includes("/clients/")) label = "Back to Clients";
+      if (pathname.includes("/jobs/")) label = "Back to Jobs";
+      if (pathname.includes("/candidates/")) label = "Back to Candidates";
+      
+      return { path: parentPath, label };
     }
-    if (pathname.includes("/reactruterpipeline/")) {
-      return { path: "/reactruterpipeline", label: "Back to Recruiter Pipeline" };
-    }
-    if (pathname.includes("/clients/")) {
-      return { path: "/clients", label: "Back to Clients" };
-    }
-    if (pathname.includes("/jobs/")) {
-      return { path: "/jobs", label: "Back to Jobs" };
-    }
-    if (pathname.includes("/candidates/")) {
-      return { path: "/candidates", label: "Back to Candidates" };
-    }
-    // Add more routes as needed
+    
     return { path: "/", label: "Back" };
   };
 
   const handleBack = () => {
-    const { path } = getBackNavigation();
-    router.push(path);
+    // Attempt to go back in history first for better UX
+    // but fallback to calculated path if history is unavailable
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      const { path } = getBackNavigation();
+      router.push(path);
+    }
   };
 
   const handleAvatarClick = () => {

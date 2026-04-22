@@ -288,13 +288,6 @@ export default function CandidatePipelineDetailsPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] bg-[#F8FAFC] pb-2 flex flex-col">
       <div className="w-full px-2 mt-2 space-y-3">
-        <div 
-          className="flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors cursor-pointer w-fit -ml-1 py-1" 
-          onClick={() => router.push(`/reactruterpipeline/${pipelineId}`)}
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back to Pipeline
-        </div>
         
         <CandidateHeaderCard 
           candidate={candidate} 
