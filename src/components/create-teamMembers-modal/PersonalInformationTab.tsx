@@ -151,7 +151,7 @@ export function PersonalInformationTab({
         <div className="space-y-2">
           <Label htmlFor="phone">Phone Number</Label>
           <PhoneInput
-            countryCode={formData.countryCode || "IN"}
+            countryCode={formData.countryCode || "SA"}
             onCountryCodeChange={(code) => handleInputChange("countryCode", code)}
             phoneNumber={formData.phone || ""}
             onPhoneNumberChange={(value) => handleInputChange("phone", value || "")}

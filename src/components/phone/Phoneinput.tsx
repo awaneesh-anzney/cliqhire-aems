@@ -42,7 +42,7 @@ export default function PhoneInput({
   phoneNumber,
   onPhoneNumberChange,
   onRawChange,
-  defaultCountry = "IN",
+  defaultCountry = "SA",
   label,
   required = false,
   disabled = false,
@@ -52,7 +52,7 @@ export default function PhoneInput({
 }: PhoneInputProps) {
   // ── State ────────────────────────────────────────────────────────────────
   const [selectedCountry, setSelectedCountry] = useState<Country>(
-    () => getCountryByCode(countryCode || defaultCountry) || getCountryByCode("IN")!
+    () => getCountryByCode(countryCode || defaultCountry) || getCountryByCode("SA")!
   );
   
   // Internal state used if specific props aren't provided

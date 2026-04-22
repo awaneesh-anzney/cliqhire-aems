@@ -37,7 +37,7 @@ export function EditPrimaryContactDialog({ open, onOpenChange, contact, onSave }
       setLastName(contact.lastName || (contact.name ? contact.name.split(' ').slice(1).join(' ') : ''));
       setEmail(contact.email || '');
       setPhone(contact.phone || '');
-      setCountryCode(contact.countryCode || '966');
+      setCountryCode(contact.countryCode || 'SA');
       setLinkedin(contact.linkedin || '');
     }
   }, [contact, open]);

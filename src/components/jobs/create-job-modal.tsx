@@ -49,6 +49,7 @@ const jobStages: JobStage[] = [
 ]
 
 const currencies = [
+  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', flag: 'SA' },
   { code: 'USD', symbol: '$', name: 'US Dollar', flag: 'US' },
   { code: 'EUR', symbol: '€', name: 'Euro', flag: 'EU' },
   { code: 'GBP', symbol: '£', name: 'British Pound', flag: 'GB' },
@@ -58,7 +59,6 @@ const currencies = [
   { code: 'CHF', symbol: 'Fr', name: 'Swiss Franc', flag: 'CH' },
   { code: 'CNY', symbol: '¥', name: 'Chinese Yuan', flag: 'CN' },
   { code: 'INR', symbol: '₹', name: 'Indian Rupee', flag: 'IN' },
-  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', flag: 'SA' },
   { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', flag: 'AE' },
   { code: 'KWD', symbol: 'د.ك', name: 'Kuwaiti Dinar', flag: 'KW' },
   { code: 'BHD', symbol: '.د.ب', name: 'Bahraini Dinar', flag: 'BH' },
