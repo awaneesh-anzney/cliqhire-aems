@@ -84,6 +84,16 @@ export function Sidebar() {
             ) : (
               <SidebarMenu className="group-data-[collapsible=icon]:gap-1 space-y-1.5">
                 {SIDEBAR_MODULES.filter((item) => {
+                  // Hide specific modules for Admin
+                  if (
+                    isAdmin &&
+                    ["recruiter", "today_tasks", "headhunter"].includes(
+                      item.moduleKey
+                    )
+                  ) {
+                    return false;
+                  }
+
                   if (item.alwaysVisible) return true;
                   if (isAdmin) return true;
                   return hasPermission(item.moduleKey, "view");
