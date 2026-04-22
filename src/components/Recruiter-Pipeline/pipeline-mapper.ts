@@ -21,12 +21,17 @@ function getStageDataFromHistory(
   stageName: string
 ): Record<string, any> {
   if (!Array.isArray(stageHistory)) return {};
-  // Take the last entry that matches the stage name (most recent)
   const entries = stageHistory.filter(
     (h) => h.stage?.toLowerCase() === stageName.toLowerCase()
   );
   if (entries.length === 0) return {};
-  return entries[entries.length - 1]?.data || {};
+
+  // The API usually returns descending (newest first). 
+  // We sort ascending to ensure the 'last' entry is truly the most recent.
+  const sorted = [...entries].sort((a, b) => 
+    new Date(a.movedAt || 0).getTime() - new Date(b.movedAt || 0).getTime()
+  );
+  return sorted[sorted.length - 1]?.data || {};
 }
 
 /**
@@ -262,8 +267,15 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     notes: data.notes || (stageHistory.length > 0 ? stageHistory[stageHistory.length - 1].notes : ""),
     addedAt: data.addedAt,
     lastUpdated: data.lastUpdated,
-    stageHistory,
-    rejectionHistory: data.rejectionHistory || [],
+    stageHistory: stageHistory.map((h: any) => ({
+      ...h,
+      stage: mapBackendStageToUIStage(h.stage),
+    })),
+    rejectionHistory: (data.rejectionHistory || []).map((rej: any) => ({
+      ...rej,
+      rejectedAt: rej.rejectionDate || rej.rejectedAt,
+      stage: mapBackendStageToUIStage(rej.stage),
+    })),
     sourcing: sourcingData,
     screening: screeningData,
     clientScreening: clientReviewData,
@@ -272,9 +284,29 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     onboarding: onboardingData,
     hired: hiredData,
     disqualified: disqualifiedData,
-    source: sourcingData?.connection || "",
-    connection: sourcingData?.connection || ""
+    source: sourcingData?.connection || candidateInfo?.source || "",
+    connection: sourcingData?.connection || candidateInfo?.source || ""
   } as any;
+
+  // If candidate is disqualified and no explicit disqualified data in history,
+  // try to infer it from the last history entry or current state
+  if ((data.currentStatus === 'Disqualified' || data.status === 'Disqualified') && (!candidate.disqualified || Object.keys(candidate.disqualified).length === 0)) {
+    // Sort history by date ascending to get the absolute latest status
+    const sortedHistory = [...stageHistory].sort((a, b) => 
+      new Date(a.movedAt || 0).getTime() - new Date(b.movedAt || 0).getTime()
+    );
+    const lastHistory = sortedHistory[sortedHistory.length - 1];
+    const lastRejection = data.rejectionHistory?.[data.rejectionHistory.length - 1];
+    
+    candidate.disqualified = {
+      disqualificationStage: mapBackendStageToUIStage(lastRejection?.stage || lastHistory?.stage || data.currentStage || "Sourcing"),
+      disqualificationStatus: lastHistory?.status || data.currentStatus || "Disqualified",
+      disqualificationReason: lastRejection?.rejectionReason || lastHistory?.notes || data.notes || "No reason provided",
+      disqualificationFeedback: lastRejection?.feedback || lastHistory?.data?.feedback || "",
+      disqualifiedAt: lastRejection?.rejectionDate || lastHistory?.movedAt || data.lastUpdated,
+      disqualifiedBy: lastRejection?.rejectedBy || lastHistory?.movedBy
+    };
+  }
 
   const jobData = data.job || {};
   const job: Job = {
