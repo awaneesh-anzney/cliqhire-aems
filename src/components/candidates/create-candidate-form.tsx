@@ -259,6 +259,22 @@ export default function CreateCandidateForm({
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-4 min-h-0">
           <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {isTempCandidateConversion && (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-4 mb-6 shadow-sm">
+                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+                  <Info className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-black text-amber-900 uppercase tracking-widest mb-1">Temporary Candidate</h3>
+                  <p className="text-xs text-amber-700 font-bold leading-relaxed">
+                    This candidate was previously added as a temporary entry. Completing this form will convert them into a permanent candidate in your talent pool.
+                  </p>
+                </div>
+                <div className="px-3 py-1 bg-amber-200/50 rounded-full border border-amber-300">
+                  <span className="text-[10px] font-black text-amber-800 uppercase">Action Required</span>
+                </div>
+              </div>
+            )}
             {currentTab === 0 && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

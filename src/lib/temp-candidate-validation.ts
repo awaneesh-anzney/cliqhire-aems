@@ -9,6 +9,18 @@ export interface TempCandidateValidationResult {
 }
 
 /**
+ * Checks if a candidate is a temp candidate
+ * @param candidate - The candidate object
+ * @returns boolean indicating if the candidate is a temp candidate
+ */
+export function isTempCandidate(candidate: any): boolean {
+  return candidate?.candidateId?.isTempCandidate === true || 
+         candidate?.isTempCandidate === true ||
+         candidate?.candidateId?.isTemp === true ||
+         candidate?.isTemp === true;
+}
+
+/**
  * Validates if a candidate's stage can be changed
  * @param candidate - The candidate object
  * @param newStage - The new stage being set (optional)
@@ -21,10 +33,9 @@ export function validateTempCandidateStageChange(
   newStatus?: string
 ): TempCandidateValidationResult {
   // Check if candidate is a temp candidate
-  const isTempCandidate = candidate?.candidateId?.isTempCandidate === true || 
-                         candidate?.isTempCandidate === true;
+  const isTemp = isTempCandidate(candidate);
 
-  if (isTempCandidate) {
+  if (isTemp) {
     // If changing status to "CV Received", allow it and trigger create dialog
     if (newStatus === "CV Received") {
       return {
@@ -57,10 +68,9 @@ export function validateTempCandidateStatusChange(
   newStatus: string
 ): TempCandidateValidationResult {
   // Check if candidate is a temp candidate
-  const isTempCandidate = candidate?.candidateId?.isTempCandidate === true || 
-                         candidate?.isTempCandidate === true;
+  const isTemp = isTempCandidate(candidate);
 
-  if (isTempCandidate) {
+  if (isTemp) {
     // If changing status to "CV Received", allow it and trigger create dialog
     if (newStatus === "CV Received") {
       return {
@@ -79,16 +89,6 @@ export function validateTempCandidateStatusChange(
   return {
     canChangeStage: true
   };
-}
-
-/**
- * Checks if a candidate is a temp candidate
- * @param candidate - The candidate object
- * @returns boolean indicating if the candidate is a temp candidate
- */
-export function isTempCandidate(candidate: any): boolean {
-  return candidate?.candidateId?.isTempCandidate === true || 
-         candidate?.isTempCandidate === true;
 }
 
 /**

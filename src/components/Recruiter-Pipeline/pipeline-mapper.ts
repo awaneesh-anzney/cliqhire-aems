@@ -127,7 +127,7 @@ export function mapEntryToJob(entry: any): Job {
       educationDegree: candidateInfo?.educationDegree,
       primaryLanguage: candidateInfo?.primaryLanguage,
       resume: candidateInfo?.resume,
-      isTempCandidate: candidateInfo?.isTempCandidate || false,
+      isTempCandidate: candidateInfo?.isTempCandidate || candidateInfo?.isTemp || c?.isTemp || false,
       avatar: undefined,
 
       // Meta
@@ -262,7 +262,7 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     country: candidateInfo.country,
     nationality: candidateInfo.nationality,
     resume: candidateInfo.resume,
-    isTempCandidate: candidateInfo.isTempCandidate || false,
+    isTempCandidate: candidateInfo.isTempCandidate || candidateInfo.isTemp || data.isTemp || false,
     priority: data.priority,
     notes: data.notes || (stageHistory.length > 0 ? stageHistory[stageHistory.length - 1].notes : ""),
     addedAt: data.addedAt,
