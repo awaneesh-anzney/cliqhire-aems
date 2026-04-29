@@ -26,6 +26,7 @@ import { mapPipelineCandidateResponse } from "@/components/Recruiter-Pipeline/pi
 import { PipelineStageDetails } from "@/components/Recruiter-Pipeline/pipeline-stage-details/PipelineStageDetails";
 import { useAuth } from "@/contexts/AuthContext";
 import { type Job, type Candidate, pipelineStages, mapUIStageToBackendStage } from "@/components/Recruiter-Pipeline/dummy-data";
+import { usePermissions } from "@/contexts/PermissionContext";
 import { toast } from "sonner";
 
 import { CandidateHeaderCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateHeaderCard";
@@ -51,11 +52,9 @@ export default function CandidatePipelineDetailsPage() {
   const queryClient = useQueryClient();
 
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  const finalPermissions = (user?.permissions && user.permissions.length > 0)
-    ? user.permissions
-    : (user?.defaultPermissions || []);
-  const canModifyPipeline = isAdmin || finalPermissions.includes('RECRUITMENT_PIPELINE_MODIFY');
+  const canModifyPipeline = isAdmin || hasPermission('pipeline', 'edit');
 
   const { data, isLoading, error } = useQuery<{ job: Job; candidate: Candidate } | null>({
     queryKey: ["pipeline", pipelineId, "candidate", candidateId],

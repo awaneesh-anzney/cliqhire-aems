@@ -29,6 +29,7 @@ import { type Candidate, pipelineStages } from "./dummy-data";
 import { candidateService, type Candidate as ApiCandidate } from "@/services/candidateService";
 import { PipelineStageDetails } from "./pipeline-stage-details/PipelineStageDetails";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 interface CandidateDetailsDialogProps {
   candidate: Candidate | null;
@@ -46,11 +47,9 @@ export function CandidateDetailsDialog({
   onCandidateUpdate
 }: CandidateDetailsDialogProps) {
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const isAdmin = user?.role === 'ADMIN';
-  const finalPermissions = (user?.permissions && user.permissions.length > 0)
-    ? user.permissions
-    : (user?.defaultPermissions || []);
-  const canModifyPipeline = isAdmin || finalPermissions.includes('RECRUITMENT_PIPELINE_MODIFY');
+  const canModifyPipeline = isAdmin || hasPermission('pipeline', 'edit');
   const [selectedStage, setSelectedStage] = useState<string | undefined>(undefined);
   const [localCandidate, setLocalCandidate] = useState<any>(candidate);
   
