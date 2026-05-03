@@ -178,8 +178,8 @@ export const clientContactInfoInitialstate = {
 export const CONTRACT_TYPES = [
   "Fix with Advance",
   "Fix without Advance",
-  "Level Based (Hiring)",
-  "Level Based With Advance",
+  "Level Based Hiring",
+  "Level Based Advance Hiring",
 ];
 
 export const CURRENCIES = ["USD", "EUR", "GBP", "SAR", "AED", "INR"];

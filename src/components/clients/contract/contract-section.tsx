@@ -10,8 +10,8 @@ import BusinessForm from "@/components/contract-forms/business-form";
 import ConsultingForm from "@/components/contract-forms/consulting-form";
 import OutsourcingForm from "@/components/contract-forms/outsourcing-form";
 import { ContractInformationTab } from "@/components/contract-forms/new-contract-modal";
-import { deleteContract, updateContract, addContract } from "@/services/clientContractService";
 import { toast } from "sonner";
+import { useClientContracts } from "@/hooks/useClientContracts";
 import { ClientContractInfo } from "@/components/create-client-modal/type";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -56,9 +56,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   const [expandedContract, setExpandedContract] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Add Contract Dialog state
   const [addContractDialogOpen, setAddContractDialogOpen] = useState(false);
@@ -66,8 +64,16 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
     lineOfBusiness: [],
     contractForms: {},
   });
-  const [isAddingContract, setIsAddingContract] = useState(false);
+  
+  const { contractsQuery, addContractMutation, updateContractMutation, deleteContractMutation } = useClientContracts(clientId);
   const queryClient = useQueryClient();
+  
+  const isAddingContract = addContractMutation.isPending;
+  const isSubmitting = updateContractMutation.isPending;
+  const isDeleting = deleteContractMutation.isPending;
+  
+  // Use contracts from the new API if available, fallback to clientData
+  const contractsObj = contractsQuery.data?.data || clientData?.contracts || {};
 
   // Function to map contract data to form data structure
   const mapContractDataToFormData = (contractData: any, businessType: string) => {
@@ -179,7 +185,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   const handleEditContract = (businessType: string) => {
     if (!canModify) return;
     const contractKey = CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
-    const contractData = clientData?.contracts?.[contractKey];
+    const contractData = contractsObj[contractKey];
     const mappedData = mapContractDataToFormData(contractData, businessType);
     setFormData(mappedData);
     setEditDialogOpen(businessType);
@@ -189,24 +195,12 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
     if (!canModify) return;
     if (!editDialogOpen || !clientId) return;
 
-    setIsSubmitting(true);
-
     try {
-      // Get the backend contract type (mapped value) to send to API
       const contractKey = CONTRACT_MAPPING[editDialogOpen as keyof typeof CONTRACT_MAPPING];
-
-      await updateContract(clientId, contractKey, updatedFormData);
-      toast.success(`${editDialogOpen} contract updated successfully!`);
+      await updateContractMutation.mutateAsync({ contractType: contractKey, contractData: updatedFormData });
       setEditDialogOpen(null);
-      // Invalidate client data to refetch updated contract details
-      await queryClient.invalidateQueries({ queryKey: ["clientsData", clientId] });
-      // Optional: Refresh client data to show updated values
-      // You might want to call a refresh function here or update local state
     } catch (error) {
       console.error("Failed to update contract:", error);
-      toast.error(`Failed to update ${editDialogOpen} contract. Please try again.`);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -214,25 +208,12 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
     if (!canModify) return;
     if (!deleteDialogOpen || !clientId) return;
 
-    setIsDeleting(true);
-
     try {
-      // Get the backend contract type (mapped value) to send to API
       const contractKey = CONTRACT_MAPPING[deleteDialogOpen as keyof typeof CONTRACT_MAPPING];
-      await deleteContract(clientId, contractKey);
-
-      toast.success(`${deleteDialogOpen} contract deleted successfully!`);
+      await deleteContractMutation.mutateAsync(contractKey);
       setDeleteDialogOpen(null);
-      // Invalidate client data to refetch and remove deleted contract
-      await queryClient.invalidateQueries({ queryKey: ["clientsData", clientId] });
-
-      // Optional: Refresh client data to remove deleted contract
-      // You might want to call a refresh function here or update local state
     } catch (error) {
       console.error("Failed to delete contract:", error);
-      toast.error(`Failed to delete ${deleteDialogOpen} contract. Please try again.`);
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -260,34 +241,19 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
       return;
     }
 
-    setIsAddingContract(true);
-
     try {
-      // Submit contracts for each selected line of business
       const promises = addContractFormData.lineOfBusiness.map(async (businessType: string) => {
-        // Use businessType as key to access form data (stored by ContractInformationTab)
         const contractFormData = addContractFormData.contractForms[businessType];
         if (contractFormData) {
-          await addContract(
-            clientId,
-            CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING],
-            contractFormData,
-          );
+          const contractKey = CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
+          await addContractMutation.mutateAsync({ contractType: contractKey, contractData: contractFormData });
         }
       });
 
       await Promise.all(promises);
-
-      toast.success("Contract(s) added successfully!");
       handleCloseAddContractDialog();
-
-      // Invalidate client data to show new contracts without page reload
-      await queryClient.invalidateQueries({ queryKey: ["clientsData", clientId] });
     } catch (error) {
       console.error("Failed to add contract:", error);
-      toast.error("Failed to add contract. Please try again.");
-    } finally {
-      setIsAddingContract(false);
     }
   };
 
@@ -317,7 +283,6 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   const lineOfBusiness = clientData.lineOfBusiness || [];
 
   // Determine available contracts from both lineOfBusiness and actual contracts present
-  const contractsObj = clientData?.contracts || {};
   const contractsBusinessTypes = Object.keys(contractsObj)
     .map((key) => {
       const found = Object.entries(CONTRACT_MAPPING).find(([, mappedKey]) => mappedKey === key);
@@ -416,10 +381,10 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         summary.details = `${contractData.fixedPercentage || 0}% + ${contractData.advanceMoneyAmount || 0} ${contractData.advanceMoneyCurrency || "SAR"}`;
       } else if (contractData.ContractType === "Fix without Advance") {
         summary.details = `${contractData.fixedPercentageWithoutAdvance || 0}%`;
-      } else if (contractData.ContractType === "Level Based (Hiring)") {
+      } else if (contractData.ContractType === "Level Based Hiring") {
         const levelTypes = contractData.levelBasedHiring?.levelTypes || [];
         summary.details = `${levelTypes.length} levels configured`;
-      } else if (contractData.ContractType === "Level Based With Advance") {
+      } else if (contractData.ContractType === "Level Based Advance Hiring") {
         const levelTypes = contractData.levelBasedAdvanceHiring?.levelTypes || [];
         summary.details = `${levelTypes.length} levels with advance`;
       }
@@ -491,8 +456,8 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
                   </div>
                 ))}
 
-              {contractData.ContractType === "Level Based (Hiring)" ||
-                (contractData.contractType === "Level Based (Hiring)" &&
+              {contractData.ContractType === "Level Based Hiring" ||
+                (contractData.contractType === "Level Based Hiring" &&
                   contractData.levelBasedHiring?.levelTypes?.length > 0 && (
                     <div>
                       <span className="font-medium text-gray-600">Level Configuration:</span>
@@ -526,8 +491,8 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
                     </div>
                   ))}
 
-              {contractData.ContractType === "Level Based With Advance" ||
-                (contractData.contractType === "Level Based With Advance" &&
+              {contractData.ContractType === "Level Based Advance Hiring" ||
+                (contractData.contractType === "Level Based Advance Hiring" &&
                   contractData.levelBasedAdvanceHiring?.levelTypes?.length > 0 && (
                     <div>
                       <span className="font-medium text-gray-600">
@@ -754,7 +719,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
 
       {availableContracts.map((businessType: string) => {
         const contractKey = CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
-        const contractData = clientData?.contracts?.[contractKey];
+        const contractData = contractsObj[contractKey];
         const summary = getContractSummary(contractData, businessType);
         const isExpanded = expandedContract === businessType;
 

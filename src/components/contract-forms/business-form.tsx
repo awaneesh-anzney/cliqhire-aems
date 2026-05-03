@@ -462,7 +462,7 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
         </div>
       )}
       {/* Level Based Hiring */}
-      {formData.contractType === "Level Based (Hiring)" && (
+      {formData.contractType === "Level Based Hiring" && (
         <div className="w-full">
           <div className="space-y-4 col-span-1 sm:col-span-2 border rounded-lg p-4">
             <div className="space-y-1">
@@ -532,7 +532,7 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
         </div>
       )}
       {/* Level Based With Advance */}
-      {formData.contractType === "Level Based With Advance" && (
+      {formData.contractType === "Level Based Advance Hiring" && (
         <div className="w-full">
           <div className="space-y-4 col-span-1 sm:col-span-2 border rounded-lg p-4">
             <div className="space-y-1">
@@ -577,7 +577,7 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
                           onPercentageChange={(value) =>
                             handleValueChangeAdvance(level, value, "percentage")
                           }
-                          showCurrency={formData.contractType === "Level Based With Advance"}
+                          showCurrency={formData.contractType === "Level Based Advance Hiring"}
                           currencyValue={
                             (
                               formData.levelBasedAdvanceHiring[

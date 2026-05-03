@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   RefreshCcw,
@@ -27,7 +28,6 @@ import { ContactsContent } from "@/components/clients/contacts/contacts-content"
 import { HistoryContent } from "@/components/clients/history/history-content";
 import { JobsContent } from "@/components/clients/jobs/jobs-content";
 import { getClientById, updateClientStage, updateClientStageStatus, ClientStageStatus } from "@/services/clientService";
-import { ContractSection } from "@/components/clients/contract/contract-section";
 import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
 import { useClientById } from "@/hooks/useClient";
 import { useQuery } from "@tanstack/react-query";
@@ -88,6 +88,7 @@ interface PageProps {
 
 export default function ClientPage({ params }: PageProps) {
   const { id } = params;
+  const router = useRouter();
   // const [isLoading, setIsLoading] = useState(false);
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [jobsAvailable, setJobsAvailable] = useState(false);
@@ -442,6 +443,16 @@ export default function ClientPage({ params }: PageProps) {
               />
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 font-medium"
+              onClick={() => router.push(`/clients/${id}/contract`)}
+            >
+              <FilePen className="h-4 w-4 mr-2 text-brand" />
+              View Contract
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -516,14 +527,6 @@ export default function ClientPage({ params }: PageProps) {
           >
             <FileIcon className="h-4 w-4" />
             Summary
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="Contract"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
-          >
-            <FilePen className="h-4 w-4" />
-            Contract Details
           </TabsTrigger>
 
           <TabsTrigger
@@ -603,10 +606,6 @@ export default function ClientPage({ params }: PageProps) {
 
         <TabsContent value="History" className="p-4">
           <HistoryContent clientId={id} />
-        </TabsContent>
-
-        <TabsContent value="Contract" className="p-4">
-          <ContractSection clientId={id} clientData={client} canModify={canModifyClients} />
         </TabsContent>
 
         <TabsContent value="EmailTemplates" className="p-4">

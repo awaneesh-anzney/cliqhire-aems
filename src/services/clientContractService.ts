@@ -1,6 +1,28 @@
 import axios from "axios";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
+// Get all contracts for a client
+export const getClientContracts = async (clientId: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/contracts/client/${clientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching client contracts:", error);
+    throw error;
+  }
+};
+
+// Get single contract type for a client
+export const getContractByType = async (clientId: string, contractType: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/contracts/${clientId}/${contractType}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching ${contractType} contract:`, error);
+    throw error;
+  }
+};
+
 // Update contract API function
 export const updateContract = async (clientId: string, contractType: string, contractData: any) => {
   try {
