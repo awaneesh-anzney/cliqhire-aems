@@ -2,17 +2,14 @@
 
 import { useState } from "react";
 import { ChevronRight, FileText, Calendar, Edit, Trash2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import BusinessForm from "@/components/contract-forms/business-form";
 import ConsultingForm from "@/components/contract-forms/consulting-form";
 import OutsourcingForm from "@/components/contract-forms/outsourcing-form";
-import { ContractInformationTab } from "@/components/contract-forms/new-contract-modal";
-import { toast } from "sonner";
 import { useClientContracts } from "@/hooks/useClientContracts";
-import { ClientContractInfo } from "@/components/create-client-modal/type";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface ContractSectionProps {
@@ -58,17 +55,10 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   const [formData, setFormData] = useState<any>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
 
-  // Add Contract Dialog state
-  const [addContractDialogOpen, setAddContractDialogOpen] = useState(false);
-  const [addContractFormData, setAddContractFormData] = useState<ClientContractInfo>({
-    lineOfBusiness: [],
-    contractForms: {},
-  });
-  
-  const { contractsQuery, addContractMutation, updateContractMutation, deleteContractMutation } = useClientContracts(clientId);
+  const { contractsQuery, updateContractMutation, deleteContractMutation } = useClientContracts(clientId);
   const queryClient = useQueryClient();
+  const router = useRouter();
   
-  const isAddingContract = addContractMutation.isPending;
   const isSubmitting = updateContractMutation.isPending;
   const isDeleting = deleteContractMutation.isPending;
   
@@ -219,42 +209,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
 
   const handleAddContract = () => {
     if (!canModify) return;
-    setAddContractFormData({
-      lineOfBusiness: [],
-      contractForms: {},
-    });
-    setAddContractDialogOpen(true);
-  };
-
-  const handleCloseAddContractDialog = () => {
-    setAddContractDialogOpen(false);
-    setAddContractFormData({
-      lineOfBusiness: [],
-      contractForms: {},
-    });
-  };
-
-  const handleSubmitContract = async () => {
-    if (!canModify) return;
-    if (!clientId || !addContractFormData.lineOfBusiness.length) {
-      toast.error("Please select at least one line of business");
-      return;
-    }
-
-    try {
-      const promises = addContractFormData.lineOfBusiness.map(async (businessType: string) => {
-        const contractFormData = addContractFormData.contractForms[businessType];
-        if (contractFormData) {
-          const contractKey = CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
-          await addContractMutation.mutateAsync({ contractType: contractKey, contractData: contractFormData });
-        }
-      });
-
-      await Promise.all(promises);
-      handleCloseAddContractDialog();
-    } catch (error) {
-      console.error("Failed to add contract:", error);
-    }
+    router.push(`/clients/${clientId}/contract/new`);
   };
 
   const renderEditForm = (businessType: string) => {
@@ -312,32 +267,6 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
             Add Contract
           </Button>
         </div>
-        {/* Add Contract Dialog */}
-        <Dialog open={addContractDialogOpen} onOpenChange={handleCloseAddContractDialog}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add New Contract</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <ContractInformationTab
-                formData={addContractFormData}
-                setFormData={setAddContractFormData}
-              />
-              <div className="flex justify-end space-x-2 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={handleCloseAddContractDialog}
-                  disabled={isAddingContract}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmitContract} disabled={isAddingContract}>
-                  {isAddingContract ? "Adding Contract..." : "Submit Contract"}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </>
     );
   }
@@ -411,7 +340,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
     if (!contractData) return null;
 
     return (
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg border space-y-3">
+      <div className="p-2 bg-gray-50 rounded-lg border space-y-3">
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <span className="font-medium text-gray-600">Contract Type:</span>
@@ -722,12 +651,34 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         const contractData = contractsObj[contractKey];
         const summary = getContractSummary(contractData, businessType);
         const isExpanded = expandedContract === businessType;
+        const isEditing = editDialogOpen === businessType;
 
         return (
           <div key={businessType} className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
             <div className="p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
+              {isEditing ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b pb-4 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Edit {businessType} Contract</h3>
+                  </div>
+                  {renderEditForm(businessType)}
+                  <div className="flex justify-end space-x-2 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setEditDialogOpen(null)}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={() => handleFormSubmit(formData)} disabled={isSubmitting || !canModify}>
+                      {isSubmitting ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
                   <div className="flex items-center space-x-3">
                     <h3 className="text-sm font-semibold text-gray-800">{businessType} Contract</h3>
                     <Badge variant="secondary" className="text-xs">
@@ -803,34 +754,12 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               </div>
 
               {isExpanded && renderContractDetails(contractData, businessType)}
+                </>
+              )}
             </div>
           </div>
         );
       })}
-
-      {/* Edit Contract Dialog */}
-      <Dialog open={!!editDialogOpen} onOpenChange={(open) => !open && setEditDialogOpen(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit {editDialogOpen} Contract</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {editDialogOpen && renderEditForm(editDialogOpen)}
-            <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setEditDialogOpen(null)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button onClick={() => handleFormSubmit(formData)} disabled={isSubmitting || !canModify}>
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Contract Confirmation Dialog */}
       <ConfirmDialog
@@ -845,33 +774,6 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         disabled={!canModify}
         confirmVariant="destructive"
       />
-
-      {/* Add Contract Dialog */}
-      <Dialog open={addContractDialogOpen} onOpenChange={handleCloseAddContractDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Contract</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <ContractInformationTab
-              formData={addContractFormData}
-              setFormData={setAddContractFormData}
-            />
-            <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={handleCloseAddContractDialog}
-                disabled={isAddingContract}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleSubmitContract} disabled={isAddingContract || !canModify}>
-                {isAddingContract ? "Adding Contract..." : "Submit Contract"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -58,18 +58,15 @@ export default function ClientContractPage({ params }: PageProps) {
 
   return (
     <div className="flex flex-col h-full bg-slate-50/30">
-      <div className="border-b bg-white py-4 px-6 flex items-center justify-between sticky top-0 z-10">
+      <div className="border-b bg-white py-2 px-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full hover:bg-slate-100">
-            <ArrowLeft className="h-5 w-5 text-slate-600" />
-          </Button>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">Contract Details</h1>
-            <p className="text-sm text-slate-500">{client.name}</p>
+            <h1 className="text-md font-bold text-slate-800">Contract Details</h1>
+            <p className="text-xs text-slate-500 truncate w-40">{client.name}</p>
           </div>
         </div>
       </div>
-      <div className="flex-1 p-6 max-w-7xl mx-auto w-full">
+      <div className="flex-1 p-2 w-full">
         <ContractSection clientId={id} clientData={client} canModify={canModifyClients} />
       </div>
     </div>
