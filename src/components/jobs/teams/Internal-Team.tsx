@@ -135,157 +135,177 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
   );
 
   return (
-    <div className="bg-white rounded-lg border px-4 py-4 h-[56vh] overflow-y-auto">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden flex flex-col h-full min-h-[500px]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-brand/10 rounded-lg">
+            <Users className="h-4 w-4 text-brand" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-slate-800">Internal Team</h2>
+            {totalAssigned > 0 && (
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                {totalAssigned} Members Assigned
+              </p>
+            )}
+          </div>
+        </div>
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-gray-500" />
-          <h2 className="text-sm font-semibold">Internal Team</h2>
-          {totalAssigned > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {totalAssigned} assigned
-            </Badge>
+          {teamError && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
+              onClick={() => refetchTeam()}
+            >
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              Retry
+            </Button>
           )}
         </div>
-        {teamError && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs text-gray-500"
-            onClick={() => refetchTeam()}
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Retry
-          </Button>
-        )}
       </div>
 
-      {/* Soft warning if positions API failed (defaults are being used) */}
-      {positionsError && (
-        <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
-          <AlertCircle className="h-3 w-3 shrink-0" />
-          <span>
-            Could not load positions from server — using defaults.{" "}
-            <button className="underline" onClick={() => refetchPositions()}>
-              Retry
-            </button>
-          </span>
-        </div>
-      )}
+      <div className="flex-1 overflow-auto p-5">
+        {/* Soft warning if positions API failed */}
+        {positionsError && (
+          <div className="flex items-center gap-2 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-100 rounded-lg p-3 mb-4">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>
+              Using default positions — server sync failed.{" "}
+              <button className="underline hover:text-amber-700 ml-1" onClick={() => refetchPositions()}>
+                Retry sync
+              </button>
+            </span>
+          </div>
+        )}
 
-      {/* Position cards */}
-      <div className="space-y-3">
-        {positions.map((pos) => {
-          const assignedUsers = getUsersForPos(pos.name);
-          const isFull =
-            pos.maxUsers !== null && assignedUsers.length >= pos.maxUsers;
-          const colorClass =
-            POSITION_COLORS[pos.name] || "text-gray-700 bg-gray-50 border-gray-200";
+        {/* Position cards */}
+        <div className="space-y-6">
+          {positions.map((pos) => {
+            const assignedUsers = getUsersForPos(pos.name);
+            const isFull =
+              pos.maxUsers !== null && assignedUsers.length >= pos.maxUsers;
+            const colorClass =
+              POSITION_COLORS[pos.name] || "text-slate-700 bg-slate-50 border-slate-200";
 
-          return (
-            <div
-              key={pos._id || pos.name}
-              className="border rounded-lg p-4 space-y-2"
-            >
-              {/* Row: label + button */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${colorClass}`}
-                  >
-                    {pos.label}
-                  </span>
-                  {pos.maxUsers !== null && (
-                    <span className="text-xs text-gray-400">
-                      {assignedUsers.length}/{pos.maxUsers}
+            return (
+              <div
+                key={pos._id || pos.name}
+                className="space-y-3"
+              >
+                {/* Row: label + button */}
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-[0.05em] px-2.5 py-1 rounded-md border ${colorClass}`}
+                    >
+                      {pos.label}
                     </span>
+                    {pos.maxUsers !== null && (
+                      <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                        {assignedUsers.length} / {pos.maxUsers}
+                      </span>
+                    )}
+                  </div>
+
+                  {canModify && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-[10px] font-bold uppercase text-brand hover:bg-brand/10 transition-colors"
+                      onClick={() =>
+                        setEditState({
+                          position:      pos.name,
+                          positionLabel: pos.label,
+                          maxUsers:      pos.maxUsers,
+                          currentUserIds: assignedUsers.map((u) => u._id),
+                        })
+                      }
+                      disabled={isAssigning || isRemoving}
+                    >
+                      {isAssigning ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                      ) : assignedUsers.length === 0 ? (
+                        <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                      ) : (
+                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                      {assignedUsers.length === 0
+                        ? "Assign"
+                        : isFull
+                        ? "Change"
+                        : "Manage"}
+                    </Button>
                   )}
                 </div>
 
-                {canModify && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                    onClick={() =>
-                      setEditState({
-                        position:      pos.name,
-                        positionLabel: pos.label,
-                        maxUsers:      pos.maxUsers,
-                        currentUserIds: assignedUsers.map((u) => u._id),
-                      })
-                    }
-                    disabled={isAssigning || isRemoving}
-                  >
-                    {isAssigning ? (
-                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    ) : assignedUsers.length === 0 ? (
-                      <UserPlus className="h-3 w-3 mr-1" />
-                    ) : (
-                      <Pencil className="h-3 w-3 mr-1" />
-                    )}
-                    {assignedUsers.length === 0
-                      ? "Assign"
-                      : isFull
-                      ? "Change"
-                      : "Edit"}
-                  </Button>
+                {/* Assigned member rows */}
+                {assignedUsers.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {assignedUsers.map((user) => (
+                      <div
+                        key={user._id}
+                        className="flex items-center justify-between bg-white border border-slate-100 rounded-xl p-3 shadow-sm hover:border-slate-200 transition-all group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs border border-slate-200">
+                            {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-900 truncate">
+                              {user.firstName} {user.lastName}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <p className="text-[10px] text-slate-500 truncate max-w-[120px]">
+                                {user.email}
+                              </p>
+                              {user.department && (
+                                <>
+                                  <span className="text-slate-300">•</span>
+                                  <p className="text-[10px] text-brand/70 font-medium truncate">
+                                    {user.department}
+                                  </p>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 ml-2 shrink-0">
+                          {canModify && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() =>
+                                removeFromPosition(pos.name, user._id)
+                              }
+                              disabled={isRemoving}
+                            >
+                              {isRemoving ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          )}
+                          <div className="h-5 w-5 rounded-full bg-green-50 flex items-center justify-center border border-green-100">
+                            <CheckCircle className="h-3 w-3 text-green-500" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-[10px] font-medium text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl py-4 justify-center">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    No {pos.label} assigned yet
+                  </div>
                 )}
               </div>
-
-              {/* Assigned member rows */}
-              {assignedUsers.length > 0 ? (
-                <div className="space-y-2">
-                  {assignedUsers.map((user) => (
-                    <div
-                      key={user._id}
-                      className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {user.firstName} {user.lastName}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {user.email}
-                        </p>
-                        {user.department && (
-                          <p className="text-xs text-gray-400 truncate">
-                            {user.department}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 ml-2 shrink-0">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        {canModify && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-gray-400 hover:text-red-500"
-                            onClick={() =>
-                              removeFromPosition(pos.name, user._id)
-                            }
-                            disabled={isRemoving}
-                          >
-                            {isRemoving ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3 w-3" />
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-xs text-gray-400 italic py-1">
-                  <AlertCircle className="h-3 w-3" />
-                  Not assigned
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Assignment dialog */}

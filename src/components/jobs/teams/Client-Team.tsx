@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, UserPlus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, UserPlus, Users, Building2, Briefcase, Mail, Phone, Linkedin, Loader2, AlertCircle } from "lucide-react";
 import { getJobById, getPrimaryContactsByJobId, updateJobPrimaryContacts } from "@/services/jobService";
 import { getClientById } from "@/services/clientService";
 import { AddContactModal } from "@/components/clients/modals/add-contact-modal";
@@ -91,115 +92,128 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
   const isNewContact = (contact: any) => newContacts.some((nc) => nc._id === contact._id);
 
   return (
-    <div className="bg-white rounded-lg border px-4 py-4 h-[56vh] flex flex-col overflow-y-auto">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Client Team</h2>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden flex flex-col h-full min-h-[500px]">
+      <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-brand/10 rounded-lg">
+            <Building2 className="w-4 h-4 text-brand" />
+          </div>
+          <h2 className="text-base font-semibold text-slate-800">Client Team</h2>
+        </div>
         <Button
           variant="default"
           size="sm"
-          className="gap-1"
-          disabled={!canModify}
+          className="bg-brand hover:bg-brand/90 text-white rounded-lg px-4"
+          disabled={!canModify || loading}
           onClick={() => {
             if (!canModify) return;
             setShowPrimaryContactsDialog(true);
           }}
         >
-          <Plus className="w-4 h-4" />
-          Add Primary Contacts
+          <Plus className="w-4 h-4 mr-2" />
+          Manage Contacts
         </Button>
       </div>
-      <div className="flex-1 overflow-auto mt-2">
-        {error && <div className="text-red-500 text-sm">{error}</div>}
-        {/* Show empty state if no contacts */}
+
+      <div className="flex-1 overflow-auto p-5">
+        {error && (
+          <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg mb-4">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+        )}
+        
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-brand animate-spin" />
+          </div>
+        )}
+
         {(() => {
-          // Show selected contacts (from allClientContacts if present, else from jobContacts)
+          if (loading) return null;
+          
           const selected = selectedContactIds
             .map(id =>
               allClientContacts.find(c => c._id === id) ||
               jobContacts.find(c => c._id === id)
             )
             .filter(Boolean);
+
           if (selected.length === 0 && !error) {
             return (
-              <div className="flex flex-col items-center justify-center h-[calc(100%-50px)] text-gray-500 text-sm py-8">
-                <UserPlus className="w-10 h-10 mb-2" />
-                <span className="text-base">
-                  Add primary contact related to this job.
-                </span>
+              <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                <div className="p-4 bg-slate-50 rounded-full mb-4">
+                  <UserPlus className="w-12 h-12 text-slate-200" />
+                </div>
+                <h3 className="text-sm font-medium text-slate-900 mb-1">No Primary Contacts</h3>
+                <p className="text-xs text-slate-500 max-w-[200px] text-center">
+                  Add team members from the client side who are involved in this job.
+                </p>
               </div>
             );
           }
+
           return (
-            <div className="space-y-2">
-              <Label className="mb-2 block text-sm">
-                Team involved from client Side to handle this job
-              </Label>
-              {selected.map((contact: any) => (
-                <div key={contact._id} className="p-3 rounded-md border bg-gray-50">
-                  <div className="flex gap-6">
-                    <div>
-                      <div>
-                        <span className="text-xs font-semibold text-gray-500 mr-1">Name:</span>
-                        <span className="text-sm text-muted-foreground">
-                          {contact.firstName || contact.lastName
-                            ? `${contact.firstName || ""} ${contact.lastName || ""}`.trim()
-                            : contact.name || "Unnamed Contact"}
-                        </span>
-                      </div>
+            <div className="space-y-4">
+              <p className="text-xs font-medium text-slate-500 mb-4 flex items-center gap-2">
+                <Users className="w-3.5 h-3.5" />
+                Stakeholders from {jobData.client.name}
+              </p>
+              
+              <div className="grid grid-cols-1 gap-4">
+                {selected.map((contact: any) => (
+                  <div key={contact._id} className="p-4 rounded-xl border border-slate-100 bg-white shadow-sm hover:border-brand/20 transition-all group">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand transition-colors">
+                            {contact.firstName || contact.lastName
+                              ? `${contact.firstName || ""} ${contact.lastName || ""}`.trim()
+                              : contact.name || "Unnamed Contact"}
+                          </h4>
+                          <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
+                            <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                            {contact.position || "Stakeholder"}
+                          </p>
+                        </div>
 
-                      <div>
-                        <span className="text-xs font-semibold text-gray-500 mr-1">Position:</span>
-                        <span className="text-sm text-muted-foreground">
-                          {contact.position || "—"}
-                        </span>
-                      </div>
-
-                      <div>
-                        <span className="text-xs font-semibold text-gray-500 mr-1">Email:</span>
-                        <span className="text-sm text-muted-foreground">
-                          {contact.email || "—"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div>
-                        <span className="text-xs font-semibold text-gray-500 mr-1">Gender:</span>
-                        <span className="text-sm text-muted-foreground">
-                          {contact.gender || "—"}
-                        </span>
-                      </div>
-
-                      <div>
-                        <span className="text-xs font-semibold text-gray-500 mr-1">LinkedIn:</span>
-                        <span className="text-sm text-muted-foreground">
-                          {contact.linkedin ? (
-                            <a
-                              href={contact.linkedin}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-500 hover:underline"
-                            >
-                              {contact.linkedin}
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                            <Mail className="w-3.5 h-3.5 text-slate-400" />
+                            <a href={`mailto:${contact.email}`} className="hover:text-brand hover:underline">
+                              {contact.email || "—"}
                             </a>
-                          ) : (
-                            "No LinkedIn"
-                          )}
-                        </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                            <Phone className="w-3.5 h-3.5 text-slate-400" />
+                            <span>
+                              {getCountryCodeLabel(contact.countryCode || "")} {contact.phone || "No phone"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
 
-                      <div>
-                        <span className="text-xs font-semibold text-gray-500 mr-1">Phone:</span>
-                        <span className="text-sm text-muted-foreground">
-                          {getCountryCodeLabel(contact.countryCode || "")}
-                          <span className="mx-1">-</span>
-                          {contact.phone || "No phone"}
-                        </span>
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 h-full pt-1">
+                        <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200 text-[10px] font-bold uppercase tracking-wider">
+                          {contact.gender || "—"}
+                        </Badge>
+                        
+                        {contact.linkedin && (
+                          <a
+                            href={contact.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 bg-[#0077B5]/10 text-[#0077B5] rounded-md hover:bg-[#0077B5]/20 transition-colors"
+                            title="View LinkedIn Profile"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           );
         })()}
