@@ -13,9 +13,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const getTeamMembers = async (filters?: TeamMemberFilters): Promise<{ teamMembers: TeamMember[] }> => {
   try {
      const response = await api.get('/api/users', { params: filters });
-    if (response.data && response.data.status === 'success') {
+    if (response.data && (response.data.status === 'success' || response.data.success === true)) {
       return {
-        teamMembers: response.data.data.users || []
+        teamMembers: response.data.data?.users || response.data.data || []
       };
     }
     throw new Error(response.data?.message || 'Failed to fetch team members');
@@ -65,8 +65,8 @@ export const createTeamMember = async (teamMemberData: CreateTeamMemberData | Fo
       response = await api.post('/api/users/add-member', teamMemberData);
     }
     
-    if (response.data && response.data.status === 'success') {
-      return response.data.data.user || response.data.data;
+    if (response.data && (response.data.status === 'success' || response.data.success === true)) {
+      return response.data.data?.user || response.data.data;
     }
     throw new Error(response.data?.message || 'Failed to create team member');
   } catch (error: any) {
@@ -173,7 +173,7 @@ export const updateTeamMember = async (teamMemberData: UpdateTeamMemberData): Pr
 export const deleteTeamMember = async (id: string): Promise<void> => {
   try {  
     const response = await api.delete(`/api/users/${id}`);
-    if (!response.data || response.data.status !== 'success') {
+    if (!response.data || (response.data.status !== 'success' && response.data.success !== true)) {
       throw new Error(response.data?.message || 'Failed to delete team member');
     }
   } catch (error: any) {
@@ -291,7 +291,7 @@ export const getTeamMemberStats = async (id: string): Promise<{
   try {
     const response = await api.get(`/api/users/${id}/stats`);
     
-    if (response.data && response.data.status === 'success') {
+    if (response.data && (response.data.status === 'success' || response.data.success === true)) {
       return response.data.data;
     }
     throw new Error(response.data?.message || 'Failed to fetch team member stats');
