@@ -15,6 +15,8 @@ import {
   Mail,
   FileText,
   Download,
+  MapPin,
+  Forklift,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios-config"; // Import directly as used in jobs-content
@@ -417,75 +419,87 @@ export default function ClientPage({ params }: PageProps) {
       />
 
       {/* Header Section */}
-      <div className="border-b bg-brand/6 py-4 px-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">{client.name || "Unnamed Client"}</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              {client.industry && <span>{client.industry}</span>}
-              {client.industry && (client.address || client.location) && <span>•</span>}
-              {(client.address || client.location) && (
-                <span>{client.address || client.location}</span>
-              )}
-              {(client.industry || client.address || client.location) && <span>•</span>}
-              <ClientStageBadge
-                id={client._id}
-                stage={client.clientStage || "Lead"}
-                onStageChange={handleStageChange}
-                disabled={!canModifyClients}
-              />
-              <ClientStageStatusBadge
-                id={client._id}
-                status={(client.clientSubStage || "") as any}
-                stage={client.clientStage || "Lead"}
-                onStatusChange={handleStageStatusChange}
-                disabled={!canModifyClients}
-              />
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-6 py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{client.name || "Unnamed Client"}</h1>
+                <div className="flex items-center gap-2">
+                  <ClientStageBadge
+                    id={client._id}
+                    stage={client.clientStage || "Lead"}
+                    onStageChange={handleStageChange}
+                    disabled={!canModifyClients}
+                  />
+                  <ClientStageStatusBadge
+                    id={client._id}
+                    status={(client.clientSubStage || "") as any}
+                    stage={client.clientStage || "Lead"}
+                    onStatusChange={handleStageStatusChange}
+                    disabled={!canModifyClients}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-slate-500">
+                {client.industry && (
+                  <div className="flex items-center gap-1.5">
+                    <Forklift className="h-4 w-4 text-slate-400" />
+                    <span>{client.industry}</span>
+                  </div>
+                )}
+                {(client.address || client.location) && (
+                  <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
+                    <MapPin  className="h-4 w-4 text-slate-400" />
+                    <span className="truncate max-w-xs">{ client.location ||client.address}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
+                  <RefreshCcw 
+                    className={`h-4 w-4 text-brand cursor-pointer hover:rotate-180 transition-transform duration-500 ${isLoading ? "animate-spin" : ""}`} 
+                    onClick={handleRefresh}
+                  />
+                  <span className="text-slate-400">Last updated: Just now</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 font-medium"
-              onClick={() => router.push(`/clients/${id}/contract`)}
-            >
-              <FilePen className="h-4 w-4 mr-2 text-brand" />
-              View Contract
-            </Button>
+
+            <div className="flex items-center gap-3">
+              <Button
+                className="bg-brand text-white hover:bg-brand/90 font-semibold shadow-md px-6 h-11 transition-all active:scale-95"
+                onClick={() => router.push(`/clients/${id}/contract`)}
+              >
+                <FilePen className="h-4 w-4 mr-2" />
+                View Contract
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Button Bar */}
-      <div className="flex items-center justify-between p-4 border-b">
-        {canModifyJobs && (
-          <Button
-            className="bg-brand text-brand-foreground hover:bg-brand/90 rounded-md flex items-center gap-2"
-            onClick={() => setIsCreateJobOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-            Create Job Requirement
-          </Button>
-        )}
+      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-slate-50/50 border-b gap-4">
+        <div className="flex items-center gap-3">
+          {canModifyJobs && (
+            <Button
+              className="bg-brand text-brand-foreground hover:bg-brand/90 rounded-lg flex items-center gap-2 h-10 px-5 shadow-sm transition-all active:scale-95"
+              onClick={() => setIsCreateJobOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              Create Job Requirement
+            </Button>
+          )}
+        </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border rounded-md flex items-center gap-2"
-            onClick={handleRefresh}
-            disabled={isLoading}
-          >
-            <RefreshCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-
+        <div className="flex items-center gap-3">
           {jobsAvailable &&
             (reportStatus === "idle" ? (
               <Button
                 ref={buttonRef}
                 size="sm"
-                className="w-50"
+                variant="outline"
+                className="h-10 px-5 border-slate-200 hover:bg-white hover:text-brand hover:border-brand transition-all rounded-lg flex items-center gap-2 shadow-sm"
                 onClick={handleGenerateReportClick}
               >
                 <FileText className="h-4 w-4" />
@@ -493,26 +507,26 @@ export default function ClientPage({ params }: PageProps) {
               </Button>
             ) : reportStatus === "generating" ? (
               <div
-                className="relative h-8 rounded-md bg-gray-200 overflow-hidden inline-flex items-center justify-center px-3"
-                style={{ width: buttonWidth ? `${buttonWidth}px` : "auto", maxWidth: "200px" }}
+                className="relative h-10 rounded-lg bg-slate-200 overflow-hidden inline-flex items-center justify-center px-4"
+                style={{ width: buttonWidth ? `${buttonWidth}px` : "auto", minWidth: "180px" }}
               >
                 <div
                   className="absolute left-0 top-0 h-full bg-brand transition-all duration-100 ease-linear"
                   style={{ width: `${reportProgress}%` }}
                 />
-                <div className="relative z-10 flex items-center gap-2 text-xs font-medium text-gray-700 whitespace-nowrap">
+                <div className="relative z-10 flex items-center gap-2 text-xs font-semibold text-white whitespace-nowrap">
                   <Loader className="h-4 w-4 animate-spin" />
-                  Generating...
+                  Generating ({reportProgress}%)
                 </div>
               </div>
             ) : (
               <Button
                 size="sm"
-                className="w-50 bg-brand text-brand-foreground hover:bg-brand/90"
+                className="h-10 px-5 bg-green-600 text-white hover:bg-green-700 rounded-lg flex items-center gap-2 shadow-sm animate-in fade-in zoom-in duration-300"
                 onClick={handleDownloadReport}
               >
                 <Download className="h-4 w-4" />
-                Download Weekly Report
+                Download Report
               </Button>
             ))}
         </div>

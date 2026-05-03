@@ -6,15 +6,10 @@ import { TeamMember } from "./team-member";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { FileUploadRow } from "./file-upload-row";
-import { AddTeamMemberModal } from "../modals/add-team-member-modal";
-import { AddContactModal } from "../modals/add-contact-modal";
-import { EditDescriptionModal } from "../modals/edit-description-modal";
 import { FileUploadModal } from "../modals/file-upload-modal";
-import { Plus, Pencil, ChevronsUpDown, X, FileText, FilePen, StickyNote } from "lucide-react";
+import { FileText, Users } from "lucide-react";
 import { SalesInfo } from "./sales/salesInfo";
 import { toast } from "sonner";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import ContractOverview from "./contract-overview";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getFileType, ClientDetails, PrimaryContact, TeamMemberType, ContactType } from "./summaryType";
 import { api } from "@/lib/axios-config";
@@ -41,9 +36,6 @@ export function SummaryContent({
   const [teamMembers, setTeamMembers] = useState<TeamMemberType[]>([
     { name: "Shaswat singh", role: "Admin", email: "shaswat@example.com", isActive: true },
   ]);
-  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
   const [previewFileUrl, setPreviewFileUrl] = useState("");
   const [previewFileName, setPreviewFileName] = useState("");
@@ -239,283 +231,207 @@ export function SummaryContent({
   ];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-2 bg-slate-50/50 rounded-2xl">
-      {/* Left Column: Details */}
-      <div className="space-y-6">
-        <Collapsible
-          defaultOpen
-          className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden"
-        >
-          <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
-            <div className="flex items-center gap-3">
+    <div className="p-2 bg-slate-50/50 rounded-2xl">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column: Engagement & Basic Info */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <FileText className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Client Details</h4>
+              <h4 className="text-base font-semibold text-slate-800">Engagement & Identity</h4>
             </div>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-xs hover:bg-slate-200/50 transition-colors">
-                Toggle Details
-                <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50" />
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <div className="p-5">
-            <div className="space-y-4">
-              <DetailRow
-                label="Sales Lead (Internal)"
-                value={clientData?.salesLead}
-                onUpdate={handleUpdateField("salesLead")}
-                disableInternalEdit={!canModify}
-                customEdit={() => {
-                  if (!canModify) return;
-                  setShowSalesLeadDialog(true);
-                }}
-              />
-              <DetailRow
-                label="Referred By (External)"
-                value={clientData?.referredBy}
-                onUpdate={handleUpdateField("referredBy")}
-                disableInternalEdit={!canModify}
-              />
-
-              <DetailRow
-                label="Client Priority"
-                value={clientData?.clientPriority}
-                onUpdate={handleUpdateField("clientPriority")}
-                options={[
-                  { value: "High", label: "High" },
-                  { value: "Medium", label: "Medium" },
-                  { value: "Low", label: "Low" },
-                ]}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Client Segment"
-                value={clientData?.clientSegment}
-                onUpdate={handleUpdateField("clientSegment")}
-                options={[
-                  { value: "Silver", label: "Silver" },
-                  { value: "Gold", label: "Gold" },
-                  { value: "Premium", label: "Premium" },
-                ]}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Client Name"
-                value={clientData?.name}
-                onUpdate={handleUpdateField("name")}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Client Phone Number"
-                value={clientData?.phoneNumber}
-                onUpdate={handleUpdateField("phoneNumber")}
-                disableInternalEdit={!canModify}
-              />
-            </div>
-          </div>
-          <CollapsibleContent>
-            <div className="px-5 pb-5 pt-2 border-t border-slate-100/60 bg-slate-50/20 space-y-4">
-              <DetailRow
-                label="Client Email(s)"
-                value={clientData?.emails?.join(", ") || ""}
-                onUpdate={handleUpdateEmails}
-                alwaysShowEdit={true}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Client Industry"
-                value={clientData?.industry}
-                onUpdate={handleUpdateField("industry")}
-                disableInternalEdit={true}
-                customInput={
-                  <IndustrySelector
-                    value={clientData?.industry}
-                    onValueChange={handleUpdateField("industry")}
-                    disabled={!canModify}
+            <div className="p-5 space-y-6">
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Engagement Details</h5>
+                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                  <DetailRow
+                    label="Sales Lead (Internal)"
+                    value={clientData?.salesLead}
+                    onUpdate={handleUpdateField("salesLead")}
+                    disableInternalEdit={!canModify}
+                    customEdit={() => {
+                      if (!canModify) return;
+                      setShowSalesLeadDialog(true);
+                    }}
                   />
-                }
-              />
-              <DetailRow
-                label="Client Website"
-                value={clientData?.website}
-                onUpdate={handleUpdateField("website")}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Google Maps Link"
-                value={clientData?.googleMapsLink}
-                onUpdate={handleUpdateField("googleMapsLink")}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Client Location"
-                value={clientData?.location}
-                onUpdate={handleUpdateField("location")}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Client Address"
-                value={clientData?.address}
-                onUpdate={handleUpdateField("address")}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="Country of Business"
-                value={clientData?.countryOfBusiness}
-                onUpdate={handleUpdateField("countryOfBusiness")}
-                disableInternalEdit={!canModify}
-              />
-              <DetailRow
-                label="LinkedIn Profile"
-                value={clientData?.linkedInProfile}
-                onUpdate={handleUpdateField("linkedInProfile")}
-                optional
-                disableInternalEdit={!canModify}
-              />
+                  <DetailRow
+                    label="Referred By (External)"
+                    value={clientData?.referredBy}
+                    onUpdate={handleUpdateField("referredBy")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Client Priority"
+                    value={clientData?.clientPriority}
+                    onUpdate={handleUpdateField("clientPriority")}
+                    options={[
+                      { value: "High", label: "High" },
+                      { value: "Medium", label: "Medium" },
+                      { value: "Low", label: "Low" },
+                    ]}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Client Segment"
+                    value={clientData?.clientSegment}
+                    onUpdate={handleUpdateField("clientSegment")}
+                    options={[
+                      { value: "Silver", label: "Silver" },
+                      { value: "Gold", label: "Gold" },
+                      { value: "Premium", label: "Premium" },
+                    ]}
+                    disableInternalEdit={!canModify}
+                  />
+                </div>
+              </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-100">
-                <h5 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Documents</h5>
-                <FileUploadRow
-                  id="vat-copy-upload"
-                  label="VAT Copy"
-                  className="mb-2"
-                  onFileSelect={canModify ? handleFileUpload("vatCopy") : () => { }}
-                  onUploadClick={canModify ? () => handleOpenFileUploadModal("vatCopy", "VAT Copy") : () => { }}
-                  docUrl={clientData?.vatCopy?.url}
-                  currentFileName={clientData?.vatCopy?.fileName}
-                  onPreview={() =>
-                    handlePreviewFile(
-                      clientData?.vatCopy?.url || "",
-                      clientData?.vatCopy?.fileName,
-                    )
-                  }
-                  onDownload={() => handleDownloadFile(clientData?.vatCopy?.url || "")}
-                />
-                <FileUploadRow
-                  id="cr-copy-upload"
-                  label="CR Copy"
-                  className="mb-2"
-                  onFileSelect={canModify ? handleFileUpload("crCopy") : () => { }}
-                  onUploadClick={canModify ? () => handleOpenFileUploadModal("crCopy", "CR Copy") : () => { }}
-                  docUrl={clientData?.crCopy?.url}
-                  currentFileName={clientData?.crCopy?.fileName}
-                  onPreview={() =>
-                    handlePreviewFile(
-                      clientData?.crCopy?.url || "",
-                      clientData?.crCopy?.fileName,
-                    )
-                  }
-                  onDownload={() => handleDownloadFile(clientData?.crCopy?.url || "")}
-                />
-                <FileUploadRow
-                  id="gst-tin-document-upload"
-                  label="GST IN Doc"
-                  onFileSelect={canModify ? handleFileUpload("gstTinDocument") : () => { }}
-                  onUploadClick={canModify ? () =>
-                    handleOpenFileUploadModal("gstTinDocument", "GST TIN Document") : () => { }}
-                  docUrl={clientData?.gstTinDocument?.url}
-                  currentFileName={clientData?.gstTinDocument?.fileName}
-                  onPreview={() =>
-                    handlePreviewFile(
-                      clientData?.gstTinDocument?.url || "",
-                      clientData?.gstTinDocument?.fileName,
-                    )
-                  }
-                  onDownload={() => handleDownloadFile(clientData?.gstTinDocument?.url || "")}
-                />
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Basic Information</h5>
+                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                  <DetailRow
+                    label="Client Name"
+                    value={clientData?.name}
+                    onUpdate={handleUpdateField("name")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Client Industry"
+                    value={clientData?.industry}
+                    onUpdate={handleUpdateField("industry")}
+                    disableInternalEdit={true}
+                    customInput={
+                      <IndustrySelector
+                        value={clientData?.industry}
+                        onValueChange={handleUpdateField("industry")}
+                        disabled={!canModify}
+                      />
+                    }
+                  />
+                  <DetailRow
+                    label="Client Phone Number"
+                    value={clientData?.phoneNumber}
+                    onUpdate={handleUpdateField("phoneNumber")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Client Email(s)"
+                    value={clientData?.emails?.join(", ") || ""}
+                    onUpdate={handleUpdateEmails}
+                    alwaysShowEdit={true}
+                    disableInternalEdit={!canModify}
+                  />
+                </div>
               </div>
             </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-
-      {/* Right Column: Overview & Description */}
-      <div className="space-y-6">
-        <Collapsible
-          defaultOpen
-          className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden"
-        >
-          <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <FilePen className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-slate-800">Contract Overview</h4>
-            </div>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-xs hover:bg-slate-200/50 transition-colors">
-                Toggle Details
-                <ChevronsUpDown className="w-4 h-4 ml-2 opacity-50" />
-              </Button>
-            </CollapsibleTrigger>
           </div>
-          <CollapsibleContent className="p-5">
-            <ContractOverview
-              lineOfBusiness={clientData.lineOfBusiness}
-              onViewDetails={() => onTabSwitch?.("Contract")}
-            />
-          </CollapsibleContent>
-        </Collapsible>
+        </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md p-5">
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
+        {/* Right Column: Location & Documents */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
               <div className="p-2 bg-brand/10 rounded-lg">
-                <StickyNote className="w-4 h-4 text-brand" />
+                <Users className="w-4 h-4 text-brand" />
               </div>
-              <h2 className="text-base font-semibold text-slate-800">Description</h2>
+              <h4 className="text-base font-semibold text-slate-800">Presence & Compliance</h4>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDescriptionModalOpen(true)}
-              className="hover:bg-brand hover:text-white transition-colors border-brand/20 text-brand"
-            >
-              {clientData?.description ? (
-                <>
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit Description
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Description
-                </>
-              )}
-            </Button>
-          </div>
-          <div className="bg-slate-50/50 rounded-lg p-4 border border-slate-100">
-            {clientData?.description ? (
-              <p className="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">{clientData.description}</p>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-sm text-slate-400 py-6">
-                <StickyNote className="w-8 h-8 mb-2 opacity-20" />
-                <p>No description added yet</p>
+            <div className="p-5 space-y-6">
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Online & Location</h5>
+                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                  <DetailRow
+                    label="Client Website"
+                    value={clientData?.website}
+                    onUpdate={handleUpdateField("website")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="LinkedIn Profile"
+                    value={clientData?.linkedInProfile}
+                    onUpdate={handleUpdateField("linkedInProfile")}
+                    optional
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Google Maps"
+                    value={clientData?.googleMapsLink}
+                    onUpdate={handleUpdateField("googleMapsLink")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Location"
+                    value={clientData?.location}
+                    onUpdate={handleUpdateField("location")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Address"
+                    value={clientData?.address}
+                    onUpdate={handleUpdateField("address")}
+                    disableInternalEdit={!canModify}
+                  />
+                </div>
               </div>
-            )}
+
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Compliance Documents</h5>
+                <div className="grid grid-cols-1 gap-3">
+                  <FileUploadRow
+                    id="vat-copy-upload"
+                    label="VAT Copy"
+                    onFileSelect={canModify ? handleFileUpload("vatCopy") : () => { }}
+                    onUploadClick={canModify ? () => handleOpenFileUploadModal("vatCopy", "VAT Copy") : () => { }}
+                    docUrl={clientData?.vatCopy?.url}
+                    currentFileName={clientData?.vatCopy?.fileName}
+                    onPreview={() =>
+                      handlePreviewFile(
+                        clientData?.vatCopy?.url || "",
+                        clientData?.vatCopy?.fileName,
+                      )
+                    }
+                    onDownload={() => handleDownloadFile(clientData?.vatCopy?.url || "")}
+                  />
+                  <FileUploadRow
+                    id="cr-copy-upload"
+                    label="CR Copy"
+                    onFileSelect={canModify ? handleFileUpload("crCopy") : () => { }}
+                    onUploadClick={canModify ? () => handleOpenFileUploadModal("crCopy", "CR Copy") : () => { }}
+                    docUrl={clientData?.crCopy?.url}
+                    currentFileName={clientData?.crCopy?.fileName}
+                    onPreview={() =>
+                      handlePreviewFile(
+                        clientData?.crCopy?.url || "",
+                        clientData?.crCopy?.fileName,
+                      )
+                    }
+                    onDownload={() => handleDownloadFile(clientData?.crCopy?.url || "")}
+                  />
+                  <FileUploadRow
+                    id="gst-tin-document-upload"
+                    label="GST IN Doc"
+                    onFileSelect={canModify ? handleFileUpload("gstTinDocument") : () => { }}
+                    onUploadClick={canModify ? () =>
+                      handleOpenFileUploadModal("gstTinDocument", "GST TIN Document") : () => { }}
+                    docUrl={clientData?.gstTinDocument?.url}
+                    currentFileName={clientData?.gstTinDocument?.fileName}
+                    onPreview={() =>
+                      handlePreviewFile(
+                        clientData?.gstTinDocument?.url || "",
+                        clientData?.gstTinDocument?.fileName,
+                      )
+                    }
+                    onDownload={() => handleDownloadFile(clientData?.gstTinDocument?.url || "")}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <AddTeamMemberModal
-        open={isTeamModalOpen}
-        onOpenChange={setIsTeamModalOpen}
-        onAdd={handleAddTeamMember}
-      />
-      <AddContactModal
-        open={isContactModalOpen}
-        onOpenChange={setIsContactModalOpen}
-        onAdd={handleAddContact}
-        positionOptions={positionOptions}
-      />
-      <EditDescriptionModal
-        open={isDescriptionModalOpen}
-        onOpenChange={setIsDescriptionModalOpen}
-        currentDescription={clientData?.description || ""}
-        onSave={handleUpdateDescription}
-      />
+
 
       {/* PDF Viewer */}
       <PDFViewer
