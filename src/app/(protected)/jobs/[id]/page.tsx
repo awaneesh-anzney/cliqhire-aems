@@ -107,34 +107,50 @@ export default function JobPage({ params }: PageProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header Section */}
-      <div className="border-b bg-white py-2 px-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{jobTitle}</h1>
-              <h2 className="text-xl">({job.jobId})</h2>
-            </span>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <span className="flex items-center gap-2">
-                {" "}
-                <Building2 className="size-4" /> {job.client.name || ""}
-              </span>
-              <span className="flex items-center gap-2">
-                {" "}
-                <MapPin className="size-4" /> {location}
-              </span>
-              <span>•</span>
-              {/* Use the same color logic as JobStageBadge, but display-only */}
-              <Badge
-                variant="secondary"
-                className={`${stageColors[stage] || "bg-gray-100 text-gray-800"} border-none`}
-              >
-                {stage}
-              </Badge>
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-6 py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{jobTitle}</h1>
+                  <span className="text-xl text-slate-400 font-medium font-mono">#{job.jobId}</span>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className={`${stageColors[stage] || "bg-gray-100 text-gray-800"} border-none px-3 py-1 text-xs font-semibold uppercase tracking-wider`}
+                >
+                  {stage}
+                </Badge>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-slate-500">
+                <div className="flex items-center gap-2 group cursor-pointer hover:text-brand transition-colors">
+                  <div className="p-1.5 bg-slate-100 rounded-md group-hover:bg-brand/10 transition-colors">
+                    <Building2 className="h-4 w-4 text-slate-400 group-hover:text-brand" />
+                  </div>
+                  <span className="font-medium text-slate-700">{job.client.name || "Unknown Client"}</span>
+                </div>
+
+                <div className="flex items-center gap-2 group border-l border-slate-200 pl-6">
+                  <div className="p-1.5 bg-slate-100 rounded-md">
+                    <MapPin className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <span>{location}</span>
+                </div>
+
+                <div className="flex items-center gap-2 border-l border-slate-200 pl-6">
+                  <div className="p-1.5 bg-slate-100 rounded-md">
+                    <Loader className={`h-4 w-4 text-brand cursor-pointer hover:rotate-180 transition-transform duration-500 ${isLoading ? "animate-spin" : ""}`} onClick={handleRefresh} />
+                  </div>
+                  <span className="text-slate-400">Last updated: Just now</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div>
-            <LinkedInPostDialog job={job} />
+
+            <div className="flex items-center gap-3">
+              <LinkedInPostDialog job={job} />
+            </div>
           </div>
         </div>
       </div>

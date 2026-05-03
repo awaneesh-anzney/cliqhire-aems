@@ -3,14 +3,12 @@
 import { DetailRow } from "@/components/clients/summary/detail-row";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Plus, Pencil, ChevronsUpDown } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Plus, Pencil } from "lucide-react";
 import { EditFieldDialog } from "./edit-field-dialog";
 import { EditSalaryDialog } from "./edit-salary-dialog";
 import { updateJobById, uploadJobFile } from "@/services/jobService";
-import { JobDescriptionInternal } from "./job-description";
-import { JobTeamInfoSection } from "./JobTeamInfoSection";
 import { JDBenefitFilesSection } from "./jd-benefit-files-section";
+import { Briefcase, MapPin, Building2, Wallet, FileText, ClipboardList, Clock, GraduationCap, Users } from "lucide-react";
 import { toast } from "sonner";
 import { JobData } from "../types";
 import { Label } from "@/components/ui/label";
@@ -217,282 +215,193 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
   };
 
   return (
-    <div className="grid grid-cols-2 gap-6 p-4">
-      {/* Left Column: Details (Collapsible) */}
-      <div className="space-y-6">
-        <Collapsible className="rounded-lg border shadow-sm">
-          <div className="flex items-center justify-between p-4">
-            <h4 className="text-sm font-semibold">Job Details</h4>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-xs p-1">
-                Show Complete Details
-                <ChevronsUpDown />
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <div className="px-4 pb-4">
-            <div className="space-y-3">
-              <DetailRow
-                label="Job Title"
-                value={jobDetails.jobTitle}
-                onUpdate={handleUpdateField("jobTitle")}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Department"
-                value={jobDetails.department}
-                onUpdate={handleUpdateField("department")}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Job Location"
-                value={
-                  Array.isArray(jobDetails.location)
-                    ? jobDetails.location.join(", ")
-                    : jobDetails.location
-                }
-                onUpdate={handleUpdateField("location")}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Headcount"
-                value={jobDetails.headcount.toString()}
-                onUpdate={handleUpdateField("headcount")}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Job Stage"
-                value={jobDetails.stage}
-                onUpdate={handleUpdateField("stage")}
-                customEdit={canEdit ? () => setIsJobStageDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-            </div>
-          </div>
-          <CollapsibleContent className="px-4 pb-4">
-            <div className="space-y-3">
-              <DetailRow
-                label="Job Type"
-                value={capitalize(jobDetails.jobType)}
-                onUpdate={handleUpdateField("jobType")}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Experience"
-                value={capitalize(jobDetails.experience)}
-                onUpdate={handleUpdateField("experience")}
-                customEdit={canEdit ? () => setIsExperienceDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Gender"
-                value={capitalize(jobDetails.gender)}
-                onUpdate={handleUpdateField("gender")}
-                customEdit={canEdit ? () => setIsGenderDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Deadline (By Client)"
-                value={
-                  jobDetails.deadlineByClient
-                    ? format(jobDetails.deadlineByClient, "dd-MM-yyyy")
-                    : ""
-                }
-                onUpdate={handleUpdateField("deadlineByClient")}
-                customEdit={canEdit ? () => setIsDeadlineDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Date Range (By Internal Team)"
-                value={
-                  jobDetails.startDateByInternalTeam && jobDetails.endDateByInternalTeam
-                    ? `${format(jobDetails.startDateByInternalTeam, "dd-MM-yyyy")} to ${format(jobDetails.endDateByInternalTeam, "dd-MM-yyyy")}`
-                    : ""
-                }
-                onUpdate={() =>
-                  handleDateRangeSave(
-                    jobDetails.startDateByInternalTeam,
-                    jobDetails.endDateByInternalTeam,
-                    jobDetails.totalCVs
-                  )
-                }
-                customEdit={canEdit ? () => setIsDateRangeDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Total No. of CVs"
-                value={jobDetails.totalCVs?.toString() || ""}
-                onUpdate={() =>
-                  handleDateRangeSave(
-                    jobDetails.startDateByInternalTeam,
-                    jobDetails.endDateByInternalTeam,
-                    jobDetails.totalCVs
-                  )
-                }
-                customEdit={canEdit ? () => setIsDateRangeDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Nationality"
-                value={jobDetails.nationalities ? jobDetails.nationalities.join(", ") : ""}
-                onUpdate={() => {}} // Not used since we use customEdit
-                customEdit={canEdit ? () => setIsNationalityDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Reporting To"
-                value={jobDetails.reportingTo}
-                onUpdate={handleUpdateField("reportingTo")}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Team Size"
-                value={jobDetails.teamSize?.toString() || ""}
-                onUpdate={handleUpdateField("teamSize")}
-                customEdit={canEdit ? () => setIsTeamSizeDialogOpen(true) : undefined}
-                disableInternalEdit={!canEdit}
-              />
-              <DetailRow
-                label="Key Skills"
-                value={jobDetails.keySkills}
-                onUpdate={handleUpdateField("keySkills")}
-                disableInternalEdit={!canEdit}
-              />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-      {/* Right Column: Other Sections (Collapsible) */}
-      <div className="space-y-6">
-        {/* Package Details */}
-        <div className="rounded-lg border shadow-sm px-4 pb-4 pt-4">
-          <h4 className="text-sm font-semibold mb-4">Package Details</h4>
-          <div className="flex items-center justify-between">
-            <Label className="text-sm tracking-tight">Salary Range</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm">
-                {jobDetails.salaryCurrency || "SAR"} {jobDetails.minimumSalary || 0}
-              </span>
-              <span className="text-sm">-</span>
-              <span className="text-sm">{jobDetails.maximumSalary || 0}</span>
-            </div>
-            {canEdit && (
-              <Button variant="outline" size="sm" onClick={() => setIsSalaryDialogOpen(true)}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            )}
-          </div>
-        </div>
-        {/* Job Description */}
-        <Collapsible className="rounded-lg border shadow-sm">
-          <div className="flex items-center justify-between p-4">
-            <h4 className="text-sm font-semibold">Job Description By Client</h4>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-xs p-1">
-                Show Complete Details
-                <ChevronsUpDown />
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent className="px-4 pb-4">
-            <div className="bg-white rounded-lg border shadow-sm p-4">
-              <div className="flex items-center justify-between mb-4">
-                <Label className="text-sm tracking-tight">Description</Label>
-                {canEdit && (
-                  <Button variant="outline" size="sm" onClick={() => setIsDescriptionModalOpen(true)}>
-                    {jobDetails.jobDescription ? (
-                      <>
-                        <Pencil className="h-4 w-4" />
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </>
-                    )}
-                  </Button>
-                )}
+    <div className="p-2 space-y-6 bg-slate-50/50 rounded-2xl">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column: Job Details & Requirements */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="p-2 bg-brand/10 rounded-lg">
+                <Briefcase className="w-4 h-4 text-brand" />
               </div>
-              <div className="space-y-3">
-                {jobDetails.jobDescription ? (
-                  <div className="w-full">
-                    <p className="text-sm whitespace-pre-wrap break-words overflow-hidden">{jobDetails.jobDescription}</p>
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground text-center py-4">
-                    No description added yet
-                  </div>
-                )}
+              <h4 className="text-base font-semibold text-slate-800">Position Details</h4>
+            </div>
+            <div className="p-5 space-y-6">
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Basic Information</h5>
+                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                  <DetailRow
+                    label="Job Title"
+                    value={jobDetails.jobTitle}
+                    onUpdate={handleUpdateField("jobTitle")}
+                    disableInternalEdit={!canEdit}
+                  />
+                  <DetailRow
+                    label="Department"
+                    value={jobDetails.department}
+                    onUpdate={handleUpdateField("department")}
+                    disableInternalEdit={!canEdit}
+                  />
+                  <DetailRow
+                    label="Job Location"
+                    value={Array.isArray(jobDetails.location) ? jobDetails.location.join(", ") : jobDetails.location}
+                    onUpdate={handleUpdateField("location")}
+                    disableInternalEdit={!canEdit}
+                  />
+                  <DetailRow
+                    label="Headcount"
+                    value={jobDetails.headcount.toString()}
+                    onUpdate={handleUpdateField("headcount")}
+                    disableInternalEdit={!canEdit}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Requirements & Experience</h5>
+                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                  <DetailRow
+                    label="Experience"
+                    value={capitalize(jobDetails.experience)}
+                    onUpdate={handleUpdateField("experience")}
+                    customEdit={canEdit ? () => setIsExperienceDialogOpen(true) : undefined}
+                    disableInternalEdit={!canEdit}
+                  />
+                  <DetailRow
+                    label="Gender"
+                    value={capitalize(jobDetails.gender)}
+                    onUpdate={handleUpdateField("gender")}
+                    customEdit={canEdit ? () => setIsGenderDialogOpen(true) : undefined}
+                    disableInternalEdit={!canEdit}
+                  />
+                  <DetailRow
+                    label="Nationality"
+                    value={jobDetails.nationalities ? jobDetails.nationalities.join(", ") : ""}
+                    onUpdate={() => {}} 
+                    customEdit={canEdit ? () => setIsNationalityDialogOpen(true) : undefined}
+                    disableInternalEdit={!canEdit}
+                  />
+                  <DetailRow
+                    label="Key Skills"
+                    value={jobDetails.keySkills}
+                    onUpdate={handleUpdateField("keySkills")}
+                    disableInternalEdit={!canEdit}
+                  />
+                </div>
               </div>
             </div>
-          </CollapsibleContent>
-        </Collapsible>
-        {/* Job Description By Internal Team */}
-        <Collapsible className="rounded-lg border shadow-sm">
-          <div className="flex items-center justify-between p-4">
-            <h4 className="text-sm font-semibold">Job Description By Internal Team</h4>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-xs p-1">
-                Show Complete Details
-                <ChevronsUpDown />
-              </Button>
-            </CollapsibleTrigger>
           </div>
-          <CollapsibleContent className="px-4 pb-4">
-            <div className="bg-white rounded-lg border shadow-sm p-4">
-              <div className="flex items-center justify-between mb-4">
-                <Label className="text-sm tracking-tight">Description</Label>
-                {canEdit && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsInternalDescriptionModalOpen(true)}
-                  >
-                    {jobDetails.jobDescriptionByInternalTeam ? (
-                      <>
-                        <Pencil className="h-4 w-4" />
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-              <div className="space-y-3">
-                {jobDetails.jobDescriptionByInternalTeam ? (
-                  <p className="text-sm whitespace-pre-wrap">
-                    {jobDetails.jobDescriptionByInternalTeam}
-                  </p>
-                ) : (
-                  <div className="text-sm text-muted-foreground text-center py-4">
-                    No description added yet
-                  </div>
-                )}
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-        {/* JD and Benefit Files Section */}
-        <div className="rounded-lg border shadow-sm px-4 pb-4 pt-4">
-          <JDBenefitFilesSection
-            jobDescriptionPdf={jobDetails.jobDescriptionPdf}
-            benefitPdf={jobDetails.benefitPdf}
-            onFileUpdate={handleFileUpdate}
-            canModify={canEdit}
-          />
         </div>
 
-        {/* Job Info Section */}
-                    <JobTeamInfoSection 
-              jobDetails={jobDetails} 
-              handleUpdateField={handleUpdateField}
-              handleUpdateMultipleFields={handleUpdateMultipleFields}
-              canModify={canEdit}
-            />
+        {/* Right Column: Compensation, Deadlines & Descriptions */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="p-2 bg-brand/10 rounded-lg">
+                <Wallet className="w-4 h-4 text-brand" />
+              </div>
+              <h4 className="text-base font-semibold text-slate-800">Compensation & Benefits</h4>
+            </div>
+            <div className="p-5">
+              <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-4 rounded-lg border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Salary Range</p>
+                    <p className="text-lg font-bold text-slate-700">
+                      {jobDetails.salaryCurrency || "SAR"} {jobDetails.minimumSalary || 0} - {jobDetails.maximumSalary || 0}
+                    </p>
+                  </div>
+                  {canEdit && (
+                    <Button variant="outline" size="sm" onClick={() => setIsSalaryDialogOpen(true)} className="border-brand/20 text-brand hover:bg-brand hover:text-white">
+                      <Pencil className="h-3.5 w-3.5 mr-2" />
+                      Update Salary
+                    </Button>
+                  )}
+                </div>
+                <div className="pt-4 border-t border-slate-100">
+                  <JDBenefitFilesSection
+                    jobDescriptionPdf={jobDetails.jobDescriptionPdf}
+                    benefitPdf={jobDetails.benefitPdf}
+                    onFileUpdate={handleFileUpdate}
+                    canModify={canEdit}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="p-2 bg-brand/10 rounded-lg">
+                <Clock className="w-4 h-4 text-brand" />
+              </div>
+              <h4 className="text-base font-semibold text-slate-800">Timelines & Status</h4>
+            </div>
+            <div className="p-5">
+              <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-4 rounded-lg border border-slate-100">
+                <DetailRow
+                  label="Job Stage"
+                  value={jobDetails.stage}
+                  onUpdate={handleUpdateField("stage")}
+                  customEdit={canEdit ? () => setIsJobStageDialogOpen(true) : undefined}
+                  disableInternalEdit={!canEdit}
+                />
+                <DetailRow
+                  label="Deadline (By Client)"
+                  value={jobDetails.deadlineByClient ? format(jobDetails.deadlineByClient, "dd-MM-yyyy") : ""}
+                  onUpdate={handleUpdateField("deadlineByClient")}
+                  customEdit={canEdit ? () => setIsDeadlineDialogOpen(true) : undefined}
+                  disableInternalEdit={!canEdit}
+                />
+                <DetailRow
+                  label="Internal Date Range"
+                  value={jobDetails.startDateByInternalTeam && jobDetails.endDateByInternalTeam ? `${format(jobDetails.startDateByInternalTeam, "dd-MM-yyyy")} to ${format(jobDetails.endDateByInternalTeam, "dd-MM-yyyy")}` : ""}
+                  onUpdate={() => {}}
+                  customEdit={canEdit ? () => setIsDateRangeDialogOpen(true) : undefined}
+                  disableInternalEdit={!canEdit}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-brand/10 rounded-lg">
+                  <ClipboardList className="w-4 h-4 text-brand" />
+                </div>
+                <h4 className="text-base font-semibold text-slate-800">Job Description</h4>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="text-brand hover:bg-brand/10" onClick={() => setIsDescriptionModalOpen(true)}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Client
+                </Button>
+                <Button variant="ghost" size="sm" className="text-brand hover:bg-brand/10" onClick={() => setIsInternalDescriptionModalOpen(true)}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Internal
+                </Button>
+              </div>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-slate-50/50 rounded-lg p-4 border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Description by Client</p>
+                {jobDetails.jobDescription ? (
+                  <p className="text-sm text-slate-600 line-clamp-6">{jobDetails.jobDescription}</p>
+                ) : (
+                  <p className="text-sm text-slate-400 italic">No description provided by client</p>
+                )}
+              </div>
+              <div className="bg-slate-50/50 rounded-lg p-4 border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Internal Team Notes</p>
+                {jobDetails.jobDescriptionByInternalTeam ? (
+                  <p className="text-sm text-slate-600 line-clamp-6">{jobDetails.jobDescriptionByInternalTeam}</p>
+                ) : (
+                  <p className="text-sm text-slate-400 italic">No internal notes added</p>
+                )}
+              </div>
+            </div>
+        </div>
+        </div>
       </div>
       {canEdit && (
         <EditSalaryDialog
@@ -618,17 +527,16 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
       />
       )}
 
-      {/* Job Stage Selector Dialog */}
       {canEdit && (
-      <JobStageSelector
-        open={isJobStageDialogOpen}
-        onClose={() => setIsJobStageDialogOpen(false)}
-        currentValue={jobDetails.stage || ""}
-        onSave={async (val: string) => {
-          await handleFieldSave("stage", val);
-          setIsJobStageDialogOpen(false);
-        }}
-      />
+        <JobStageSelector
+          open={isJobStageDialogOpen}
+          onClose={() => setIsJobStageDialogOpen(false)}
+          currentValue={jobDetails.stage || ""}
+          onSave={async (val: string) => {
+            await handleFieldSave("stage", val);
+            setIsJobStageDialogOpen(false);
+          }}
+        />
       )}
     </div>
   );
