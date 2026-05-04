@@ -5,7 +5,7 @@ import { CandidateNotesContent } from '@/components/candidates/notes/notes-conte
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SlidersHorizontal, RefreshCcw, Plus, FileText, Users, Briefcase, Star, Activity, StickyNote, Paperclip, Clock, User, FileIcon, FilePen, Mail, Phone, MapPin, Calendar } from "lucide-react";
+import { SlidersHorizontal, RefreshCcw, Plus, FileText, Users, Briefcase, Star, Activity, StickyNote, Paperclip, Clock, User, FileIcon, FilePen, Mail, Phone, MapPin, Calendar,Loader  } from "lucide-react";
 import { AttachmentsContent } from '@/components/candidates/attachments/attachments-content';
 import { JobsContent, JobsContentRef } from '@/components/candidates/jobs/jobs-content';
 import { AddToJobDialog } from '@/components/candidates/add-to-job-dialog';
@@ -16,6 +16,7 @@ import { formatPhoneNumber } from "@/lib/countryCodes";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
+import { cn } from "@/lib/utils";
 
 interface Tab {
   label: string;
@@ -195,79 +196,120 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
       }
     } catch (error) {
       console.error('Error updating candidate:', error);
-      // onError in mutation handles auth and revert
     }
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header Section */}
-      <div className="border-b bg-white py-2 px-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{candidate.name || "Unknown Candidate"}</h1>
-              <h2 className="text-sm text-muted-foreground">({candidate.profileId || "Unknown Profile ID"})</h2>
-            </span>
-            
-            
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              {candidate.experience && <><span>{candidate.experience}</span><span>•</span></>}
-              {candidate.location && <><span>{candidate.location}</span><span>•</span></>}
-              <Badge variant="outline" className={getStatusColor(candidate.status || "unknown")}>
-                {candidate.status || "Unknown"}
-              </Badge>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="border rounded-md px-4">
-              Resume
-            </Button>
-            <Button variant="outline" size="sm" className="border rounded-md px-4">
-              Contact
-            </Button>
+    <div className="flex flex-col h-full bg-white">
+      {/* Header Section (Matching Jobs ID page) */}
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-6 py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{candidate.name || "Untitled Candidate"}</h1>
+                  <span className="text-xl text-slate-400 font-medium font-mono">#{candidate.profileId || "—"}</span>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    "border-none px-3 py-1 text-xs font-semibold uppercase tracking-wider",
+                    candidate.status === "Placed" ? "bg-green-100 text-green-800" :
+                    candidate.status === "Interviewing" ? "bg-orange-100 text-orange-800" :
+                    "bg-gray-100 text-gray-800"
+                  )}
+                >
+                  {candidate.status || "New"}
+                </Badge>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-slate-500">
+                <div className="flex items-center gap-2 group cursor-pointer hover:text-brand transition-colors">
+                  <div className="p-1.5 bg-slate-100 rounded-md group-hover:bg-brand/10 transition-colors">
+                    <MapPin className="h-4 w-4 text-slate-400 group-hover:text-brand" />
+                  </div>
+                  <span className="font-medium text-slate-700">{candidate.location || "No location"}</span>
+                </div>
 
+                <div className="flex items-center gap-2 group border-l border-slate-200 pl-6">
+                  <div className="p-1.5 bg-slate-100 rounded-md">
+                    <Briefcase className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <span>{candidate.experience || "No experience info"}</span>
+                </div>
+
+                <div className="flex items-center gap-2 border-l border-slate-200 pl-6">
+                  <div className="p-1.5 bg-slate-100 rounded-md">
+                    <Loader className="h-4 w-4 text-brand" />
+                  </div>
+                  <span className="text-slate-400">Last updated: Just now</span>
+                </div>
+              </div>
+
+              {/* Quick Contact Links */}
+              <div className="flex items-center gap-4 mt-2">
+                {candidate.email && (
+                  <a href={`mailto:${candidate.email}`} className="group flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-brand transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-slate-50 group-hover:bg-brand/10 flex items-center justify-center transition-all">
+                      <Mail className="h-3.5 w-3.5" />
+                    </div>
+                    {candidate.email}
+                  </a>
+                )}
+                {candidate.phone && (
+                  <a href={`tel:${candidate.phone}`} className="group flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-brand transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-slate-50 group-hover:bg-brand/10 flex items-center justify-center transition-all">
+                      <Phone className="h-3.5 w-3.5" />
+                    </div>
+                    {formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
      
 
-      {/* Tabs */}
+      {/* Modern Segmented Control Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0">
-          <TabsTrigger
-            value="Summary"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
-          >
-            <FileIcon className="h-4 w-4" />
-            Summary
-          </TabsTrigger>
+        <div className="bg-white border-b border-slate-200/60 sticky top-0 z-20 px-6 py-3">
+          <TabsList className="inline-flex items-center h-12 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50 shadow-inner">
+            <TabsTrigger
+              value="Summary"
+              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+            >
+              <FileIcon className="h-4 w-4" />
+              Summary
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="Jobs"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
-          >
-            <Briefcase className="h-4 w-4" />
-            Jobs
-          </TabsTrigger>
+            <TabsTrigger
+              value="Jobs"
+              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+            >
+              <Briefcase className="h-4 w-4" />
+              Jobs
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="Notes"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
-          >
-            <StickyNote className="h-4 w-4" />
-            Notes
-          </TabsTrigger>
+            <TabsTrigger
+              value="Notes"
+              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+            >
+              <StickyNote className="h-4 w-4" />
+              Notes
+            </TabsTrigger>
 
-          <TabsTrigger
-            value="Attachments"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
-          >
-            <Paperclip className="h-4 w-4" />
-            Attachments
-          </TabsTrigger>
-        </TabsList>
+            <TabsTrigger
+              value="Attachments"
+              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+            >
+              <Paperclip className="h-4 w-4" />
+              Attachments
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="Summary" className="p-4">
           <CandidateSummary 
