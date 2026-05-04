@@ -25,6 +25,7 @@ interface DetailRowProps {
   disableInternalEdit?: boolean; // NEW PROP
   customEdit?: () => void; // NEW PROP for custom edit handlers
   customInput?: React.ReactNode; // NEW PROP for custom input component
+  formattedValue?: string; // NEW PROP for display-only formatting
 }
 
 export function DetailRow({
@@ -43,6 +44,7 @@ export function DetailRow({
   disableInternalEdit,
   customEdit,
   customInput,
+  formattedValue,
 }: DetailRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -113,7 +115,9 @@ export function DetailRow({
             </Select>
           ) : (
             <span className="text-sm">
-              {displayValue() ? (
+              {formattedValue ? (
+                formattedValue
+              ) : displayValue() ? (
                 displayValue()
               ) : (
                 <span className="text-muted-foreground">No Details</span>

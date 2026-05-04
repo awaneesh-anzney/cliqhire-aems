@@ -12,6 +12,7 @@ import {
   deletePrimaryContact,
 } from "@/services/clientService";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { formatPhoneNumber } from "@/lib/countryCodes";
 import EditContactDetailsModal from "./EditContactDetailsModal";
 import {
   Dialog,
@@ -561,9 +562,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                               <span className="text-xs font-semibold text-gray-500 mr-1">
                                 Phone Number:
                               </span>
-                              {getCountryCodeLabel(contact.countryCode || "")}
-                              <span className="mx-1">-</span>
-                              {contact.phone || "No phone"}
+                              {formatPhoneNumber(contact.phone || "", contact.countryCode || "") || "No phone"}
                             </div>
                             {/* LinkedIn */}
                             <div className="text-sm text-muted-foreground">

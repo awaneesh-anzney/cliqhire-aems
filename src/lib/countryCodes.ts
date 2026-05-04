@@ -312,3 +312,22 @@ export function splitFullPhone(fullPhone: string): { countryCode: string; localN
     }
     return null;
 }
+
+/**
+ * Formats a phone number with its country dial code
+ * @param phoneNumber The local phone number
+ * @param countryCode The ISO country code
+ * @returns Formatted string: +DialCode-PhoneNumber
+ */
+export function formatPhoneNumber(phoneNumber?: string, countryCode?: string): string {
+    if (!phoneNumber) return "";
+    if (!countryCode) return phoneNumber;
+    
+    const country = getCountryByCode(countryCode);
+    if (!country) return phoneNumber;
+    
+    // Remove any leading plus/dial code if it was accidentally stored in phoneNumber
+    const cleanNumber = phoneNumber.replace(country.dialCode, "").replace(/^\+/, "");
+    
+    return `${country.dialCode}-${cleanNumber}`;
+}

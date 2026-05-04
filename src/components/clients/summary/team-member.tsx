@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -10,26 +10,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { formatPhoneNumber } from "@/lib/countryCodes"
 
 interface TeamMemberProps {
   name: string
   avatar?: string
   role?: string
   isActive?: boolean
+  email?: string
+  phone?: string
+  countryCode?: string
 }
 
-export function TeamMember({ name, avatar, role, isActive }: TeamMemberProps) {
+export function TeamMember({ name, avatar, role, isActive, email, phone, countryCode }: TeamMemberProps) {
   const [showDetails, setShowDetails] = useState(false)
 
   return (
     <>
       <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8 bg-orange-500">
+          <Avatar className="h-8 w-8 bg-orange-500 text-white">
             <AvatarFallback>{avatar || name.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <span className="text-sm">{name}</span>
+            <span className="text-sm font-medium">{name}</span>
             {role && <div className="text-xs text-muted-foreground">{role}</div>}
           </div>
         </div>
@@ -47,58 +51,65 @@ export function TeamMember({ name, avatar, role, isActive }: TeamMemberProps) {
       </div>
 
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Team Member Details</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg">
-              <Avatar className="h-16 w-16 bg-orange-500">
-                <AvatarFallback>{avatar || name.slice(0, 2).toUpperCase()}</AvatarFallback>
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <Avatar className="h-16 w-16 bg-orange-500 text-white border-2 border-white shadow-sm">
+                <AvatarFallback className="text-xl font-bold">{avatar || name.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-lg font-semibold">{name}</h3>
-                <p className="text-sm text-muted-foreground">{role}</p>
+                <h3 className="text-lg font-bold text-slate-900">{name}</h3>
+                <p className="text-sm font-medium text-slate-500">{role}</p>
                 {isActive && (
-                  <Badge variant="outline" className="bg-green-100 text-green-800 border-none mt-2">
+                  <Badge variant="outline" className="bg-green-100 text-green-800 border-none mt-2 font-bold text-[10px]">
                     ACTIVE
                   </Badge>
                 )}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h4 className="font-medium">Contact Information</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Email</p>
-                  <p>example@email.com</p>
+            <div className="space-y-3">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Contact Information</h4>
+              <div className="grid grid-cols-1 gap-4 text-sm bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Email Address</p>
+                  <p className="font-bold text-slate-700">{email || "No email provided"}</p>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">Phone</p>
-                  <p>+1 234 567 890</p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Phone Number</p>
+                  <p className="font-bold text-slate-700">{formatPhoneNumber(phone, countryCode) || "No phone provided"}</p>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h4 className="font-medium">Permissions</h4>
-              <div className="space-y-1 text-sm">
-                <p>• Can view and edit client information</p>
-                <p>• Can manage team members</p>
-                <p>• Can view analytics and reports</p>
+            <div className="space-y-3">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Permissions</h4>
+              <div className="space-y-2 text-sm bg-slate-50/50 p-4 rounded-xl border border-dashed border-slate-200">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <p className="font-medium text-slate-600">Can view and edit client information</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <p className="font-medium text-slate-600">Can manage team members</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <p className="font-medium text-slate-600">Can view analytics and reports</p>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h4 className="font-medium">Activity</h4>
-              <div className="text-sm text-muted-foreground">
-                Last active: Today at 2:30 PM
-              </div>
+            <div className="pt-2 flex items-center justify-between text-[11px] font-bold text-slate-400 border-t border-slate-100 uppercase tracking-wider">
+              <span>Last active</span>
+              <span className="text-slate-900">Today at 2:30 PM</span>
             </div>
           </div>
         </DialogContent>
       </Dialog>
     </>
   )
-}
+}

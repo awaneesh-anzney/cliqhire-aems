@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  formatDate,
+  getCountryByCode,
+  formatPhoneNumber,
+} from "@/lib/countryCodes";
 import { SectionHeader } from "./section-header";
 import { DetailRow } from "./detail-row";
 import { TeamMember } from "./team-member";
@@ -312,6 +317,7 @@ export function SummaryContent({
                   <DetailRow
                     label="Client Phone Number"
                     value={clientData?.phoneNumber}
+                    formattedValue={formatPhoneNumber(clientData?.phoneNumber, clientData?.countryCode)}
                     onUpdate={handleUpdateField("phoneNumber")}
                     disableInternalEdit={!canModify}
                   />
@@ -324,6 +330,34 @@ export function SummaryContent({
                   />
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="p-2 bg-brand/10 rounded-lg">
+                <Users className="w-4 h-4 text-brand" />
+              </div>
+              <h4 className="text-base font-semibold text-slate-800">Primary Contacts</h4>
+            </div>
+            <div className="p-5 space-y-3">
+              {clientData?.primaryContacts?.length > 0 ? (
+                clientData.primaryContacts.map((contact: any, index: number) => (
+                  <TeamMember
+                    key={contact._id || index}
+                    name={`${contact.firstName} ${contact.lastName}`}
+                    role={contact.designation || contact.position}
+                    email={contact.email}
+                    phone={contact.phone}
+                    countryCode={contact.countryCode}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-8 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Primary Contacts</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Add contacts in the Contacts tab</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
