@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { formatPhoneNumber } from "@/lib/countryCodes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -257,7 +258,7 @@ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersT
           </TableCell>
           <TableCell className="text-sm">{teamMember.lastName}</TableCell>
           <TableCell className="text-sm">{teamMember.email}</TableCell>
-          <TableCell className="text-sm">{teamMember.phone}</TableCell>
+          <TableCell className="text-sm">{formatPhoneNumber(teamMember.phone, teamMember.countryCode)}</TableCell>
           <TableCell className="text-sm">{teamMember.location}</TableCell>
           <TableCell className="text-sm">{teamMember.experience}</TableCell>
           <TableCell className="text-sm">

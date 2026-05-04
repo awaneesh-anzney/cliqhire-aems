@@ -143,6 +143,7 @@ export function CreateTeamMemberModal({
         password: formData.password,
         roleId: formData.roleId,
         phone: formData.phone,
+        countryCode: formData.countryCode,
       };
 
       await createTeamMember(payload as any);

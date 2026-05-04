@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Mail, Phone, MapPin, Briefcase, Shield, User as UserIcon, Calendar, Check, AlertTriangle, Zap, Globe, Edit2, Save, X, Loader2 } from "lucide-react";
+import { formatPhoneNumber } from "@/lib/countryCodes";
 
 import { getTeamMemberById, updateTeamMemberStatus, updateTeamMember } from "@/services/teamMembersService";
 import { roleService, Role } from "@/services/roleService";
@@ -320,7 +321,7 @@ export default function TeamMemberDetailsPage() {
                       <Phone className="h-3 w-3" /> Phone Number
                     </p>
                     {!isEditing ? (
-                      <p className="text-sm font-medium text-slate-800">{user.phone || "Not Provided"}</p>
+                      <p className="text-sm font-medium text-slate-800">{formatPhoneNumber(user.phone, user.countryCode) || "Not Provided"}</p>
                     ) : (
                       <PhoneInput
                         countryCode={editForm.countryCode}

@@ -84,7 +84,7 @@ export const updateTeamMember = async (teamMemberData: UpdateTeamMemberData): Pr
     const allowedFields = [
       'name', 'firstName', 'lastName', 'email', 'teamRole', 'phone', 'location', 'experience', 
       'status', 'department', 'specialization', 'skills', 'resume', 
-      'avatar', 'gender'
+      'avatar', 'gender', 'countryCode'
     ];
     
     const filteredUpdateData = Object.keys(updateData).reduce((acc, key) => {
