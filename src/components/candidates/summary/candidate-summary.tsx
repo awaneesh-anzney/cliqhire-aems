@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { formatPhoneNumber } from "@/lib/countryCodes";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, ChevronsUpDown } from "lucide-react";
 import { EditFieldModal } from "./edit-field-modal";
@@ -86,9 +87,17 @@ const defaultDetailsFields = detailsFields.slice(0, 7); // Up to "Referred By"
 const collapsibleDetailsFields = detailsFields.slice(7); // From "Gender" onwards
 
 const contactFields = [
-  { key: "phone", label: "Phone Number" },
+  { 
+    key: "phone", 
+    label: "Phone Number",
+    render: (val: string | undefined, record: any) => formatPhoneNumber(val, record?.countryCode) || undefined
+  },
   { key: "email", label: "Email" },
-  { key: "otherPhone", label: "Other Phone Number" },
+  { 
+    key: "otherPhone", 
+    label: "Other Phone Number",
+    render: (val: string | undefined, record: any) => formatPhoneNumber(val, record?.otherCountryCode) || undefined
+  },
   {
     key: "linkedin",
     label: "LinkedIn",
@@ -174,20 +183,34 @@ const CandidateSummary = ({
   };
 
   const handleSave = async (fieldKey: string, newValue: any) => {
-    // If saving referredBy and we have a user object, extract the name
-    if (fieldKey === 'referredBy' && newValue && typeof newValue === 'object') {
-      newValue = newValue.name || newValue.email || '';
-    }
-    // LinkedIn validation
-    if (fieldKey === "linkedin" && newValue && newValue.trim()) {
-      const trimmedValue = newValue.trim();
-      if (!trimmedValue.startsWith("http://") && !trimmedValue.startsWith("https://")) {
-        toast.error("LinkedIn URL must start with 'http://' or 'https://'");
-        return;
-      }
-    }
+    let updatedCandidate = { ...localCandidate };
 
-    const updatedCandidate = { ...localCandidate, [fieldKey]: newValue };
+    if (fieldKey === "phone" && typeof newValue === "object" && newValue.phone) {
+      updatedCandidate = {
+        ...updatedCandidate,
+        phone: newValue.phone,
+        countryCode: newValue.countryCode,
+      };
+    } else if (fieldKey === "otherPhone" && typeof newValue === "object" && newValue.phone) {
+      updatedCandidate = {
+        ...updatedCandidate,
+        otherPhone: newValue.phone,
+        otherCountryCode: newValue.countryCode,
+      };
+    } else if (fieldKey === 'referredBy' && newValue && typeof newValue === 'object') {
+      const name = newValue.name || newValue.email || '';
+      updatedCandidate = { ...updatedCandidate, [fieldKey]: name };
+    } else {
+      // LinkedIn validation
+      if (fieldKey === "linkedin" && newValue && typeof newValue === "string" && newValue.trim()) {
+        const trimmedValue = newValue.trim();
+        if (!trimmedValue.startsWith("http://") && !trimmedValue.startsWith("https://")) {
+          toast.error("LinkedIn URL must start with 'http://' or 'https://'");
+          return;
+        }
+      }
+      updatedCandidate = { ...updatedCandidate, [fieldKey]: newValue };
+    }
     setLocalCandidate(updatedCandidate);
     setEditField(null);
 
@@ -231,7 +254,7 @@ const CandidateSummary = ({
 
   const renderField = (field: any, fieldArray: any[]) => {
     const rawValue = localCandidate?.[field.key];
-    const value = field.render ? field.render(rawValue) : rawValue;
+    const value = field.render ? field.render(rawValue, localCandidate) : rawValue;
     const hasValue =
       rawValue !== undefined &&
       rawValue !== null &&
@@ -531,10 +554,12 @@ const CandidateSummary = ({
                         ? rawValue.join(", ")
                         : ""
                   }
-                  onSave={(val: string) => handleSave(field.key, val)}
+                  onSave={(val: any) => handleSave(field.key, val)}
                   isCountry={field.key === "country" || field.key === "location"}
                   isNationality={field.key === "nationality"}
                   isContinent={field.key === "continent"}
+                  isPhone={field.key === "phone" || field.key === "otherPhone"}
+                  countryCode={field.key === "phone" ? localCandidate?.countryCode : localCandidate?.otherCountryCode}
                 />
               </>
             )}

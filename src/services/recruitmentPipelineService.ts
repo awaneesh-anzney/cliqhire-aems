@@ -230,6 +230,8 @@ export interface ConvertTempCandidateRequest {
   willingToRelocate?: string;
   linkedin?: string;
   continent?: string;
+  countryCode?: string;
+  otherCountryCode?: string;
 }
 
 // ─── Pipeline CRUD ────────────────────────────────────────────────────────────

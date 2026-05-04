@@ -1,6 +1,7 @@
 "use client";
 import { Candidate, candidateService } from "@/services/candidateService";
 import { useCandidates, useUpdateCandidate, useDeleteCandidate } from "@/hooks/useCandidate";
+import { formatPhoneNumber } from "@/lib/countryCodes";
 import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from "@/components/ui/table";
 import { Loader } from "lucide-react";
 import { CandidatesEmptyState } from "../../../components/candidates/empty-states";
@@ -230,7 +231,7 @@ export default function CandidatesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-sm">{candidate.email || "N/A"}</TableCell>
-                    <TableCell className="text-sm">{candidate.phone || "N/A"}</TableCell>
+                    <TableCell className="text-sm">{formatPhoneNumber(candidate.phone, (candidate as any).countryCode) || "N/A"}</TableCell>
                     <TableCell className="text-sm">{candidate.location || "N/A"}</TableCell>
                     <TableCell className="text-sm">
                       <CandidateStatusBadge

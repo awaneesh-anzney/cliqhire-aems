@@ -1,5 +1,6 @@
 // Types for candidate data
 import { api } from "@/lib/axios-config";
+import { formatPhoneNumber } from "@/lib/countryCodes";
 import axios, { AxiosError } from "axios";
 
 export interface Candidate {
@@ -25,8 +26,10 @@ export interface Candidate {
   willingToRelocate?: string;
   description?: string;
   phone?: string;
+  countryCode?: string;
   email?: string;
   otherPhone?: string;
+  otherCountryCode?: string;
   linkedin?: string;
   continent?: string;
   currentSalary?: string | number;

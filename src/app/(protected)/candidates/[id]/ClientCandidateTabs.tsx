@@ -12,6 +12,7 @@ import { AddToJobDialog } from '@/components/candidates/add-to-job-dialog';
 import { candidateService } from '@/services/candidateService';
 import { toast } from "sonner";
 import { initializeAuth } from '@/lib/axios-config';
+import { formatPhoneNumber } from "@/lib/countryCodes";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
@@ -356,7 +357,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
                 <Phone className="w-5 h-5 text-gray-600" />
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-sm text-gray-600">{candidate.phone || 'Not provided'}</p>
+                  <p className="text-sm text-gray-600">{formatPhoneNumber(candidate.phone, (candidate as any).countryCode) || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 border rounded-lg">

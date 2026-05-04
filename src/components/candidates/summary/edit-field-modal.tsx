@@ -11,13 +11,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CurrencyFlag from "react-currency-flags";
 import { CountrySelect } from "@/components/ui/country-select";
+import PhoneInput from "@/components/phone/Phoneinput";
 
 interface EditFieldModalProps {
   open: boolean;
   onClose: () => void;
   fieldName: string;
-  currentValue?: string;
-  onSave: (value: string) => void;
+  currentValue?: any;
+  onSave: (value: any) => void;
   isDate?: boolean;
   isNumber?: boolean;
   isCurrency?: boolean;
@@ -25,6 +26,8 @@ interface EditFieldModalProps {
   isCountry?: boolean;
   isNationality?: boolean;
   isContinent?: boolean;
+  isPhone?: boolean;
+  countryCode?: string;
   options?: { value: string; label: string }[];
   currencyOptions?: Array<{ code: string; symbol: string; name: string; countryCode?: string }>;
 }
@@ -42,10 +45,13 @@ export function EditFieldModal({
   isCountry,
   isNationality,
   isContinent,
+  isPhone,
+  countryCode: initialCountryCode = "SA",
   options,
   currencyOptions
 }: EditFieldModalProps) {
   const [value, setValue] = useState(currentValue);
+  const [phoneCountryCode, setPhoneCountryCode] = useState(initialCountryCode);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     currentValue ? new Date(currentValue) : null
   );
@@ -53,6 +59,8 @@ export function EditFieldModal({
   const handleSave = () => {
     if (isDate && selectedDate) {
       onSave(selectedDate.toISOString().split("T")[0]);
+    } else if (isPhone) {
+      onSave({ phone: value, countryCode: phoneCountryCode });
     } else {
       onSave(value);
     }
@@ -156,6 +164,15 @@ export function EditFieldModal({
                   onChange={setValue}
                   type="continent"
                   placeholder={`Search ${fieldName.toLowerCase()}...`}
+                />
+              </div>
+            ) : isPhone ? (
+              <div className="space-y-2">
+                <PhoneInput
+                  phoneNumber={value}
+                  onPhoneNumberChange={setValue}
+                  countryCode={phoneCountryCode}
+                  onCountryCodeChange={setPhoneCountryCode}
                 />
               </div>
             ) : isTextarea ? (
