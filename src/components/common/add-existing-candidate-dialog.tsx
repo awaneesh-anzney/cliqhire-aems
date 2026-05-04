@@ -135,18 +135,27 @@ export function AddExistingCandidateDialog({
     if (currentOpen) {
       setPage(1);
       setHasMore(true);
-      setCandidates([]);
-      fetchCandidates(1, "", true);
+      // We don't clear candidates here anymore, let the next useEffect handle it
     } else {
       setSearchTerm("");
       setSelectedCandidateIds([]);
       setSelectedCandidates([]);
+      setCandidates([]);
     }
   }, [currentOpen]);
 
+  // Handle search term changes - reset to page 1
   useEffect(() => {
-    if (currentOpen && page === 1) fetchCandidates(1, debouncedSearchTerm, true);
-    else if (currentOpen) fetchCandidates(page, debouncedSearchTerm, false);
+    if (currentOpen) {
+      setPage(1);
+      setCandidates([]); // Clear existing list to show only search results
+    }
+  }, [debouncedSearchTerm]);
+
+  useEffect(() => {
+    if (currentOpen) {
+      fetchCandidates(page, debouncedSearchTerm, page === 1);
+    }
   }, [page, debouncedSearchTerm, currentOpen]);
 
   const handleAddCandidates = async () => {
