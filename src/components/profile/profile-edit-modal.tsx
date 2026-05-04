@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Phone, MapPin, Briefcase, GraduationCap } from "lucide-react";
+import PhoneInput from "@/components/phone/Phoneinput";
 
 interface ProfileEditModalProps {
   open: boolean;
@@ -95,22 +96,13 @@ export function ProfileEditModal({
             </div>
 
             {/* Contact Section */}
-            <div className="space-y-2">
-              <Label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Country Code</Label>
-              <Input
-                value={formData.countryCode}
-                onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
-                placeholder="91"
-                className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold"
-              />
-            </div>
-            <div className="space-y-2">
+            <div className="md:col-span-2 space-y-2">
               <Label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</Label>
-              <Input
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="1234567890"
-                className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold"
+              <PhoneInput
+                phoneNumber={formData.phone}
+                onPhoneNumberChange={(val) => setFormData({ ...formData, phone: val })}
+                countryCode={formData.countryCode}
+                onCountryCodeChange={(val) => setFormData({ ...formData, countryCode: val })}
               />
             </div>
 

@@ -30,6 +30,7 @@ export function ImageCropperDialog({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [baseSize, setBaseSize] = useState({ width: 0, height: 0 });
   
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,6 +42,25 @@ export function ImageCropperDialog({
       setPosition({ x: 0, y: 0 });
     }
   }, [open]);
+
+  const handleImageLoad = () => {
+    if (imageRef.current && containerRef.current) {
+      const img = imageRef.current;
+      const container = containerRef.current;
+      
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+      
+      // Calculate base size to fit the container
+      const ratio = Math.min(cw / nw, ch / nh);
+      setBaseSize({
+        width: nw * ratio,
+        height: nh * ratio
+      });
+    }
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -60,52 +80,48 @@ export function ImageCropperDialog({
   };
 
   const getCroppedImg = () => {
-    if (!imageRef.current || !containerRef.current) return;
+    if (!imageRef.current || !containerRef.current || baseSize.width === 0) return;
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Fixed size for avatar
-    const size = 400;
+    // High res output
+    const size = 512;
     canvas.width = size;
     canvas.height = size;
 
     const img = imageRef.current;
+    const uiCircleSize = 200;
     
-    // The circle in the UI is 200px wide. The canvas is 400px wide.
-    // So we scale everything by 2x from UI to Canvas.
-    const uiToCanvasScale = size / 200;
+    // The scale factor from UI pixels (at zoom 1.0) to natural pixels
+    const uiToNaturalScale = img.naturalWidth / baseSize.width;
+    
+    // The actual crop size in natural pixels
+    const cropSizeInNatural = (uiCircleSize / zoom) * uiToNaturalScale;
+    
+    // The center of the crop area in natural pixels
+    // position.x/y is UI offset from center. 
+    // Circle is fixed at center. So circle center relative to image center is -position.x/y
+    const centerXInNatural = img.naturalWidth / 2 - (position.x / zoom) * uiToNaturalScale;
+    const centerYInNatural = img.naturalHeight / 2 - (position.y / zoom) * uiToNaturalScale;
+    
+    const sourceX = centerXInNatural - cropSizeInNatural / 2;
+    const sourceY = centerYInNatural - cropSizeInNatural / 2;
     
     ctx.save();
-    ctx.translate(size / 2, size / 2);
-    ctx.rotate((rotation * Math.PI) / 180);
     
-    // Natural dimensions
-    const naturalWidth = img.naturalWidth;
-    const naturalHeight = img.naturalHeight;
+    // Handle rotation
+    if (rotation !== 0) {
+      ctx.translate(size / 2, size / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-size / 2, -size / 2);
+    }
     
-    // Displayed dimensions (before zoom/rotation)
-    const displayWidth = img.width;
-    const displayHeight = img.height;
-    
-    // Ratio between natural and displayed
-    const naturalToDisplayRatio = naturalWidth / displayWidth;
-    
-    // How much the image is actually scaled in the UI including zoom
-    // We want to draw the image such that the 200px circle area in the UI
-    // maps to the 400px canvas area.
-    
-    const drawWidth = displayWidth * zoom * uiToCanvasScale;
-    const drawHeight = displayHeight * zoom * uiToCanvasScale;
-    
-    // Position.x/y is the offset from center
     ctx.drawImage(
       img,
-      (position.x * uiToCanvasScale) - (drawWidth / 2),
-      (position.y * uiToCanvasScale) - (drawHeight / 2),
-      drawWidth,
-      drawHeight
+      sourceX, sourceY, cropSizeInNatural, cropSizeInNatural,
+      0, 0, size, size
     );
     
     ctx.restore();
@@ -142,9 +158,12 @@ export function ImageCropperDialog({
                 ref={imageRef}
                 src={image || ""}
                 alt="To crop"
-                className="max-w-none transition-transform duration-75 select-none"
+                onLoad={handleImageLoad}
+                className="max-w-none select-none"
                 style={{
-                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom}) rotate(${rotation}deg)`,
+                  width: baseSize.width ? `${baseSize.width * zoom}px` : "auto",
+                  height: baseSize.height ? `${baseSize.height * zoom}px` : "auto",
+                  transform: `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg)`,
                 }}
                 draggable={false}
               />
@@ -152,10 +171,6 @@ export function ImageCropperDialog({
             
             {/* Circle Overlay */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-0 bg-slate-900/40" style={{ 
-                clipPath: 'path("M0 0h100v100H0z M50 50 m-40 0 a 40 40 0 1 0 80 0 a 40 40 0 1 0 -80 0")',
-                clipRule: 'evenodd'
-              }} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-[200px] h-[200px] rounded-full border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]" />
               </div>
@@ -168,7 +183,7 @@ export function ImageCropperDialog({
               <ZoomOut className="h-4 w-4 text-slate-400" />
               <Slider
                 value={[zoom]}
-                min={1}
+                min={0.5}
                 max={3}
                 step={0.1}
                 onValueChange={([val]) => setZoom(val)}

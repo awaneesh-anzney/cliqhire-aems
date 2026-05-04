@@ -2,11 +2,19 @@
 
 import React, { useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
+import { formatPhoneNumber } from "@/lib/countryCodes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { 
   User, 
@@ -23,7 +31,9 @@ import {
   CheckCircle2,
   Globe,
   Award,
-  Settings
+  Settings,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Loader } from "lucide-react";
@@ -39,6 +49,7 @@ export default function ProfilePage() {
   // Avatar Edit States
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Form states
@@ -46,6 +57,12 @@ export default function ProfilePage() {
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
+  });
+  
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
   });
 
   if (isLoading) {
@@ -88,7 +105,7 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onload = () => {
         setSelectedImage(reader.result as string);
-        setIsCropperOpen(true);
+        setIsPreviewOpen(true);
       };
       reader.readAsDataURL(file);
     }
@@ -175,7 +192,7 @@ export default function ProfilePage() {
                        <div className="h-8 w-8 rounded-lg bg-slate-50 group-hover:bg-brand/10 flex items-center justify-center transition-all">
                          <Phone className="h-4 w-4" />
                        </div>
-                       <span>{userProfile?.countryCode ? `+${userProfile.countryCode}` : ""} {userProfile?.phone}</span>
+                       <span>{formatPhoneNumber(userProfile?.phone, userProfile?.countryCode) || "Not Set"}</span>
                     </div>
                    <div className="flex items-center gap-3 text-sm font-semibold text-slate-600 group hover:text-brand transition-colors cursor-default">
                       <div className="h-8 w-8 rounded-lg bg-slate-50 group-hover:bg-brand/10 flex items-center justify-center transition-all">
@@ -345,36 +362,63 @@ export default function ProfilePage() {
                     <form onSubmit={handlePasswordChange} className="space-y-6 max-w-md">
                       <div className="space-y-2">
                         <Label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Current Password</Label>
-                        <Input 
-                          type="password" 
-                          placeholder="••••••••"
-                          className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-mono"
-                          value={passwordForm.currentPassword}
-                          onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                          required
-                        />
+                        <div className="relative">
+                          <Input 
+                            type={showPasswords.current ? "text" : "password"} 
+                            placeholder="••••••••"
+                            className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-mono pr-12"
+                            value={passwordForm.currentPassword}
+                            onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({...showPasswords, current: !showPasswords.current})}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand transition-colors"
+                          >
+                            {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">New Password</Label>
-                        <Input 
-                          type="password" 
-                          placeholder="••••••••"
-                          className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-mono"
-                          value={passwordForm.newPassword}
-                          onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                          required
-                        />
+                        <div className="relative">
+                          <Input 
+                            type={showPasswords.new ? "text" : "password"} 
+                            placeholder="••••••••"
+                            className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-mono pr-12"
+                            value={passwordForm.newPassword}
+                            onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand transition-colors"
+                          >
+                            {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Confirm New Password</Label>
-                        <Input 
-                          type="password" 
-                          placeholder="••••••••"
-                          className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-mono"
-                          value={passwordForm.confirmPassword}
-                          onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                          required
-                        />
+                        <div className="relative">
+                          <Input 
+                            type={showPasswords.confirm ? "text" : "password"} 
+                            placeholder="••••••••"
+                            className="h-12 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-mono pr-12"
+                            value={passwordForm.confirmPassword}
+                            onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand transition-colors"
+                          >
+                            {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                       <Button 
                         type="submit" 
@@ -414,11 +458,54 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Original Image Preview Dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-2xl rounded-3xl overflow-hidden border-none shadow-2xl p-0">
+          <DialogHeader className="p-8 pb-4">
+            <DialogTitle className="text-xl font-black text-slate-900 flex items-center gap-2">
+              <Camera className="h-5 w-5 text-brand" />
+              Preview Original Image
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-8 pb-4 flex justify-center bg-slate-50 py-10">
+            <img 
+              src={selectedImage || ""} 
+              alt="Preview" 
+              className="max-h-[50vh] rounded-2xl shadow-lg border-4 border-white" 
+            />
+          </div>
+          <DialogFooter className="p-6 bg-white flex gap-3">
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                setIsPreviewOpen(false);
+                setSelectedImage(null);
+              }} 
+              className="rounded-xl font-bold text-slate-500"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                setIsPreviewOpen(false);
+                setIsCropperOpen(true);
+              }} 
+              className="rounded-xl bg-slate-900 hover:bg-black text-white font-black uppercase tracking-widest px-8"
+            >
+              Continue to Crop
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Image Cropper Component */}
       <ImageCropperDialog
         image={selectedImage}
         open={isCropperOpen}
-        onClose={() => setIsCropperOpen(false)}
+        onClose={() => {
+          setIsCropperOpen(false);
+          setSelectedImage(null);
+        }}
         onCrop={handleCropComplete}
       />
       {/* Edit Profile Modal */}
