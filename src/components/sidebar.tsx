@@ -15,6 +15,7 @@ import {
   ListTodo,
   UserRoundSearch,
   UserPlus,
+  CircleUser,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,6 +48,7 @@ const MODULE_ICONS: Record<string, React.ElementType> = {
   teams:          Users,
   roles:          LockKeyhole,
   settings:       Settings,
+  profile:        CircleUser,
   admin:          Lock,
 };
 

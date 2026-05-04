@@ -22,6 +22,28 @@ export interface LoginUserData {
   password: string;
 }
 
+export interface UserProfile {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  teamRole?: string;
+  phone?: string;
+  countryCode?: string;
+  location?: string;
+  experience?: string;
+  status?: string;
+  department?: string;
+  specialization?: string;
+  skills?: string[];
+  resume?: string;
+  avatar?: string;
+  gender?: string;
+  registrationStatus?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface User {
   id?: string;
   _id?: string;
@@ -34,13 +56,7 @@ export interface User {
   updatedAt?: string;
   permissions?: string[];
   defaultPermissions?: string[];
-  profile?: {
-    _id?: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    teamRole?: string;
-  };
+  profile?: UserProfile;
 }
 
 // API Response interfaces
@@ -310,6 +326,35 @@ class AuthService {
         success: false,
         message: error instanceof Error ? error.message : 'Failed to change password'
       };
+    }
+  }
+
+  /**
+   * Get logged-in user's profile
+   */
+  async getProfile(): Promise<ApiResponse<{ user: User }>> {
+    try {
+      const response = await api.get('/api/auth/profile');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update logged-in user's profile basic info
+   * Supports both JSON (firstName, lastName, avatar URL) 
+   * and FormData (avatar file)
+   */
+  async updateProfile(data: any): Promise<ApiResponse<{ user: User }>> {
+    try {
+      // If it's FormData, let Axios handle headers automatically (especially for boundary)
+      const response = await api.put('/api/auth/profile', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
     }
   }
 
