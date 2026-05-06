@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  formatDate,
   getCountryByCode,
   formatPhoneNumber,
 } from "@/lib/countryCodes";

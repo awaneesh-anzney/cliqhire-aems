@@ -134,5 +134,5 @@ export type ClientContactInfo = {
 
 export type ClientContractInfo = {
   lineOfBusiness: string[];
-  contractForms: Record<string, Object>;
+  contractForms: Record<string, any>;
 }

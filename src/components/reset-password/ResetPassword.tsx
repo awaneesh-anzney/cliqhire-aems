@@ -39,7 +39,7 @@ type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 export function ResetPassword({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get("token");
+  const token = searchParams?.get("token");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
