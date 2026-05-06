@@ -6,9 +6,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { 
-  Briefcase, 
-  Building2, 
+import {
+  Briefcase,
+  Building2,
   Calendar,
   GraduationCap,
   Languages,
@@ -21,7 +21,7 @@ import {
   ChevronLeft,
   Loader2
 } from "lucide-react";
-import { getPipelineCandidateDetails, updateCandidateStage, updateCandidateStatus } from "@/services/recruitmentPipelineService";
+import { getPipelineCandidateDetails, updateCandidateStage, updateCandidateStatus, addInterviewRound } from "@/services/recruitmentPipelineService";
 import { mapPipelineCandidateResponse } from "@/components/Recruiter-Pipeline/pipeline-mapper";
 import { PipelineStageDetails } from "@/components/Recruiter-Pipeline/pipeline-stage-details/PipelineStageDetails";
 import { useAuth } from "@/contexts/AuthContext";
@@ -168,12 +168,15 @@ export default function CandidatePipelineDetailsPage() {
       try {
         const backendStage = mapUIStageToBackendStage(stageChangeDialog.newStage);
         await updateCandidateStage(pipelineId, stageChangeDialog.candidate.id, {
-          newStage: backendStage,
+          stage: backendStage,
+          notes: `Moved to ${stageChangeDialog.newStage}`,
         });
-        await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId] });
+        await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId, "candidate", candidateId] });
+        toast.success(`Candidate moved to ${stageChangeDialog.newStage}`);
         setStageChangeDialog({ isOpen: false, candidate: null, currentStage: '', newStage: '' });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error updating candidate stage:', error);
+        toast.error(error.message || 'Failed to update candidate stage');
       }
     }
   };
@@ -230,11 +233,12 @@ export default function CandidatePipelineDetailsPage() {
           stage: mapUIStageToBackendStage(statusChangeDialog.candidate.currentStage),
           notes: `Status updated to ${statusChangeDialog.newStatus}`,
         });
-        await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId] });
+        await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId, "candidate", candidateId] });
+        toast.success(`Status updated to ${statusChangeDialog.newStatus}`);
         setStatusChangeDialog({ isOpen: false, candidate: null, newStatus: null });
       } catch (error: any) {
         console.error('Error updating candidate status:', error);
-        alert(error.message || 'Failed to update candidate status. Please try again.');
+        toast.error(error.message || 'Failed to update candidate status. Please try again.');
       }
     }
   };
@@ -248,14 +252,30 @@ export default function CandidatePipelineDetailsPage() {
     if (!candidate) return;
     try {
       const backendStage = mapUIStageToBackendStage('Interview');
+
+      // STEP 1 — Move Candidate to Interview Stage
       await updateCandidateStage(pipelineId, candidate.id, {
-        newStage: backendStage,
-        interviewDate: dateTime,
-        interviewMeetingLink: meetingLink,
+        stage: backendStage,
+        status: "Scheduled",
+        notes: "Moving to interview stage"
       });
-      await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId] });
-    } catch (error) {
+
+      // STEP 2 — Add Round 1 (only if a date was provided)
+      if (dateTime) {
+        await addInterviewRound(pipelineId, candidate.id, {
+          roundLabel: "Technical Round 1",
+          interviewType: meetingLink ? "Video" : "In-Person",
+          scheduledAt: new Date(dateTime).toISOString(),
+          ...(meetingLink ? { extraData: { meetLink: meetingLink } } : {}),
+          notes: "Initial interview scheduled via stage move"
+        });
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId, "candidate", candidateId] });
+      toast.success("Candidate moved to Interview stage and round scheduled");
+    } catch (error: any) {
       console.error('Error updating candidate stage to Interview:', error);
+      toast.error(error.message || "Failed to move candidate to interview stage");
     } finally {
       setInterviewDialog({ isOpen: false, candidate: null });
     }
@@ -287,36 +307,37 @@ export default function CandidatePipelineDetailsPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] bg-[#F8FAFC] pb-2 flex flex-col">
       <div className="w-full px-2 mt-2 space-y-3">
-        
-        <CandidateHeaderCard 
-          candidate={candidate} 
+
+        <CandidateHeaderCard
+          candidate={candidate}
           onStageChange={handleStageChange}
           onStatusChange={handleStatusChange}
           canModify={canModifyPipeline}
         />
-        
-        <CandidateProgressCard 
-          candidate={candidate} 
-          selectedStage={selectedStage} 
-          setSelectedStage={setSelectedStage} 
+
+        <CandidateProgressCard
+          candidate={candidate}
+          selectedStage={selectedStage}
+          setSelectedStage={setSelectedStage}
           stages={job.stages}
         />
-        
+
         <CandidateDisqualificationCard candidate={candidate} />
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 p-4">
-          <PipelineStageDetails 
+          <PipelineStageDetails
             candidate={candidate}
             selectedStage={selectedStage}
             onStageSelect={setSelectedStage}
             onUpdateCandidate={handleUpdateCandidate}
             pipelineId={pipelineId}
+            candidateId={candidateId}
             canModify={canModifyPipeline}
           />
         </div>
 
         <CandidateInfoGrid candidate={candidate} />
-        
+
         <CandidateDocumentsCard candidate={candidate} />
       </div>
 
@@ -359,7 +380,7 @@ export default function CandidatePipelineDetailsPage() {
         </DialogContent>
       </Dialog>
 
-      <TempCandidateAlertDialog 
+      <TempCandidateAlertDialog
         isOpen={tempCandidateAlert.isOpen}
         onClose={() => setTempCandidateAlert({ isOpen: false, candidateName: null, message: null })}
         candidateName={tempCandidateAlert.candidateName || ''}
@@ -400,7 +421,8 @@ export default function CandidatePipelineDetailsPage() {
                   stage: mapUIStageToBackendStage(disqualificationDialog.candidate.currentStage),
                   notes: data.disqualificationReason,
                 });
-                await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId] });
+                await queryClient.invalidateQueries({ queryKey: ["pipeline", pipelineId, "candidate", candidateId] });
+                toast.success("Candidate disqualified");
               } catch (error) {
                 console.error("Disqualification error: ", error);
               }

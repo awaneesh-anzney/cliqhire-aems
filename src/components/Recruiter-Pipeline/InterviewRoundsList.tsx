@@ -44,7 +44,8 @@ export function InterviewRoundsList({
 }: InterviewRoundsListProps) {
   const [expandedRounds, setExpandedRounds] = useState<Record<string, boolean>>({});
 
-  const toggleRound = (roundId: string) => {
+  const toggleRound = (round: any) => {
+    const roundId = round._id || round.id;
     setExpandedRounds(prev => ({
       ...prev,
       [roundId]: !prev[roundId]
@@ -108,13 +109,14 @@ export function InterviewRoundsList({
       ) : (
         <div className="space-y-3">
           {rounds.map((round, index) => {
-            const isExpanded = expandedRounds[round._id] || (index === rounds.length - 1 && Object.keys(expandedRounds).length === 0);
+            const roundId = (round as any)._id || (round as any).id;
+            const isExpanded = expandedRounds[roundId] || (index === rounds.length - 1 && Object.keys(expandedRounds).length === 0);
             
             return (
-              <Card key={round._id} className={`overflow-hidden border transition-all ${isExpanded ? 'ring-1 ring-blue-100 shadow-md' : 'hover:border-slate-300'}`}>
+              <Card key={roundId} className={`overflow-hidden border transition-all ${isExpanded ? 'ring-1 ring-blue-100 shadow-md' : 'hover:border-slate-300'}`}>
                 <div 
                   className={`p-3 cursor-pointer flex items-center justify-between ${isExpanded ? 'bg-blue-50/30' : 'bg-white'}`}
-                  onClick={() => toggleRound(round._id)}
+                  onClick={() => toggleRound(round)}
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 shadow-sm">
@@ -169,7 +171,7 @@ export function InterviewRoundsList({
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Overall</span>
                         </div>
                         <div className="text-lg font-bold text-slate-700">
-                          {round.overallScore ? `${round.overallScore}/10` : '—'}
+                          {round.overallScore !== undefined && round.overallScore !== null ? `${round.overallScore}/10` : '—'}
                         </div>
                       </div>
                       <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
@@ -178,7 +180,7 @@ export function InterviewRoundsList({
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Technical</span>
                         </div>
                         <div className="text-lg font-bold text-slate-700">
-                          {round.technicalScore ? `${round.technicalScore}/10` : '—'}
+                          {round.technicalScore !== undefined && round.technicalScore !== null ? `${round.technicalScore}/10` : '—'}
                         </div>
                       </div>
                       <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
@@ -187,7 +189,7 @@ export function InterviewRoundsList({
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Comm.</span>
                         </div>
                         <div className="text-lg font-bold text-slate-700">
-                          {round.communicationScore ? `${round.communicationScore}/10` : '—'}
+                          {round.communicationScore !== undefined && round.communicationScore !== null ? `${round.communicationScore}/10` : '—'}
                         </div>
                       </div>
                     </div>
@@ -227,6 +229,18 @@ export function InterviewRoundsList({
                             {round.areasOfImprovement || 'Not provided'}
                           </p>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Reschedule Reason */}
+                    {round.status === "Rescheduled" && round.rescheduleReason && (
+                      <div className="space-y-1.5 bg-orange-50/50 p-2 rounded border border-orange-100">
+                        <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" /> Reschedule Reason
+                        </h4>
+                        <p className="text-xs text-orange-700 leading-relaxed italic">
+                          "{round.rescheduleReason}"
+                        </p>
                       </div>
                     )}
 

@@ -30,7 +30,6 @@ import {
   mapUIStageToBackendStage,
   type InterviewRound 
 } from "../dummy-data";
-import { updateCandidateStageData, addInterviewRound, updateInterviewRound } from "@/services/recruitmentPipelineService";
 import { InterviewRoundsList } from "../InterviewRoundsList";
 import { InterviewRoundDialog } from "../InterviewRoundDialog";
 
@@ -47,6 +46,7 @@ interface PipelineStageDetailsProps {
   onStageSelect?: (stage: string) => void;
   onUpdateCandidate?: (updatedCandidate?: any) => void;
   pipelineId?: string;
+  candidateId?: string; // New prop for explicit ID
   canModify?: boolean;
 }
 
@@ -56,6 +56,7 @@ export function PipelineStageDetails({
   onStageSelect,
   onUpdateCandidate,
   pipelineId,
+  candidateId,
   canModify = true,
 }: PipelineStageDetailsProps) {
   const [isEditingStage, setIsEditingStage] = useState(false);
@@ -105,8 +106,8 @@ export function PipelineStageDetails({
 
   const handleConfirmSave = async () => {
     // ── Get the correct candidate ID for the API call
-    const candidateId = candidate.id || candidate._id;
-    const hasApiIntegration = pipelineId && candidateId;
+    const cid = candidateId || candidate.id || candidate._id;
+    const hasApiIntegration = pipelineId && cid;
 
     const updatedFields: Record<string, any> = {};
     Object.entries(editValues).forEach(([key, val]) => {
@@ -133,11 +134,10 @@ export function PipelineStageDetails({
       const stageKey = getStageKey(displayStage);
       const existingStageData = candidate[stageKey] || {};
 
-      const response = await updateCandidateStageData(
+      const response = await RecruiterPipelineService.updateStageData(
         pipelineId!,
-        candidateId,
+        cid,
         {
-          stage: backendStage,
           data: { ...existingStageData, ...updatedFields },
           notes: `Bulk updated stage details for ${displayStage}`,
         }
@@ -170,29 +170,89 @@ export function PipelineStageDetails({
   };
 
   const handleConfirmRound = async (roundData: any) => {
-    const candidateId = candidate.id || candidate._id;
-    if (!pipelineId || !candidateId) return;
+    // Priority: Prop ID > Candidate Record ID > candidateId field
+    const cid = candidateId || candidate.id || candidate._id || (candidate as any).candidateId?._id;
+    
+    if (!pipelineId || !cid) {
+      toast.error("Critical Error: Missing IDs. Please refresh.");
+      console.error("Missing IDs:", { pipelineId, candidateId: cid });
+      return;
+    }
+
+    const targetCandidateId = cid;
 
     setIsUpdating(true);
     try {
       let response;
       if (roundDialog.round) {
         // Update existing round
-        response = await updateInterviewRound(pipelineId, candidateId, roundDialog.round._id, roundData);
-        toast.success("Interview round updated successfully");
+        const originalRound = roundDialog.round as any;
+        const roundId = originalRound._id || originalRound.id;
+        
+        // Build the update payload
+        const updatePayload: any = {};
+        
+        // Always send status and result if we are in an update
+        updatePayload.status = roundData.status;
+        updatePayload.result = roundData.result;
+
+        // Only send scores/feedback if they have values or were changed
+        const fields = [
+          'overallScore', 'technicalScore', 'communicationScore', 'duration',
+          'strengths', 'areasOfImprovement', 'feedback', 'rescheduleReason',
+          'notes', 'roundLabel', 'interviewType', 'extraData', 'interviewers'
+        ];
+
+        fields.forEach(field => {
+          if (roundData[field] !== undefined) {
+            updatePayload[field] = roundData[field];
+          }
+        });
+
+        // Handle dates with care - only send if changed to avoid timezone/format noise
+        const dateFields = ['scheduledAt', 'conductedAt'];
+        dateFields.forEach(field => {
+          const newDate = roundData[field] ? new Date(roundData[field]).getTime() : null;
+          const oldDate = originalRound[field] ? new Date(originalRound[field]).getTime() : null;
+          if (newDate !== oldDate) {
+            updatePayload[field] = roundData[field];
+          }
+        });
+
+        console.log("Updating round (Payload):", { pipelineId, candidateId: targetCandidateId, roundId, updatePayload });
+        
+        if (!roundId) throw new Error("Missing Interview Round ID");
+        
+        const promise = RecruiterPipelineService.updateInterviewRound(pipelineId, targetCandidateId, roundId, updatePayload);
+        toast.promise(promise, {
+          loading: 'Updating interview round...',
+          success: 'Interview round updated successfully',
+          error: (err) => err.message || 'Failed to update round'
+        });
+        response = await promise;
       } else {
         // Add new round
-        response = await addInterviewRound(pipelineId, candidateId, roundData);
-        toast.success("New interview round added");
+        console.log("Adding new round (Payload):", { pipelineId, candidateId: targetCandidateId, roundData });
+        const promise = RecruiterPipelineService.addInterviewRound(pipelineId, targetCandidateId, roundData);
+        toast.promise(promise, {
+          loading: 'Adding interview round...',
+          success: 'New interview round added',
+          error: (err) => err.message || 'Failed to add round'
+        });
+        response = await promise;
       }
 
       if (response.success) {
         await onUpdateCandidate?.();
         setRoundDialog({ isOpen: false, round: null });
+        setIsUpdating(false);
+      } else {
+        toast.error(response.message || "Failed to save");
+        setIsUpdating(false);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to save interview round");
-    } finally {
+      console.error("Save Error:", error);
+      toast.error(error.message || "An unexpected error occurred");
       setIsUpdating(false);
     }
   };

@@ -394,6 +394,76 @@ export class RecruiterPipelineService {
     }
   }
 
+  // ─── Interview Rounds ────────────────────────────────────────
+
+  /**
+   * Add a new interview round
+   */
+  static async addInterviewRound(
+    pipelineId: string,
+    candidateId: string,
+    roundData: any
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.post(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/interview-rounds`,
+        roundData
+      );
+      return { success: true, message: 'Interview round added', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add interview round',
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Update an existing interview round
+   */
+  static async updateInterviewRound(
+    pipelineId: string,
+    candidateId: string,
+    roundId: string,
+    roundData: any
+  ): Promise<StageUpdateResponse> {
+    try {
+      const url = `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/interview-rounds/${roundId}`;
+      console.log(`PATCH Request to: ${url}`, roundData);
+      const response = await api.patch(url, roundData);
+      return { success: true, message: 'Interview round updated', data: response.data };
+    } catch (error: any) {
+      console.error('PATCH Request Failed:', error.response?.data || error.message);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update interview round',
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get all interview rounds for a candidate
+   */
+  static async getInterviewRounds(
+    pipelineId: string,
+    candidateId: string
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.get(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/interview-rounds`
+      );
+      return { success: true, message: 'Interview rounds fetched', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch interview rounds',
+        error: error.message,
+      };
+    }
+  }
+
   // ─── Legacy compat (for existing hooks that reference old method names) ─
 
   /** @deprecated Use updateStageData instead */
