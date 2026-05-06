@@ -360,6 +360,58 @@ class AuthService {
   }
 
   /**
+   * Forgot password - sends reset link to email
+   */
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.post('/api/auth/forgot-password', { email });
+      return {
+        success: true,
+        message: response.data.message || 'If this email is registered, a password reset link has been sent.'
+      };
+    } catch (error) {
+      console.error('Error in forgot password:', error);
+      if (axios.isAxiosError(error)) {
+        const errorData = error.response?.data as any;
+        return {
+          success: false,
+          message: errorData?.message || error.message || 'Failed to process forgot password request'
+        };
+      }
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'An unexpected error occurred'
+      };
+    }
+  }
+
+  /**
+   * Reset password - updates password using token
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.post('/api/auth/reset-password', { token, newPassword });
+      return {
+        success: true,
+        message: response.data.message || 'Password successfully reset. You can now login.'
+      };
+    } catch (error) {
+      console.error('Error in reset password:', error);
+      if (axios.isAxiosError(error)) {
+        const errorData = error.response?.data as any;
+        return {
+          success: false,
+          message: errorData?.message || error.message || 'Failed to reset password'
+        };
+      }
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'An unexpected error occurred'
+      };
+    }
+  }
+
+  /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {

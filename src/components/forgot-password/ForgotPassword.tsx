@@ -19,6 +19,8 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+import { usePasswordReset } from "@/hooks/usePasswordReset";
+
 const forgotPasswordSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
@@ -28,8 +30,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 export function ForgotPassword({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { forgotPassword, isForgotPasswordPending, isForgotPasswordSuccess } = usePasswordReset();
 
   const form = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -39,24 +40,10 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
   });
 
   const onSubmit = async (values: ForgotPasswordValues) => {
-    setIsSubmitting(true);
-    try {
-      // Simulate API call for forgot password
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Example implementation if authService had a forgotPassword method:
-      // await authService.forgotPassword(values.email);
-      
-      toast.success("Password reset link sent!");
-      setIsSubmitted(true);
-    } catch (error) {
-      toast.error("Failed to send reset link. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    forgotPassword(values.email);
   };
 
-  if (isSubmitted) {
+  if (isForgotPasswordSuccess) {
     return (
       <div className={cn("flex w-full flex-col gap-6 items-center text-center", className)} {...props}>
         <div className="h-16 w-16 bg-brand/10 rounded-full flex items-center justify-center mb-2">
@@ -71,7 +58,7 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
         </p>
         <div className="flex flex-col gap-3 w-full mt-4">
           <Button 
-            onClick={() => setIsSubmitted(false)}
+            onClick={() => window.location.reload()}
             variant="outline" 
             className="w-full h-12 rounded-full border-gray-200 text-[#2B3674] hover:bg-gray-50 font-medium"
           >
@@ -121,9 +108,9 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
           <Button
             type="submit"
             className="w-full h-12 rounded-full bg-brand hover:bg-brand/90 text-white font-medium text-base mt-2 shadow-md transition-all shadow-brand/20"
-            disabled={isSubmitting}
+            disabled={isForgotPasswordPending}
           >
-            {isSubmitting ? "Sending reset link..." : "Send Reset Link"}
+            {isForgotPasswordPending ? "Sending reset link..." : "Send Reset Link"}
           </Button>
 
           <div className="text-center mt-6">
