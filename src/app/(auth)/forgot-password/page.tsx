@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
           <div className="relative z-10 space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">Password Recovery</h1>
             <p className="text-lg text-white/90 max-w-[280px]">
-              Don't worry, it happens to the best of us. Let's get you back into your account.
+              Don&apos;t worry, it happens to the best of us. Let&apos;s get you back into your account.
             </p>
           </div>
         </div>

@@ -54,7 +54,7 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
           We have sent a password reset link to <span className="font-semibold text-[#2B3674]">{form.getValues("email")}</span>. 
         </p>
         <p className="text-sm text-gray-500">
-          Didn't receive the email? Check your spam folder or try again.
+          Did&apos;t receive the email? Check your spam folder or try again.
         </p>
         <div className="flex flex-col gap-3 w-full mt-4">
           <Button 
@@ -78,7 +78,7 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
     <div className={cn("flex w-full flex-col gap-6", className)} {...props}>
       <h2 className="text-3xl font-bold tracking-tight text-[#2B3674] mb-2">Forgot Password</h2>
       <p className="text-gray-500 mb-4 text-sm leading-relaxed">
-        Enter the email address associated with your account and we'll send you a link to reset your password.
+        Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
       </p>
 
       <Form {...form}>

@@ -239,7 +239,7 @@ export function InterviewRoundsList({
                           <AlertCircle className="h-3 w-3" /> Reschedule Reason
                         </h4>
                         <p className="text-xs text-orange-700 leading-relaxed italic">
-                          "{round.rescheduleReason}"
+                          &quot;{round.rescheduleReason}&quot;
                         </p>
                       </div>
                     )}
@@ -249,7 +249,7 @@ export function InterviewRoundsList({
                       <div className="space-y-1.5">
                         <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Feedback</h4>
                         <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-2 rounded italic">
-                          "{round.feedback}"
+                          &quot;{round.feedback}&quot;
                         </p>
                       </div>
                     )}
