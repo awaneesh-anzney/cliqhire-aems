@@ -129,15 +129,6 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           type: "select",
           options: ["LinkedIn", "Email", "Indeed", "Referral", "Direct", "Other"]
         },
-        {
-          key: "referredBy",
-          label: "Referred By",
-          value: sourcingData.referredBy || "Not set",
-          icon: <User className="h-4 w-4" />,
-          color: "bg-purple-50 text-purple-600",
-          type: "text",
-          placeholder: "Enter referrer name"
-        },
         // {
         //   key: "source",
         //   label: "Source",
