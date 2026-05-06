@@ -110,8 +110,20 @@ export function PipelineStageDetails({
     const hasApiIntegration = pipelineId && cid;
 
     const updatedFields: Record<string, any> = {};
+    const numericFields = [
+      "sourcingRating", "screeningRating", "overallRating", "clientRating", 
+      "hiringRating", "offeredSalary", "finalSalary", "interviewRoundNo", 
+      "interviewReschedules"
+    ];
+
     Object.entries(editValues).forEach(([key, val]) => {
-      updatedFields[key] = val === "" || val === "Not set" ? null : val;
+      if (val === "" || val === "Not set") {
+        updatedFields[key] = null;
+      } else if (numericFields.includes(key) && !isNaN(Number(val))) {
+        updatedFields[key] = Number(val);
+      } else {
+        updatedFields[key] = val;
+      }
     });
 
     if (!hasApiIntegration) {

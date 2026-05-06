@@ -457,29 +457,64 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
       return [
         {
           key: "hireDate",
-          label: "Joining Date",
+          label: "Hire Date",
           value: formatApiDate(hiredData.hireDate),
           icon: <CalendarDays className="h-4 w-4" />,
           color: "bg-green-50 text-green-600",
           type: "date"
         },
         {
+          key: "startDate",
+          label: "Start Date",
+          value: formatApiDate(hiredData.startDate),
+          icon: <CalendarDays className="h-4 w-4" />,
+          color: "bg-blue-50 text-blue-600",
+          type: "date"
+        },
+        {
+          key: "offeredSalary",
+          label: "Offered Salary",
+          value: hiredData.offeredSalary?.toString() || "Not set",
+          icon: <DollarSign className="h-4 w-4" />,
+          color: "bg-emerald-50 text-emerald-600",
+          type: "text",
+          placeholder: "e.g., 15000"
+        },
+        {
+          key: "offeredSalaryCurrency",
+          label: "Currency",
+          value: hiredData.offeredSalaryCurrency || "Not set",
+          icon: <DollarSign className="h-4 w-4" />,
+          color: "bg-slate-50 text-slate-600",
+          type: "select",
+          options: ["SAR", "USD", "EUR", "GBP", "INR", "AED"]
+        },
+        {
+          key: "probationPeriod",
+          label: "Probation Period",
+          value: hiredData.probationPeriod || "Not set",
+          icon: <Clock className="h-4 w-4" />,
+          color: "bg-orange-50 text-orange-600",
+          type: "text",
+          placeholder: "e.g., 3 months"
+        },
+        {
+          key: "hiringRating",
+          label: "Hiring Rating",
+          value: hiredData.hiringRating?.toString() || "Not set",
+          icon: <Star className="h-4 w-4" />,
+          color: "bg-yellow-50 text-yellow-600",
+          type: "select",
+          options: ["1", "2", "3", "4", "5"]
+        },
+        {
           key: "contractType",
           label: "Contract Type",
           value: hiredData.contractType || "Not set",
           icon: <FileText className="h-4 w-4" />,
-          color: "bg-blue-50 text-blue-600",
+          color: "bg-indigo-50 text-indigo-600",
           type: "select",
-          options: ["Full-time", "Part-time", "Contract", "Internship"]
-        },
-        {
-          key: "finalSalary",
-          label: "Salary",
-          value: hiredData.finalSalary || "Not set",
-          icon: <DollarSign className="h-4 w-4" />,
-          color: "bg-purple-50 text-purple-600",
-          type: "text",
-          placeholder: "e.g., $75,000"
+          options: ["Full Time", "Part Time", "Contract", "Internship"]
         }
       ];
 
