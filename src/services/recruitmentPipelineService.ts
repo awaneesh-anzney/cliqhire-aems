@@ -454,6 +454,62 @@ export const getPipelineCandidateDetails = async (
 };
 
 /**
+ * Add a new interview round
+ */
+export const addInterviewRound = async (
+  pipelineId: string,
+  candidateId: string,
+  roundData: any
+): Promise<any> => {
+  try {
+    const response = await api.post(
+      `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/interview-rounds`,
+      roundData
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to add interview round');
+  }
+};
+
+/**
+ * Update an existing interview round
+ */
+export const updateInterviewRound = async (
+  pipelineId: string,
+  candidateId: string,
+  roundId: string,
+  roundData: any
+): Promise<any> => {
+  try {
+    const response = await api.patch(
+      `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/interview-rounds/${roundId}`,
+      roundData
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to update interview round');
+  }
+};
+
+/**
+ * Get all interview rounds for a candidate
+ */
+export const getInterviewRounds = async (
+  pipelineId: string,
+  candidateId: string
+): Promise<any> => {
+  try {
+    const response = await api.get(
+      `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/interview-rounds`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch interview rounds');
+  }
+};
+
+/**
  * Get full stage history of a candidate
  */
 export const getCandidateHistory = async (

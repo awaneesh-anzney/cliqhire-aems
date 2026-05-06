@@ -13,6 +13,36 @@ export type OnboardingStatus = "Pending" | "Completed";
 
 export type StatusType = SourcingStatus | ScreeningStatus | ClientScreeningStatus | InterviewStatus | VerificationStatus | OnboardingStatus;
 
+export interface InterviewRound {
+  _id: string;
+  roundNumber: number;
+  roundLabel: string;
+  interviewType: string;
+  scheduledAt: string;
+  conductedAt?: string | null;
+  duration?: number | null;
+  interviewers: Array<{
+    name: string;
+    designation: string;
+    email: string;
+  }>;
+  status: string;
+  result: string;
+  overallScore?: number | null;
+  technicalScore?: number | null;
+  communicationScore?: number | null;
+  strengths?: string;
+  areasOfImprovement?: string;
+  feedback?: string;
+  rescheduleReason?: string;
+  notes?: string;
+  extraData?: any;
+  addedBy?: { _id: string; name: string; email: string };
+  lastEditedBy?: { _id: string; name: string; email: string } | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Candidate {
   id: string;
   name: string;
@@ -65,6 +95,8 @@ export interface Candidate {
   onboarding?: any;
   hired?: any;
   disqualified?: any;
+  interviewRounds?: InterviewRound[];
+  currentInterviewRound?: number;
   // Additional pipeline fields
   connection?: ConnectionType;
   hiringManager?: string;

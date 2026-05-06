@@ -148,6 +148,9 @@ export function mapEntryToJob(entry: any): Job {
       hired: hiredData,
       disqualified: disqualifiedData,
 
+      interviewRounds: c?.interviewRounds || [],
+      currentInterviewRound: c?.currentInterviewRound,
+
       // Team info (from job, not per-candidate in v2)
       hiringManager: c?.hiringManager,
       recruiter: c?.recruiter,
@@ -285,7 +288,9 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     hired: hiredData,
     disqualified: disqualifiedData,
     source: sourcingData?.connection || candidateInfo?.source || "",
-    connection: sourcingData?.connection || candidateInfo?.source || ""
+    connection: sourcingData?.connection || candidateInfo?.source || "",
+    interviewRounds: data.interviewRounds || [],
+    currentInterviewRound: data.currentInterviewRound,
   } as any;
 
   // If candidate is disqualified and no explicit disqualified data in history,
