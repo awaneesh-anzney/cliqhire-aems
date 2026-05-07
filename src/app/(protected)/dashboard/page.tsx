@@ -39,47 +39,47 @@
      <>
        <div className="flex flex-col w-full min-h-full py-3 px-4 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-slate-50/50">
          
-         {/* Optimized Welcome Section - Brand Theme */}
-         <div className="relative overflow-hidden rounded-[2rem] bg-brand text-white py-5 px-8 shadow-2xl shadow-brand/20 border border-brand/10">
-           {/* Abstract Background Elements */}
+         {/* Optimized Welcome Section - Brand Theme with Modern Animations */}
+         <div className="group relative overflow-hidden rounded-[2rem] bg-brand text-white py-5 px-8 shadow-2xl shadow-brand/20 border border-brand/10 transition-all duration-700 hover:shadow-brand/30">
+           {/* Abstract Background Elements with Floating Animation */}
            <div className="absolute top-0 right-0 w-1/2 h-full overflow-hidden pointer-events-none">
-             <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-[80px]" />
-             <div className="absolute top-1/2 -right-12 w-48 h-48 bg-white/5 rounded-full blur-[60px]" />
+             <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-[80px] transition-all duration-1000 group-hover:scale-120 group-hover:-translate-x-12 animate-pulse" />
+             <div className="absolute top-1/2 -right-12 w-48 h-48 bg-white/5 rounded-full blur-[60px] transition-all duration-1000 group-hover:scale-110 group-hover:-translate-y-12" />
            </div>
            
            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
              <div className="space-y-0.5">
-               <div className="flex items-center gap-2 mb-0.5">
+               <div className="flex items-center gap-2 mb-0.5 animate-in fade-in slide-in-from-left-4 duration-700">
                  <span className="flex h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Recruitment Hub</p>
                </div>
-               <h3 className="text-2xl font-black tracking-tight text-white">
-                 Welcome back, {firstName}.
+               <h3 className="text-2xl font-black tracking-tight text-white animate-in fade-in slide-in-from-left-6 duration-700 delay-100">
+                 Welcome back, <span className="text-white/90">{firstName}</span>.
                </h3>
-               <p className="text-white/80 font-bold text-xs max-w-xl">
+               <p className="text-white/80 font-bold text-xs max-w-xl animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
                  Fueling your talent acquisition journey with precision and speed.
                </p>
              </div>
              
-             <div className="flex-shrink-0 flex items-center gap-3">
-               <div className="hidden lg:flex flex-col items-end px-3 py-1 border-r border-white/20">
+             <div className="flex-shrink-0 flex items-center gap-3 animate-in fade-in slide-in-from-right-10 duration-1000 delay-300">
+               <div className="hidden lg:flex flex-col items-end px-3 py-1 border-r border-white/20 transition-all duration-500 group-hover:border-white/40">
                   <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">Efficiency</p>
                   <p className="text-xs font-black text-white">+12.5%</p>
                </div>
-               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/10 border border-white/10 text-[10px] font-black backdrop-blur-xl shadow-inner text-white">
-                 <Calendar className="w-3 h-3 text-white" />
+               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/10 border border-white/10 text-[10px] font-black backdrop-blur-xl shadow-inner text-white transition-all duration-500 hover:bg-white/20 hover:scale-105 cursor-default">
+                 <Calendar className="w-3 h-3 text-white transition-transform duration-500 group-hover:rotate-12" />
                  {currentDate}
                </div>
              </div>
            </div>
          </div>
  
-         {/* Dashboard KPI Metrics - Tightened Spacing */}
+         {/* Dashboard KPI Metrics - Tightened Spacing with Entry Animation */}
          <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
            <DashboardKpiCards />
          </div>
  
-         {/* Quick Actions - High Density Grid */}
+         {/* Quick Actions - High Density Grid with Staggered Entry */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-300">
            {/* Action 1: Client Creation */}
            <button
