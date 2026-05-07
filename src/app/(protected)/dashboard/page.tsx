@@ -39,35 +39,35 @@
      <>
        <div className="flex flex-col w-full min-h-full py-3 px-4 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-slate-50/50">
          
-         {/* Optimized Welcome Section - More Compact */}
-         <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 text-white py-5 px-8 shadow-2xl shadow-slate-200 border border-slate-800">
+         {/* Optimized Welcome Section - Brand Theme */}
+         <div className="relative overflow-hidden rounded-[2rem] bg-brand text-white py-5 px-8 shadow-2xl shadow-brand/20 border border-brand/10">
            {/* Abstract Background Elements */}
            <div className="absolute top-0 right-0 w-1/2 h-full overflow-hidden pointer-events-none">
-             <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand/20 rounded-full blur-[80px]" />
-             <div className="absolute top-1/2 -right-12 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px]" />
+             <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-[80px]" />
+             <div className="absolute top-1/2 -right-12 w-48 h-48 bg-white/5 rounded-full blur-[60px]" />
            </div>
            
            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
              <div className="space-y-0.5">
                <div className="flex items-center gap-2 mb-0.5">
-                 <span className="flex h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
-                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Recruitment Hub</p>
+                 <span className="flex h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Recruitment Hub</p>
                </div>
                <h3 className="text-2xl font-black tracking-tight text-white">
-                 Welcome back, <span className="text-brand">{firstName}</span>.
+                 Welcome back, {firstName}.
                </h3>
-               <p className="text-slate-400 font-bold text-xs max-w-xl">
+               <p className="text-white/80 font-bold text-xs max-w-xl">
                  Fueling your talent acquisition journey with precision and speed.
                </p>
              </div>
              
              <div className="flex-shrink-0 flex items-center gap-3">
-               <div className="hidden lg:flex flex-col items-end px-3 py-1 border-r border-slate-800">
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Efficiency</p>
-                  <p className="text-xs font-black text-brand">+12.5%</p>
+               <div className="hidden lg:flex flex-col items-end px-3 py-1 border-r border-white/20">
+                  <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">Efficiency</p>
+                  <p className="text-xs font-black text-white">+12.5%</p>
                </div>
-               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black backdrop-blur-xl shadow-inner text-slate-200">
-                 <Calendar className="w-3 h-3 text-brand" />
+               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/10 border border-white/10 text-[10px] font-black backdrop-blur-xl shadow-inner text-white">
+                 <Calendar className="w-3 h-3 text-white" />
                  {currentDate}
                </div>
              </div>
@@ -142,28 +142,33 @@
            </button>
  
            {/* Action 3: Candidate Creation */}
-           <div className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden">
-             <div className="absolute -top-12 -right-12 w-32 h-32 bg-slate-50 rounded-full group-hover:scale-150 transition-transform duration-700 ease-out" />
-             
-             <div className="relative z-10 p-3.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 mb-5">
-               <Rocket className="w-6 h-6" />
-             </div>
-             
-             <div className="relative z-10 space-y-2.5 flex-1">
-               <h2 className="text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-emerald-600 transition-colors">
-                 Capture <br/>Top Talent
-               </h2>
-               <p className="text-slate-400 text-[11px] font-bold leading-relaxed max-w-[180px]">
-                 Expand your candidate pool with high-potential profiles.
-               </p>
-             </div>
+           <CreateCandidateButton className="p-0 border-none bg-transparent hover:bg-transparent shadow-none w-full h-full block">
+             <div className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden">
+               <div className="absolute -top-12 -right-12 w-32 h-32 bg-slate-50 rounded-full group-hover:scale-150 transition-transform duration-700 ease-out" />
+               
+               <div className="relative z-10 p-3.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 mb-5">
+                 <Rocket className="w-6 h-6" />
+               </div>
+               
+               <div className="relative z-10 space-y-2.5 flex-1">
+                 <h2 className="text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-emerald-600 transition-colors">
+                   Capture <br/>Top Talent
+                 </h2>
+                 <p className="text-slate-400 text-[11px] font-bold leading-relaxed max-w-[180px]">
+                   Expand your candidate pool with high-potential profiles.
+                 </p>
+               </div>
  
-             <div className="relative z-10 mt-6 w-full">
-               <CreateCandidateButton className="w-full h-11 bg-slate-900 text-white hover:bg-brand font-black rounded-xl transition-all shadow-xl shadow-slate-200 flex items-center justify-center border-none group-hover:scale-[1.02] active:scale-[0.98]">
-                 Add Profile
-               </CreateCandidateButton>
+               <div className="relative z-10 mt-6 flex items-center justify-between w-full">
+                 <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-full">
+                   <Rocket className="w-2.5 h-2.5" /> Capture
+                 </div>
+                 <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                 </div>
+               </div>
              </div>
-           </div>
+           </CreateCandidateButton>
          </div>
        </div>
  
