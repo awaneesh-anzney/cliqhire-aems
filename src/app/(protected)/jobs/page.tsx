@@ -43,7 +43,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
-import JobsFilter from "@/components/jobs/JobsFilter";
+import { FilterModal } from "@/components/filter-modal";
 import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
 import { useExportJobs } from "@/hooks/useExportJobs";
 import { useJobs, useUpdateJobStage, useDeleteJob } from "@/hooks/useJobs";
@@ -468,21 +468,21 @@ export default function JobsPage() {
         confirmText={isDeleting ? 'Deleting...' : 'Delete'}
         isDeleting={isDeleting}
       />
-      <JobsFilter
+      <FilterModal
         open={filterOpen}
         onOpenChange={setFilterOpen}
-        positionName={filterPositionName}
-        onPositionNameChange={(v) => { setFilterPositionName(v); setCurrentPage(1); }}
-        jobOwner={filterJobOwner}
-        onJobOwnerChange={setFilterJobOwner}
-        selectedStages={selectedStages}
-        onStagesChange={setSelectedStages}
-        jobOwners={allOwnerOptions}
-        onApply={() => setFilterOpen(false)}
-        onClear={() => {
-          setFilterPositionName("");
-          setFilterJobOwner("");
-          setSelectedStages([]);
+        module="jobs"
+        initialFilters={{
+          name: filterPositionName,
+          owner: filterJobOwner,
+          stage: selectedStages,
+        }}
+        onApplyFilters={(newFilters) => {
+          setFilterPositionName(newFilters.name || "");
+          setFilterJobOwner(newFilters.owner || "");
+          setSelectedStages(newFilters.stage || []);
+          setCurrentPage(1);
+          setFilterOpen(false);
         }}
       />
       {canModifyJobs && <CreateJobRequirementForm open={open} onOpenChange={setOpen} />}

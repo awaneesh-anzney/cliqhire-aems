@@ -17,7 +17,7 @@ import { Loader } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import ClientsFilter from "@/components/clients/ClientsFilter";
+import { FilterModal } from "@/components/filter-modal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
 import { useExportClients } from "@/hooks/useExportClients";
@@ -458,23 +458,23 @@ export default function ClientsPage() {
           isDeleting={isDeleting}
         />
 
-        <ClientsFilter
+        <FilterModal
           open={filterOpen}
           onOpenChange={setFilterOpen}
-          name={filterName}
-          onNameChange={(v) => { setFilterName(v); setCurrentPage(1); }}
-          industry={filterIndustry}
-          onIndustryChange={(v) => { setFilterIndustry(v); setCurrentPage(1); }}
-          location={filterLocation}
-          onLocationChange={setFilterLocation}
-          selectedStages={filterStages as any}
-          onStagesChange={setFilterStages as any}
-          onApply={() => setFilterOpen(false)}
-          onClear={() => {
-            setFilterName("");
-            setFilterIndustry("");
-            setFilterLocation("");
-            setFilterStages([]);
+          module="clients"
+          initialFilters={{
+            name: filterName,
+            industry: filterIndustry,
+            location: filterLocation,
+            stage: filterStages,
+          }}
+          onApplyFilters={(newFilters) => {
+            setFilterName(newFilters.name || "");
+            setFilterIndustry(newFilters.industry || "");
+            setFilterLocation(newFilters.location || "");
+            setFilterStages(newFilters.stage || []);
+            setCurrentPage(1);
+            setFilterOpen(false);
           }}
         />
 
