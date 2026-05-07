@@ -37,6 +37,7 @@ import { convertTempCandidateToReal, type ConvertTempCandidateRequest } from "@/
 import { toast } from "sonner";
 import PhoneInput from "@/components/phone/Phoneinput";
 import { cn } from "@/lib/utils";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 
 interface CreateCandidateFormProps {
   onCandidateCreated?: (candidate: any) => void;
@@ -300,7 +301,15 @@ export default function CreateCandidateForm({
                     countryCode={form.countryCode}
                     onCountryCodeChange={v => handleSelectChange('countryCode', v)}
                     phoneNumber={form.phone}
-                    onPhoneNumberChange={v => handleSelectChange('phone', v)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Current Location</Label>
+                  <LocationSuggestion
+                    value={form.location}
+                    onChange={(val) => handleSelectChange('location', val)}
+                    placeholder="Search for candidate's city..."
                   />
                 </div>
 

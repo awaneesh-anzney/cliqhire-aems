@@ -12,6 +12,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import CurrencyFlag from "react-currency-flags";
 import { CountrySelect } from "@/components/ui/country-select";
 import PhoneInput from "@/components/phone/Phoneinput";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 
 interface EditFieldModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ interface EditFieldModalProps {
   isNationality?: boolean;
   isContinent?: boolean;
   isPhone?: boolean;
+  isLocation?: boolean;
   countryCode?: string;
   options?: { value: string; label: string }[];
   currencyOptions?: Array<{ code: string; symbol: string; name: string; countryCode?: string }>;
@@ -46,6 +48,7 @@ export function EditFieldModal({
   isNationality,
   isContinent,
   isPhone,
+  isLocation,
   countryCode: initialCountryCode = "SA",
   options,
   currencyOptions
@@ -173,6 +176,14 @@ export function EditFieldModal({
                   onPhoneNumberChange={setValue}
                   countryCode={phoneCountryCode}
                   onCountryCodeChange={setPhoneCountryCode}
+                />
+              </div>
+            ) : isLocation ? (
+              <div className="space-y-2">
+                <LocationSuggestion
+                  value={value}
+                  onChange={setValue}
+                  placeholder={`Search ${fieldName.toLowerCase()}...`}
                 />
               </div>
             ) : isTextarea ? (

@@ -21,6 +21,7 @@ import { getClients } from "@/services/clientService"
 import { cn } from "@/lib/utils"
 import { CountrySelect } from "@/components/ui/country-select"
 import { CONTINENTS } from "@/lib/constants"
+import { LocationSuggestion as LocationSearch } from "@/components/location/LocationSuggestion"
 
 // Define type for client data
 interface ClientData {
@@ -110,8 +111,6 @@ interface CreateJobModalProps {
 }
 
 export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
-  const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([])
-  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
   const [selectedNationalities, setSelectedNationalities] = useState<string[]>([])
   const [selectedContinents, setSelectedContinents] = useState<string[]>([])
   const [nationalityMode, setNationalityMode] = useState<'all' | 'specific'>('specific')
@@ -201,48 +200,26 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
 
 
 
-  useEffect(() => {
-    const fetchLocationSuggestions = async () => {
-      if (locationInput.length < 3) {
-        setLocationSuggestions([])
-        return
-      }
+  // Location search handled by LocationSearch component now
 
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationInput)}`
-        )
-        setLocationSuggestions(response.data)
-        setShowLocationSuggestions(true)
-      } catch (error) {
-        console.error("Error fetching location suggestions:", error)
-      }
-    }
-
-    const debounceTimer = setTimeout(fetchLocationSuggestions, 300)
-    return () => clearTimeout(debounceTimer)
-  }, [locationInput])
-
-  const handleLocationSelect = (suggestion: LocationSuggestion) => {
-    const location = suggestion.display_name
+  const handleLocationSelect = (label: string) => {
     const numberOfPositions = parseInt(formData.numberOfPositions) || 1
     if (numberOfPositions > 1) {
-      if (!selectedLocations.includes(location)) {
-        setSelectedLocations(prev => [...prev, location])
+      if (!selectedLocations.includes(label)) {
+        setSelectedLocations(prev => [...prev, label])
         setFormData(prev => ({
           ...prev,
-          locations: [...prev.locations, location]
+          locations: [...prev.locations, label]
         }))
       }
       setLocationInput("")
     } else {
       setFormData(prev => ({
         ...prev,
-        location: suggestion.display_name
+        location: label
       }));
-      setLocationInput(suggestion.display_name); // Update input field to show selected location
+      setLocationInput(label); 
     }
-    setShowLocationSuggestions(false);
   }
 
   const addLocation = () => {
@@ -613,80 +590,40 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                         </Badge>
                       ))}
                     </div>
-                    <div className="relative flex gap-2">
-                      <Input
-                        id="location"
-                        value={locationInput}
-                        onChange={(e) => setLocationInput(e.target.value)}
-                        onFocus={() => setShowLocationSuggestions(true)}
-                        onKeyDown={handleLocationKeyDown}
-                        placeholder="Type location and press Enter"
-                        required={selectedLocations.length === 0}
-                      />
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <LocationSearch
+                          value={locationInput}
+                          onChange={setLocationInput}
+                          onSelectCity={(city) => handleLocationSelect(city.label)}
+                          placeholder="Type location and press Enter"
+                          disabled={selectedLocations.length >= parseInt(formData.numberOfPositions) && parseInt(formData.numberOfPositions) > 1}
+                        />
+                      </div>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={addLocation}
                         disabled={!locationInput.trim()}
+                        className="h-11 px-4 rounded-xl"
                       >
                         Add
                       </Button>
-                      {showLocationSuggestions && locationSuggestions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto top-full">
-                          {locationSuggestions.map((suggestion, index) => (
-                            <div
-                              key={index}
-                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                              onMouseDown={() => handleLocationSelect(suggestion)}
-                            >
-                              {suggestion.display_name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 ) : (
-                  <div className="relative">
-                    <Input
-                      id="location"
-                      value={locationInput} // Bind to locationInput for live search
-                      onChange={(e) => {
-                        setLocationInput(e.target.value);
-                        // If user types, clear the official formData.location until a new suggestion is selected.
-                        if (formData.location && e.target.value !== formData.location) {
-                          setFormData(prev => ({ ...prev, location: "" }));
-                        }
-                      }}
-                      onFocus={() => {
-                        // If focusing and input is empty but a location was previously selected, populate input for editing.
-                        if (!locationInput && formData.location) {
-                          setLocationInput(formData.location);
-                        }
-                        setShowLocationSuggestions(true);
-                      }}
-                      onBlur={() => {
-                        // Hide suggestions after a delay to allow click.
-                        setTimeout(() => setShowLocationSuggestions(false), 200);
-                      }}
-                      placeholder="Type to search location"
-                      required
-                    />
-                    {showLocationSuggestions && locationSuggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                        {locationSuggestions.map((suggestion, index) => (
-                          <div
-                            key={index}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onMouseDown={() => handleLocationSelect(suggestion)}
-                          >
-                            {suggestion.display_name}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <LocationSearch
+                    value={locationInput || formData.location}
+                    onChange={(val) => {
+                      setLocationInput(val);
+                      if (formData.location && val !== formData.location) {
+                        setFormData(prev => ({ ...prev, location: "" }));
+                      }
+                    }}
+                    onSelectCity={(city) => handleLocationSelect(city.label)}
+                    placeholder="Type to search location"
+                  />
                 )}
               </div>
 

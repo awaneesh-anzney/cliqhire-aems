@@ -322,7 +322,8 @@ const CandidateSummary = ({
                       : ""
                 }
                 onSave={(val: any) => handleSave(field.key, val)}
-                isCountry={field.key === "country" || field.key === "location"}
+                isLocation={field.key === "location"}
+                isCountry={field.key === "country"}
                 isNationality={field.key === "nationality"}
                 isContinent={field.key === "continent"}
                 isPhone={field.key === "phone" || field.key === "otherPhone"}
