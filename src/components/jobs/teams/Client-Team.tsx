@@ -66,6 +66,9 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
       setError(null);
       setLoading(true);
       try {
+        if (!jobData.client) {
+          throw new Error("Client information is missing for this job.");
+        }
         setClientId(jobData.client._id);
         // Fetch client contacts (all options)
         const client = await getClientById(jobData.client._id);
@@ -157,7 +160,7 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
             <div className="space-y-4">
               <p className="text-xs font-medium text-slate-500 mb-4 flex items-center gap-2">
                 <Users className="w-3.5 h-3.5" />
-                Stakeholders from {jobData.client.name}
+                Stakeholders from {jobData.client?.name || "Client"}
               </p>
               
               <div className="grid grid-cols-1 gap-4">
