@@ -114,12 +114,12 @@
    const handleStageChange = (candidate: Candidate, newStage: string) => {
      if (!canModifyPipeline) return;
      if (candidate.isTempCandidate) {
-       const validation = validateTempCandidateStageChange(candidate.name, newStage);
-       if (!validation.isValid) {
+       const validation = validateTempCandidateStageChange(candidate, newStage);
+       if (!validation.canChangeStage) {
          setTempCandidateAlert({
            isOpen: true,
            candidateName: candidate.name,
-           message: validation.message,
+           message: validation.message || null,
          });
          return;
        }
@@ -141,7 +141,7 @@
      if (!stageChangeDialog.candidate || !id) return;
      try {
        const backendStage = mapUIStageToBackendStage(stageChangeDialog.newStage);
-       await updateCandidateStage(id, stageChangeDialog.candidate.id, backendStage);
+       await updateCandidateStage(id, stageChangeDialog.candidate.id, { stage: backendStage });
        await refetch();
        setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
      } catch (err) {
@@ -156,12 +156,12 @@
    const handleStatusChange = (candidate: Candidate, newStatus: string) => {
      if (!canModifyPipeline) return;
      if (candidate.isTempCandidate) {
-       const validation = validateTempCandidateStatusChange(candidate.name, newStatus);
-       if (!validation.isValid) {
+       const validation = validateTempCandidateStatusChange(candidate, newStatus);
+       if (!validation.canChangeStage) {
          setTempCandidateAlert({
            isOpen: true,
            candidateName: candidate.name,
-           message: validation.message,
+           message: validation.message || null,
          });
          return;
        }
@@ -177,7 +177,7 @@
    const handleConfirmStatusChange = async () => {
      if (!statusChangeDialog.candidate || !id) return;
      try {
-       await updateCandidateStatus(id, statusChangeDialog.candidate.id, statusChangeDialog.newStatus);
+       await updateCandidateStatus(id, statusChangeDialog.candidate.id, { status: statusChangeDialog.newStatus });
        await refetch();
        setStatusChangeDialog(prev => ({ ...prev, isOpen: false }));
      } catch (err) {
@@ -226,7 +226,7 @@
    const handleConfirmInterviewDetails = async (details: any) => {
      if (!interviewDialog.candidate || !id) return;
      try {
-       await updateCandidateStage(id, interviewDialog.candidate.id, "Interview", details);
+       await updateCandidateStage(id, interviewDialog.candidate.id, { stage: "Interview", data: details });
        await refetch();
        setInterviewDialog({ isOpen: false, candidate: null, newStage: "" });
      } catch (err) {
@@ -259,7 +259,7 @@
    const handleConfirmDisqualification = async (data: DisqualificationData) => {
      if (!disqualificationDialog.candidate || !id) return;
      try {
-       await updateCandidateStatus(id, disqualificationDialog.candidate.id, "Disqualified", data);
+       await updateCandidateStatus(id, disqualificationDialog.candidate.id, { status: "Disqualified", data: data });
        await refetch();
        setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
      } catch (err) {

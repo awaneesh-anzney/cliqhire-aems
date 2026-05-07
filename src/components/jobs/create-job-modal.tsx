@@ -230,7 +230,6 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
         locations: [...prev.locations, locationInput.trim()]
       }))
       setLocationInput("")
-      setShowLocationSuggestions(false)
     }
   }
 

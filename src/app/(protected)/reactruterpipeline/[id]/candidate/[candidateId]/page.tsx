@@ -113,9 +113,9 @@
    const handleStageChange = (candidate: Candidate, newStage: string) => {
      if (!canModifyPipeline) return;
      if (candidate.isTempCandidate) {
-       const validation = validateTempCandidateStageChange(candidate.name, newStage);
-       if (!validation.isValid) {
-         setTempCandidateAlert({ isOpen: true, candidateName: candidate.name, message: validation.message });
+       const validation = validateTempCandidateStageChange(candidate, newStage);
+       if (!validation.canChangeStage) {
+         setTempCandidateAlert({ isOpen: true, candidateName: candidate.name, message: validation.message || null });
          return;
        }
      }
@@ -126,7 +126,7 @@
    const handleConfirmStageChange = async () => {
      if (!stageChangeDialog.candidate || !pipelineId) return;
      try {
-       await updateCandidateStage(pipelineId, stageChangeDialog.candidate.id, mapUIStageToBackendStage(stageChangeDialog.newStage));
+       await updateCandidateStage(pipelineId, stageChangeDialog.candidate.id, { stage: mapUIStageToBackendStage(stageChangeDialog.newStage) });
        await refetch();
        setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
        toast.success("Pipeline stage updated");
@@ -136,9 +136,9 @@
    const handleStatusChange = (candidate: Candidate, newStatus: string) => {
      if (!canModifyPipeline) return;
      if (candidate.isTempCandidate) {
-       const validation = validateTempCandidateStatusChange(candidate.name, newStatus);
-       if (!validation.isValid) {
-         setTempCandidateAlert({ isOpen: true, candidateName: candidate.name, message: validation.message });
+       const validation = validateTempCandidateStatusChange(candidate, newStatus);
+       if (!validation.canChangeStage) {
+         setTempCandidateAlert({ isOpen: true, candidateName: candidate.name, message: validation.message || null });
          return;
        }
      }

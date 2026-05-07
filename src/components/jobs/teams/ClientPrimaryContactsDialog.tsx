@@ -208,7 +208,7 @@
                  </div>
                  <h3 className="text-lg font-black text-slate-800 tracking-tight">No results found</h3>
                  <p className="text-sm text-slate-400 font-semibold max-w-xs mx-auto mt-2">
-                   We couldn't find any contacts matching "<span className="text-slate-900">{searchQuery}</span>"
+                   We couldn&apos;t find any contacts matching &quot;<span className="text-slate-900">{searchQuery}</span>&quot;
                  </p>
                </div>
              )}

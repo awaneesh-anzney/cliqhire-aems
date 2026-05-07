@@ -293,7 +293,7 @@
               {roles.map(role => (
                  <TabsTrigger
                    key={role._id || role.id}
-                   value={role._id || role.id}
+                   value={role._id || role.id || ""}
                    className="data-[state=active]:bg-brand data-[state=active]:text-white data-[state=active]:shadow-md text-slate-500 font-bold text-[11px] uppercase tracking-wider rounded-xl px-4 py-2 transition-all hover:bg-brand/5 border border-transparent data-[state=active]:border-brand"
                  >
                    {role.name} ({getCountByRole(role)})

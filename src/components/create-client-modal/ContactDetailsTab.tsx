@@ -1,5 +1,6 @@
 import PhoneInput from "@/components/phone/Phoneinput";
 import { LocationSuggestion } from "@/components/location/LocationSuggestion";
+import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 
 interface ContactDetailsTabProps {
   form:     ClientForm;
