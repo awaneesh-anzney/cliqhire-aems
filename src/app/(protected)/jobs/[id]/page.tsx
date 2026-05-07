@@ -129,7 +129,7 @@ export default function JobPage({ params }: PageProps) {
                   <div className="p-1.5 bg-slate-100 rounded-md group-hover:bg-brand/10 transition-colors">
                     <Building2 className="h-4 w-4 text-slate-400 group-hover:text-brand" />
                   </div>
-                  <span className="font-medium text-slate-700">{job.client.name || "Unknown Client"}</span>
+                  <span className="font-medium text-slate-700">{job.client?.name || "Unknown Client"}</span>
                 </div>
 
                 <div className="flex items-center gap-2 group border-l border-slate-200 pl-6">
