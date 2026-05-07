@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2, Mail, Phone, Linkedin, MapPin, User, Briefcase, Globe, Info, Loader2, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AddContactModal } from "../modals/add-contact-modal";
 import { formatPhoneNumber } from "@/lib/countryCodes";
 import EditContactDetailsModal from "./EditContactDetailsModal";
@@ -41,6 +41,17 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
     emails: clientData?.emails || [],
     linkedInProfile: clientData?.linkedInProfile || "",
   });
+
+  useEffect(() => {
+    if (clientData) {
+      setClientInfo({
+        phoneNumber: clientData.phoneNumber || "",
+        website: clientData.website || "",
+        emails: clientData.emails || [],
+        linkedInProfile: clientData.linkedInProfile || "",
+      });
+    }
+  }, [clientData]);
 
   const handleAddOrEditContact = async (contact: any) => {
     try {
@@ -120,7 +131,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Phone</span>
                   <p className="text-sm font-bold text-slate-700">
-                    {clientInfo.phoneNumber ? formatPhoneNumber(clientInfo.phoneNumber) : "Not Provided"}
+                    {clientInfo.phoneNumber ? formatPhoneNumber(clientInfo.phoneNumber, clientData?.countryCode) : "Not Provided"}
                   </p>
                 </div>
                 
@@ -220,11 +231,18 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                         <User className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-sm font-black text-slate-900 leading-tight">
-                          {contact.firstName} {contact.lastName}
-                        </h4>
-                        <p className="text-[10px] font-black text-brand uppercase tracking-widest flex items-center gap-1">
-                          <Briefcase className="w-3 h-3" /> {contact.position || contact.designation || "Role Not Set"}
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-black text-slate-900 leading-tight">
+                            {contact.firstName} {contact.lastName}
+                          </h4>
+                          {contact.gender && (
+                            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md uppercase">
+                              {contact.gender}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] font-black text-brand uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                          <Briefcase className="w-3 h-3" /> {contact.designation || contact.position || "Role Not Set"}
                         </p>
                       </div>
                     </div>
@@ -263,13 +281,13 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                     {contact.location && (
                       <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
                         <MapPin className="w-3.5 h-3.5 text-slate-300" />
-                        <span>{contact.location}</span>
+                        <span className="truncate">{contact.location}</span>
                       </div>
                     )}
                     {contact.linkedin && (
                       <a href={contact.linkedin} target="_blank" className="flex items-center gap-3 text-xs font-bold text-brand hover:underline">
                         <Linkedin className="w-3.5 h-3.5" />
-                        <span>LinkedIn Profile</span>
+                        <span className="truncate">LinkedIn Profile</span>
                       </a>
                     )}
                   </div>

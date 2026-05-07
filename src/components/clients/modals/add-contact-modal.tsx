@@ -96,9 +96,9 @@ export function AddContactModal({
     email: initialValues?.email ?? "",
     phone: initialValues?.phone ?? "",
     countryCode: initialValues?.countryCode ?? "SA",
-    position: initialValues?.position ?? "",
+    position: initialValues?.position ?? (initialValues as any)?.designation ?? "",
     linkedin: initialValues?.linkedin ?? "",
-    location: initialValues?.location ?? "",
+    location: (initialValues as any)?.location ?? "",
   });
   
   const [currentTab, setCurrentTab] = useState(0);
@@ -115,9 +115,9 @@ export function AddContactModal({
         email: initialValues?.email ?? "",
         phone: initialValues?.phone ?? "",
         countryCode: initialValues?.countryCode ?? "SA",
-        position: initialValues?.position ?? "",
+        position: initialValues?.position ?? (initialValues as any)?.designation ?? "",
         linkedin: initialValues?.linkedin ?? "",
-        location: initialValues?.location ?? "",
+        location: (initialValues as any)?.location ?? "",
       });
       setCurrentTab(0);
     }

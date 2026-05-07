@@ -15,6 +15,7 @@ export interface PrimaryContact {
   error?: string;
   gender?: string;
   name?: string; // Add name field for backend compatibility
+  location?: string;
 }
 
 export const clientStageStatuses = [
@@ -744,6 +745,7 @@ const addPrimaryContact = async (
       designation: contactData.position || "", // Backend expects 'designation' not 'position'
       linkedin: contactData.linkedin || "",
       gender: contactData.gender || "",
+      location: (contactData as any).location || "",
       isPrimary: true, // Backend expects this field
     };
 
