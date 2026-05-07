@@ -1,154 +1,173 @@
 "use client";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Building2, HandCoins, MapPin, Plus, Users, Copy, Check, Download } from "lucide-react";
-import { type Job } from "./dummy-data";
-import { ExportCandidatesDialog } from "./ExportCandidatesDialog";
-
-type Props = {
-  job: Job;
-  onAddCandidate: () => void;
-};
-
-export function PipelineJobHeader({ job, onAddCandidate }: Props) {
-  const router = useRouter();
-  const [isFormLinkCopied, setIsFormLinkCopied] = useState(false);
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-
-  console.log('DEBUG: PipelineJobHeader job data:', job);
-  console.log('DEBUG: Hiring manager:', job.hiringManagerName);
-  console.log('DEBUG: Recruiter:', job.recruiterName);
-  console.log('DEBUG: Job team members:', job.jobTeamMembers);
-
-  const handleCopyCandidateFormLink = async () => {
-    const path = `${window.location.origin}/candidate?job=${encodeURIComponent(job.title)}`;
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(path);
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = path;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-      setIsFormLinkCopied(true);
-      window.setTimeout(() => setIsFormLinkCopied(false), 15000);
-    } catch (err) {
-      console.error("Failed to copy!", err);
-    }
-  };
-
-  return (
-    <div className="bg-brand-primary p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <h3 
-                  className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
-                  onClick={() => job.jobId?._id && router.push(`/jobs/${job.jobId._id}`)}
-                >
-                  {job.title}
-                </h3>
-                <Building2 className="h-4 w-4 text-gray-400" />
-                <span 
-                  className="text-sm text-gray-600 cursor-pointer hover:text-blue-600 transition-colors"
-                  onClick={() => {
-                    const clientId = job.jobId?.client?._id || (typeof job.jobId?.client === 'string' ? job.jobId.client : null);
-                    if (clientId) router.push(`/clients/${clientId}`);
-                  }}
-                >
-                  {job.clientName}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
-              <div className="flex items-center space-x-1">
-                <MapPin className="h-4 w-4 text-red-500" />
-                <span>{job.location}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <HandCoins className="h-4 w-4 text-yellow-500" />
-                <span>{job.salaryRange}</span>
-              </div>
-              <Badge variant="outline" className="bg-gray-100 text-gray-700">
-                {job.jobType}
-              </Badge>
-              <div className="flex items-center space-x-1">
-                <Users className="h-4 w-4 text-purple-500" />
-                <span>{job.totalCandidates || job.candidates.length} candidates</span>
-              </div>
-              {job.jobTeamMembers && job.jobTeamMembers.length > 0 ? (
-                job.jobTeamMembers.map((member: any) => (
-                  <div key={member.position} className="flex items-center space-x-1">
-                    <span className="text-xs font-medium text-gray-500">{member.position === 'hiringManager' ? 'HM' : member.position === 'recruiter' ? 'Rec' : member.positionLabel}:</span>
-                    <span className="text-xs text-gray-700">
-                      {member.users?.map((u: any) => 
-                        u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.name || u.email || 'Unknown')
-                      ).join(", ") || 'Not assigned'}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-xs font-medium text-gray-500">HM:</span>
-                    <span className="text-xs text-gray-700">{job.hiringManagerName || 'No HM'}</span>
-                  </div>
-                  {job.recruiterName && (
-                    <div className="flex items-center space-x-1">
-                      <span className="text-xs font-medium text-gray-500">Rec:</span>
-                      <span className="text-xs text-gray-700">{job.recruiterName}</span>
-                    </div>
-                  )}
-                </>
-              )}
-              {job.jobId?.stage && (
-                <Badge
-                  variant="outline"
-                  className="bg-gray-100 text-gray-700 border-gray-200"
-                >
-                  {job.jobId.stage}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 ml-4">
-          <Button size="sm" variant="outline" onClick={() => setIsExportDialogOpen(true)} title="Export Candidates">
-            <Download className="h-4 w-4 mr-1" />
-            Export
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleCopyCandidateFormLink} title="Copy candidate form URL">
-            {isFormLinkCopied ? (
-              <Check className="h-4 w-4 mr-1 text-green-600" />
-            ) : (
-              <Copy className="h-4 w-4 mr-1" />
-            )}
-            {isFormLinkCopied ? "Copied" : "Copy Form URL"}
-          </Button>
-          <Button onClick={onAddCandidate} size="sm" variant="outline">
-            <Plus className="h-4 w-4 mr-1" />
-            Attach Candidate
-          </Button>
-        </div>
-      </div>
-
-      <ExportCandidatesDialog
-        isOpen={isExportDialogOpen}
-        onClose={() => setIsExportDialogOpen(false)}
-        pipelineId={job.id}
-        jobTitle={job.title}
-      />
-    </div>
-  );
-}
-
-
-
+ import React, { useState } from "react";
+ import { useRouter } from "next/navigation";
+ import { Badge } from "@/components/ui/badge";
+ import { Button } from "@/components/ui/button";
+ import { Building2, HandCoins, MapPin, Plus, Users, Copy, Check, Download, Briefcase, User2, ShieldCheck, ChevronLeft } from "lucide-react";
+ import { type Job } from "./dummy-data";
+ import { ExportCandidatesDialog } from "./ExportCandidatesDialog";
+ import { cn } from "@/lib/utils";
+ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+ 
+ type Props = {
+   job: Job;
+   onAddCandidate: () => void;
+ };
+ 
+ export function PipelineJobHeader({ job, onAddCandidate }: Props) {
+   const router = useRouter();
+   const [isFormLinkCopied, setIsFormLinkCopied] = useState(false);
+   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+ 
+   const handleCopyCandidateFormLink = async () => {
+     const path = `${window.location.origin}/candidate?job=${encodeURIComponent(job.title)}`;
+     try {
+       if (navigator?.clipboard?.writeText) {
+         await navigator.clipboard.writeText(path);
+       } else {
+         const ta = document.createElement("textarea");
+         ta.value = path;
+         document.body.appendChild(ta);
+         ta.select();
+         document.execCommand("copy");
+         document.body.removeChild(ta);
+       }
+       setIsFormLinkCopied(true);
+       window.setTimeout(() => setIsFormLinkCopied(false), 5000);
+     } catch (err) {
+       console.error("Failed to copy!", err);
+     }
+   };
+ 
+   return (
+     <div className="relative overflow-hidden bg-white p-4 border-b border-slate-100">
+       {/* Background Accent */}
+       <div className="absolute top-0 right-0 w-64 h-full bg-brand/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-16" />
+ 
+       <div className="flex items-center justify-between relative z-10">
+         <div className="flex items-center gap-6">
+           {/* Back Button */}
+           <Button 
+             variant="ghost" 
+             size="icon" 
+             onClick={() => router.back()}
+             className="h-10 w-10 rounded-xl bg-slate-50 hover:bg-brand/10 hover:text-brand transition-all border border-slate-100 group"
+           >
+             <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+           </Button>
+ 
+           {/* Icon Hub */}
+           <div className="h-14 w-14 shrink-0 rounded-2xl bg-brand text-white flex items-center justify-center shadow-lg shadow-brand/20">
+             <Briefcase className="h-7 w-7" />
+           </div>
+ 
+           {/* Job Meta Section */}
+           <div className="flex flex-col gap-1">
+             <div className="flex items-center gap-3">
+               <h1 
+                 className="text-xl font-black text-slate-900 tracking-tighter cursor-pointer hover:text-brand transition-colors"
+                 onClick={() => job.jobId?._id && router.push(`/jobs/${job.jobId._id}`)}
+               >
+                 {job.title}
+               </h1>
+               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100">
+                  <Building2 className="h-3 w-3 text-slate-400" />
+                  <span 
+                    className="text-[11px] font-black text-slate-500 uppercase tracking-widest cursor-pointer hover:text-brand transition-colors"
+                    onClick={() => {
+                      const clientId = job.jobId?.client?._id || (typeof job.jobId?.client === 'string' ? job.jobId.client : null);
+                      if (clientId) router.push(`/clients/${clientId}`);
+                    }}
+                  >
+                    {job.clientName}
+                  </span>
+               </div>
+             </div>
+ 
+             {/* Secondary Meta Row */}
+             <div className="flex items-center gap-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+               <div className="flex items-center gap-1.5">
+                 <MapPin className="h-3.5 w-3.5 text-brand/60" />
+                 <span>{job.location}</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                 <HandCoins className="h-3.5 w-3.5 text-amber-500/60" />
+                 <span>{job.salaryRange || "Competitive"}</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500/60" />
+                 <span className="text-emerald-700">{job.jobType}</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                 <Users className="h-3.5 w-3.5 text-purple-500/60" />
+                 <span className="text-purple-700">{job.totalCandidates || job.candidates.length} Applicants</span>
+               </div>
+               
+               {/* Team Labels (Compact) */}
+               <div className="flex items-center gap-4 border-l border-slate-100 pl-4 ml-2">
+                 {job.jobTeamMembers?.slice(0, 2).map((member: any) => (
+                   <Tooltip key={member.position}>
+                     <TooltipTrigger asChild>
+                       <div className="flex items-center gap-1.5 cursor-help">
+                         <div className="h-5 w-5 rounded-full bg-slate-100 flex items-center justify-center text-[8px] font-black text-slate-500 border border-white">
+                            {member.position === 'hiringManager' ? 'HM' : 'RC'}
+                         </div>
+                         <span className="text-[10px] text-slate-400">
+                           {member.users?.[0]?.firstName || 'Assignee'}
+                         </span>
+                       </div>
+                     </TooltipTrigger>
+                     <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                       {member.positionLabel}: {member.users?.map((u: any) => u.name || u.email).join(", ")}
+                     </TooltipContent>
+                   </Tooltip>
+                 ))}
+               </div>
+             </div>
+           </div>
+         </div>
+ 
+         {/* Action Hub */}
+         <div className="flex items-center gap-2">
+           <Button 
+             variant="outline" 
+             size="sm" 
+             onClick={() => setIsExportDialogOpen(true)}
+             className="h-10 px-4 rounded-xl border-slate-100 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm group"
+           >
+             <Download className="h-4 w-4 mr-2 text-slate-400 group-hover:text-slate-600" />
+             Export
+           </Button>
+           <Button 
+             variant="outline" 
+             size="sm" 
+             onClick={handleCopyCandidateFormLink}
+             className="h-10 px-4 rounded-xl border-slate-100 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm group"
+           >
+             {isFormLinkCopied ? (
+               <Check className="h-4 w-4 mr-2 text-emerald-500" />
+             ) : (
+               <Copy className="h-4 w-4 mr-2 text-slate-400 group-hover:text-slate-600" />
+             )}
+             {isFormLinkCopied ? "Copied" : "Form Link"}
+           </Button>
+           <Button 
+             onClick={onAddCandidate} 
+             size="sm" 
+             className="h-10 px-5 rounded-xl bg-brand hover:bg-brand/90 font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-brand/20"
+           >
+             <Plus className="h-4 w-4 mr-2" />
+             Add Candidate
+           </Button>
+         </div>
+       </div>
+ 
+       <ExportCandidatesDialog
+         isOpen={isExportDialogOpen}
+         onClose={() => setIsExportDialogOpen(false)}
+         pipelineId={job.id}
+         jobTitle={job.title}
+       />
+     </div>
+   );
+ }
