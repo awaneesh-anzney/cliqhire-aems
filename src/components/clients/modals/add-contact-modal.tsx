@@ -48,6 +48,7 @@ import {
   Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 
 interface AddContactModalProps {
   open: boolean;
@@ -369,15 +370,12 @@ export function AddContactModal({
                         </div>
                         <div className="space-y-2">
                           <Label className="text-sm font-bold text-slate-700">Location</Label>
-                          <div className="relative group">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                            <Input 
-                              value={formData.location} 
-                              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))} 
-                              placeholder="City/Region" 
-                              className="pl-10 h-11 border-slate-200 font-bold"
-                            />
-                          </div>
+                          <LocationSuggestion
+                            value={formData.location}
+                            onChange={(val) => setFormData(prev => ({ ...prev, location: val }))}
+                            placeholder="Search City/Region..."
+                            className="w-full"
+                          />
                         </div>
                       </div>
                     </div>

@@ -803,6 +803,19 @@ const deletePrimaryContact = async (
   }
 };
 
+// Get all primary contacts for a client
+const getPrimaryContacts = async (clientId: string): Promise<PrimaryContact[]> => {
+  try {
+    const response = await axios.get<ApiResponse<PrimaryContact[]>>(
+      `${API_URL}/api/clients/${clientId}/primary-contacts`,
+      { timeout: 15000 }
+    );
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -816,4 +829,5 @@ export {
   addPrimaryContact,
   updatePrimaryContact,
   deletePrimaryContact,
+  getPrimaryContacts,
 };
