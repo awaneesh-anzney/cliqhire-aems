@@ -301,6 +301,7 @@ export default function CreateCandidateForm({
                     countryCode={form.countryCode}
                     onCountryCodeChange={v => handleSelectChange('countryCode', v)}
                     phoneNumber={form.phone}
+                    onPhoneNumberChange={v => handleSelectChange('phone', v)}
                   />
                 </div>
 
@@ -338,7 +339,7 @@ export default function CreateCandidateForm({
 
                 <div className="space-y-2">
                   <Label className="text-sm font-bold text-slate-700">Date of Birth</Label>
-                  <Popover open={dobOpen} onOpenChange={setDobOpen}>
+                  <Popover open={dobOpen} onOpenChange={setDobOpen} modal={true}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full h-11 justify-start text-left font-bold border-slate-200 px-4">
                         <CalendarIcon className="mr-3 h-4 w-4 text-slate-300" />
