@@ -1,139 +1,47 @@
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-export interface SearchResultItem {
-    id: string;
-    _id?: string;
-    name?: string;
-    email?: string;
-    subtitle?: string;
-    status?: string;
-}
-
-export interface JobSearchResult {
-    id: string;
-    _id?: string;
-    jobTitle: string;
-    client: {
-        name: string;
-    } | string;
-    status?: string;
-}
-
-export interface GlobalSearchResponse {
-    success: boolean;
-    data: {
-        candidates: SearchResultItem[];
-        clients: SearchResultItem[];
-        jobs: JobSearchResult[];
-        teamMembers: SearchResultItem[];
-    };
-    totalCount: number;
-    message?: string;
-}
-
-export interface GlobalSearchParams {
-    q: string;
-    limit?: number;
-}
+import { api } from "@/lib/axios-config";
+import { SearchParams, SearchResponse } from "@/types/search";
 
 /**
- * Global search across candidates, clients, jobs, and team members
- * @param params - Search parameters (query and optional limit)
+ * Global search across multiple entities (candidates, clients, jobs, users, temp)
+ * @param params - Search parameters (query, type, page, limit, status)
  * @returns Promise with search results
  */
-export const globalSearch = async (params: GlobalSearchParams): Promise<GlobalSearchResponse> => {
-    try {
-        const { q, limit = 5 } = params;
+export const globalSearch = async (params: SearchParams): Promise<SearchResponse> => {
+    const { q, type = 'all', page = 1, limit = 5, status = "" } = params;
 
-        // Validate query length (backend accepts 2+ characters)
-        if (!q || q.trim().length < 2) {
-            return {
-                success: false,
-                data: {
-                    candidates: [],
-                    clients: [],
-                    jobs: [],
-                    teamMembers: []
-                },
-                totalCount: 0,
-                message: "Search query must be at least 2 characters"
-            };
-        }
-
-        const response = await axios.get<GlobalSearchResponse>(`${API_URL}/api/search`, {
-            params: {
-                q: q.trim(),
-                limit: Math.min(limit, 50) // Cap at 50 to prevent abuse
-            },
-            timeout: 10000, // 10 second timeout
-            withCredentials: true // Include auth cookies
-        });
-
-        return response.data;
-    } catch (error: any) {
-        console.error("Global search error:", error);
-
-        // Handle specific error cases
-        if (error.response) {
-            const status = error.response.status;
-            const errorData = error.response.data;
-
-            if (status === 400) {
-                return {
-                    success: false,
-                    data: {
-                        candidates: [],
-                        clients: [],
-                        jobs: [],
-                        teamMembers: []
-                    },
-                    totalCount: 0,
-                    message: errorData.message || "Invalid search query"
-                };
-            }
-
-            if (status === 401) {
-                return {
-                    success: false,
-                    data: {
-                        candidates: [],
-                        clients: [],
-                        jobs: [],
-                        teamMembers: []
-                    },
-                    totalCount: 0,
-                    message: "Authentication required"
-                };
-            }
-
-            if (status === 429) {
-                return {
-                    success: false,
-                    data: {
-                        candidates: [],
-                        clients: [],
-                        jobs: [],
-                        teamMembers: []
-                    },
-                    totalCount: 0,
-                    message: "Too many requests. Please try again later."
-                };
-            }
-        }
-
-        // Generic error fallback
-        return {
-            success: false,
-            data: {
-                candidates: [],
-                clients: [],
-                jobs: [],
-                teamMembers: []
-            },
-            totalCount: 0,
-            message: "Search failed. Please try again."
-        };
+    // Validate query length
+    if (!q || q.trim().length < 1) {
+        throw new Error("Search query (q) is required");
     }
+
+    const response = await api.get<SearchResponse>("/api/search", {
+        params: {
+            q: q.trim(),
+            type,
+            page,
+            limit,
+            status
+        }
+    });
+
+    return response.data;
 };
+
+/**
+ * Entity-specific search shortcuts
+ */
+export const searchCandidates = (q: string, page = 1, limit = 10, status = "") => 
+    globalSearch({ q, type: 'candidates', page, limit, status });
+
+export const searchClients = (q: string, page = 1, limit = 10, status = "") => 
+    globalSearch({ q, type: 'clients', page, limit, status });
+
+export const searchJobs = (q: string, page = 1, limit = 10, status = "") => 
+    globalSearch({ q, type: 'jobs', page, limit, status });
+
+export const searchUsers = (q: string, page = 1, limit = 10, status = "") => 
+    globalSearch({ q, type: 'users', page, limit, status });
+
+export const searchTempCandidates = (q: string, page = 1, limit = 10) => 
+    globalSearch({ q, type: 'temp', page, limit });
+
