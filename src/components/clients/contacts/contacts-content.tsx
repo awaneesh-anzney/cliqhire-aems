@@ -109,10 +109,10 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group hover:shadow-md transition-all">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-brand/10 rounded-lg group-hover:bg-brand group-hover:text-white transition-colors">
+                <div className="p-2 bg-brand/10 rounded-lg group-hover:bg-brand group-hover:text-white transition-all duration-300">
                   <Globe className="w-4 h-4 text-brand group-hover:text-white" />
                 </div>
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">Client Hub</h2>
+                <h2 className="text-xs font-black text-slate-900 uppercase tracking-widest">Client Identity</h2>
               </div>
               {canModify && (
                 <Button
@@ -180,19 +180,19 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
         {/* Right Section: Stakeholders / Primary Contacts */}
         <div className="flex-1 space-y-6">
           <div className="flex items-center justify-between px-2">
-            <div>
-              <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                 Primary Stakeholders
-                <span className="text-xs font-black bg-brand/10 text-brand px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-black bg-brand/10 text-brand px-2.5 py-1 rounded-full border border-brand/10 shadow-sm">
                   {primaryContacts.length}
                 </span>
               </h2>
-              <p className="text-xs text-slate-500 font-semibold">Manage key decision makers and points of contact.</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Strategic Decision Makers & Points of Contact</p>
             </div>
             {canModify && (
               <Button 
                 onClick={() => { setEditContactIndex(null); setAddEditModalOpen(true); }}
-                className="bg-slate-900 hover:bg-black text-white font-black h-10 px-6 shadow-xl shadow-slate-200 active:scale-95 transition-all"
+                className="bg-brand text-white font-black h-11 px-8 rounded-xl shadow-lg shadow-brand/10 hover:shadow-brand/20 active:scale-95 transition-all duration-300"
               >
                 <Plus className="w-4 h-4 mr-2" /> New Contact
               </Button>
@@ -223,25 +223,25 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
               {primaryContacts.map((contact, index) => (
                 <div key={contact._id || index} className="group bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-lg hover:border-brand/20 transition-all relative overflow-hidden">
                   {/* Status Indicator */}
-                  <div className="absolute top-0 left-0 w-1 h-full bg-slate-100 group-hover:bg-brand transition-colors" />
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-50 group-hover:bg-brand transition-all duration-300" />
                   
                   <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand/5 group-hover:text-brand transition-all">
-                        <User className="w-6 h-6" />
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand/5 group-hover:text-brand transition-all duration-500 shadow-inner">
+                        <User className="w-7 h-7" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-black text-slate-900 leading-tight">
+                          <h4 className="text-base font-black text-slate-900 leading-tight tracking-tight">
                             {contact.firstName} {contact.lastName}
                           </h4>
                           {contact.gender && (
-                            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md uppercase">
+                            <span className="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200/50">
                               {contact.gender}
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] font-black text-brand uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                        <p className="text-[10px] font-black text-brand uppercase tracking-[0.15em] flex items-center gap-1.5 mt-1 opacity-80">
                           <Briefcase className="w-3 h-3" /> {contact.designation || contact.position || "Role Not Set"}
                         </p>
                       </div>

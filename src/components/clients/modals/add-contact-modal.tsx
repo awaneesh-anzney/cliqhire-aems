@@ -185,16 +185,16 @@ export function AddContactModal({
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
                     ${currentTab === index 
-                      ? "bg-primary text-white shadow-lg shadow-primary/30" 
+                      ? "bg-brand text-white shadow-lg shadow-brand/10" 
                       : (index < currentTab ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500")}
                   `}>
                     {index < currentTab ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
                   </div>
                   <div className="flex flex-col">
-                    <span className={`text-sm font-bold ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
+                    <span className={`text-sm font-black tracking-tight ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
                       {tab}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Section {index + 1}</span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Step {index + 1}</span>
                   </div>
                 </div>
               ))}
@@ -401,14 +401,14 @@ export function AddContactModal({
                   {currentTab === TABS.length - 1 ? (
                     <Button 
                       onClick={() => handleSubmit()} 
-                      className="bg-primary hover:bg-primary/90 text-white px-8 font-black shadow-xl shadow-primary/30"
+                      className="bg-brand text-white px-8 font-black shadow-xl shadow-brand/10 rounded-xl active:scale-95 transition-all duration-300"
                     >
                       <UserPlus className="w-4 h-4 mr-2" /> {isEdit ? "Save Changes" : "Create Contact"}
                     </Button>
                   ) : (
                     <Button 
                       onClick={handleNext} 
-                      className="bg-primary hover:bg-primary/90 text-white px-8 font-black shadow-xl shadow-primary/30"
+                      className="bg-brand text-white px-8 font-black shadow-xl shadow-brand/10 rounded-xl active:scale-95 transition-all duration-300"
                     >
                       Continue <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
