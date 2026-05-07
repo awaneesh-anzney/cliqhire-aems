@@ -44,6 +44,7 @@
  import { useJobs, useUpdateJobStage, useDeleteJob } from "@/hooks/useJobs";
  import { usePermissions } from "@/contexts/PermissionContext";
  import { cn } from "@/lib/utils";
+ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
  
  function ConfirmStageChangeDialog({
    open,
@@ -214,7 +215,7 @@
    }
  
    return (
-     <>
+     <TooltipProvider delayDuration={200}>
        <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Page Header */}
          <div className="flex-shrink-0 relative overflow-hidden bg-white rounded-[1.5rem] border border-slate-100 shadow-lg p-1.5">
@@ -238,9 +239,9 @@
          {/* Table Area */}
          <div className="flex-1 min-h-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
            <div className="flex-1 overflow-auto custom-scrollbar relative">
-             <Table className="w-full border-collapse table-auto">
+             <Table className="w-full border-separate border-spacing-0 table-auto">
                <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
-                 <TableRow className="hover:bg-slate-50/95">
+                 <TableRow className="hover:bg-slate-50/95 transition-colors">
                    <TableHead className="w-[48px] px-3 py-3 border-b border-slate-100 text-center">
                      <Checkbox
                        checked={selectedRows.size > 0 && selectedRows.size === allJobs.length}
@@ -280,7 +281,8 @@
                      <TableRow
                        key={job._id}
                        className={cn(
-                         "group border-b border-slate-50 transition-all hover:bg-slate-50/50",
+                         "group border-b border-slate-50 transition-all duration-300",
+                         "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
                          selectedRows.has(job._id) ? "bg-brand/[0.02]" : ""
                        )}
                      >
@@ -296,24 +298,38 @@
                        
                        {/* Job ID */}
                        <TableCell className="px-3 py-2.5">
-                         <span 
-                           className="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
-                           onClick={() => router.push(`/jobs/${job._id}`)}
-                         >
-                           {job.jobId || "—"}
-                         </span>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <span 
+                               className="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
+                               onClick={() => router.push(`/jobs/${job._id}`)}
+                             >
+                               {job.jobId || "—"}
+                             </span>
+                           </TooltipTrigger>
+                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                             {job.jobId}
+                           </TooltipContent>
+                         </Tooltip>
                        </TableCell>
  
                        {/* Position Name */}
                        <TableCell className="px-3 py-2.5">
-                         <div 
-                           className="cursor-pointer group/title max-w-[160px] truncate"
-                           onClick={() => router.push(`/jobs/${job._id}`)}
-                         >
-                           <span className="text-[13px] font-bold text-slate-900 group-hover/title:text-brand transition-all block truncate">
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <div 
+                               className="cursor-pointer group/title max-w-[160px] truncate"
+                               onClick={() => router.push(`/jobs/${job._id}`)}
+                             >
+                               <span className="text-[13px] font-bold text-slate-900 group-hover/title:text-brand transition-all block truncate">
+                                 {job.jobTitle}
+                               </span>
+                             </div>
+                           </TooltipTrigger>
+                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[11px] border-none shadow-2xl">
                              {job.jobTitle}
-                           </span>
-                         </div>
+                           </TooltipContent>
+                         </Tooltip>
                        </TableCell>
  
                        {/* Job Type */}
@@ -328,12 +344,19 @@
  
                        {/* Location */}
                        <TableCell className="px-3 py-2.5">
-                         <div className="flex items-center gap-1.5 max-w-[120px] truncate">
-                            <MapPin className="w-3 h-3 text-slate-300 shrink-0" />
-                            <span className="text-[11px] font-medium text-slate-600 truncate">
-                              {Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "—"}
-                            </span>
-                         </div>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <div className="flex items-center gap-1.5 max-w-[120px] truncate cursor-help">
+                                <MapPin className="w-3 h-3 text-slate-300 shrink-0" />
+                                <span className="text-[11px] font-medium text-slate-600 truncate">
+                                  {Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "—"}
+                                </span>
+                             </div>
+                           </TooltipTrigger>
+                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                             {Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "Global"}
+                           </TooltipContent>
+                         </Tooltip>
                        </TableCell>
  
                        {/* Headcount */}
@@ -367,9 +390,16 @@
  
                        {/* Client */}
                        <TableCell className="px-3 py-2.5">
-                         <span className="text-[11px] font-bold text-slate-700 block truncate max-w-[120px]">
-                            {typeof job.client === "object" ? job.client?.name : job.client || "—"}
-                         </span>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <span className="text-[11px] font-bold text-slate-700 block truncate max-w-[120px] cursor-help">
+                                {typeof job.client === "object" ? job.client?.name : job.client || "—"}
+                             </span>
+                           </TooltipTrigger>
+                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                             {typeof job.client === "object" ? job.client?.name : job.client || "No Client Specified"}
+                           </TooltipContent>
+                         </Tooltip>
                        </TableCell>
  
                        {/* Created By */}
@@ -444,6 +474,6 @@
          onExport={(params: ExportFilterParams | undefined) => exportJobsMutation(params)}
          filename="jobs_report"
        />
-     </>
+     </TooltipProvider>
    );
  }

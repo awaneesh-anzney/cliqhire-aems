@@ -25,6 +25,7 @@
  import { usePermissions } from "@/contexts/PermissionContext";
  import { cn } from "@/lib/utils";
  import { Button } from "@/components/ui/button";
+ import { TooltipProvider } from "@/components/ui/tooltip";
  
  interface Client {
    clientId?: string;
@@ -240,7 +241,7 @@
    }
  
    return (
-     <>
+     <TooltipProvider delayDuration={200}>
        <ConfirmDialog
          open={showConfirmDialog}
          onOpenChange={setShowConfirmDialog}
@@ -290,9 +291,9 @@
          {/* Table Content Area - Optimized for No Horizontal Scroll */}
          <div className="flex-1 min-h-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
            <div className="flex-1 overflow-auto custom-scrollbar relative">
-             <Table className="w-full border-collapse table-auto">
+             <Table className="w-full border-separate border-spacing-0 table-auto">
                <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
-                 <TableRow className="hover:bg-slate-50/95">
+                 <TableRow className="hover:bg-slate-50/95 transition-colors">
                    <TableHead className="w-[48px] px-3 py-3 border-b border-slate-100">
                      <div className="flex items-center justify-center">
                        <Checkbox
@@ -314,7 +315,7 @@
                  </TableRow>
                </TableHeader>
                <TableBody>
-                 {isLoading ? (
+                 {isLoading && allClients.length === 0 ? (
                    <TableRow>
                      <TableCell colSpan={10} className="h-64 text-center">
                         <Loader className="size-6 animate-spin text-brand mx-auto mb-2" />
@@ -332,7 +333,8 @@
                      <TableRow
                        key={client.id ?? client._id}
                        className={cn(
-                         "group border-b border-slate-50 transition-all hover:bg-slate-50/50",
+                         "group border-b border-slate-50 transition-all duration-300",
+                         "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
                          selectedRows.has(client.id) ? "bg-brand/[0.02]" : ""
                        )}
                      >
@@ -415,6 +417,6 @@
            filename="clients"
          />
        </div>
-     </>
+     </TooltipProvider>
    );
  }
