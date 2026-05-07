@@ -453,7 +453,7 @@ const updateJobPrimaryContacts = async (
 ): Promise<JobResponse> => {
   try {
     const payload = { selectedContacts: selectedContactIds, newContact: newContacts || [], clientId: clientId || "" };
-    const response = await api.patch<JobResponse>(`/api/jobs/${jobId}/primarycontact`, payload, {
+    const response = await api.post<JobResponse>(`/api/jobs/${jobId}/primary-contact`, payload, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data;
@@ -465,7 +465,7 @@ const updateJobPrimaryContacts = async (
 
 const getPrimaryContactsByJobId = async (jobId: string): Promise<any> => {
   try {
-    const response = await api.get(`/api/jobs/${jobId}/primarycontacts`);
+    const response = await api.get(`/api/jobs/${jobId}/primary-contacts`);
     const res = response.data;
     if (res?.data?.primaryContacts && Array.isArray(res.data.primaryContacts)) {
       return { success: true, data: { primaryContacts: res.data.primaryContacts } };

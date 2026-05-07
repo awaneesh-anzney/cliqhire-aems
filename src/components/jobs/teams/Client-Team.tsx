@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, UserPlus, Users, Building2, Briefcase, Mail, Phone, Linkedin, Loader2, AlertCircle } from "lucide-react";
 import { getJobById, getPrimaryContactsByJobId, updateJobPrimaryContacts } from "@/services/jobService";
-import { getClientById } from "@/services/clientService";
+import { getPrimaryContacts } from "@/services/clientService";
 import { AddContactModal } from "@/components/clients/modals/add-contact-modal";
 import { Label } from "@/components/ui/label";
 import { ClientPrimaryContactsDialog } from "./ClientPrimaryContactsDialog";
@@ -61,74 +61,80 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
 
 
   // Fetch client contacts and job's selected contacts
-  useEffect(() => {
-    const fetchClientAndJobContacts = async () => {
-      setError(null);
-      setLoading(true);
-      try {
-        if (!jobData.client) {
-          throw new Error("Client information is missing for this job.");
-        }
-        setClientId(jobData.client._id);
-        // Fetch client contacts (all options)
-        const client = await getClientById(jobData.client._id);
-        setAllClientContacts(client.primaryContacts || []);
-        // Fetch job's primary contacts (selected)
-        const pcRes = await getPrimaryContactsByJobId(jobId);
-        const jobContactsArr = pcRes?.data?.primaryContacts || [];
-        setJobContacts(jobContactsArr);
-        setSelectedContactIds(jobContactsArr.map((c: any) => c._id));
-        setNewContacts([]);
-      } catch (err: any) {
-        setError(err.message || "Failed to load primary contacts");
-        setAllClientContacts([]);
-        setSelectedContactIds([]);
-        setNewContacts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (jobId) fetchClientAndJobContacts();
-  }, [jobId]);
+  const fetchClientAndJobContacts = async () => {
+    if (!jobId || !jobData?.client?._id) return;
+    
+    setError(null);
+    setLoading(true);
+    try {
+      setClientId(jobData.client._id);
+      
+      // Fetch both in parallel
+      const [allContactsArr, pcRes] = await Promise.all([
+        getPrimaryContacts(jobData.client._id),
+        getPrimaryContactsByJobId(jobId)
+      ]);
+      
+      setAllClientContacts(allContactsArr || []);
+      const jobContactsArr = pcRes?.data?.primaryContacts || [];
+      setJobContacts(jobContactsArr);
+      setSelectedContactIds(jobContactsArr.map((c: any) => c._id));
+      setNewContacts([]);
+    } catch (err: any) {
+      console.error("Error fetching contacts:", err);
+      setError(err.message || "Failed to load primary contacts");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Helper to check if a contact is new
-  const isNewContact = (contact: any) => newContacts.some((nc) => nc._id === contact._id);
+  useEffect(() => {
+    fetchClientAndJobContacts();
+  }, [jobId, jobData?.client?._id]);
+
+  const handleOpenManageContacts = () => {
+    fetchClientAndJobContacts(); // Refresh data on open
+    setShowPrimaryContactsDialog(true);
+  };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden flex flex-col h-full min-h-[500px]">
-      <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:border-brand/20 overflow-hidden flex flex-col h-full min-h-[550px]">
+      <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand/10 rounded-lg">
-            <Building2 className="w-4 h-4 text-brand" />
+          <div className="p-2.5 bg-brand/10 rounded-xl">
+            <Building2 className="w-5 h-5 text-brand" />
           </div>
-          <h2 className="text-base font-semibold text-slate-800">Client Team</h2>
+          <div>
+            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Client Team</h2>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Stakeholders & Hiring Managers</p>
+          </div>
         </div>
-        <Button
-          variant="default"
-          size="sm"
-          className="bg-brand hover:bg-brand/90 text-white rounded-lg px-4"
-          disabled={!canModify || loading}
-          onClick={() => {
-            if (!canModify) return;
-            setShowPrimaryContactsDialog(true);
-          }}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Manage Contacts
-        </Button>
+        {canModify && (
+          <Button
+            variant="default"
+            size="sm"
+            className="bg-brand text-white font-black h-10 px-6 rounded-xl shadow-lg shadow-brand/10 hover:shadow-brand/20 active:scale-95 transition-all duration-300"
+            disabled={loading}
+            onClick={handleOpenManageContacts}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Manage
+          </Button>
+        )}
       </div>
 
-      <div className="flex-1 overflow-auto p-5">
+      <div className="flex-1 overflow-auto p-6">
         {error && (
-          <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg mb-4">
-            <AlertCircle className="w-4 h-4" />
+          <div className="flex items-center gap-3 p-4 text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-2xl mb-6 animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             {error}
           </div>
         )}
         
         {loading && (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <Loader2 className="w-8 h-8 text-brand animate-spin" />
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Retrieving Stakeholders...</p>
           </div>
         )}
 
@@ -144,69 +150,99 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
 
           if (selected.length === 0 && !error) {
             return (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                <div className="p-4 bg-slate-50 rounded-full mb-4">
-                  <UserPlus className="w-12 h-12 text-slate-200" />
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
+                  <UserPlus className="w-10 h-10 text-slate-200" />
                 </div>
-                <h3 className="text-sm font-medium text-slate-900 mb-1">No Primary Contacts</h3>
-                <p className="text-xs text-slate-500 max-w-[200px] text-center">
-                  Add team members from the client side who are involved in this job.
+                <h3 className="text-base font-black text-slate-800">No Stakeholders Assigned</h3>
+                <p className="text-xs text-slate-400 font-semibold max-w-[240px] mt-2 mb-8 uppercase tracking-wider">
+                  Link decision makers from the client organization to this job requirement.
                 </p>
+                {canModify && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handleOpenManageContacts}
+                    className="border-slate-200 text-slate-600 font-bold hover:bg-slate-50 px-8 rounded-xl"
+                  >
+                    Add Hiring Manager
+                  </Button>
+                )}
               </div>
             );
           }
 
           return (
-            <div className="space-y-4">
-              <p className="text-xs font-medium text-slate-500 mb-4 flex items-center gap-2">
-                <Users className="w-3.5 h-3.5" />
-                Stakeholders from {jobData.client?.name || "Client"}
-              </p>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Users className="w-3.5 h-3.5" />
+                  Linked Stakeholders ({selected.length})
+                </p>
+              </div>
               
               <div className="grid grid-cols-1 gap-4">
-                {selected.map((contact: any) => (
-                  <div key={contact._id} className="p-4 rounded-xl border border-slate-100 bg-white shadow-sm hover:border-brand/20 transition-all group">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900 group-hover:text-brand transition-colors">
-                            {contact.firstName || contact.lastName
-                              ? `${contact.firstName || ""} ${contact.lastName || ""}`.trim()
-                              : contact.name || "Unnamed Contact"}
-                          </h4>
-                          <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
-                            <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                            {contact.position || "Stakeholder"}
-                          </p>
-                        </div>
+                {selected.map((contact: any, index) => (
+                  <div 
+                    key={contact._id} 
+                    className="group p-5 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-brand/20 transition-all duration-300 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {/* Brand line on hover */}
+                    <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-50 group-hover:bg-brand transition-all duration-300" />
 
-                        <div className="flex flex-wrap gap-x-4 gap-y-2">
-                          <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                            <Mail className="w-3.5 h-3.5 text-slate-400" />
-                            <a href={`mailto:${contact.email}`} className="hover:text-brand hover:underline">
-                              {contact.email || "—"}
-                            </a>
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand/5 group-hover:text-brand transition-all duration-500 shadow-inner shrink-0">
+                          <Users className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-3 min-w-0">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-black text-slate-900 group-hover:text-brand transition-colors truncate">
+                                {contact.firstName || contact.lastName
+                                  ? `${contact.firstName || ""} ${contact.lastName || ""}`.trim()
+                                  : contact.name || "Unnamed Contact"}
+                              </h4>
+                              {contact.gender && (
+                                <span className="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200/50">
+                                  {contact.gender}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] font-black text-brand uppercase tracking-[0.15em] flex items-center gap-1.5 mt-1 opacity-80">
+                              <Briefcase className="w-3 h-3" /> 
+                              {contact.position || contact.designation || "Stakeholder"}
+                            </p>
                           </div>
-                          <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                            <Phone className="w-3.5 h-3.5 text-slate-400" />
-                            <span>
-                              {getCountryCodeLabel(contact.countryCode || "")} {contact.phone || "No phone"}
-                            </span>
+  
+                          <div className="flex flex-wrap gap-x-6 gap-y-2">
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                              <Mail className="w-3.5 h-3.5 text-slate-300" />
+                              <a href={`mailto:${contact.email}`} className="hover:text-brand hover:underline truncate">
+                                {contact.email || "—"}
+                              </a>
+                            </div>
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                              <Phone className="w-3.5 h-3.5 text-slate-300" />
+                              <span className="whitespace-nowrap">
+                                {contact.phone ? (
+                                  <>
+                                    <span className="opacity-50 font-medium">{contact.countryCode || ""}</span> {contact.phone}
+                                  </>
+                                ) : "No phone"}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-
-                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 h-full pt-1">
-                        <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200 text-[10px] font-bold uppercase tracking-wider">
-                          {contact.gender || "—"}
-                        </Badge>
-                        
+  
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 h-full pt-1 shrink-0">
                         {contact.linkedin && (
                           <a
                             href={contact.linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 bg-[#0077B5]/10 text-[#0077B5] rounded-md hover:bg-[#0077B5]/20 transition-colors"
+                            className="p-2 bg-brand/5 text-brand rounded-xl hover:bg-brand hover:text-white transition-all duration-300 shadow-sm"
                             title="View LinkedIn Profile"
                           >
                             <Linkedin className="w-4 h-4" />
@@ -230,28 +266,21 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
           setLoading(true);
           setError(null);
           try {
-            // Existing contact IDs: those in selectedIds AND present in allClientContacts (with real backend _id)
             const existingIdsSet = new Set(allClientContacts.map((c: any) => c._id));
             const selectedExistingContactIds = selectedIds.filter(id => existingIdsSet.has(id));
-            // New contacts: those in dialogNewContacts with temp _id (not in allClientContacts)
             const newContactsToSave = (dialogNewContacts || [])
               .filter((c: any) => !existingIdsSet.has(c._id))
               .map((c: any) => {
-                // Remove temp _id if present, and add client_id
                 const { _id, ...rest } = c;
                 return { ...rest, client_id: clientId };
               });
             await updateJobPrimaryContacts(
               jobId,
-              selectedExistingContactIds, // array of IDs
-              newContactsToSave,          // array of new contact objects
-              clientId                    // string
+              selectedExistingContactIds,
+              newContactsToSave,
+              clientId
             );
-            // Refresh contacts from backend
-            const pcRes = await getPrimaryContactsByJobId(jobId);
-            const jobContacts = pcRes?.data?.primaryContacts || [];
-            setSelectedContactIds(jobContacts.map((c: any) => c._id));
-            setNewContacts([]);
+            await fetchClientAndJobContacts(); // Refresh after save
             setShowPrimaryContactsDialog(false);
           } catch (err: any) {
             setError(err.message || "Failed to update primary contacts");
