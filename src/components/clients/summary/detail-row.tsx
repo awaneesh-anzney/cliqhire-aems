@@ -180,7 +180,7 @@ export function DetailRow({
           isNumber={isNumber}
           options={options}
           isCountry={label.toLowerCase().includes("country")}
-          isLocation={isLocation || label.toLowerCase().includes("location") || label.toLowerCase().includes("address")}
+          isLocation={isLocation || label.toLowerCase().includes("location")}
         />
       )}
     </div>

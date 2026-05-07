@@ -404,6 +404,7 @@ export function SummaryContent({
                     value={clientData?.address}
                     onUpdate={handleUpdateField("address")}
                     disableInternalEdit={!canModify}
+                    isLocation={false}
                   />
                 </div>
               </div>
