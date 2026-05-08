@@ -332,7 +332,7 @@ export function SummaryContent({
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+          {/* <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
             <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Users className="w-4 h-4 text-brand" />
@@ -358,7 +358,7 @@ export function SummaryContent({
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Right Column: Location & Documents */}
