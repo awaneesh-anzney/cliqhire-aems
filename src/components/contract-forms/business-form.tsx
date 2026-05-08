@@ -13,6 +13,8 @@ import { CONTRACT_TYPES, CURRENCIES, LEVELS, levelFieldMap } from "../create-cli
 type LevelValue = {
   percentage: number;
   notes: string;
+  amount: number;
+  currency: string;
 };
 
 type LevelBasedHiring = {
@@ -313,10 +315,16 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
 
   const handleValueChangeFix = (level: string, value: number | string, type: keyof LevelValue) => {
     const clonedFormData = structuredClone(formData);
+    const targetLevel = clonedFormData.levelBasedHiring[levelToKey(level)] as LevelValue;
+    
     if (type === "percentage" && typeof value === "number") {
-      (clonedFormData.levelBasedHiring[levelToKey(level)] as LevelValue).percentage = value;
+      targetLevel.percentage = value;
     } else if (type === "notes" && typeof value === "string") {
-      (clonedFormData.levelBasedHiring[levelToKey(level)] as LevelValue).notes = value;
+      targetLevel.notes = value;
+    } else if (type === "currency" && typeof value === "string") {
+      targetLevel.currency = value;
+    } else if (type === "amount" && typeof value === "number") {
+      targetLevel.amount = value;
     }
     setFormData(clonedFormData);
   };
@@ -504,6 +512,19 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
                             }
                             onPercentageChange={(value) =>
                               handleValueChangeFix(level, value, "percentage")
+                            }
+                            showCurrency
+                            currencyValue={
+                              (formData.levelBasedHiring[levelToKey(level)] as LevelValue).currency
+                            }
+                            onCurrencyChange={(value) =>
+                              handleValueChangeFix(level, value, "currency")
+                            }
+                            amountValue={
+                              (formData.levelBasedHiring[levelToKey(level)] as LevelValue).amount
+                            }
+                            onAmountChange={(value) =>
+                              handleValueChangeFix(level, value, "amount")
                             }
                             notesValue={
                               (formData.levelBasedHiring[levelToKey(level)] as LevelValue).notes

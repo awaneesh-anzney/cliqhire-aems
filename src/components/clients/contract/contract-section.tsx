@@ -76,20 +76,20 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         contractEndDate: contractData?.contractEndDate
           ? new Date(contractData.contractEndDate)
           : null,
-        contractType: contractData?.ContractType || contractData?.contractType || "",
+        contractType: contractData?.contractType || contractData?.ContractType || "",
         fixedPercentage: contractData?.fixedPercentage || 0,
         advanceMoneyCurrency: contractData?.advanceMoneyCurrency || "SAR",
         advanceMoneyAmount: contractData?.advanceMoneyAmount || 0,
         fixedPercentageAdvanceNotes: contractData?.fixedPercentageAdvanceNotes || "",
         contractDocument: contractData?.contractDocument || null,
-        fixWithoutAdvanceValue: contractData?.fixedPercentageWithoutAdvance || 0,
-        fixWithoutAdvanceNotes: contractData?.fixedPercentageWithoutAdvanceNotes || "",
+        fixWithoutAdvanceValue: contractData?.fixWithoutAdvanceValue || 0,
+        fixWithoutAdvanceNotes: contractData?.fixWithoutAdvanceNotes || "",
         levelBasedHiring: contractData?.levelBasedHiring || {
           levelTypes: [],
-          seniorLevel: { percentage: 0, notes: "" },
-          executives: { percentage: 0, notes: "" },
-          nonExecutives: { percentage: 0, notes: "" },
-          other: { percentage: 0, notes: "" },
+          seniorLevel: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
+          executives: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
+          nonExecutives: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
+          other: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
         },
         levelBasedAdvanceHiring: contractData?.levelBasedAdvanceHiring || {
           levelTypes: [],
@@ -127,6 +127,19 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         contractEndDate: contractData?.contractEndDate
           ? new Date(contractData.contractEndDate)
           : null,
+        
+        contractType: contractData?.contractType || "",
+        salaryCurrency: contractData?.salaryCurrency || "SAR",
+
+        // HRC Specific
+        serviceScope: contractData?.serviceScope || "",
+        clientContact: contractData?.clientContact || "",
+        estimatedHours: contractData?.estimatedHours || "",
+        
+        // MGTC Specific
+        projectScope: contractData?.projectScope || "",
+        clientCompany: contractData?.clientCompany || "",
+        keyDeliverables: contractData?.keyDeliverables || "",
 
         // Proposal notes
         technicalProposalNotes: contractData?.technicalProposalNotes || "",
@@ -136,17 +149,13 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         technicalProposalDocument,
         financialProposalDocument,
 
-        // Preserve any additional fields that might exist in the original data
-        // These will be sent back to the backend even if not edited
-        ...(contractData?.contractType && { contractType: contractData.contractType }),
-        ...(contractData?.contractValue && { contractValue: contractData.contractValue }),
-        ...(contractData?.contractNumber && { contractNumber: contractData.contractNumber }),
-        ...(contractData?.businessType && { businessType: contractData.businessType }),
-        ...(contractData?.clientId && { clientId: contractData.clientId }),
+        // Total Cost (used by both)
+        totalCost: contractData?.totalCost || 0,
+
+        // Preserve metadata
         ...(contractData?._id && { _id: contractData._id }),
         ...(contractData?.createdAt && { createdAt: contractData.createdAt }),
         ...(contractData?.updatedAt && { updatedAt: contractData.updatedAt }),
-        ...(contractData?.createdBy && { createdBy: contractData.createdBy }),
       };
       return mappedData;
     }
@@ -220,7 +229,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
     }
 
     if (formType === "consulting") {
-      return <ConsultingForm formData={formData} setFormData={setFormData} />;
+      return <ConsultingForm businessType={businessType} formData={formData} setFormData={setFormData} />;
     }
 
     if (formType === "outsourcing") {
@@ -306,14 +315,15 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
       contractType === "IT & Technology" ||
       contractType === "HR Managed Services"
     ) {
-      if (contractData.ContractType === "Fix with Advance") {
+      const type = contractData.contractType || contractData.ContractType;
+      if (type === "Fix with Advance") {
         summary.details = `${contractData.fixedPercentage || 0}% + ${contractData.advanceMoneyAmount || 0} ${contractData.advanceMoneyCurrency || "SAR"}`;
-      } else if (contractData.ContractType === "Fix without Advance") {
-        summary.details = `${contractData.fixedPercentageWithoutAdvance || 0}%`;
-      } else if (contractData.ContractType === "Level Based Hiring") {
+      } else if (type === "Fix without Advance") {
+        summary.details = `${contractData.fixWithoutAdvanceValue || 0}%`;
+      } else if (type === "Level Based Hiring") {
         const levelTypes = contractData.levelBasedHiring?.levelTypes || [];
         summary.details = `${levelTypes.length} levels configured`;
-      } else if (contractData.ContractType === "Level Based Advance Hiring") {
+      } else if (type === "Level Based Advance Hiring") {
         const levelTypes = contractData.levelBasedAdvanceHiring?.levelTypes || [];
         summary.details = `${levelTypes.length} levels with advance`;
       }
@@ -361,121 +371,182 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         {(contractType === "Recruitment" ||
           contractType === "IT & Technology" ||
           contractType === "HR Managed Services") && (
-            <div className="space-y-2">
-              {contractData.ContractType === "Fix with Advance" ||
-                (contractData.contractType === "Fix with Advance" && (
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium text-gray-600">Fixed Percentage:</span>
-                      <p className="text-gray-800">{contractData.fixedPercentage || 0}%</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-600">Advance Amount:</span>
-                      <p className="text-gray-800">
-                        {contractData.advanceMoneyAmount || 0}{" "}
-                        {contractData.advanceMoneyCurrency || "SAR"}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-600">Notes:</span>
-                      <p className="text-gray-800">
-                        {contractData.fixedPercentageAdvanceNotes || "No notes"}
-                      </p>
+            <div className="space-y-4">
+              {/* Fix with Advance */}
+              {((contractData.ContractType || contractData.contractType) === "Fix with Advance") && (
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-600">Fixed Percentage:</span>
+                    <p className="text-gray-800">{contractData.fixedPercentage || 0}%</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Advance Amount:</span>
+                    <p className="text-gray-800">
+                      {contractData.advanceMoneyAmount || 0}{" "}
+                      {contractData.advanceMoneyCurrency || "SAR"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Notes:</span>
+                    <p className="text-gray-800">
+                      {contractData.fixedPercentageAdvanceNotes || "No notes"}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Fix without Advance */}
+              {((contractData.ContractType || contractData.contractType) === "Fix without Advance") && (
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-600">Fixed Percentage:</span>
+                    <p className="text-gray-800">{contractData.fixWithoutAdvanceValue || 0}%</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Notes:</span>
+                    <p className="text-gray-800">
+                      {contractData.fixWithoutAdvanceNotes || "No notes"}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Level Based Hiring */}
+              {((contractData.ContractType || contractData.contractType) === "Level Based Hiring") &&
+                contractData.levelBasedHiring?.levelTypes?.length > 0 && (
+                  <div>
+                    <span className="font-medium text-gray-600">Level Configuration:</span>
+                    <div className="mt-2 space-y-1">
+                      {contractData.levelBasedHiring.levelTypes.map((level: string) => {
+                        const levelKey =
+                          LEVEL_TYPE_MAPPING[level] || level.toLowerCase().replace(/[^a-z]/g, "");
+                        const levelData = contractData.levelBasedHiring[levelKey] || {};
+                        return (
+                          <div key={level} className="text-sm grid grid-cols-2 gap-4 bg-white p-3 rounded-md border border-slate-100 shadow-sm mb-2">
+                            <div>
+                              <p className="font-medium text-gray-600">Level Type:</p>
+                              <p className="font-semibold text-slate-800">{level}</p>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-600">Percentage:</p>
+                              <p className="text-brand font-bold">{levelData.percentage || 0}%</p>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-600">Amount:</p>
+                              <p>{levelData.amount || 0} {levelData.currency || "SAR"}</p>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-600">Notes:</p>
+                              <p className="text-xs text-slate-500 italic">{levelData.notes || "No notes"}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
+                )}
 
-              {contractData.ContractType === "Level Based Hiring" ||
-                (contractData.contractType === "Level Based Hiring" &&
-                  contractData.levelBasedHiring?.levelTypes?.length > 0 && (
-                    <div>
-                      <span className="font-medium text-gray-600">Level Configuration:</span>
-                      <div className="mt-2 space-y-1">
-                        {contractData.levelBasedHiring.levelTypes.map((level: string) => {
-                          const levelKey =
-                            LEVEL_TYPE_MAPPING[level] || level.toLowerCase().replace(/[^a-z]/g, "");
-                          const levelData = contractData.levelBasedHiring[levelKey] || {};
-                          return (
-                            <div key={level} className="text-sm grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="font-medium text-gray-600">Level Type:</p>
-                                <p>{level}</p>
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-600">Percentage:</p>
-                                <p>{levelData.percentage || 0}%</p>
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-600">Amount:</p>
-                                <p>{levelData.amount || 0} {levelData.currency || "SAR"}</p>
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-600">Notes:</p>
-                                <p>{levelData.notes || "No notes"}</p>
-                              </div>
+              {/* Level Based Advance Hiring */}
+              {((contractData.ContractType || contractData.contractType) === "Level Based Advance Hiring") &&
+                contractData.levelBasedAdvanceHiring?.levelTypes?.length > 0 && (
+                  <div>
+                    <span className="font-medium text-gray-600">
+                      Level Configuration (With Advance):
+                    </span>
+                    <div className="mt-2 space-y-1">
+                      {contractData.levelBasedAdvanceHiring.levelTypes.map((level: string) => {
+                        const levelKey =
+                          LEVEL_TYPE_MAPPING[level] || level.toLowerCase().replace(/[^a-z]/g, "");
+                        const levelData = contractData.levelBasedAdvanceHiring[levelKey] || {};
+                        return (
+                          <div key={level} className="text-sm grid grid-cols-3 gap-4 bg-white p-3 rounded-md border border-slate-100 shadow-sm mb-2">
+                            <div>
+                              <p className="font-medium text-gray-600">Level Type:</p>
+                              <p className="font-semibold text-slate-800">{level}</p>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-
-              {contractData.ContractType === "Level Based Advance Hiring" ||
-                (contractData.contractType === "Level Based Advance Hiring" &&
-                  contractData.levelBasedAdvanceHiring?.levelTypes?.length > 0 && (
-                    <div>
-                      <span className="font-medium text-gray-600">
-                        Level Configuration (With Advance):
-                      </span>
-                      <div className="mt-2 space-y-1">
-                        {contractData.levelBasedAdvanceHiring.levelTypes.map((level: string) => {
-                          const levelKey =
-                            LEVEL_TYPE_MAPPING[level] || level.toLowerCase().replace(/[^a-z]/g, "");
-                          const levelData = contractData.levelBasedAdvanceHiring[levelKey] || {};
-                          return (
-                            <div key={level} className="text-sm grid grid-cols-3 gap-4">
-                              <div>
-                                <p className="font-medium text-gray-600">Level Type:</p>
-                                <p>{level}</p>
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-600">Percentage:</p>
-                                <p>{levelData.percentage || 0}%</p>
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-600">Amount:</p>
-                                <p>
-                                  {levelData.amount || 0} {levelData.currency || "SAR"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-600">Notes:</p>
-                                <p>{levelData.notes || "No notes"}</p>
-                              </div>
+                            <div>
+                              <p className="font-medium text-gray-600">Percentage:</p>
+                              <p className="text-brand font-bold">{levelData.percentage || 0}%</p>
                             </div>
-                          );
-                        })}
-                      </div>
+                            <div>
+                              <p className="font-medium text-gray-600">Amount:</p>
+                              <p className="font-semibold text-brand-600">
+                                {levelData.amount || 0} {levelData.currency || "SAR"}
+                              </p>
+                            </div>
+                            <div className="col-span-3 mt-1">
+                              <p className="font-medium text-[10px] text-gray-500 uppercase tracking-wider">Notes:</p>
+                              <p className="text-xs text-slate-500 italic">{levelData.notes || "No notes"}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
+                  </div>
+                )}
             </div>
           )}
 
         {/* Consulting specific details */}
         {(contractType === "HR Consulting" || contractType === "Mgt Consulting") && (
-          <div className="space-y-2">
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-600">Currency:</span>
-                <p className="text-gray-800">{contractData.salaryCurrency || "SAR"}</p>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
+                <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Currency</span>
+                <p className="text-gray-800 font-medium">{contractData.salaryCurrency || "SAR"}</p>
               </div>
-              <div>
-                <span className="font-medium text-gray-600">Technical Proposal:</span>
-                <p className="text-gray-800">{contractData.technicalProposalNotes || "No notes"}</p>
+              <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
+                <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Total Cost</span>
+                <p className="text-gray-800 font-medium">{contractData.totalCost || 0} {contractData.salaryCurrency || "SAR"}</p>
               </div>
-              <div className="text-sm">
-                <span className="font-medium text-gray-600">Financial Proposal:</span>
-                <p className="text-gray-800">{contractData.financialProposalNotes || "No notes"}</p>
+              {contractType === "HR Consulting" && (
+                <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
+                  <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Est. Hours</span>
+                  <p className="text-gray-800 font-medium">{contractData.estimatedHours || "Not specified"}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              {contractType === "HR Consulting" ? (
+                <>
+                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
+                    <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Service Scope</span>
+                    <p className="text-gray-800 mt-1">{contractData.serviceScope || "No scope defined"}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
+                    <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Client Contact</span>
+                    <p className="text-gray-800 mt-1">{contractData.clientContact || "Not specified"}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
+                    <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Project Scope</span>
+                    <p className="text-gray-800 mt-1">{contractData.projectScope || "No scope defined"}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm space-y-3">
+                    <div>
+                      <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Client Company</span>
+                      <p className="text-gray-800">{contractData.clientCompany || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Key Deliverables</span>
+                      <p className="text-gray-800">{contractData.keyDeliverables || "Not specified"}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="bg-slate-50 p-3 rounded-md border border-slate-200">
+                <span className="font-semibold text-slate-500 uppercase text-[10px] tracking-wider">Technical Proposal Notes</span>
+                <p className="text-slate-700 mt-1 italic">{contractData.technicalProposalNotes || "No notes"}</p>
+              </div>
+              <div className="bg-slate-50 p-3 rounded-md border border-slate-200">
+                <span className="font-semibold text-slate-500 uppercase text-[10px] tracking-wider">Financial Proposal Notes</span>
+                <p className="text-slate-700 mt-1 italic">{contractData.financialProposalNotes || "No notes"}</p>
               </div>
             </div>
           </div>
