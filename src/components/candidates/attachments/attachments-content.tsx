@@ -105,11 +105,11 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
   return (
     <div className="">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-800">Upload File</h3>
+        <h3 className="text-lg font-semibold text-foreground">Upload File</h3>
         <Button
           onClick={() => setShowUploadBox(true)}
           disabled={showUploadBox || !canModify}
-          className="flex items-center gap-2 bg-black text-white hover:bg-gray-800"
+          className="flex items-center gap-2 bg-black text-white hover:bg-foreground"
         >
           <Plus className="w-4 h-4" />
           Upload File
@@ -124,7 +124,7 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
       />
 
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading attachments...</div>
+        <div className="text-center py-8 text-muted-foreground">Loading attachments...</div>
       ) : attachments.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center">
           <div className="w-48 h-48 mb-6">
@@ -136,7 +136,7 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
             </svg>
           </div>
           <h2 className="text-xl font-semibold mb-2">No attachments yet</h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-muted-foreground mb-4">
             Add your first attachment to share files with your team.
           </p>
         </div>

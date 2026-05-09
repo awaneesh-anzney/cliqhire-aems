@@ -234,8 +234,8 @@
          <div className="p-4 rounded-full bg-red-50 text-red-500">
            <Lock className="w-8 h-8" />
          </div>
-         <div className="text-center font-black text-slate-900 tracking-tight">Access Denied</div>
-         <div className="text-center text-slate-400 text-sm font-bold uppercase tracking-widest">You do not have permission to view clients.</div>
+         <div className="text-center font-black text-foreground tracking-tight">Access Denied</div>
+         <div className="text-center text-muted-foreground text-sm font-bold uppercase tracking-widest">You do not have permission to view clients.</div>
        </div>
      );
    }
@@ -268,9 +268,9 @@
          error={error}
        />
  
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50/50 p-3 gap-3 animate-in fade-in duration-700">
+       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Compressed Sticky Header Section */}
-         <div className="flex-shrink-0 relative overflow-hidden bg-white rounded-[1.5rem] border border-slate-100 shadow-lg p-1.5">
+         <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
            <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
            <Dashboardheader
              setOpen={setOpen}
@@ -289,29 +289,29 @@
          </div>
  
          {/* Table Content Area - Optimized for No Horizontal Scroll */}
-         <div className="flex-1 min-h-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
            <div className="flex-1 overflow-auto custom-scrollbar relative">
              <Table className="w-full border-separate border-spacing-0 table-auto">
-               <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
-                 <TableRow className="hover:bg-slate-50/95 transition-colors">
-                   <TableHead className="w-[48px] px-3 py-3 border-b border-slate-100">
+               <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
+                 <TableRow className="hover:bg-muted/95 transition-colors">
+                   <TableHead className="w-[48px] px-3 py-3 border-b border-border">
                      <div className="flex items-center justify-center">
                        <Checkbox
                          checked={selectedRows.size > 0 && selectedRows.size === pagedClients.length}
                          onCheckedChange={() => toggleSelectAll()}
-                         className="h-4 w-4 rounded border-slate-300"
+                         className="h-4 w-4 rounded border-border"
                        />
                      </div>
                    </TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">ID</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Name</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Industry</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Location</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Stage</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-center">Status</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-center">Age</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-center">Jobs</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-right pr-6">Created By</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">ID</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Name</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Industry</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Location</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Stage</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Status</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Age</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Jobs</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-right pr-6">Created By</TableHead>
                  </TableRow>
                </TableHeader>
                <TableBody>
@@ -319,13 +319,13 @@
                    <TableRow>
                      <TableCell colSpan={10} className="h-64 text-center">
                         <Loader className="size-6 animate-spin text-brand mx-auto mb-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading...</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading...</span>
                      </TableCell>
                    </TableRow>
                  ) : pagedClients.length === 0 ? (
                    <TableRow>
                      <TableCell colSpan={10} className="h-64 text-center">
-                        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No clients available</p>
+                        <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">No clients available</p>
                      </TableCell>
                    </TableRow>
                  ) : (
@@ -333,7 +333,7 @@
                      <TableRow
                        key={client.id ?? client._id}
                        className={cn(
-                         "group border-b border-slate-50 transition-all duration-300",
+                         "group border-b border-border transition-all duration-300",
                          "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
                          selectedRows.has(client.id) ? "bg-brand/[0.02]" : ""
                        )}
@@ -343,7 +343,7 @@
                            <Checkbox
                              checked={selectedRows.has(client.id)}
                              onCheckedChange={() => toggleRowSelection(client.id)}
-                             className="h-4 w-4 rounded border-slate-300"
+                             className="h-4 w-4 rounded border-border"
                              onClick={(e) => e.stopPropagation()}
                            />
                          </div>
@@ -362,7 +362,7 @@
            </div>
            
            {/* Compact Pagination Footer */}
-           <div className="flex-shrink-0 bg-white border-t border-slate-100 p-1.5">
+           <div className="flex-shrink-0 bg-card border-t border-border p-1.5">
              <ClientPaginationControls
                currentPage={currentPage}
                totalPages={totalPagesCalc}

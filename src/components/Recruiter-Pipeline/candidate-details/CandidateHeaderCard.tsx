@@ -22,7 +22,7 @@
    const router = useRouter();
  
    return (
-     <div className="relative overflow-hidden bg-white rounded-[1.5rem] border border-slate-100 shadow-xl p-5">
+     <div className="relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-xl p-5">
        {/* Glassmorphic Background Glow */}
        <div className="absolute top-0 right-0 w-64 h-full bg-brand/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-16" />
  
@@ -30,14 +30,14 @@
          <div className="flex items-center gap-6">
            {/* Avatar with Status */}
            <div className="relative group shrink-0">
-             <Avatar className="h-20 w-20 rounded-[1.5rem] border-4 border-white shadow-lg ring-1 ring-slate-100 transition-all duration-500 group-hover:scale-105 group-hover:rotate-3">
+             <Avatar className="h-20 w-20 rounded-[1.5rem] border-4 border-white shadow-lg ring-1 ring-border transition-all duration-500 group-hover:scale-105 group-hover:rotate-3">
                <AvatarImage src={candidate.avatar} />
                <AvatarFallback className="text-2xl font-black bg-brand/5 text-brand uppercase">
                  {candidate.name ? candidate.name.split(' ').map((n: string) => n[0]).join('') : 'NA'}
                </AvatarFallback>
              </Avatar>
              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-4 border-white flex items-center justify-center shadow-sm">
-                <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                <div className="w-1.5 h-1.5 bg-card rounded-full animate-pulse" />
              </div>
            </div>
  
@@ -45,7 +45,7 @@
            <div className="flex flex-col gap-1.5 min-w-0">
              <div className="flex items-center gap-3">
                <h2 
-                 className="text-2xl font-black text-slate-900 tracking-tighter cursor-pointer hover:text-brand transition-colors"
+                 className="text-2xl font-black text-foreground tracking-tighter cursor-pointer hover:text-brand transition-colors"
                  onClick={() => router.push(`/candidates/${candidate.id}`)}
                >
                  {candidate.name || 'Anonymous Candidate'}
@@ -58,16 +58,16 @@
              </div>
  
              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5 text-slate-500">
-                   <Briefcase className="h-4 w-4 text-slate-300" />
-                   <span className="text-[13px] font-bold text-slate-600">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                   <Briefcase className="h-4 w-4 text-muted-foreground" />
+                   <span className="text-[13px] font-bold text-foreground">
                       {candidate.currentJobTitle || "Independent Professional"}
                    </span>
                 </div>
-                <div className="h-3 w-[1px] bg-slate-200" />
-                <div className="flex items-center gap-1.5 text-slate-500">
-                   <Globe className="h-4 w-4 text-slate-300" />
-                   <span className="text-[13px] font-medium text-slate-500">
+                <div className="h-3 w-[1px] bg-muted" />
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                   <Globe className="h-4 w-4 text-muted-foreground" />
+                   <span className="text-[13px] font-medium text-muted-foreground">
                       {candidate.source || "Organic Sourcing"}
                    </span>
                 </div>
@@ -113,7 +113,7 @@
            variant="outline" 
            size="sm" 
            onClick={() => router.back()}
-           className="h-10 px-5 rounded-xl border-slate-100 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm group"
+           className="h-10 px-5 rounded-xl border-border font-black text-[10px] uppercase tracking-widest hover:bg-muted transition-all shadow-sm group"
          >
            <ChevronLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
            Back to Pipeline

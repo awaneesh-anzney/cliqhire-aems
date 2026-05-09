@@ -91,7 +91,7 @@ export function DisqualificationDialog({
               id="current-stage"
               value={currentStage}
               disabled
-              className="bg-gray-50"
+              className="bg-muted"
             />
           </div>
 
@@ -103,7 +103,7 @@ export function DisqualificationDialog({
               id="current-stage-status"
               value={currentStageStatus || ""}
               disabled
-              className="bg-gray-50"
+              className="bg-muted"
             />
           </div>
 

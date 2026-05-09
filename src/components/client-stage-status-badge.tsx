@@ -24,9 +24,9 @@ type ClientStageStatus = (typeof stageStatuses)[number]
 const stageStatusColors: Record<ClientStageStatus, string> = {
   "Calls": "bg-blue-100 text-blue-800",
   "Profile Sent": "bg-purple-100 text-purple-800",
-  "Contract Sent": "bg-yellow-100 text-gray-800",
+  "Contract Sent": "bg-yellow-100 text-foreground",
   "Attended a meeting": "bg-indigo-100 text-indigo-800",
-  "Replied to a message": "bg-gray-100 text-gray-800",
+  "Replied to a message": "bg-muted text-foreground",
   "Contract Negotiation": "bg-green-100 text-green-800",
 } as const
 
@@ -41,14 +41,14 @@ interface ClientStageStatusBadgeProps {
 export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disabled = false }: ClientStageStatusBadgeProps) {
   if (stage !== "Engaged" || disabled) {
     return (
-      <Badge variant="secondary" className="bg-gray-200 text-gray-500 border-none">
+      <Badge variant="secondary" className="bg-muted text-muted-foreground border-none">
         N/A
       </Badge>
     );
   }
 
   if (!onStatusChange || disabled) {
-    const currentStatusColor = (stageStatusColors as any)[status] || "bg-gray-100 text-gray-800";
+    const currentStatusColor = (stageStatusColors as any)[status] || "bg-muted text-foreground";
     return (
       <Badge variant="secondary" className={`${currentStatusColor} border-none`}>
         {status || "N/A"}
@@ -67,7 +67,7 @@ export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disa
     }
   }
 
-  const currentStatusColor = (stageStatusColors as any)[status] || "bg-gray-100 text-gray-800";
+  const currentStatusColor = (stageStatusColors as any)[status] || "bg-muted text-foreground";
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

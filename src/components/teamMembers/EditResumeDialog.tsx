@@ -98,12 +98,12 @@ export function EditResumeDialog({ open, onOpenChange, teamMember, onUpdated }: 
               }}
             />
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+              className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-border transition-colors"
               onClick={() => document.getElementById("resume-file-input")?.click()}
             >
-              <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <div className="text-sm font-medium text-gray-700 mb-1">Upload File</div>
-              <div className="text-xs text-gray-500">5MB max</div>
+              <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <div className="text-sm font-medium text-foreground mb-1">Upload File</div>
+              <div className="text-xs text-muted-foreground">5MB max</div>
               {resumeFile && (
                 <div className="text-xs text-green-600 mt-2">
                   File selected: {resumeFile.name}

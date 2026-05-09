@@ -8,20 +8,20 @@ export function CandidateDocumentsCard({ candidate }: { candidate: Candidate }) 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {candidate.description && (
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/60 h-full">
-          <h4 className="font-semibold text-slate-900 text-sm mb-3 flex items-center">
-            <FileText className="h-4 w-4 text-slate-500 mr-2" />
+        <div className="bg-card rounded-xl p-4 shadow-sm border border-border/60 h-full">
+          <h4 className="font-semibold text-foreground text-sm mb-3 flex items-center">
+            <FileText className="h-4 w-4 text-muted-foreground mr-2" />
             Description
           </h4>
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-100/60 max-h-40 overflow-y-auto custom-scrollbar">
-            <p className="text-xs text-slate-700 leading-relaxed">{candidate.description}</p>
+          <div className="bg-muted p-3 rounded-lg border border-border/60 max-h-40 overflow-y-auto custom-scrollbar">
+            <p className="text-xs text-foreground leading-relaxed">{candidate.description}</p>
           </div>
         </div>
       )}
 
       {candidate.resume && (
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/60 h-full">
-          <h4 className="font-semibold text-slate-900 text-sm mb-3 flex items-center">
+        <div className="bg-card rounded-xl p-4 shadow-sm border border-border/60 h-full">
+          <h4 className="font-semibold text-foreground text-sm mb-3 flex items-center">
             <FileText className="h-4 w-4 text-blue-500 mr-2" />
             Documents
           </h4>
@@ -30,7 +30,7 @@ export function CandidateDocumentsCard({ candidate }: { candidate: Candidate }) 
               <FileText className="h-4 w-4 text-blue-600" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-900 mb-0.5">Resume / CV</span>
+              <span className="text-xs font-semibold text-foreground mb-0.5">Resume / CV</span>
               <a 
                 href={candidate.resume} 
                 target="_blank" 

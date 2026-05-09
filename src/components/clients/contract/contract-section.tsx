@@ -240,7 +240,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   };
 
   if (!clientData) {
-    return <div className="text-center py-8 text-gray-500">Loading contract information...</div>;
+    return <div className="text-center py-8 text-muted-foreground">Loading contract information...</div>;
   }
 
   // Get line of business array
@@ -265,10 +265,10 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   if (availableContracts.length === 0) {
     return (
       <>
-        <div className="text-center py-8 text-gray-500">
-          <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+        <div className="text-center py-8 text-muted-foreground">
+          <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-sm">No contract information available</p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Contract details will appear here once configured
           </p>
           <Button onClick={handleAddContract} className="mt-4 flex items-center gap-2 mx-auto">
@@ -350,17 +350,17 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
     if (!contractData) return null;
 
     return (
-      <div className="p-2 bg-gray-50 rounded-lg border space-y-3">
+      <div className="p-2 bg-muted rounded-lg border space-y-3">
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
-            <span className="font-medium text-gray-600">Contract Type:</span>
-            <p className="text-gray-800">
+            <span className="font-medium text-foreground">Contract Type:</span>
+            <p className="text-foreground">
               {contractData.ContractType || contractData.contractType || "Not specified"}
             </p>
           </div>
           <div>
-            <span className="font-medium text-gray-600">Duration:</span>
-            <p className="text-gray-800">
+            <span className="font-medium text-foreground">Duration:</span>
+            <p className="text-foreground">
               {formatDate(contractData.contractStartDate)} -{" "}
               {formatDate(contractData.contractEndDate)}
             </p>
@@ -376,19 +376,19 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               {((contractData.ContractType || contractData.contractType) === "Fix with Advance") && (
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="font-medium text-gray-600">Fixed Percentage:</span>
-                    <p className="text-gray-800">{contractData.fixedPercentage || 0}%</p>
+                    <span className="font-medium text-foreground">Fixed Percentage:</span>
+                    <p className="text-foreground">{contractData.fixedPercentage || 0}%</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-600">Advance Amount:</span>
-                    <p className="text-gray-800">
+                    <span className="font-medium text-foreground">Advance Amount:</span>
+                    <p className="text-foreground">
                       {contractData.advanceMoneyAmount || 0}{" "}
                       {contractData.advanceMoneyCurrency || "SAR"}
                     </p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-600">Notes:</span>
-                    <p className="text-gray-800">
+                    <span className="font-medium text-foreground">Notes:</span>
+                    <p className="text-foreground">
                       {contractData.fixedPercentageAdvanceNotes || "No notes"}
                     </p>
                   </div>
@@ -399,12 +399,12 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               {((contractData.ContractType || contractData.contractType) === "Fix without Advance") && (
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium text-gray-600">Fixed Percentage:</span>
-                    <p className="text-gray-800">{contractData.fixWithoutAdvanceValue || 0}%</p>
+                    <span className="font-medium text-foreground">Fixed Percentage:</span>
+                    <p className="text-foreground">{contractData.fixWithoutAdvanceValue || 0}%</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-600">Notes:</span>
-                    <p className="text-gray-800">
+                    <span className="font-medium text-foreground">Notes:</span>
+                    <p className="text-foreground">
                       {contractData.fixWithoutAdvanceNotes || "No notes"}
                     </p>
                   </div>
@@ -415,29 +415,29 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               {((contractData.ContractType || contractData.contractType) === "Level Based Hiring") &&
                 contractData.levelBasedHiring?.levelTypes?.length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-600">Level Configuration:</span>
+                    <span className="font-medium text-foreground">Level Configuration:</span>
                     <div className="mt-2 space-y-1">
                       {contractData.levelBasedHiring.levelTypes.map((level: string) => {
                         const levelKey =
                           LEVEL_TYPE_MAPPING[level] || level.toLowerCase().replace(/[^a-z]/g, "");
                         const levelData = contractData.levelBasedHiring[levelKey] || {};
                         return (
-                          <div key={level} className="text-sm grid grid-cols-2 gap-4 bg-white p-3 rounded-md border border-slate-100 shadow-sm mb-2">
+                          <div key={level} className="text-sm grid grid-cols-2 gap-4 bg-card p-3 rounded-md border border-border shadow-sm mb-2">
                             <div>
-                              <p className="font-medium text-gray-600">Level Type:</p>
-                              <p className="font-semibold text-slate-800">{level}</p>
+                              <p className="font-medium text-foreground">Level Type:</p>
+                              <p className="font-semibold text-foreground">{level}</p>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-600">Percentage:</p>
+                              <p className="font-medium text-foreground">Percentage:</p>
                               <p className="text-brand font-bold">{levelData.percentage || 0}%</p>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-600">Amount:</p>
+                              <p className="font-medium text-foreground">Amount:</p>
                               <p>{levelData.amount || 0} {levelData.currency || "SAR"}</p>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-600">Notes:</p>
-                              <p className="text-xs text-slate-500 italic">{levelData.notes || "No notes"}</p>
+                              <p className="font-medium text-foreground">Notes:</p>
+                              <p className="text-xs text-muted-foreground italic">{levelData.notes || "No notes"}</p>
                             </div>
                           </div>
                         );
@@ -450,7 +450,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               {((contractData.ContractType || contractData.contractType) === "Level Based Advance Hiring") &&
                 contractData.levelBasedAdvanceHiring?.levelTypes?.length > 0 && (
                   <div>
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-foreground">
                       Level Configuration (With Advance):
                     </span>
                     <div className="mt-2 space-y-1">
@@ -459,24 +459,24 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
                           LEVEL_TYPE_MAPPING[level] || level.toLowerCase().replace(/[^a-z]/g, "");
                         const levelData = contractData.levelBasedAdvanceHiring[levelKey] || {};
                         return (
-                          <div key={level} className="text-sm grid grid-cols-3 gap-4 bg-white p-3 rounded-md border border-slate-100 shadow-sm mb-2">
+                          <div key={level} className="text-sm grid grid-cols-3 gap-4 bg-card p-3 rounded-md border border-border shadow-sm mb-2">
                             <div>
-                              <p className="font-medium text-gray-600">Level Type:</p>
-                              <p className="font-semibold text-slate-800">{level}</p>
+                              <p className="font-medium text-foreground">Level Type:</p>
+                              <p className="font-semibold text-foreground">{level}</p>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-600">Percentage:</p>
+                              <p className="font-medium text-foreground">Percentage:</p>
                               <p className="text-brand font-bold">{levelData.percentage || 0}%</p>
                             </div>
                             <div>
-                              <p className="font-medium text-gray-600">Amount:</p>
+                              <p className="font-medium text-foreground">Amount:</p>
                               <p className="font-semibold text-brand-600">
                                 {levelData.amount || 0} {levelData.currency || "SAR"}
                               </p>
                             </div>
                             <div className="col-span-3 mt-1">
-                              <p className="font-medium text-[10px] text-gray-500 uppercase tracking-wider">Notes:</p>
-                              <p className="text-xs text-slate-500 italic">{levelData.notes || "No notes"}</p>
+                              <p className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">Notes:</p>
+                              <p className="text-xs text-muted-foreground italic">{levelData.notes || "No notes"}</p>
                             </div>
                           </div>
                         );
@@ -491,18 +491,18 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         {(contractType === "HR Consulting" || contractType === "Mgt Consulting") && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
-                <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Currency</span>
-                <p className="text-gray-800 font-medium">{contractData.salaryCurrency || "SAR"}</p>
+              <div className="bg-card p-3 rounded-md border border-border shadow-sm">
+                <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Currency</span>
+                <p className="text-foreground font-medium">{contractData.salaryCurrency || "SAR"}</p>
               </div>
-              <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
-                <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Total Cost</span>
-                <p className="text-gray-800 font-medium">{contractData.totalCost || 0} {contractData.salaryCurrency || "SAR"}</p>
+              <div className="bg-card p-3 rounded-md border border-border shadow-sm">
+                <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Total Cost</span>
+                <p className="text-foreground font-medium">{contractData.totalCost || 0} {contractData.salaryCurrency || "SAR"}</p>
               </div>
               {contractType === "HR Consulting" && (
-                <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
-                  <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Est. Hours</span>
-                  <p className="text-gray-800 font-medium">{contractData.estimatedHours || "Not specified"}</p>
+                <div className="bg-card p-3 rounded-md border border-border shadow-sm">
+                  <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Est. Hours</span>
+                  <p className="text-foreground font-medium">{contractData.estimatedHours || "Not specified"}</p>
                 </div>
               )}
             </div>
@@ -510,29 +510,29 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               {contractType === "HR Consulting" ? (
                 <>
-                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
-                    <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Service Scope</span>
-                    <p className="text-gray-800 mt-1">{contractData.serviceScope || "No scope defined"}</p>
+                  <div className="bg-card p-3 rounded-md border border-border shadow-sm">
+                    <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Service Scope</span>
+                    <p className="text-foreground mt-1">{contractData.serviceScope || "No scope defined"}</p>
                   </div>
-                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
-                    <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Client Contact</span>
-                    <p className="text-gray-800 mt-1">{contractData.clientContact || "Not specified"}</p>
+                  <div className="bg-card p-3 rounded-md border border-border shadow-sm">
+                    <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Client Contact</span>
+                    <p className="text-foreground mt-1">{contractData.clientContact || "Not specified"}</p>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm">
-                    <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Project Scope</span>
-                    <p className="text-gray-800 mt-1">{contractData.projectScope || "No scope defined"}</p>
+                  <div className="bg-card p-3 rounded-md border border-border shadow-sm">
+                    <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Project Scope</span>
+                    <p className="text-foreground mt-1">{contractData.projectScope || "No scope defined"}</p>
                   </div>
-                  <div className="bg-white p-3 rounded-md border border-slate-100 shadow-sm space-y-3">
+                  <div className="bg-card p-3 rounded-md border border-border shadow-sm space-y-3">
                     <div>
-                      <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Client Company</span>
-                      <p className="text-gray-800">{contractData.clientCompany || "Not specified"}</p>
+                      <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Client Company</span>
+                      <p className="text-foreground">{contractData.clientCompany || "Not specified"}</p>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-500 uppercase text-[10px] tracking-wider">Key Deliverables</span>
-                      <p className="text-gray-800">{contractData.keyDeliverables || "Not specified"}</p>
+                      <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Key Deliverables</span>
+                      <p className="text-foreground">{contractData.keyDeliverables || "Not specified"}</p>
                     </div>
                   </div>
                 </>
@@ -540,13 +540,13 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="bg-slate-50 p-3 rounded-md border border-slate-200">
-                <span className="font-semibold text-slate-500 uppercase text-[10px] tracking-wider">Technical Proposal Notes</span>
-                <p className="text-slate-700 mt-1 italic">{contractData.technicalProposalNotes || "No notes"}</p>
+              <div className="bg-muted p-3 rounded-md border border-border">
+                <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Technical Proposal Notes</span>
+                <p className="text-foreground mt-1 italic">{contractData.technicalProposalNotes || "No notes"}</p>
               </div>
-              <div className="bg-slate-50 p-3 rounded-md border border-slate-200">
-                <span className="font-semibold text-slate-500 uppercase text-[10px] tracking-wider">Financial Proposal Notes</span>
-                <p className="text-slate-700 mt-1 italic">{contractData.financialProposalNotes || "No notes"}</p>
+              <div className="bg-muted p-3 rounded-md border border-border">
+                <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">Financial Proposal Notes</span>
+                <p className="text-foreground mt-1 italic">{contractData.financialProposalNotes || "No notes"}</p>
               </div>
             </div>
           </div>
@@ -559,11 +559,11 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               <div className="pt-2 border-t">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-600">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">
                       Technical Proposal Document:
                     </span>
-                    <span className="text-sm text-gray-800">
+                    <span className="text-sm text-foreground">
                       {contractData.techProposalDocHRC.fileName || "Technical Proposal"}
                     </span>
                   </div>
@@ -582,11 +582,11 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               <div className={contractData.techProposalDocHRC?.url ? "pt-2" : "pt-2 border-t"}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-600">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">
                       Financial Proposal Document:
                     </span>
-                    <span className="text-sm text-gray-800">
+                    <span className="text-sm text-foreground">
                       {contractData.finProposalDocHRC.fileName || "Financial Proposal"}
                     </span>
                   </div>
@@ -610,11 +610,11 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               <div className="pt-2 border-t">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-600">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">
                       Technical Proposal Document:
                     </span>
-                    <span className="text-sm text-gray-800">
+                    <span className="text-sm text-foreground">
                       {contractData.techProposalDocMGTC.fileName || "Technical Proposal"}
                     </span>
                   </div>
@@ -633,11 +633,11 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
               <div className={contractData.techProposalDocMGTC?.url ? "pt-2" : "pt-2 border-t"}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-600">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">
                       Financial Proposal Document:
                     </span>
-                    <span className="text-sm text-gray-800">
+                    <span className="text-sm text-foreground">
                       {contractData.finProposalDocMGTC.fileName || "Financial Proposal"}
                     </span>
                   </div>
@@ -658,16 +658,16 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         {contractType === "Outsourcing" && (
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
-              <span className="font-medium text-gray-600">Resources:</span>
-              <p className="text-gray-800">{contractData.numberOfResources || 0}</p>
+              <span className="font-medium text-foreground">Resources:</span>
+              <p className="text-foreground">{contractData.numberOfResources || 0}</p>
             </div>
             <div>
-              <span className="font-medium text-gray-600">Total Cost:</span>
-              <p className="text-gray-800">{contractData.totalCost || 0}</p>
+              <span className="font-medium text-foreground">Total Cost:</span>
+              <p className="text-foreground">{contractData.totalCost || 0}</p>
             </div>
             <div>
-              <span className="font-medium text-gray-600">Service Category:</span>
-              <p className="text-gray-800">{contractData.serviceCategory || "Not specified"}</p>
+              <span className="font-medium text-foreground">Service Category:</span>
+              <p className="text-foreground">{contractData.serviceCategory || "Not specified"}</p>
             </div>
           </div>
         )}
@@ -677,9 +677,9 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
           <div className="pt-2 border-t">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-600">Contract Document:</span>
-                <span className="text-sm text-gray-800">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Contract Document:</span>
+                <span className="text-sm text-foreground">
                   {contractData.contractDocument.fileName}
                 </span>
               </div>
@@ -698,14 +698,14 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   };
 
   return (
-    <div className="bg-slate-50/50 rounded-2xl p-6 flex flex-col space-y-6">
+    <div className="bg-muted/50 rounded-2xl p-6 flex flex-col space-y-6">
       {/* Add Contract Button */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-border shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-brand/10 rounded-lg">
             <FileText className="w-4 h-4 text-brand" />
           </div>
-          <h2 className="text-base font-semibold text-slate-800">Client Contracts</h2>
+          <h2 className="text-base font-semibold text-foreground">Client Contracts</h2>
         </div>
         <Button
           onClick={handleAddContract}
@@ -725,12 +725,12 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         const isEditing = editDialogOpen === businessType;
 
         return (
-          <div key={businessType} className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
+          <div key={businessType} className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
             <div className="p-5">
               {isEditing ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b pb-4 mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800">Edit {businessType} Contract</h3>
+                    <h3 className="text-lg font-semibold text-foreground">Edit {businessType} Contract</h3>
                   </div>
                   {renderEditForm(businessType)}
                   <div className="flex justify-end space-x-2 pt-4 border-t">
@@ -751,17 +751,17 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                   <div className="flex items-center space-x-3">
-                    <h3 className="text-sm font-semibold text-gray-800">{businessType} Contract</h3>
+                    <h3 className="text-sm font-semibold text-foreground">{businessType} Contract</h3>
                     <Badge variant="secondary" className="text-xs">
                       {summary?.contractType || summary?.ContractType}
                     </Badge>
                   </div>
 
                   {summary?.details && (
-                    <p className="text-sm text-gray-600 mt-1">{summary.details}</p>
+                    <p className="text-sm text-foreground mt-1">{summary.details}</p>
                   )}
 
-                  <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                  <div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
                     {summary?.startDate && (
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-3 w-3" />

@@ -72,7 +72,7 @@ export function JobsTable({ jobs, loading }: JobsTableProps) {
                 </TableCell>
                 <TableCell>
                    <Badge className={`rounded-md font-medium text-xs px-2.5 py-0.5 border-none ${
-                     job.stage === 'Closed' ? 'bg-slate-100 text-slate-600' : 
+                     job.stage === 'Closed' ? 'bg-muted text-foreground' : 
                      job.stage === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                    }`}>
                      {job.stage || 'Draft'}

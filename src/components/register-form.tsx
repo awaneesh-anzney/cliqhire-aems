@@ -99,10 +99,10 @@ export function RegisterForm({
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       placeholder="First Name"
-                      className="w-full pl-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                   </div>
@@ -118,10 +118,10 @@ export function RegisterForm({
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       placeholder="LastName"
-                      className="w-full pl-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                   </div>
@@ -138,11 +138,11 @@ export function RegisterForm({
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type="email"
                       placeholder="Work Email"
-                      className="w-full pl-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                   </div>
@@ -159,18 +159,18 @@ export function RegisterForm({
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="w-full pl-12 pr-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 pr-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-transparent text-gray-400"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-transparent text-muted-foreground"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -194,18 +194,18 @@ export function RegisterForm({
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm Password"
-                      className="w-full pl-12 pr-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 pr-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-transparent text-gray-400"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-transparent text-muted-foreground"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? (
@@ -229,7 +229,7 @@ export function RegisterForm({
             {isSubmitting ? "Creating..." : "Create Account"}
           </Button>
 
-          <div className="text-center text-sm text-gray-500 mt-6">
+          <div className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{" "}
             <a href="/login" className="text-brand hover:underline font-medium">
               Sign in

@@ -14,7 +14,7 @@ const stages: (keyof typeof stageColors)[] = ["Lead", "Engaged", "Signed"];
 
 const stageColors = {
   Lead: "bg-blue-100 text-blue-800",
-  Engaged: "bg-yellow-100 text-gray-800",
+  Engaged: "bg-yellow-100 text-foreground",
   Signed: "bg-green-100 text-green-800",
 } as const;
 
@@ -27,7 +27,7 @@ interface ClientStageBadgeProps {
 
 export function ClientStageBadge({ id, stage, onStageChange, disabled = false }: ClientStageBadgeProps) {
   if (!onStageChange || disabled) {
-    const currentStageColor = (stageColors as any)[stage] || "bg-gray-100 text-gray-800";
+    const currentStageColor = (stageColors as any)[stage] || "bg-muted text-foreground";
     return (
       <Badge variant="secondary" className={`${currentStageColor} border-none`}>
         {stage}
@@ -46,7 +46,7 @@ export function ClientStageBadge({ id, stage, onStageChange, disabled = false }:
     };
   };
 
-  const currentStageColor = (stageColors as any)[stage] || "bg-gray-100 text-gray-800";
+  const currentStageColor = (stageColors as any)[stage] || "bg-muted text-foreground";
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

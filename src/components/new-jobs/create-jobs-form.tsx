@@ -223,15 +223,15 @@ export function CreateJobRequirementForm({
       <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <div className="flex h-full lg:h-[650px] min-h-[500px]">
           {/* Sidebar Step Indicator */}
-          <div className="hidden md:flex flex-col w-64 bg-slate-50 border-r border-slate-200 p-8 shrink-0">
+          <div className="hidden md:flex flex-col w-64 bg-muted border-r border-border p-8 shrink-0">
             <div className="mb-10">
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Briefcase className="w-5 h-5 text-primary" />
                 </div>
-                <span className="font-bold text-slate-800 text-lg tracking-tight">CliqHire</span>
+                <span className="font-bold text-foreground text-lg tracking-tight">CliqHire</span>
               </div>
-              <p className="text-xs text-slate-400 font-bold tracking-widest uppercase">Job Recruitment</p>
+              <p className="text-xs text-muted-foreground font-bold tracking-widest uppercase">Job Recruitment</p>
             </div>
 
             <div className="space-y-8">
@@ -241,15 +241,15 @@ export function CreateJobRequirementForm({
                     w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
                     ${currentTab === index 
                       ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110" 
-                      : (index < currentTab ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500")}
+                      : (index < currentTab ? "bg-green-500 text-white" : "bg-muted text-muted-foreground")}
                   `}>
                     {index < currentTab ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
                   </div>
                   <div className="flex flex-col">
-                    <span className={`text-sm font-bold ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
+                    <span className={`text-sm font-bold ${currentTab === index ? "text-foreground" : "text-muted-foreground"}`}>
                       {tab}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Section {index + 1}</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase">Section {index + 1}</span>
                   </div>
                 </div>
               ))}
@@ -258,7 +258,7 @@ export function CreateJobRequirementForm({
              <div className="mt-auto bg-primary/5 p-4 rounded-xl border border-primary/10">
               <div className="flex items-start gap-2">
                 <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
+                <p className="text-[11px] text-foreground leading-relaxed font-semibold">
                   Defining precise requirements helps our AI match the best candidates for your team.
                 </p>
               </div>
@@ -266,17 +266,17 @@ export function CreateJobRequirementForm({
           </div>
 
           {/* Form Content */}
-          <div className="flex-1 flex flex-col bg-white overflow-hidden">
+          <div className="flex-1 flex flex-col bg-card overflow-hidden">
             <DialogHeader className="p-8 pb-4 border-b md:border-none">
               <div className="flex justify-between items-center mb-1">
-                <DialogTitle className="text-3xl font-black text-slate-900 tracking-tight">
+                <DialogTitle className="text-3xl font-black text-foreground tracking-tight">
                   {currentTab === 0 ? "Job Core Info" : currentTab === 1 ? "Requirements" : "Final Details"}
                 </DialogTitle>
                 <div className="text-[10px] text-primary font-black bg-primary/10 px-2 py-1 rounded-full uppercase tracking-tighter shadow-sm">
                   {currentTab + 1} of 3
                 </div>
               </div>
-              <DialogDescription className="text-slate-500 font-semibold text-sm">
+              <DialogDescription className="text-muted-foreground font-semibold text-sm">
                 Provide the details to start sourcing top talent for this role.
               </DialogDescription>
             </DialogHeader>
@@ -287,25 +287,25 @@ export function CreateJobRequirementForm({
                   {currentTab === 0 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">Position Name <span className="text-primary">*</span></Label>
+                        <Label className="text-sm font-bold text-foreground">Position Name <span className="text-primary">*</span></Label>
                         <div className="relative group">
-                          <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                          <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input
                             name="positionName"
                             value={form.positionName}
                             onChange={handleChange}
                             placeholder="e.g. Senior Frontend Developer"
-                            className={cn("pl-10 h-12 border-slate-200 focus:border-primary focus:ring-primary/10", errors.positionName && "border-red-500")}
+                            className={cn("pl-10 h-12 border-border focus:border-primary focus:ring-primary/10", errors.positionName && "border-red-500")}
                           />
                         </div>
                         {errors.positionName && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.positionName}</p>}
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">Client Name <span className="text-primary">*</span></Label>
+                        <Label className="text-sm font-bold text-foreground">Client Name <span className="text-primary">*</span></Label>
                         {lockedClientId ? (
-                          <div className="h-12 flex items-center px-4 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 font-bold">
-                            <Building2 className="w-4 h-4 mr-3 text-slate-400" />
+                          <div className="h-12 flex items-center px-4 border border-border rounded-lg bg-muted text-foreground font-bold">
+                            <Building2 className="w-4 h-4 mr-3 text-muted-foreground" />
                             {lockedClientName}
                           </div>
                         ) : (
@@ -313,21 +313,21 @@ export function CreateJobRequirementForm({
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
-                                className={cn("w-full h-12 justify-between font-bold border-slate-200 hover:border-primary/50 text-slate-700 px-4", errors.clientId && "border-red-500")}
+                                className={cn("w-full h-12 justify-between font-bold border-border hover:border-primary/50 text-foreground px-4", errors.clientId && "border-red-500")}
                               >
                                 <div className="flex items-center">
-                                  <Building2 className="w-4 h-4 mr-3 text-slate-400" />
+                                  <Building2 className="w-4 h-4 mr-3 text-muted-foreground" />
                                   {form.clientId ? clientOptions.find(c => c._id === form.clientId)?.name || form.clientName : "Select Client"}
                                 </div>
                                 <ChevronsUpDown className="w-4 h-4 opacity-50" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 shadow-2xl border-slate-100" align="start">
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 shadow-2xl border-border" align="start">
                               <div className="flex flex-col">
-                                <div className="flex items-center border-b px-3 bg-slate-50">
-                                  <Search className="mr-2 h-4 w-4 text-slate-400" />
+                                <div className="flex items-center border-b px-3 bg-muted">
+                                  <Search className="mr-2 h-4 w-4 text-muted-foreground" />
                                   <input
-                                    className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-slate-400 font-semibold"
+                                    className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground font-semibold"
                                     placeholder="Search client database..."
                                     value={clientSearch}
                                     onChange={(e) => setClientSearch(e.target.value)}
@@ -365,9 +365,9 @@ export function CreateJobRequirementForm({
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold text-slate-700">Contract Type</Label>
+                          <Label className="text-sm font-bold text-foreground">Contract Type</Label>
                           <Select value={form.jobType} onValueChange={(val) => setForm(prev => ({ ...prev, jobType: val }))}>
-                            <SelectTrigger className="h-12 border-slate-200 font-bold">
+                            <SelectTrigger className="h-12 border-border font-bold">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -376,43 +376,43 @@ export function CreateJobRequirementForm({
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold text-slate-700">Headcount</Label>
+                          <Label className="text-sm font-bold text-foreground">Headcount</Label>
                           <div className="relative group">
-                            <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
                               name="headcount"
                               value={form.headcount}
                               onChange={handleChange}
                               type="number"
                               placeholder="0"
-                              className="pl-10 h-12 border-slate-200 font-bold"
+                              className="pl-10 h-12 border-border font-bold"
                             />
                           </div>
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">Work Location</Label>
+                        <Label className="text-sm font-bold text-foreground">Work Location</Label>
                         <div className="relative group">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
                             name="location"
                             value={form.location}
                             onChange={handleChange}
                             placeholder="e.g. Dubai, UAE (or Remote)"
-                            className="pl-10 h-12 border-slate-200 font-bold"
+                            className="pl-10 h-12 border-border font-bold"
                           />
                         </div>
                       </div>
 
-                      <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-                        <Label className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                      <div className="p-6 bg-muted rounded-2xl border border-border space-y-4">
+                        <Label className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2">
                           <DollarSign className="w-4 h-4 text-primary" /> Budget Range
                         </Label>
                         <div className="grid grid-cols-12 gap-3">
                           <div className="col-span-4">
                              <Select value={form.currency} onValueChange={(val) => setForm(prev => ({ ...prev, currency: val }))}>
-                              <SelectTrigger className="h-11 border-slate-200 bg-white font-bold">
+                              <SelectTrigger className="h-11 border-border bg-card font-bold">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="max-h-[200px]">
@@ -434,7 +434,7 @@ export function CreateJobRequirementForm({
                               onChange={handleChange} 
                               placeholder="Min" 
                               type="number" 
-                              className="h-11 border-slate-200 bg-white font-bold"
+                              className="h-11 border-border bg-card font-bold"
                             />
                           </div>
                           <div className="col-span-4">
@@ -444,7 +444,7 @@ export function CreateJobRequirementForm({
                               onChange={handleChange} 
                               placeholder="Max" 
                               type="number" 
-                              className="h-11 border-slate-200 bg-white font-bold"
+                              className="h-11 border-border bg-card font-bold"
                             />
                           </div>
                         </div>
@@ -455,16 +455,16 @@ export function CreateJobRequirementForm({
                   {currentTab === 2 && (
                     <div className="space-y-4">
                       <div className="flex justify-between items-center px-1">
-                        <Label className="text-sm font-bold text-slate-700">Position Summary</Label>
-                        <span className="text-[10px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded font-black uppercase">Markdown Support</span>
+                        <Label className="text-sm font-bold text-foreground">Position Summary</Label>
+                        <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded font-black uppercase">Markdown Support</span>
                       </div>
                       <div className="relative">
-                        <FileText className="absolute right-4 top-4 w-5 h-5 text-slate-100" />
+                        <FileText className="absolute right-4 top-4 w-5 h-5 text-muted-foreground" />
                         <textarea
                           name="jobDescription"
                           value={form.jobDescription}
                           onChange={handleChange}
-                          className="w-full min-h-[300px] p-6 border border-slate-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-slate-700 text-sm leading-relaxed custom-scrollbar"
+                          className="w-full min-h-[300px] p-6 border border-border rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-medium text-foreground text-sm leading-relaxed custom-scrollbar"
                           placeholder="Describe the role, key responsibilities, and must-have requirements..."
                         />
                       </div>
@@ -474,14 +474,14 @@ export function CreateJobRequirementForm({
               </div>
             </div>
 
-            <DialogFooter className="p-6 bg-slate-50 border-t flex flex-row items-center mt-auto shrink-0 transition-all">
+            <DialogFooter className="p-6 bg-muted border-t flex flex-row items-center mt-auto shrink-0 transition-all">
               <div className="flex justify-between w-full items-center">
                 <div className="flex gap-3">
-                  <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-slate-500 font-bold hover:bg-slate-100">
+                  <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground font-bold hover:bg-muted">
                     Cancel
                   </Button>
                   {currentTab > 0 && (
-                    <Button variant="outline" onClick={handlePrevious} className="border-slate-200 font-bold bg-white px-5 shadow-sm">
+                    <Button variant="outline" onClick={handlePrevious} className="border-border font-bold bg-card px-5 shadow-sm">
                       <ArrowLeft className="w-4 h-4 mr-2" /> Back
                     </Button>
                   )}

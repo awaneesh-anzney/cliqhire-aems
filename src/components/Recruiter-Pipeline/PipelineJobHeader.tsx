@@ -40,7 +40,7 @@
    };
  
    return (
-     <div className="relative overflow-hidden bg-white p-4 border-b border-slate-100">
+     <div className="relative overflow-hidden bg-card p-4 border-b border-border">
        {/* Background Accent */}
        <div className="absolute top-0 right-0 w-64 h-full bg-brand/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-16" />
  
@@ -51,7 +51,7 @@
              variant="ghost" 
              size="icon" 
              onClick={() => router.back()}
-             className="h-10 w-10 rounded-xl bg-slate-50 hover:bg-brand/10 hover:text-brand transition-all border border-slate-100 group"
+             className="h-10 w-10 rounded-xl bg-muted hover:bg-brand/10 hover:text-brand transition-all border border-border group"
            >
              <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
            </Button>
@@ -65,15 +65,15 @@
            <div className="flex flex-col gap-1">
              <div className="flex items-center gap-3">
                <h1 
-                 className="text-xl font-black text-slate-900 tracking-tighter cursor-pointer hover:text-brand transition-colors"
+                 className="text-xl font-black text-foreground tracking-tighter cursor-pointer hover:text-brand transition-colors"
                  onClick={() => job.jobId?._id && router.push(`/jobs/${job.jobId._id}`)}
                >
                  {job.title}
                </h1>
-               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100">
-                  <Building2 className="h-3 w-3 text-slate-400" />
+               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-muted border border-border">
+                  <Building2 className="h-3 w-3 text-muted-foreground" />
                   <span 
-                    className="text-[11px] font-black text-slate-500 uppercase tracking-widest cursor-pointer hover:text-brand transition-colors"
+                    className="text-[11px] font-black text-muted-foreground uppercase tracking-widest cursor-pointer hover:text-brand transition-colors"
                     onClick={() => {
                       const clientId = job.jobId?.client?._id || (typeof job.jobId?.client === 'string' ? job.jobId.client : null);
                       if (clientId) router.push(`/clients/${clientId}`);
@@ -85,7 +85,7 @@
              </div>
  
              {/* Secondary Meta Row */}
-             <div className="flex items-center gap-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+             <div className="flex items-center gap-6 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                <div className="flex items-center gap-1.5">
                  <MapPin className="h-3.5 w-3.5 text-brand/60" />
                  <span>{job.location}</span>
@@ -104,15 +104,15 @@
                </div>
                
                {/* Team Labels (Compact) */}
-               <div className="flex items-center gap-4 border-l border-slate-100 pl-4 ml-2">
+               <div className="flex items-center gap-4 border-l border-border pl-4 ml-2">
                  {job.jobTeamMembers?.slice(0, 2).map((member: any) => (
                    <Tooltip key={member.position}>
                      <TooltipTrigger asChild>
                        <div className="flex items-center gap-1.5 cursor-help">
-                         <div className="h-5 w-5 rounded-full bg-slate-100 flex items-center justify-center text-[8px] font-black text-slate-500 border border-white">
+                         <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[8px] font-black text-muted-foreground border border-white">
                             {member.position === 'hiringManager' ? 'HM' : 'RC'}
                          </div>
-                         <span className="text-[10px] text-slate-400">
+                         <span className="text-[10px] text-muted-foreground">
                            {member.users?.[0]?.firstName || 'Assignee'}
                          </span>
                        </div>
@@ -133,21 +133,21 @@
              variant="outline" 
              size="sm" 
              onClick={() => setIsExportDialogOpen(true)}
-             className="h-10 px-4 rounded-xl border-slate-100 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm group"
+             className="h-10 px-4 rounded-xl border-border font-black text-[10px] uppercase tracking-widest hover:bg-muted transition-all shadow-sm group"
            >
-             <Download className="h-4 w-4 mr-2 text-slate-400 group-hover:text-slate-600" />
+             <Download className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-foreground" />
              Export
            </Button>
            <Button 
              variant="outline" 
              size="sm" 
              onClick={handleCopyCandidateFormLink}
-             className="h-10 px-4 rounded-xl border-slate-100 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm group"
+             className="h-10 px-4 rounded-xl border-border font-black text-[10px] uppercase tracking-widest hover:bg-muted transition-all shadow-sm group"
            >
              {isFormLinkCopied ? (
                <Check className="h-4 w-4 mr-2 text-emerald-500" />
              ) : (
-               <Copy className="h-4 w-4 mr-2 text-slate-400 group-hover:text-slate-600" />
+               <Copy className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-foreground" />
              )}
              {isFormLinkCopied ? "Copied" : "Form Link"}
            </Button>

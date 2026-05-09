@@ -76,16 +76,16 @@ export default function EditResumeDialog({ open, onOpenChange, candidate, onUpda
               }}
             />
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-24 text-center cursor-pointer hover:border-gray-400 transition-colors"
+              className="border-2 border-dashed border-border rounded-lg p-24 text-center cursor-pointer hover:border-border transition-colors"
               onClick={() => document.getElementById("candidate-resume-file-input")?.click()}
             >
               <Upload className="h-8 w-8 mx-auto mb-3 text-blue-400" />
-              <div className="text-lg text-gray-600">
+              <div className="text-lg text-foreground">
                 Drag & drop your resume here, or <span className="text-blue-600 underline">browse</span>
                 
               </div>
-              <span className="text-gray-400 text-sm"> (PDF, DOC, DOCX, RTF, JPG, PNG)</span>
-              <div className="text-xs text-gray-400 mt-1">5MB max</div>
+              <span className="text-muted-foreground text-sm"> (PDF, DOC, DOCX, RTF, JPG, PNG)</span>
+              <div className="text-xs text-muted-foreground mt-1">5MB max</div>
               {resumeFile && (
                 <div className="text-xs text-green-600 mt-2">File selected: {resumeFile.name}</div>
               )}

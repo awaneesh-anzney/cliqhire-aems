@@ -17,13 +17,13 @@ import {
  */
 export const getFileIcon = (fileName?: string): JSX.Element => {
   if (!fileName || typeof fileName !== "string") {
-    return <File className="h-4 w-4 text-gray-500" />;
+    return <File className="h-4 w-4 text-muted-foreground" />;
   }
 
   const extension = fileName.split(".").pop()?.toLowerCase();
 
   if (!extension) {
-    return <File className="h-4 w-4 text-gray-500" />;
+    return <File className="h-4 w-4 text-muted-foreground" />;
   }
 
   switch (extension) {
@@ -74,6 +74,6 @@ export const getFileIcon = (fileName?: string): JSX.Element => {
 
     // 🗃️ Default fallback
     default:
-      return <File className="h-4 w-4 text-gray-500" />;
+      return <File className="h-4 w-4 text-muted-foreground" />;
   }
 };

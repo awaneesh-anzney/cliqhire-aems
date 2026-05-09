@@ -91,12 +91,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type="email"
                       autoComplete="email"
                       placeholder="Username or email"
-                      className="w-full pl-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       data-form-type="other"
                       {...field}
                     />
@@ -113,10 +113,10 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      className="w-full pl-12 pr-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 pr-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                       placeholder="Password"
                       autoComplete="current-password"
@@ -126,7 +126,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-transparent text-gray-400"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-transparent text-muted-foreground"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -151,18 +151,18 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                   <FormControl>
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand"
+                      className="h-4 w-4 rounded border-border text-brand focus:ring-brand"
                       checked={field.value}
                       onChange={field.onChange}
                     />
                   </FormControl>
-                  <label className="text-sm text-gray-500 font-medium cursor-pointer" onClick={() => field.onChange(!field.value)}>
+                  <label className="text-sm text-muted-foreground font-medium cursor-pointer" onClick={() => field.onChange(!field.value)}>
                     Remember me
                   </label>
                 </FormItem>
               )}
             />
-            <a href="/forgot-password" className="text-sm text-gray-500 hover:text-brand">
+            <a href="/forgot-password" className="text-sm text-muted-foreground hover:text-brand">
               Forgot password?
             </a>
           </div>
@@ -175,7 +175,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             {isLoginLoading ? "Signing in..." : "Sign In"}
           </Button>
 
-          <div className="text-center text-sm text-gray-500 mt-6">
+          <div className="text-center text-sm text-muted-foreground mt-6">
             New here?{" "}
             <a href="/register" className="text-brand hover:underline font-medium">
               Create an Account

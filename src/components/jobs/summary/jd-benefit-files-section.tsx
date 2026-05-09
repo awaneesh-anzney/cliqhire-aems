@@ -126,12 +126,12 @@ export function JDBenefitFilesSection({
     const hasFile = file && fileName !== "No file uploaded";
 
     return (
-      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+      <div className="flex items-center justify-between py-3 border-b border-border last:border-b-0">
         <div className="flex items-center gap-3">
           <File className="h-5 w-5 text-blue-500" />
           <div>
             <div className="font-medium text-sm">{label}</div>
-            <div className="text-sm text-gray-600">{fileName}</div>
+            <div className="text-sm text-foreground">{fileName}</div>
           </div>
         </div>
 
@@ -197,7 +197,7 @@ export function JDBenefitFilesSection({
         </div>
 
         <CollapsibleContent className="space-y-0 mt-4">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4">
             <FileRow
               label="Job Description PDF"
               file={jobDescriptionPdf}

@@ -228,7 +228,7 @@ export function ReportsContent({ jobId }: ReportsContentProps) {
               <div key={index} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-gray-50">
+                    <div className="p-2 rounded-lg bg-muted">
                       {source.icon}
                     </div>
                     <span className="font-medium">{source.label}</span>
@@ -239,7 +239,7 @@ export function ReportsContent({ jobId }: ReportsContentProps) {
                   </div>
                 </div>
                 <div className="relative pt-2">
-                  <div className="absolute top-0 left-0 h-2 rounded-full bg-gray-100 w-full" />
+                  <div className="absolute top-0 left-0 h-2 rounded-full bg-muted w-full" />
                   <div 
                     className={`absolute top-0 left-0 h-2 rounded-full ${source.color} transition-all duration-500`}
                     style={{ width: `${source.percentage}%` }}

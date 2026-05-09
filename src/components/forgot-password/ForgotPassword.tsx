@@ -50,17 +50,17 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
           <CheckCircle2 className="h-8 w-8 text-brand" />
         </div>
         <h2 className="text-3xl font-bold tracking-tight text-[#2B3674]">Check your email</h2>
-        <p className="text-gray-500 max-w-sm">
+        <p className="text-muted-foreground max-w-sm">
           We have sent a password reset link to <span className="font-semibold text-[#2B3674]">{form.getValues("email")}</span>. 
         </p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Did&apos;t receive the email? Check your spam folder or try again.
         </p>
         <div className="flex flex-col gap-3 w-full mt-4">
           <Button 
             onClick={() => window.location.reload()}
             variant="outline" 
-            className="w-full h-12 rounded-full border-gray-200 text-[#2B3674] hover:bg-gray-50 font-medium"
+            className="w-full h-12 rounded-full border-border text-[#2B3674] hover:bg-muted font-medium"
           >
             Try another email
           </Button>
@@ -77,7 +77,7 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
   return (
     <div className={cn("flex w-full flex-col gap-6", className)} {...props}>
       <h2 className="text-3xl font-bold tracking-tight text-[#2B3674] mb-2">Forgot Password</h2>
-      <p className="text-gray-500 mb-4 text-sm leading-relaxed">
+      <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
         Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
       </p>
 
@@ -90,12 +90,12 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type="email"
                       autoComplete="email"
                       placeholder="Enter your email address"
-                      className="w-full pl-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                   </div>
@@ -116,7 +116,7 @@ export function ForgotPassword({ className, ...props }: React.ComponentPropsWith
           <div className="text-center mt-6">
             <Link 
               href="/login" 
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-brand transition-colors"
+              className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-brand transition-colors"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login

@@ -240,7 +240,7 @@ export function ViewEditTeamMemberDialog({ open, onOpenChange, teamMember, onUpd
               )}
             </div>
           ) : (
-            <div className="flex-1 border-b border-gray-300 pb-1">
+            <div className="flex-1 border-b border-border pb-1">
               <span className="text-sm text-black break-words">
                 {value || "—"}
               </span>
@@ -335,7 +335,7 @@ export function ViewEditTeamMemberDialog({ open, onOpenChange, teamMember, onUpd
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-2 flex-1">
                 <span className="text-sm font-medium text-muted-foreground">Resume:</span>
-                <div className="flex-1 border-b border-gray-300 pb-1">
+                <div className="flex-1 border-b border-border pb-1">
                   <span className="text-sm text-black">
                     {teamMember?.resume ? (
                       <a
@@ -367,7 +367,7 @@ export function ViewEditTeamMemberDialog({ open, onOpenChange, teamMember, onUpd
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-2 flex-1">
                 <span className="text-sm font-medium text-muted-foreground">Specialization:</span>
-                <div className="flex-1 border-b border-gray-300 pb-1">
+                <div className="flex-1 border-b border-border pb-1">
                   <span className="text-sm text-black">
                     {teamMember?.specialization || "—"}
                   </span>
@@ -391,7 +391,7 @@ export function ViewEditTeamMemberDialog({ open, onOpenChange, teamMember, onUpd
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-2 flex-1">
                 <span className="text-sm font-medium text-muted-foreground">Skills:</span>
-                <div className="flex-1 border-b border-gray-300 pb-1">
+                <div className="flex-1 border-b border-border pb-1">
                   <span className="text-sm text-black">
                     {Array.isArray(teamMember?.skills) && teamMember.skills.length > 0 ? (
                       <div className="flex flex-wrap gap-1">

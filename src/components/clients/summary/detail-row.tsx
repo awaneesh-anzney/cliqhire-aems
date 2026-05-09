@@ -158,7 +158,7 @@ export function DetailRow({
       </div>
 
       {isDate && showDatePicker && (
-        <div className="absolute z-50 mt-1 bg-white shadow-lg rounded-md">
+        <div className="absolute z-50 mt-1 bg-card shadow-lg rounded-md">
           <DatePicker
             selected={selectedDate}
             onChange={handleDateChange}

@@ -9,7 +9,7 @@ export function InboxEmptyState() {
         <EmailLogo />
       </div>
       <h2 className="text-xl font-semibold mb-3">No email provider integrated yet</h2>
-      <p className="text-gray-500 mb-6">
+      <p className="text-muted-foreground mb-6">
         In order to best leverage inbox, please integrate your Google or Outlook email to sync all your candidate and contact emails with Cliqhire.
       </p>
       <div className="flex flex-col items-center gap-4">

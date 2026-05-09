@@ -244,12 +244,12 @@ export function AddCandidateDialog({ jobId, jobTitle, trigger, onCandidatesAdded
                         if (!candidate) return null;
                         
                         return (
-                          <div key={candidateId} className="p-4 rounded-lg border bg-gray-50/50">
+                          <div key={candidateId} className="p-4 rounded-lg border bg-muted/50">
                             <div className="flex justify-between items-start">
                               <div className="flex-1 grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                       Name:
                                     </span>
                                     <span className="text-sm font-medium">
@@ -257,7 +257,7 @@ export function AddCandidateDialog({ jobId, jobTitle, trigger, onCandidatesAdded
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                       Current Position:
                                     </span>
                                     <span className="text-sm text-muted-foreground">
@@ -265,7 +265,7 @@ export function AddCandidateDialog({ jobId, jobTitle, trigger, onCandidatesAdded
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                       Email:
                                     </span>
                                     <span className="text-sm text-muted-foreground">
@@ -275,7 +275,7 @@ export function AddCandidateDialog({ jobId, jobTitle, trigger, onCandidatesAdded
                                 </div>
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                       Location:
                                     </span>
                                     <span className="text-sm text-muted-foreground">
@@ -283,7 +283,7 @@ export function AddCandidateDialog({ jobId, jobTitle, trigger, onCandidatesAdded
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                       Phone:
                                     </span>
                                     <span className="text-sm text-muted-foreground">
@@ -291,7 +291,7 @@ export function AddCandidateDialog({ jobId, jobTitle, trigger, onCandidatesAdded
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                       Experience:
                                     </span>
                                     <span className="text-sm text-muted-foreground">

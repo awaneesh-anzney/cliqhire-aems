@@ -22,7 +22,7 @@ interface CandidateFiltersProps {
 
 const CandidateFilters: React.FC<CandidateFiltersProps> = ({ filters, onChange }) => {
   return (
-    <div className="p-4 border-b bg-white">
+    <div className="p-4 border-b bg-card">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1">
           <Label htmlFor="candidate-name">Name</Label>

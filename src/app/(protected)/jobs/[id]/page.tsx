@@ -100,50 +100,50 @@ export default function JobPage({ params }: PageProps) {
     Shortlisted: "bg-indigo-100 text-indigo-800",
     Offer: "bg-pink-100 text-pink-800",
     Hired: "bg-green-100 text-green-800",
-    "On Hold": "bg-gray-100 text-gray-800",
+    "On Hold": "bg-muted text-foreground",
     Cancelled: "bg-red-100 text-red-800",
   };
 
   return (
     <div className="flex flex-col h-full">
       {/* Header Section */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-card border-b shadow-sm">
         <div className="max-w-[1600px] mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{jobTitle}</h1>
-                  <span className="text-xl text-slate-400 font-medium font-mono">#{job.jobId}</span>
+                  <h1 className="text-3xl font-bold text-foreground tracking-tight">{jobTitle}</h1>
+                  <span className="text-xl text-muted-foreground font-medium font-mono">#{job.jobId}</span>
                 </div>
                 <Badge
                   variant="secondary"
-                  className={`${stageColors[stage] || "bg-gray-100 text-gray-800"} border-none px-3 py-1 text-xs font-semibold uppercase tracking-wider`}
+                  className={`${stageColors[stage] || "bg-muted text-foreground"} border-none px-3 py-1 text-xs font-semibold uppercase tracking-wider`}
                 >
                   {stage}
                 </Badge>
               </div>
               
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-slate-500">
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2 group cursor-pointer hover:text-brand transition-colors">
-                  <div className="p-1.5 bg-slate-100 rounded-md group-hover:bg-brand/10 transition-colors">
-                    <Building2 className="h-4 w-4 text-slate-400 group-hover:text-brand" />
+                  <div className="p-1.5 bg-muted rounded-md group-hover:bg-brand/10 transition-colors">
+                    <Building2 className="h-4 w-4 text-muted-foreground group-hover:text-brand" />
                   </div>
-                  <span className="font-medium text-slate-700">{job.client?.name || "Unknown Client"}</span>
+                  <span className="font-medium text-foreground">{job.client?.name || "Unknown Client"}</span>
                 </div>
 
-                <div className="flex items-center gap-2 group border-l border-slate-200 pl-6">
-                  <div className="p-1.5 bg-slate-100 rounded-md">
-                    <MapPin className="h-4 w-4 text-slate-400" />
+                <div className="flex items-center gap-2 group border-l border-border pl-6">
+                  <div className="p-1.5 bg-muted rounded-md">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <span>{location}</span>
                 </div>
 
-                <div className="flex items-center gap-2 border-l border-slate-200 pl-6">
-                  <div className="p-1.5 bg-slate-100 rounded-md">
+                <div className="flex items-center gap-2 border-l border-border pl-6">
+                  <div className="p-1.5 bg-muted rounded-md">
                     <Loader className={`h-4 w-4 text-brand cursor-pointer hover:rotate-180 transition-transform duration-500 ${isLoading ? "animate-spin" : ""}`} onClick={handleRefresh} />
                   </div>
-                  <span className="text-slate-400">Last updated: Just now</span>
+                  <span className="text-muted-foreground">Last updated: Just now</span>
                 </div>
               </div>
             </div>

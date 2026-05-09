@@ -8,7 +8,7 @@ export function PlacementsEmptyState() {
         <PlacementLogo />
       </div>
       <h2 className="text-xl font-semibold mb-3">No placement has been made yet</h2>
-      <p className="text-gray-500 mb-6">
+      <p className="text-muted-foreground mb-6">
         All placements will be displayed on this screen once the first placement has been made.
       </p>
       <Link href="#" className="text-blue-600 hover:underline">

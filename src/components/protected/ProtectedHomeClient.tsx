@@ -34,7 +34,7 @@ export function ProtectedHomeClient() {
       case 'low':
         return 'bg-green-100 text-green-700';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-muted text-foreground';
     }
   };
 
@@ -57,7 +57,7 @@ export function ProtectedHomeClient() {
     <>
       <div className="flex flex-col items-center max-w-6xl mx-auto py-12 px-4">
         <h1 className="text-4xl font-semibold mb-6">Hello Aems,</h1>
-        <p className="text-xl text-gray-600 mb-12">Here are three steps to get you started.</p>
+        <p className="text-xl text-foreground mb-12">Here are three steps to get you started.</p>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
           {/* Create Client Tile */}
@@ -66,7 +66,7 @@ export function ProtectedHomeClient() {
               <Building2 className="w-12 h-12 text-green-600" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Create a Client</h2>
-            <p className="text-gray-500 mb-4">Clients host the different jobs under your agency&apos;s account.</p>
+            <p className="text-muted-foreground mb-4">Clients host the different jobs under your agency&apos;s account.</p>
             <Button className="w-full max-w-xs" size="lg" onClick={() => setOpen(true)}>
               Create a Client
             </Button>
@@ -78,7 +78,7 @@ export function ProtectedHomeClient() {
               <Briefcase className="w-12 h-12 text-blue-600" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Create Job Requirement</h2>
-            <p className="text-gray-500 mb-4">A new position opened up? Let&apos;s add it to the job list.</p>
+            <p className="text-muted-foreground mb-4">A new position opened up? Let&apos;s add it to the job list.</p>
             <Button
               className="w-full max-w-xs"
               size="lg"
@@ -94,7 +94,7 @@ export function ProtectedHomeClient() {
               <UserPlus className="w-12 h-12 text-yellow-600" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Create a Candidate</h2>
-            <p className="text-gray-500 mb-4">Let&apos;s start by creating your first candidate and manage them</p>
+            <p className="text-muted-foreground mb-4">Let&apos;s start by creating your first candidate and manage them</p>
             <CreateCandidateButton className="w-full max-w-xs" size="lg">
               Create a Candidate
             </CreateCandidateButton>
@@ -119,7 +119,7 @@ export function ProtectedHomeClient() {
               {todoItems.map((item) => (
                 <div
                   key={item.id}
-                  className="group flex items-center gap-4 p-4 rounded-lg transition-all bg-white hover:shadow-md border relative overflow-hidden cursor-pointer"
+                  className="group flex items-center gap-4 p-4 rounded-lg transition-all bg-card hover:shadow-md border relative overflow-hidden cursor-pointer"
                   onClick={() => completeTask(item.id)}
                 >
                   <div className="absolute inset-0 bg-green-500/0 group-hover:bg-green-500/5 transition-colors duration-200" />
@@ -137,18 +137,18 @@ export function ProtectedHomeClient() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1 text-gray-500">
+                      <div className="flex items-center gap-1 text-muted-foreground">
                         {getTypeIcon(item.type)}
                         <span className="text-sm capitalize">{item.type}</span>
                       </div>
-                      <span className="text-sm text-gray-400">•</span>
-                      <span className="text-sm text-gray-500">{item.time}</span>
+                      <span className="text-sm text-muted-foreground">•</span>
+                      <span className="text-sm text-muted-foreground">{item.time}</span>
                     </div>
                   </div>
                 </div>
               ))}
               {todoItems.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground">
                   <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-500" />
                   <p className="text-lg font-medium">All tasks completed!</p>
                   <p className="text-sm">Great job! You&apos;re all caught up for today.</p>

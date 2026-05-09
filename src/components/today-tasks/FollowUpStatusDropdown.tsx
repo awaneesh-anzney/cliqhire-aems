@@ -40,13 +40,13 @@ export function FollowUpStatusDropdown({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+        return 'bg-muted text-foreground hover:bg-muted';
       case 'in-progress':
         return 'bg-blue-100 text-blue-700 hover:bg-blue-200';
       case 'completed':
         return 'bg-green-100 text-green-700 hover:bg-green-200';
       default:
-        return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+        return 'bg-muted text-foreground hover:bg-muted';
     }
   };
 
@@ -115,7 +115,7 @@ export function FollowUpStatusDropdown({
             onClick={() => handleStatusSelect('pending')}
             className="flex items-center gap-2"
           >
-            <AlertCircle className="w-4 h-4 text-gray-500" />
+            <AlertCircle className="w-4 h-4 text-muted-foreground" />
             <span>Pending</span>
           </DropdownMenuItem>
           <DropdownMenuItem 

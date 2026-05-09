@@ -56,13 +56,13 @@ export function TeamMember({ name, avatar, role, isActive, email, phone, country
             <DialogTitle>Team Member Details</DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="flex items-center gap-4 p-4 bg-muted rounded-2xl border border-border">
               <Avatar className="h-16 w-16 bg-orange-500 text-white border-2 border-white shadow-sm">
                 <AvatarFallback className="text-xl font-bold">{avatar || name.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{name}</h3>
-                <p className="text-sm font-medium text-slate-500">{role}</p>
+                <h3 className="text-lg font-bold text-foreground">{name}</h3>
+                <p className="text-sm font-medium text-muted-foreground">{role}</p>
                 {isActive && (
                   <Badge variant="outline" className="bg-green-100 text-green-800 border-none mt-2 font-bold text-[10px]">
                     ACTIVE
@@ -72,44 +72,44 @@ export function TeamMember({ name, avatar, role, isActive, email, phone, country
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Contact Information</h4>
-              <div className="grid grid-cols-1 gap-4 text-sm bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+              <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest">Contact Information</h4>
+              <div className="grid grid-cols-1 gap-4 text-sm bg-card p-4 rounded-xl border border-border shadow-sm">
                 <div className="flex flex-col gap-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Email Address</p>
-                  <p className="font-bold text-slate-700">{email || "No email provided"}</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Email Address</p>
+                  <p className="font-bold text-foreground">{email || "No email provided"}</p>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Phone Number</p>
-                  <p className="font-bold text-slate-700">{formatPhoneNumber(phone, countryCode) || "No phone provided"}</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Phone Number</p>
+                  <p className="font-bold text-foreground">{formatPhoneNumber(phone, countryCode) || "No phone provided"}</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Permissions</h4>
-              <div className="space-y-2 text-sm bg-slate-50/50 p-4 rounded-xl border border-dashed border-slate-200">
+              <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest">Permissions</h4>
+              <div className="space-y-2 text-sm bg-muted/50 p-4 rounded-xl border border-dashed border-border">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  <p className="font-medium text-slate-600">Can view and edit client information</p>
+                  <p className="font-medium text-foreground">Can view and edit client information</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  <p className="font-medium text-slate-600">Can manage team members</p>
+                  <p className="font-medium text-foreground">Can manage team members</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  <p className="font-medium text-slate-600">Can view analytics and reports</p>
+                  <p className="font-medium text-foreground">Can view analytics and reports</p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between text-[11px] font-bold text-slate-400 border-t border-slate-100 uppercase tracking-wider">
+            <div className="pt-2 flex items-center justify-between text-[11px] font-bold text-muted-foreground border-t border-border uppercase tracking-wider">
               <span>Last active</span>
-              <span className="text-slate-900">Today at 2:30 PM</span>
+              <span className="text-foreground">Today at 2:30 PM</span>
             </div>
           </div>
         </DialogContent>
       </Dialog>
     </>
   )
-}
+}

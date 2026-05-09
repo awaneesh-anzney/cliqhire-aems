@@ -249,24 +249,24 @@ export default function EmailsPage() {
           }, 0);
         }}
       />
-      <div className="h-[calc(100vh-5rem)] flex flex-col bg-white overflow-hidden">
+      <div className="h-[calc(100vh-5rem)] flex flex-col bg-card overflow-hidden">
       <div className="p-4 flex-shrink-0">
         {/* Dashboard Header */}
         <div className="flex items-center mb-4">
           <span className="bg-blue-100 text-blue-600 rounded-lg p-2 mr-3">
             <Mail className="w-6 h-6" />
           </span>
-          <h1 className="text-2xl font-semibold text-gray-800">Email</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Email</h1>
         </div>
       </div>
       
       {/* Full Width Email Container */}
       <div className="flex-1 flex flex-col overflow-hidden px-4 pb-4">
         {/* To and Subject */}
-        <div className="mb-3 border border-gray-200 rounded-lg bg-white flex-shrink-0">
-          <div className="px-4 py-3 border-b border-gray-200">
+        <div className="mb-3 border border-border rounded-lg bg-card flex-shrink-0">
+          <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="text-gray-400 text-sm">To:</span>
+              <span className="text-muted-foreground text-sm">To:</span>
               
               {/* Show email chips if emails are selected */}
               {selectedEmails.length > 0 && selectedEmails.map((email) => (
@@ -299,20 +299,20 @@ export default function EmailsPage() {
                 
                 {/* Suggestions Dropdown */}
                 {showSuggestions && filteredEmails.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                     {filteredEmails.map((email) => (
                       <button
                         key={email.id}
                         onClick={() => addEmail(email)}
                         onMouseDown={(e) => e.preventDefault()}
-                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left"
+                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted text-left"
                       >
                         <div className={`w-8 h-8 ${getAvatarColor(email.email)} rounded-full flex items-center justify-center text-white text-xs font-semibold`}>
                           {getInitials(email.name)}
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{email.name}</div>
-                          <div className="text-xs text-gray-500">{email.email}</div>
+                          <div className="text-sm font-medium text-foreground">{email.name}</div>
+                          <div className="text-xs text-muted-foreground">{email.email}</div>
                         </div>
                       </button>
                     ))}
@@ -322,14 +322,14 @@ export default function EmailsPage() {
                       <button
                         onClick={addCustomEmail}
                         onMouseDown={(e) => e.preventDefault()}
-                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left border-t border-gray-100"
+                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted text-left border-t border-border"
                       >
-                        <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                           +
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">Add &quot;{emailInput}&quot;</div>
-                          <div className="text-xs text-gray-500">Press Enter to add</div>
+                          <div className="text-sm font-medium text-foreground">Add &quot;{emailInput}&quot;</div>
+                          <div className="text-xs text-muted-foreground">Press Enter to add</div>
                         </div>
                       </button>
                     )}
@@ -345,11 +345,11 @@ export default function EmailsPage() {
           </div>
           
           <div className="flex items-center gap-2 px-4 py-2">
-            <span className="text-gray-500 text-sm">Subject:</span>
+            <span className="text-muted-foreground text-sm">Subject:</span>
             <input
               type="text"
               placeholder="Type subject..."
-              className="bg-transparent font-semibold text-gray-800 text-base outline-none border-none px-2 py-1 flex-1"
+              className="bg-transparent font-semibold text-foreground text-base outline-none border-none px-2 py-1 flex-1"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
             />
@@ -359,97 +359,97 @@ export default function EmailsPage() {
         
 
         {/* Formatting Toolbar */}
-        <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 mb-3 flex-shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-1 bg-muted border border-border rounded-lg px-3 py-2 mb-3 flex-shrink-0 overflow-x-auto">
           <button 
             onClick={() => executeCommand('undo')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Undo"
           >
-            <RotateCcw className="w-4 h-4 text-gray-600" />
+            <RotateCcw className="w-4 h-4 text-foreground" />
           </button>
           
-          <div className="w-px h-5 bg-gray-300 mx-1 flex-shrink-0" />
+          <div className="w-px h-5 bg-muted mx-1 flex-shrink-0" />
           
           <button 
             onClick={() => formatText('bold')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Bold"
           >
-            <Bold className="w-4 h-4 text-gray-600" />
+            <Bold className="w-4 h-4 text-foreground" />
           </button>
           <button 
             onClick={() => formatText('italic')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Italic"
           >
-            <Italic className="w-4 h-4 text-gray-600" />
+            <Italic className="w-4 h-4 text-foreground" />
           </button>
           <button 
             onClick={() => formatText('underline')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Underline"
           >
-            <Underline className="w-4 h-4 text-gray-600" />
+            <Underline className="w-4 h-4 text-foreground" />
           </button>
           
-          <div className="w-px h-5 bg-gray-300 mx-1 flex-shrink-0" />
+          <div className="w-px h-5 bg-muted mx-1 flex-shrink-0" />
           
           <button 
             onClick={() => setAlignment('Left')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Align Left"
           >
-            <AlignLeft className="w-4 h-4 text-gray-600" />
+            <AlignLeft className="w-4 h-4 text-foreground" />
           </button>
           <button 
             onClick={() => setAlignment('Center')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Align Center"
           >
-            <AlignCenter className="w-4 h-4 text-gray-600" />
+            <AlignCenter className="w-4 h-4 text-foreground" />
           </button>
           <button 
             onClick={() => setAlignment('Right')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Align Right"
           >
-            <AlignRight className="w-4 h-4 text-gray-600" />
+            <AlignRight className="w-4 h-4 text-foreground" />
           </button>
           <button 
             onClick={() => setAlignment('Full')}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Justify"
           >
-            <AlignJustify className="w-4 h-4 text-gray-600" />
+            <AlignJustify className="w-4 h-4 text-foreground" />
           </button>
           
           
-          <div className="w-px h-5 bg-gray-300 mx-1 flex-shrink-0" />
+          <div className="w-px h-5 bg-muted mx-1 flex-shrink-0" />
           
           <button 
             onClick={insertLink}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Insert Link"
           >
-            <Link2 className="w-4 h-4 text-gray-600" />
+            <Link2 className="w-4 h-4 text-foreground" />
           </button>
           <button 
             onClick={insertImage}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Insert Image"
           >
-            <ImageIcon className="w-4 h-4 text-gray-600" />
+            <ImageIcon className="w-4 h-4 text-foreground" />
           </button>
           
-          <span className="ml-auto text-xs text-gray-500 font-medium flex-shrink-0">HTML</span>
+          <span className="ml-auto text-xs text-muted-foreground font-medium flex-shrink-0">HTML</span>
         </div>
         
         {/* Rich Text Editor Area - Flexible Height */}
-        <div className="border border-gray-200 rounded-lg bg-white flex-1 flex flex-col overflow-hidden max-h-[calc(100vh-21rem)] relative">
+        <div className="border border-border rounded-lg bg-card flex-1 flex flex-col overflow-hidden max-h-[calc(100vh-21rem)] relative">
           <div 
             ref={editorRef}
             contentEditable
-            className="flex-1 outline-none text-gray-900 leading-relaxed p-4 overflow-y-auto min-h-0"
+            className="flex-1 outline-none text-foreground leading-relaxed p-4 overflow-y-auto min-h-0"
             suppressContentEditableWarning={true}
             onInput={(e) => {
               setEmailContent(e.currentTarget.innerHTML);
@@ -457,7 +457,7 @@ export default function EmailsPage() {
           />
           {/* Placeholder overlay */}
           {(!emailContent || emailContent.trim() === '') && (
-            <div className="absolute top-4 left-4 text-gray-500 pointer-events-none">
+            <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">
               Compose your email here or use a template to get started...
             </div>
           )}
@@ -465,10 +465,10 @@ export default function EmailsPage() {
           {/* Attached Files Display - Bottom Left */}
           {attachedFiles.length > 0 && (
             <div className="absolute bottom-4 left-4 max-w-md">
-              <div className="text-xs text-gray-500 mb-2">{attachedFiles.length} attachment{attachedFiles.length > 1 ? 's' : ''}</div>
+              <div className="text-xs text-muted-foreground mb-2">{attachedFiles.length} attachment{attachedFiles.length > 1 ? 's' : ''}</div>
               <div className="flex flex-wrap gap-2">
                 {attachedFiles.map((file) => (
-                  <div key={file.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 min-w-0">
+                  <div key={file.id} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 border border-border min-w-0">
                     <div className="flex-shrink-0">
                       {file.type.startsWith('image/') ? (
                         <div className="w-8 h-8 bg-orange-100 rounded flex items-center justify-center">
@@ -485,12 +485,12 @@ export default function EmailsPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900 truncate">{file.name}</div>
-                      <div className="text-xs text-gray-500">{formatFileSize(file.size)}</div>
+                      <div className="text-sm font-medium text-foreground truncate">{file.name}</div>
+                      <div className="text-xs text-muted-foreground">{formatFileSize(file.size)}</div>
                     </div>
                     <button 
                       onClick={() => removeFile(file.id)}
-                      className="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1"
+                      className="flex-shrink-0 text-muted-foreground hover:text-foreground p-1"
                       title="Remove file"
                     >
                       <X className="w-3 h-3" />
@@ -507,34 +507,34 @@ export default function EmailsPage() {
           <div className="flex gap-2">
             <div className="relative group">
               <button 
-                className="bg-gray-100 hover:bg-gray-200 rounded-lg p-2 transition-colors"
+                className="bg-muted hover:bg-muted rounded-lg p-2 transition-colors"
                 title="Attach file"
                 onClick={triggerFileUpload}
               >
-                <Paperclip className="w-5 h-5 text-gray-600" />
+                <Paperclip className="w-5 h-5 text-foreground" />
               </button>
               {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Attach file
               </div>
             </div>
             <div className="relative group">
               <button 
-                className="bg-gray-100 hover:bg-gray-200 rounded-lg p-2 transition-colors"
+                className="bg-muted hover:bg-muted rounded-lg p-2 transition-colors"
                 title="Use template"
                 onClick={() => setTemplateDialogOpen(true)}
               >
-                <FileText className="w-5 h-5 text-gray-600" />
+                <FileText className="w-5 h-5 text-foreground" />
               </button>
               {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Use template
               </div>
             </div>
           </div>
           <div className="flex gap-2">
             <button
-              className="bg-gray-900 text-white rounded-lg px-6 py-2 text-sm font-medium flex items-center gap-2 hover:bg-gray-800 transition"
+              className="bg-foreground text-white rounded-lg px-6 py-2 text-sm font-medium flex items-center gap-2 hover:bg-foreground transition"
               onClick={sendEmail}
             >
               <Send className="w-4 h-4" /> Send

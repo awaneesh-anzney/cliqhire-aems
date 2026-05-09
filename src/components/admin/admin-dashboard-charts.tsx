@@ -128,21 +128,21 @@ export function AdminDashboardCharts() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="border border-[hsl(var(--border))] rounded-xl bg-white p-6">
+      <div className="border border-[hsl(var(--border))] rounded-xl bg-card p-6">
         <h3 className="text-sm font-semibold text-[hsl(var(--foreground))] mb-6">Activity Overview</h3>
         <div className="h-[300px]">
           <Line options={chartOptions as any} data={lineData} />
         </div>
       </div>
 
-      <div className="border border-[hsl(var(--border))] rounded-xl bg-white p-6">
+      <div className="border border-[hsl(var(--border))] rounded-xl bg-card p-6">
         <h3 className="text-sm font-semibold text-[hsl(var(--foreground))] mb-6">Sourcing Channels</h3>
         <div className="h-[300px]">
           <Bar options={chartOptions as any} data={barData} />
         </div>
       </div>
 
-      <div className="lg:col-span-2 border border-[hsl(var(--border))] rounded-xl bg-white p-6">
+      <div className="lg:col-span-2 border border-[hsl(var(--border))] rounded-xl bg-card p-6">
         <h3 className="text-sm font-semibold text-[hsl(var(--foreground))] mb-6">Department Distribution</h3>
         <div className="h-[300px] w-full max-w-[500px] mx-auto">
            <Doughnut 

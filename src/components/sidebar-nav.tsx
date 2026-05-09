@@ -18,21 +18,21 @@ export function SidebarNav({ className }: SidebarNavProps) {
       <nav className="space-y-1 px-2">
         <Link
           href="/inbox"
-          className="flex items-center gap-3 rounded-lg bg-gray-100 px-3 py-2 text-gray-900"
+          className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-foreground"
         >
           <Inbox className="h-4 w-4" />
           Inbox
         </Link>
         <Link
           href="/inbox/sent"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-foreground hover:bg-muted hover:text-foreground"
         >
           <Send className="h-4 w-4" />
           Sent
         </Link>
         <Link
           href="/inbox/drafts"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-foreground hover:bg-muted hover:text-foreground"
         >
           <FileText className="h-4 w-4" />
           Drafts
@@ -41,9 +41,9 @@ export function SidebarNav({ className }: SidebarNavProps) {
       <div className="mt-auto p-4 border-t">
         <div className="mb-4">
           {/* <h3 className="font-medium">Mann admin</h3>
-          <p className="text-sm text-gray-500">mann.3@mail.manatal.com</p> */}
+          <p className="text-sm text-muted-foreground">mann.3@mail.manatal.com</p> */}
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-muted-foreground">
           {/* <p>You are currently using Manatal Email</p> */}
           {/* <Link href="/settings" className="text-blue-600 hover:underline flex items-center gap-2 mt-1"> */}
             {/* <Settings className="h-4 w-4" /> */}

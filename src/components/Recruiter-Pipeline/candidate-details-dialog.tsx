@@ -86,12 +86,12 @@ export function CandidateDetailsDialog({
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <div className="w-2 h-2 bg-card rounded-full"></div>
                 </div>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <DialogTitle className="text-2xl font-bold text-gray-900">
+                  <DialogTitle className="text-2xl font-bold text-foreground">
                     {localCandidate.name || 'Unknown Candidate'}
                   </DialogTitle>
                   {localCandidate.isTempCandidate && (
@@ -100,7 +100,7 @@ export function CandidateDetailsDialog({
                     </Badge>
                   )}
                 </div>
-                <DialogDescription className="text-lg text-gray-600 font-medium">
+                <DialogDescription className="text-lg text-foreground font-medium">
                   {localCandidate.currentJobTitle || "Professional"}
                 </DialogDescription>
                 <div className="flex items-center space-x-4 mt-2">
@@ -117,21 +117,21 @@ export function CandidateDetailsDialog({
                       : localCandidate.currentStage
                     }
                   </Badge>
-                  <span className="text-sm text-gray-500">•</span>
-                  <span className="text-sm text-gray-500">{localCandidate.source}</span>
+                  <span className="text-sm text-muted-foreground">•</span>
+                  <span className="text-sm text-muted-foreground">{localCandidate.source}</span>
                 </div>
               </div>
             </div>
           
                      {/* Pipeline Progress Bar */}
-           <div className="w-full bg-gradient-to-r from-sky-200 to-indigo-200 rounded-xl p-2 shadow-sm border border-gray-100">
+           <div className="w-full bg-gradient-to-r from-sky-200 to-indigo-200 rounded-xl p-2 shadow-sm border border-border">
              <div className="flex items-center justify-between mb-4">
-               <h4 className="text-lg font-semibold text-gray-900">Pipeline Progress</h4>
+               <h4 className="text-lg font-semibold text-foreground">Pipeline Progress</h4>
                <div className="flex items-center space-x-4">
-                 <span className="text-xs text-gray-500 italic">Click any stage to view details</span>
+                 <span className="text-xs text-muted-foreground italic">Click any stage to view details</span>
                  <div className="flex items-center space-x-2">
                    <div className={`w-2 h-2 rounded-full ${localCandidate.status === 'Disqualified' ? 'bg-red-500' : 'bg-indigo-500 animate-pulse'}`}></div>
-                   <span className="text-sm text-gray-600">
+                   <span className="text-sm text-foreground">
                      {localCandidate.status === 'Disqualified' 
                        ? (localCandidate.disqualified?.disqualificationStage || 'Disqualified')
                        : (localCandidate.status || 'No Status')
@@ -142,7 +142,7 @@ export function CandidateDetailsDialog({
              </div>
              <div className="relative">
                {/* Progress Bar Background */}
-               <div className="w-full h-10 bg-gray-100 rounded-full relative overflow-hidden shadow-inner hover:shadow-md transition-shadow duration-200">
+               <div className="w-full h-10 bg-muted rounded-full relative overflow-hidden shadow-inner hover:shadow-md transition-shadow duration-200">
                  {/* Progress Bar Fill */}
                  <div 
                    className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out shadow-sm ${
@@ -194,14 +194,14 @@ export function CandidateDetailsDialog({
                          <div className={`w-5 h-5 rounded-full flex items-center justify-center mr-2 shadow-sm transition-all duration-200 ${
                            isCompleted 
                              ? isDisqualified 
-                               ? 'bg-white text-red-500 ring-2 ring-red-200' 
-                               : 'bg-white text-blue-500 ring-2 ring-blue-200'
-                             : 'bg-gray-200 text-gray-400'
+                               ? 'bg-card text-red-500 ring-2 ring-red-200' 
+                               : 'bg-card text-blue-500 ring-2 ring-blue-200'
+                             : 'bg-muted text-muted-foreground'
                          } ${isSelected ? (isDisqualified ? 'ring-4 ring-red-300 scale-110' : 'ring-4 ring-blue-300 scale-110') : ''} `}>
                            {isCompleted && <Check className="h-3 w-3" />}
                          </div>
                          <span className={`text-xs font-semibold transition-all duration-200 ${
-                           isCurrent ? 'text-white drop-shadow-sm' : isCompleted ? 'text-white drop-shadow-sm' : 'text-gray-500'
+                           isCurrent ? 'text-white drop-shadow-sm' : isCompleted ? 'text-white drop-shadow-sm' : 'text-muted-foreground'
                          } ${isSelected ? (isDisqualified ? 'text-red-100 font-bold' : 'text-blue-100 font-bold') : ''} `}>
                            {stage}
                          </span>
@@ -319,7 +319,7 @@ export function CandidateDetailsDialog({
            <div className="space-y-8">
             {/* Current Status */}
             {/* <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">Current Status</h3>
+              <h3 className="text-lg font-medium text-foreground">Current Status</h3>
               <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
                 {candidate.currentStage}
               </Badge>
@@ -327,8 +327,8 @@ export function CandidateDetailsDialog({
 
                          {/* Basic Information */}
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+               <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                 <h4 className="font-semibold text-foreground mb-4 flex items-center">
                    <Briefcase className="h-5 w-5 text-blue-500 mr-2" />
                    Basic Information
                  </h4>
@@ -339,8 +339,8 @@ export function CandidateDetailsDialog({
                        <Briefcase className="h-4 w-4 text-blue-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Current Position</p>
-                       <p className="text-sm text-gray-600">{candidate.currentJobTitle || "Not specified"}</p>
+                       <p className="text-sm font-medium text-foreground">Current Position</p>
+                       <p className="text-sm text-foreground">{candidate.currentJobTitle || "Not specified"}</p>
                      </div>
                    </div>
                    
@@ -349,8 +349,8 @@ export function CandidateDetailsDialog({
                        <Building2 className="h-4 w-4 text-indigo-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Previous Company</p>
-                       <p className="text-sm text-gray-600">{candidate.previousCompanyName || "Not specified"}</p>
+                       <p className="text-sm font-medium text-foreground">Previous Company</p>
+                       <p className="text-sm text-foreground">{candidate.previousCompanyName || "Not specified"}</p>
                      </div>
                    </div>
                    
@@ -359,15 +359,15 @@ export function CandidateDetailsDialog({
                        <Calendar className="h-4 w-4 text-green-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Experience</p>
-                       <p className="text-sm text-gray-600">{candidate.experience || "Not specified"}</p>
+                       <p className="text-sm font-medium text-foreground">Experience</p>
+                       <p className="text-sm text-foreground">{candidate.experience || "Not specified"}</p>
                      </div>
                    </div>
                  </div>
                </div>
 
-               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+               <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                 <h4 className="font-semibold text-foreground mb-4 flex items-center">
                    <Mail className="h-5 w-5 text-red-500 mr-2" />
                    Contact Information
                  </h4>
@@ -378,8 +378,8 @@ export function CandidateDetailsDialog({
                        <Mail className="h-4 w-4 text-red-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Email</p>
-                       <p className="text-sm text-gray-600">{candidate.email || "Not provided"}</p>
+                       <p className="text-sm font-medium text-foreground">Email</p>
+                       <p className="text-sm text-foreground">{candidate.email || "Not provided"}</p>
                      </div>
                    </div>
                    
@@ -388,8 +388,8 @@ export function CandidateDetailsDialog({
                        <Phone className="h-4 w-4 text-green-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Phone</p>
-                       <p className="text-sm text-gray-600">{candidate.phone || "Not provided"}</p>
+                       <p className="text-sm font-medium text-foreground">Phone</p>
+                       <p className="text-sm text-foreground">{candidate.phone || "Not provided"}</p>
                      </div>
                    </div>
                    
@@ -398,15 +398,15 @@ export function CandidateDetailsDialog({
                        <MapPin className="h-4 w-4 text-orange-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Location</p>
-                       <p className="text-sm text-gray-600">{candidate.location || "Not specified"}</p>
+                       <p className="text-sm font-medium text-foreground">Location</p>
+                       <p className="text-sm text-foreground">{candidate.location || "Not specified"}</p>
                      </div>
                    </div>
                  </div>
                </div>
 
-               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+               <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                 <h4 className="font-semibold text-foreground mb-4 flex items-center">
                    <Award className="h-5 w-5 text-purple-500 mr-2" />
                    Additional Information
                  </h4>
@@ -417,8 +417,8 @@ export function CandidateDetailsDialog({
                        <GraduationCap className="h-4 w-4 text-purple-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Education</p>
-                       <p className="text-sm text-gray-600">{candidate.educationDegree || "Not specified"}</p>
+                       <p className="text-sm font-medium text-foreground">Education</p>
+                       <p className="text-sm text-foreground">{candidate.educationDegree || "Not specified"}</p>
                      </div>
                    </div>
                    
@@ -427,8 +427,8 @@ export function CandidateDetailsDialog({
                        <Languages className="h-4 w-4 text-blue-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Languages</p>
-                       <p className="text-sm text-gray-600">{candidate.primaryLanguage || "Not specified"}</p>
+                       <p className="text-sm font-medium text-foreground">Languages</p>
+                       <p className="text-sm text-foreground">{candidate.primaryLanguage || "Not specified"}</p>
                      </div>
                    </div>
                    
@@ -437,8 +437,8 @@ export function CandidateDetailsDialog({
                        <Award className="h-4 w-4 text-yellow-600" />
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">Skills</p>
-                       <p className="text-sm text-gray-600">{candidate.skills?.join(', ') || "Not specified"}</p>
+                       <p className="text-sm font-medium text-foreground">Skills</p>
+                       <p className="text-sm text-foreground">{candidate.skills?.join(', ') || "Not specified"}</p>
                      </div>
                    </div>
                    
@@ -453,21 +453,21 @@ export function CandidateDetailsDialog({
 
                          {/* Description */}
              {candidate.description && (
-               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                   <FileText className="h-5 w-5 text-gray-500 mr-2" />
+               <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                 <h4 className="font-semibold text-foreground mb-4 flex items-center">
+                   <FileText className="h-5 w-5 text-muted-foreground mr-2" />
                    Description
                  </h4>
-                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                   <p className="text-sm text-gray-700 leading-relaxed">{candidate.description}</p>
+                 <div className="bg-muted p-4 rounded-lg border border-border">
+                   <p className="text-sm text-foreground leading-relaxed">{candidate.description}</p>
                  </div>
                </div>
              )}
 
              {/* Resume/CV Link */}
              {candidate.resume && (
-               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+               <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+                 <h4 className="font-semibold text-foreground mb-4 flex items-center">
                    <FileText className="h-5 w-5 text-blue-500 mr-2" />
                    Documents
                  </h4>

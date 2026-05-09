@@ -276,21 +276,21 @@ const CandidateSummary = ({
     return (
       <div 
         key={field.key} 
-        className="group flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50/80 transition-all border border-transparent hover:border-slate-100/60"
+        className="group flex items-center justify-between py-3 px-4 rounded-xl hover:bg-muted/80 transition-all border border-transparent hover:border-border/60"
       >
         <div className="flex flex-col min-w-0">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 leading-none">
             {field.label}
           </span>
           <div className="flex flex-col">
             <span className={cn(
               "text-sm font-bold tracking-tight truncate",
-              hasValue ? "text-slate-900" : "text-slate-300 italic"
+              hasValue ? "text-foreground" : "text-muted-foreground italic"
             )}>
               {hasValue ? (field.key === 'referredBy' && typeof value === 'object' ? value.name || value.email : value) : "Not Provided"}
             </span>
             {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
-              <span className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+              <span className="text-[10px] text-muted-foreground font-medium truncate mt-0.5">
                 {localCandidate.referredBy.email}
               </span>
             )}
@@ -302,10 +302,10 @@ const CandidateSummary = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:shadow-sm border-transparent hover:border-slate-100"
+              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-card hover:shadow-sm border-transparent hover:border-border"
               onClick={handleEditClick}
             >
-              <Pencil className="h-3.5 w-3.5 text-slate-400" />
+              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
             </Button>
             
             {/* Modal injections for fields that don't use dedicated dialogs */}
@@ -355,28 +355,28 @@ const CandidateSummary = ({
     // Display value: if array, join with commas; if string, use as is
     const displayValue = Array.isArray(rawValue) ? rawValue.join(", ") : rawValue;
     return (
-      <div key={field.key} className="group flex flex-col p-4 rounded-xl bg-slate-50/50 border border-slate-100/60 hover:bg-white hover:shadow-md transition-all duration-300">
+      <div key={field.key} className="group flex flex-col p-4 rounded-xl bg-muted/50 border border-border/60 hover:bg-card hover:shadow-md transition-all duration-300">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-             <div className="h-7 w-7 rounded-lg bg-white flex items-center justify-center text-brand border border-slate-100 shadow-sm">
+             <div className="h-7 w-7 rounded-lg bg-card flex items-center justify-center text-brand border border-border shadow-sm">
                 <Star className="h-3.5 w-3.5" />
              </div>
-             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{field.label}</span>
+             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{field.label}</span>
           </div>
           {canModify && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-50"
+              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
               onClick={() => setEditField(field.key)}
             >
-              <Pencil className="h-3.5 w-3.5 text-slate-400" />
+              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
             </Button>
           )}
         </div>
         <div className={cn(
           "text-sm font-bold leading-relaxed",
-          hasValue ? "text-slate-700" : "text-slate-300 italic"
+          hasValue ? "text-foreground" : "text-muted-foreground italic"
         )}>
           {hasValue ? displayValue : "Not Provided"}
         </div>
@@ -405,22 +405,22 @@ const CandidateSummary = ({
 
   // Main component return
   return (
-    <div className="p-2 space-y-6 bg-slate-50/50 rounded-2xl">
+    <div className="p-2 space-y-6 bg-muted/50 rounded-2xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Left Column: Profile & Professional */}
         <div className="space-y-6">
           {/* Profile Details Card */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <User className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Profile Details</h4>
+              <h4 className="text-base font-semibold text-foreground">Profile Details</h4>
             </div>
             <div className="p-5 space-y-6">
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Identity & Sourcing</h5>
-                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Identity & Sourcing</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                   {defaultDetailsFields.map((field) => renderField(field, defaultDetailsFields))}
                 </div>
               </div>
@@ -428,19 +428,19 @@ const CandidateSummary = ({
           </div>
 
           {/* Professional Background Card */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Briefcase className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Professional Background</h4>
+              <h4 className="text-base font-semibold text-foreground">Professional Background</h4>
             </div>
             <div className="p-5 space-y-6">
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Role & Compensation</h5>
-                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Role & Compensation</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                   {previousCompanyFields.map((field) => renderField(field, previousCompanyFields))}
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="pt-2 border-t border-border">
                     <SalaryRange
                       candidate={localCandidate}
                       onCandidateUpdate={onCandidateUpdate}
@@ -453,15 +453,15 @@ const CandidateSummary = ({
           </div>
 
           {/* Skills Matrix Card */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Star className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Skill Matrix</h4>
+              <h4 className="text-base font-semibold text-foreground">Skill Matrix</h4>
             </div>
             <div className="p-5 space-y-4">
-              <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Technical Assessment</h5>
+              <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Technical Assessment</h5>
               <div className="grid grid-cols-1 gap-4">
                 {skillFields.map((field) => renderSkillField(field))}
               </div>
@@ -472,32 +472,32 @@ const CandidateSummary = ({
         {/* Right Column: Contact & Personal */}
         <div className="space-y-6">
           {/* Contact Information Card */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Globe className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Contact Information</h4>
+              <h4 className="text-base font-semibold text-foreground">Contact Information</h4>
             </div>
             <div className="p-5">
-              <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+              <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                 {contactFields.map((field) => renderField(field, contactFields))}
               </div>
             </div>
           </div>
 
           {/* Education & Personal Card */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <GraduationCap className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Education & Personal</h4>
+              <h4 className="text-base font-semibold text-foreground">Education & Personal</h4>
             </div>
             <div className="p-5">
               <div className="space-y-4">
-                 <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Background Details</h5>
-                 <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                 <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Background Details</h5>
+                 <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                     {collapsibleDetailsFields.map((field) => renderField(field, collapsibleDetailsFields))}
                  </div>
               </div>
@@ -510,21 +510,21 @@ const CandidateSummary = ({
       <Dialog open={showConfirmReferrer} onOpenChange={setShowConfirmReferrer}>
         <DialogContent className="rounded-2xl overflow-hidden border-none shadow-2xl">
           <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Confirm Referrer Change</DialogTitle>
+            <DialogTitle className="text-xl font-black text-foreground tracking-tight">Confirm Referrer Change</DialogTitle>
           </DialogHeader>
           <div className="p-6 py-8">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm font-semibold text-slate-600 flex items-center gap-3">
-               <div className="h-10 w-10 rounded-lg bg-white flex items-center justify-center shadow-sm border border-slate-100 text-brand">
+            <div className="p-4 bg-muted rounded-xl border border-border text-sm font-semibold text-foreground flex items-center gap-3">
+               <div className="h-10 w-10 rounded-lg bg-card flex items-center justify-center shadow-sm border border-border text-brand">
                   <User className="h-5 w-5" />
                </div>
-               <span>Assign <span className="text-slate-900 font-black tracking-tight">{pendingReferrerName}</span> as the official referrer for this candidate?</span>
+               <span>Assign <span className="text-foreground font-black tracking-tight">{pendingReferrerName}</span> as the official referrer for this candidate?</span>
             </div>
           </div>
-          <DialogFooter className="p-6 bg-slate-50 border-t flex flex-row items-center gap-3">
-            <Button variant="ghost" onClick={cancelReferrer} className="text-slate-500 font-bold">
+          <DialogFooter className="p-6 bg-muted border-t flex flex-row items-center gap-3">
+            <Button variant="ghost" onClick={cancelReferrer} className="text-muted-foreground font-bold">
               Cancel
             </Button>
-            <Button onClick={confirmReferrer} className="bg-slate-900 hover:bg-black text-white px-8 font-black shadow-xl shadow-slate-200">
+            <Button onClick={confirmReferrer} className="bg-foreground hover:bg-black text-white px-8 font-black shadow-xl shadow-black/10">
               Confirm & Save
             </Button>
           </DialogFooter>

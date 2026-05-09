@@ -93,24 +93,24 @@ export function AdvanceSearch() {
         <h2 className="mt-4 text-xl font-semibold">
         Start your search by combining keywords and/or selecting a criteria
       </h2>
-      <p className="mt-6 text-gray-600 max-w-xl mx-auto">
+      <p className="mt-6 text-foreground max-w-xl mx-auto">
         The advanced search allows you to search for candidates in your database using keywords in a boolean search and/or a wide range of search criteria.
       </p>
       <div className="mt-6 grid md:grid-cols-2 gap-4 max-w-6xl mx-auto text-left">
         <div>
           <h3 className="font-medium mb-2">What&apos;s a search criteria?</h3>
-          <p className="text-gray-600">
+          <p className="text-foreground">
             Search criteria allow you to search and rank candidates based on multiple parameters such as skills, spoken languages, degree, location, current and past experiences, and many more. Candidate scores are generated using artificial intelligence based on how well each candidate matches the selected criteria.
           </p>
         </div>
         <div>
           <h3 className="font-medium mb-2">What&apos;s a boolean search?</h3>
-          <p className="text-gray-600">
+          <p className="text-foreground">
             A boolean search is a type of search allowing users to combine keywords with operators to make the search results more relevant. Manatal&apos;s boolean search works the same way as LinkedIn or Google, and is case insensitive.
           </p>
           <div className="mt-4">
             <h4 className="font-medium mb-1">Examples</h4>
-            <ul className="space-y-1 text-gray-600">
+            <ul className="space-y-1 text-foreground">
               <li>Google AND developer</li>
               <li>Apple AND (iOS OR android)</li>
               <li>(Google OR Apple) AND (iOS AND android)</li>

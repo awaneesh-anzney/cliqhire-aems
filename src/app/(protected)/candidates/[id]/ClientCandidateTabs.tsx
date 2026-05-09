@@ -91,7 +91,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
     return (
       <div className="min-h-[400px] font-sans w-full flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-500 text-lg mb-4">You do not have permission to view this candidate.</div>
+          <div className="text-muted-foreground text-lg mb-4">You do not have permission to view this candidate.</div>
         </div>
       </div>
     );
@@ -125,7 +125,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
     return (
       <div className="min-h-[400px] font-sans w-full flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-500 text-lg mb-4">{(error as any)?.message || 'Candidate not found.'}</div>
+          <div className="text-muted-foreground text-lg mb-4">{(error as any)?.message || 'Candidate not found.'}</div>
           <Button onClick={handleRefresh} variant="outline">
             <RefreshCcw className="h-4 w-4 mr-2" />
             Retry
@@ -146,7 +146,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
       case 'rejected':
         return 'bg-red-100 text-red-800 hover:bg-red-100';
       default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+        return 'bg-muted text-foreground hover:bg-muted';
     }
   };
 
@@ -200,16 +200,16 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-card">
       {/* Header Section (Matching Jobs ID page) */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-card border-b shadow-sm">
         <div className="max-w-[1600px] mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{candidate.name || "Untitled Candidate"}</h1>
-                  <span className="text-xl text-slate-400 font-medium font-mono">#{candidate.profileId || "—"}</span>
+                  <h1 className="text-3xl font-bold text-foreground tracking-tight">{candidate.name || "Untitled Candidate"}</h1>
+                  <span className="text-xl text-muted-foreground font-medium font-mono">#{candidate.profileId || "—"}</span>
                 </div>
                 <Badge
                   variant="secondary"
@@ -217,49 +217,49 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
                     "border-none px-3 py-1 text-xs font-semibold uppercase tracking-wider",
                     candidate.status === "Placed" ? "bg-green-100 text-green-800" :
                     candidate.status === "Interviewing" ? "bg-orange-100 text-orange-800" :
-                    "bg-gray-100 text-gray-800"
+                    "bg-muted text-foreground"
                   )}
                 >
                   {candidate.status || "New"}
                 </Badge>
               </div>
               
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-slate-500">
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2 group cursor-pointer hover:text-brand transition-colors">
-                  <div className="p-1.5 bg-slate-100 rounded-md group-hover:bg-brand/10 transition-colors">
-                    <MapPin className="h-4 w-4 text-slate-400 group-hover:text-brand" />
+                  <div className="p-1.5 bg-muted rounded-md group-hover:bg-brand/10 transition-colors">
+                    <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-brand" />
                   </div>
-                  <span className="font-medium text-slate-700">{candidate.location || "No location"}</span>
+                  <span className="font-medium text-foreground">{candidate.location || "No location"}</span>
                 </div>
 
-                <div className="flex items-center gap-2 group border-l border-slate-200 pl-6">
-                  <div className="p-1.5 bg-slate-100 rounded-md">
-                    <Briefcase className="h-4 w-4 text-slate-400" />
+                <div className="flex items-center gap-2 group border-l border-border pl-6">
+                  <div className="p-1.5 bg-muted rounded-md">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <span>{candidate.experience || "No experience info"}</span>
                 </div>
 
-                <div className="flex items-center gap-2 border-l border-slate-200 pl-6">
-                  <div className="p-1.5 bg-slate-100 rounded-md">
+                <div className="flex items-center gap-2 border-l border-border pl-6">
+                  <div className="p-1.5 bg-muted rounded-md">
                     <Loader className="h-4 w-4 text-brand" />
                   </div>
-                  <span className="text-slate-400">Last updated: Just now</span>
+                  <span className="text-muted-foreground">Last updated: Just now</span>
                 </div>
               </div>
 
               {/* Quick Contact Links */}
               <div className="flex items-center gap-4 mt-2">
                 {candidate.email && (
-                  <a href={`mailto:${candidate.email}`} className="group flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-brand transition-colors">
-                    <div className="h-7 w-7 rounded-lg bg-slate-50 group-hover:bg-brand/10 flex items-center justify-center transition-all">
+                  <a href={`mailto:${candidate.email}`} className="group flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-brand transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-muted group-hover:bg-brand/10 flex items-center justify-center transition-all">
                       <Mail className="h-3.5 w-3.5" />
                     </div>
                     {candidate.email}
                   </a>
                 )}
                 {candidate.phone && (
-                  <a href={`tel:${candidate.phone}`} className="group flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-brand transition-colors">
-                    <div className="h-7 w-7 rounded-lg bg-slate-50 group-hover:bg-brand/10 flex items-center justify-center transition-all">
+                  <a href={`tel:${candidate.phone}`} className="group flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-brand transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-muted group-hover:bg-brand/10 flex items-center justify-center transition-all">
                       <Phone className="h-3.5 w-3.5" />
                     </div>
                     {formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}
@@ -275,11 +275,11 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
 
       {/* Modern Segmented Control Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="bg-white border-b border-slate-200/60 sticky top-0 z-20 px-6 py-3">
-          <TabsList className="inline-flex items-center h-12 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50 shadow-inner">
+        <div className="bg-card border-b border-border/60 sticky top-0 z-20 px-6 py-3">
+          <TabsList className="inline-flex items-center h-12 p-1 bg-muted/80 rounded-2xl border border-border/50 shadow-inner">
             <TabsTrigger
               value="Summary"
-              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
             >
               <FileIcon className="h-4 w-4" />
               Summary
@@ -287,7 +287,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
 
             <TabsTrigger
               value="Jobs"
-              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
             >
               <Briefcase className="h-4 w-4" />
               Jobs
@@ -295,7 +295,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
 
             <TabsTrigger
               value="Notes"
-              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
             >
               <StickyNote className="h-4 w-4" />
               Notes
@@ -303,7 +303,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
 
             <TabsTrigger
               value="Attachments"
-              className="data-[state=active]:bg-white data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-all duration-300"
+              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
             >
               <Paperclip className="h-4 w-4" />
               Attachments
@@ -331,29 +331,29 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Recent Activities</h3>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <div>
                   <p className="font-medium">Phone call scheduled</p>
-                  <p className="text-sm text-gray-600">Scheduled for tomorrow at 2:00 PM</p>
+                  <p className="text-sm text-foreground">Scheduled for tomorrow at 2:00 PM</p>
                 </div>
-                <span className="text-xs text-gray-500 ml-auto">2 hours ago</span>
+                <span className="text-xs text-muted-foreground ml-auto">2 hours ago</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <div>
                   <p className="font-medium">Resume uploaded</p>
-                  <p className="text-sm text-gray-600">Updated resume received</p>
+                  <p className="text-sm text-foreground">Updated resume received</p>
                 </div>
-                <span className="text-xs text-gray-500 ml-auto">1 day ago</span>
+                <span className="text-xs text-muted-foreground ml-auto">1 day ago</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                 <div>
                   <p className="font-medium">Initial contact</p>
-                  <p className="text-sm text-gray-600">First email sent</p>
+                  <p className="text-sm text-foreground">First email sent</p>
                 </div>
-                <span className="text-xs text-gray-500 ml-auto">3 days ago</span>
+                <span className="text-xs text-muted-foreground ml-auto">3 days ago</span>
               </div>
             </div>
           </div>
@@ -372,12 +372,12 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
             <h3 className="text-lg font-semibold">Assigned Team Members</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-gray-600" />
+                <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-foreground" />
                 </div>
                 <div>
                   <p className="font-medium">Recruiter</p>
-                  <p className="text-sm text-gray-600">Assigned to: {user?.name || 'Unassigned'}</p>
+                  <p className="text-sm text-foreground">Assigned to: {user?.name || 'Unassigned'}</p>
                 </div>
               </div>
             </div>
@@ -389,24 +389,24 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
             <h3 className="text-lg font-semibold">Contact Information</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <Mail className="w-5 h-5 text-gray-600" />
+                <Mail className="w-5 h-5 text-foreground" />
                 <div>
                   <p className="font-medium">Email</p>
-                  <p className="text-sm text-gray-600">{candidate.email || 'Not provided'}</p>
+                  <p className="text-sm text-foreground">{candidate.email || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <Phone className="w-5 h-5 text-gray-600" />
+                <Phone className="w-5 h-5 text-foreground" />
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-sm text-gray-600">{formatPhoneNumber(candidate.phone, (candidate as any).countryCode) || 'Not provided'}</p>
+                  <p className="text-sm text-foreground">{formatPhoneNumber(candidate.phone, (candidate as any).countryCode) || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <MapPin className="w-5 h-5 text-gray-600" />
+                <MapPin className="w-5 h-5 text-foreground" />
                 <div>
                   <p className="font-medium">Location</p>
-                  <p className="text-sm text-gray-600">{candidate.location || 'Not provided'}</p>
+                  <p className="text-sm text-foreground">{candidate.location || 'Not provided'}</p>
                 </div>
               </div>
             </div>
@@ -417,21 +417,21 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Candidate History</h3>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <Calendar className="w-5 h-5 text-gray-600" />
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <Calendar className="w-5 h-5 text-foreground" />
                 <div>
                   <p className="font-medium">Added to system</p>
-                  <p className="text-sm text-gray-600">Candidate profile created</p>
+                  <p className="text-sm text-foreground">Candidate profile created</p>
                 </div>
-                <span className="text-xs text-gray-500 ml-auto">Jan 10, 2024</span>
+                <span className="text-xs text-muted-foreground ml-auto">Jan 10, 2024</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <Calendar className="w-5 h-5 text-gray-600" />
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <Calendar className="w-5 h-5 text-foreground" />
                 <div>
                   <p className="font-medium">Status updated</p>
-                  <p className="text-sm text-gray-600">Changed to {candidate.status || 'Unknown'}</p>
+                  <p className="text-sm text-foreground">Changed to {candidate.status || 'Unknown'}</p>
                 </div>
-                <span className="text-xs text-gray-500 ml-auto">Jan 12, 2024</span>
+                <span className="text-xs text-muted-foreground ml-auto">Jan 12, 2024</span>
               </div>
             </div>
           </div>

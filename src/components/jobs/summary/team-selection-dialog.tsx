@@ -184,7 +184,7 @@ export function TeamSelectionDialog({
           {selectedTeam && (
             <div className="space-y-2">
               <Label>Hiring Manager</Label>
-              <div className="p-3 bg-gray-50 rounded-md border">
+              <div className="p-3 bg-muted rounded-md border">
                 <span className="text-sm font-medium">
                   {typeof (selectedTeam as any).hiringManagerId === "object"
                     ? (selectedTeam as any).hiringManagerId?.firstName + " " + (selectedTeam as any).hiringManagerId?.lastName
@@ -198,7 +198,7 @@ export function TeamSelectionDialog({
           {selectedTeam && (
             <div className="space-y-2">
               <Label>Team Lead</Label>
-              <div className="p-3 bg-gray-50 rounded-md border">
+              <div className="p-3 bg-muted rounded-md border">
                 <span className="text-sm font-medium">
                   {typeof (selectedTeam as any).teamLeadId === "object"
                     ? (selectedTeam as any).teamLeadId?.firstName + " " + (selectedTeam as any).teamLeadId?.lastName

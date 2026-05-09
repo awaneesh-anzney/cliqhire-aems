@@ -223,15 +223,15 @@ const ConsultingForm = ({ businessType, formData, setFormData }: ConsultingContr
         {/* Proposals Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Technical Proposal */}
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-            <Label className="text-sm font-semibold flex items-center gap-2 text-slate-700">
+          <div className="bg-muted p-4 rounded-xl border border-border space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <FileText className="w-4 h-4 text-primary" /> Technical Proposal
             </Label>
             <Textarea
               value={formData.technicalProposalNotes || ""}
               onChange={(e) => setFormData((prev: any) => ({ ...prev, technicalProposalNotes: e.target.value }))}
               placeholder="Technical proposal notes..."
-              className="min-h-[80px] bg-white"
+              className="min-h-[80px] bg-card"
             />
             <div className="flex items-center gap-3">
               <Button
@@ -239,7 +239,7 @@ const ConsultingForm = ({ businessType, formData, setFormData }: ConsultingContr
                 size="sm"
                 type="button"
                 onClick={() => technicalProposalOptionInputRef.current?.click()}
-                className="bg-white hover:bg-slate-50 transition-colors"
+                className="bg-card hover:bg-muted transition-colors"
               >
                 <Upload className="h-4 w-4 mr-2" /> Upload Document
               </Button>
@@ -256,7 +256,7 @@ const ConsultingForm = ({ businessType, formData, setFormData }: ConsultingContr
                 }
               />
               {formData.technicalProposalDocument && (
-                <div className="flex items-center gap-1 text-xs text-slate-600 bg-slate-200/50 px-2 py-1 rounded-md max-w-[200px]">
+                <div className="flex items-center gap-1 text-xs text-foreground bg-muted/50 px-2 py-1 rounded-md max-w-[200px]">
                   <span className="truncate">{formData.technicalProposalDocument.name}</span>
                 </div>
               )}
@@ -264,15 +264,15 @@ const ConsultingForm = ({ businessType, formData, setFormData }: ConsultingContr
           </div>
 
           {/* Financial Proposal */}
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-            <Label className="text-sm font-semibold flex items-center gap-2 text-slate-700">
+          <div className="bg-muted p-4 rounded-xl border border-border space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <DollarSign className="w-4 h-4 text-primary" /> Financial Proposal
             </Label>
             <Textarea
               value={formData.financialProposalNotes || ""}
               onChange={(e) => setFormData((prev: any) => ({ ...prev, financialProposalNotes: e.target.value }))}
               placeholder="Financial proposal notes..."
-              className="min-h-[80px] bg-white"
+              className="min-h-[80px] bg-card"
             />
             <div className="flex items-center gap-3">
               <Button
@@ -280,7 +280,7 @@ const ConsultingForm = ({ businessType, formData, setFormData }: ConsultingContr
                 size="sm"
                 type="button"
                 onClick={() => financialProposalOptionInputRef.current?.click()}
-                className="bg-white hover:bg-slate-50 transition-colors"
+                className="bg-card hover:bg-muted transition-colors"
               >
                 <Upload className="h-4 w-4 mr-2" /> Upload Document
               </Button>
@@ -297,7 +297,7 @@ const ConsultingForm = ({ businessType, formData, setFormData }: ConsultingContr
                 }
               />
               {formData.financialProposalDocument && (
-                <div className="flex items-center gap-1 text-xs text-slate-600 bg-slate-200/50 px-2 py-1 rounded-md max-w-[200px]">
+                <div className="flex items-center gap-1 text-xs text-foreground bg-muted/50 px-2 py-1 rounded-md max-w-[200px]">
                   <span className="truncate">{formData.financialProposalDocument.name}</span>
                 </div>
               )}

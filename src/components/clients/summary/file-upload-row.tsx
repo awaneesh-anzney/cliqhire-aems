@@ -37,8 +37,8 @@ export const FileUploadRow = ({
     <div className={`flex items-center justify-between py-2 ${className || ""}`}>
       <p className="text-sm text-muted-foreground">{label}</p>
       <div className="flex items-center gap-10">
-        <span className="text-sm text-gray-800 truncate" title={currentFileName || "No Details"}>
-          {currentFileName || <span className="text-gray-400">No Details</span>}
+        <span className="text-sm text-foreground truncate" title={currentFileName || "No Details"}>
+          {currentFileName || <span className="text-muted-foreground">No Details</span>}
         </span>
         <div className="flex items-center gap-4">
           {onPreview && (

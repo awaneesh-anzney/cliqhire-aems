@@ -110,7 +110,7 @@ export function SkillsAndStatusTab({ formData, setFormData, errors, onResumeFile
       <div className="space-y-2 ml-2 mr-2 ">
         <Label htmlFor="resume">Upload Resume</Label>
         <div 
-          className="relative border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+          className="relative border-2 border-dashed border-border rounded-md p-6 text-center cursor-pointer hover:border-border transition-colors"
           onClick={handleFileClick}
         >
           <input
@@ -121,8 +121,8 @@ export function SkillsAndStatusTab({ formData, setFormData, errors, onResumeFile
             onChange={handleFileChange}
             className="hidden"
           />
-          <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-          <div className="text-sm text-gray-600">
+          <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+          <div className="text-sm text-foreground">
             {resumeFile ? (
               <div className="flex items-center justify-center gap-2">
                 <span className="text-green-600 font-medium">{resumeFile.name}</span>
@@ -139,9 +139,9 @@ export function SkillsAndStatusTab({ formData, setFormData, errors, onResumeFile
               </div>
             ) : (
               <>
-                <span className="font-medium text-gray-900">Click to upload</span>
+                <span className="font-medium text-foreground">Click to upload</span>
                 <br />
-                <span className="text-gray-500">PDF, DOC, DOCX (max 10MB)</span>
+                <span className="text-muted-foreground">PDF, DOC, DOCX (max 10MB)</span>
               </>
             )}
           </div>

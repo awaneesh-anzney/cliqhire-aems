@@ -125,7 +125,7 @@ export function JobDescriptionInternal({ value, onSave, disabled }: JobDiscripti
       ) : (
         <>
           <FakeToolbar />
-          <div className="text-sm prose prose-sm dark:prose-invert min-h-[48px] border border-input rounded-md px-3 py-2 bg-white">
+          <div className="text-sm prose prose-sm dark:prose-invert min-h-[48px] border border-input rounded-md px-3 py-2 bg-card">
             {value ? (
               <div dangerouslySetInnerHTML={{ __html: value }} />
             ) : (

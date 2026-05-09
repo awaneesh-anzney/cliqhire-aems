@@ -168,15 +168,15 @@ export function AddContactModal({
       <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <div className="flex h-full lg:h-[550px] min-h-[400px]">
           {/* Sidebar */}
-          <div className="hidden md:flex flex-col w-56 bg-slate-50 border-r border-slate-200 p-8 shrink-0">
+          <div className="hidden md:flex flex-col w-56 bg-muted border-r border-border p-8 shrink-0">
             <div className="mb-10">
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <UserPlus className="w-5 h-5 text-primary" />
                 </div>
-                <span className="font-bold text-slate-800 text-lg tracking-tight">CliqHire</span>
+                <span className="font-bold text-foreground text-lg tracking-tight">CliqHire</span>
               </div>
-              <p className="text-[10px] text-slate-400 font-black tracking-widest uppercase">Client Contact</p>
+              <p className="text-[10px] text-muted-foreground font-black tracking-widest uppercase">Client Contact</p>
             </div>
 
             <div className="space-y-8">
@@ -186,15 +186,15 @@ export function AddContactModal({
                     w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
                     ${currentTab === index 
                       ? "bg-brand text-white shadow-lg shadow-brand/10" 
-                      : (index < currentTab ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500")}
+                      : (index < currentTab ? "bg-green-500 text-white" : "bg-muted text-muted-foreground")}
                   `}>
                     {index < currentTab ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
                   </div>
                   <div className="flex flex-col">
-                    <span className={`text-sm font-black tracking-tight ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
+                    <span className={`text-sm font-black tracking-tight ${currentTab === index ? "text-foreground" : "text-muted-foreground"}`}>
                       {tab}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Step {index + 1}</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Step {index + 1}</span>
                   </div>
                 </div>
               ))}
@@ -203,7 +203,7 @@ export function AddContactModal({
             <div className="mt-auto bg-primary/5 p-4 rounded-xl border border-primary/10">
               <div className="flex items-start gap-2">
                 <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
+                <p className="text-[11px] text-foreground leading-relaxed font-semibold">
                   Adding precise contact points improves communication and account management.
                 </p>
               </div>
@@ -211,17 +211,17 @@ export function AddContactModal({
           </div>
 
           {/* Form Content */}
-          <div className="flex-1 flex flex-col bg-white overflow-hidden">
+          <div className="flex-1 flex flex-col bg-card overflow-hidden">
              <div className="p-8 pb-4">
               <div className="flex justify-between items-center mb-1">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                <h2 className="text-3xl font-black text-foreground tracking-tight">
                   {isEdit ? "Edit Contact" : (currentTab === 0 ? "Identify Contact" : "Reach & Social")}
                 </h2>
                 <div className="text-[10px] text-primary font-black bg-primary/10 px-3 py-1 rounded-full uppercase tracking-tighter">
                    {currentTab + 1} of 2
                 </div>
               </div>
-              <DialogDescription className="text-slate-500 font-semibold text-sm">
+              <DialogDescription className="text-muted-foreground font-semibold text-sm">
                 {currentTab === 0 ? "Basic identity and professional role within the company." : "Contact points and social presence."}
               </DialogDescription>
             </div>
@@ -233,36 +233,36 @@ export function AddContactModal({
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold text-slate-700">First Name <span className="text-primary">*</span></Label>
+                          <Label className="text-sm font-bold text-foreground">First Name <span className="text-primary">*</span></Label>
                           <div className="relative group">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input 
                               value={formData.firstName} 
                               onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))} 
                               placeholder="Enter first name" 
-                              className="pl-10 h-11 border-slate-200 font-bold focus:border-primary"
+                              className="pl-10 h-11 border-border font-bold focus:border-primary"
                               required
                             />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold text-slate-700">Last Name</Label>
+                          <Label className="text-sm font-bold text-foreground">Last Name</Label>
                           <Input 
                             value={formData.lastName} 
                             onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))} 
                             placeholder="Enter last name" 
-                            className="h-11 border-slate-200 font-bold"
+                            className="h-11 border-border font-bold"
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">Gender</Label>
+                        <Label className="text-sm font-bold text-foreground">Gender</Label>
                         <Select 
                           value={formData.gender} 
                           onValueChange={(val) => setFormData(prev => ({ ...prev, gender: val }))}
                         >
-                          <SelectTrigger className="h-11 border-slate-200 font-bold">
+                          <SelectTrigger className="h-11 border-border font-bold">
                             <SelectValue placeholder="Select gender" />
                           </SelectTrigger>
                           <SelectContent>
@@ -275,7 +275,7 @@ export function AddContactModal({
 
                       <div className="space-y-2">
                         <div className="flex items-center justify-between px-1">
-                          <Label className="text-sm font-bold text-slate-700">Position <span className="text-primary">*</span></Label>
+                          <Label className="text-sm font-bold text-foreground">Position <span className="text-primary">*</span></Label>
                           <Button 
                             type="button" 
                             variant="ghost" 
@@ -291,16 +291,16 @@ export function AddContactModal({
                             <Button 
                               type="button" 
                               variant="outline" 
-                              className="w-full h-11 justify-between border-slate-200 font-bold text-slate-700"
+                              className="w-full h-11 justify-between border-border font-bold text-foreground"
                             >
                               <div className="flex items-center">
-                                <Briefcase className="w-4 h-4 mr-3 text-slate-300" />
+                                <Briefcase className="w-4 h-4 mr-3 text-muted-foreground" />
                                 {formData.position || "Select professional role"}
                               </div>
                               <ChevronDown className="h-4 w-4 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="p-0 w-[--radix-popover-trigger-width] shadow-2xl border-slate-100" align="start">
+                          <PopoverContent className="p-0 w-[--radix-popover-trigger-width] shadow-2xl border-border" align="start">
                             <Command className="min-h-0 h-64">
                               <CommandInput placeholder="Search positions..." className="font-bold" />
                               <CommandList className="custom-scrollbar">
@@ -331,22 +331,22 @@ export function AddContactModal({
                   {currentTab === 1 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">Email Address <span className="text-primary">*</span></Label>
+                        <Label className="text-sm font-bold text-foreground">Email Address <span className="text-primary">*</span></Label>
                         <div className="relative group">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input 
                             type="email" 
                             value={formData.email} 
                             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))} 
                             placeholder="Email..." 
-                            className="pl-10 h-11 border-slate-200 font-bold focus:border-primary"
+                            className="pl-10 h-11 border-border font-bold focus:border-primary"
                             required
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">Phone Number <span className="text-primary">*</span></Label>
+                        <Label className="text-sm font-bold text-foreground">Phone Number <span className="text-primary">*</span></Label>
                         <PhoneInput
                           countryCode={formData.countryCode}
                           onCountryCodeChange={(val) => setFormData(prev => ({ ...prev, countryCode: val }))}
@@ -357,19 +357,19 @@ export function AddContactModal({
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold text-slate-700">LinkedIn URL</Label>
+                          <Label className="text-sm font-bold text-foreground">LinkedIn URL</Label>
                           <div className="relative group">
-                            <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                            <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input 
                               value={formData.linkedin} 
                               onChange={(e) => setFormData(prev => ({ ...prev, linkedin: e.target.value }))} 
                               placeholder="URL" 
-                              className="pl-10 h-11 border-slate-200 font-bold"
+                              className="pl-10 h-11 border-border font-bold"
                             />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold text-slate-700">Location</Label>
+                          <Label className="text-sm font-bold text-foreground">Location</Label>
                           <LocationSuggestion
                             value={formData.location}
                             onChange={(val) => setFormData(prev => ({ ...prev, location: val }))}
@@ -384,14 +384,14 @@ export function AddContactModal({
               </div>
             </div>
 
-            <DialogFooter className="p-6 bg-slate-50 border-t flex flex-row items-center mt-auto shrink-0">
+            <DialogFooter className="p-6 bg-muted border-t flex flex-row items-center mt-auto shrink-0">
                <div className="flex justify-between w-full h-11 items-center">
                 <div className="flex gap-3">
-                  <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-slate-500 font-bold hover:bg-slate-100">
+                  <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground font-bold hover:bg-muted">
                     Cancel
                   </Button>
                   {currentTab > 0 && (
-                    <Button variant="outline" onClick={handlePrevious} className="bg-white border-slate-200 font-bold px-5 shadow-sm">
+                    <Button variant="outline" onClick={handlePrevious} className="bg-card border-border font-bold px-5 shadow-sm">
                       <ArrowLeft className="w-4 h-4 mr-2" /> Back
                     </Button>
                   )}

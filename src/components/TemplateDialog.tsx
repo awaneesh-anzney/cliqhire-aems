@@ -658,21 +658,21 @@ export function TemplateDialog({ open, onOpenChange, onUseTemplate }: TemplateDi
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="min-w-[800px] bg-white border border-gray-200 flex flex-col p-0 rounded-2xl" >
+        <DialogContent className="min-w-[800px] bg-card border border-border flex flex-col p-0 rounded-2xl" >
           <div className="sticky top-0 left-0 rounded-t-2xl ">
             
             <div className="relative flex items-center w-full pt-4">
-              <span className="absolute left-3 text-gray-400">
+              <span className="absolute left-3 text-muted-foreground">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               </span>
               <input
-                className="w-full pl-10 pr-10 py-2 text-gray-900 text-base bg-transparent border-none outline-none shadow-none placeholder-gray-400"
+                className="w-full pl-10 pr-10 py-2 text-foreground text-base bg-transparent border-none outline-none shadow-none placeholder-gray-400"
                 placeholder="Search from all available templates..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            <div className="w-full h-px bg-gray-200" />
+            <div className="w-full h-px bg-muted" />
           </div>
           <div className="flex-1 flex flex-col items-center justify-start px-5 py-0">
             <div className="w-full flex flex-col overflow-hidden">
@@ -684,15 +684,15 @@ export function TemplateDialog({ open, onOpenChange, onUseTemplate }: TemplateDi
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="font-bold text-lg text-gray-900 leading-tight">{t.client}</div>
+                        <div className="font-bold text-lg text-foreground leading-tight">{t.client}</div>
                         <Badge variant="secondary">{t.category}</Badge>
                       </div>
-                      <div className="font-semibold text-base text-gray-900 leading-tight mb-1">{t.name}</div>
-                      <div className="text-gray-400 text-base leading-snug truncate">{t.content}</div>
+                      <div className="font-semibold text-base text-foreground leading-tight mb-1">{t.name}</div>
+                      <div className="text-muted-foreground text-base leading-snug truncate">{t.content}</div>
                     </div>
                     <div className="flex flex-col gap-2 ml-1">
-                      <Button size="icon" variant="outline" className="border-gray-300" onClick={() => setViewing(t)} aria-label="View">
-                        <Eye className="w-5 h-5 text-gray-700" />
+                      <Button size="icon" variant="outline" className="border-border" onClick={() => setViewing(t)} aria-label="View">
+                        <Eye className="w-5 h-5 text-foreground" />
                       </Button>
                       <Button size="icon" className="bg-blue-600 hover:bg-blue-700 border-blue-700" onClick={() => { onUseTemplate(t.content, t.subject); }} aria-label="Use">
                         <Check className="w-5 h-5 text-white" />
@@ -701,7 +701,7 @@ export function TemplateDialog({ open, onOpenChange, onUseTemplate }: TemplateDi
                   </div>
                 ))}
                 {filtered.length === 0 && (
-                  <div className="text-sm text-gray-400 text-center p-4">No templates found.</div>
+                  <div className="text-sm text-muted-foreground text-center p-4">No templates found.</div>
                 )}
               </div>
             </div>
@@ -712,13 +712,13 @@ export function TemplateDialog({ open, onOpenChange, onUseTemplate }: TemplateDi
       {/* View Template Popup */}
 
       <Dialog open={!!viewing} onOpenChange={() => setViewing(null)}>
-        <DialogContent showCloseButton className="min-w-[800px] bg-white border border-gray-200 shadow-xl">
-          <DialogHeader className="pb-2 border-b border-gray-100">
-            <DialogTitle className="text-xl font-semibold text-gray-900 leading-tight mb-0">
+        <DialogContent showCloseButton className="min-w-[800px] bg-card border border-border shadow-xl">
+          <DialogHeader className="pb-2 border-b border-border">
+            <DialogTitle className="text-xl font-semibold text-foreground leading-tight mb-0">
               {viewing?.name}
             </DialogTitle>
             <DialogDescription>
-              Client: <span className="font-medium text-gray-800">{viewing?.client}</span>
+              Client: <span className="font-medium text-foreground">{viewing?.client}</span>
             </DialogDescription>
             
           </DialogHeader>
@@ -730,8 +730,8 @@ export function TemplateDialog({ open, onOpenChange, onUseTemplate }: TemplateDi
           </div>
           
           {/* Content area moved outside of header */}
-          <div className="max-h-[500px] overflow-y-auto w-full mt-0 rounded-lg border border-gray-200 p-4 text-gray-900 text-lg leading-relaxed shadow-sm">
-            <pre className="whitespace-pre-wrap font-sans text-md leading-relaxed text-gray-900">
+          <div className="max-h-[500px] overflow-y-auto w-full mt-0 rounded-lg border border-border p-4 text-foreground text-lg leading-relaxed shadow-sm">
+            <pre className="whitespace-pre-wrap font-sans text-md leading-relaxed text-foreground">
               {viewing?.content}
             </pre>
           </div>

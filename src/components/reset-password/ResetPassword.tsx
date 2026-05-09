@@ -75,7 +75,7 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
           <CheckCircle2 className="h-8 w-8 text-green-600" />
         </div>
         <h2 className="text-3xl font-bold tracking-tight text-[#2B3674]">Success!</h2>
-        <p className="text-gray-500 max-w-sm">
+        <p className="text-muted-foreground max-w-sm">
           Your password has been successfully reset. You can now use your new password to log in.
         </p>
         <div className="flex flex-col gap-3 w-full mt-4">
@@ -93,7 +93,7 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
   return (
     <div className={cn("flex w-full flex-col gap-6", className)} {...props}>
       <h2 className="text-3xl font-bold tracking-tight text-[#2B3674] mb-2">Set New Password</h2>
-      <p className="text-gray-500 mb-4 text-sm leading-relaxed">
+      <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
         Your new password must be different from previous used passwords.
       </p>
 
@@ -106,17 +106,17 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="New Password"
-                      className="w-full pl-12 pr-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 pr-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -134,17 +134,17 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
               <FormItem>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm New Password"
-                      className="w-full pl-12 pr-12 h-12 rounded-full border-gray-200 focus-visible:ring-brand focus-visible:ring-offset-0 bg-white"
+                      className="w-full pl-12 pr-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
                       {...field}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -166,7 +166,7 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
           <div className="text-center mt-6">
             <Link 
               href="/login" 
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-brand transition-colors"
+              className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-brand transition-colors"
             >
               Back to login
             </Link>

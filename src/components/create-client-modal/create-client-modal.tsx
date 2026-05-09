@@ -162,15 +162,15 @@ export function CreateClientModal({
       <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-2xl">
         <div className="flex flex-col md:flex-row h-full md:h-[620px] min-h-[500px]">
           {/* Left Sidebar - Step Indicator */}
-          <div className="hidden md:flex flex-col w-52 bg-slate-50 border-r border-slate-200 p-8 shrink-0">
+          <div className="hidden md:flex flex-col w-52 bg-muted border-r border-border p-8 shrink-0">
             <div className="mb-10">
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Building2 className="w-5 h-5 text-primary" />
                 </div>
-                <span className="font-bold text-slate-800 text-lg">CliqHire</span>
+                <span className="font-bold text-foreground text-lg">CliqHire</span>
               </div>
-              <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">Client Management</p>
+              <p className="text-xs text-muted-foreground font-medium tracking-wider uppercase">Client Management</p>
             </div>
 
             <div className="space-y-6">
@@ -185,24 +185,24 @@ export function CreateClientModal({
                     w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors
                     ${currentTab === index 
                       ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                      : (index < currentTab ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500")}
+                      : (index < currentTab ? "bg-green-500 text-white" : "bg-muted text-muted-foreground")}
                   `}>
                     {index < currentTab ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
                   </div>
                   <div className="flex flex-col">
-                    <span className={`text-sm font-semibold ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
+                    <span className={`text-sm font-semibold ${currentTab === index ? "text-foreground" : "text-muted-foreground"}`}>
                       {tab}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">Step {index + 1}</span>
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Step {index + 1}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-auto bg-white/50 p-4 rounded-xl border border-slate-200">
+            <div className="mt-auto bg-card/50 p-4 rounded-xl border border-border">
               <div className="flex items-start gap-2">
-                <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
                   Filling out accurate client details helps in better coordination and sales pipeline tracking.
                 </p>
               </div>
@@ -210,17 +210,17 @@ export function CreateClientModal({
           </div>
 
           {/* Right Content */}
-          <div className="flex-1 flex flex-col bg-white overflow-hidden">
+          <div className="flex-1 flex flex-col bg-card overflow-hidden">
             <DialogHeader className="p-8 pb-4 border-b md:border-none">
               <div className="flex justify-between items-center mb-1">
-                <DialogTitle className="text-3xl font-black text-slate-900 tracking-tight">
+                <DialogTitle className="text-3xl font-black text-foreground tracking-tight">
                   New Client
                 </DialogTitle>
-                <div className="text-xs text-slate-400 font-medium bg-slate-50 px-2 py-1 rounded-md border">
+                <div className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md border">
                   Step {currentTab + 1} of 3
                 </div>
               </div>
-              <DialogDescription className="text-slate-500 font-medium">
+              <DialogDescription className="text-muted-foreground font-medium">
                 Complete the details below to onboard a new client.
               </DialogDescription>
             </DialogHeader>
@@ -234,7 +234,7 @@ export function CreateClientModal({
                     if (index < currentTab) setCurrentTab(index);
                   }}
                   className={`flex-1 py-4 flex flex-col items-center gap-1 border-b-2 transition-all ${
-                    currentTab === index ? "border-primary text-primary" : "border-transparent text-slate-400"
+                    currentTab === index ? "border-primary text-primary" : "border-transparent text-muted-foreground"
                   }`}
                 >
                   {tabIcons[index]}
@@ -263,14 +263,14 @@ export function CreateClientModal({
               </div>
             </div>
 
-            <DialogFooter className="p-6 bg-slate-50/80 border-t flex flex-row items-center gap-4 mt-auto">
+            <DialogFooter className="p-6 bg-muted/80 border-t flex flex-row items-center gap-4 mt-auto">
               <div className="flex justify-between w-full h-11 items-center">
                 <div className="flex gap-3">
                   <Button 
                     variant="ghost" 
                     onClick={handleClose} 
                     disabled={loading}
-                    className="text-slate-500 hover:text-slate-900"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     Cancel
                   </Button>
@@ -279,7 +279,7 @@ export function CreateClientModal({
                       variant="outline" 
                       onClick={handlePrevious} 
                       disabled={loading}
-                      className="border-slate-200 hover:bg-white"
+                      className="border-border hover:bg-card"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" /> Back
                     </Button>

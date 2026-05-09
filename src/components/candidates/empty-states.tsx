@@ -11,7 +11,7 @@ export function CandidatesEmptyState({ children }: CandidatesEmptyStateProps) {
         <CandidateLogo />
       </div>
       <h2 className="text-xl font-semibold mb-3">You have not created any candidates yet</h2>
-      <p className="text-gray-500 mb-6">
+      <p className="text-muted-foreground mb-6">
         Creating candidates will allow you to add their details, resumes, add them to a job and much more.
       </p>
       {children}

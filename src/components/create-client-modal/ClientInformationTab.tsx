@@ -23,7 +23,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
   return (
     <div className="grid grid-cols-2 gap-4 p-1">
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Client stage *</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Client stage *</label>
         <Select
           value={form.clientStage}
           onValueChange={val => {
@@ -31,10 +31,10 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
             if (val !== "Engaged") setField("clientSubStage", "");
           }}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
             <SelectValue placeholder="Select stage" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+          <SelectContent className="rounded-xl border-border shadow-xl">
             <SelectItem value="Lead">Lead</SelectItem>
             <SelectItem value="Engaged">Engaged</SelectItem>
             <SelectItem value="Signed">Signed</SelectItem>
@@ -43,16 +43,16 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Sub-stage</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Sub-stage</label>
         <Select
           value={form.clientSubStage}
           onValueChange={val => setField("clientSubStage", val)}
           disabled={form.clientStage !== "Engaged"}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold disabled:opacity-50">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold disabled:opacity-50">
             <SelectValue placeholder={form.clientStage === "Engaged" ? "Select sub-stage" : "N/A"} />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+          <SelectContent className="rounded-xl border-border shadow-xl">
             <SelectItem value="Calls">Calls</SelectItem>
             <SelectItem value="Profile Sent">Profile Sent</SelectItem>
             <SelectItem value="Contract Sent">Contract Sent</SelectItem>
@@ -64,39 +64,39 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Sales lead</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Sales lead</label>
         <Button
           variant="outline"
           type="button"
           onClick={() => setIsUserDialogOpen(true)}
-          className="h-11 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold justify-start text-slate-700"
+          className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start text-foreground"
         >
-          <User className="w-4 h-4 mr-2 text-slate-400" />
+          <User className="w-4 h-4 mr-2 text-muted-foreground" />
           {form.salesLead || "Select Sales Lead..."}
         </Button>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Referred by</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Referred by</label>
         <input
           type="text"
           value={form.referredBy}
           onChange={e => setField("referredBy", e.target.value)}
           placeholder="Referral name"
-          className="h-11 border border-slate-100 rounded-xl px-4 text-sm bg-slate-50 focus:bg-white transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Priority</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Priority</label>
         <Select
           value={form.clientPriority}
           onValueChange={val => setField("clientPriority", val)}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
             <SelectValue placeholder="Select priority" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+          <SelectContent className="rounded-xl border-border shadow-xl">
             <SelectItem value="High">High</SelectItem>
             <SelectItem value="Medium">Medium</SelectItem>
             <SelectItem value="Low">Low</SelectItem>
@@ -105,15 +105,15 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Segment</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Segment</label>
         <Select
           value={form.clientSegment}
           onValueChange={val => setField("clientSegment", val)}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
             <SelectValue placeholder="Select segment" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+          <SelectContent className="rounded-xl border-border shadow-xl">
             <SelectItem value="Silver">Silver</SelectItem>
             <SelectItem value="Gold">Gold</SelectItem>
             <SelectItem value="Premium">Premium</SelectItem>
@@ -122,15 +122,15 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Client Source</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Client Source</label>
         <Select
           value={form.clientSource}
           onValueChange={val => setField("clientSource", val)}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-100 focus:bg-white transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
             <SelectValue placeholder="Select source" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+          <SelectContent className="rounded-xl border-border shadow-xl">
             <SelectItem value="Cold Call">Cold Call</SelectItem>
             <SelectItem value="Reference">Reference</SelectItem>
             <SelectItem value="Events">Events</SelectItem>
@@ -141,9 +141,9 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Industry</label>
-        <div className="h-11 rounded-xl bg-slate-50 border border-slate-100 focus-within:bg-white transition-all flex items-center px-1">
-          <Building2 className="w-4 h-4 mx-3 text-slate-400 shrink-0" />
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Industry</label>
+        <div className="h-11 rounded-xl bg-muted border border-border focus-within:bg-card transition-all flex items-center px-1">
+          <Building2 className="w-4 h-4 mx-3 text-muted-foreground shrink-0" />
           <IndustrySelector 
             value={form.industry} 
             onValueChange={val => setField("industry", val)} 
@@ -160,4 +160,4 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
       />
     </div>
   );
-}
+}

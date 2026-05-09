@@ -31,12 +31,12 @@ export function EntityHeader({
             <span className="ml-2 px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800 font-medium">{status}</span>
           )}
         </div>
-        {subtitle && <div className="text-sm text-gray-500">{subtitle}</div>}
-        {location && <div className="text-xs text-gray-400 flex items-center gap-1">{location}</div>}
+        {subtitle && <div className="text-sm text-muted-foreground">{subtitle}</div>}
+        {location && <div className="text-xs text-muted-foreground flex items-center gap-1">{location}</div>}
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {tags.map((tag) => (
-              <span key={tag} className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-medium">{tag}</span>
+              <span key={tag} className="bg-muted text-foreground rounded px-2 py-0.5 text-xs font-medium">{tag}</span>
             ))}
           </div>
         )}

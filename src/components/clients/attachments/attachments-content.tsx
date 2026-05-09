@@ -89,13 +89,13 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
   }, [clientId]);
 
   return (
-    <div className="bg-slate-50/50 rounded-2xl p-6 flex flex-col h-full">
-      <div className="mb-6 flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+    <div className="bg-muted/50 rounded-2xl p-6 flex flex-col h-full">
+      <div className="mb-6 flex items-center justify-between bg-card p-4 rounded-xl border border-border shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-brand/10 rounded-lg">
             <Plus className="w-4 h-4 text-brand" />
           </div>
-          <h3 className="text-base font-semibold text-slate-800">Client Attachments</h3>
+          <h3 className="text-base font-semibold text-foreground">Client Attachments</h3>
         </div>
         <Button
           onClick={() => setShowUploadBox(true)}
@@ -107,7 +107,7 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
         </Button>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex-1">
+      <div className="bg-card rounded-xl border border-border shadow-sm p-6 flex-1">
         <UploadAttachment
           show={showUploadBox}
           setShow={setShowUploadBox}
@@ -116,16 +116,16 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
         />
 
         {loading ? (
-          <div className="text-center py-12 text-slate-500 animate-pulse">Loading attachments...</div>
+          <div className="text-center py-12 text-muted-foreground animate-pulse">Loading attachments...</div>
         ) : attachments.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-12">
-            <div className="w-24 h-24 mb-6 bg-slate-50 rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2">
+            <div className="w-24 h-24 mb-6 bg-muted rounded-full flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-slate-800 mb-2">No attachments yet</h2>
-            <p className="text-slate-500 max-w-sm">
+            <h2 className="text-lg font-semibold text-foreground mb-2">No attachments yet</h2>
+            <p className="text-muted-foreground max-w-sm">
               Add your first attachment to share files with your team.
             </p>
           </div>

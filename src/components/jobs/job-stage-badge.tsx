@@ -16,7 +16,7 @@ const stageColors: Record<JobStage, string> = {
   'Onboarding': "bg-indigo-100 text-indigo-800",
   'Active': "bg-green-100 text-green-800",
   'Hired': "bg-green-100 text-green-800",
-  'On Hold': "bg-gray-100 text-gray-800",
+  'On Hold': "bg-muted text-foreground",
   'Closed': "bg-red-100 text-red-800",
 }
 

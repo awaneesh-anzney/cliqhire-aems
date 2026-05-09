@@ -97,10 +97,10 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-800">Upload File</h3>
+        <h3 className="text-lg font-semibold text-foreground">Upload File</h3>
         <Button
           onClick={() => setShowUploadBox(true)}
-          className="flex items-center gap-2 bg-black text-white hover:bg-gray-800"
+          className="flex items-center gap-2 bg-black text-white hover:bg-foreground"
           disabled={showUploadBox || !canModify}
         >
           <Plus className="w-4 h-4" />
@@ -118,7 +118,7 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <Loader className="size-6 animate-spin" />
-          <div className="text-lg text-gray-600 mt-2">Loading Attachments Details ......</div>
+          <div className="text-lg text-foreground mt-2">Loading Attachments Details ......</div>
         </div>
       ) : attachments.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-6 text-center">
@@ -131,7 +131,7 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
             </svg>
           </div>
           <h2 className="text-xl font-semibold mb-2">No attachments yet</h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-muted-foreground mb-4">
             Add your first attachment to share files with your team.
           </p>
         </div>

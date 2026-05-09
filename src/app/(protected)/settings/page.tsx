@@ -151,7 +151,7 @@ function PermissionDialog({
   if (loading) {
     return (
       <Dialog open onOpenChange={onClose}>
-        <DialogContent className="max-w-md p-6 text-center text-slate-500">
+        <DialogContent className="max-w-md p-6 text-center text-muted-foreground">
           Loading permissions...
         </DialogContent>
       </Dialog>
@@ -168,10 +168,10 @@ function PermissionDialog({
               <Settings2 className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <DialogTitle className="text-base font-semibold text-slate-800">
+              <DialogTitle className="text-base font-semibold text-foreground">
                 Edit Permissions — <span className="text-brand">{role.name}</span>
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                 {totalEnabled} of {PERMISSION_MODULES.length} modules active
               </DialogDescription>
             </div>
@@ -182,8 +182,8 @@ function PermissionDialog({
         <div className="overflow-auto flex-1">
           <table className="w-full text-sm border-collapse">
             <thead className="sticky top-0 z-10">
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="text-left px-5 py-3 font-semibold text-slate-600 w-44 text-xs uppercase tracking-wide">
+              <tr className="bg-muted border-b border-border">
+                <th className="text-left px-5 py-3 font-semibold text-foreground w-44 text-xs uppercase tracking-wide">
                   Module
                 </th>
                 {ACTIONS.map((a) => (
@@ -203,7 +203,7 @@ function PermissionDialog({
                     </div>
                   </th>
                 ))}
-                <th className="text-center px-4 py-3 w-20 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <th className="text-center px-4 py-3 w-20 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   All
                 </th>
               </tr>
@@ -214,17 +214,17 @@ function PermissionDialog({
                 return (
                   <tr
                     key={mod.moduleKey}
-                    className={`border-b border-slate-100 transition-colors ${
-                      rowActive ? "bg-brand/[0.02]" : "hover:bg-slate-50/60"
+                    className={`border-b border-border transition-colors ${
+                      rowActive ? "bg-brand/[0.02]" : "hover:bg-muted/60"
                     }`}
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2.5">
                         <div
-                          className={`h-1.5 w-1.5 rounded-full shrink-0 ${rowActive ? "bg-brand" : "bg-slate-300"}`}
+                          className={`h-1.5 w-1.5 rounded-full shrink-0 ${rowActive ? "bg-brand" : "bg-muted"}`}
                         />
                         <span
-                          className={`text-sm font-medium ${rowActive ? "text-slate-800" : "text-slate-500"}`}
+                          className={`text-sm font-medium ${rowActive ? "text-foreground" : "text-muted-foreground"}`}
                         >
                           {mod.name}
                         </span>
@@ -253,7 +253,7 @@ function PermissionDialog({
           </table>
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t bg-slate-50/80">
+        <DialogFooter className="px-6 py-4 border-t bg-muted/80">
           <Button variant="outline" onClick={onClose} disabled={saving} className="h-9">
             Cancel
           </Button>
@@ -312,7 +312,7 @@ function EditRoleDialog({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">
               Role Name
             </Label>
             <Input
@@ -329,7 +329,7 @@ function EditRoleDialog({
             )}
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">
               Description
             </Label>
             <Input
@@ -383,7 +383,7 @@ function ViewPermissionsDialog({ role, onClose }: { role: Role; onClose: () => v
   if (loading) {
     return (
       <Dialog open onOpenChange={onClose}>
-        <DialogContent className="max-w-sm p-6 text-center text-slate-500">
+        <DialogContent className="max-w-sm p-6 text-center text-muted-foreground">
           Loading permissions...
         </DialogContent>
       </Dialog>
@@ -409,8 +409,8 @@ function ViewPermissionsDialog({ role, onClose }: { role: Role; onClose: () => v
         <div className="overflow-auto flex-1">
           <table className="w-full text-sm border-collapse">
             <thead className="sticky top-0">
-              <tr className="bg-slate-50 border-b">
-                <th className="text-left px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500 w-44">
+              <tr className="bg-muted border-b">
+                <th className="text-left px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground w-44">
                   Module
                 </th>
                 {ACTIONS.map((a) => (
@@ -431,11 +431,11 @@ function ViewPermissionsDialog({ role, onClose }: { role: Role; onClose: () => v
                 return (
                   <tr
                     key={mod.moduleKey}
-                    className={`border-b border-slate-100 ${hasAny ? "" : "opacity-40"}`}
+                    className={`border-b border-border ${hasAny ? "" : "opacity-40"}`}
                   >
-                    <td className="px-5 py-2.5 font-medium text-slate-700 flex items-center gap-2">
+                    <td className="px-5 py-2.5 font-medium text-foreground flex items-center gap-2">
                       <div
-                        className={`h-1.5 w-1.5 rounded-full ${hasAny ? "bg-brand" : "bg-slate-300"}`}
+                        className={`h-1.5 w-1.5 rounded-full ${hasAny ? "bg-brand" : "bg-muted"}`}
                       />
                       {mod.name}
                     </td>
@@ -444,7 +444,7 @@ function ViewPermissionsDialog({ role, onClose }: { role: Role; onClose: () => v
                         {mp?.[a] ? (
                           <Check className="h-4 w-4 text-emerald-500 mx-auto" />
                         ) : (
-                          <X className="h-3.5 w-3.5 text-slate-200 mx-auto" />
+                          <X className="h-3.5 w-3.5 text-muted-foreground mx-auto" />
                         )}
                       </td>
                     ))}
@@ -454,7 +454,7 @@ function ViewPermissionsDialog({ role, onClose }: { role: Role; onClose: () => v
             </tbody>
           </table>
         </div>
-        <div className="px-6 py-4 border-t bg-slate-50">
+        <div className="px-6 py-4 border-t bg-muted">
           <Button variant="outline" onClick={onClose} className="h-9">
             Close
           </Button>
@@ -488,7 +488,7 @@ function RoleCard({
 
   return (
     <>
-      <div className="group bg-white rounded-xl border border-slate-200 hover:border-brand/40 hover:shadow-md shadow-sm transition-all duration-200 flex flex-col overflow-hidden">
+      <div className="group bg-card rounded-xl border border-border hover:border-brand/40 hover:shadow-md shadow-sm transition-all duration-200 flex flex-col overflow-hidden">
         {/* Top strip — color indicator */}
         <div
           className={`h-1 w-full ${role.isSystem ? "bg-gradient-to-r from-slate-400 to-slate-500" : "bg-gradient-to-r from-brand to-brand/60"}`}
@@ -499,20 +499,20 @@ function RoleCard({
           <div className="flex items-start justify-between gap-2 mb-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${role.isSystem ? "bg-slate-100" : "bg-brand/10"}`}
+                className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${role.isSystem ? "bg-muted" : "bg-brand/10"}`}
               >
                 {role.isSystem ? (
-                  <Globe className="h-4 w-4 text-slate-500" />
+                  <Globe className="h-4 w-4 text-muted-foreground" />
                 ) : (
                   <Shield className="h-4 w-4 text-brand" />
                 )}
               </div>
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-slate-800 truncate leading-tight">
+                <h3 className="text-sm font-semibold text-foreground truncate leading-tight">
                   {role.name}
                 </h3>
                 {role.isSystem && (
-                  <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     System Role
                   </span>
                 )}
@@ -561,21 +561,21 @@ function RoleCard({
 
           {/* Description */}
           {role.description && (
-            <p className="text-xs text-slate-500 mb-3 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
               {role.description}
             </p>
           )}
 
           {/* Stats row */}
-          <div className="flex items-center gap-3 mb-3 text-xs text-slate-500">
+          <div className="flex items-center gap-3 mb-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Zap className="h-3 w-3 text-brand" />
-              <strong className="text-slate-700">{totalPerms}</strong> permissions
+              <strong className="text-foreground">{totalPerms}</strong> permissions
             </span>
-            <span className="text-slate-300">•</span>
+            <span className="text-muted-foreground">•</span>
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />
-              <strong className="text-slate-700">{role.userCount ?? 0}</strong> users
+              <strong className="text-foreground">{role.userCount ?? 0}</strong> users
             </span>
           </div>
 
@@ -591,19 +591,19 @@ function RoleCard({
                 </span>
               ))}
               {enabledMods.length > 4 && (
-                <span className="text-xs font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500">
+                <span className="text-xs font-medium px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
                   +{enabledMods.length - 4}
                 </span>
               )}
             </div>
           ) : (
-            <div className="mb-4 flex items-center gap-1.5 text-xs text-slate-400">
+            <div className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
               <AlertTriangle className="h-3 w-3 text-amber-400" /> No permissions set
             </div>
           )}
 
           {/* Action buttons */}
-          <div className="flex gap-2 mt-auto pt-3 border-t border-slate-100">
+          <div className="flex gap-2 mt-auto pt-3 border-t border-border">
             <Button
               variant="outline"
               size="sm"
@@ -681,24 +681,24 @@ export default function SettingsRolesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60">
+    <div className="min-h-screen bg-muted/60">
       {/* Page Header */}
-      <div className="bg-white border-b sticky top-0 z-20">
+      <div className="bg-card border-b sticky top-0 z-20">
         <div className="px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center">
               <Shield className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <h1 className="text-base font-semibold text-slate-800">Roles & Permissions</h1>
-              <p className="text-xs text-slate-500">
+              <h1 className="text-base font-semibold text-foreground">Roles & Permissions</h1>
+              <p className="text-xs text-muted-foreground">
                 {roles.length} total roles • {roles.filter((r) => !r.isSystem).length} custom
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 placeholder="Search roles…"
                 value={search}
@@ -724,7 +724,7 @@ export default function SettingsRolesPage() {
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-xl border border-slate-200 h-52 animate-pulse"
+                className="bg-card rounded-xl border border-border h-52 animate-pulse"
               />
             ))}
           </div>
@@ -734,10 +734,10 @@ export default function SettingsRolesPage() {
             {customRoles.length > 0 && (
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     Custom Roles
                   </h2>
-                  <div className="h-px flex-1 bg-slate-200" />
+                  <div className="h-px flex-1 bg-muted" />
                   <Badge variant="secondary" className="text-xs">
                     {customRoles.length}
                   </Badge>
@@ -760,10 +760,10 @@ export default function SettingsRolesPage() {
             {systemRoles.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     System Roles
                   </h2>
-                  <div className="h-px flex-1 bg-slate-200" />
+                  <div className="h-px flex-1 bg-muted" />
                   <Badge variant="secondary" className="text-xs">
                     {systemRoles.length}
                   </Badge>
@@ -784,11 +784,11 @@ export default function SettingsRolesPage() {
 
             {!filtered.length && (
               <div className="text-center py-20">
-                <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-7 w-7 text-slate-300" />
+                <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-7 w-7 text-muted-foreground" />
                 </div>
-                <p className="text-slate-600 font-medium">No roles found</p>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-foreground font-medium">No roles found</p>
+                <p className="text-muted-foreground text-sm mt-1">
                   {search
                     ? `No results for "${search}"`
                     : "Create your first custom role to get started."}

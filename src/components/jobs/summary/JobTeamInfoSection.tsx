@@ -81,11 +81,11 @@ export function JobTeamInfoSection({ jobDetails, canModify }: JobTeamInfoSection
 
   return (
     <CollapsibleSection title="Job Team Info">
-      <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+      <div className="bg-card rounded-lg border shadow-sm p-4 space-y-3">
         <div className="flex items-center justify-between pb-2 border-b">
-          <h3 className="text-sm font-medium text-gray-900">Team Assignment</h3>
+          <h3 className="text-sm font-medium text-foreground">Team Assignment</h3>
           {isLoading && (
-            <span className="text-xs text-gray-400 animate-pulse">Loading…</span>
+            <span className="text-xs text-muted-foreground animate-pulse">Loading…</span>
           )}
         </div>
 

@@ -111,10 +111,10 @@ export function CandidateTeamInfoSection({ candidateDetails, handleUpdateField }
 
   return (
     <CollapsibleSection title="Candidate Team Info">
-      <div className="bg-white rounded-lg border shadow-sm p-4 space-y-3">
+      <div className="bg-card rounded-lg border shadow-sm p-4 space-y-3">
         {/* Section Header with Edit Button */}
         <div className="flex items-center justify-between pb-2 border-b">
-          <h3 className="text-sm font-medium text-gray-900">Team Assignment</h3>
+          <h3 className="text-sm font-medium text-foreground">Team Assignment</h3>
           <Button
             variant="outline"
             size="sm"

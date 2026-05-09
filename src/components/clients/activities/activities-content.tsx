@@ -105,7 +105,7 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
 
       <div className="space-y-4">
         {activities.map((activity) => (
-          <div key={activity.id} className="bg-white rounded-lg border p-4">
+          <div key={activity.id} className="bg-card rounded-lg border p-4">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8 bg-blue-500">

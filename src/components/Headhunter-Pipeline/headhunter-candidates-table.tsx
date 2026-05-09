@@ -78,30 +78,30 @@ export const HeadhunterCandidatesTable: React.FC<HeadhunterCandidatesTableProps>
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
-    <div className="bg-white  shadow-sm h-[560px] overflow-y-auto">
+    <div className="bg-card  shadow-sm h-[560px] overflow-y-auto">
       <Table>
-        <TableHeader className="sticky top-0 z-20 bg-white">
-          <TableRow className="bg-white">
-            <TableHead className="w-12 px-4 sticky top-0 z-20 bg-white">
+        <TableHeader className="sticky top-0 z-20 bg-card">
+          <TableRow className="bg-card">
+            <TableHead className="w-12 px-4 sticky top-0 z-20 bg-card">
               <div className="flex items-center justify-center">
                 <Checkbox
                   checked={selectedIds.size > 0 && selectedIds.size === candidates.length}
                   onCheckedChange={() => onToggleSelectAll?.()}
-                  className="h-4 w-4 rounded border-gray-300 data-[state=checked]:bg-slate-100 data-[state=checked]:text-blue-600 data-[state=checked]:border-blue-600 focus-visible:ring-indigo-500"
+                  className="h-4 w-4 rounded border-border data-[state=checked]:bg-muted data-[state=checked]:text-blue-600 data-[state=checked]:border-blue-600 focus-visible:ring-indigo-500"
                 />
               </div>
             </TableHead>
-            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-white">Candidate Name</TableHead>
-            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-white">Email</TableHead>
-            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-white">Phone</TableHead>
-            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-white">Resume</TableHead>
-            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-white">Action</TableHead>
+            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-card">Candidate Name</TableHead>
+            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-card">Email</TableHead>
+            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-card">Phone</TableHead>
+            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-card">Resume</TableHead>
+            <TableHead className="text-xs uppercase text-muted-foreground font-medium sticky top-0 z-20 bg-card">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {candidates.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-gray-500 py-6">
+              <TableCell colSpan={6} className="text-center text-muted-foreground py-6">
                 No candidates
               </TableCell>
             </TableRow>
@@ -113,7 +113,7 @@ export const HeadhunterCandidatesTable: React.FC<HeadhunterCandidatesTableProps>
                     <Checkbox
                       checked={selectedIds.has(c.id)}
                       onCheckedChange={() => onToggleSelect?.(c.id)}
-                      className="h-4 w-4 rounded border-gray-300 data-[state=checked]:bg-slate-100 data-[state=checked]:text-blue-600 data-[state=checked]:border-blue-600 focus-visible:ring-indigo-500"
+                      className="h-4 w-4 rounded border-border data-[state=checked]:bg-muted data-[state=checked]:text-blue-600 data-[state=checked]:border-blue-600 focus-visible:ring-indigo-500"
                     />
                   </div>
                 </TableCell>
@@ -129,7 +129,7 @@ export const HeadhunterCandidatesTable: React.FC<HeadhunterCandidatesTableProps>
                       Resume
                     </span>
                   ) : (
-                    <span className="text-gray-500">N/A</span>
+                    <span className="text-muted-foreground">N/A</span>
                   )}
                 </TableCell>
                 <TableCell>

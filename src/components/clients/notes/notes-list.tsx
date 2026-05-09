@@ -35,7 +35,7 @@ export function NotesList({ notes, onEdit, onDelete, canModify }: NotesListProps
   return (
     <div className="space-y-6 overflow-x-hidden">
       {notes.map((note) => (
-        <div key={note.id} className="bg-white rounded-lg border p-4 overflow-x-hidden">
+        <div key={note.id} className="bg-card rounded-lg border p-4 overflow-x-hidden">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <div>

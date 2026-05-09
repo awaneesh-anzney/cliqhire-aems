@@ -75,7 +75,7 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
 
         <div className="p-4">
           <div className="mb-4">
-            <div className="text-gray-600 mb-2">Related To</div>
+            <div className="text-foreground mb-2">Related To</div>
             <div className="flex items-center gap-2">
               <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center">
                 A
@@ -118,7 +118,7 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
               >
                 <Strikethrough className="h-4 w-4" />
               </Button>
-              <div className="w-px h-8 bg-gray-200 mx-1" />
+              <div className="w-px h-8 bg-muted mx-1" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -132,7 +132,7 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
               >
                 <Link2 className="h-4 w-4" />
               </Button>
-              <div className="w-px h-8 bg-gray-200 mx-1" />
+              <div className="w-px h-8 bg-muted mx-1" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -141,7 +141,7 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
               >
                 <List className="h-4 w-4" />
               </Button>
-              <div className="w-px h-8 bg-gray-200 mx-1" />
+              <div className="w-px h-8 bg-muted mx-1" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -166,7 +166,7 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
               >
                 <AlignRight className="h-4 w-4" />
               </Button>
-              <div className="w-px h-8 bg-gray-200 mx-1" />
+              <div className="w-px h-8 bg-muted mx-1" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -183,7 +183,7 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
               >
                 <Redo className="h-4 w-4" />
               </Button>
-              <div className="w-px h-8 bg-gray-200 mx-1" />
+              <div className="w-px h-8 bg-muted mx-1" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -200,7 +200,7 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-4 border-t bg-gray-50">
+        <div className="flex items-center justify-between p-4 border-t bg-muted">
           <div className="flex items-center gap-4">
             <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white">
               Save
@@ -215,10 +215,10 @@ export function AddNoteDialog({ open, onOpenChange, onSubmit }: AddNoteDialogPro
               id="share-guest"
               checked={isSharedWithGuest}
               onChange={(e) => setIsSharedWithGuest(e.target.checked)}
-              className="rounded border-gray-300"
+              className="rounded border-border"
             />
-            <label htmlFor="share-guest" className="text-sm text-gray-600">Share with guest</label>
-            <button className="ml-2 text-gray-400 hover:text-gray-600">
+            <label htmlFor="share-guest" className="text-sm text-foreground">Share with guest</label>
+            <button className="ml-2 text-muted-foreground hover:text-foreground">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 16v-4M12 8h.01"/>

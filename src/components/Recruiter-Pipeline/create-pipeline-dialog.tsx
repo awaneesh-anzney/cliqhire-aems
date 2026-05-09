@@ -298,12 +298,12 @@ export function CreatePipelineDialog({ trigger, onPipelineCreated }: CreatePipel
                       if (!job) return null;
                       
                       return (
-                        <div key={jobId} className="p-4 rounded-lg border bg-gray-50/50">
+                        <div key={jobId} className="p-4 rounded-lg border bg-muted/50">
                           <div className="flex justify-between items-start">
                             <div className="flex-1 grid grid-cols-2 gap-4">
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                  <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                     Job Title:
                                   </span>
                                   <span className="text-sm text-muted-foreground">
@@ -311,7 +311,7 @@ export function CreatePipelineDialog({ trigger, onPipelineCreated }: CreatePipel
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                  <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                     Client:
                                   </span>
                                   <span className="text-sm text-muted-foreground">
@@ -319,7 +319,7 @@ export function CreatePipelineDialog({ trigger, onPipelineCreated }: CreatePipel
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                  <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                     Location:
                                   </span>
                                   <span className="text-sm text-muted-foreground">
@@ -329,7 +329,7 @@ export function CreatePipelineDialog({ trigger, onPipelineCreated }: CreatePipel
                               </div>
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                  <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                     Salary:
                                   </span>
                                   <span className="text-sm text-muted-foreground">
@@ -337,7 +337,7 @@ export function CreatePipelineDialog({ trigger, onPipelineCreated }: CreatePipel
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                  <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                     Job Type:
                                   </span>
                                   <span className="text-sm text-muted-foreground">
@@ -345,7 +345,7 @@ export function CreatePipelineDialog({ trigger, onPipelineCreated }: CreatePipel
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-gray-500 min-w-[80px]">
+                                  <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">
                                     Experience:
                                   </span>
                                   <span className="text-sm text-muted-foreground">

@@ -186,15 +186,15 @@
  
    return (
      <Sheet open={open} onOpenChange={onOpenChange}>
-       <SheetContent side="right" className="w-full sm:max-w-md p-0 bg-white border-l border-slate-100 shadow-2xl flex flex-col overflow-hidden">
+       <SheetContent side="right" className="w-full sm:max-w-md p-0 bg-card border-l border-border shadow-2xl flex flex-col overflow-hidden">
          {/* Premium Header */}
-         <SheetHeader className="px-6 py-8 border-b border-slate-50 bg-white shrink-0 relative">
+         <SheetHeader className="px-6 py-8 border-b border-border bg-card shrink-0 relative">
            <div className="flex items-center gap-4">
              <div className="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center text-brand shadow-sm">
                <Filter className="w-6 h-6" />
              </div>
              <div>
-               <SheetTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+               <SheetTitle className="text-xl font-black text-foreground tracking-tight flex items-center gap-2">
                  {config.title}
                  {activeFilterCount > 0 && (
                    <span className="bg-brand text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-in zoom-in">
@@ -202,14 +202,14 @@
                    </span>
                  )}
                </SheetTitle>
-               <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
+               <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">
                  {config.subtitle}
                </p>
              </div>
            </div>
            <button 
              onClick={() => onOpenChange(false)}
-             className="absolute top-8 right-6 p-2 rounded-xl hover:bg-slate-50 transition-all text-slate-300 hover:text-slate-900"
+             className="absolute top-8 right-6 p-2 rounded-xl hover:bg-muted transition-all text-muted-foreground hover:text-foreground"
            >
              <X className="w-5 h-5" />
            </button>
@@ -227,14 +227,14 @@
                    <div className="flex items-center gap-3">
                      <div className={cn(
                        "p-2 rounded-xl transition-all duration-300",
-                       tempFilters[field.id] ? "bg-brand/10 text-brand" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+                       tempFilters[field.id] ? "bg-brand/10 text-brand" : "bg-muted text-muted-foreground group-hover:bg-muted"
                      )}>
                        {field.icon ? <field.icon className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
                      </div>
-                     <span className="text-[11px] font-black text-slate-900 uppercase tracking-wider">{field.label}</span>
+                     <span className="text-[11px] font-black text-foreground uppercase tracking-wider">{field.label}</span>
                    </div>
                    <ChevronDown className={cn(
-                     "w-4 h-4 text-slate-300 transition-transform duration-300",
+                     "w-4 h-4 text-muted-foreground transition-transform duration-300",
                      expandedSections.includes(field.id) ? "rotate-180" : ""
                    )} />
                  </button>
@@ -247,12 +247,12 @@
                            value={tempFilters[field.id] || ""}
                            onChange={(e) => handleValueChange(field.id, e.target.value)}
                            placeholder={field.placeholder}
-                           className="bg-slate-50/50 border-slate-100 rounded-xl focus-visible:ring-brand h-11 text-sm font-medium"
+                           className="bg-muted/50 border-border rounded-xl focus-visible:ring-brand h-11 text-sm font-medium"
                          />
                          {tempFilters[field.id] && (
                            <button 
                              onClick={() => handleValueChange(field.id, "")}
-                             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-300 hover:text-slate-900"
+                             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
                            >
                              <X className="w-3.5 h-3.5" />
                            </button>
@@ -270,11 +270,11 @@
                              <Checkbox 
                                checked={(tempFilters[field.id] || []).includes(option.value)}
                                onCheckedChange={(checked) => handleCheckboxChange(field.id, option.value, !!checked)}
-                               className="rounded-md border-slate-200 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
+                               className="rounded-md border-border data-[state=checked]:bg-brand data-[state=checked]:border-brand"
                              />
                              <span className={cn(
                                "text-sm font-medium transition-colors",
-                               (tempFilters[field.id] || []).includes(option.value) ? "text-slate-900 font-bold" : "text-slate-500 group-hover:text-slate-900"
+                               (tempFilters[field.id] || []).includes(option.value) ? "text-foreground font-bold" : "text-muted-foreground group-hover:text-foreground"
                              )}>
                                {option.label}
                              </span>
@@ -284,19 +284,19 @@
                      )}
                    </div>
                  )}
-                 <Separator className="bg-slate-50" />
+                 <Separator className="bg-muted" />
                </div>
              ))}
            </div>
          </ScrollArea>
  
          {/* Actions (E-commerce Style) */}
-         <div className="p-6 border-t border-slate-100 bg-white/80 backdrop-blur-md shrink-0">
+         <div className="p-6 border-t border-border bg-card/80 backdrop-blur-md shrink-0">
            <div className="flex gap-3">
              <Button
                variant="outline"
                onClick={handleReset}
-               className="flex-1 h-12 rounded-2xl border-2 border-slate-100 font-black text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all active:scale-95"
+               className="flex-1 h-12 rounded-2xl border-2 border-border font-black text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-95"
              >
                <RotateCcw className="w-4 h-4 mr-2" />
                Reset

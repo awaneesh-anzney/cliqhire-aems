@@ -105,11 +105,11 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
     const salaryValue = localCandidate?.currentSalary;
     const hasSalary = salaryValue !== undefined && salaryValue !== null && salaryValue !== '';
     return (
-      <div className="flex items-center gap-4 p-3 border rounded-md bg-gray-50">
+      <div className="flex items-center gap-4 p-3 border rounded-md bg-muted">
         <div className="flex items-center gap-2 flex-1">
-          <Label className="text-sm font-medium text-gray-700 min-w-[100px]">Current Salary:</Label>
-          <div className="bg-white px-3 py-2 rounded border flex-1">
-            <span className={`text-sm ${hasSalary ? 'font-medium' : 'text-gray-500'}`}>
+          <Label className="text-sm font-medium text-foreground min-w-[100px]">Current Salary:</Label>
+          <div className="bg-card px-3 py-2 rounded border flex-1">
+            <span className={`text-sm ${hasSalary ? 'font-medium' : 'text-muted-foreground'}`}>
               {hasSalary ? `${currencyValue} ${salaryValue}` : 'No Details'}
             </span>
           </div>
@@ -133,11 +133,11 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
     const salaryValue = localCandidate?.expectedSalary;
     const hasSalary = salaryValue !== undefined && salaryValue !== null && salaryValue !== '';
     return (
-      <div className="flex items-center gap-4 p-3 border rounded-md bg-gray-50">
+      <div className="flex items-center gap-4 p-3 border rounded-md bg-muted">
         <div className="flex items-center gap-2 flex-1">
-          <Label className="text-sm font-medium text-gray-700 min-w-[100px]">Expected Salary:</Label>
-          <div className="bg-white px-3 py-2 rounded border flex-1">
-            <span className={`text-sm ${hasSalary ? 'font-medium' : 'text-gray-500'}`}>
+          <Label className="text-sm font-medium text-foreground min-w-[100px]">Expected Salary:</Label>
+          <div className="bg-card px-3 py-2 rounded border flex-1">
+            <span className={`text-sm ${hasSalary ? 'font-medium' : 'text-muted-foreground'}`}>
               {hasSalary ? `${currencyValue} ${salaryValue}` : 'No Details'}
             </span>
           </div>

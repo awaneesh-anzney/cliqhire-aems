@@ -151,7 +151,7 @@ export default function NewContractPage({ params }: PageProps) {
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center justify-center">
           <TriangleAlert className="size-4 text-red-500 mb-2" />
-          <div className="text-gray-600">Something went wrong! Please try again later</div>
+          <div className="text-foreground">Something went wrong! Please try again later</div>
         </div>
       </div>
     );
@@ -162,7 +162,7 @@ export default function NewContractPage({ params }: PageProps) {
       <div className="flex items-center justify-center h-full">
         <div className="flex items-center flex-col justify-center">
           <Loader className="size-6 animate-spin text-primary mb-2" />
-          <p className="text-gray-600">Loading client data...</p>
+          <p className="text-foreground">Loading client data...</p>
         </div>
       </div>
     );
@@ -179,30 +179,30 @@ export default function NewContractPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 overflow-y-auto">
-      <div className="border-b bg-white py-2 px-3 flex items-center sticky top-0 z-10 shadow-sm">
-        <Button variant="ghost" size="icon" onClick={() => router.push(`/clients/${id}/contract`)} className="rounded-full hover:bg-slate-100 mr-4">
-          <ArrowLeft className="h-5 w-5 text-slate-600" />
+    <div className="flex flex-col h-full bg-muted overflow-y-auto">
+      <div className="border-b bg-card py-2 px-3 flex items-center sticky top-0 z-10 shadow-sm">
+        <Button variant="ghost" size="icon" onClick={() => router.push(`/clients/${id}/contract`)} className="rounded-full hover:bg-muted mr-4">
+          <ArrowLeft className="h-5 w-5 text-foreground" />
         </Button>
         <div>
-          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
             <FilePlus className="h-5 w-5 text-primary" />
             Add New Contract
           </h1>
-          <p className="text-sm text-slate-500">For client: {client.name}</p>
+          <p className="text-sm text-muted-foreground">For client: {client.name}</p>
         </div>
       </div>
       <div className="flex-1 p-2  w-full">
-        <Card className="shadow-lg border-0 bg-white rounded-xl overflow-hidden mb-4">
-          <CardHeader className="bg-slate-50/80 border-b px-6 py-4">
-            <CardTitle className="text-2xl text-slate-800">Contract Configuration</CardTitle>
-            <CardDescription className="text-base text-slate-500">
+        <Card className="shadow-lg border-0 bg-card rounded-xl overflow-hidden mb-4">
+          <CardHeader className="bg-muted/80 border-b px-6 py-4">
+            <CardTitle className="text-2xl text-foreground">Contract Configuration</CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
               Select one or more lines of business. You can fill out the specific contract terms for each below.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-6 py-6">
             <div className="space-y-4">
-              <Label className="text-base font-semibold text-slate-800">
+              <Label className="text-base font-semibold text-foreground">
                 Select Line of Business<span className="text-red-600 ml-1">*</span>
               </Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -210,7 +210,7 @@ export default function NewContractPage({ params }: PageProps) {
                   <div 
                     key={option} 
                     className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer transition-colors ${
-                      addContractFormData.lineOfBusiness.includes(option) ? 'border-primary bg-primary/5' : 'hover:bg-slate-50'
+                      addContractFormData.lineOfBusiness.includes(option) ? 'border-primary bg-primary/5' : 'hover:bg-muted'
                     }`}
                     onClick={() => handleBusinessCheckChange(option, !addContractFormData.lineOfBusiness.includes(option))}
                   >
@@ -234,9 +234,9 @@ export default function NewContractPage({ params }: PageProps) {
             {addContractFormData.lineOfBusiness.length > 0 && (
               <div className="mt-10 space-y-8">
                 {addContractFormData.lineOfBusiness.map((business) => (
-                  <div key={business} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                    <div className="bg-slate-100/50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                      <h3 className="font-semibold text-lg text-slate-800">{business} Details</h3>
+                  <div key={business} className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
+                    <div className="bg-muted/50 px-6 py-4 border-b border-border flex items-center justify-between">
+                      <h3 className="font-semibold text-lg text-foreground">{business} Details</h3>
                     </div>
                     <div className="p-6">
                       {["Recruitment", "HR Managed Services", "IT & Technology"].includes(business) && (
@@ -264,12 +264,12 @@ export default function NewContractPage({ params }: PageProps) {
               </div>
             )}
           </CardContent>
-          <CardFooter className="bg-slate-50/80 border-t px-6 py-4 flex justify-end gap-3 sticky bottom-0 z-10">
+          <CardFooter className="bg-muted/80 border-t px-6 py-4 flex justify-end gap-3 sticky bottom-0 z-10">
             <Button
               variant="outline"
               onClick={() => router.push(`/clients/${id}/contract`)}
               disabled={isAddingContract}
-              className="px-6 border-slate-300"
+              className="px-6 border-border"
             >
               Cancel
             </Button>

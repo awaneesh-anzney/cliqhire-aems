@@ -22,7 +22,7 @@ function OptionCard({ icon, title, description, onClick }: OptionCardProps) {
   return (
     <Button
       variant="outline"
-      className="h-auto flex flex-col items-center gap-4 p-8 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-300 group shadow-sm hover:shadow-md bg-white"
+      className="h-auto flex flex-col items-center gap-4 p-8 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-300 group shadow-sm hover:shadow-md bg-card"
       onClick={onClick}
     >
       <div className="w-16 h-16 flex items-center justify-center bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors duration-300">
@@ -31,9 +31,9 @@ function OptionCard({ icon, title, description, onClick }: OptionCardProps) {
         })}
       </div>
       <div className="flex flex-col items-center gap-1">
-        <span className="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors duration-300">{title}</span>
+        <span className="text-lg font-bold text-foreground group-hover:text-primary transition-colors duration-300">{title}</span>
         {description && (
-          <span className="text-sm text-slate-500 font-normal group-hover:text-slate-600 transition-colors duration-300">{description}</span>
+          <span className="text-sm text-muted-foreground font-normal group-hover:text-foreground transition-colors duration-300">{description}</span>
         )}
       </div>
     </Button>
@@ -72,7 +72,7 @@ export function AddCandidateDialog({
           <DialogTitle className="text-3xl font-black text-primary leading-tight tracking-tight">
             Add Candidate
           </DialogTitle>
-          <DialogDescription className="text-slate-500 text-base mt-2">
+          <DialogDescription className="text-muted-foreground text-base mt-2">
             {jobTitle
               ? `Expand your talent pool for "${jobTitle}" by choosing one of the methods below.`
               : "Choose your preferred method to add a new candidate to the pipeline."}

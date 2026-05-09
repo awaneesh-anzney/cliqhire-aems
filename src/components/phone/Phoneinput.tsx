@@ -176,7 +176,7 @@ export default function PhoneInput({
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
-        <label className="text-sm font-bold text-slate-700 uppercase tracking-tight ml-0.5">
+        <label className="text-sm font-bold text-foreground uppercase tracking-tight ml-0.5">
           {label}
           {required && <span className="text-primary ml-1">*</span>}
         </label>
@@ -184,9 +184,9 @@ export default function PhoneInput({
 
       <div
         className={cn(
-          "flex items-center border rounded-xl overflow-visible bg-white transition-all h-11",
-          displayError ? "border-red-400 focus-within:border-red-500 shadow-sm shadow-red-50" : "border-slate-200 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 shadow-sm",
-          disabled && "opacity-50 pointer-events-none bg-slate-50"
+          "flex items-center border rounded-xl overflow-visible bg-card transition-all h-11",
+          displayError ? "border-red-400 focus-within:border-red-500 shadow-sm shadow-red-50" : "border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 shadow-sm",
+          disabled && "opacity-50 pointer-events-none bg-muted"
         )}
       >
         {/* Country Selector */}
@@ -195,12 +195,12 @@ export default function PhoneInput({
             type="button"
             onClick={() => setDropdownOpen((prev) => !prev)}
             disabled={disabled}
-            className="flex items-center gap-2 px-3 h-full border-r border-slate-100 hover:bg-slate-50 transition-colors min-w-[95px]"
+            className="flex items-center gap-2 px-3 h-full border-r border-border hover:bg-muted transition-colors min-w-[95px]"
           >
             <span className="text-lg leading-none">{selectedCountry.flag}</span>
-            <span className="text-sm text-slate-900 font-bold">{selectedCountry.dialCode}</span>
+            <span className="text-sm text-foreground font-bold">{selectedCountry.dialCode}</span>
             <svg
-              className={cn("w-3.5 h-3.5 text-slate-400 transition-transform", dropdownOpen && "rotate-180")}
+              className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform", dropdownOpen && "rotate-180")}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -212,21 +212,21 @@ export default function PhoneInput({
 
           {/* Dropdown */}
           {dropdownOpen && (
-            <div className="absolute z-[100] top-full left-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-left">
-              <div className="p-3 border-b border-slate-100 bg-slate-50/50">
+            <div className="absolute z-[100] top-full left-0 mt-2 w-72 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-left">
+              <div className="p-3 border-b border-border bg-muted/50">
                 <input
                   ref={searchRef}
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search country or code..."
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-bold"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-bold"
                 />
               </div>
 
               <ul className="max-h-64 overflow-y-auto custom-scrollbar p-1">
                 {filteredCountries.length === 0 ? (
-                  <li className="px-4 py-8 text-sm text-slate-400 text-center font-bold">No country matches</li>
+                  <li className="px-4 py-8 text-sm text-muted-foreground text-center font-bold">No country matches</li>
                 ) : (
                   filteredCountries.map((country) => (
                     <li
@@ -234,12 +234,12 @@ export default function PhoneInput({
                       onClick={() => handleCountrySelect(country)}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-xl transition-all",
-                        country.code === selectedCountry.code ? "bg-primary/10 text-primary font-bold" : "hover:bg-slate-50 text-slate-700"
+                        country.code === selectedCountry.code ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted text-foreground"
                       )}
                     >
                       <span className="text-lg">{country.flag}</span>
                       <span className="flex-1 text-sm font-bold truncate">{country.name}</span>
-                      <span className="text-slate-400 text-[10px] font-black uppercase">{country.dialCode}</span>
+                      <span className="text-muted-foreground text-[10px] font-black uppercase">{country.dialCode}</span>
                     </li>
                   ))
                 )}
@@ -257,7 +257,7 @@ export default function PhoneInput({
           onBlur={handleBlur}
           disabled={disabled}
           placeholder={placeholder || `${selectedCountry.minLength}–${selectedCountry.maxLength} digits`}
-          className="flex-1 px-4 py-2.5 text-sm font-bold outline-none bg-transparent text-slate-900 placeholder:text-slate-300"
+          className="flex-1 px-4 py-2.5 text-sm font-bold outline-none bg-transparent text-foreground placeholder:text-muted-foreground"
         />
 
         {/* Status Icon */}

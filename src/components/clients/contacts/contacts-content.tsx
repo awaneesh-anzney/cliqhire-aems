@@ -87,7 +87,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
     return (
       <div className="flex flex-col items-center justify-center p-20 space-y-4">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-slate-500 font-bold animate-pulse uppercase tracking-widest text-[10px]">Loading Primary Contacts...</p>
+        <p className="text-muted-foreground font-bold animate-pulse uppercase tracking-widest text-[10px]">Loading Primary Contacts...</p>
       </div>
     );
   }
@@ -102,26 +102,26 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
   }
 
   return (
-    <div className="bg-slate-50/50 rounded-2xl p-6 space-y-8 animate-in fade-in duration-500">
+    <div className="bg-muted/50 rounded-2xl p-6 space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Card: Client Identity */}
         <div className="w-full lg:w-[35%] shrink-0">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group hover:shadow-md transition-all">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group hover:shadow-md transition-all">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-brand/10 rounded-lg group-hover:bg-brand group-hover:text-white transition-all duration-300">
                   <Globe className="w-4 h-4 text-brand group-hover:text-white" />
                 </div>
-                <h2 className="text-xs font-black text-slate-900 uppercase tracking-widest">Client Identity</h2>
+                <h2 className="text-xs font-black text-foreground uppercase tracking-widest">Client Identity</h2>
               </div>
               {canModify && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 rounded-lg hover:bg-slate-100"
+                  className="h-8 w-8 p-0 rounded-lg hover:bg-muted"
                   onClick={() => setIsContactEditOpen(true)}
                 >
-                  <Pencil className="h-3.5 w-3.5 text-slate-400" />
+                  <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
               )}
             </div>
@@ -129,47 +129,47 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
             <div className="p-6 space-y-6">
               <div className="space-y-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Phone</span>
-                  <p className="text-sm font-bold text-slate-700">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Phone</span>
+                  <p className="text-sm font-bold text-foreground">
                     {clientInfo.phoneNumber ? formatPhoneNumber(clientInfo.phoneNumber, clientData?.countryCode) : "Not Provided"}
                   </p>
                 </div>
                 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Website</span>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Website</span>
                   {clientInfo.website ? (
                     <a href={clientInfo.website} target="_blank" className="text-sm font-bold text-brand hover:underline flex items-center gap-1">
                       {clientInfo.website} <Globe className="w-3 h-3" />
                     </a>
-                  ) : <p className="text-sm font-bold text-slate-300 italic">Not Provided</p>}
+                  ) : <p className="text-sm font-bold text-muted-foreground italic">Not Provided</p>}
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Primary Email(s)</span>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Primary Email(s)</span>
                   <div className="flex flex-wrap gap-2">
                     {clientInfo.emails.length > 0 ? clientInfo.emails.map((email: string, idx: number) => (
-                      <a key={idx} href={`mailto:${email}`} className="text-sm font-bold text-slate-700 hover:text-brand transition-colors">
+                      <a key={idx} href={`mailto:${email}`} className="text-sm font-bold text-foreground hover:text-brand transition-colors">
                         {email}{idx < clientInfo.emails.length - 1 ? "," : ""}
                       </a>
-                    )) : <p className="text-sm font-bold text-slate-300 italic">Not Provided</p>}
+                    )) : <p className="text-sm font-bold text-muted-foreground italic">Not Provided</p>}
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">LinkedIn Profile</span>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">LinkedIn Profile</span>
                   {clientInfo.linkedInProfile ? (
                     <a href={clientInfo.linkedInProfile} target="_blank" className="text-sm font-bold text-brand hover:underline flex items-center gap-1">
                       Official Page <Linkedin className="w-3 h-3" />
                     </a>
-                  ) : <p className="text-sm font-bold text-slate-300 italic">Not Provided</p>}
+                  ) : <p className="text-sm font-bold text-muted-foreground italic">Not Provided</p>}
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-50 flex items-start gap-3">
-                <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
-                  <Info className="w-4 h-4 text-slate-400" />
+              <div className="pt-6 border-t border-border flex items-start gap-3">
+                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <Info className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
+                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed">
                   These details represent the general contact channels for {clientData?.name || "the client"}.
                 </p>
               </div>
@@ -181,13 +181,13 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
         <div className="flex-1 space-y-6">
           <div className="flex items-center justify-between px-2">
             <div className="space-y-1">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <h2 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-3">
                 Primary Stakeholders
                 <span className="text-[10px] font-black bg-brand/10 text-brand px-2.5 py-1 rounded-full border border-brand/10 shadow-sm">
                   {primaryContacts.length}
                 </span>
               </h2>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Strategic Decision Makers & Points of Contact</p>
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Strategic Decision Makers & Points of Contact</p>
             </div>
             {canModify && (
               <Button 
@@ -200,19 +200,19 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
           </div>
 
           {primaryContacts.length === 0 ? (
-            <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center flex flex-col items-center">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                <Users className="w-8 h-8 text-slate-300" />
+            <div className="bg-card rounded-3xl border-2 border-dashed border-border p-12 text-center flex flex-col items-center">
+              <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-4">
+                <Users className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-black text-slate-800">No Stakeholders Assigned</h3>
-              <p className="text-slate-500 text-sm font-semibold max-w-sm mx-auto mt-1 mb-6">
+              <h3 className="text-lg font-black text-foreground">No Stakeholders Assigned</h3>
+              <p className="text-muted-foreground text-sm font-semibold max-w-sm mx-auto mt-1 mb-6">
                 Assign primary contacts to track relationship ownership and streamline communication.
               </p>
               {canModify && (
                 <Button 
                   onClick={() => setAddEditModalOpen(true)}
                   variant="outline"
-                  className="font-bold border-slate-200 hover:bg-slate-50"
+                  className="font-bold border-border hover:bg-muted"
                 >
                   <Plus className="w-4 h-4 mr-2" /> Add First Contact
                 </Button>
@@ -221,22 +221,22 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {primaryContacts.map((contact, index) => (
-                <div key={contact._id || index} className="group bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-lg hover:border-brand/20 transition-all relative overflow-hidden">
+                <div key={contact._id || index} className="group bg-card rounded-2xl border border-border p-5 shadow-sm hover:shadow-lg hover:border-brand/20 transition-all relative overflow-hidden">
                   {/* Status Indicator */}
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-50 group-hover:bg-brand transition-all duration-300" />
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-muted group-hover:bg-brand transition-all duration-300" />
                   
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand/5 group-hover:text-brand transition-all duration-500 shadow-inner">
+                      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-brand/5 group-hover:text-brand transition-all duration-500 shadow-inner">
                         <User className="w-7 h-7" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="text-base font-black text-slate-900 leading-tight tracking-tight">
+                          <h4 className="text-base font-black text-foreground leading-tight tracking-tight">
                             {contact.firstName} {contact.lastName}
                           </h4>
                           {contact.gender && (
-                            <span className="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200/50">
+                            <span className="text-[8px] font-black bg-muted text-muted-foreground px-2 py-0.5 rounded-full uppercase tracking-tighter border border-border/50">
                               {contact.gender}
                             </span>
                           )}
@@ -252,10 +252,10 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-lg hover:bg-slate-100"
+                          className="h-8 w-8 rounded-lg hover:bg-muted"
                           onClick={() => { setEditContactIndex(index); setAddEditModalOpen(true); }}
                         >
-                          <Pencil className="h-3.5 w-3.5 text-slate-400" />
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -270,17 +270,17 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                   </div>
 
                   <div className="space-y-2.5">
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
-                      <Mail className="w-3.5 h-3.5 text-slate-300" />
+                    <div className="flex items-center gap-3 text-xs font-bold text-foreground">
+                      <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                       <span className="truncate">{contact.email || "No email provided"}</span>
                     </div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
-                      <Phone className="w-3.5 h-3.5 text-slate-300" />
+                    <div className="flex items-center gap-3 text-xs font-bold text-foreground">
+                      <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                       <span>{contact.phone ? formatPhoneNumber(contact.phone, contact.countryCode) : "No phone provided"}</span>
                     </div>
                     {contact.location && (
-                      <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
-                        <MapPin className="w-3.5 h-3.5 text-slate-300" />
+                      <div className="flex items-center gap-3 text-xs font-bold text-foreground">
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
                         <span className="truncate">{contact.location}</span>
                       </div>
                     )}
@@ -328,13 +328,13 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
           <Dialog open={deleteContactId !== null} onOpenChange={() => setDeleteContactId(null)}>
             <DialogContent className="rounded-3xl border-none shadow-2xl">
               <DialogHeader>
-                <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Revoke Access?</DialogTitle>
-                <DialogDescription className="text-sm font-semibold text-slate-500">
+                <DialogTitle className="text-xl font-black text-foreground tracking-tight">Revoke Access?</DialogTitle>
+                <DialogDescription className="text-sm font-semibold text-muted-foreground">
                   This will permanently remove this stakeholder from your records.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-3 mt-6">
-                <Button variant="ghost" onClick={() => setDeleteContactId(null)} className="font-bold text-slate-400 hover:text-slate-600">
+                <Button variant="ghost" onClick={() => setDeleteContactId(null)} className="font-bold text-muted-foreground hover:text-foreground">
                   Cancel
                 </Button>
                 <Button

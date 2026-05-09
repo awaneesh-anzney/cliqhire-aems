@@ -170,10 +170,10 @@
  
    if (isLoading) {
      return (
-       <div className="flex flex-col items-center justify-center h-screen bg-slate-50/30 gap-4">
-         <div className="p-5 rounded-3xl bg-white shadow-2xl border border-slate-100 flex items-center gap-4 animate-in zoom-in-50 duration-700">
+       <div className="flex flex-col items-center justify-center h-screen bg-muted/30 gap-4">
+         <div className="p-5 rounded-3xl bg-card shadow-2xl border border-border flex items-center gap-4 animate-in zoom-in-50 duration-700">
            <Loader2 className="h-6 w-6 animate-spin text-brand" />
-           <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Loading Candidate Profile...</span>
+           <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Loading Candidate Profile...</span>
          </div>
        </div>
      );
@@ -181,14 +181,14 @@
  
    if (error || !candidate || !job) {
      return (
-       <div className="flex flex-col items-center justify-center h-screen gap-6 bg-slate-50/50 p-6">
-         <div className="p-8 rounded-[2rem] bg-white shadow-xl border border-slate-100 text-center max-w-md">
+       <div className="flex flex-col items-center justify-center h-screen gap-6 bg-muted/50 p-6">
+         <div className="p-8 rounded-[2rem] bg-card shadow-xl border border-border text-center max-w-md">
             <User2 className="h-12 w-12 text-red-500 mx-auto mb-4 opacity-20" />
-            <h2 className="text-xl font-black text-slate-900 tracking-tighter mb-2">Profile Unreachable</h2>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 leading-relaxed">
+            <h2 className="text-xl font-black text-foreground tracking-tighter mb-2">Profile Unreachable</h2>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6 leading-relaxed">
                {(error as any)?.message || "The candidate profile could not be synchronized."}
             </p>
-            <Button variant="outline" onClick={() => router.back()} className="w-full h-12 rounded-xl font-black text-xs uppercase tracking-widest border-slate-100 hover:bg-slate-50">
+            <Button variant="outline" onClick={() => router.back()} className="w-full h-12 rounded-xl font-black text-xs uppercase tracking-widest border-border hover:bg-muted">
               <ChevronLeft className="h-4 w-4 mr-2" /> Return to Pipeline
             </Button>
          </div>
@@ -202,7 +202,7 @@
  
    return (
      <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50/50 p-3 gap-3 animate-in fade-in duration-700">
+       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Top Level Section: Header & Progress */}
          <div className="flex-shrink-0 flex flex-col gap-3 animate-in slide-in-from-top-4 duration-1000 delay-100">
            <CandidateHeaderCard
@@ -223,10 +223,10 @@
          <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-4 duration-1000 delay-200 pr-1">
            <CandidateDisqualificationCard candidate={candidate} />
  
-           <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-visible p-6">
+           <div className="bg-card rounded-[1.5rem] border border-border shadow-xl overflow-visible p-6">
              <div className="flex items-center gap-3 mb-6">
                 <LayoutDashboard className="h-5 w-5 text-brand" />
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Stage Intelligence</h3>
+                <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Stage Intelligence</h3>
              </div>
              <PipelineStageDetails
                candidate={candidate}
@@ -265,15 +265,15 @@
          open={statusChangeDialog.isOpen}
          onOpenChange={(isOpen) => !isOpen && setStatusChangeDialog({ isOpen: false, candidate: null, newStatus: null })}
        >
-         <DialogContent className="rounded-[2rem] border-slate-100 shadow-2xl">
+         <DialogContent className="rounded-[2rem] border-border shadow-2xl">
            <DialogHeader>
-             <DialogTitle className="font-black text-slate-900 tracking-tighter">Confirm Status Update</DialogTitle>
-             <DialogDescription className="font-bold text-slate-400 uppercase tracking-widest text-[11px] leading-relaxed">
+             <DialogTitle className="font-black text-foreground tracking-tighter">Confirm Status Update</DialogTitle>
+             <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
                Confirm changing the status of <strong className="text-brand">{statusChangeDialog.candidate?.name}</strong> to <strong className="text-brand">{statusChangeDialog.newStatus}</strong>.
              </DialogDescription>
            </DialogHeader>
            <DialogFooter className="gap-2">
-             <Button variant="outline" onClick={() => setStatusChangeDialog({ isOpen: false, candidate: null, newStatus: null })} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-slate-100">
+             <Button variant="outline" onClick={() => setStatusChangeDialog({ isOpen: false, candidate: null, newStatus: null })} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
                Cancel
              </Button>
              <Button onClick={handleConfirmStatusChange} className="bg-brand hover:bg-brand/90 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-brand/20">

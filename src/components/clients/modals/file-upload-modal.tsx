@@ -147,8 +147,8 @@ export const FileUploadModal = ({
           <div
             className={`
               border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
-              ${isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-300"}
-              ${selectedFile ? "bg-gray-50" : "hover:bg-gray-50"}
+              ${isDragOver ? "border-blue-500 bg-blue-50" : "border-border"}
+              ${selectedFile ? "bg-muted" : "hover:bg-muted"}
             `}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -167,8 +167,8 @@ export const FileUploadModal = ({
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-                  <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                  <p className="text-sm font-medium text-foreground">{selectedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
                 </div>
                 {uploadComplete && (
                   <p className="text-sm text-green-600 font-medium">Upload Complete!</p>
@@ -176,13 +176,13 @@ export const FileUploadModal = ({
               </div>
             ) : (
               <div className="space-y-2">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto" />
+                <Upload className="h-8 w-8 text-muted-foreground mx-auto" />
                 <div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-foreground">
                     Drag and drop your file here, or{" "}
                     <span className="text-blue-600 font-medium">browse</span>
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Max size: {maxSizeInMB}MB</p>
+                  <p className="text-xs text-muted-foreground mt-1">Max size: {maxSizeInMB}MB</p>
                 </div>
               </div>
             )}

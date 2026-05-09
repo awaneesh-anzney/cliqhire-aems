@@ -130,8 +130,8 @@ export function CreateCandidateDialog({
                 <UserPlus className="w-5 h-5" />
               </div>
               <div className="flex flex-col">
-                <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">Add Temp Candidate</DialogTitle>
-                <DialogDescription className="text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none">
+                <DialogTitle className="text-xl font-black text-foreground tracking-tight">Add Temp Candidate</DialogTitle>
+                <DialogDescription className="text-[10px] uppercase font-black text-muted-foreground tracking-widest leading-none">
                   Quick pipeline entry
                 </DialogDescription>
               </div>
@@ -147,14 +147,14 @@ export function CreateCandidateDialog({
                   name="name"
                   render={({ field }) => (
                     <FormItem className="space-y-1">
-                      <FormLabel className="text-xs font-black text-slate-700 uppercase tracking-wide">Full Name <span className="text-primary">*</span></FormLabel>
+                      <FormLabel className="text-xs font-black text-foreground uppercase tracking-wide">Full Name <span className="text-primary">*</span></FormLabel>
                       <FormControl>
                         <div className="relative group">
-                          <User className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors", form.formState.errors.name ? "text-red-400" : "text-slate-300 group-focus-within:text-primary")} />
+                          <User className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors", form.formState.errors.name ? "text-red-400" : "text-muted-foreground group-focus-within:text-primary")} />
                           <Input 
                             placeholder="John Doe" 
                             {...field} 
-                            className="pl-10 h-10 border-slate-200 font-bold focus:border-primary shadow-sm hover:border-slate-300 transition-all text-sm"
+                            className="pl-10 h-10 border-border font-bold focus:border-primary shadow-sm hover:border-border transition-all text-sm"
                           />
                         </div>
                       </FormControl>
@@ -168,14 +168,14 @@ export function CreateCandidateDialog({
                   name="profileLink"
                   render={({ field }) => (
                     <FormItem className="space-y-1">
-                      <FormLabel className="text-xs font-black text-slate-700 uppercase tracking-wide">Profile Link <span className="text-primary">*</span></FormLabel>
+                      <FormLabel className="text-xs font-black text-foreground uppercase tracking-wide">Profile Link <span className="text-primary">*</span></FormLabel>
                       <FormControl>
                         <div className="relative group">
-                          <LinkIcon className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors", form.formState.errors.profileLink ? "text-red-400" : "text-slate-300 group-focus-within:text-primary")} />
+                          <LinkIcon className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors", form.formState.errors.profileLink ? "text-red-400" : "text-muted-foreground group-focus-within:text-primary")} />
                           <Input 
                             placeholder="LinkedIn URL" 
                             {...field} 
-                            className="pl-10 h-10 border-slate-200 font-bold focus:border-primary shadow-sm text-sm"
+                            className="pl-10 h-10 border-border font-bold focus:border-primary shadow-sm text-sm"
                           />
                         </div>
                       </FormControl>
@@ -190,14 +190,14 @@ export function CreateCandidateDialog({
                     name="email"
                     render={({ field }) => (
                       <FormItem className="space-y-1">
-                        <FormLabel className="text-xs font-black text-slate-700 uppercase tracking-wide">Email</FormLabel>
+                        <FormLabel className="text-xs font-black text-foreground uppercase tracking-wide">Email</FormLabel>
                         <FormControl>
                           <div className="relative group">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input 
                               placeholder="email@..." 
                               {...field} 
-                              className="pl-10 h-10 border-slate-200 font-bold focus:border-primary shadow-sm text-sm"
+                              className="pl-10 h-10 border-border font-bold focus:border-primary shadow-sm text-sm"
                             />
                           </div>
                         </FormControl>
@@ -211,7 +211,7 @@ export function CreateCandidateDialog({
                     name="phone"
                     render={({ field }) => (
                       <FormItem className="space-y-1">
-                        <FormLabel className="text-xs font-black text-slate-700 uppercase tracking-wide">Phone</FormLabel>
+                        <FormLabel className="text-xs font-black text-foreground uppercase tracking-wide">Phone</FormLabel>
                         <FormControl>
                           <PhoneInput
                             countryCode={form.watch("countryCode")}
@@ -237,7 +237,7 @@ export function CreateCandidateDialog({
 
               <div className="pt-2 flex gap-3">
                 <DialogClose asChild>
-                  <Button type="button" variant="ghost" className="flex-1 font-bold text-slate-500 h-11">Cancel</Button>
+                  <Button type="button" variant="ghost" className="flex-1 font-bold text-muted-foreground h-11">Cancel</Button>
                 </DialogClose>
                 <Button 
                   type="submit" 

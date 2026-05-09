@@ -20,7 +20,7 @@ export function CollapsibleSection({
   const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed);
 
   return (
-    <div className={`bg-white rounded-lg border shadow-sm ${className}`}>
+    <div className={`bg-card rounded-lg border shadow-sm ${className}`}>
       <div className="flex items-center justify-between p-4">
         <h2 className="text-sm font-semibold">{title}</h2>
         <Button
