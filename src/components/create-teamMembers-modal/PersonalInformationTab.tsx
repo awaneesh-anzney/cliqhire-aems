@@ -14,6 +14,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { CreateTeamMemberData } from "@/types/teamMember";
 import PhoneInput from "@/components/phone/Phoneinput";
 import { useRoles } from "@/hooks/useRoles";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 
 interface PersonalInformationTabProps {
   formData: CreateTeamMemberData;
@@ -155,6 +156,15 @@ export function PersonalInformationTab({
             onCountryCodeChange={(code) => handleInputChange("countryCode", code)}
             phoneNumber={formData.phone || ""}
             onPhoneNumberChange={(value) => handleInputChange("phone", value || "")}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <LocationSuggestion
+            value={formData.location}
+            onChange={(val) => handleInputChange("location", val)}
+            placeholder="Search for member city..."
           />
         </div>
       </div>

@@ -26,6 +26,7 @@ interface DetailRowProps {
   customEdit?: () => void; // NEW PROP for custom edit handlers
   customInput?: React.ReactNode; // NEW PROP for custom input component
   formattedValue?: string; // NEW PROP for display-only formatting
+  isLocation?: boolean;
 }
 
 export function DetailRow({
@@ -45,6 +46,7 @@ export function DetailRow({
   customEdit,
   customInput,
   formattedValue,
+  isLocation,
 }: DetailRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -178,6 +180,7 @@ export function DetailRow({
           isNumber={isNumber}
           options={options}
           isCountry={label.toLowerCase().includes("country")}
+          isLocation={isLocation || label.toLowerCase().includes("location")}
         />
       )}
     </div>

@@ -48,6 +48,7 @@ import {
   Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 
 interface AddContactModalProps {
   open: boolean;
@@ -95,9 +96,9 @@ export function AddContactModal({
     email: initialValues?.email ?? "",
     phone: initialValues?.phone ?? "",
     countryCode: initialValues?.countryCode ?? "SA",
-    position: initialValues?.position ?? "",
+    position: initialValues?.position ?? (initialValues as any)?.designation ?? "",
     linkedin: initialValues?.linkedin ?? "",
-    location: initialValues?.location ?? "",
+    location: (initialValues as any)?.location ?? "",
   });
   
   const [currentTab, setCurrentTab] = useState(0);
@@ -114,9 +115,9 @@ export function AddContactModal({
         email: initialValues?.email ?? "",
         phone: initialValues?.phone ?? "",
         countryCode: initialValues?.countryCode ?? "SA",
-        position: initialValues?.position ?? "",
+        position: initialValues?.position ?? (initialValues as any)?.designation ?? "",
         linkedin: initialValues?.linkedin ?? "",
-        location: initialValues?.location ?? "",
+        location: (initialValues as any)?.location ?? "",
       });
       setCurrentTab(0);
     }
@@ -184,16 +185,16 @@ export function AddContactModal({
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
                     ${currentTab === index 
-                      ? "bg-primary text-white shadow-lg shadow-primary/30" 
+                      ? "bg-brand text-white shadow-lg shadow-brand/10" 
                       : (index < currentTab ? "bg-green-500 text-white" : "bg-slate-200 text-slate-500")}
                   `}>
                     {index < currentTab ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
                   </div>
                   <div className="flex flex-col">
-                    <span className={`text-sm font-bold ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
+                    <span className={`text-sm font-black tracking-tight ${currentTab === index ? "text-slate-900" : "text-slate-400"}`}>
                       {tab}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">Section {index + 1}</span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Step {index + 1}</span>
                   </div>
                 </div>
               ))}
@@ -369,15 +370,12 @@ export function AddContactModal({
                         </div>
                         <div className="space-y-2">
                           <Label className="text-sm font-bold text-slate-700">Location</Label>
-                          <div className="relative group">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                            <Input 
-                              value={formData.location} 
-                              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))} 
-                              placeholder="City/Region" 
-                              className="pl-10 h-11 border-slate-200 font-bold"
-                            />
-                          </div>
+                          <LocationSuggestion
+                            value={formData.location}
+                            onChange={(val) => setFormData(prev => ({ ...prev, location: val }))}
+                            placeholder="Search City/Region..."
+                            className="w-full"
+                          />
                         </div>
                       </div>
                     </div>
@@ -403,14 +401,14 @@ export function AddContactModal({
                   {currentTab === TABS.length - 1 ? (
                     <Button 
                       onClick={() => handleSubmit()} 
-                      className="bg-primary hover:bg-primary/90 text-white px-8 font-black shadow-xl shadow-primary/30"
+                      className="bg-brand text-white px-8 font-black shadow-xl shadow-brand/10 rounded-xl active:scale-95 transition-all duration-300"
                     >
                       <UserPlus className="w-4 h-4 mr-2" /> {isEdit ? "Save Changes" : "Create Contact"}
                     </Button>
                   ) : (
                     <Button 
                       onClick={handleNext} 
-                      className="bg-primary hover:bg-primary/90 text-white px-8 font-black shadow-xl shadow-primary/30"
+                      className="bg-brand text-white px-8 font-black shadow-xl shadow-brand/10 rounded-xl active:scale-95 transition-all duration-300"
                     >
                       Continue <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>

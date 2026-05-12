@@ -1,5 +1,6 @@
-import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 import PhoneInput from "@/components/phone/Phoneinput";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
+import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 
 interface ContactDetailsTabProps {
   form:     ClientForm;
@@ -80,8 +81,17 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           type="text"
           value={form.address}
           onChange={e => setField("address", e.target.value)}
-          placeholder="Street address"
+          placeholder="e.g. 123 Business Way"
           className="h-9 border rounded-md px-2 text-sm"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-muted-foreground font-bold uppercase tracking-wider ml-1">Location</label>
+        <LocationSuggestion
+          value={form.location}
+          onChange={val => setField("location", val)}
+          placeholder="Search for client city..."
         />
       </div>
 

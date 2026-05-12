@@ -32,11 +32,23 @@ const stages: JobStage[] = [
 interface JobStageBadgeProps {
   stage: JobStage
   onStageChange: (newStage: JobStage) => void
+  disabled?: boolean
 }
 
 
 
-export function JobStageBadge({ stage, onStageChange }: JobStageBadgeProps) {
+export function JobStageBadge({ stage, onStageChange, disabled }: JobStageBadgeProps) {
+
+  if (disabled) {
+    return (
+      <Badge 
+        variant="secondary" 
+        className={`${stageColors[stage]} border-none flex items-center gap-1`}
+      >
+        {stage}
+      </Badge>
+    );
+  }
 
     const handleClick = (stageOption : any)=>{
           return (event: React.MouseEvent) => {

@@ -1,371 +1,295 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus, X, Pencil, Check, Ghost } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
-import { Command as CommandPrimitive } from "cmdk";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-
-interface ClientPrimaryContactsDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  primaryContacts: any[];
-  onSave: (updatedContacts: any[], selectedContactIds: string[], newContacts?: any[]) => void;
-  countryCodes: { code: string; label: string }[];
-  positionOptions: { value: string; label: string }[];
-  AddContactModal: React.ComponentType<any>;
-  initialSelectedContactIds?: string[];
-  initialNewContacts?: any[];
-}
-
-export function ClientPrimaryContactsDialog({
-  open,
-  onOpenChange,
-  primaryContacts,
-  onSave,
-  countryCodes,
-  positionOptions,
-  AddContactModal,
-  initialSelectedContactIds = [],
-  initialNewContacts = [],
-}: ClientPrimaryContactsDialogProps) {
-  const [dialogSelectedContactIds, setDialogSelectedContactIds] = useState<string[]>(initialSelectedContactIds);
-  const [dialogNewContacts, setDialogNewContacts] = useState<any[]>(initialNewContacts);
-  const [editContact, setEditContact] = useState<any | null>(null);
-  const [addContactOpen, setAddContactOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  const wasOpen = React.useRef(false);
-  React.useEffect(() => {
-    if (open && !wasOpen.current) {
-      setDialogSelectedContactIds(initialSelectedContactIds || []);
-      setDialogNewContacts(initialNewContacts || []);
-      setEditContact(null);
-    }
-    wasOpen.current = open;
-  }, [open]);
-
-  const getCountryCodeLabel = (code: string) => {
-    const country = countryCodes.find((option) => option.code === code);
-    return country ? country.label : code;
-  };
-
-  // Helper to check if a contact is new
-  const isNewContact = (contact: any) => dialogNewContacts.some((nc) => nc._id === contact._id);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl min-h-[400px] flex flex-col !pt-0 h-[500px] mt-2" showCloseButton={false}>
-        <TooltipProvider>
-          {/* Fixed header inside dialog */}
-          <div className="flex items-center justify-between text-lg font-bold !mb-0 !mt-4 !pb-0 !pt-0 sticky top-0 bg-white z-30">
-            Primary Contacts
-            <button
-              className="ml-2 p-1 rounded hover:bg-gray-100"
-              onClick={() => onOpenChange(false)}
-              aria-label="Close"
-              type="button"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-          {/* Scrollable content area for selection and contacts */}
-          <div className="flex-1 overflow-auto !m-0 !p-0" style={{ minHeight: 0 }}>
-            <Label className="!mb-0 mt-4 !pb-0 !pt-0">Select Primary Contact for this Job</Label>
-            {/* Selection UI */}
-            <Command className="w-full flex-col overflow-visible mt-2 !mb-0 !pt-0 !pb-0 !h-auto">
-              {/* Sticky badges+input bar */}
-              <div
-                className="rounded-md border border-input w-full box-border flex flex-nowrap items-center px-3 py-2 text-sm bg-white z-20 sticky top-16 gap-x-2"
-                style={{ top: 64 }}
-              >
-                {/* Show badges for selected primary contacts only */}
-                {primaryContacts
-                  .filter((c) => dialogSelectedContactIds.includes(c._id))
-                  .map((contact: any) => (
-                    <Badge key={contact._id} variant="secondary" className="select-none flex items-center gap-1 pr-1">
-                      {contact.name || contact.firstName + " " + contact.lastName}
-                      <button
-                        type="button"
-                        className="ml-1 p-0.5 rounded hover:bg-gray-200"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDialogSelectedContactIds((ids) => ids.filter((id) => id !== contact._id));
-                        }}
-                        aria-label="Remove contact"
-                      >
-                        <X className="w-3 h-3 text-gray-500" />
-                      </button>
-                    </Badge>
-                  ))}
-                <CommandPrimitive.Input
-                  placeholder="Select contacts..."
-                  className="flex-1 min-w-0 bg-transparent outline-none border-none border-transparent rounded-none m-0 p-0 placeholder:text-muted-foreground"
-                  onFocus={() => setDropdownOpen(true)}
-                  onBlur={() => setDropdownOpen(false)}
-                />
-              </div>
-              {/* Scrollable dropdown below sticky bar */}
-              {dropdownOpen && (
-                <div className="relative w-full" style={{ maxHeight: 240 }}>
-                  <CommandList>
-                    <div className="absolute top-0 left-0 z-10 w-full rounded-md border bg-white text-popover-foreground shadow-md outline-none max-h-60 overflow-y-auto">
-                      <CommandGroup className="h-full w-full">
-                        {primaryContacts.map((contact: any) => {
-                          const isSelected = dialogSelectedContactIds.includes(contact._id);
-                          return (
-                            <CommandItem
-                              key={contact._id}
-                              onMouseDown={(e) => e.preventDefault()}
-                              onSelect={() => {
-                                setDialogSelectedContactIds((ids) =>
-                                  isSelected
-                                    ? ids.filter((id) => id !== contact._id)
-                                    : [...ids, contact._id],
-                                );
-                              }}
-                              className={`w-full cursor-pointer flex items-center bg-white ${isSelected ? "text-black" : ""}`}
-                            >
-                              <span className="truncate flex-1">{contact.name || contact.firstName + " " + contact.lastName}</span>
-                              {isSelected && (
-                                <Check className="size-5 text-green-500"/>
-                              )}
-                            </CommandItem>
-                          );
-                        })}
-                      </CommandGroup>
-                    </div>
-                  </CommandList>
-                </div>
-              )}
-            </Command>
-            {/* Unified contact list (primary + new) */}
-            {(() => {
-              // Only show selected primary contacts and all new contacts
-              const selectedPrimaryContacts = primaryContacts.filter((pc) =>
-                dialogSelectedContactIds.includes(pc._id),
-              );
-              const allContacts = [
-                ...selectedPrimaryContacts,
-                ...dialogNewContacts.filter(
-                  (nc) => !selectedPrimaryContacts.some((pc) => pc._id === nc._id),
-                ),
-              ];
-              if (allContacts.length === 0) return null;
-              return (
-                <div className="mt-3">
-                  <h3 className="text-sm font-semibold mb-2">Contacts</h3>
-                  {(() => {
-                    let newContactLabelShown = false;
-                    return allContacts.map((contact: any, idx: number) => {
-                      const isSelected = dialogSelectedContactIds.includes(contact._id);
-                      const isNew = isNewContact(contact);
-                      const showNewContactLabel = isNew && !newContactLabelShown;
-                      if (showNewContactLabel) newContactLabelShown = true;
-                      return (
-                        <React.Fragment key={contact._id}>
-                          {showNewContactLabel && (
-                            <div className="mb-2">
-                              <h3 className="text-sm font-semibold">New Contact</h3>
-                            </div>
-                          )}
-                          <div className="p-3 rounded-md border mb-2 bg-gray-50">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1 flex  gap-8">
-                                <div>
-                                  <div>
-                                    <span className="text-xs font-semibold text-gray-500 mr-1">
-                                      Name:
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">
-                                      {contact.firstName || contact.lastName
-                                        ? `${contact.firstName || ""} ${contact.lastName || ""}`.trim()
-                                        : contact.name || "Unnamed Contact"}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-xs font-semibold text-gray-500 mr-1">
-                                      Position:
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">
-                                      {contact.position || "—"}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-xs font-semibold text-gray-500 mr-1">
-                                      Email:
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">
-                                      {contact.email || "—"}
-                                    </span>
-                                  </div>
-                                </div>
-                                {/* Row 2: Phone | Position */}
-                                <div>
-                                  <div>
-                                    <span className="text-xs font-semibold text-gray-500 mr-1">
-                                      Gender:
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">
-                                      {contact.gender || "—"}
-                                    </span>
-                                  </div>
-
-                                  <div>
-                                    <span className="text-xs font-semibold text-gray-500 mr-1">
-                                      LinkedIn:
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">
-                                      {contact.linkedin ? (
-                                        <a
-                                          href={contact.linkedin}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-gray-500 hover:underline"
-                                        >
-                                          {contact.linkedin}
-                                        </a>
-                                      ) : (
-                                        "No LinkedIn"
-                                      )}
-                                    </span>
-                                  </div>
-
-                                  <div>
-                                    <span className="text-xs font-semibold text-gray-500 mr-1">
-                                      Phone Number:
-                                    </span>
-                                    <span className="text-sm text-muted-foreground">
-                                      {getCountryCodeLabel(contact.countryCode || "")}
-                                      <span className="mx-1">-</span>
-                                      {contact.phone || "No phone"}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                              {/* For new contacts, show Edit button */}
-                              {isNew && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="ml-2 flex items-center gap-1 border border-gray-300 shadow-none"
-                                      onClick={() => {
-                                        setEditContact(contact);
-                                        setAddContactOpen(true);
-                                      }}
-                                      type="button"
-                                    >
-                                      <Pencil className="w-4 h-4 text-black" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Edit</TooltipContent>
-                                </Tooltip>
-                              )}
-                              {/* For selected primary contacts, show red cross button for removal */}
-                              {!isNew && isSelected && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      onClick={() =>
-                                        setDialogSelectedContactIds((ids) =>
-                                          ids.filter((id) => id !== contact._id),
-                                        )
-                                      }
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                    >
-                                      <X className="w-4 h-4 text-red-500" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Remove</TooltipContent>
-                                </Tooltip>
-                              )}
-                            </div>
-                          </div>
-                        </React.Fragment>
-                      );
-                    });
-                  })()}
-                </div>
-              );
-            })()}
-          </div>
-          {/* Fixed footer inside dialog */}
-          <div className="flex items-center justify-between mt-4 border-t pt-4 bg-white">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={() => setAddContactOpen(true)}
-            >
-              <Plus className="w-4 h-4" />
-              Add New Contact
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => {
-                // Merge dialog new contacts into main primaryContacts (avoid duplicates by _id)
-                const ids = new Set(primaryContacts.map((c) => c._id));
-                const updatedContacts = [
-                  ...primaryContacts,
-                  ...dialogNewContacts.filter((nc) => !ids.has(nc._id)),
-                ];
-                onSave(updatedContacts, dialogSelectedContactIds, dialogNewContacts);
-                setEditContact(null);
-                onOpenChange(false);
-              }}
-            >
-              Save
-            </Button>
-          </div>
-        </TooltipProvider>
-      </DialogContent>
-      <AddContactModal
-        open={addContactOpen}
-        onOpenChange={(open: boolean) => {
-          setAddContactOpen(open);
-          if (!open) setEditContact(null);
-        }}
-        onAdd={(contact: any) => {
-          if (editContact) {
-            // Update existing contact in dialogNewContacts
-            setDialogNewContacts((prev) =>
-              prev.map((c) =>
-                c._id === editContact._id
-                  ? {
-                      ...c,
-                      ...contact,
-                      name: `${contact.firstName || ""} ${contact.lastName || ""}`.trim(),
-                    }
-                  : c,
-              ),
-            );
-            setEditContact(null);
-          } else {
-            // Add new contact to dialogNewContacts
-            const newId = Math.random().toString(36).substr(2, 9);
-            setDialogNewContacts((prev) => [
-              ...prev,
-              {
-                ...contact,
-                _id: newId, // temp id
-                name: `${contact.firstName || ""} ${contact.lastName || ""}`.trim(),
-              },
-            ]);
-            // Automatically select the new contact
-            setDialogSelectedContactIds((ids) => [...ids, newId]);
-          }
-        }}
-        countryCodes={countryCodes}
-        positionOptions={positionOptions}
-        initialValues={editContact || undefined}
-      />
-    </Dialog>
-  );
-} 
+"use client";
+ 
+ import React, { useState, useMemo } from "react";
+ import { Button } from "@/components/ui/button";
+ import { 
+   Plus, 
+   X, 
+   Pencil, 
+   Check, 
+   Users, 
+   Search, 
+   UserPlus, 
+   Mail, 
+   Phone, 
+   Briefcase, 
+   Linkedin,
+   ArrowRight
+ } from "lucide-react";
+ import { Dialog, DialogContent } from "@/components/ui/dialog";
+ import { Badge } from "@/components/ui/badge";
+ import { Input } from "@/components/ui/input";
+ import { cn } from "@/lib/utils";
+ import { ScrollArea } from "@/components/ui/scroll-area";
+ 
+ interface ClientPrimaryContactsDialogProps {
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+   primaryContacts: any[];
+   onSave: (updatedContacts: any[], selectedContactIds: string[], newContacts?: any[]) => void;
+   countryCodes: { code: string; label: string }[];
+   positionOptions: { value: string; label: string }[];
+   AddContactModal: React.ComponentType<any>;
+   initialSelectedContactIds?: string[];
+   initialNewContacts?: any[];
+ }
+ 
+ export function ClientPrimaryContactsDialog({
+   open,
+   onOpenChange,
+   primaryContacts,
+   onSave,
+   countryCodes,
+   positionOptions,
+   AddContactModal,
+   initialSelectedContactIds = [],
+   initialNewContacts = [],
+ }: ClientPrimaryContactsDialogProps) {
+   const [dialogSelectedContactIds, setDialogSelectedContactIds] = useState<string[]>(initialSelectedContactIds);
+   const [dialogNewContacts, setDialogNewContacts] = useState<any[]>(initialNewContacts);
+   const [searchQuery, setSearchQuery] = useState("");
+   const [editContact, setEditContact] = useState<any | null>(null);
+   const [addContactOpen, setAddContactOpen] = useState(false);
+ 
+   const wasOpen = React.useRef(false);
+   React.useEffect(() => {
+     if (open && !wasOpen.current) {
+       setDialogSelectedContactIds(initialSelectedContactIds || []);
+       setDialogNewContacts(initialNewContacts || []);
+       setEditContact(null);
+     }
+     wasOpen.current = open;
+   }, [open, initialSelectedContactIds, initialNewContacts]);
+ 
+   const filteredContacts = useMemo(() => {
+     const query = searchQuery.toLowerCase();
+     return primaryContacts.filter(c => 
+       (c.name || `${c.firstName} ${c.lastName}`).toLowerCase().includes(query) ||
+       (c.email || '').toLowerCase().includes(query) ||
+       (c.position || c.designation || '').toLowerCase().includes(query)
+     );
+   }, [primaryContacts, searchQuery]);
+ 
+   const handleToggleContact = (id: string) => {
+     setDialogSelectedContactIds(prev => 
+       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+     );
+   };
+ 
+   const isNewContact = (contact: any) => dialogNewContacts.some((nc) => nc._id === contact._id);
+ 
+   return (
+     <Dialog open={open} onOpenChange={onOpenChange}>
+       <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-slate-50 border-none rounded-[2rem] shadow-2xl">
+         {/* Header */}
+         <div className="bg-white px-8 pt-8 pb-6 border-b border-slate-100 shrink-0">
+           <div className="flex items-center justify-between mb-6">
+             <div className="space-y-1">
+               <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                 Manage Stakeholders
+                 <span className="text-[10px] font-black bg-brand/10 text-brand px-3 py-1 rounded-full border border-brand/10">
+                   {dialogSelectedContactIds.length} Selected
+                 </span>
+               </h2>
+               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Select or add hiring managers for this job</p>
+             </div>
+             <Button 
+               variant="ghost" 
+               size="icon" 
+               onClick={() => onOpenChange(false)} 
+               className="rounded-full hover:bg-slate-100 transition-colors"
+             >
+               <X className="w-5 h-5 text-slate-400" />
+             </Button>
+           </div>
+ 
+           <div className="relative group">
+             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand transition-colors" />
+             <Input 
+               placeholder="Search by name, email or position..." 
+               className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-2xl focus-visible:ring-brand focus-visible:border-brand font-medium text-sm transition-all"
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+             />
+           </div>
+         </div>
+ 
+         {/* Content Area */}
+         <div className="flex-1 overflow-hidden flex flex-col">
+           <ScrollArea className="flex-1 px-8 py-6">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               {/* New Contacts First */}
+               {dialogNewContacts.map((contact) => (
+                 <div 
+                   key={contact._id}
+                   onClick={() => handleToggleContact(contact._id)}
+                   className={cn(
+                     "group relative p-5 rounded-3xl border-2 transition-all cursor-pointer bg-white",
+                     dialogSelectedContactIds.includes(contact._id) 
+                       ? "border-brand shadow-lg shadow-brand/5 ring-1 ring-brand/20" 
+                       : "border-transparent shadow-sm hover:border-slate-200"
+                   )}
+                 >
+                   <div className="flex items-start justify-between gap-4">
+                     <div className="flex items-start gap-4 min-w-0">
+                       <div className={cn(
+                         "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-inner shrink-0",
+                         dialogSelectedContactIds.includes(contact._id) ? "bg-brand text-white" : "bg-slate-100 text-slate-400"
+                       )}>
+                         {dialogSelectedContactIds.includes(contact._id) ? <Check className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
+                       </div>
+                       <div className="min-w-0">
+                         <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-black text-slate-900 truncate">{contact.name}</h4>
+                            <span className="text-[8px] font-black bg-green-50 text-green-600 px-2 py-0.5 rounded-full uppercase tracking-tighter border border-green-100">NEW</span>
+                         </div>
+                         <p className="text-[10px] font-black text-brand uppercase tracking-widest mt-1 opacity-80 truncate">
+                           {contact.position || contact.designation || "Stakeholder"}
+                         </p>
+                       </div>
+                     </div>
+                     <Button
+                       variant="ghost"
+                       size="icon"
+                       className="h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-400"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         setEditContact(contact);
+                         setAddContactOpen(true);
+                       }}
+                     >
+                       <Pencil className="w-3.5 h-3.5" />
+                     </Button>
+                   </div>
+                 </div>
+               ))}
+ 
+               {/* Existing Contacts */}
+               {filteredContacts.map((contact) => {
+                 if (dialogNewContacts.some(nc => nc._id === contact._id)) return null;
+                 const isSelected = dialogSelectedContactIds.includes(contact._id);
+                 return (
+                   <div 
+                     key={contact._id}
+                     onClick={() => handleToggleContact(contact._id)}
+                     className={cn(
+                       "group relative p-5 rounded-3xl border-2 transition-all cursor-pointer bg-white",
+                       isSelected 
+                         ? "border-brand shadow-lg shadow-brand/5 ring-1 ring-brand/20" 
+                         : "border-transparent shadow-sm hover:border-slate-200"
+                     )}
+                   >
+                     <div className="flex items-start gap-4">
+                       <div className={cn(
+                         "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-inner shrink-0",
+                         isSelected ? "bg-brand text-white shadow-brand/20" : "bg-slate-50 text-slate-300 group-hover:bg-slate-100"
+                       )}>
+                         {isSelected ? <Check className="w-6 h-6" /> : <Users className="w-6 h-6" />}
+                       </div>
+                       <div className="min-w-0 space-y-1">
+                         <h4 className="text-sm font-black text-slate-900 truncate">{contact.name || `${contact.firstName} ${contact.lastName}`}</h4>
+                         <p className="text-[10px] font-black text-brand uppercase tracking-widest opacity-80 truncate">
+                           {contact.position || contact.designation || "Stakeholder"}
+                         </p>
+                         <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400 pt-1">
+                            <span className="truncate">{contact.email}</span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 );
+               })}
+             </div>
+ 
+             {filteredContacts.length === 0 && searchQuery && (
+               <div className="py-20 text-center flex flex-col items-center animate-in fade-in zoom-in duration-300">
+                 <div className="w-20 h-20 bg-slate-100 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-inner">
+                   <Search className="w-8 h-8 text-slate-300" />
+                 </div>
+                 <h3 className="text-lg font-black text-slate-800 tracking-tight">No results found</h3>
+                 <p className="text-sm text-slate-400 font-semibold max-w-xs mx-auto mt-2">
+                   We couldn&apos;t find any contacts matching &quot;<span className="text-slate-900">{searchQuery}</span>&quot;
+                 </p>
+               </div>
+             )}
+           </ScrollArea>
+         </div>
+ 
+         {/* Footer */}
+         <div className="bg-white px-8 py-6 border-t border-slate-100 flex items-center justify-between shrink-0">
+           <Button
+             variant="outline"
+             onClick={() => setAddContactOpen(true)}
+             className="rounded-2xl border-2 border-slate-200 text-slate-600 font-black h-12 px-6 hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95"
+           >
+             <Plus className="w-4 h-4 mr-2" />
+             Add New Contact
+           </Button>
+ 
+           <div className="flex items-center gap-3">
+             <Button
+               variant="ghost"
+               onClick={() => onOpenChange(false)}
+               className="rounded-2xl text-slate-400 font-bold hover:text-slate-600 px-6 h-12"
+             >
+               Cancel
+             </Button>
+             <Button
+               onClick={() => {
+                 const ids = new Set(primaryContacts.map((c) => c._id));
+                 const updatedContacts = [
+                   ...primaryContacts,
+                   ...dialogNewContacts.filter((nc) => !ids.has(nc._id)),
+                 ];
+                 onSave(updatedContacts, dialogSelectedContactIds, dialogNewContacts);
+                 setEditContact(null);
+                 onOpenChange(false);
+               }}
+               className="bg-brand text-white font-black h-12 px-10 rounded-2xl shadow-xl shadow-brand/20 active:scale-95 transition-all"
+             >
+               Confirm Selection <ArrowRight className="w-4 h-4 ml-2" />
+             </Button>
+           </div>
+         </div>
+       </DialogContent>
+ 
+       <AddContactModal
+         open={addContactOpen}
+         onOpenChange={(open: boolean) => {
+           setAddContactOpen(open);
+           if (!open) setEditContact(null);
+         }}
+         onAdd={(contact: any) => {
+           if (editContact) {
+             setDialogNewContacts((prev) =>
+               prev.map((c) =>
+                 c._id === editContact._id
+                   ? {
+                       ...c,
+                       ...contact,
+                       name: `${contact.firstName || ""} ${contact.lastName || ""}`.trim(),
+                     }
+                   : c,
+               ),
+             );
+             setEditContact(null);
+           } else {
+             const newId = Math.random().toString(36).substr(2, 9);
+             setDialogNewContacts((prev) => [
+               ...prev,
+               {
+                 ...contact,
+                 _id: newId,
+                 name: `${contact.firstName || ""} ${contact.lastName || ""}`.trim(),
+               },
+             ]);
+             setDialogSelectedContactIds((ids) => [...ids, newId]);
+           }
+         }}
+         countryCodes={countryCodes}
+         positionOptions={positionOptions}
+         initialValues={editContact || undefined}
+       />
+     </Dialog>
+   );
+ }

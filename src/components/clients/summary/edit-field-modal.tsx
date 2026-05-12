@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CountrySelect } from "@/components/ui/country-select";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 
 interface EditFieldModalProps {
   open: boolean;
@@ -26,6 +27,7 @@ interface EditFieldModalProps {
   isDate?: boolean;
   isNumber?: boolean;
   isCountry?: boolean;
+  isLocation?: boolean;
   options?: { value: string; label: string }[];
 }
 
@@ -39,6 +41,7 @@ export function EditFieldModal({
   isDate,
   options,
   isCountry,
+  isLocation,
 }: EditFieldModalProps) {
   const [value, setValue] = useState(currentValue);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
@@ -85,7 +88,7 @@ export function EditFieldModal({
                 />
               </div>
             ) : options ? (
-              <Select value={value} onValueChange={(value) => setValue(value)}>
+              <Select value={value} onValueChange={(val) => setValue(val)}>
                 <SelectTrigger className="w-full p-2 border rounded-md">
                   <SelectValue placeholder="Select an option" />
                 </SelectTrigger>
@@ -102,6 +105,12 @@ export function EditFieldModal({
                 value={value}
                 onChange={setValue}
                 type="country"
+                placeholder={`Search ${fieldName.toLowerCase()}...`}
+              />
+            ) : isLocation ? (
+              <LocationSuggestion
+                value={value}
+                onChange={setValue}
                 placeholder={`Search ${fieldName.toLowerCase()}...`}
               />
             ) : (

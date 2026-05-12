@@ -1,67 +1,95 @@
 "use client";
-
-import { MapPin, Users, Building2, ChevronRight, Briefcase } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { type Job } from "./dummy-data";
-import { Badge } from "@/components/ui/badge";
-
-interface PipelineJobCardProps {
-  job: Job;
-  isHighlighted?: boolean;
-}
-
-export function PipelineJobCard({ job, isHighlighted = false }: PipelineJobCardProps) {
-  const router = useRouter();
-
-  return (
-    <div
-      onClick={() => router.push(`/reactruterpipeline/${job.id}`)}
-      className={`group relative flex flex-col bg-white rounded-xl border border-slate-200/60 p-3 cursor-pointer transition-all duration-300 hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5 ${
-        isHighlighted ? "ring-2 ring-blue-500 bg-blue-50/20" : ""
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center flex-1 gap-4">
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
-            <Briefcase className="h-5 w-5 opacity-80" />
-          </div>
-          <div className="flex flex-col justify-center min-w-[200px]">
-            <h3 className="text-base font-semibold text-slate-800 tracking-tight group-hover:text-blue-600 transition-colors truncate">
-              {job.title}
-            </h3>
-            <div className="flex items-center space-x-1.5 text-slate-500 mt-0.5 text-sm">
-              <Building2 className="h-3.5 w-3.5" />
-              <span className="font-medium truncate">{job.clientName}</span>
+ 
+ import { MapPin, Users, Building2, ChevronRight, Briefcase, Target, ArrowRight } from "lucide-react";
+ import { useRouter } from "next/navigation";
+ import { type Job } from "./dummy-data";
+ import { Badge } from "@/components/ui/badge";
+ import { cn } from "@/lib/utils";
+ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+ 
+ interface PipelineJobCardProps {
+   job: Job;
+   isHighlighted?: boolean;
+ }
+ 
+ export function PipelineJobCard({ job, isHighlighted = false }: PipelineJobCardProps) {
+   const router = useRouter();
+ 
+   return (
+     <div
+       onClick={() => router.push(`/reactruterpipeline/${job.id}`)}
+       className={cn(
+         "group relative flex items-center bg-white rounded-2xl border border-slate-100 p-2.5 cursor-pointer transition-all duration-500",
+         "hover:bg-brand/[0.03] hover:shadow-xl hover:border-brand/10 hover:translate-x-1",
+         isHighlighted ? "ring-2 ring-brand/20 bg-brand/[0.02] border-brand/20" : ""
+       )}
+     >
+       {/* Brand accent strip */}
+       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-brand opacity-0 group-hover:opacity-100 transition-all duration-500" />
+ 
+       <div className="flex items-center w-full gap-5">
+         {/* Icon Container */}
+         <div className="h-12 w-12 shrink-0 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 transition-all duration-500 group-hover:bg-brand group-hover:text-white group-hover:rotate-6 group-hover:scale-110 shadow-sm">
+           <Briefcase className="h-6 w-6" />
+         </div>
+ 
+         {/* Main Content */}
+         <div className="flex flex-col min-w-0 flex-1 gap-1">
+           <div className="flex items-center gap-2">
+             <Tooltip>
+               <TooltipTrigger asChild>
+                 <h3 className="text-sm font-black text-slate-900 tracking-tight group-hover:text-brand transition-colors truncate max-w-[300px]">
+                   {job.title}
+                 </h3>
+               </TooltipTrigger>
+               <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[11px] border-none shadow-2xl">
+                 {job.title}
+               </TooltipContent>
+             </Tooltip>
+             {job.jobId?.stage && (
+               <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-50 border border-slate-100 text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:bg-brand/10 group-hover:text-brand group-hover:border-brand/20 transition-all">
+                 {job.jobId.stage}
+               </span>
+             )}
+           </div>
+ 
+           <div className="flex items-center gap-4 text-slate-500">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5 overflow-hidden cursor-help">
+                     <Building2 className="h-3.5 w-3.5 text-slate-300" />
+                     <span className="text-[11px] font-bold text-slate-600 truncate max-w-[150px]">{job.clientName}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                  {job.clientName}
+                </TooltipContent>
+              </Tooltip>
+ 
+              <div className="flex items-center gap-1.5 overflow-hidden">
+                 <MapPin className="h-3.5 w-3.5 text-slate-300" />
+                 <span className="text-[11px] font-medium text-slate-500 truncate max-w-[120px]">{job.location}</span>
+              </div>
+           </div>
+         </div>
+ 
+         {/* Stats and Action */}
+         <div className="flex items-center gap-8 pr-2">
+            {/* Candidate Count */}
+            <div className="flex flex-col items-center">
+               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 group-hover:bg-amber-100 transition-colors shadow-sm">
+                  <Users className="h-3.5 w-3.5" />
+                  <span className="text-xs font-black tracking-tight">{job.totalCandidates || job.candidates?.length || 0}</span>
+               </div>
+               <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Candidates</span>
             </div>
-          </div>
-
-          <div className="flex ml-auto flex-wrap items-center gap-2">
-            <Badge variant="secondary" className="bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md px-2 py-0.5 text-xs font-medium transition-colors">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span className="truncate max-w-[100px]">{job.location}</span>
-            </Badge>
-            {job.jobType && (
-              <Badge variant="outline" className="text-slate-600 border-slate-200 rounded-md px-2 py-0.5 text-xs font-medium bg-white">
-                {job.jobType}
-              </Badge>
-            )}
-            {job.jobId?.stage && (
-              <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200 rounded-md px-2 py-0.5 text-xs font-medium">
-                {job.jobId.stage}
-              </Badge>
-            )}
-            <Badge variant="secondary" className="bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-md px-2 py-0.5 text-xs font-medium transition-colors shrink-0">
-              <Users className="h-3 w-3 mr-1" />
-              {job.totalCandidates || job.candidates?.length || 0}
-            </Badge>
-          </div>
-        </div>
-        <div className="flex shrink-0 items-center pl-4">
-          <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white text-slate-400 transition-all duration-300 shadow-sm border border-slate-100 group-hover:border-blue-600">
-            <ChevronRight className="h-4 w-4" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+ 
+            {/* Arrow Action */}
+            <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-brand text-slate-300 group-hover:text-white transition-all duration-500 border border-slate-100 group-hover:border-brand group-hover:rotate-0 rotate-[-45deg] shadow-sm">
+              <ArrowRight className="h-5 w-5" />
+            </div>
+         </div>
+       </div>
+     </div>
+   );
+ }

@@ -15,6 +15,7 @@ export interface PrimaryContact {
   error?: string;
   gender?: string;
   name?: string; // Add name field for backend compatibility
+  location?: string;
 }
 
 export const clientStageStatuses = [
@@ -744,6 +745,7 @@ const addPrimaryContact = async (
       designation: contactData.position || "", // Backend expects 'designation' not 'position'
       linkedin: contactData.linkedin || "",
       gender: contactData.gender || "",
+      location: (contactData as any).location || "",
       isPrimary: true, // Backend expects this field
     };
 
@@ -803,6 +805,19 @@ const deletePrimaryContact = async (
   }
 };
 
+// Get all primary contacts for a client
+const getPrimaryContacts = async (clientId: string): Promise<PrimaryContact[]> => {
+  try {
+    const response = await axios.get<ApiResponse<PrimaryContact[]>>(
+      `${API_URL}/api/clients/${clientId}/primary-contacts`,
+      { timeout: 15000 }
+    );
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -816,4 +831,5 @@ export {
   addPrimaryContact,
   updatePrimaryContact,
   deletePrimaryContact,
+  getPrimaryContacts,
 };

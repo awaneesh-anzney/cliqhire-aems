@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { TeamMemberStatusBadge } from "@/components/teamMembers/team-status-badge";
 import PhoneInput from "@/components/phone/Phoneinput";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 
 type ActionKey = "view" | "create" | "edit" | "delete";
 const ACTIONS: ActionKey[] = ["view", "create", "edit", "delete"];
@@ -339,7 +340,11 @@ export default function TeamMemberDetailsPage() {
                     {!isEditing ? (
                       <p className="text-sm font-medium text-slate-800">{user.location || "Office / Remote"}</p>
                     ) : (
-                      <Input value={editForm.location} onChange={e => setEditForm({...editForm, location: e.target.value})} className="h-9 text-sm px-3 w-full bg-slate-50 border-none focus-visible:ring-brand/20" />
+                      <LocationSuggestion
+                        value={editForm.location}
+                        onChange={(val) => setEditForm({ ...editForm, location: val })}
+                        placeholder="Search city..."
+                      />
                     )}
                  </div>
 

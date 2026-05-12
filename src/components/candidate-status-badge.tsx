@@ -46,13 +46,14 @@ interface CandidateStatusBadgeProps {
   id?: string;
   status: CandidateStatus;
   onStatusChange?: (id: string, newStatus: CandidateStatus) => void;
+  disabled?: boolean;
 }
 
-export function CandidateStatusBadge({ id, status, onStatusChange }: CandidateStatusBadgeProps) {
+export function CandidateStatusBadge({ id, status, onStatusChange, disabled }: CandidateStatusBadgeProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<CandidateStatus | null>(null);
 
-  if (!onStatusChange) {
+  if (!onStatusChange || disabled) {
     return (
       <Badge variant="secondary" className={`${statusColors[status]} border-none`}>
         {status}

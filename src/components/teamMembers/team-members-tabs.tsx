@@ -1,354 +1,332 @@
 "use client";
-
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { formatPhoneNumber } from "@/lib/countryCodes";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MoreVertical, Trash2, Users, UserCheck, UserCog, Crown, Eye, Shield } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableHead,
-  TableRow,
-} from "@/components/ui/table";
-import { TeamMemberStatusBadge } from "@/components/teamMembers/team-status-badge";
-import { DeleteTeamMemberDialog } from "@/components/teamMembers/delete-team-member-dialog";
-import { getTeamMembers, deleteTeamMember } from "@/services/teamMembersService";
-import { roleService } from "@/services/roleService";
-import { TeamMember, TeamMemberStatus } from "@/types/teamMember";
-
-interface TeamMembersTabsProps {
-  onTeamMemberClick?: (teamMemberId: string) => void;
-  highlightId?: string; // ID of team member to highlight
-}
-
-const headerArr = [
-  "First Name",
-  "Last Name",
-  "Email",
-  "Phone",
-  "Location",
-  "Experience",
-  "User Role",
-  "Status",
-  "Actions",
-];
-
-// Team role color mapping
-const getTeamRoleBadgeVariant = (role: string): "default" | "secondary" | "destructive" | "outline" => {
-  const normalizedRole = role?.toLowerCase() || "";
-
-  switch (normalizedRole) {
-    case "admin":
-    case "administrator":
-      return "destructive"; // Red
-    case "hiring manager":
-    case "hiring_manager":
-    case "hir":
-      return "default"; // Blue
-    case "team lead":
-    case "team_lead":
-    case "lead":
-      return "secondary"; // Gray
-    case "recruiter":
-    case "recruiters":
-    case "rec":
-      return "outline"; // Border only
-    case "head hunter":
-    case "head_hunter":
-    case "head enter":
-    case "headenter":
-      return "destructive"; // Red
-    case "sales team":
-    case "sales_team":
-    case "sales":
-      return "secondary"; // Gray
-    default:
-      return "outline"; // Default for unknown roles
-  }
-};
-
-// Team role color classes for custom styling - matching status badge style
-const getTeamRoleColorClass = (role: string): string => {
-  const normalizedRole = role?.toLowerCase() || "";
-
-  switch (normalizedRole) {
-    case "admin":
-    case "administrator":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "hiring manager":
-    case "hiring_manager":
-    case "hir":
-      return "bg-sky-100 text-sky-800 border-sky-200";
-    case "team lead":
-    case "team_lead":
-    case "lead":
-      return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    case "recruiter":
-    case "recruiters":
-    case "rec":
-      return "bg-teal-100 text-teal-800 border-teal-200";
-    case "head hunter":
-    case "head_hunter":
-    case "head enter":
-    case "headenter":
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case "sales team":
-    case "sales_team":
-    case "sales":
-      return "bg-amber-100 text-amber-800 border-amber-200";
-    default:
-      return "bg-gray-100 text-gray-700 border-gray-200";
-  }
-};
-
-// Function to format team role display - replace underscores with spaces
-const formatTeamRoleDisplay = (role: string): string => {
-  if (!role) return "Not Assigned";
-  return role.replace(/_/g, " ");
-};
-
-export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersTabsProps) {
-  const [activeTab, setActiveTab] = useState("all");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [teamMemberToDelete, setTeamMemberToDelete] = useState<TeamMember | null>(null);
-
-  // React Query setup
-  const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
-    queryKey: ["teamMembers"],
-    queryFn: () => getTeamMembers(),
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    staleTime: 30_000,
-  });
-  const dataTeamMembers: TeamMember[] = data?.teamMembers ?? [];
-
-  const { data: rolesRes } = useQuery({
-    queryKey: ["roles"],
-    queryFn: () => roleService.getRoles(),
-  });
-  const roles = rolesRes?.data ?? [];
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteTeamMember(id),
-    onSuccess: () => {
-      // Refresh list after successful deletion
-      queryClient.invalidateQueries({ queryKey: ["teamMembers"] });
-      setDeleteDialogOpen(false);
-      setTeamMemberToDelete(null);
-    },
-  });
-
-  const handleStatusChange = async (teamMemberId: string, newStatus: TeamMemberStatus) => {
-    // Optimistically update cache for status changes
-    queryClient.setQueryData(["teamMembers"], (oldData: any) => {
-      if (!oldData?.teamMembers) return oldData;
-      return {
-        ...oldData,
-        teamMembers: oldData.teamMembers.map((tm: TeamMember) =>
-          tm._id === teamMemberId ? { ...tm, status: newStatus } : tm
-        ),
-      };
-    });
-    // Do not refetch here; mutation in TeamMemberStatusBadge will invalidate once
-  };
-
-  const handleDeleteTeamMember = (teamMember: TeamMember) => {
-    setTeamMemberToDelete(teamMember);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDeleteTeamMember = async () => {
-    if (!teamMemberToDelete) return;
-    deleteMutation.mutate(teamMemberToDelete._id);
-  };
-
-  const cancelDeleteTeamMember = () => {
-    setDeleteDialogOpen(false);
-    setTeamMemberToDelete(null);
-  };
-
-
-
-  // Filter team members based on active tab
-  const getFilteredTeamMembers = () => {
-    if (activeTab === "all") return dataTeamMembers;
-    
-    // activeTab corresponds to role._id
-    const selectedRole = roles.find(r => (r._id || r.id) === activeTab);
-    if (!selectedRole) return dataTeamMembers;
-
-    return dataTeamMembers.filter(member => {
-      // User might be assigned via roleId directly, or we fall back to teamRole string match
-      if (member.roleId === selectedRole._id || member.roleId === selectedRole.id) return true;
-      
-      const roleName = selectedRole.name.toLowerCase();
-      const memberRole1 = (member.teamRole || "").toLowerCase();
-      const memberRole2 = (member.role || "").toLowerCase();
-      
-      return memberRole1 === roleName || memberRole2 === roleName;
-    });
-  };
-
-  const filteredTeamMembers = getFilteredTeamMembers();
-
-  // Helper to count members by dynamic role
-  const getCountByRole = (roleItem: any) => {
-    return dataTeamMembers.filter(member => {
-      if (member.roleId === roleItem._id || member.roleId === roleItem.id) return true;
-      const roleName = roleItem.name.toLowerCase();
-      const memberRole1 = (member.teamRole || "").toLowerCase();
-      const memberRole2 = (member.role || "").toLowerCase();
-      return memberRole1 === roleName || memberRole2 === roleName;
-    }).length;
-  };
-
-  const renderTeamMembersTable = (members: TeamMember[]) => {
-    if (isLoading) {
-      return (
-        <TableRow>
-          <TableCell colSpan={headerArr.length} className="h-[calc(100vh-240px)] text-center">
-            <div className="py-24">
-              <div className="text-center">Loading team members...</div>
+ 
+ import React, { useState } from "react";
+ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+ import { formatPhoneNumber } from "@/lib/countryCodes";
+ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+ import { Button } from "@/components/ui/button";
+ import { Badge } from "@/components/ui/badge";
+ import { MoreVertical, Trash2, Users, Mail, Phone, MapPin, Briefcase, Shield, Loader, User2 } from "lucide-react";
+ import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+ } from "@/components/ui/dropdown-menu";
+ import {
+   Table,
+   TableBody,
+   TableCell,
+   TableHeader,
+   TableHead,
+   TableRow,
+ } from "@/components/ui/table";
+ import { TeamMemberStatusBadge } from "@/components/teamMembers/team-status-badge";
+ import { DeleteTeamMemberDialog } from "@/components/teamMembers/delete-team-member-dialog";
+ import { getTeamMembers, deleteTeamMember } from "@/services/teamMembersService";
+ import { roleService } from "@/services/roleService";
+ import { TeamMember, TeamMemberStatus } from "@/types/teamMember";
+ import { cn } from "@/lib/utils";
+ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+ 
+ interface TeamMembersTabsProps {
+   onTeamMemberClick?: (teamMemberId: string) => void;
+   highlightId?: string;
+ }
+ 
+ const headerArr = [
+   "Name",
+   "Contact",
+   "Location",
+   "Experience",
+   "Role",
+   "Status",
+   "Actions",
+ ];
+ 
+ const getTeamRoleColorClass = (role: string): string => {
+   const normalizedRole = role?.toLowerCase() || "";
+   switch (normalizedRole) {
+     case "admin":
+     case "administrator":
+       return "bg-blue-50 text-blue-700 border-blue-100";
+     case "hiring manager":
+     case "hiring_manager":
+       return "bg-sky-50 text-sky-700 border-sky-100";
+     case "team lead":
+     case "team_lead":
+       return "bg-emerald-50 text-emerald-700 border-emerald-100";
+     case "recruiter":
+       return "bg-teal-50 text-teal-700 border-teal-100";
+     case "head hunter":
+       return "bg-purple-50 text-purple-700 border-purple-100";
+     case "sales":
+       return "bg-amber-50 text-amber-700 border-amber-100";
+     default:
+       return "bg-slate-50 text-slate-600 border-slate-100";
+   }
+ };
+ 
+ const formatTeamRoleDisplay = (role: string): string => {
+   if (!role) return "Not Assigned";
+   return role.replace(/_/g, " ");
+ };
+ 
+ export function TeamMembersTabs({ onTeamMemberClick, highlightId }: TeamMembersTabsProps) {
+   const [activeTab, setActiveTab] = useState("all");
+   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   const [teamMemberToDelete, setTeamMemberToDelete] = useState<TeamMember | null>(null);
+ 
+   const queryClient = useQueryClient();
+   const { data, isLoading } = useQuery({
+     queryKey: ["teamMembers"],
+     queryFn: () => getTeamMembers(),
+     refetchOnWindowFocus: false,
+     staleTime: 30_000,
+   });
+   const dataTeamMembers: TeamMember[] = data?.teamMembers ?? [];
+ 
+   const { data: rolesRes } = useQuery({
+     queryKey: ["roles"],
+     queryFn: () => roleService.getRoles(),
+   });
+   const roles = rolesRes?.data ?? [];
+ 
+   const deleteMutation = useMutation({
+     mutationFn: (id: string) => deleteTeamMember(id),
+     onSuccess: () => {
+       queryClient.invalidateQueries({ queryKey: ["teamMembers"] });
+       setDeleteDialogOpen(false);
+       setTeamMemberToDelete(null);
+     },
+   });
+ 
+   const handleStatusChange = async (teamMemberId: string, newStatus: TeamMemberStatus) => {
+     queryClient.setQueryData(["teamMembers"], (oldData: any) => {
+       if (!oldData?.teamMembers) return oldData;
+       return {
+         ...oldData,
+         teamMembers: oldData.teamMembers.map((tm: TeamMember) =>
+           tm._id === teamMemberId ? { ...tm, status: newStatus } : tm
+         ),
+       };
+     });
+   };
+ 
+   const handleDeleteTeamMember = (teamMember: TeamMember) => {
+     setTeamMemberToDelete(teamMember);
+     setDeleteDialogOpen(true);
+   };
+ 
+   const confirmDeleteTeamMember = async () => {
+     if (!teamMemberToDelete) return;
+     deleteMutation.mutate(teamMemberToDelete._id);
+   };
+ 
+   const filteredTeamMembers = activeTab === "all" ? dataTeamMembers : dataTeamMembers.filter(member => {
+       const selectedRole = roles.find(r => (r._id || r.id) === activeTab);
+       if (!selectedRole) return true;
+       if (member.roleId === selectedRole._id || member.roleId === selectedRole.id) return true;
+       return (member.teamRole || "").toLowerCase() === selectedRole.name.toLowerCase();
+   });
+ 
+   const getCountByRole = (roleItem: any) => {
+     return dataTeamMembers.filter(member => {
+       if (member.roleId === roleItem._id || member.roleId === roleItem.id) return true;
+       const roleName = roleItem.name.toLowerCase();
+       return (member.teamRole || "").toLowerCase() === roleName;
+     }).length;
+   };
+ 
+   const renderTableBody = () => {
+     if (isLoading) {
+       return (
+         <TableRow>
+           <TableCell colSpan={headerArr.length} className="h-64 text-center">
+             <Loader className="size-6 animate-spin text-brand mx-auto mb-2" />
+             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Team...</span>
+           </TableCell>
+         </TableRow>
+       );
+     }
+ 
+     if (filteredTeamMembers.length === 0) {
+       return (
+         <TableRow>
+           <TableCell colSpan={headerArr.length} className="h-64 text-center">
+             <Users className="size-8 text-slate-200 mx-auto mb-3" />
+             <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No members found</p>
+           </TableCell>
+         </TableRow>
+       );
+     }
+ 
+     return filteredTeamMembers.map((member) => (
+       <TableRow
+         key={member._id}
+         className={cn(
+           "group border-b border-slate-50 transition-all duration-300",
+           "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
+           highlightId === member._id ? "bg-brand/[0.02]" : ""
+         )}
+       >
+         {/* Name */}
+         <TableCell className="px-3 py-2.5">
+           <Tooltip>
+             <TooltipTrigger asChild>
+               <div 
+                 className="cursor-pointer group/title max-w-[150px] truncate"
+                 onClick={() => onTeamMemberClick?.(member._id)}
+               >
+                 <span className="text-[13px] font-bold text-slate-900 group-hover/title:text-brand transition-all block truncate">
+                   {member.firstName} {member.lastName}
+                 </span>
+               </div>
+             </TooltipTrigger>
+             <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[11px] border-none shadow-2xl">
+               {member.firstName} {member.lastName}
+             </TooltipContent>
+           </Tooltip>
+         </TableCell>
+ 
+         {/* Contact */}
+         <TableCell className="px-3 py-2.5">
+            <div className="flex flex-col gap-0.5 max-w-[160px]">
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <div className="flex items-center gap-1.5 overflow-hidden cursor-help">
+                      <Mail className="w-2.5 h-2.5 text-slate-300 shrink-0" />
+                      <span className="text-[10px] font-medium text-slate-600 truncate">{member.email}</span>
+                   </div>
+                 </TooltipTrigger>
+                 <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                   {member.email}
+                 </TooltipContent>
+               </Tooltip>
+               <div className="flex items-center gap-1.5 overflow-hidden">
+                  <Phone className="w-2.5 h-2.5 text-slate-300 shrink-0" />
+                  <span className="text-[10px] font-medium text-slate-600 truncate">{formatPhoneNumber(member.phone, member.countryCode)}</span>
+               </div>
             </div>
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    if (members.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={headerArr.length} className="h-[calc(100vh-240px)] text-center">
-            <div className="py-24">
-              <div className="text-center">No team members found in this category</div>
+         </TableCell>
+ 
+         {/* Location */}
+         <TableCell className="px-3 py-2.5">
+           <Tooltip>
+             <TooltipTrigger asChild>
+               <div className="flex items-center gap-1.5 max-w-[100px] truncate cursor-help">
+                  <MapPin className="w-3 h-3 text-slate-300 shrink-0" />
+                  <span className="text-[11px] font-medium text-slate-600 truncate">{member.location || "Office"}</span>
+               </div>
+             </TooltipTrigger>
+             <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+               {member.location || "Remote/Office"}
+             </TooltipContent>
+           </Tooltip>
+         </TableCell>
+ 
+         {/* Experience */}
+         <TableCell className="px-3 py-2.5">
+            <div className="flex items-center gap-1.5">
+               <Briefcase className="w-3 h-3 text-slate-300 shrink-0" />
+               <span className="text-[11px] font-bold text-slate-700">{member.experience || "N/A"}</span>
             </div>
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return members.map((teamMember) => {
-      const isHighlighted = highlightId && teamMember._id === highlightId;
-
-      return (
-        <TableRow
-          key={teamMember._id}
-          className={`hover:bg-muted/50 transition-colors ${isHighlighted ? 'bg-brand/5' : ''
-            }`}
-        >
-          <TableCell className="text-sm font-medium">
-            <span
-              className="font-medium text-slate-900 hover:text-brand hover:underline cursor-pointer transition-colors block"
-              onClick={() => onTeamMemberClick?.(teamMember._id)}
-            >
-              {teamMember.firstName}
-            </span>
-          </TableCell>
-          <TableCell className="text-sm">{teamMember.lastName}</TableCell>
-          <TableCell className="text-sm">{teamMember.email}</TableCell>
-          <TableCell className="text-sm">{formatPhoneNumber(teamMember.phone, teamMember.countryCode)}</TableCell>
-          <TableCell className="text-sm">{teamMember.location}</TableCell>
-          <TableCell className="text-sm">{teamMember.experience}</TableCell>
-          <TableCell className="text-sm">
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTeamRoleColorClass(teamMember.teamRole || "")}`}
-              style={{
-                transition: 'none',
-                pointerEvents: 'none'
-              }}
-            >
-              {formatTeamRoleDisplay(teamMember.teamRole || "")}
-            </span>
-          </TableCell>
-
-          <TableCell className="text-sm">
-            <TeamMemberStatusBadge
-              id={teamMember._id}
-              status={teamMember.status}
-              onStatusChange={handleStatusChange}
-            />
-          </TableCell>
-          <TableCell className="text-sm">
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-8 w-8 p-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteTeamMember(teamMember);
-                  }}
-                  className="text-red-600"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </TableCell>
-        </TableRow>
-      );
-    });
-  };
-
-  return (
-    <div className="flex flex-col h-full">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col min-h-0 bg-white shadow-sm rounded-xl border border-slate-200">
-        <TabsList className="flex border-b border-slate-200 w-full rounded-t-xl justify-start h-14 bg-slate-50/50 px-2 shrink-0 overflow-x-auto gap-2">
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-slate-200 data-[state=active]:shadow-sm data-[state=active]:text-brand text-slate-500 hover:text-slate-900 rounded-lg flex items-center gap-2 h-10 px-4 transition-all mt-2"
-          >
-            <Users className="h-4 w-4" />
-            All Team Members
-            <Badge variant="secondary" className="ml-1 text-[10px] h-5 px-1.5 bg-slate-100 text-slate-600">
-              {dataTeamMembers.length}
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="p-0 mt-0 flex-1 overflow-auto relative rounded-b-xl bg-white">
-          <Table>
-            <TableHeader>
-              <TableRow className="sticky top-0 z-40 bg-white border-b border-slate-200 hover:bg-white text-slate-600 shadow-sm">
-                {headerArr.map((header, index) => (
-                  <TableHead key={index} className="h-12 text-xs font-semibold uppercase tracking-wider">{header}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {renderTeamMembersTable(filteredTeamMembers)}
-            </TableBody>
-          </Table>
-        </TabsContent>
-      </Tabs>
-
-      <DeleteTeamMemberDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        teamMemberName={teamMemberToDelete?.firstName + " " + teamMemberToDelete?.lastName || ""}
-        onConfirm={confirmDeleteTeamMember}
-        isLoading={deleteMutation.isPending}
-      />
-    </div>
-  );
-}
+         </TableCell>
+ 
+         {/* Role */}
+         <TableCell className="px-3 py-2.5">
+           <div className="scale-90 origin-left">
+             <span className={cn(
+               "inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-widest border shadow-sm",
+               getTeamRoleColorClass(member.teamRole || "")
+             )}>
+               {formatTeamRoleDisplay(member.teamRole || "")}
+             </span>
+           </div>
+         </TableCell>
+ 
+         {/* Status */}
+         <TableCell className="px-3 py-2.5">
+           <div className="scale-90 origin-left">
+             <TeamMemberStatusBadge
+               id={member._id}
+               status={member.status}
+               onStatusChange={handleStatusChange}
+             />
+           </div>
+         </TableCell>
+ 
+         {/* Actions */}
+         <TableCell className="px-3 py-2.5 text-right">
+           <DropdownMenu modal={false}>
+             <DropdownMenuTrigger asChild>
+               <Button variant="ghost" className="h-7 w-7 p-0 rounded-lg hover:bg-brand/5 group">
+                 <MoreVertical className="h-3.5 w-3.5 text-slate-400 group-hover:text-brand" />
+               </Button>
+             </DropdownMenuTrigger>
+             <DropdownMenuContent align="end" className="rounded-xl border-slate-100 shadow-xl">
+               <DropdownMenuItem
+                 onClick={(e) => { e.stopPropagation(); handleDeleteTeamMember(member); }}
+                 className="text-red-600 font-bold text-xs flex items-center gap-2 p-2 cursor-pointer hover:bg-red-50"
+               >
+                 <Trash2 className="h-3.5 w-3.5" />
+                 Delete Member
+               </DropdownMenuItem>
+             </DropdownMenuContent>
+           </DropdownMenu>
+         </TableCell>
+       </TableRow>
+     ));
+   };
+ 
+   return (
+     <div className="flex flex-col h-full bg-white animate-in slide-in-from-bottom-2 duration-700">
+       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col min-h-0">
+         <div className="px-4 py-2 border-b border-slate-50 bg-slate-50/30">
+            <TabsList className="bg-transparent gap-2 h-auto p-0 flex-wrap justify-start">
+              <TabsTrigger
+                value="all"
+                className="data-[state=active]:bg-brand data-[state=active]:text-white data-[state=active]:shadow-md text-slate-500 font-bold text-[11px] uppercase tracking-wider rounded-xl px-4 py-2 transition-all hover:bg-brand/5 border border-transparent data-[state=active]:border-brand"
+              >
+                All Members ({dataTeamMembers.length})
+              </TabsTrigger>
+              {roles.map(role => (
+                 <TabsTrigger
+                   key={role._id || role.id}
+                   value={role._id || role.id || ""}
+                   className="data-[state=active]:bg-brand data-[state=active]:text-white data-[state=active]:shadow-md text-slate-500 font-bold text-[11px] uppercase tracking-wider rounded-xl px-4 py-2 transition-all hover:bg-brand/5 border border-transparent data-[state=active]:border-brand"
+                 >
+                   {role.name} ({getCountByRole(role)})
+                 </TabsTrigger>
+              ))}
+            </TabsList>
+         </div>
+ 
+         <div className="flex-1 overflow-auto custom-scrollbar relative">
+           <Table className="w-full border-separate border-spacing-0 table-auto">
+             <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
+               <TableRow>
+                 {headerArr.map((header) => (
+                   <TableHead key={header} className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                     {header}
+                   </TableHead>
+                 ))}
+               </TableRow>
+             </TableHeader>
+             <TableBody>
+               {renderTableBody()}
+             </TableBody>
+           </Table>
+         </div>
+       </Tabs>
+ 
+       <DeleteTeamMemberDialog
+         open={deleteDialogOpen}
+         onOpenChange={setDeleteDialogOpen}
+         teamMemberName={teamMemberToDelete?.firstName + " " + teamMemberToDelete?.lastName || ""}
+         onConfirm={confirmDeleteTeamMember}
+         isLoading={deleteMutation.isPending}
+       />
+     </div>
+   );
+ }

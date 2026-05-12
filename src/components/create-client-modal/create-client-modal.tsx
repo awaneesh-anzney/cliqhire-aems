@@ -41,6 +41,7 @@ const INITIAL_STATE = {
   countryCode:       "SA",
   website:           "",
   address:           "",
+  location:          "",
   countryOfBusiness: "",
   linkedInProfile:   "",
   googleMapsLink:    "",
