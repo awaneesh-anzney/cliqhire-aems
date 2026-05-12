@@ -247,6 +247,7 @@ export default function NewContractPage({ params }: PageProps) {
                       )}
                       {["HR Consulting", "Mgt Consulting"].includes(business) && (
                         <ConsultingForm
+                          businessType={business}
                           formData={addContractFormData.contractForms[business]}
                           setFormData={createUpdateFormHandler(business)}
                         />

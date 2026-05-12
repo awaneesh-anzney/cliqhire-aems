@@ -75,7 +75,9 @@ export const clientSubStages = [
 
 export const levelValue = {
   percentage: 0,
+  amount: 0,
   notes: "",
+  currency: "SAR",
 };
 
 export const levelValueAdvance = {
@@ -121,11 +123,25 @@ export const businessInitialState = {
 export const consultingInitialState = {
   contractStartDate: null,
   contractEndDate: null,
-  technicalProposalDocument: null,
-  financialProposalDocument: null,
+  contractType: "Fixed Fee", // Default for HRC
+  salaryCurrency: "SAR",
+  serviceScope: "",
+  clientContact: "",
+  estimatedHours: "",
+  totalCost: 0,
   technicalProposalNotes: "",
   financialProposalNotes: "",
+  technicalProposalDocument: null,
+  financialProposalDocument: null,
+  // MGTC specific
+  projectScope: "",
+  clientCompany: "",
+  keyDeliverables: "",
 };
+
+export const HRC_CONTRACT_TYPES = ["Fixed Fee", "Hourly Rated", "Retainer"];
+export const MGTC_CONTRACT_TYPES = ["Project-Based", "Retainer", "Performance-Based"];
+
 
 export const primaryContactInitialState = {
   firstName: "",
