@@ -33,22 +33,22 @@ export default function JobSection({ item }: JobSectionProps) {
       case "on hold":
         return "bg-yellow-100 text-yellow-700"
       case "closed":
-        return "bg-gray-100 text-gray-700"
+        return "bg-muted text-foreground"
       default:
-        return "bg-slate-100 text-slate-700"
+        return "bg-muted text-foreground"
     }
   }
 
   return (
       <div className="p-4">
-        <div className="flex items-start justify-between gap-4 cursor-pointer hover:bg-gray-50 rounded-md"
+        <div className="flex items-start justify-between gap-4 cursor-pointer hover:bg-muted rounded-md"
              onClick={() => setExpanded((v) => !v)}>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               {expanded ? (
-                <ChevronDown className="h-5 w-5 text-gray-500" />
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
               ) : (
-                <ChevronRight className="h-5 w-5 text-gray-500" />
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
               )}
               <p className="font-medium">{item.jobId?.jobTitle}</p>
               <Badge className={statusColor(item.jobId?.stage)} variant="secondary">

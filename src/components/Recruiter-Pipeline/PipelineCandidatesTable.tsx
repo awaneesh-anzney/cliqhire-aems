@@ -49,14 +49,14 @@
  
    return (
      <Table className="w-full border-separate border-spacing-0 table-auto">
-       <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
-         <TableRow className="hover:bg-slate-50/95 transition-colors">
-           <TableHead className="w-[60px] px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Candidate</TableHead>
-           <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Name & Title</TableHead>
-           {showStageColumn && <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Pipeline Stage</TableHead>}
-           <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Internal Status</TableHead>
-           <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Assignees</TableHead>
-           <TableHead className="w-[80px] px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-right pr-6">Action</TableHead>
+       <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
+         <TableRow className="hover:bg-muted/95 transition-colors">
+           <TableHead className="w-[60px] px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Candidate</TableHead>
+           <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Name & Title</TableHead>
+           {showStageColumn && <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Pipeline Stage</TableHead>}
+           <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Internal Status</TableHead>
+           <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Assignees</TableHead>
+           <TableHead className="w-[80px] px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-right pr-6">Action</TableHead>
          </TableRow>
        </TableHeader>
        <TableBody>
@@ -64,14 +64,14 @@
            <TableRow 
              key={candidate.id} 
              className={cn(
-                "group border-b border-slate-50 transition-all duration-300",
+                "group border-b border-border transition-all duration-300",
                 "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1"
              )}
            >
              {/* Avatar Column */}
              <TableCell className="px-3 py-2.5 w-[60px]">
                <Avatar 
-                 className="h-9 w-9 rounded-xl border-2 border-white shadow-sm ring-1 ring-slate-100 transition-transform group-hover:scale-110 group-hover:rotate-3 cursor-pointer"
+                 className="h-9 w-9 rounded-xl border-2 border-white shadow-sm ring-1 ring-border transition-transform group-hover:scale-110 group-hover:rotate-3 cursor-pointer"
                  onClick={() => router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`)}
                >
                  <AvatarImage src={candidate.avatar} />
@@ -90,7 +90,7 @@
                          className="flex items-center gap-2 cursor-pointer group/name truncate"
                          onClick={() => router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`)}
                       >
-                         <span className="text-[13px] font-black text-slate-900 group-hover/name:text-brand transition-colors truncate">
+                         <span className="text-[13px] font-black text-foreground group-hover/name:text-brand transition-colors truncate">
                            {candidate.name || "Anonymous Candidate"}
                          </span>
                          {candidate.isTempCandidate && (
@@ -106,8 +106,8 @@
                   </Tooltip>
                   
                   <div className="flex items-center gap-1.5 overflow-hidden">
-                     <Building2 className="h-3 w-3 text-slate-300 shrink-0" />
-                     <span className="text-[11px] font-medium text-slate-500 truncate">
+                     <Building2 className="h-3 w-3 text-muted-foreground shrink-0" />
+                     <span className="text-[11px] font-medium text-muted-foreground truncate">
                         {candidate.currentJobTitle || "Independent Professional"}
                      </span>
                   </div>
@@ -151,7 +151,7 @@
                      </div>
                    );
                  } else {
-                   return <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">N/A</span>;
+                   return <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">N/A</span>;
                  }
                })()}
              </TableCell>
@@ -160,14 +160,14 @@
              <TableCell className="px-3 py-2.5">
                <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-1.5">
-                     <ShieldCheck className="h-2.5 w-2.5 text-slate-300" />
-                     <span className="text-[10px] font-bold text-slate-600 truncate max-w-[120px]">
+                     <ShieldCheck className="h-2.5 w-2.5 text-muted-foreground" />
+                     <span className="text-[10px] font-bold text-foreground truncate max-w-[120px]">
                         HM: {job.hiringManagerName || "Unassigned"}
                      </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                     <User2 className="h-2.5 w-2.5 text-slate-300" />
-                     <span className="text-[10px] font-medium text-slate-500 truncate max-w-[120px]">
+                     <User2 className="h-2.5 w-2.5 text-muted-foreground" />
+                     <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[120px]">
                         REC: {job.recruiterName || "Unassigned"}
                      </span>
                   </div>
@@ -183,10 +183,10 @@
                      className="h-8 w-8 p-0 rounded-xl hover:bg-brand/5 group/btn"
                      onClick={(e) => e.stopPropagation()}
                    >
-                     <MoreVertical className="h-4 w-4 text-slate-400 group-hover/btn:text-brand transition-colors" />
+                     <MoreVertical className="h-4 w-4 text-muted-foreground group-hover/btn:text-brand transition-colors" />
                    </Button>
                  </DropdownMenuTrigger>
-                 <DropdownMenuContent align="end" className="rounded-xl border-slate-100 shadow-xl w-52 p-1.5">
+                 <DropdownMenuContent align="end" className="rounded-xl border-border shadow-xl w-52 p-1.5">
                    <DropdownMenuItem
                      onClick={(e) => {
                        e.stopPropagation();

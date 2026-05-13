@@ -80,30 +80,30 @@
          <div className="p-4 rounded-full bg-red-50 text-red-500">
            <FilterX className="w-8 h-8" />
          </div>
-         <div className="text-center font-black text-slate-900 tracking-tight">Access Restricted</div>
-         <div className="text-center text-slate-400 text-sm font-bold uppercase tracking-widest">Pipeline visibility requires authorized permissions.</div>
+         <div className="text-center font-black text-foreground tracking-tight">Access Restricted</div>
+         <div className="text-center text-muted-foreground text-sm font-bold uppercase tracking-widest">Pipeline visibility requires authorized permissions.</div>
        </div>
      );
    }
  
    return (
-     <div className="flex flex-col h-full w-full overflow-hidden bg-white">
+     <div className="flex flex-col h-full w-full overflow-hidden bg-card">
        {/* KPI Section - Reduced horizontal padding */}
-       <div className="flex-shrink-0 bg-slate-50/50 p-2 border-b border-slate-100">
+       <div className="flex-shrink-0 bg-muted/50 p-2 border-b border-border">
          <KPISection data={calculateKPIData()} />
        </div>
  
        {/* Search Bar Container - Removed max-w, expanded to full width */}
-       <div className="flex-shrink-0 p-2 bg-white border-b border-slate-100">
+       <div className="flex-shrink-0 p-2 bg-card border-b border-border">
          <div className="relative group w-full">
            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-             <Search className="h-4 w-4 text-slate-400 group-focus-within:text-brand transition-colors" />
+             <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-brand transition-colors" />
            </div>
            <Input
              placeholder="Search jobs, clients, or pipeline notes..."
              value={searchTerm}
              onChange={(e) => setSearchTerm(e.target.value)}
-             className="h-10 pl-10 pr-4 bg-slate-50/50 border-slate-100 rounded-xl text-[13px] font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-medium focus:bg-white focus:ring-4 focus:ring-brand/5 focus:border-brand/20 transition-all shadow-sm"
+             className="h-10 pl-10 pr-4 bg-muted/50 border-border rounded-xl text-[13px] font-bold text-foreground placeholder:text-muted-foreground placeholder:font-medium focus:bg-card focus:ring-4 focus:ring-brand/5 focus:border-brand/20 transition-all shadow-sm"
            />
            {listLoading && (
              <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
@@ -114,12 +114,12 @@
        </div>
  
        {/* Pipeline Content Area - Removed max-w, expanded to full width */}
-       <div className="flex-1 overflow-y-auto custom-scrollbar p-2 bg-slate-50/10">
+       <div className="flex-1 overflow-y-auto custom-scrollbar p-2 bg-muted/10">
          {listLoading && renderJobs.length === 0 ? (
            <div className="h-full flex flex-col items-center justify-center gap-3">
-              <div className="p-4 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center gap-3 animate-bounce">
+              <div className="p-4 rounded-2xl bg-card shadow-xl border border-border flex items-center gap-3 animate-bounce">
                  <Loader className="h-5 w-5 text-brand animate-spin" />
-                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Pipeline Data...</span>
+                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Pipeline Data...</span>
               </div>
            </div>
          ) : renderJobs.length > 0 ? (
@@ -133,12 +133,12 @@
            </div>
          ) : (
            <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
-             <div className="p-6 rounded-full bg-white shadow-lg border border-slate-100">
-                <Search className="size-10 text-slate-200" />
+             <div className="p-6 rounded-full bg-card shadow-lg border border-border">
+                <Search className="size-10 text-muted-foreground" />
              </div>
              <div className="space-y-1">
-                <p className="text-slate-900 font-black tracking-tight text-lg">No Results Found</p>
-                <p className="text-slate-400 font-bold text-xs uppercase tracking-widest max-w-[280px]">
+                <p className="text-foreground font-black tracking-tight text-lg">No Results Found</p>
+                <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest max-w-[280px]">
                    Adjust your search or filters to see more pipeline jobs.
                 </p>
              </div>
@@ -147,18 +147,18 @@
        </div>
  
        {/* Pagination Footer - Removed max-w, reduced padding */}
-       <div className="flex-shrink-0 bg-white border-t border-slate-100 p-2">
+       <div className="flex-shrink-0 bg-card border-t border-border p-2">
          {totalPages > 1 ? (
            <div className="flex items-center justify-between w-full px-2">
              <div className="flex items-center gap-2">
-                <div className="px-3 py-1 rounded-lg bg-slate-50 border border-slate-100 shadow-sm">
-                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1.5">Page</span>
-                   <span className="text-sm font-black text-slate-900">{currentPageRes}</span>
-                   <span className="text-sm font-bold text-slate-300 mx-1">/</span>
-                   <span className="text-sm font-bold text-slate-500">{totalPages}</span>
+                <div className="px-3 py-1 rounded-lg bg-muted border border-border shadow-sm">
+                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mr-1.5">Page</span>
+                   <span className="text-sm font-black text-foreground">{currentPageRes}</span>
+                   <span className="text-sm font-bold text-muted-foreground mx-1">/</span>
+                   <span className="text-sm font-bold text-muted-foreground">{totalPages}</span>
                 </div>
-                <div className="h-4 w-[1px] bg-slate-200 mx-2" />
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <div className="h-4 w-[1px] bg-muted mx-2" />
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                    {totalItems} total records
                 </span>
              </div>
@@ -169,7 +169,7 @@
                  size="sm"
                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                  disabled={!hasPrevPage}
-                 className="h-8 px-4 rounded-xl border-slate-100 font-bold text-xs uppercase tracking-widest hover:bg-brand hover:text-white hover:border-brand transition-all disabled:opacity-40 shadow-sm"
+                 className="h-8 px-4 rounded-xl border-border font-bold text-xs uppercase tracking-widest hover:bg-brand hover:text-white hover:border-brand transition-all disabled:opacity-40 shadow-sm"
                >
                  <ChevronLeft className="h-4 w-4 mr-1.5" />
                  Prev
@@ -179,7 +179,7 @@
                  size="sm"
                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                  disabled={!hasNextPage}
-                 className="h-9 px-4 rounded-xl border-slate-100 font-bold text-xs uppercase tracking-widest hover:bg-brand hover:text-white hover:border-brand transition-all disabled:opacity-40 shadow-sm"
+                 className="h-9 px-4 rounded-xl border-border font-bold text-xs uppercase tracking-widest hover:bg-brand hover:text-white hover:border-brand transition-all disabled:opacity-40 shadow-sm"
                >
                  Next
                  <ChevronRight className="h-4 w-4 ml-1.5" />
@@ -188,8 +188,8 @@
            </div>
          ) : (
            <div className="text-center">
-             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Showing all <span className="text-slate-900 mx-1">{totalItems}</span> pipeline entries
+             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                Showing all <span className="text-foreground mx-1">{totalItems}</span> pipeline entries
              </span>
            </div>
          )}

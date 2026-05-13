@@ -40,7 +40,7 @@ export function StatsGrid({ stats, loading }: StatsGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {metrics.map((m, i) => (
-        <Card key={i} className="p-6 border border-[hsl(var(--border))] bg-white shadow-sm hover:border-[hsl(var(--primary))] transition-colors">
+        <Card key={i} className="p-6 border border-[hsl(var(--border))] bg-card shadow-sm hover:border-[hsl(var(--primary))] transition-colors">
            <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-[hsl(var(--muted-foreground))]">{m.title}</h3>
               <m.icon className="w-5 h-5 text-[hsl(var(--primary))]" />

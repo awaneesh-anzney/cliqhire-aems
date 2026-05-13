@@ -32,7 +32,7 @@ export function TempCandidateAlertDialog({
                 <strong>{candidateName}</strong> is a temporary candidate.
               </div>
             )}
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-foreground">
               {message}
             </div>
           </DialogDescription>

@@ -42,7 +42,7 @@ export function ActivitySidebar({ jobs = [], candidates = [] }: ActivitySidebarP
                 <div key={activity.id} className="flex gap-3">
                    <div className="mt-0.5">
                       {activity.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-                      {activity.type === 'neutral' && <Clock className="w-4 h-4 text-slate-400" />}
+                      {activity.type === 'neutral' && <Clock className="w-4 h-4 text-muted-foreground" />}
                       {activity.type === 'info' && <Info className="w-4 h-4 text-blue-500" />}
                       {activity.type === 'warning' && <AlertCircle className="w-4 h-4 text-orange-500" />}
                    </div>
@@ -63,14 +63,14 @@ export function ActivitySidebar({ jobs = [], candidates = [] }: ActivitySidebarP
        <div className="pt-6 border-t border-[hsl(var(--border))]">
           <h3 className="text-sm font-semibold text-[hsl(var(--foreground))] mb-4">Upcoming Priorities</h3>
           <div className="space-y-3">
-             <div onClick={() => alert("Calendar integration pending")} className="flex items-start gap-3 p-3 rounded-lg border border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--primary))] transition-colors cursor-pointer">
+             <div onClick={() => alert("Calendar integration pending")} className="flex items-start gap-3 p-3 rounded-lg border border-[hsl(var(--border))] bg-card hover:border-[hsl(var(--primary))] transition-colors cursor-pointer">
                 <Calendar className="w-4 h-4 mt-0.5 text-[hsl(var(--primary))]" />
                 <div>
                    <p className="text-sm font-medium text-[hsl(var(--foreground))]">Client Sync</p>
                    <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">Check with key partners</p>
                 </div>
              </div>
-             <div onClick={() => alert("Budget settings pending")} className="flex items-start gap-3 p-3 rounded-lg border border-[hsl(var(--border))] bg-white hover:border-[hsl(var(--primary))] transition-colors cursor-pointer">
+             <div onClick={() => alert("Budget settings pending")} className="flex items-start gap-3 p-3 rounded-lg border border-[hsl(var(--border))] bg-card hover:border-[hsl(var(--primary))] transition-colors cursor-pointer">
                 <AlertCircle className="w-4 h-4 mt-0.5 text-rose-500" />
                 <div>
                    <p className="text-sm font-medium text-[hsl(var(--foreground))]">Review Active Roles</p>

@@ -25,7 +25,7 @@ export default function TeamSettingsView({ clientId }: TeamSettingsViewProps) {
 
       {/* Settings Card */}
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg border shadow-sm">
+        <div className="bg-card rounded-lg border shadow-sm">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-2">Team Settings</h2>
             <p className="text-muted-foreground mb-6">

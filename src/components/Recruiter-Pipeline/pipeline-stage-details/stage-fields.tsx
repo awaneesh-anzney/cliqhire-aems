@@ -177,7 +177,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           label: "Notes",
           value: sourcingData.notes || "Not set",
           icon: <MessageSquare className="h-4 w-4" />,
-          color: "bg-gray-50 text-gray-600",
+          color: "bg-muted text-foreground",
           type: "textarea",
           placeholder: "Enter sourcing notes..."
         },
@@ -258,7 +258,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           label: "Screening Notes",
           value: screeningData.screeningNotes || "Not set",
           icon: <MessageSquare className="h-4 w-4" />,
-          color: "bg-gray-50 text-gray-600",
+          color: "bg-muted text-foreground",
           type: "textarea",
           placeholder: "Enter screening notes..."
         },
@@ -476,7 +476,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           label: "Currency",
           value: hiredData.offeredSalaryCurrency || "Not set",
           icon: <DollarSign className="h-4 w-4" />,
-          color: "bg-slate-50 text-slate-600",
+          color: "bg-muted text-foreground",
           type: "select",
           options: ["SAR", "USD", "EUR", "GBP", "INR", "AED"]
         },
@@ -567,5 +567,5 @@ export const getStageColor = (stage: string) => {
     "Hired": "bg-red-100 text-red-800 border-red-200",
     "Disqualified": "bg-red-100 text-red-800 border-red-200"
   };
-  return colors[stage as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
+  return colors[stage as keyof typeof colors] || "bg-muted text-foreground border-border";
 };

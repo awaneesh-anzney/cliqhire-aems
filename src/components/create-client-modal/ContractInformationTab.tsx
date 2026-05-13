@@ -265,7 +265,7 @@ export function ContractInformationTab({ form }: ContractInformationTabProps) {
             return (
               <div
                 key={business}
-                className="rounded border bg-white py-4 px-6 mb-4 flex items-center justify-between w-full"
+                className="rounded border bg-card py-4 px-6 mb-4 flex items-center justify-between w-full"
               >
                 <span className="font-medium text-xs sm:text-sm">{business} contract form</span>
                 <div className="flex gap-2">

@@ -119,17 +119,17 @@
          <div className="p-4 rounded-full bg-red-50 text-red-500">
            <Lock className="w-8 h-8" />
          </div>
-         <div className="text-center font-black text-slate-900 tracking-tight">Access Denied</div>
-         <div className="text-center text-slate-400 text-sm font-bold uppercase tracking-widest">Permission required to view candidates.</div>
+         <div className="text-center font-black text-foreground tracking-tight">Access Denied</div>
+         <div className="text-center text-muted-foreground text-sm font-bold uppercase tracking-widest">Permission required to view candidates.</div>
        </div>
      );
    }
  
    return (
      <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50/50 p-3 gap-3 animate-in fade-in duration-700">
+       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Page Header */}
-         <div className="flex-shrink-0 relative overflow-hidden bg-white rounded-[1.5rem] border border-slate-100 shadow-lg p-1.5">
+         <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
            <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
            <Dashboardheader
              setOpen={setOpen}
@@ -149,27 +149,27 @@
          </div>
  
          {/* Content Table Area */}
-         <div className="flex-1 min-h-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
            <div className="flex-1 overflow-auto custom-scrollbar relative">
              <Table className="w-full border-separate border-spacing-0 table-auto">
-               <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
-                 <TableRow className="hover:bg-slate-50/95 transition-colors">
-                   <TableHead className="w-[48px] px-3 py-3 border-b border-slate-100 text-center">
+               <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
+                 <TableRow className="hover:bg-muted/95 transition-colors">
+                   <TableHead className="w-[48px] px-3 py-3 border-b border-border text-center">
                      <Checkbox
                        checked={selectedRows.size > 0 && selectedRows.size === candidates.length}
                        onCheckedChange={() => toggleSelectAll()}
-                       className="h-4 w-4 rounded border-slate-300"
+                       className="h-4 w-4 rounded border-border"
                        disabled={!canDeleteCandidates}
                      />
                    </TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">ID</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Name</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Contact</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Location</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Status</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Experience</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-center">Resume</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-right pr-6">Created By</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">ID</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Name</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Contact</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Location</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Experience</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Resume</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-right pr-6">Created By</TableHead>
                  </TableRow>
                </TableHeader>
                <TableBody>
@@ -177,7 +177,7 @@
                    <TableRow>
                      <TableCell colSpan={10} className="h-64 text-center">
                         <Loader className="size-6 animate-spin text-brand mx-auto mb-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Talent Pool...</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Talent Pool...</span>
                      </TableCell>
                    </TableRow>
                  ) : candidates.length === 0 ? (
@@ -193,7 +193,7 @@
                      <TableRow
                        key={candidate._id}
                        className={cn(
-                         "group border-b border-slate-50 transition-all duration-300",
+                         "group border-b border-border transition-all duration-300",
                          "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
                          candidate._id && selectedRows.has(candidate._id) ? "bg-brand/[0.02]" : ""
                        )}
@@ -202,7 +202,7 @@
                          <Checkbox
                            checked={candidate._id ? selectedRows.has(candidate._id) : false}
                            onCheckedChange={() => candidate._id && toggleRowSelection(candidate._id)}
-                           className="h-4 w-4 rounded border-slate-300"
+                           className="h-4 w-4 rounded border-border"
                            disabled={!canDeleteCandidates}
                            onClick={(e) => e.stopPropagation()}
                          />
@@ -213,7 +213,7 @@
                          <Tooltip>
                            <TooltipTrigger asChild>
                              <span 
-                               className="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
+                               className="text-[10px] font-bold text-muted-foreground cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
                                onClick={() => candidate._id && router.push(`/candidates/${candidate._id}`)}
                              >
                                {candidate.profileId || "—"}
@@ -233,7 +233,7 @@
                                className="cursor-pointer group/title max-w-[150px] truncate"
                                onClick={() => candidate._id && router.push(`/candidates/${candidate._id}`)}
                              >
-                               <span className="text-[13px] font-bold text-slate-900 group-hover/title:text-brand transition-all block truncate">
+                               <span className="text-[13px] font-bold text-foreground group-hover/title:text-brand transition-all block truncate">
                                  {candidate.name || "N/A"}
                                </span>
                              </div>
@@ -250,8 +250,8 @@
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <div className="flex items-center gap-1.5 overflow-hidden cursor-help">
-                                   <Mail className="w-2.5 h-2.5 text-slate-300 shrink-0" />
-                                   <span className="text-[10px] font-medium text-slate-600 truncate">{candidate.email}</span>
+                                   <Mail className="w-2.5 h-2.5 text-muted-foreground shrink-0" />
+                                   <span className="text-[10px] font-medium text-foreground truncate">{candidate.email}</span>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
@@ -262,8 +262,8 @@
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <div className="flex items-center gap-1.5 overflow-hidden cursor-help">
-                                   <Phone className="w-2.5 h-2.5 text-slate-300 shrink-0" />
-                                   <span className="text-[10px] font-medium text-slate-600 truncate">{formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}</span>
+                                   <Phone className="w-2.5 h-2.5 text-muted-foreground shrink-0" />
+                                   <span className="text-[10px] font-medium text-foreground truncate">{formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}</span>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
@@ -278,8 +278,8 @@
                          <Tooltip>
                            <TooltipTrigger asChild>
                              <div className="flex items-center gap-1.5 max-w-[100px] truncate cursor-help">
-                                <MapPin className="w-3 h-3 text-slate-300 shrink-0" />
-                                <span className="text-[11px] font-medium text-slate-600 truncate">{candidate.location || "Global"}</span>
+                                <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                                <span className="text-[11px] font-medium text-foreground truncate">{candidate.location || "Global"}</span>
                              </div>
                            </TooltipTrigger>
                            <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
@@ -303,8 +303,8 @@
                        {/* Experience */}
                        <TableCell className="px-3 py-2.5">
                           <div className="flex items-center gap-1.5 max-w-[100px] truncate">
-                             <Briefcase className="w-3 h-3 text-slate-300 shrink-0" />
-                             <span className="text-[11px] font-bold text-slate-700 truncate">{candidate.experience || "N/A"}</span>
+                             <Briefcase className="w-3 h-3 text-muted-foreground shrink-0" />
+                             <span className="text-[11px] font-bold text-foreground truncate">{candidate.experience || "N/A"}</span>
                           </div>
                        </TableCell>
  
@@ -328,13 +328,13 @@
                              </TooltipContent>
                            </Tooltip>
                          ) : (
-                           <span className="text-[10px] font-bold text-slate-300 italic">No File</span>
+                           <span className="text-[10px] font-bold text-muted-foreground italic">No File</span>
                          )}
                        </TableCell>
  
                        {/* Created By */}
                        <TableCell className="px-3 py-2.5 text-right pr-6">
-                          <span className="text-[11px] font-bold text-slate-700 block truncate max-w-[120px] ml-auto">
+                          <span className="text-[11px] font-bold text-foreground block truncate max-w-[120px] ml-auto">
                              {candidate.createdBy?.name || (typeof candidate.createdBy === 'string' ? candidate.createdBy : "System")}
                           </span>
                        </TableCell>
@@ -346,7 +346,7 @@
            </div>
            
            {/* Pagination Footer */}
-           <div className="flex-shrink-0 bg-white border-t border-slate-100 p-1.5">
+           <div className="flex-shrink-0 bg-card border-t border-border p-1.5">
              <CandidatePaginationControls
                currentPage={currentPage}
                totalPages={data?.totalPages || 1}

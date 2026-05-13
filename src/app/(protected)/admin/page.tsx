@@ -23,7 +23,7 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col w-full h-full bg-[hsl(var(--background))] overflow-y-auto">
       {/* Breadcrumb Area */}
-      <div className="bg-white border-b border-[hsl(var(--border))] px-8 py-3 w-full">
+      <div className="bg-card border-b border-[hsl(var(--border))] px-8 py-3 w-full">
          <div className="flex items-center gap-2 text-[hsl(var(--muted-foreground))] font-medium text-sm">
             <LayoutDashboard className="w-4 h-4 text-[hsl(var(--primary))]" />
             <span>Administration</span>
@@ -65,19 +65,19 @@ export default function AdminPage() {
                 <TabsList className="bg-[hsl(var(--muted))] p-1 rounded-lg">
                   <TabsTrigger 
                     value="jobs" 
-                    className="rounded-md px-6 py-2 font-semibold text-sm data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--primary))] data-[state=active]:shadow-sm"
+                    className="rounded-md px-6 py-2 font-semibold text-sm data-[state=active]:bg-card data-[state=active]:text-[hsl(var(--primary))] data-[state=active]:shadow-sm"
                   >
                     Active Jobs
                   </TabsTrigger>
                   <TabsTrigger 
                     value="talents" 
-                    className="rounded-md px-6 py-2 font-semibold text-sm data-[state=active]:bg-white data-[state=active]:text-[hsl(var(--primary))] data-[state=active]:shadow-sm"
+                    className="rounded-md px-6 py-2 font-semibold text-sm data-[state=active]:bg-card data-[state=active]:text-[hsl(var(--primary))] data-[state=active]:shadow-sm"
                   >
                     Candidate Pool
                   </TabsTrigger>
                 </TabsList>
                 
-                <Button onClick={() => alert("Filter functionality to be integrated")} variant="outline" size="sm" className="h-9 px-4 text-[hsl(var(--foreground))] font-medium text-sm border-[hsl(var(--border))] bg-white">
+                <Button onClick={() => alert("Filter functionality to be integrated")} variant="outline" size="sm" className="h-9 px-4 text-[hsl(var(--foreground))] font-medium text-sm border-[hsl(var(--border))] bg-card">
                   <Filter className="w-4 h-4 mr-2" /> Filter
                 </Button>
               </div>
@@ -99,7 +99,7 @@ export default function AdminPage() {
                      <p className="text-sm text-[hsl(var(--muted-foreground))] mt-0.5">Key performance indicators for the current period.</p>
                   </div>
                </div>
-               <div className="bg-white p-4 rounded-xl border border-[hsl(var(--border))] shadow-sm">
+               <div className="bg-card p-4 rounded-xl border border-[hsl(var(--border))] shadow-sm">
                   <AdminDashboardCharts />
                </div>
             </section>

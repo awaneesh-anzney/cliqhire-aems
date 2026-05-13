@@ -89,7 +89,7 @@ export function PipelineJobExpanded({
           {selectedStageFilter && (
             <Badge
               variant="outline"
-              className="bg-gray-100 text-gray-600 border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+              className="bg-muted text-foreground border-border cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => onChangeStageFilter(null)}
             >
               <X className="text-red-500 h-3 w-3 mr-1" />
@@ -100,7 +100,7 @@ export function PipelineJobExpanded({
       )}
 
       {/* Candidates Table */}
-      <div className="border-2 border-blue-200 rounded-md bg-gray-50 max-h-[300px] overflow-hidden">
+      <div className="border-2 border-blue-200 rounded-md bg-muted max-h-[300px] overflow-hidden">
         {selectedStageFilter && (
           <div className="px-4 py-2 bg-blue-50 border-b border-blue-200 text-sm text-blue-700 ">
             Showing candidates in: <span className="font-semibold">{selectedStageFilter}</span>

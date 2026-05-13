@@ -264,34 +264,34 @@ export function HeadhunterAddCandidateDialog({
                         const candidate = candidates.find((c) => c._id === candidateId);
                         if (!candidate) return null;
                         return (
-                          <div key={candidateId} className="p-4 rounded-lg border bg-gray-50/50">
+                          <div key={candidateId} className="p-4 rounded-lg border bg-muted/50">
                             <div className="flex justify-between items-start">
                               <div className="flex-1 grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">Name:</span>
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">Name:</span>
                                     <span className="text-sm font-medium">{candidate.name || "Unnamed Candidate"}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">Current Position:</span>
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">Current Position:</span>
                                     <span className="text-sm text-muted-foreground">{candidate.currentJobTitle || "—"}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">Email:</span>
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">Email:</span>
                                     <span className="text-sm text-muted-foreground">{candidate.email || "—"}</span>
                                   </div>
                                 </div>
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">Location:</span>
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">Location:</span>
                                     <span className="text-sm text-muted-foreground">{candidate.location || "—"}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">Phone:</span>
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">Phone:</span>
                                     <span className="text-sm text-muted-foreground">{candidate.phone || "—"}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-gray-500 min-w-[80px]">Experience:</span>
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[80px]">Experience:</span>
                                     <span className="text-sm text-muted-foreground">{candidate.experience ? `${candidate.experience}` : "—"}</span>
                                   </div>
                                 </div>

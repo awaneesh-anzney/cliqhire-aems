@@ -52,17 +52,17 @@ export function AssignedJobs({ assignedJobs, onStatusChange, loading = false }: 
   };
 
   return (
-    <Card className="rounded-xl border border-slate-200 shadow-sm bg-white overflow-hidden">
+    <Card className="rounded-xl border border-border shadow-sm bg-card overflow-hidden">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors py-4 px-6 border-b border-transparent data-[state=open]:border-slate-200">
+          <CardHeader className="cursor-pointer hover:bg-muted transition-colors py-4 px-6 border-b border-transparent data-[state=open]:border-border">
             <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-900 font-semibold">
+              <div className="flex items-center gap-2 text-foreground font-semibold">
                 <Briefcase className="w-5 h-5 text-brand" />
                 Assigned Jobs
               </div>
-              <div className="flex items-center gap-4 text-sm text-slate-500 font-normal">
-                <span>Total Job Count: <span className="font-semibold text-gray-900">{totalJobs}</span></span>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground font-normal">
+                <span>Total Job Count: <span className="font-semibold text-foreground">{totalJobs}</span></span>
                 <span>Total Active Job: <span className="font-semibold text-green-600">{activeJobs}</span></span>
                 {isOpen ? (
                   <ChevronDown className="w-4 h-4" />
@@ -77,7 +77,7 @@ export function AssignedJobs({ assignedJobs, onStatusChange, loading = false }: 
           <CardContent>
             <div className="rounded-md border">
               {/* Fixed Header */}
-              <div className="border-b bg-gray-50/50">
+              <div className="border-b bg-muted/50">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b-0 hover:bg-transparent">
@@ -111,19 +111,19 @@ export function AssignedJobs({ assignedJobs, onStatusChange, loading = false }: 
                         <TableCell colSpan={5} className="text-center py-8">
                           <div className="flex items-center justify-center">
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand"></div>
-                            <span className="ml-2 text-slate-500">Loading assigned jobs...</span>
+                            <span className="ml-2 text-muted-foreground">Loading assigned jobs...</span>
                           </div>
                         </TableCell>
                       </TableRow>
                     ) : assignedJobs.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                           No assigned jobs found
                         </TableCell>
                       </TableRow>
                     ) : (
                       assignedJobs.map((job) => (
-                        <TableRow key={job.id} className="hover:bg-gray-50">
+                        <TableRow key={job.id} className="hover:bg-muted">
                           <TableCell className="w-12">
                             <Checkbox
                               checked={checkedJobs.has(job.id)}

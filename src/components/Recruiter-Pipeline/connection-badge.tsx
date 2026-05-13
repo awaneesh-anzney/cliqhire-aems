@@ -17,7 +17,7 @@ const connectionColors: Record<ConnectionType, string> = {
   'Indeed': "bg-purple-100 text-purple-800 border-purple-200",
   'Referral': "bg-green-100 text-green-800 border-green-200",
   'Direct': "bg-orange-100 text-orange-800 border-orange-200",
-  'Other': "bg-gray-100 text-gray-800 border-gray-200"
+  'Other': "bg-muted text-foreground border-border"
 };
 
 const connectionTypes: ConnectionType[] = [
@@ -54,7 +54,7 @@ export function ConnectionBadge({
       return (
         <Badge 
           variant="secondary" 
-          className="bg-gray-100 text-gray-500 border-gray-200"
+          className="bg-muted text-muted-foreground border-border"
         >
           Not set
         </Badge>
@@ -70,7 +70,7 @@ export function ConnectionBadge({
           >
             <Badge 
               variant="secondary" 
-              className="bg-gray-100 text-gray-500 border-gray-200 flex items-center gap-1"
+              className="bg-muted text-muted-foreground border-border flex items-center gap-1"
             >
               Set Connection
               <ChevronDown className="h-3 w-3" />

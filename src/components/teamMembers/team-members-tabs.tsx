@@ -63,7 +63,7 @@
      case "sales":
        return "bg-amber-50 text-amber-700 border-amber-100";
      default:
-       return "bg-slate-50 text-slate-600 border-slate-100";
+       return "bg-muted text-foreground border-border";
    }
  };
  
@@ -144,7 +144,7 @@
          <TableRow>
            <TableCell colSpan={headerArr.length} className="h-64 text-center">
              <Loader className="size-6 animate-spin text-brand mx-auto mb-2" />
-             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Team...</span>
+             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Syncing Team...</span>
            </TableCell>
          </TableRow>
        );
@@ -154,8 +154,8 @@
        return (
          <TableRow>
            <TableCell colSpan={headerArr.length} className="h-64 text-center">
-             <Users className="size-8 text-slate-200 mx-auto mb-3" />
-             <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No members found</p>
+             <Users className="size-8 text-muted-foreground mx-auto mb-3" />
+             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">No members found</p>
            </TableCell>
          </TableRow>
        );
@@ -165,7 +165,7 @@
        <TableRow
          key={member._id}
          className={cn(
-           "group border-b border-slate-50 transition-all duration-300",
+           "group border-b border-border transition-all duration-300",
            "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
            highlightId === member._id ? "bg-brand/[0.02]" : ""
          )}
@@ -178,7 +178,7 @@
                  className="cursor-pointer group/title max-w-[150px] truncate"
                  onClick={() => onTeamMemberClick?.(member._id)}
                >
-                 <span className="text-[13px] font-bold text-slate-900 group-hover/title:text-brand transition-all block truncate">
+                 <span className="text-[13px] font-bold text-foreground group-hover/title:text-brand transition-all block truncate">
                    {member.firstName} {member.lastName}
                  </span>
                </div>
@@ -195,8 +195,8 @@
                <Tooltip>
                  <TooltipTrigger asChild>
                    <div className="flex items-center gap-1.5 overflow-hidden cursor-help">
-                      <Mail className="w-2.5 h-2.5 text-slate-300 shrink-0" />
-                      <span className="text-[10px] font-medium text-slate-600 truncate">{member.email}</span>
+                      <Mail className="w-2.5 h-2.5 text-muted-foreground shrink-0" />
+                      <span className="text-[10px] font-medium text-foreground truncate">{member.email}</span>
                    </div>
                  </TooltipTrigger>
                  <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
@@ -204,8 +204,8 @@
                  </TooltipContent>
                </Tooltip>
                <div className="flex items-center gap-1.5 overflow-hidden">
-                  <Phone className="w-2.5 h-2.5 text-slate-300 shrink-0" />
-                  <span className="text-[10px] font-medium text-slate-600 truncate">{formatPhoneNumber(member.phone, member.countryCode)}</span>
+                  <Phone className="w-2.5 h-2.5 text-muted-foreground shrink-0" />
+                  <span className="text-[10px] font-medium text-foreground truncate">{formatPhoneNumber(member.phone, member.countryCode)}</span>
                </div>
             </div>
          </TableCell>
@@ -215,8 +215,8 @@
            <Tooltip>
              <TooltipTrigger asChild>
                <div className="flex items-center gap-1.5 max-w-[100px] truncate cursor-help">
-                  <MapPin className="w-3 h-3 text-slate-300 shrink-0" />
-                  <span className="text-[11px] font-medium text-slate-600 truncate">{member.location || "Office"}</span>
+                  <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                  <span className="text-[11px] font-medium text-foreground truncate">{member.location || "Office"}</span>
                </div>
              </TooltipTrigger>
              <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
@@ -228,8 +228,8 @@
          {/* Experience */}
          <TableCell className="px-3 py-2.5">
             <div className="flex items-center gap-1.5">
-               <Briefcase className="w-3 h-3 text-slate-300 shrink-0" />
-               <span className="text-[11px] font-bold text-slate-700">{member.experience || "N/A"}</span>
+               <Briefcase className="w-3 h-3 text-muted-foreground shrink-0" />
+               <span className="text-[11px] font-bold text-foreground">{member.experience || "N/A"}</span>
             </div>
          </TableCell>
  
@@ -261,10 +261,10 @@
            <DropdownMenu modal={false}>
              <DropdownMenuTrigger asChild>
                <Button variant="ghost" className="h-7 w-7 p-0 rounded-lg hover:bg-brand/5 group">
-                 <MoreVertical className="h-3.5 w-3.5 text-slate-400 group-hover:text-brand" />
+                 <MoreVertical className="h-3.5 w-3.5 text-muted-foreground group-hover:text-brand" />
                </Button>
              </DropdownMenuTrigger>
-             <DropdownMenuContent align="end" className="rounded-xl border-slate-100 shadow-xl">
+             <DropdownMenuContent align="end" className="rounded-xl border-border shadow-xl">
                <DropdownMenuItem
                  onClick={(e) => { e.stopPropagation(); handleDeleteTeamMember(member); }}
                  className="text-red-600 font-bold text-xs flex items-center gap-2 p-2 cursor-pointer hover:bg-red-50"
@@ -280,13 +280,13 @@
    };
  
    return (
-     <div className="flex flex-col h-full bg-white animate-in slide-in-from-bottom-2 duration-700">
+     <div className="flex flex-col h-full bg-card animate-in slide-in-from-bottom-2 duration-700">
        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col min-h-0">
-         <div className="px-4 py-2 border-b border-slate-50 bg-slate-50/30">
+         <div className="px-4 py-2 border-b border-border bg-muted/30">
             <TabsList className="bg-transparent gap-2 h-auto p-0 flex-wrap justify-start">
               <TabsTrigger
                 value="all"
-                className="data-[state=active]:bg-brand data-[state=active]:text-white data-[state=active]:shadow-md text-slate-500 font-bold text-[11px] uppercase tracking-wider rounded-xl px-4 py-2 transition-all hover:bg-brand/5 border border-transparent data-[state=active]:border-brand"
+                className="data-[state=active]:bg-brand data-[state=active]:text-white data-[state=active]:shadow-md text-muted-foreground font-bold text-[11px] uppercase tracking-wider rounded-xl px-4 py-2 transition-all hover:bg-brand/5 border border-transparent data-[state=active]:border-brand"
               >
                 All Members ({dataTeamMembers.length})
               </TabsTrigger>
@@ -294,7 +294,7 @@
                  <TabsTrigger
                    key={role._id || role.id}
                    value={role._id || role.id || ""}
-                   className="data-[state=active]:bg-brand data-[state=active]:text-white data-[state=active]:shadow-md text-slate-500 font-bold text-[11px] uppercase tracking-wider rounded-xl px-4 py-2 transition-all hover:bg-brand/5 border border-transparent data-[state=active]:border-brand"
+                   className="data-[state=active]:bg-brand data-[state=active]:text-white data-[state=active]:shadow-md text-muted-foreground font-bold text-[11px] uppercase tracking-wider rounded-xl px-4 py-2 transition-all hover:bg-brand/5 border border-transparent data-[state=active]:border-brand"
                  >
                    {role.name} ({getCountByRole(role)})
                  </TabsTrigger>
@@ -304,10 +304,10 @@
  
          <div className="flex-1 overflow-auto custom-scrollbar relative">
            <Table className="w-full border-separate border-spacing-0 table-auto">
-             <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
+             <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
                <TableRow>
                  {headerArr.map((header) => (
-                   <TableHead key={header} className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                   <TableHead key={header} className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">
                      {header}
                    </TableHead>
                  ))}

@@ -427,19 +427,19 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
 
         <div className="flex flex-wrap justify-between border-b mb-4">
           <button
-            className={`px-4 py-2 ${currentTab === 0 ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+            className={`px-4 py-2 ${currentTab === 0 ? 'border-b-2 border-blue-500 text-blue-500' : 'text-muted-foreground'}`}
             onClick={() => setCurrentTab(0)}
           >
             General Information
           </button>
           <button
-            className={`px-4 py-2 ${currentTab === 1 ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+            className={`px-4 py-2 ${currentTab === 1 ? 'border-b-2 border-blue-500 text-blue-500' : 'text-muted-foreground'}`}
             onClick={() => setCurrentTab(1)}
           >
             Details
           </button>
           <button
-            className={`px-4 py-2 ${currentTab === 2 ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+            className={`px-4 py-2 ${currentTab === 2 ? 'border-b-2 border-blue-500 text-blue-500' : 'text-muted-foreground'}`}
             onClick={() => setCurrentTab(2)}
           >
             Description
@@ -477,9 +477,9 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                       </div>
                     )}
                     {showClientDropdown && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg max-h-60 overflow-auto">
                         {clientError ? (
-                          <div className="px-4 py-2 text-gray-500 flex items-center justify-between">
+                          <div className="px-4 py-2 text-muted-foreground flex items-center justify-between">
                             <span>{clientError}</span>
                             <Button
                               variant="link"
@@ -491,7 +491,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                             </Button>
                           </div>
                         ) : clients.length === 0 && !isLoadingClients ? (
-                          <div className="px-4 py-2 text-gray-500">No clients available</div>
+                          <div className="px-4 py-2 text-muted-foreground">No clients available</div>
                         ) : (
                           <>
                             {(() => {
@@ -507,7 +507,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
 
                               if (filteredClients.length === 0 && searchClient.trim()) {
                                 return (
-                                  <div className="px-4 py-2 text-gray-500">
+                                  <div className="px-4 py-2 text-muted-foreground">
                                     No clients found matching &quot{searchClient}&quot
                                   </div>
                                 );
@@ -516,7 +516,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                               return filteredClients.map((client) => (
                                 <div
                                   key={client._id}
-                                  className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${formData.client === client._id ? 'bg-blue-100' : ''
+                                  className={`px-4 py-2 hover:bg-muted cursor-pointer ${formData.client === client._id ? 'bg-blue-100' : ''
                                     }`}
                                   onMouseDown={(e) => {
                                     e.preventDefault();
@@ -744,7 +744,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2 min-h-[3.5rem] p-3 border rounded-lg bg-gray-50/30">
+                  <div className="flex flex-wrap gap-2 min-h-[3.5rem] p-3 border rounded-lg bg-muted/30">
                     {nationalityMode === 'all' && (
                       <Badge 
                         variant="outline" 
@@ -767,13 +767,13 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                       <Badge 
                         key={nationality} 
                         variant="secondary" 
-                        className="flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 shadow-sm transition-all hover:bg-gray-50"
+                        className="flex items-center gap-1.5 px-3 py-1 bg-card border border-border shadow-sm transition-all hover:bg-muted"
                       >
                         <span className="text-sm">{nationality}</span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-auto p-0 hover:bg-transparent text-gray-400 hover:text-red-500"
+                          className="h-auto p-0 hover:bg-transparent text-muted-foreground hover:text-red-500"
                           onClick={() => removeNationality(nationality)}
                         >
                           <X className="h-3.5 w-3.5" />
@@ -852,7 +852,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
               </div>
 
               <div className="flex flex-col">
-                <Label htmlFor="gender" className="text-sm font-medium text-gray-700 mb-1">Gender</Label>
+                <Label htmlFor="gender" className="text-sm font-medium text-foreground mb-1">Gender</Label>
                 <Select
                   value={formData.gender}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
@@ -869,7 +869,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
               </div>
 
               <div className="flex flex-col">
-                <Label htmlFor="numberOfPositions" className="text-sm font-medium text-gray-700 mb-1">Number of Positions</Label>
+                <Label htmlFor="numberOfPositions" className="text-sm font-medium text-foreground mb-1">Number of Positions</Label>
                 <Input
                   id="numberOfPositions"
                   type="number"
@@ -970,7 +970,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
               </div>
 
               <div className="flex flex-col">
-                <Label htmlFor="reportingTo" className="text-sm font-medium text-gray-700 mb-1">Reporting To</Label>
+                <Label htmlFor="reportingTo" className="text-sm font-medium text-foreground mb-1">Reporting To</Label>
                 <Input
                   id="reportingTo"
                   value={formData.reportingTo}
@@ -1066,7 +1066,7 @@ export function CreateJobModal({ open, onOpenChange }: CreateJobModalProps) {
                       Or write the description below
                     </p>
                     {selectedFile && (
-                      <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div className="flex items-center justify-between p-2 bg-muted rounded">
                         <div className="flex items-center gap-2">
                           <FileText className="h-5 w-5 text-blue-500" />
                           <span>{selectedFile.name}</span>

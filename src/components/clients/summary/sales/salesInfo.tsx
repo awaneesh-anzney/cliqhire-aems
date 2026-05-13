@@ -30,7 +30,7 @@ function SalesField({
       {editMode ? (
         <Input name={field.name} type={field.type} value={value} onChange={onChange} />
       ) : (
-        <div className="text-sm rounded-md border border-gray-200 p-2 bg-white">{value || "-"}</div>
+        <div className="text-sm rounded-md border border-border p-2 bg-card">{value || "-"}</div>
       )}
     </div>
   );
@@ -94,7 +94,7 @@ export function SalesInfo() {
   if (loading) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="bg-white rounded-lg border shadow-sm p-4">
+    <div className="bg-card rounded-lg border shadow-sm p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold">Sales Team Info</h2>
         {!editMode && (

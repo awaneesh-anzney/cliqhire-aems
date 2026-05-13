@@ -24,7 +24,7 @@ export default function TeamContent({ clientId }: TeamContentProps) {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg border shadow-sm">
+      <div className="bg-card rounded-lg border shadow-sm">
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-2">Client Team</h2>
           <p className="text-muted-foreground mb-4">
@@ -37,7 +37,7 @@ export default function TeamContent({ clientId }: TeamContentProps) {
 
         <div className="border-t">
           <button 
-            className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+            className="w-full flex items-center justify-between p-4 hover:bg-muted"
             onClick={() => setCurrentView('members')}
           >
             <div className="flex items-center gap-4">
@@ -52,7 +52,7 @@ export default function TeamContent({ clientId }: TeamContentProps) {
 
         <div className="border-t">
           <button 
-            className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+            className="w-full flex items-center justify-between p-4 hover:bg-muted"
             onClick={() => setCurrentView('settings')}
           >
             <div className="flex items-center gap-4">

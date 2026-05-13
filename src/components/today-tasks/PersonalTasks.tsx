@@ -92,20 +92,20 @@ export function PersonalTasks({
       case 'low':
         return 'bg-green-100 text-green-700 border-green-200';
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-200';
+        return 'bg-muted text-foreground border-border';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'to-do':
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-muted text-foreground';
       case 'inprogress':
         return 'bg-blue-100 text-blue-700';
       case 'completed':
         return 'bg-green-100 text-green-700';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-muted text-foreground';
     }
   };
 
@@ -233,34 +233,34 @@ export function PersonalTasks({
   };
 
   return (
-    <Card className="rounded-xl border border-slate-200 shadow-sm bg-white overflow-hidden mb-6">
+    <Card className="rounded-xl border border-border shadow-sm bg-card overflow-hidden mb-6">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors py-4 px-6 border-b border-transparent data-[state=open]:border-slate-200">
+          <CardHeader className="cursor-pointer hover:bg-muted transition-colors py-4 px-6 border-b border-transparent data-[state=open]:border-border">
             <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-900 font-semibold">
+              <div className="flex items-center gap-2 text-foreground font-semibold">
                 <User className="w-5 h-5 text-brand" />
                 Personal Tasks
               </div>
-              <div className="flex items-center gap-4 text-sm text-slate-500 font-normal">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground font-normal">
                 {/* Status Filter - Only visible when open */}
                 {isOpen && (
                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                    <span className="text-sm font-medium text-slate-700">Filter:</span>
+                    <span className="text-sm font-medium text-foreground">Filter:</span>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-32 h-8 bg-white border-slate-200 focus:ring-brand focus:border-brand transition-colors text-slate-900">
+                      <SelectTrigger className="w-32 h-8 bg-card border-border focus:ring-brand focus:border-brand transition-colors text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-slate-200 shadow-md">
-                        <SelectItem value="all" className="focus:bg-slate-50 focus:text-slate-900 cursor-pointer">All</SelectItem>
-                        <SelectItem value="to-do" className="focus:bg-slate-50 focus:text-slate-900 cursor-pointer">To-do</SelectItem>
-                        <SelectItem value="inprogress" className="focus:bg-slate-50 focus:text-slate-900 cursor-pointer">In Progress</SelectItem>
-                        <SelectItem value="completed" className="focus:bg-slate-50 focus:text-slate-900 cursor-pointer">Completed</SelectItem>
+                      <SelectContent className="bg-card border-border shadow-md">
+                        <SelectItem value="all" className="focus:bg-muted focus:text-foreground cursor-pointer">All</SelectItem>
+                        <SelectItem value="to-do" className="focus:bg-muted focus:text-foreground cursor-pointer">To-do</SelectItem>
+                        <SelectItem value="inprogress" className="focus:bg-muted focus:text-foreground cursor-pointer">In Progress</SelectItem>
+                        <SelectItem value="completed" className="focus:bg-muted focus:text-foreground cursor-pointer">Completed</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 )}
-                <span>Total: <span className="font-semibold text-slate-900">{filteredPersonalTasks.length}</span></span>
+                <span>Total: <span className="font-semibold text-foreground">{filteredPersonalTasks.length}</span></span>
                 {isOpen ? (
                   <ChevronDown className="w-4 h-4" />
                 ) : (
@@ -277,14 +277,14 @@ export function PersonalTasks({
               <div className="text-center py-8">
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand"></div>
-                  <span className="ml-2 text-slate-500">Loading personal tasks...</span>
+                  <span className="ml-2 text-muted-foreground">Loading personal tasks...</span>
                 </div>
               </div>
             ) : filteredPersonalTasks.length > 0 ? (
               filteredPersonalTasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`border border-slate-200 rounded-xl p-4 hover:shadow-md hover:border-brand/30 hover:bg-slate-50/50 transition-all duration-300 bg-white ${completedTasks.has(task.id)
+                  className={`border border-border rounded-xl p-4 hover:shadow-md hover:border-brand/30 hover:bg-muted/50 transition-all duration-300 bg-card ${completedTasks.has(task.id)
                     ? 'bg-green-50/50 border-green-200 opacity-75 grayscale-[0.3]'
                     : ''
                     }`}
@@ -304,8 +304,8 @@ export function PersonalTasks({
                     <div className="flex-1 min-w-0 max-w-md">
                       <h3
                         className={`font-medium text-sm truncate cursor-pointer hover:text-blue-600 hover:underline transition-colors ${task.status === 'completed'
-                          ? 'line-through text-gray-500'
-                          : 'text-gray-900'
+                          ? 'line-through text-muted-foreground'
+                          : 'text-foreground'
                           }`}
                         onClick={() => handleViewDetails(task)}
                       >
@@ -318,20 +318,20 @@ export function PersonalTasks({
                       {task.description && (
                         <div className="group relative inline-block w-full">
                           <span
-                            className="text-xs text-gray-600 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+                            className="text-xs text-foreground cursor-pointer hover:text-blue-600 hover:underline transition-colors"
                             onClick={() => handleViewDetails(task)}
                           >
                             {truncateText(task.description, 50)}
                             {/* Edit icon that appears on hover */}
                             <button
-                              className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-100 rounded p-0.5 align-middle"
+                              className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-muted rounded p-0.5 align-middle"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEditTask(task);
                               }}
                               title="Edit description"
                             >
-                              <SquarePen className="w-3 h-3 text-gray-500 hover:text-blue-600" />
+                              <SquarePen className="w-3 h-3 text-muted-foreground hover:text-blue-600" />
                             </button>
                           </span>
                         </div>
@@ -340,13 +340,13 @@ export function PersonalTasks({
 
                     {/* Category */}
                     <div className="flex-shrink-0 w-28">
-                      <span className="text-xs text-gray-500 capitalize">{task.category}</span>
+                      <span className="text-xs text-muted-foreground capitalize">{task.category}</span>
                     </div>
 
                     {/* Due Date */}
                     <div className="flex-shrink-0 w-32">
                       {task.dueDate && (
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Calendar className="w-3 h-3" />
                           <span>{formatDate(task.dueDate)}</span>
                           {task.dueTime && <span className="text-xs">at {task.dueTime}</span>}
@@ -425,8 +425,8 @@ export function PersonalTasks({
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <User className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <div className="text-center py-8 text-muted-foreground">
+                <User className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-lg font-medium">No personal tasks found</p>
                 <p className="text-sm">
                   {searchQuery ? 'Try adjusting your search criteria' : 'Add a new task to get started'}
@@ -490,7 +490,7 @@ export function PersonalTasks({
       {/* Edit Task Form Dialog */}
       {isEditFormOpen && taskToEdit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="bg-card rounded-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-lg font-semibold mb-4">Edit Task</h2>
             <AddTaskForm
               onClose={handleCloseEditForm}

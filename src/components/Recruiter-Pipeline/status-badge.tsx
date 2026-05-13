@@ -33,7 +33,7 @@ const statusOptions: Record<string, StatusType[]> = {
 // Status colors
 const statusColors: Record<StatusType, string> = {
   // Sourcing statuses
-  "Pending": "bg-gray-100 text-gray-700 border-gray-200",
+  "Pending": "bg-muted text-foreground border-border",
   "Connections Sent": "bg-blue-100 text-blue-800 border-blue-200",
   "Connections Accepted": "bg-green-100 text-green-800 border-green-200",
   "CV Received": "bg-purple-100 text-purple-800 border-purple-200",
@@ -66,7 +66,7 @@ const statusColors: Record<StatusType, string> = {
 
 // Additional generic statuses for headhunter
 const genericStatusColors: Record<string, string> = {
-  "Pending": "bg-gray-100 text-gray-700 border-gray-200",
+  "Pending": "bg-muted text-foreground border-border",
   "Submitted": "bg-blue-100 text-blue-800 border-blue-200",
   "Accepted": "bg-green-100 text-green-800 border-green-200",
   "Rejected": "bg-red-100 text-red-800 border-red-200",
@@ -128,7 +128,7 @@ export function StatusBadge({
       return (
         <Badge 
           variant="secondary" 
-          className="bg-gray-100 text-gray-500 border-gray-200"
+          className="bg-muted text-muted-foreground border-border"
         >
           Not set
         </Badge>
@@ -144,7 +144,7 @@ export function StatusBadge({
           >
             <Badge 
               variant="secondary" 
-              className="bg-gray-100 text-gray-500 border-gray-200 flex items-center gap-1"
+              className="bg-muted text-muted-foreground border-border flex items-center gap-1"
             >
               Set Status
               <ChevronDown className="h-3 w-3" />
@@ -160,7 +160,7 @@ export function StatusBadge({
             >
               <Badge 
                 variant="secondary" 
-                className={`${statusColors[statusOption as StatusType] || genericStatusColors[statusOption] || "bg-gray-100 text-gray-700 border-gray-200"} border-none`}
+                className={`${statusColors[statusOption as StatusType] || genericStatusColors[statusOption] || "bg-muted text-foreground border-border"} border-none`}
               >
                 {getDisplayLabel(statusOption)}
               </Badge>
@@ -176,7 +176,7 @@ export function StatusBadge({
     return (
       <Badge 
         variant="secondary" 
-        className={`${statusColors[effectiveStatus as StatusType] || genericStatusColors[effectiveStatus] || "bg-gray-100 text-gray-700 border-gray-200"} border-none`}
+        className={`${statusColors[effectiveStatus as StatusType] || genericStatusColors[effectiveStatus] || "bg-muted text-foreground border-border"} border-none`}
       >
         {getDisplayLabel(effectiveStatus)}
       </Badge>
@@ -192,7 +192,7 @@ export function StatusBadge({
         >
         <Badge 
           variant="secondary" 
-          className={`${statusColors[effectiveStatus as StatusType] || genericStatusColors[effectiveStatus] || "bg-gray-100 text-gray-700 border-gray-200"} border-none flex items-center gap-1`}
+          className={`${statusColors[effectiveStatus as StatusType] || genericStatusColors[effectiveStatus] || "bg-muted text-foreground border-border"} border-none flex items-center gap-1`}
         >
           {getDisplayLabel(effectiveStatus)}
           <ChevronDown className="h-3 w-3" />
@@ -208,7 +208,7 @@ export function StatusBadge({
           >
             <Badge 
               variant="secondary" 
-              className={`${statusColors[statusOption as StatusType] || genericStatusColors[statusOption] || "bg-gray-100 text-gray-700 border-gray-200"} border-none`}
+              className={`${statusColors[statusOption as StatusType] || genericStatusColors[statusOption] || "bg-muted text-foreground border-border"} border-none`}
             >
               {getDisplayLabel(statusOption)}
             </Badge>

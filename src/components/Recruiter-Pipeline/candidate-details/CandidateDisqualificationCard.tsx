@@ -41,28 +41,28 @@ export function CandidateDisqualificationCard({ candidate }: { candidate: Candid
       )}
 
       {hasHistory && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div className="bg-muted border border-border rounded-xl p-4 shadow-sm">
           <div className="flex items-center mb-3">
-            <div className="w-6 h-6 bg-slate-200 rounded-md flex items-center justify-center mr-2">
-              <History className="w-3.5 h-3.5 text-slate-600" />
+            <div className="w-6 h-6 bg-muted rounded-md flex items-center justify-center mr-2">
+              <History className="w-3.5 h-3.5 text-foreground" />
             </div>
-            <h4 className="text-sm font-semibold text-slate-900">Rejection History</h4>
+            <h4 className="text-sm font-semibold text-foreground">Rejection History</h4>
           </div>
           <div className="space-y-3">
             {candidate.rejectionHistory?.map((rej, idx) => (
-              <div key={idx} className="bg-white border border-slate-100 rounded-lg p-3 text-xs shadow-sm">
+              <div key={idx} className="bg-card border border-border rounded-lg p-3 text-xs shadow-sm">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-700">{rej.stage}</span>
-                    <span className="text-slate-400">•</span>
-                    <span className="text-slate-500 font-medium">{rej.status}</span>
+                    <span className="font-bold text-foreground">{rej.stage}</span>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-muted-foreground font-medium">{rej.status}</span>
                   </div>
-                  <span className="text-slate-400 font-medium">{rej.rejectedAt ? new Date(rej.rejectedAt).toLocaleDateString() : 'Date unknown'}</span>
+                  <span className="text-muted-foreground font-medium">{rej.rejectedAt ? new Date(rej.rejectedAt).toLocaleDateString() : 'Date unknown'}</span>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-slate-600"><span className="font-semibold text-slate-700">Reason:</span> {rej.rejectionReason}</p>
-                  {rej.feedback && <p className="text-slate-500 italic"><span className="font-semibold text-slate-700 not-italic">Feedback:</span> {rej.feedback}</p>}
-                  {rej.rejectedBy && <p className="text-slate-400 text-[10px] mt-1">Rejected by: {rej.rejectedBy.name} ({rej.rejectedBy.email})</p>}
+                  <p className="text-foreground"><span className="font-semibold text-foreground">Reason:</span> {rej.rejectionReason}</p>
+                  {rej.feedback && <p className="text-muted-foreground italic"><span className="font-semibold text-foreground not-italic">Feedback:</span> {rej.feedback}</p>}
+                  {rej.rejectedBy && <p className="text-muted-foreground text-[10px] mt-1">Rejected by: {rej.rejectedBy.name} ({rej.rejectedBy.email})</p>}
                 </div>
               </div>
             ))}

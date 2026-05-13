@@ -62,7 +62,7 @@ export const JobCandidatesList = forwardRef<JobCandidatesListRef, JobCandidatesL
 
     return (
       <div className="w-full">
-           <div className="border-b py-2 px-6 grid grid-cols-[1.5fr_2.5fr_1.5fr_1fr_1fr_1.5fr] min-w-[900px] w-full text-sm font-medium text-gray-500">
+           <div className="border-b py-2 px-6 grid grid-cols-[1.5fr_2.5fr_1.5fr_1fr_1fr_1.5fr] min-w-[900px] w-full text-sm font-medium text-muted-foreground">
               <div >Name</div>
               <div >Email</div>
               <div >Phone</div>
@@ -82,7 +82,7 @@ export const JobCandidatesList = forwardRef<JobCandidatesListRef, JobCandidatesL
             candidates.map((candidate) => (
               <div
                 key={candidate._id || Math.random().toString(36)}
-                className="border-b hover:bg-gray-50 py-3 px-4 cursor-pointer"
+                className="border-b hover:bg-muted py-3 px-4 cursor-pointer"
                 onClick={() => candidate._id && router.push(`/candidates/${candidate._id}`)}
               >
                
@@ -97,7 +97,7 @@ export const JobCandidatesList = forwardRef<JobCandidatesListRef, JobCandidatesL
               </div>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center h-48 text-gray-500 gap-3">
+            <div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-3">
               <div>No candidates have been added to this job yet.</div>
             </div>
           )}

@@ -20,13 +20,13 @@ export function AdminCard({
 }: AdminCardProps) {
   return (
     <div className={cn(
-      "flex flex-col h-full p-6 rounded-lg border bg-white",
+      "flex flex-col h-full p-6 rounded-lg border bg-card",
       className
     )}>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-          <p className="text-sm text-gray-500">{description}</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
         <div className="flex-shrink-0">
           {icon}

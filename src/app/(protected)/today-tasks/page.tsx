@@ -207,19 +207,19 @@ export default function TodayTasksPage() {
   // if (isLoading) return <div>Loading...</div>; // Optional, layout handles it often
 
   return (
-    <div className="flex flex-col bg-slate-50/50 p-2 space-y-2" style={{ height: 'calc(100vh - 20px)' }}>
+    <div className="flex flex-col bg-muted/50 p-2 space-y-2" style={{ height: 'calc(100vh - 20px)' }}>
       {/* Header */}
-      <div className="flex-none bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+      <div className="flex-none bg-card rounded-xl border border-border shadow-sm p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Today&apos;s Tasks</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Today&apos;s Tasks</h1>
+            <p className="text-foreground mt-1">
               Manage your assigned jobs, interviews, and personal tasks
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search tasks..."
                 value={searchQuery}

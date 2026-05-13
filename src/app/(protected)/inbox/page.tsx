@@ -5,7 +5,7 @@ export default function InboxPage() {
   return (
     <div className="flex h-full">
       {/* Sidebar */}
-      <div className="w-64 border-r bg-white">
+      <div className="w-64 border-r bg-card">
         <SidebarNav />
       </div>
 

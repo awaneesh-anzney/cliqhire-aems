@@ -58,15 +58,15 @@ const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
     if (!localCandidate) return null;
 
     const DetailItem = ({ label, fieldKey, value, isLink = false, fullWidth = false }: { label: string; fieldKey: string; value: string | undefined | number; isLink?: boolean; fullWidth?: boolean }) => (
-        <div className={`flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-gray-50/50 ${fullWidth ? 'col-span-2' : 'col-span-1'}`}>
+        <div className={`flex items-center justify-between p-3 border border-border rounded-lg bg-muted/50 ${fullWidth ? 'col-span-2' : 'col-span-1'}`}>
             <div className="flex flex-col gap-1 overflow-hidden">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</span>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
                 {isLink && typeof value === 'string' ? (
                     <a href={value} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline truncate">
                         View Resume
                     </a>
                 ) : (
-                    <span className="text-sm font-medium text-gray-900 truncate block" title={typeof value === 'string' ? value : undefined}>
+                    <span className="text-sm font-medium text-foreground truncate block" title={typeof value === 'string' ? value : undefined}>
                         {value || "N/A"}
                     </span>
                 )}
@@ -74,7 +74,7 @@ const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
             <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors flex-shrink-0 ml-2"
+                className="h-6 w-6 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 transition-colors flex-shrink-0 ml-2"
                 onClick={() => {
                     setPendingField(fieldKey);
                     setPendingFieldLabel(label);
@@ -106,15 +106,15 @@ const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
     return (
         <>
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[750px] bg-white p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
-                <DialogHeader className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
-                    <DialogTitle className="text-lg font-semibold text-gray-900">Candidate Details & Submissions</DialogTitle>
+            <DialogContent className="sm:max-w-[750px] bg-card p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
+                <DialogHeader className="px-6 py-4 border-b border-border bg-muted/50 flex-shrink-0">
+                    <DialogTitle className="text-lg font-semibold text-foreground">Candidate Details & Submissions</DialogTitle>
                 </DialogHeader>
 
                 <ScrollArea className="flex-1 overflow-y-auto">
                     <div className="p-6 space-y-6">
                         <section>
-                            <h3 className="text-sm font-semibold text-gray-900 mb-4 px-1">Basic Information</h3>
+                            <h3 className="text-sm font-semibold text-foreground mb-4 px-1">Basic Information</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <DetailItem label="Name" fieldKey="name" value={localCandidate.name} />
                                 <DetailItem label="Email" fieldKey="email" value={localCandidate.email} />
@@ -124,7 +124,7 @@ const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
                         </section>
 
                         <section>
-                            <h3 className="text-sm font-semibold text-gray-900 mb-4 px-1">Professional Details</h3>
+                            <h3 className="text-sm font-semibold text-foreground mb-4 px-1">Professional Details</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <DetailItem label="Total Experience" fieldKey="experience" value={localCandidate.experience} />
                                 <DetailItem label="Current Job Title" fieldKey="currentJobTitle" value={(localCandidate as any).currentJobTitle} />
@@ -135,19 +135,19 @@ const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
                         </section>
 
                         <section>
-                            <h3 className="text-sm font-semibold text-gray-900 mb-4 px-1">Submission History</h3>
+                            <h3 className="text-sm font-semibold text-foreground mb-4 px-1">Submission History</h3>
                             <div className="border rounded-lg overflow-hidden">
                                 {loadingJobs ? (
-                                    <div className="p-4 text-center text-sm text-gray-500 font-medium">Loading submissions...</div>
+                                    <div className="p-4 text-center text-sm text-muted-foreground font-medium">Loading submissions...</div>
                                 ) : submissionJobs.length === 0 ? (
-                                    <div className="p-4 text-center text-sm text-gray-500 font-medium">No job submissions found</div>
+                                    <div className="p-4 text-center text-sm text-muted-foreground font-medium">No job submissions found</div>
                                 ) : (
                                     <table className="w-full text-sm">
-                                        <thead className="bg-gray-50 border-b">
+                                        <thead className="bg-muted border-b">
                                             <tr>
-                                                <th className="px-4 py-2 text-left font-medium text-gray-500">Job Title</th>
-                                                <th className="px-4 py-2 text-left font-medium text-gray-500">Status</th>
-                                                <th className="px-4 py-2 text-left font-medium text-gray-500">Date</th>
+                                                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Job Title</th>
+                                                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Status</th>
+                                                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Date</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y">
@@ -163,7 +163,7 @@ const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
                                                             {sub.submissionStatus}
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-2 text-gray-500">{formatDate(sub.submittedAt)}</td>
+                                                    <td className="px-4 py-2 text-muted-foreground">{formatDate(sub.submittedAt)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -174,7 +174,7 @@ const [submissionJobs, setSubmissionJobs] = React.useState<any[]>([]);
                     </div>
                 </ScrollArea>
 
-                <div className="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-100 flex-shrink-0">
+                <div className="bg-muted px-6 py-4 flex justify-end border-t border-border flex-shrink-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
                 </div>
             </DialogContent>

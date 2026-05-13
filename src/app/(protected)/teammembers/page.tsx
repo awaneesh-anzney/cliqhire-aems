@@ -34,9 +34,9 @@
  
    return (
      <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50/50 p-3 gap-3 animate-in fade-in duration-700">
+       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Page Header */}
-         <div className="flex-shrink-0 relative overflow-hidden bg-white rounded-[1.5rem] border border-slate-100 shadow-lg p-1.5">
+         <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
            <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
            <Dashboardheader
              setOpen={setOpen}
@@ -51,7 +51,7 @@
          </div>
  
          {/* Content Area */}
-         <div className="flex-1 min-h-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
            <TeamMembersTabs
              onTeamMemberClick={handleTeamMemberClick}
              highlightId={highlightId}

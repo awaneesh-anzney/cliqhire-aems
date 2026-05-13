@@ -29,7 +29,7 @@ export default function ClientContractPage({ params }: PageProps) {
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center justify-center">
           <TriangleAlert className="size-4" />
-          <div className="text-gray-600">Something went wrong! Please try again later</div>
+          <div className="text-foreground">Something went wrong! Please try again later</div>
         </div>
       </div>
     );
@@ -40,7 +40,7 @@ export default function ClientContractPage({ params }: PageProps) {
       <div className="flex items-center justify-center h-full">
         <div className="flex items-center flex-col justify-center">
           <Loader className="size-6 animate-spin" />
-          <p className="text-gray-600">Loading client data...</p>
+          <p className="text-foreground">Loading client data...</p>
         </div>
       </div>
     );
@@ -57,12 +57,12 @@ export default function ClientContractPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/30">
-      <div className="border-b bg-white py-2 px-3 flex items-center justify-between sticky top-0 z-10">
+    <div className="flex flex-col h-full bg-muted/30">
+      <div className="border-b bg-card py-2 px-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-md font-bold text-slate-800">Contract Details</h1>
-            <p className="text-xs text-slate-500 truncate w-40">{client.name}</p>
+            <h1 className="text-md font-bold text-foreground">Contract Details</h1>
+            <p className="text-xs text-muted-foreground truncate w-40">{client.name}</p>
           </div>
         </div>
       </div>

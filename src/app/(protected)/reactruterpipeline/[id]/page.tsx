@@ -279,10 +279,10 @@
  
    if (isLoading) {
      return (
-       <div className="flex flex-col items-center justify-center h-screen bg-slate-50/30 gap-4">
-         <div className="p-5 rounded-3xl bg-white shadow-2xl border border-slate-100 flex items-center gap-4 animate-in zoom-in-50 duration-700">
+       <div className="flex flex-col items-center justify-center h-screen bg-muted/30 gap-4">
+         <div className="p-5 rounded-3xl bg-card shadow-2xl border border-border flex items-center gap-4 animate-in zoom-in-50 duration-700">
            <Loader2 className="h-6 w-6 animate-spin text-brand" />
-           <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Building Pipeline...</span>
+           <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Building Pipeline...</span>
          </div>
        </div>
      );
@@ -290,17 +290,17 @@
  
    if (error || !job) {
      return (
-       <div className="flex flex-col items-center justify-center h-screen gap-6 bg-slate-50/50 p-6">
-         <div className="p-8 rounded-[2rem] bg-white shadow-xl border border-slate-100 text-center max-w-md">
+       <div className="flex flex-col items-center justify-center h-screen gap-6 bg-muted/50 p-6">
+         <div className="p-8 rounded-[2rem] bg-card shadow-xl border border-border text-center max-w-md">
             <FilterX className="h-12 w-12 text-red-500 mx-auto mb-4 opacity-20" />
-            <h2 className="text-xl font-black text-slate-900 tracking-tighter mb-2">Sync Error</h2>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">
+            <h2 className="text-xl font-black text-foreground tracking-tighter mb-2">Sync Error</h2>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">
                {(error as any)?.message || "The requested pipeline could not be loaded."}
             </p>
             <Button 
               variant="outline" 
               onClick={() => router.back()} 
-              className="w-full h-12 rounded-xl font-black text-xs uppercase tracking-widest border-slate-100 hover:bg-slate-50"
+              className="w-full h-12 rounded-xl font-black text-xs uppercase tracking-widest border-border hover:bg-muted"
             >
               <ChevronLeft className="h-4 w-4 mr-2" /> 
               Return to Pipeline
@@ -317,8 +317,8 @@
              <Users className="h-10 w-10" />
           </div>
           <div className="space-y-1">
-             <h2 className="text-xl font-black text-slate-900 tracking-tighter">Access Denied</h2>
-             <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">
+             <h2 className="text-xl font-black text-foreground tracking-tighter">Access Denied</h2>
+             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">
                 Authorized credentials required for this pipeline.
              </p>
           </div>
@@ -328,14 +328,14 @@
  
    return (
      <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50/50 p-3 gap-3 animate-in fade-in duration-700">
+       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Premium Job Header */}
-         <div className="flex-shrink-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-lg overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-1000 delay-100">
+         <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-lg overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-1000 delay-100">
            <PipelineJobHeader job={job} onAddCandidate={handleAddCandidate} />
          </div>
  
          {/* Stage Navigation & Filters */}
-         <div className="flex-shrink-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-md p-3 animate-in slide-in-from-top-2 duration-1000 delay-200">
+         <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-3 animate-in slide-in-from-top-2 duration-1000 delay-200">
            <PipelineStageFilters
              job={job}
              selectedStage={selectedStageFilter}
@@ -344,14 +344,14 @@
          </div>
  
          {/* Candidates Table Area */}
-         <div className="flex-1 min-h-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-300">
+         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-300">
            {selectedStageFilter && (
-             <div className="px-6 py-2 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
+             <div className="px-6 py-2 bg-muted/50 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Current View:</span>
+                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current View:</span>
                    <span className="text-[11px] font-black text-brand uppercase tracking-widest">{selectedStageFilter}</span>
                 </div>
-                <div className="px-2 py-0.5 rounded-md bg-white border border-slate-100 text-[10px] font-black text-slate-500">
+                <div className="px-2 py-0.5 rounded-md bg-card border border-border text-[10px] font-black text-muted-foreground">
                    {getFilteredCandidates.length} Active Candidates
                 </div>
              </div>
@@ -414,15 +414,15 @@
  
        {deleteCandidateDialog.isOpen && (
          <Dialog open={deleteCandidateDialog.isOpen} onOpenChange={(open) => setDeleteCandidateDialog(prev => ({ ...prev, isOpen: open }))}>
-           <DialogContent className="rounded-[2rem] border-slate-100 shadow-2xl">
+           <DialogContent className="rounded-[2rem] border-border shadow-2xl">
              <DialogHeader>
-               <DialogTitle className="font-black text-slate-900 tracking-tighter">Remove Candidate</DialogTitle>
-               <DialogDescription className="font-bold text-slate-400 uppercase tracking-widest text-[11px] leading-relaxed">
+               <DialogTitle className="font-black text-foreground tracking-tighter">Remove Candidate</DialogTitle>
+               <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
                  Are you sure you want to remove <strong className="text-brand">{deleteCandidateDialog.candidate?.name}</strong> from this pipeline? This action is permanent.
                </DialogDescription>
              </DialogHeader>
              <DialogFooter className="gap-2">
-               <Button variant="outline" onClick={handleCancelDeleteCandidate} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-slate-100">
+               <Button variant="outline" onClick={handleCancelDeleteCandidate} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
                  Cancel
                </Button>
                <Button variant="destructive" onClick={handleConfirmDeleteCandidate} className="rounded-xl font-black text-[10px] uppercase tracking-widest">

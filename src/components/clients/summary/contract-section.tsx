@@ -729,10 +729,10 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
   ]);
 
   return (
-    <div className="bg-white rounded-lg border p-6 shadow-sm">
+    <div className="bg-card rounded-lg border p-6 shadow-sm">
       <h2 className="text-sm font-semibold">Contract Information</h2>
       {status.error && <div className="text-red-500 text-sm mt-2">{status.error}</div>}
-      {status.loading && <div className="text-gray-500 text-sm mt-2">Loading...</div>}
+      {status.loading && <div className="text-muted-foreground text-sm mt-2">Loading...</div>}
       <div className="space-y-4 mt-4">
         <DetailRow
           label="Contract Start Date"
@@ -747,27 +747,27 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
           isDate
         />
         <div className="flex items-center space-x-4">
-          <label className="w-1/3 text-sm font-medium text-gray-600">Contract Type</label>
+          <label className="w-1/3 text-sm font-medium text-foreground">Contract Type</label>
           <div className="w-2/3 flex items-center space-x-2">
             {isEditingContractType ? (
               <div className="relative flex-1">
                 <button
-                  className="w-full bg-gray-100 border rounded-md p-2 text-sm text-gray-500 flex justify-between hover:bg-gray-200"
+                  className="w-full bg-muted border rounded-md p-2 text-sm text-muted-foreground flex justify-between hover:bg-muted"
                   onClick={() => setIsContractTypeDropdownOpen(!isContractTypeDropdownOpen)}
                 >
                   <span>{contractDetails.contractType || "Select Contract Type"}</span>
                   {isContractTypeDropdownOpen ? (
-                    <ChevronUp className="h-4 w-4 text-gray-400" />
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   )}
                 </button>
                 {isContractTypeDropdownOpen && (
-                  <div className="absolute z-10 w-full bg-white border rounded-md mt-1 shadow-lg">
+                  <div className="absolute z-10 w-full bg-card border rounded-md mt-1 shadow-lg">
                     {contractTypes.map((type) => (
                       <button
                         key={type}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-blue-50"
+                        className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-blue-50"
                         onClick={() => {
                           handleContractTypeSelect(type);
                           setIsContractTypeDropdownOpen(false);
@@ -781,12 +781,12 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                 )}
               </div>
             ) : (
-              <div className="flex-1 bg-gray-50 border rounded-md p-2 text-sm text-gray-800">
+              <div className="flex-1 bg-muted border rounded-md p-2 text-sm text-foreground">
                 {contractDetails.contractType || "No contract type selected"}
               </div>
             )}
             <button
-              className="p-2 border rounded-md hover:bg-gray-100 group relative"
+              className="p-2 border rounded-md hover:bg-muted group relative"
               onClick={() => {
                 setIsEditingContractType(!isEditingContractType);
                 if (!isEditingContractType) {
@@ -796,7 +796,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
               aria-label={isEditingContractType ? "Cancel Edit" : "Edit Contract Type"}
             >
               {isEditingContractType ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-              <span className="absolute hidden group-hover:block text-xs bg-gray-800 text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+              <span className="absolute hidden group-hover:block text-xs bg-foreground text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
                 {isEditingContractType ? "Cancel" : "Edit Contract Type"}
               </span>
             </button>
@@ -807,7 +807,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
             contractDetails.contractType,
           ) && (
             <div className="ml-8 flex items-center space-x-4">
-              <label className="w-1/3 text-sm font-medium text-gray-600">
+              <label className="w-1/3 text-sm font-medium text-foreground">
                 {contractDetails.contractType}
               </label>
               <div className="w-2/3 flex flex-wrap items-center gap-2 min-w-0">
@@ -832,14 +832,14 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                     readOnly={editingLevel !== "contractType"}
                     className={`w-full border rounded-md p-2 text-sm pr-6 ${
                       editingLevel === "contractType"
-                        ? "focus:ring-2 focus:ring-blue-500 bg-white"
-                        : "bg-gray-50 cursor-not-allowed"
+                        ? "focus:ring-2 focus:ring-blue-500 bg-card"
+                        : "bg-muted cursor-not-allowed"
                     }`}
                     min="0"
                     max="100"
                     placeholder="0"
                   />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                     %
                   </span>
                 </div>
@@ -867,8 +867,8 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                         disabled={editingLevel !== "contractType"}
                         className={`w-full border rounded-md p-2 text-sm ${
                           editingLevel === "contractType"
-                            ? "focus:ring-2 focus:ring-blue-500 bg-white"
-                            : "bg-gray-50 cursor-not-allowed"
+                            ? "focus:ring-2 focus:ring-blue-500 bg-card"
+                            : "bg-muted cursor-not-allowed"
                         }`}
                       >
                         {["USD", "EUR", "GBP", "SAR", "AED", "INR"].map((c) => (
@@ -901,8 +901,8 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                         readOnly={editingLevel !== "contractType"}
                         className={`w-full border rounded-md p-2 text-sm ${
                           editingLevel === "contractType"
-                            ? "focus:ring-2 focus:ring-blue-500 bg-white"
-                            : "bg-gray-50 cursor-not-allowed"
+                            ? "focus:ring-2 focus:ring-blue-500 bg-card"
+                            : "bg-muted cursor-not-allowed"
                         }`}
                         placeholder="Amount"
                       />
@@ -935,8 +935,8 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                     readOnly={editingLevel !== "contractType"}
                     className={`w-full border rounded-md p-2 text-sm min-w-0 ${
                       editingLevel === "contractType"
-                        ? "focus:ring-2 focus:ring-blue-500 bg-white"
-                        : "bg-gray-50 cursor-not-allowed"
+                        ? "focus:ring-2 focus:ring-blue-500 bg-card"
+                        : "bg-muted cursor-not-allowed"
                     }`}
                     placeholder="Notes"
                   />
@@ -951,29 +951,29 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                         aria-label="Save Changes"
                       >
                         <Check className="h-4 w-4 text-green-600" />
-                        <span className="absolute hidden group-hover:block text-xs bg-gray-800 text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                        <span className="absolute hidden group-hover:block text-xs bg-foreground text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
                           Save Changes
                         </span>
                       </button>
                       <button
-                        className="p-2 border rounded-md hover:bg-gray-100 group relative"
+                        className="p-2 border rounded-md hover:bg-muted group relative"
                         onClick={() => cancelEdit("contractType")}
                         aria-label="Cancel Edit"
                       >
                         <X className="h-4 w-4" />
-                        <span className="absolute hidden group-hover:block text-xs bg-gray-800 text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                        <span className="absolute hidden group-hover:block text-xs bg-foreground text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
                           Cancel
                         </span>
                       </button>
                     </>
                   ) : (
                     <button
-                      className="p-2 border rounded-md hover:bg-gray-100 group relative"
+                      className="p-2 border rounded-md hover:bg-muted group relative"
                       onClick={() => startEditing("contractType")}
                       aria-label={`Edit ${contractDetails.contractType} Details`}
                     >
                       <Pencil className="h-4 w-4" />
-                      <span className="absolute hidden group-hover:block text-xs bg-gray-800 text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                      <span className="absolute hidden group-hover:block text-xs bg-foreground text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
                         Edit {contractDetails.contractType} Details
                       </span>
                     </button>
@@ -987,10 +987,10 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
         ) && (
           <div className="ml-8 space-y-4">
             <div className="flex items-center space-x-4">
-              <label className="w-1/4 text-sm font-medium text-gray-600">Levels</label>
+              <label className="w-1/4 text-sm font-medium text-foreground">Levels</label>
               <div className="relative w-3/4 flex space-x-2">
                 <button
-                  className="flex-1 bg-gray-100 border rounded-md p-2 text-sm text-gray-800 flex justify-between hover:bg-gray-200"
+                  className="flex-1 bg-muted border rounded-md p-2 text-sm text-foreground flex justify-between hover:bg-muted"
                   onClick={() => setIsLevelDropdownOpen(!isLevelDropdownOpen)}
                 >
                   {contractDetails.selectedLevels.join(", ") || "Select Levels"}
@@ -1001,21 +1001,21 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                   )}
                 </button>
                 <button
-                  className="p-2 border rounded-md hover:bg-gray-100 group relative"
+                  className="p-2 border rounded-md hover:bg-muted group relative"
                   onClick={() => setIsLevelDropdownOpen(!isLevelDropdownOpen)}
                   aria-label="Edit Levels"
                 >
                   <Pencil className="h-4 w-4" />
-                  <span className="absolute hidden group-hover:block text-xs bg-gray-800 text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2">
+                  <span className="absolute hidden group-hover:block text-xs bg-foreground text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2">
                     Edit Levels
                   </span>
                 </button>
                 {isLevelDropdownOpen && (
-                  <div className="absolute z-10 w-full bg-white border rounded-md mt-10 shadow-lg">
+                  <div className="absolute z-10 w-full bg-card border rounded-md mt-10 shadow-lg">
                     {levelOptions.map((level) => (
                       <button
                         key={level}
-                        className={`w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-blue-50 ${
+                        className={`w-full text-left px-4 py-2 text-sm text-foreground hover:bg-blue-50 ${
                           contractDetails.selectedLevels.includes(level) ? "bg-blue-100" : ""
                         }`}
                         onClick={() => handleLevelSelect(level)}
@@ -1033,9 +1033,9 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
               return (
                 <div
                   key={level}
-                  className="flex flex-wrap items-center gap-2 p-2 rounded-md hover:bg-gray-50"
+                  className="flex flex-wrap items-center gap-2 p-2 rounded-md hover:bg-muted"
                 >
-                  <label className="w-32 text-sm font-medium text-gray-800 truncate">{level}</label>
+                  <label className="w-32 text-sm font-medium text-foreground truncate">{level}</label>
                   {/* Percentage */}
                   <div className="relative flex-1 min-w-[100px] max-w-xs">
                     <input
@@ -1043,12 +1043,12 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                       value={details.percentage}
                       onChange={(e) => updateLevelDetail(level, "percentage", e.target.value)}
                       readOnly={!isEditing}
-                      className={`w-full border rounded-md p-2 text-sm pr-6 min-w-0 ${isEditing ? "bg-white focus:ring-2 focus:ring-blue-500" : "bg-gray-100"}`}
+                      className={`w-full border rounded-md p-2 text-sm pr-6 min-w-0 ${isEditing ? "bg-card focus:ring-2 focus:ring-blue-500" : "bg-muted"}`}
                       placeholder="0"
                       min="0"
                       max="100"
                     />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                       %
                     </span>
                   </div>
@@ -1060,7 +1060,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                           value={details.currency || "SAR"}
                           onChange={(e) => updateLevelDetail(level, "currency", e.target.value)}
                           disabled={!isEditing}
-                          className={`w-full border rounded-md p-2 text-sm min-w-0 ${isEditing ? "bg-white focus:ring-2 focus:ring-blue-500" : "bg-gray-100"}`}
+                          className={`w-full border rounded-md p-2 text-sm min-w-0 ${isEditing ? "bg-card focus:ring-2 focus:ring-blue-500" : "bg-muted"}`}
                         >
                           {["USD", "EUR", "GBP", "SAR", "AED", "INR"].map((c) => (
                             <option key={c} value={c}>
@@ -1075,7 +1075,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                           value={details.money}
                           onChange={(e) => updateLevelDetail(level, "money", e.target.value)}
                           readOnly={!isEditing}
-                          className={`w-full border rounded-md p-2 text-sm min-w-0 ${isEditing ? "bg-white focus:ring-2 focus:ring-blue-500" : "bg-gray-100"}`}
+                          className={`w-full border rounded-md p-2 text-sm min-w-0 ${isEditing ? "bg-card focus:ring-2 focus:ring-blue-500" : "bg-muted"}`}
                           placeholder="Amount"
                         />
                       </div>
@@ -1088,7 +1088,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                       value={details.notes}
                       onChange={(e) => updateLevelDetail(level, "notes", e.target.value)}
                       readOnly={!isEditing}
-                      className={`w-full border rounded-md p-2 text-sm min-w-0 truncate ${isEditing ? "bg-white focus:ring-2 focus:ring-blue-500" : "bg-gray-100"}`}
+                      className={`w-full border rounded-md p-2 text-sm min-w-0 truncate ${isEditing ? "bg-card focus:ring-2 focus:ring-blue-500" : "bg-muted"}`}
                       placeholder="Notes"
                     />
                   </div>
@@ -1104,7 +1104,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                           <Check className="h-4 w-4 text-green-600" />
                         </button>
                         <button
-                          className="p-2 border rounded-md hover:bg-gray-100 group relative"
+                          className="p-2 border rounded-md hover:bg-muted group relative"
                           onClick={() => cancelEdit("level", level)}
                           aria-label="Cancel Edit"
                         >
@@ -1114,12 +1114,12 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                     ) : (
                       <>
                         <button
-                          className="p-2 border rounded-md hover:bg-gray-100 group relative"
+                          className="p-2 border rounded-md hover:bg-muted group relative"
                           onClick={() => startEditing("level", level)}
                           aria-label={`Edit ${level} Details`}
                         >
                           <Pencil className="h-4 w-4" />
-                          <span className="absolute hidden group-hover:block text-xs bg-gray-800 text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                          <span className="absolute hidden group-hover:block text-xs bg-foreground text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
                             Edit {level} Details
                           </span>
                         </button>
@@ -1129,7 +1129,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                           aria-label={`Remove ${level}`}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
-                          <span className="absolute hidden group-hover:block text-xs bg-gray-800 text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                          <span className="absolute hidden group-hover:block text-xs bg-foreground text-white rounded p-1 -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
                             Remove {level}
                           </span>
                         </button>
@@ -1141,12 +1141,12 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
             })}
           </div>
         )}
-        <div className="flex items-center space-x-4 py-2 border-t border-gray-200">
-          <label className="w-1/4 text-sm font-medium text-gray-600">Line of Business</label>
+        <div className="flex items-center space-x-4 py-2 border-t border-border">
+          <label className="w-1/4 text-sm font-medium text-foreground">Line of Business</label>
           <div className="relative w-3/4 flex space-x-2">
             <div className="flex-1 relative">
               <button
-                className="w-full bg-gray-100 border rounded-md p-2 text-sm text-gray-800 flex justify-between items-center"
+                className="w-full bg-muted border rounded-md p-2 text-sm text-foreground flex justify-between items-center"
                 onClick={() => {
                   if (!isLineOfBusinessDropdownOpen) {
                     setTempLineOfBusiness([...contractDetails.lineOfBusiness]);
@@ -1160,31 +1160,31 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                     : "Select Line of Business"}
                 </span>
                 {isLineOfBusinessDropdownOpen ? (
-                  <ChevronUp className="h-4 w-4 text-gray-400" />
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 )}
               </button>
               {isLineOfBusinessDropdownOpen && (
-                <div className="absolute z-20 w-full bg-white border rounded-md mt-1 shadow-lg">
+                <div className="absolute z-20 w-full bg-card border rounded-md mt-1 shadow-lg">
                   {lineOfBusinessOptions.map((option) => (
                     <label
                       key={option}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-blue-50 flex items-center cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-blue-50 flex items-center cursor-pointer"
                     >
                       <input
                         type="checkbox"
                         checked={tempLineOfBusiness.includes(option)}
                         onChange={() => handleTempLineOfBusinessSelect(option)}
-                        className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        className="mr-2 h-4 w-4 text-blue-600 border-border rounded focus:ring-blue-500"
                       />
                       {option}
                     </label>
                   ))}
-                  <div className="flex justify-end space-x-2 p-2 bg-gray-50 border-t">
+                  <div className="flex justify-end space-x-2 p-2 bg-muted border-t">
                     <button
                       onClick={cancelLineOfBusinessEdit}
-                      className="px-4 py-2 text-sm rounded-md border hover:bg-gray-100"
+                      className="px-4 py-2 text-sm rounded-md border hover:bg-muted"
                     >
                       Cancel
                     </button>
@@ -1212,11 +1212,11 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
       </div>
       {editDialog.open && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Edit Details</h3>
+          <div className="bg-card rounded-lg p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Edit Details</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Percentage</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Percentage</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -1229,7 +1229,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                     max="100"
                     placeholder="0"
                   />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                     %
                   </span>
                 </div>
@@ -1240,7 +1240,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                 <>
                   <div className="flex space-x-4">
                     <div className="w-1/2">
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-foreground mb-1">
                         Currency
                       </label>
                       <select
@@ -1258,7 +1258,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                       </select>
                     </div>
                     <div className="w-full">
-                      <Label className="text-sm font-medium text-gray-600 ">Amount</Label>
+                      <Label className="text-sm font-medium text-foreground ">Amount</Label>
                       <input
                         type="number"
                         value={editDialog.money}
@@ -1273,7 +1273,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
                 </>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Notes</label>
                 <textarea
                   value={editDialog.notes}
                   onChange={(e) => setEditDialog((prev) => ({ ...prev, notes: e.target.value }))}
@@ -1283,7 +1283,7 @@ export function ContractSection({ clientId, clientData }: ContractSectionProps) 
               </div>
               <div className="flex justify-end space-x-2">
                 <button
-                  className="px-4 py-2 bg-gray-200 rounded-md text-sm text-gray-800 hover:bg-gray-300"
+                  className="px-4 py-2 bg-muted rounded-md text-sm text-foreground hover:bg-muted"
                   onClick={() =>
                     setEditDialog({
                       open: false,

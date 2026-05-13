@@ -117,7 +117,7 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border px-4 py-4 h-[56vh] overflow-y-auto space-y-4">
+      <div className="bg-card rounded-lg border px-4 py-4 h-[56vh] overflow-y-auto space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Skeleton className="h-4 w-4 rounded" />
           <Skeleton className="h-5 w-32" />
@@ -135,17 +135,17 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
   );
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden flex flex-col h-full min-h-[500px]">
+    <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden flex flex-col h-full min-h-[500px]">
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+      <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-brand/10 rounded-lg">
             <Users className="h-4 w-4 text-brand" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-slate-800">Internal Team</h2>
+            <h2 className="text-base font-semibold text-foreground">Internal Team</h2>
             {totalAssigned > 0 && (
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
                 {totalAssigned} Members Assigned
               </p>
             )}
@@ -187,7 +187,7 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
             const isFull =
               pos.maxUsers !== null && assignedUsers.length >= pos.maxUsers;
             const colorClass =
-              POSITION_COLORS[pos.name] || "text-slate-700 bg-slate-50 border-slate-200";
+              POSITION_COLORS[pos.name] || "text-foreground bg-muted border-border";
 
             return (
               <div
@@ -203,7 +203,7 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                       {pos.label}
                     </span>
                     {pos.maxUsers !== null && (
-                      <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                      <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded border border-border">
                         {assignedUsers.length} / {pos.maxUsers}
                       </span>
                     )}
@@ -246,23 +246,23 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                     {assignedUsers.map((user) => (
                       <div
                         key={user._id}
-                        className="flex items-center justify-between bg-white border border-slate-100 rounded-xl p-3 shadow-sm hover:border-slate-200 transition-all group"
+                        className="flex items-center justify-between bg-card border border-border rounded-xl p-3 shadow-sm hover:border-border transition-all group"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs border border-slate-200">
+                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs border border-border">
                             {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate">
+                            <p className="text-sm font-bold text-foreground truncate">
                               {user.firstName} {user.lastName}
                             </p>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <p className="text-[10px] text-slate-500 truncate max-w-[120px]">
+                              <p className="text-[10px] text-muted-foreground truncate max-w-[120px]">
                                 {user.email}
                               </p>
                               {user.department && (
                                 <>
-                                  <span className="text-slate-300">•</span>
+                                  <span className="text-muted-foreground">•</span>
                                   <p className="text-[10px] text-brand/70 font-medium truncate">
                                     {user.department}
                                   </p>
@@ -276,7 +276,7 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={() =>
                                 removeFromPosition(pos.name, user._id)
                               }
@@ -297,7 +297,7 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-[10px] font-medium text-slate-400 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl py-4 justify-center">
+                  <div className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground bg-muted/50 border border-dashed border-border rounded-xl py-4 justify-center">
                     <AlertCircle className="h-3.5 w-3.5" />
                     No {pos.label} assigned yet
                   </div>

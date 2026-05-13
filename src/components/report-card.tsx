@@ -21,7 +21,7 @@ export function ReportCard({
     <Link
       href={href}
       className={cn(
-        "group flex items-center justify-between p-6 rounded-lg border bg-white shadow-sm transition-all hover:shadow-md",
+        "group flex items-center justify-between p-6 rounded-lg border bg-card shadow-sm transition-all hover:shadow-md",
         className
       )}
     >
@@ -30,11 +30,11 @@ export function ReportCard({
           {icon}
         </div>
         <div>
-          <h3 className="font-semibold text-lg text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-500">{description}</p>
+          <h3 className="font-semibold text-lg text-foreground">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
-      <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-0.5" />
+      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
     </Link>
   )
 }

@@ -26,9 +26,9 @@ export function ShareMenu({ shareText }: ShareMenuProps) {
         <Share2 className="w-5 h-5" />
       </Button>
       {open && (
-        <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg min-w-[160px] z-50">
+        <div className="absolute right-0 mt-2 bg-card border rounded shadow-lg min-w-[160px] z-50">
           <button
-            className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100"
+            className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
             onClick={() => {
               window.open(whatsappUrl, "_blank");
               setOpen(false);
@@ -37,7 +37,7 @@ export function ShareMenu({ shareText }: ShareMenuProps) {
             <MessageCircle className="w-4 h-4 mr-2 text-green-500" /> WhatsApp
           </button>
           <button
-            className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100"
+            className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
             onClick={() => {
               window.open(emailUrl, "_blank");
               setOpen(false);

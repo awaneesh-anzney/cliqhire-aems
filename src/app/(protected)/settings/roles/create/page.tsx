@@ -104,26 +104,26 @@ export default function CreateRolePage() {
   const allOn = PERMISSION_MODULES.every(m => isRowAll(m.moduleKey));
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-muted/50">
       {/* Premium Sticky Header */}
-      <div className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-30 px-8 py-5">
+      <div className="bg-card/80 backdrop-blur-md border-b sticky top-0 z-30 px-8 py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Button
               variant="outline"
               size="icon"
               onClick={() => router.push("/settings")}
-              className="h-10 w-10 rounded-xl border-slate-200 hover:bg-slate-50 shadow-sm"
+              className="h-10 w-10 rounded-xl border-border hover:bg-muted shadow-sm"
             >
-              <ArrowLeft className="h-4 w-4 text-slate-600" />
+              <ArrowLeft className="h-4 w-4 text-foreground" />
             </Button>
-            <div className="flex items-center gap-4 border-l pl-6 border-slate-200">
+            <div className="flex items-center gap-4 border-l pl-6 border-border">
                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-inner">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">Create Access Role</h1>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <h1 className="text-2xl font-black text-foreground tracking-tight leading-none mb-1">Create Access Role</h1>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                   <CheckCircle2 className="w-3 h-3 text-green-500" /> {totalChecked} PERMISSIONS ACROSS {enabledCount} MODULES
                 </p>
               </div>
@@ -134,7 +134,7 @@ export default function CreateRolePage() {
              <Button 
                 variant="ghost" 
                 onClick={() => router.push("/settings")} 
-                className="font-bold text-slate-500 hover:bg-slate-100 px-6 h-11"
+                className="font-bold text-muted-foreground hover:bg-muted px-6 h-11"
               >
                 Discard Changes
               </Button>
@@ -153,42 +153,42 @@ export default function CreateRolePage() {
       <div className="px-8 py-10 max-w-7xl mx-auto grid grid-cols-12 gap-8">
         {/* Left Column: Config */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
-           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-8 sticky top-32">
+           <div className="bg-card rounded-3xl border border-border shadow-sm p-8 space-y-8 sticky top-32">
              <div className="space-y-1">
-                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 block">Identity & Purpose</Label>
+                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 block">Identity & Purpose</Label>
                 <div className="space-y-6">
                    <div className="space-y-2">
-                    <Label className="text-sm font-bold text-slate-700">Role Name <span className="text-primary">*</span></Label>
+                    <Label className="text-sm font-bold text-foreground">Role Name <span className="text-primary">*</span></Label>
                     <div className="relative group">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                       <Input
                         placeholder="e.g. Talent Acquisition Manager"
                         value={name}
                         onChange={e => setName(e.target.value)}
-                        className="pl-10 h-12 border-slate-200 font-bold focus:border-primary transition-all text-sm"
+                        className="pl-10 h-12 border-border font-bold focus:border-primary transition-all text-sm"
                         required
                       />
                     </div>
-                    <p className="text-[11px] text-slate-400 font-medium px-1">Unique identifier — displayed during assignment and in the dashboard.</p>
+                    <p className="text-[11px] text-muted-foreground font-medium px-1">Unique identifier — displayed during assignment and in the dashboard.</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-bold text-slate-700">Detailed Description</Label>
+                    <Label className="text-sm font-bold text-foreground">Detailed Description</Label>
                     <textarea
                       placeholder="Briefly describe what users under this role can execute within the platform..."
                       value={description}
                       onChange={e => setDescription(e.target.value)}
-                      className="w-full min-h-[120px] p-4 text-sm font-medium border border-slate-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all resize-none"
+                      className="w-full min-h-[120px] p-4 text-sm font-medium border border-border rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all resize-none"
                     />
-                    <p className="text-[11px] text-slate-400 font-medium px-1">Optional — provides additional context for the team.</p>
+                    <p className="text-[11px] text-muted-foreground font-medium px-1">Optional — provides additional context for the team.</p>
                   </div>
                 </div>
              </div>
 
-             <div className="pt-8 border-t border-slate-100">
+             <div className="pt-8 border-t border-border">
                <div className="flex items-start gap-4 p-5 bg-primary/5 rounded-2xl border border-primary/10">
                   <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
+                  <p className="text-[11px] text-foreground leading-relaxed font-semibold">
                     The permission matrix on the right is derived automatically from the active system modules. You can granularly control access for each route.
                   </p>
                </div>
@@ -198,20 +198,20 @@ export default function CreateRolePage() {
 
         {/* Right Column: Permission Matrix */}
         <div className="col-span-12 lg:col-span-8">
-           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+           <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
              {/* Header */}
              <div className="px-10 py-6 border-b flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                   <div className="p-2 bg-slate-50 rounded-lg">
-                      <Layout className="w-4 h-4 text-slate-400" />
+                   <div className="p-2 bg-muted rounded-lg">
+                      <Layout className="w-4 h-4 text-muted-foreground" />
                    </div>
-                   <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Permission Registry</h2>
+                   <h2 className="text-sm font-black text-foreground uppercase tracking-widest">Permission Registry</h2>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleSelectAll}
-                  className="h-10 px-6 font-bold text-slate-600 rounded-xl border-slate-200 hover:bg-slate-50 gap-2 transition-all shadow-sm active:scale-95"
+                  className="h-10 px-6 font-bold text-foreground rounded-xl border-border hover:bg-muted gap-2 transition-all shadow-sm active:scale-95"
                 >
                   <CheckSquare2 className="h-4 w-4" />
                   {allOn ? "Deselect All" : "Full Access Toggle"}
@@ -221,8 +221,8 @@ export default function CreateRolePage() {
              <div className="overflow-x-auto overflow-y-hidden">
                 <table className="w-full text-sm border-collapse min-w-[700px]">
                    <thead>
-                      <tr className="bg-slate-50/50">
-                        <th className="text-left px-10 py-6 font-black text-[10px] text-slate-400 uppercase tracking-widest w-64">System Module</th>
+                      <tr className="bg-muted/50">
+                        <th className="text-left px-10 py-6 font-black text-[10px] text-muted-foreground uppercase tracking-widest w-64">System Module</th>
                         {ACTIONS.map(a => (
                           <th key={a} className="text-center px-4 py-6 w-32">
                              <div className="flex flex-col items-center gap-4">
@@ -232,12 +232,12 @@ export default function CreateRolePage() {
                                 <Checkbox
                                   checked={isColAll(a)}
                                   onCheckedChange={v => toggleCol(a, !!v)}
-                                  className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary border-slate-300 transition-all cursor-pointer"
+                                  className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary border-border transition-all cursor-pointer"
                                 />
                              </div>
                           </th>
                         ))}
-                        <th className="text-center px-6 py-6 font-black text-[10px] text-slate-400 uppercase tracking-widest">Full Control</th>
+                        <th className="text-center px-6 py-6 font-black text-[10px] text-muted-foreground uppercase tracking-widest">Full Control</th>
                       </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-100">
@@ -249,19 +249,19 @@ export default function CreateRolePage() {
                             key={mod.moduleKey}
                             className={cn(
                               "group transition-all duration-300",
-                              active ? "bg-primary/[0.02]" : "hover:bg-slate-50/50"
+                              active ? "bg-primary/[0.02]" : "hover:bg-muted/50"
                             )}
                           >
                              <td className="px-10 py-5">
                                 <div className="flex items-center gap-4">
                                    <div className={cn(
                                      "w-2 h-10 rounded-full transition-all duration-500",
-                                     active ? "bg-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]" : "bg-slate-100"
+                                     active ? "bg-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]" : "bg-muted"
                                    )} />
                                    <div className="flex flex-col">
                                       <span className={cn(
                                         "text-base font-bold transition-colors",
-                                        active ? "text-slate-900" : "text-slate-400"
+                                        active ? "text-foreground" : "text-muted-foreground"
                                       )}>
                                         {mod.name}
                                       </span>
@@ -274,7 +274,7 @@ export default function CreateRolePage() {
                                  <Checkbox
                                    checked={matrix[mod.moduleKey]?.[a] ?? false}
                                    onCheckedChange={v => toggle(mod.moduleKey, a, !!v)}
-                                   className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary border-slate-200 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                                   className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary border-border transition-all hover:scale-110 active:scale-95 cursor-pointer"
                                  />
                                </td>
                              ))}
@@ -295,20 +295,20 @@ export default function CreateRolePage() {
              </div>
 
              {/* Dynamic Summary Footer */}
-             <div className="px-10 py-5 bg-slate-50 border-t flex items-center justify-between">
+             <div className="px-10 py-5 bg-muted border-t flex items-center justify-between">
                 <div className="flex items-center gap-2">
                    <div className="flex -space-x-2">
                       {[...Array(3)].map((_, i) => (
-                        <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-50 bg-primary/20 flex items-center justify-center">
+                        <div key={i} className="w-6 h-6 rounded-full border-2 border-border bg-primary/20 flex items-center justify-center">
                           <FileCheck2 className="w-3 h-3 text-primary" />
                         </div>
                       ))}
                    </div>
-                   <p className="text-xs font-bold text-slate-500 ml-2">
+                   <p className="text-xs font-bold text-muted-foreground ml-2">
                      <span className="text-primary">{totalChecked}</span> permissions successfully configured.
                    </p>
                 </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest italic">
                   You can modify these permissions later in the Roles settings.
                 </p>
              </div>

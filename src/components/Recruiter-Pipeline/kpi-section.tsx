@@ -74,7 +74,7 @@
            <div 
              key={card.title} 
              className={cn(
-                "group relative flex items-center p-3 rounded-2xl border bg-white transition-all duration-500 hover:shadow-lg hover:-translate-y-0.5",
+                "group relative flex items-center p-3 rounded-2xl border bg-card transition-all duration-500 hover:shadow-lg hover:-translate-y-0.5",
                 card.borderColor,
                 "animate-in fade-in slide-in-from-top-2",
                 `delay-[${idx * 100}ms]`
@@ -94,11 +94,11 @@
              </div>
              
              <div className="flex flex-col min-w-0">
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">
+               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-muted-foreground transition-colors">
                  {card.title}
                </span>
                <div className="flex items-baseline gap-1">
-                 <span className="text-xl font-black text-slate-900 tracking-tighter">
+                 <span className="text-xl font-black text-foreground tracking-tighter">
                    {value.toLocaleString()}
                  </span>
                </div>

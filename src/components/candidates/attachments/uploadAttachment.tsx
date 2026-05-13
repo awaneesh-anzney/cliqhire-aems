@@ -125,29 +125,29 @@ export function UploadAttachment({ show, setShow, onUpload, attachments }: Uploa
   return (
     <>
       <div
-        className="relative border-2 border-gray-300 rounded-md p-8 bg-gray-50 mb-6 shadow-sm"
+        className="relative border-2 border-border rounded-md p-8 bg-muted mb-6 shadow-sm"
         onDragOver={e => e.preventDefault()}
         onDrop={handleDrop}
       >
       <Button
         size="icon"
         variant="ghost"
-        className="absolute top-2 right-2 hover:bg-gray-200"
+        className="absolute top-2 right-2 hover:bg-muted"
         onClick={handleCloseUpload}
       >
         <X className="h-4 w-4" />
       </Button>
 
       <div className="text-center">
-        <UploadCloud className="mx-auto text-5xl text-gray-500 mb-4" />
-        <p className="text-lg text-gray-700 mb-2">
+        <UploadCloud className="mx-auto text-5xl text-muted-foreground mb-4" />
+        <p className="text-lg text-foreground mb-2">
           Drop files here <br /> or
         </p>
         <Button
           ref={triggerButtonRef}
           onClick={triggerFileSelect}
           disabled={uploading}
-          className="bg-black text-white hover:bg-gray-800"
+          className="bg-black text-white hover:bg-foreground"
         >
           Select Files to Upload
         </Button>
@@ -158,10 +158,10 @@ export function UploadAttachment({ show, setShow, onUpload, attachments }: Uploa
           multiple
           onChange={handleFileSelection}
         />
-        <div className="mt-4 text-sm text-gray-600">
-          Supported file types <span className="font-medium text-gray-500">(max 20MB)</span>:
+        <div className="mt-4 text-sm text-foreground">
+          Supported file types <span className="font-medium text-muted-foreground">(max 20MB)</span>:
         </div>
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-muted-foreground">
         .jpg, .jpeg, .png, .pdf, .doc, .docx
         </div>
       </div>
@@ -173,19 +173,19 @@ export function UploadAttachment({ show, setShow, onUpload, attachments }: Uploa
             {selectedFiles.map((file, index) => (
               <li
                 key={file.name}
-                className="flex items-center justify-between gap-4 border p-2 rounded-md bg-white shadow-sm"
+                className="flex items-center justify-between gap-4 border p-2 rounded-md bg-card shadow-sm"
               >
                 <div className="flex items-center gap-3 w-full">
                   <span className="text-lg">{getFileIcon(file.name)}</span>
-                  <span className="text-sm text-gray-800 truncate">{file.name}</span>
+                  <span className="text-sm text-foreground truncate">{file.name}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   {uploading ? (
                     <div className="w-28">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-muted rounded-full h-2">
                         <div
-                          className="bg-gray-700 h-2 rounded-full transition-all duration-300"
+                          className="bg-foreground h-2 rounded-full transition-all duration-300"
                           style={{ width: `${uploadProgress[file.name] || 0}%` }}
                         />
                       </div>
@@ -197,7 +197,7 @@ export function UploadAttachment({ show, setShow, onUpload, attachments }: Uploa
                     disabled={uploading}
                     onClick={() => handleFileRemove(index)}
                   >
-                    <X className="h-4 w-4 text-gray-500" />
+                    <X className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </div>
               </li>
@@ -206,7 +206,7 @@ export function UploadAttachment({ show, setShow, onUpload, attachments }: Uploa
 
           <div className="mt-4 flex justify-end">
             <Button
-              className="bg-black text-white hover:bg-gray-800"
+              className="bg-black text-white hover:bg-foreground"
               onClick={handleUploadAll}
               disabled={uploading}
             >

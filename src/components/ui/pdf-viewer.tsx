@@ -227,7 +227,7 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, candidateName }: PDFViewerP
                     min={1}
                     max={totalPages}
                   />
-                  <span className="text-sm text-gray-600">of {totalPages}</span>
+                  <span className="text-sm text-foreground">of {totalPages}</span>
                 </div>
                 
                 <Button
@@ -248,7 +248,7 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, candidateName }: PDFViewerP
                 <Button variant="outline" size="sm" onClick={zoomOut}>
                   <ZoomOut className="h-4 w-4" />
                 </Button>
-                <span className="text-sm text-gray-600 min-w-[60px] text-center">
+                <span className="text-sm text-foreground min-w-[60px] text-center">
                   {Math.round(scale * 100)}%
                 </span>
                 <Button variant="outline" size="sm" onClick={zoomIn}>
@@ -280,11 +280,11 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, candidateName }: PDFViewerP
         </div>
 
         {/* PDF Content */}
-        <div className="flex-1 overflow-auto bg-gray-100 p-4 flex items-center justify-center">
+        <div className="flex-1 overflow-auto bg-muted p-4 flex items-center justify-center">
           {loading && (
             <div className="flex flex-col items-center gap-4">
               <Progress value={50} className="w-64" />
-              <p className="text-sm text-gray-600">Loading PDF...</p>
+              <p className="text-sm text-foreground">Loading PDF...</p>
             </div>
           )}
           
@@ -293,7 +293,7 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, candidateName }: PDFViewerP
               <AlertCircle className="h-12 w-12 text-red-500" />
               <div>
                 <p className="text-lg font-semibold text-red-700">Error Loading PDF</p>
-                <p className="text-sm text-gray-600 mt-2">{error}</p>
+                <p className="text-sm text-foreground mt-2">{error}</p>
                 <Button 
                   variant="outline" 
                   className="mt-4"
@@ -309,7 +309,7 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, candidateName }: PDFViewerP
           )}
           
           {!loading && !error && pdfUrl && useIframe && (
-            <div className="w-full h-full bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="w-full h-full bg-card shadow-lg rounded-lg overflow-hidden">
               <iframe
                 src={pdfUrl}
                 className="w-full h-full border-0"
@@ -323,7 +323,7 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, candidateName }: PDFViewerP
           )}
           
           {!loading && !error && pdfUrl && !useIframe && (
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="bg-card shadow-lg rounded-lg overflow-hidden">
               <canvas
                 ref={canvasRef}
                 className="max-w-full max-h-full"
@@ -334,10 +334,10 @@ export function PDFViewer({ isOpen, onClose, pdfUrl, candidateName }: PDFViewerP
           
           {!pdfUrl && !loading && !error && (
             <div className="flex flex-col items-center gap-4 text-center">
-              <FileText className="h-12 w-12 text-gray-400" />
+              <FileText className="h-12 w-12 text-muted-foreground" />
               <div>
-                <p className="text-lg font-semibold text-gray-700">No Resume Available</p>
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-lg font-semibold text-foreground">No Resume Available</p>
+                <p className="text-sm text-foreground mt-2">
                   This candidate doesn&apos;t have a resume uploaded yet.
                 </p>
               </div>

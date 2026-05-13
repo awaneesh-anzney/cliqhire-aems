@@ -22,7 +22,7 @@ import { ChevronDown } from "lucide-react";
 export type JobStatus = "To-do" | "In Progress" | "Completed";
 
 const statusColors: Record<JobStatus, string> = {
-  'To-do': "bg-gray-100 text-gray-800",
+  'To-do': "bg-muted text-foreground",
   'In Progress': "bg-blue-100 text-blue-800",
   'Completed': "bg-green-100 text-green-800",
 }

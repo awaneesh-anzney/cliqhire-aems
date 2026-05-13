@@ -98,15 +98,15 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:border-brand/20 overflow-hidden flex flex-col h-full min-h-[550px]">
-      <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+    <div className="bg-card rounded-2xl border border-border shadow-sm transition-all hover:shadow-xl hover:border-brand/20 overflow-hidden flex flex-col h-full min-h-[550px]">
+      <div className="flex items-center justify-between p-6 border-b border-border bg-muted/50">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-brand/10 rounded-xl">
             <Building2 className="w-5 h-5 text-brand" />
           </div>
           <div>
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Client Team</h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Stakeholders & Hiring Managers</p>
+            <h2 className="text-sm font-black text-foreground uppercase tracking-widest">Client Team</h2>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter mt-0.5">Stakeholders & Hiring Managers</p>
           </div>
         </div>
         {canModify && (
@@ -134,7 +134,7 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <Loader2 className="w-8 h-8 text-brand animate-spin" />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Retrieving Stakeholders...</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest animate-pulse">Retrieving Stakeholders...</p>
           </div>
         )}
 
@@ -151,18 +151,18 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
           if (selected.length === 0 && !error) {
             return (
               <div className="flex flex-col items-center justify-center py-24 text-center">
-                <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
-                  <UserPlus className="w-10 h-10 text-slate-200" />
+                <div className="w-20 h-20 bg-muted rounded-3xl flex items-center justify-center mb-6 shadow-inner">
+                  <UserPlus className="w-10 h-10 text-muted-foreground" />
                 </div>
-                <h3 className="text-base font-black text-slate-800">No Stakeholders Assigned</h3>
-                <p className="text-xs text-slate-400 font-semibold max-w-[240px] mt-2 mb-8 uppercase tracking-wider">
+                <h3 className="text-base font-black text-foreground">No Stakeholders Assigned</h3>
+                <p className="text-xs text-muted-foreground font-semibold max-w-[240px] mt-2 mb-8 uppercase tracking-wider">
                   Link decision makers from the client organization to this job requirement.
                 </p>
                 {canModify && (
                   <Button 
                     variant="outline" 
                     onClick={handleOpenManageContacts}
-                    className="border-slate-200 text-slate-600 font-bold hover:bg-slate-50 px-8 rounded-xl"
+                    className="border-border text-foreground font-bold hover:bg-muted px-8 rounded-xl"
                   >
                     Add Hiring Manager
                   </Button>
@@ -174,7 +174,7 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
           return (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                   <Users className="w-3.5 h-3.5" />
                   Linked Stakeholders ({selected.length})
                 </p>
@@ -184,27 +184,27 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
                 {selected.map((contact: any, index) => (
                   <div 
                     key={contact._id} 
-                    className="group p-5 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:border-brand/20 transition-all duration-300 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+                    className="group p-5 rounded-2xl border border-border bg-card shadow-sm hover:shadow-xl hover:border-brand/20 transition-all duration-300 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {/* Brand line on hover */}
-                    <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-50 group-hover:bg-brand transition-all duration-300" />
+                    <div className="absolute top-0 left-0 w-1.5 h-full bg-muted group-hover:bg-brand transition-all duration-300" />
 
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand/5 group-hover:text-brand transition-all duration-500 shadow-inner shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-brand/5 group-hover:text-brand transition-all duration-500 shadow-inner shrink-0">
                           <Users className="w-6 h-6" />
                         </div>
                         <div className="space-y-3 min-w-0">
                           <div>
                             <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-black text-slate-900 group-hover:text-brand transition-colors truncate">
+                              <h4 className="text-sm font-black text-foreground group-hover:text-brand transition-colors truncate">
                                 {contact.firstName || contact.lastName
                                   ? `${contact.firstName || ""} ${contact.lastName || ""}`.trim()
                                   : contact.name || "Unnamed Contact"}
                               </h4>
                               {contact.gender && (
-                                <span className="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200/50">
+                                <span className="text-[8px] font-black bg-muted text-muted-foreground px-2 py-0.5 rounded-full uppercase tracking-tighter border border-border/50">
                                   {contact.gender}
                                 </span>
                               )}
@@ -216,14 +216,14 @@ export function ClientTeam({ jobId, jobData, canModify }: ClientTeamProps) {
                           </div>
   
                           <div className="flex flex-wrap gap-x-6 gap-y-2">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
-                              <Mail className="w-3.5 h-3.5 text-slate-300" />
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground">
+                              <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                               <a href={`mailto:${contact.email}`} className="hover:text-brand hover:underline truncate">
                                 {contact.email || "—"}
                               </a>
                             </div>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
-                              <Phone className="w-3.5 h-3.5 text-slate-300" />
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground">
+                              <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                               <span className="whitespace-nowrap">
                                 {contact.phone ? (
                                   <>

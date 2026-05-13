@@ -235,21 +235,21 @@ export function SummaryContent({
   ];
 
   return (
-    <div className="p-2 bg-slate-50/50 rounded-2xl">
+    <div className="p-2 bg-muted/50 rounded-2xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Engagement & Basic Info */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <FileText className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Engagement & Identity</h4>
+              <h4 className="text-base font-semibold text-foreground">Engagement & Identity</h4>
             </div>
             <div className="p-5 space-y-6">
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Engagement Details</h5>
-                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Engagement Details</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                   <DetailRow
                     label="Sales Lead (Internal)"
                     value={clientData?.salesLead}
@@ -292,8 +292,8 @@ export function SummaryContent({
               </div>
 
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Basic Information</h5>
-                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Basic Information</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                   <DetailRow
                     label="Client Name"
                     value={clientData?.name}
@@ -332,12 +332,12 @@ export function SummaryContent({
             </div>
           </div>
 
-          {/* <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          {/* <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Users className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Primary Contacts</h4>
+              <h4 className="text-base font-semibold text-foreground">Primary Contacts</h4>
             </div>
             <div className="p-5 space-y-3">
               {clientData?.primaryContacts?.length > 0 ? (
@@ -352,9 +352,9 @@ export function SummaryContent({
                   />
                 ))
               ) : (
-                <div className="text-center py-8 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Primary Contacts</p>
-                  <p className="text-[10px] text-slate-400 mt-1">Add contacts in the Contacts tab</p>
+                <div className="text-center py-8 border-2 border-dashed border-border rounded-2xl bg-muted/30">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">No Primary Contacts</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Add contacts in the Contacts tab</p>
                 </div>
               )}
             </div>
@@ -363,17 +363,17 @@ export function SummaryContent({
 
         {/* Right Column: Location & Documents */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Users className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Presence & Compliance</h4>
+              <h4 className="text-base font-semibold text-foreground">Presence & Compliance</h4>
             </div>
             <div className="p-5 space-y-6">
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Online & Location</h5>
-                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Online & Location</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                   <DetailRow
                     label="Client Website"
                     value={clientData?.website}
@@ -410,7 +410,7 @@ export function SummaryContent({
               </div>
 
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Compliance Documents</h5>
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Compliance Documents</h5>
                 <div className="grid grid-cols-1 gap-3">
                   <FileUploadRow
                     id="vat-copy-upload"

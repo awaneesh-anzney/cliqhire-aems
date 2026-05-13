@@ -131,7 +131,7 @@ export function CandidateDetailsDialog({
                                         {candidate.rejectionReason && (
                                             <div className="space-y-1">
                                                 <span className="text-sm text-muted-foreground">Reason:</span>
-                                                <p className="text-sm font-medium text-gray-700">
+                                                <p className="text-sm font-medium text-foreground">
                                                     {candidate.rejectionReason}
                                                 </p>
                                             </div>

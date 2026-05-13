@@ -215,21 +215,21 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
   };
 
   return (
-    <div className="p-2 space-y-6 bg-slate-50/50 rounded-2xl">
+    <div className="p-2 space-y-6 bg-muted/50 rounded-2xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Job Details & Requirements */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Briefcase className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Position Details</h4>
+              <h4 className="text-base font-semibold text-foreground">Position Details</h4>
             </div>
             <div className="p-5 space-y-6">
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Basic Information</h5>
-                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Basic Information</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                   <DetailRow
                     label="Job Title"
                     value={jobDetails.jobTitle}
@@ -258,8 +258,8 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
               </div>
 
               <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-2 px-1">Requirements & Experience</h5>
-                <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-3 rounded-lg border border-slate-100">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Requirements & Experience</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
                   <DetailRow
                     label="Experience"
                     value={capitalize(jobDetails.experience)}
@@ -295,19 +295,19 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
 
         {/* Right Column: Compensation, Deadlines & Descriptions */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Wallet className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Compensation & Benefits</h4>
+              <h4 className="text-base font-semibold text-foreground">Compensation & Benefits</h4>
             </div>
             <div className="p-5">
-              <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-4 rounded-lg border border-slate-100">
+              <div className="grid grid-cols-1 gap-4 bg-muted/30 p-4 rounded-lg border border-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Salary Range</p>
-                    <p className="text-lg font-bold text-slate-700">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Salary Range</p>
+                    <p className="text-lg font-bold text-foreground">
                       {jobDetails.salaryCurrency || "SAR"} {jobDetails.minimumSalary || 0} - {jobDetails.maximumSalary || 0}
                     </p>
                   </div>
@@ -318,7 +318,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                     </Button>
                   )}
                 </div>
-                <div className="pt-4 border-t border-slate-100">
+                <div className="pt-4 border-t border-border">
                   <JDBenefitFilesSection
                     jobDescriptionPdf={jobDetails.jobDescriptionPdf}
                     benefitPdf={jobDetails.benefitPdf}
@@ -329,15 +329,15 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Clock className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-slate-800">Timelines & Status</h4>
+              <h4 className="text-base font-semibold text-foreground">Timelines & Status</h4>
             </div>
             <div className="p-5">
-              <div className="grid grid-cols-1 gap-4 bg-slate-50/30 p-4 rounded-lg border border-slate-100">
+              <div className="grid grid-cols-1 gap-4 bg-muted/30 p-4 rounded-lg border border-border">
                 <DetailRow
                   label="Job Stage"
                   value={jobDetails.stage}
@@ -363,13 +363,13 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-brand/10 rounded-lg">
                   <ClipboardList className="w-4 h-4 text-brand" />
                 </div>
-                <h4 className="text-base font-semibold text-slate-800">Job Description</h4>
+                <h4 className="text-base font-semibold text-foreground">Job Description</h4>
               </div>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" className="text-brand hover:bg-brand/10" onClick={() => setIsDescriptionModalOpen(true)}>
@@ -383,20 +383,20 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
               </div>
             </div>
             <div className="p-5 space-y-4">
-              <div className="bg-slate-50/50 rounded-lg p-4 border border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Description by Client</p>
+              <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Description by Client</p>
                 {jobDetails.jobDescription ? (
-                  <p className="text-sm text-slate-600 line-clamp-6">{jobDetails.jobDescription}</p>
+                  <p className="text-sm text-foreground line-clamp-6">{jobDetails.jobDescription}</p>
                 ) : (
-                  <p className="text-sm text-slate-400 italic">No description provided by client</p>
+                  <p className="text-sm text-muted-foreground italic">No description provided by client</p>
                 )}
               </div>
-              <div className="bg-slate-50/50 rounded-lg p-4 border border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Internal Team Notes</p>
+              <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Internal Team Notes</p>
                 {jobDetails.jobDescriptionByInternalTeam ? (
-                  <p className="text-sm text-slate-600 line-clamp-6">{jobDetails.jobDescriptionByInternalTeam}</p>
+                  <p className="text-sm text-foreground line-clamp-6">{jobDetails.jobDescriptionByInternalTeam}</p>
                 ) : (
-                  <p className="text-sm text-slate-400 italic">No internal notes added</p>
+                  <p className="text-sm text-muted-foreground italic">No internal notes added</p>
                 )}
               </div>
             </div>

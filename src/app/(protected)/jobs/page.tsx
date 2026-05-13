@@ -57,15 +57,15 @@
  }) {
    return (
      <AlertDialog open={open} onOpenChange={onOpenChange}>
-       <AlertDialogContent className="rounded-[2rem] border-slate-100 shadow-2xl">
+       <AlertDialogContent className="rounded-[2rem] border-border shadow-2xl">
          <AlertDialogHeader>
-           <AlertDialogTitle className="font-black text-slate-900">Confirm Stage Change</AlertDialogTitle>
-           <AlertDialogDescription className="font-bold text-slate-400">
+           <AlertDialogTitle className="font-black text-foreground">Confirm Stage Change</AlertDialogTitle>
+           <AlertDialogDescription className="font-bold text-muted-foreground">
              Are you sure you want to update the job stage? This action will be saved immediately.
            </AlertDialogDescription>
          </AlertDialogHeader>
          <AlertDialogFooter>
-           <AlertDialogCancel className="rounded-xl font-black text-[11px] uppercase tracking-widest border-slate-100">Cancel</AlertDialogCancel>
+           <AlertDialogCancel className="rounded-xl font-black text-[11px] uppercase tracking-widest border-border">Cancel</AlertDialogCancel>
            <AlertDialogAction onClick={onConfirm} className="rounded-xl font-black text-[11px] uppercase tracking-widest bg-brand hover:bg-brand/90">Confirm</AlertDialogAction>
          </AlertDialogFooter>
        </AlertDialogContent>
@@ -208,17 +208,17 @@
          <div className="p-4 rounded-full bg-red-50 text-red-500">
            <Lock className="w-8 h-8" />
          </div>
-         <div className="text-center font-black text-slate-900 tracking-tight">Access Denied</div>
-         <div className="text-center text-slate-400 text-sm font-bold uppercase tracking-widest">Permission required to view jobs.</div>
+         <div className="text-center font-black text-foreground tracking-tight">Access Denied</div>
+         <div className="text-center text-muted-foreground text-sm font-bold uppercase tracking-widest">Permission required to view jobs.</div>
        </div>
      );
    }
  
    return (
      <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50/50 p-3 gap-3 animate-in fade-in duration-700">
+       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Page Header */}
-         <div className="flex-shrink-0 relative overflow-hidden bg-white rounded-[1.5rem] border border-slate-100 shadow-lg p-1.5">
+         <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
            <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
            <Dashboardheader
              setOpen={setOpen}
@@ -237,28 +237,28 @@
          </div>
  
          {/* Table Area */}
-         <div className="flex-1 min-h-0 bg-white rounded-[1.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
            <div className="flex-1 overflow-auto custom-scrollbar relative">
              <Table className="w-full border-separate border-spacing-0 table-auto">
-               <TableHeader className="sticky top-0 z-40 bg-slate-50/95 backdrop-blur-md">
-                 <TableRow className="hover:bg-slate-50/95 transition-colors">
-                   <TableHead className="w-[48px] px-3 py-3 border-b border-slate-100 text-center">
+               <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
+                 <TableRow className="hover:bg-muted/95 transition-colors">
+                   <TableHead className="w-[48px] px-3 py-3 border-b border-border text-center">
                      <Checkbox
                        checked={selectedRows.size > 0 && selectedRows.size === allJobs.length}
                        onCheckedChange={() => toggleSelectAll()}
-                       className="h-4 w-4 rounded border-slate-300"
+                       className="h-4 w-4 rounded border-border"
                        disabled={!canDeleteJobs}
                      />
                    </TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Job ID</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Position</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Type</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Location</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-center">Headcount</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Stage</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-center">Salary Range</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">Client</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400 text-right pr-6">Created By</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Job ID</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Position</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Type</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Location</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Headcount</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Stage</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Salary Range</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Client</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-right pr-6">Created By</TableHead>
                  </TableRow>
                </TableHeader>
                <TableBody>
@@ -266,14 +266,14 @@
                    <TableRow>
                      <TableCell colSpan={10} className="h-64 text-center">
                         <Loader className="size-6 animate-spin text-brand mx-auto mb-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Jobs...</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Syncing Jobs...</span>
                      </TableCell>
                    </TableRow>
                  ) : allJobs.length === 0 ? (
                    <TableRow>
                      <TableCell colSpan={10} className="h-64 text-center">
-                        <Search className="size-8 text-slate-200 mx-auto mb-3" />
-                        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No active jobs found</p>
+                        <Search className="size-8 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">No active jobs found</p>
                      </TableCell>
                    </TableRow>
                  ) : (
@@ -281,7 +281,7 @@
                      <TableRow
                        key={job._id}
                        className={cn(
-                         "group border-b border-slate-50 transition-all duration-300",
+                         "group border-b border-border transition-all duration-300",
                          "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
                          selectedRows.has(job._id) ? "bg-brand/[0.02]" : ""
                        )}
@@ -290,7 +290,7 @@
                          <Checkbox
                            checked={selectedRows.has(job._id)}
                            onCheckedChange={() => toggleRowSelection(job._id)}
-                           className="h-4 w-4 rounded border-slate-300"
+                           className="h-4 w-4 rounded border-border"
                            disabled={!canDeleteJobs}
                            onClick={(e) => e.stopPropagation()}
                          />
@@ -301,7 +301,7 @@
                          <Tooltip>
                            <TooltipTrigger asChild>
                              <span 
-                               className="text-[10px] font-bold text-slate-500 cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
+                               className="text-[10px] font-bold text-muted-foreground cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
                                onClick={() => router.push(`/jobs/${job._id}`)}
                              >
                                {job.jobId || "—"}
@@ -321,7 +321,7 @@
                                className="cursor-pointer group/title max-w-[160px] truncate"
                                onClick={() => router.push(`/jobs/${job._id}`)}
                              >
-                               <span className="text-[13px] font-bold text-slate-900 group-hover/title:text-brand transition-all block truncate">
+                               <span className="text-[13px] font-bold text-foreground group-hover/title:text-brand transition-all block truncate">
                                  {job.jobTitle}
                                </span>
                              </div>
@@ -335,8 +335,8 @@
                        {/* Job Type */}
                        <TableCell className="px-3 py-2.5">
                          <div className="flex items-center gap-1.5">
-                            <Briefcase className="w-3 h-3 text-slate-300 shrink-0" />
-                            <span className="text-[11px] font-medium text-slate-600 capitalize truncate max-w-[80px]">
+                            <Briefcase className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <span className="text-[11px] font-medium text-foreground capitalize truncate max-w-[80px]">
                               {job.jobType}
                             </span>
                          </div>
@@ -347,8 +347,8 @@
                          <Tooltip>
                            <TooltipTrigger asChild>
                              <div className="flex items-center gap-1.5 max-w-[120px] truncate cursor-help">
-                                <MapPin className="w-3 h-3 text-slate-300 shrink-0" />
-                                <span className="text-[11px] font-medium text-slate-600 truncate">
+                                <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                                <span className="text-[11px] font-medium text-foreground truncate">
                                   {Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "—"}
                                 </span>
                              </div>
@@ -361,9 +361,9 @@
  
                        {/* Headcount */}
                        <TableCell className="px-3 py-2.5 text-center">
-                         <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-100">
-                            <Users2 className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-                            <span className="text-[10px] font-black text-slate-900">{job.headcount}</span>
+                         <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted border border-border">
+                            <Users2 className="w-2.5 h-2.5 text-muted-foreground shrink-0" />
+                            <span className="text-[10px] font-black text-foreground">{job.headcount}</span>
                          </div>
                        </TableCell>
  
@@ -381,10 +381,10 @@
                        {/* Salary Range */}
                        <TableCell className="px-3 py-2.5 text-center">
                          <div className="flex flex-col items-center leading-none gap-0.5">
-                            <span className="text-[11px] font-black text-slate-900">
+                            <span className="text-[11px] font-black text-foreground">
                                {job.salaryCurrency} {job.maximumSalary}
                             </span>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Max Range</span>
+                            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Max Range</span>
                          </div>
                        </TableCell>
  
@@ -392,7 +392,7 @@
                        <TableCell className="px-3 py-2.5">
                          <Tooltip>
                            <TooltipTrigger asChild>
-                             <span className="text-[11px] font-bold text-slate-700 block truncate max-w-[120px] cursor-help">
+                             <span className="text-[11px] font-bold text-foreground block truncate max-w-[120px] cursor-help">
                                 {typeof job.client === "object" ? job.client?.name : job.client || "—"}
                              </span>
                            </TooltipTrigger>
@@ -404,7 +404,7 @@
  
                        {/* Created By */}
                        <TableCell className="px-3 py-2.5 text-right pr-6">
-                         <span className="text-[11px] font-bold text-slate-700 block truncate max-w-[120px] ml-auto">
+                         <span className="text-[11px] font-bold text-foreground block truncate max-w-[120px] ml-auto">
                             {job.createdBy?.name || (typeof job.createdBy === 'string' ? job.createdBy : "System")}
                          </span>
                        </TableCell>
@@ -416,7 +416,7 @@
            </div>
            
            {/* Pagination */}
-           <div className="flex-shrink-0 bg-white border-t border-slate-100 p-1.5">
+           <div className="flex-shrink-0 bg-card border-t border-border p-1.5">
              <JobPaginationControls
                currentPage={currentPage}
                totalPages={totalPages}

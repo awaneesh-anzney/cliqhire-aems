@@ -65,13 +65,13 @@ export function ConfirmFieldUpdateDialog({
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-gray-700">Current Value:</label>
-              <div className="mt-1 p-2 bg-gray-50 rounded border text-sm text-gray-600 min-h-[40px] flex items-center">
+              <label className="text-sm font-medium text-foreground">Current Value:</label>
+              <div className="mt-1 p-2 bg-muted rounded border text-sm text-foreground min-h-[40px] flex items-center">
                 {oldValueFormatted}
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">New Value:</label>
+              <label className="text-sm font-medium text-foreground">New Value:</label>
               <div className="mt-1 p-2 bg-blue-50 rounded border text-sm text-blue-700 min-h-[40px] flex items-center">
                 {newValueFormatted}
               </div>

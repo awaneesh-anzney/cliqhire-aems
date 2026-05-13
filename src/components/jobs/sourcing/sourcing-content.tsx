@@ -13,7 +13,7 @@ export function SourcingContent({ jobId }: SourcingContentProps) {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="grid grid-cols-2 gap-6">
         {/* Career Page Card */}
-        <div className="bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
           <div className="p-6 flex items-start gap-4">
             {/* Icon */}
             <div className="flex-shrink-0">
@@ -83,7 +83,7 @@ export function SourcingContent({ jobId }: SourcingContentProps) {
         </div>
 
         {/* Job Boards Card */}
-        <div className="bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-card rounded-lg border shadow-sm hover:shadow-md transition-shadow">
           <div className="p-6 flex items-start gap-4">
             {/* Icon */}
             <div className="flex-shrink-0">

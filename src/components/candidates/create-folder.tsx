@@ -13,7 +13,7 @@ export function CreateFolder() {
            <FolderLogo/>
           </div>
           <h3 className="mb-3 text-xl font-semibold">You have not created any folders yet</h3>
-          <p className="mb-6  text-gray-500">
+          <p className="mb-6  text-muted-foreground">
             Creating folders will allow you to organize candidates in your database by adding them to folders, and share those
             folders with your team.
           </p>

@@ -227,15 +227,15 @@ export function EmailTemplatesContent({
   }
 
   return (
-    <div className="bg-slate-50/50 rounded-2xl p-6 flex flex-col h-full">
-      <div className="mb-6 flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+    <div className="bg-muted/50 rounded-2xl p-6 flex flex-col h-full">
+      <div className="mb-6 flex justify-between items-center bg-card p-4 rounded-xl border border-border shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-brand/10 rounded-lg">
             <Mail className="w-4 h-4 text-brand" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-slate-800">Email Templates</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-base font-semibold text-foreground">Email Templates</h2>
+            <p className="text-xs text-muted-foreground">
               Manage email templates for {clientData?.name || "this client"}
             </p>
           </div>
@@ -245,7 +245,7 @@ export function EmailTemplatesContent({
         </Button>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm transition-all p-5 flex-1">
+      <div className="bg-card rounded-xl border border-border shadow-sm transition-all p-5 flex-1">
 
         {templates.length > 0 ? (
           <TemplatesList
@@ -265,17 +265,17 @@ export function EmailTemplatesContent({
           <div className="flex flex-col items-center justify-center text-center py-12 px-4 min-h-[300px]">
             {/* Illustration */}
             <div className="relative mb-6">
-              <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center">
-                <Mail className="w-12 h-12 text-slate-300" />
+              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center">
+                <Mail className="w-12 h-12 text-muted-foreground" />
               </div>
             </div>
 
             {/* Content */}
             <div className="max-w-sm">
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
                 No email templates created yet
               </h3>
-              <p className="text-slate-500 text-sm leading-relaxed mb-6">
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
                 Create professional email templates to streamline your communication with {clientData?.name || "this client"}.
               </p>
 

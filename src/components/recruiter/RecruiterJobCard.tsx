@@ -82,7 +82,7 @@ export function RecruiterJobCard({ job, loadingJobId, onToggleExpansion }: Recru
                 {job.salaryRange || "—"}
               </span>
               {job.jobType && (
-                <Badge variant="outline" className="bg-gray-100 text-gray-700">
+                <Badge variant="outline" className="bg-muted text-foreground">
                   {job.jobType}
                 </Badge>
               )}

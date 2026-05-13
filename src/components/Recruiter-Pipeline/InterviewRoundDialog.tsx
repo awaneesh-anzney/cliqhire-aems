@@ -226,7 +226,7 @@ export function InterviewRoundDialog({
             <div className="space-y-1.5">
               <Label>
                 Meeting Link{" "}
-                <span className="text-slate-400 font-normal">(optional)</span>
+                <span className="text-muted-foreground font-normal">(optional)</span>
               </Label>
               <Input
                 placeholder="https://meet.google.com/..."
@@ -257,11 +257,11 @@ export function InterviewRoundDialog({
               {formData.interviewers.map((interviewer: any, index: number) => (
                 <div
                   key={index}
-                  className="p-3 bg-slate-50 rounded-lg border border-slate-100 relative group"
+                  className="p-3 bg-muted rounded-lg border border-border relative group"
                 >
                   <div className="grid grid-cols-3 gap-2">
                     <div className="space-y-1">
-                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                      <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1">
                         <User className="h-3 w-3" /> Name
                       </div>
                       <Input
@@ -274,7 +274,7 @@ export function InterviewRoundDialog({
                       />
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                      <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1">
                         <Briefcase className="h-3 w-3" /> Designation
                       </div>
                       <Input
@@ -287,7 +287,7 @@ export function InterviewRoundDialog({
                       />
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                      <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1">
                         <Mail className="h-3 w-3" /> Email
                       </div>
                       <Input
@@ -305,7 +305,7 @@ export function InterviewRoundDialog({
                       variant="ghost"
                       size="icon"
                       onClick={() => removeInterviewer(index)}
-                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-card border border-border text-muted-foreground hover:text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -328,8 +328,8 @@ export function InterviewRoundDialog({
 
           {/* Outcome section — only for existing rounds (PATCH) */}
           {isEditMode && (
-            <div className="space-y-5 pt-4 border-t border-slate-200">
-              <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+            <div className="space-y-5 pt-4 border-t border-border">
+              <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Round Outcome &amp; Feedback
               </h4>
 
@@ -372,7 +372,7 @@ export function InterviewRoundDialog({
                       </SelectContent>
                     </Select>
                   ) : (
-                    <div className="flex items-center h-10 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-400 italic">
+                    <div className="flex items-center h-10 px-3 rounded-md border border-border bg-muted text-sm text-muted-foreground italic">
                       Status &ldquo;Completed&rdquo; karo pehle
                     </div>
                   )}

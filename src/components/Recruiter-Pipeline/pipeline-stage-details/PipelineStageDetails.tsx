@@ -226,11 +226,11 @@
              <Sparkles className="h-5 w-5" />
            </div>
            <div className="flex flex-col">
-             <h4 className="text-sm font-black text-slate-900 tracking-tight uppercase">
+             <h4 className="text-sm font-black text-foreground tracking-tight uppercase">
                 {displayStage} Intel
              </h4>
              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Current Intelligence Level</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current Intelligence Level</span>
                 <Badge className={cn("text-[9px] font-black uppercase tracking-widest py-0 px-2 h-4", getStageColor(displayStage))}>
                   {displayStage}
                 </Badge>
@@ -244,9 +244,9 @@
                 variant="outline" 
                 size="sm" 
                 onClick={handleEditAll}
-                className="h-9 px-4 rounded-xl border-slate-100 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+                className="h-9 px-4 rounded-xl border-border font-black text-[10px] uppercase tracking-widest hover:bg-muted transition-all shadow-sm"
              >
-               <Edit3 className="h-3.5 w-3.5 mr-2 text-slate-400" />
+               <Edit3 className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
                Modify Details
              </Button>
            )}
@@ -256,7 +256,7 @@
                  variant="ghost"
                  size="sm"
                  onClick={() => setIsEditingStage(false)}
-                 className="h-9 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                 className="h-9 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted"
                >
                  Discard
                </Button>
@@ -276,24 +276,24 @@
  
        {/* Movement History Sub-header */}
        {stageMoveInfo && (
-         <div className="flex flex-wrap items-center gap-y-2 gap-x-6 px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-2xl animate-in fade-in duration-1000">
+         <div className="flex flex-wrap items-center gap-y-2 gap-x-6 px-4 py-2.5 bg-muted border border-border rounded-2xl animate-in fade-in duration-1000">
            <div className="flex items-center gap-2">
-             <User2 className="h-3.5 w-3.5 text-slate-300" />
-             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Assigned By:</span>
-             <span className="text-[11px] font-bold text-slate-700">{movedBy}</span>
+             <User2 className="h-3.5 w-3.5 text-muted-foreground" />
+             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Assigned By:</span>
+             <span className="text-[11px] font-bold text-foreground">{movedBy}</span>
            </div>
            {movedAt && (
              <div className="flex items-center gap-2">
-               <Calendar className="h-3.5 w-3.5 text-slate-300" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Timestamp:</span>
-               <span className="text-[11px] font-bold text-slate-700">{movedAt}</span>
+               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Timestamp:</span>
+               <span className="text-[11px] font-bold text-foreground">{movedAt}</span>
              </div>
            )}
            {stageMoveInfo.notes && (
              <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-               <Edit3 className="h-3.5 w-3.5 text-slate-300" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Observation:</span>
-               <span className="text-[11px] font-medium text-slate-600 italic truncate">&quot;{stageMoveInfo.notes}&quot;</span>
+               <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
+               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Observation:</span>
+               <span className="text-[11px] font-medium text-foreground italic truncate">&quot;{stageMoveInfo.notes}&quot;</span>
              </div>
            )}
          </div>
@@ -311,13 +311,13 @@
              />
            </div>
          ) : stageFields.length === 0 ? (
-           <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-100 rounded-[1.5rem] bg-slate-50/30 gap-3">
-             <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <Clock className="h-6 w-6 text-slate-200" />
+           <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border rounded-[1.5rem] bg-muted/30 gap-3">
+             <div className="h-12 w-12 rounded-full bg-card flex items-center justify-center shadow-sm">
+                <Clock className="h-6 w-6 text-muted-foreground" />
              </div>
              <div className="space-y-1">
-                <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Data Pending</p>
-                <p className="text-[10px] font-bold text-slate-300">No active fields defined for the {displayStage} stage.</p>
+                <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Data Pending</p>
+                <p className="text-[10px] font-bold text-muted-foreground">No active fields defined for the {displayStage} stage.</p>
              </div>
            </div>
          ) : (
@@ -327,14 +327,14 @@
                   key={field.key} 
                   className={cn(
                     "group relative flex items-start gap-4 p-4 rounded-2xl border transition-all duration-300",
-                    isEditingStage ? "bg-white border-brand/20 shadow-md ring-2 ring-brand/5" : "bg-slate-50/50 border-slate-100 hover:bg-white hover:border-brand/10 hover:shadow-lg"
+                    isEditingStage ? "bg-card border-brand/20 shadow-md ring-2 ring-brand/5" : "bg-muted/50 border-border hover:bg-card hover:border-brand/10 hover:shadow-lg"
                   )}
                >
                  <div className={cn("p-2 rounded-xl shrink-0 transition-transform group-hover:scale-110", field.color)}>
                     {field.icon}
                  </div>
                  <div className="flex-1 min-w-0">
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-brand transition-colors">
+                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-brand transition-colors">
                       {field.label}
                    </p>
                    {isEditingStage ? (
@@ -342,7 +342,7 @@
                        {renderFieldInput(field, editValues[field.key] ?? "", (val) => handleUpdateFieldValue(field.key, val))}
                      </div>
                    ) : (
-                     <p className="text-[13px] font-black text-slate-800 truncate">
+                     <p className="text-[13px] font-black text-foreground truncate">
                         {renderFieldValue(field)}
                      </p>
                    )}
@@ -355,15 +355,15 @@
  
        {/* Overlay Dialogs */}
        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-         <AlertDialogContent className="rounded-[2rem] border-slate-100 shadow-2xl">
+         <AlertDialogContent className="rounded-[2rem] border-border shadow-2xl">
            <AlertDialogHeader>
-             <AlertDialogTitle className="font-black text-slate-900 tracking-tighter">Commit Stage Data?</AlertDialogTitle>
-             <AlertDialogDescription className="font-bold text-slate-400 uppercase tracking-widest text-[11px] leading-relaxed">
+             <AlertDialogTitle className="font-black text-foreground tracking-tighter">Commit Stage Data?</AlertDialogTitle>
+             <AlertDialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
                You are about to synchronize all updates for the <strong className="text-brand">{displayStage}</strong> intelligence module.
              </AlertDialogDescription>
            </AlertDialogHeader>
            <AlertDialogFooter className="gap-2">
-             <AlertDialogCancel onClick={() => setShowConfirmDialog(false)} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-slate-100">
+             <AlertDialogCancel onClick={() => setShowConfirmDialog(false)} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
                 Abort
              </AlertDialogCancel>
              <AlertDialogAction

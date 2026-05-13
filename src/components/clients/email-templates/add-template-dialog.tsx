@@ -244,107 +244,107 @@ export function AddTemplateDialog({
             </div>
             
             {/* Formatting Toolbar */}
-            <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 mb-3 flex-shrink-0 overflow-x-auto">
+            <div className="flex items-center gap-1 bg-muted border border-border rounded-lg px-3 py-2 mb-3 flex-shrink-0 overflow-x-auto">
               <button 
                 type="button"
                 onClick={() => executeCommand('undo')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Undo"
               >
-                <RotateCcw className="w-4 h-4 text-gray-600" />
+                <RotateCcw className="w-4 h-4 text-foreground" />
               </button>
               
-              <div className="w-px h-5 bg-gray-300 mx-1 flex-shrink-0" />
+              <div className="w-px h-5 bg-muted mx-1 flex-shrink-0" />
               
               <button 
                 type="button"
                 onClick={() => formatText('bold')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Bold"
               >
-                <Bold className="w-4 h-4 text-gray-600" />
+                <Bold className="w-4 h-4 text-foreground" />
               </button>
               <button 
                 type="button"
                 onClick={() => formatText('italic')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Italic"
               >
-                <Italic className="w-4 h-4 text-gray-600" />
+                <Italic className="w-4 h-4 text-foreground" />
               </button>
               <button 
                 type="button"
                 onClick={() => formatText('underline')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Underline"
               >
-                <Underline className="w-4 h-4 text-gray-600" />
+                <Underline className="w-4 h-4 text-foreground" />
               </button>
               
-              <div className="w-px h-5 bg-gray-300 mx-1 flex-shrink-0" />
+              <div className="w-px h-5 bg-muted mx-1 flex-shrink-0" />
               
               <button 
                 type="button"
                 onClick={() => setAlignment('Left')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Align Left"
               >
-                <AlignLeft className="w-4 h-4 text-gray-600" />
+                <AlignLeft className="w-4 h-4 text-foreground" />
               </button>
               <button 
                 type="button"
                 onClick={() => setAlignment('Center')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Align Center"
               >
-                <AlignCenter className="w-4 h-4 text-gray-600" />
+                <AlignCenter className="w-4 h-4 text-foreground" />
               </button>
               <button 
                 type="button"
                 onClick={() => setAlignment('Right')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Align Right"
               >
-                <AlignRight className="w-4 h-4 text-gray-600" />
+                <AlignRight className="w-4 h-4 text-foreground" />
               </button>
               <button 
                 type="button"
                 onClick={() => setAlignment('Full')}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Justify"
               >
-                <AlignJustify className="w-4 h-4 text-gray-600" />
+                <AlignJustify className="w-4 h-4 text-foreground" />
               </button>
               
               
-              <div className="w-px h-5 bg-gray-300 mx-1 flex-shrink-0" />
+              <div className="w-px h-5 bg-muted mx-1 flex-shrink-0" />
               
               <button 
                 type="button"
                 onClick={insertLink}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Insert Link"
               >
-                <Link2 className="w-4 h-4 text-gray-600" />
+                <Link2 className="w-4 h-4 text-foreground" />
               </button>
               <button 
                 type="button"
                 onClick={insertImage}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                 title="Insert Image"
               >
-                <ImageIcon className="w-4 h-4 text-gray-600" />
+                <ImageIcon className="w-4 h-4 text-foreground" />
               </button>
               
-              <span className="ml-auto text-xs text-gray-500 font-medium flex-shrink-0">HTML</span>
+              <span className="ml-auto text-xs text-muted-foreground font-medium flex-shrink-0">HTML</span>
             </div>
 
             {/* Rich Text Editor */}
-            <div className="border border-gray-200 rounded-lg bg-white min-h-[200px] relative">
+            <div className="border border-border rounded-lg bg-card min-h-[200px] relative">
               <div 
                 ref={editorRef}
                 contentEditable
-                className="outline-none text-gray-900 leading-relaxed p-4 min-h-[200px]"
+                className="outline-none text-foreground leading-relaxed p-4 min-h-[200px]"
                 suppressContentEditableWarning={true}
                 onInput={(e) => {
                   setContent(e.currentTarget.innerHTML);
@@ -352,7 +352,7 @@ export function AddTemplateDialog({
               />
               {/* Placeholder overlay */}
               {(!content || content.trim() === '') && (
-                <div className="absolute top-4 left-4 text-gray-500 pointer-events-none">
+                <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">
                   Dear {`{{clientName}}`}, <br /><br />
                   Thank you for your interest in working with us. We are excited about the opportunity to partner with {`{{clientCompany}}`}.<br /><br />
                   Best regards<br />
@@ -365,8 +365,8 @@ export function AddTemplateDialog({
           
 
           {/* Variable insertion buttons */}
-          <div className="flex items-center gap-1 p-1 bg-gray-50 rounded-md overflow-x-auto">
-            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Quick Insert:</span>
+          <div className="flex items-center gap-1 p-1 bg-muted rounded-md overflow-x-auto">
+            <span className="text-sm font-medium text-foreground whitespace-nowrap">Quick Insert:</span>
             {commonVariables.slice(0, 6).map((variable) => (
               <Button
                 key={variable.value}

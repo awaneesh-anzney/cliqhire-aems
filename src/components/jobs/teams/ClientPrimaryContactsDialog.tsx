@@ -80,34 +80,34 @@
  
    return (
      <Dialog open={open} onOpenChange={onOpenChange}>
-       <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-slate-50 border-none rounded-[2rem] shadow-2xl">
+       <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-muted border-none rounded-[2rem] shadow-2xl">
          {/* Header */}
-         <div className="bg-white px-8 pt-8 pb-6 border-b border-slate-100 shrink-0">
+         <div className="bg-card px-8 pt-8 pb-6 border-b border-border shrink-0">
            <div className="flex items-center justify-between mb-6">
              <div className="space-y-1">
-               <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+               <h2 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-3">
                  Manage Stakeholders
                  <span className="text-[10px] font-black bg-brand/10 text-brand px-3 py-1 rounded-full border border-brand/10">
                    {dialogSelectedContactIds.length} Selected
                  </span>
                </h2>
-               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Select or add hiring managers for this job</p>
+               <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Select or add hiring managers for this job</p>
              </div>
              <Button 
                variant="ghost" 
                size="icon" 
                onClick={() => onOpenChange(false)} 
-               className="rounded-full hover:bg-slate-100 transition-colors"
+               className="rounded-full hover:bg-muted transition-colors"
              >
-               <X className="w-5 h-5 text-slate-400" />
+               <X className="w-5 h-5 text-muted-foreground" />
              </Button>
            </div>
  
            <div className="relative group">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand transition-colors" />
+             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-brand transition-colors" />
              <Input 
                placeholder="Search by name, email or position..." 
-               className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-2xl focus-visible:ring-brand focus-visible:border-brand font-medium text-sm transition-all"
+               className="pl-12 h-12 bg-muted border-border rounded-2xl focus-visible:ring-brand focus-visible:border-brand font-medium text-sm transition-all"
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
              />
@@ -124,23 +124,23 @@
                    key={contact._id}
                    onClick={() => handleToggleContact(contact._id)}
                    className={cn(
-                     "group relative p-5 rounded-3xl border-2 transition-all cursor-pointer bg-white",
+                     "group relative p-5 rounded-3xl border-2 transition-all cursor-pointer bg-card",
                      dialogSelectedContactIds.includes(contact._id) 
                        ? "border-brand shadow-lg shadow-brand/5 ring-1 ring-brand/20" 
-                       : "border-transparent shadow-sm hover:border-slate-200"
+                       : "border-transparent shadow-sm hover:border-border"
                    )}
                  >
                    <div className="flex items-start justify-between gap-4">
                      <div className="flex items-start gap-4 min-w-0">
                        <div className={cn(
                          "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-inner shrink-0",
-                         dialogSelectedContactIds.includes(contact._id) ? "bg-brand text-white" : "bg-slate-100 text-slate-400"
+                         dialogSelectedContactIds.includes(contact._id) ? "bg-brand text-white" : "bg-muted text-muted-foreground"
                        )}>
                          {dialogSelectedContactIds.includes(contact._id) ? <Check className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
                        </div>
                        <div className="min-w-0">
                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-black text-slate-900 truncate">{contact.name}</h4>
+                            <h4 className="text-sm font-black text-foreground truncate">{contact.name}</h4>
                             <span className="text-[8px] font-black bg-green-50 text-green-600 px-2 py-0.5 rounded-full uppercase tracking-tighter border border-green-100">NEW</span>
                          </div>
                          <p className="text-[10px] font-black text-brand uppercase tracking-widest mt-1 opacity-80 truncate">
@@ -151,7 +151,7 @@
                      <Button
                        variant="ghost"
                        size="icon"
-                       className="h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-400"
+                       className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground"
                        onClick={(e) => {
                          e.stopPropagation();
                          setEditContact(contact);
@@ -173,25 +173,25 @@
                      key={contact._id}
                      onClick={() => handleToggleContact(contact._id)}
                      className={cn(
-                       "group relative p-5 rounded-3xl border-2 transition-all cursor-pointer bg-white",
+                       "group relative p-5 rounded-3xl border-2 transition-all cursor-pointer bg-card",
                        isSelected 
                          ? "border-brand shadow-lg shadow-brand/5 ring-1 ring-brand/20" 
-                         : "border-transparent shadow-sm hover:border-slate-200"
+                         : "border-transparent shadow-sm hover:border-border"
                      )}
                    >
                      <div className="flex items-start gap-4">
                        <div className={cn(
                          "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-inner shrink-0",
-                         isSelected ? "bg-brand text-white shadow-brand/20" : "bg-slate-50 text-slate-300 group-hover:bg-slate-100"
+                         isSelected ? "bg-brand text-white shadow-brand/20" : "bg-muted text-muted-foreground group-hover:bg-muted"
                        )}>
                          {isSelected ? <Check className="w-6 h-6" /> : <Users className="w-6 h-6" />}
                        </div>
                        <div className="min-w-0 space-y-1">
-                         <h4 className="text-sm font-black text-slate-900 truncate">{contact.name || `${contact.firstName} ${contact.lastName}`}</h4>
+                         <h4 className="text-sm font-black text-foreground truncate">{contact.name || `${contact.firstName} ${contact.lastName}`}</h4>
                          <p className="text-[10px] font-black text-brand uppercase tracking-widest opacity-80 truncate">
                            {contact.position || contact.designation || "Stakeholder"}
                          </p>
-                         <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400 pt-1">
+                         <div className="flex items-center gap-3 text-[11px] font-bold text-muted-foreground pt-1">
                             <span className="truncate">{contact.email}</span>
                          </div>
                        </div>
@@ -203,12 +203,12 @@
  
              {filteredContacts.length === 0 && searchQuery && (
                <div className="py-20 text-center flex flex-col items-center animate-in fade-in zoom-in duration-300">
-                 <div className="w-20 h-20 bg-slate-100 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-inner">
-                   <Search className="w-8 h-8 text-slate-300" />
+                 <div className="w-20 h-20 bg-muted rounded-[2.5rem] flex items-center justify-center mb-6 shadow-inner">
+                   <Search className="w-8 h-8 text-muted-foreground" />
                  </div>
-                 <h3 className="text-lg font-black text-slate-800 tracking-tight">No results found</h3>
-                 <p className="text-sm text-slate-400 font-semibold max-w-xs mx-auto mt-2">
-                   We couldn&apos;t find any contacts matching &quot;<span className="text-slate-900">{searchQuery}</span>&quot;
+                 <h3 className="text-lg font-black text-foreground tracking-tight">No results found</h3>
+                 <p className="text-sm text-muted-foreground font-semibold max-w-xs mx-auto mt-2">
+                   We couldn&apos;t find any contacts matching &quot;<span className="text-foreground">{searchQuery}</span>&quot;
                  </p>
                </div>
              )}
@@ -216,11 +216,11 @@
          </div>
  
          {/* Footer */}
-         <div className="bg-white px-8 py-6 border-t border-slate-100 flex items-center justify-between shrink-0">
+         <div className="bg-card px-8 py-6 border-t border-border flex items-center justify-between shrink-0">
            <Button
              variant="outline"
              onClick={() => setAddContactOpen(true)}
-             className="rounded-2xl border-2 border-slate-200 text-slate-600 font-black h-12 px-6 hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95"
+             className="rounded-2xl border-2 border-border text-foreground font-black h-12 px-6 hover:bg-muted hover:border-border transition-all active:scale-95"
            >
              <Plus className="w-4 h-4 mr-2" />
              Add New Contact
@@ -230,7 +230,7 @@
              <Button
                variant="ghost"
                onClick={() => onOpenChange(false)}
-               className="rounded-2xl text-slate-400 font-bold hover:text-slate-600 px-6 h-12"
+               className="rounded-2xl text-muted-foreground font-bold hover:text-foreground px-6 h-12"
              >
                Cancel
              </Button>

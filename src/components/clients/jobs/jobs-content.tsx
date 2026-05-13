@@ -39,7 +39,7 @@ const stageColors: Record<JobStage, string> = {
   Onboarding: "bg-purple-100 text-purple-800",
   Active: "bg-yellow-100 text-yellow-800",
   Hired: "bg-green-200 text-green-900",
-  "On Hold": "bg-gray-200 text-gray-800",
+  "On Hold": "bg-muted text-foreground",
   Closed: "bg-red-100 text-red-800",
 };
 
@@ -252,8 +252,8 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
     <>
       <div className="border-b py-2 px-4">
         <div className="flex items-center">
-          {/* <Checkbox id="selectAll" className="mr-4 border-gray-400" /> */}
-          <div className="grid grid-cols-7 w-full text-sm font-medium text-gray-500">
+          {/* <Checkbox id="selectAll" className="mr-4 border-border" /> */}
+          <div className="grid grid-cols-7 w-full text-sm font-medium text-muted-foreground">
             {[
               "Position Name",
               "Job Type",
@@ -273,11 +273,11 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
           clientJobs.map((job) => (
             <div
               key={job._id}
-              className="border-b hover:bg-gray-50 py-3 px-4 cursor-pointer"
+              className="border-b hover:bg-muted py-3 px-4 cursor-pointer"
               onClick={() => router.push(`/jobs/${job._id}`)}
             >
               <div className="flex items-center">
-                {/* <Checkbox id={`job-${job._id}`} className="mr-4 border-gray-400" /> */}
+                {/* <Checkbox id={`job-${job._id}`} className="mr-4 border-border" /> */}
                 <div className="grid grid-cols-7  w-full px-0 mx-0">
                   <div className="font-medium">{job.jobTitle}</div>
                   <div className="capitalize">{job.jobType || "N/A"}</div>
@@ -310,7 +310,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
             </div>
           ))
         ) : (
-          <div className="flex items-center justify-center h-32 text-gray-500">
+          <div className="flex items-center justify-center h-32 text-muted-foreground">
             No jobs found. Create a new job requirement.
           </div>
         )}

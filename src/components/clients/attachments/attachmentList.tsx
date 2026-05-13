@@ -85,7 +85,7 @@ export function AttachmentList({ attachments, onDelete, onDeleteSelected }: Prop
         {attachments.map((attachment:any) => (
           <li
             key={attachment._id}
-            className={`flex items-center justify-between border rounded-md p-2 ${selectedIds.includes(attachment._id) ? 'bg-gray-200' : 'bg-gray-100'}`}
+            className={`flex items-center justify-between border rounded-md p-2 ${selectedIds.includes(attachment._id) ? 'bg-muted' : 'bg-muted'}`}
           >
             <div
               className="flex items-center gap-2 min-w-0 cursor-pointer select-none w-full"

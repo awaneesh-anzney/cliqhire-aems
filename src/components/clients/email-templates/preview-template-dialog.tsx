@@ -65,10 +65,10 @@ export function PreviewTemplateDialog({
 
         <div className="space-y-6 flex-1 flex flex-col">
           {/* Email Preview Card */}
-          <div className=" rounded-lg bg-white flex flex-col flex-1">
+          <div className=" rounded-lg bg-card flex flex-col flex-1">
             {/* Email Header - Sticky */}
-            {/* <div className="border-b bg-gray-50 px-4 py-3 rounded-t-lg flex-shrink-0"> */}
-              {/* <div className="flex items-center gap-2 text-sm text-gray-600">
+            {/* <div className="border-b bg-muted px-4 py-3 rounded-t-lg flex-shrink-0"> */}
+              {/* <div className="flex items-center gap-2 text-sm text-foreground">
                 <div className="w-3 h-3 bg-red-400 rounded-full"></div>
                 <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                 <div className="w-3 h-3 bg-green-400 rounded-full"></div>
@@ -80,21 +80,21 @@ export function PreviewTemplateDialog({
             <div className="p-1 flex flex-col flex-1">
               {/* Subject Line - Sticky */}
               <div className="mb-4 flex-shrink-0">
-                <label className="text-sm font-medium text-gray-700 block mb-1">
+                <label className="text-sm font-medium text-foreground block mb-1">
                   Subject:
                 </label>
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-lg font-semibold text-foreground">
                   {replaceVariables(template.subject)}
                 </div>
               </div>
 
               {/* Email Body - Only this part scrollable */}
               <div className="flex-1 flex flex-col min-h-0">
-                <label className="text-sm font-medium text-gray-700 block mb-2 flex-shrink-0">
+                <label className="text-sm font-medium text-foreground block mb-2 flex-shrink-0">
                   Content:
                 </label>
-                <div className="bg-gray-50 rounded-lg p-4 border flex-1 overflow-y-auto min-h-0 max-h-[300px]">
-                  <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                <div className="bg-muted rounded-lg p-4 border flex-1 overflow-y-auto min-h-0 max-h-[300px]">
+                  <div className="whitespace-pre-wrap text-foreground leading-relaxed">
                     {replaceVariables(template.content)}
                   </div>
                 </div>
@@ -105,15 +105,15 @@ export function PreviewTemplateDialog({
 
         {/* Template Metadata - Sticky at bottom */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm pt-4 border-t flex-shrink-0">
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-foreground">
             <User className="h-4 w-4" />
             <span>By {template.author.name}</span>
           </div>
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-foreground">
             <Calendar className="h-4 w-4" />
             <span>Created {formatDate(template.createdAt)}</span>
           </div>
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-foreground">
             <Calendar className="h-4 w-4" />
             <span>Updated {formatDate(template.updatedAt)}</span>
           </div>
@@ -126,7 +126,7 @@ export function PreviewTemplateDialog({
           </h4>
           <div className="flex flex-wrap gap-2">
             {template.content.match(/\{\{[^}]+\}\}/g)?.map((variable, index) => (
-              <Badge key={index} variant="outline" className="text-xs bg-white">
+              <Badge key={index} variant="outline" className="text-xs bg-card">
                 {variable}
               </Badge>
             )) || <span className="text-sm text-blue-700">No variables used</span>}

@@ -84,7 +84,7 @@ export function NationalitySelector({
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 min-h-[3rem] p-3 border rounded-lg bg-gray-50/50">
+            <div className="flex flex-wrap gap-2 min-h-[3rem] p-3 border rounded-lg bg-muted/50">
               {isAllMode && (
                 <Badge 
                   variant="outline" 
@@ -107,13 +107,13 @@ export function NationalitySelector({
                 <Badge 
                   key={nationality} 
                   variant="secondary" 
-                  className="flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-200 shadow-sm transition-all hover:bg-gray-50"
+                  className="flex items-center gap-1.5 px-3 py-1 bg-card border border-border shadow-sm transition-all hover:bg-muted"
                 >
                   <span className="text-sm">{nationality}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-0 hover:bg-transparent text-gray-400 hover:text-red-500"
+                    className="h-auto p-0 hover:bg-transparent text-muted-foreground hover:text-red-500"
                     onClick={() => handleRemove(nationality)}
                   >
                     <X className="h-3.5 w-3.5" />

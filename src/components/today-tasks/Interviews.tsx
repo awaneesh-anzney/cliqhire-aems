@@ -52,7 +52,7 @@ export function Interviews({ interviews, onUpdateInterviewStatus }: InterviewsPr
       case 'rescheduled':
         return 'bg-yellow-100 text-yellow-700';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-muted text-foreground';
     }
   };
 
@@ -74,17 +74,17 @@ export function Interviews({ interviews, onUpdateInterviewStatus }: InterviewsPr
   };
 
   return (
-    <Card className="rounded-xl border border-slate-200 shadow-sm bg-white overflow-hidden">
+    <Card className="rounded-xl border border-border shadow-sm bg-card overflow-hidden">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors py-4 px-6 border-b border-transparent data-[state=open]:border-slate-200">
+          <CardHeader className="cursor-pointer hover:bg-muted transition-colors py-4 px-6 border-b border-transparent data-[state=open]:border-border">
             <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-900 font-semibold">
+              <div className="flex items-center gap-2 text-foreground font-semibold">
                 <Calendar className="w-5 h-5 text-brand" />
                 Reminder Task
               </div>
-              <div className="flex items-center gap-4 text-sm text-slate-500 font-normal">
-                <span>Total: <span className="font-semibold text-slate-900">{todaysInterviews.length}</span></span>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground font-normal">
+                <span>Total: <span className="font-semibold text-foreground">{todaysInterviews.length}</span></span>
                 {isOpen ? (
                   <ChevronDown className="w-4 h-4" />
                 ) : (
@@ -97,10 +97,10 @@ export function Interviews({ interviews, onUpdateInterviewStatus }: InterviewsPr
         <CollapsibleContent>
           <CardContent className="pt-4">
             {todaysInterviews.length > 0 ? (
-              <div className="rounded-md border border-slate-200">
+              <div className="rounded-md border border-border">
                 <div className="max-h-96 overflow-y-auto custom-scrollbar pr-2">
                   <Table>
-                    <TableHeader className="sticky top-0 bg-slate-50 border-b border-slate-200 hover:bg-slate-50 text-slate-700 z-10">
+                    <TableHeader className="sticky top-0 bg-muted border-b border-border hover:bg-muted text-foreground z-10">
                       <TableRow className="border-b-0 hover:bg-transparent">
                         <TableHead>Candidate</TableHead>
                         <TableHead>Job & Client</TableHead>
@@ -113,28 +113,28 @@ export function Interviews({ interviews, onUpdateInterviewStatus }: InterviewsPr
                     </TableHeader>
                     <TableBody>
                       {todaysInterviews.map((interview) => (
-                        <TableRow key={interview.id} className="hover:bg-gray-50">
+                        <TableRow key={interview.id} className="hover:bg-muted">
                           <TableCell>
                             <div>
-                              <div className="font-semibold text-gray-900">{interview.candidateName}</div>
-                              <div className="text-sm text-gray-600">{interview.candidateEmail}</div>
+                              <div className="font-semibold text-foreground">{interview.candidateName}</div>
+                              <div className="text-sm text-foreground">{interview.candidateEmail}</div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div>
                               <div className="font-medium">{interview.jobTitle}</div>
-                              <div className="text-sm text-gray-600">{interview.clientName}</div>
+                              <div className="text-sm text-foreground">{interview.clientName}</div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4 text-gray-500" />
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
                               <span className="font-medium">{formatDate(interview.scheduledTime)}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4 text-gray-500" />
+                              <Clock className="w-4 h-4 text-muted-foreground" />
                               <div>
                                 <div className="font-medium">{formatTime(interview.scheduledTime)}</div>
                               </div>
@@ -153,7 +153,7 @@ export function Interviews({ interviews, onUpdateInterviewStatus }: InterviewsPr
                                 Join Meeting
                               </a>
                             ) : (
-                              <span className="text-sm text-gray-400">-</span>
+                              <span className="text-sm text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -163,7 +163,7 @@ export function Interviews({ interviews, onUpdateInterviewStatus }: InterviewsPr
                           </TableCell>
                           {/* <TableCell>
                             <DropdownMenu>
-                              <DropdownMenuTrigger className="hover:bg-gray-100 p-1 rounded">
+                              <DropdownMenuTrigger className="hover:bg-muted p-1 rounded">
                                 <MoreHorizontal className="w-4 h-4" />
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
@@ -183,8 +183,8 @@ export function Interviews({ interviews, onUpdateInterviewStatus }: InterviewsPr
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-lg font-medium">No reminder tasks found</p>
                 <p className="text-sm">You are all caught up!</p>
               </div>

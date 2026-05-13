@@ -135,7 +135,7 @@ export function ImageCropperDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md rounded-3xl overflow-hidden border-none shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-black text-slate-900 flex items-center gap-2">
+          <DialogTitle className="text-xl font-black text-foreground flex items-center gap-2">
             <div className="p-2 bg-brand/10 rounded-lg text-brand">
                <Crop className="h-5 w-5" />
             </div>
@@ -147,7 +147,7 @@ export function ImageCropperDialog({
           {/* Crop Area */}
           <div 
             ref={containerRef}
-            className="relative h-80 w-full bg-slate-100 rounded-2xl overflow-hidden cursor-move touch-none"
+            className="relative h-80 w-full bg-muted rounded-2xl overflow-hidden cursor-move touch-none"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -180,7 +180,7 @@ export function ImageCropperDialog({
           {/* Controls */}
           <div className="space-y-4 px-2">
             <div className="flex items-center gap-4">
-              <ZoomOut className="h-4 w-4 text-slate-400" />
+              <ZoomOut className="h-4 w-4 text-muted-foreground" />
               <Slider
                 value={[zoom]}
                 min={0.5}
@@ -189,7 +189,7 @@ export function ImageCropperDialog({
                 onValueChange={([val]) => setZoom(val)}
                 className="flex-1"
               />
-              <ZoomIn className="h-4 w-4 text-slate-400" />
+              <ZoomIn className="h-4 w-4 text-muted-foreground" />
             </div>
 
             <div className="flex justify-center gap-2">
@@ -197,7 +197,7 @@ export function ImageCropperDialog({
                 variant="outline" 
                 size="sm" 
                 onClick={() => setRotation((r) => r + 90)}
-                className="rounded-xl border-slate-200 text-slate-600 font-bold"
+                className="rounded-xl border-border text-foreground font-bold"
               >
                 <RotateCw className="h-4 w-4 mr-2" />
                 Rotate
@@ -207,10 +207,10 @@ export function ImageCropperDialog({
         </div>
 
         <DialogFooter className="flex gap-3 px-0">
-          <Button variant="ghost" onClick={onClose} className="rounded-xl font-bold text-slate-500 hover:bg-slate-50">
+          <Button variant="ghost" onClick={onClose} className="rounded-xl font-bold text-muted-foreground hover:bg-muted">
             Cancel
           </Button>
-          <Button onClick={getCroppedImg} className="rounded-xl bg-slate-900 hover:bg-black text-white font-black uppercase tracking-widest px-8">
+          <Button onClick={getCroppedImg} className="rounded-xl bg-foreground hover:bg-black text-white font-black uppercase tracking-widest px-8">
             Save Changes
           </Button>
         </DialogFooter>

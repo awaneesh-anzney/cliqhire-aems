@@ -22,15 +22,15 @@ export default function ActivitiesPage() {
             Upcoming
           </h1>
           <div className="ml-auto flex items-center space-x-2">
-            <div className="bg-gray-100 rounded-lg p-1 flex gap-1">
-              <Button variant="ghost" size="sm" className="text-gray-600">
+            <div className="bg-muted rounded-lg p-1 flex gap-1">
+              <Button variant="ghost" size="sm" className="text-foreground">
                 DAY
               </Button>
-              <Button variant="ghost" size="sm" className="text-gray-600">
+              <Button variant="ghost" size="sm" className="text-foreground">
                 <Calendar className="h-4 w-4 mr-2" />
                 WEEK
               </Button>
-              <Button variant="ghost" size="sm" className="text-gray-600">
+              <Button variant="ghost" size="sm" className="text-foreground">
                 <LayoutGrid className="h-4 w-4 mr-2" />
                 MONTH
               </Button>

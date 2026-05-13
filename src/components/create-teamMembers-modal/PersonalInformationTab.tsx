@@ -109,7 +109,7 @@ export function PersonalInformationTab({
               type="button"
               variant="ghost"
               size="sm"
-              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent text-slate-400 hover:text-slate-600"
+              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent text-muted-foreground hover:text-foreground"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -134,13 +134,13 @@ export function PersonalInformationTab({
                   <SelectItem key={id as string} value={id as string}>
                     {role.displayName || role.name}
                     {role.isSystem && (
-                      <span className="ml-1.5 text-xs text-slate-400">(System)</span>
+                      <span className="ml-1.5 text-xs text-muted-foreground">(System)</span>
                     )}
                   </SelectItem>
                 );
               })}
               {!rolesLoading && roles.length === 0 && (
-                <div className="px-2 py-1.5 text-xs text-slate-400">
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
                   No roles found. Create roles in Settings first.
                 </div>
               )}

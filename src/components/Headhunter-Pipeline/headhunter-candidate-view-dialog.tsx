@@ -42,7 +42,7 @@ export function HeadhunterCandidateViewDialog({ candidate, open, onOpenChange, o
           <div className="space-y-2">
             <Label>Name</Label>
             <div className="flex items-center gap-2">
-              <Input value={candidate.name || ""} disabled className="bg-gray-50 flex-1" />
+              <Input value={candidate.name || ""} disabled className="bg-muted flex-1" />
               {candidate.isTempCandidate && (
                 <Badge variant="destructive" className="text-xs px-2 py-0.5">
                   TEMP
@@ -52,33 +52,33 @@ export function HeadhunterCandidateViewDialog({ candidate, open, onOpenChange, o
           </div>
           <div className="space-y-2">
             <Label>Email</Label>
-            <Input value={candidate.email || ""} disabled className="bg-gray-50" />
+            <Input value={candidate.email || ""} disabled className="bg-muted" />
           </div>
           <div className="space-y-2">
             <Label>Phone</Label>
-            <Input value={candidate.phone || ""} disabled className="bg-gray-50" />
+            <Input value={candidate.phone || ""} disabled className="bg-muted" />
           </div>
           <div className="space-y-2">
             <Label>Status</Label>
-            <Input value={(candidate.subStatus as any) || (candidate.status as any) || ""} disabled className="bg-gray-50" />
+            <Input value={(candidate.subStatus as any) || (candidate.status as any) || ""} disabled className="bg-muted" />
           </div>
           <div className="space-y-2 col-span-2">
             <Label>Location</Label>
-            <Input value={candidate.location || ""} disabled className="bg-gray-50" />
+            <Input value={candidate.location || ""} disabled className="bg-muted" />
           </div>
 
           <div className="space-y-2">
             <Label>Rejection Date</Label>
-            <Input value={formatDate(rejectionDate)} disabled className="bg-gray-50" />
+            <Input value={formatDate(rejectionDate)} disabled className="bg-muted" />
           </div>
           <div className="space-y-2"></div>
           <div className="space-y-2 col-span-2">
             <Label>Rejection Reason</Label>
-            <Textarea value={rejectionReason} rows={3} className="resize-none bg-gray-50" disabled />
+            <Textarea value={rejectionReason} rows={3} className="resize-none bg-muted" disabled />
           </div>
           <div className="space-y-2 col-span-2">
             <Label>Rejection</Label>
-            <Textarea value={rejectionReason1} rows={3} className="resize-none bg-gray-50" disabled />
+            <Textarea value={rejectionReason1} rows={3} className="resize-none bg-muted" disabled />
           </div>
           </div>
         </div>

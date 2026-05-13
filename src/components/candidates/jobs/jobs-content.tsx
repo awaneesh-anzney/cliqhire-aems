@@ -129,7 +129,7 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
     <>
       <div className="border-b py-2 px-6 ">
         <div className="flex items-center">
-          <div className="grid grid-cols-8 w-full text-sm font-medium text-gray-500 ">
+          <div className="grid grid-cols-8 w-full text-sm font-medium text-muted-foreground ">
             {["Job Title", "Client", "Location", "Job Type", "Minimum Salary", "Maximum Salary", "Experience", "Stage"].map((item, index) => (
               <div key={index}>{item}</div>
             ))}
@@ -148,7 +148,7 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
           candidateJobs.map((job) => (
             <div
               key={job._id}
-              className="border-b hover:bg-gray-50 py-3 px-4 cursor-pointer"
+              className="border-b hover:bg-muted py-3 px-4 cursor-pointer"
               onClick={() => {
                 if (job.jobId) {
                   router.push(`/jobs/${job.jobId}`);
@@ -170,7 +170,7 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
             </div>
           ))
         ) : (
-          <div className="flex items-center justify-center h-32 text-gray-500">
+          <div className="flex items-center justify-center h-32 text-muted-foreground">
             No job applications found for this candidate.
           </div>
         )}

@@ -457,7 +457,7 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
       <div className="flex-shrink-0 mb-2 pr-2 pl-2">
         <div
           className={`w-full border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2 ${
-            dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"
+            dragActive ? "border-blue-500 bg-blue-50" : "border-border bg-muted"
           } ${isUploading || isParsing ? "opacity-50 pointer-events-none" : ""}`}
           onClick={() => !isUploading && !isParsing && fileInputRef.current?.click()}
           onDragOver={handleDragOver}
@@ -491,7 +491,7 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
           ) : (
             <div className="flex items-center gap-2">
               <CloudUpload className="w-5 h-5 text-blue-400" />
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 Drag & drop your resume here, or <span className="text-blue-600 underline">browse</span>
               </span>
             </div>
@@ -503,7 +503,7 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
       {/* Progress Bar - Show while uploading/parsing */}
       {(isUploading || isParsing) && (
         <div className="flex-shrink-0 w-full space-y-2 mb-2">
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex justify-between text-sm text-foreground">
             <span>{isUploading ? "Uploading resume..." : "Parsing resume..."}</span>
             <span>{progress}%</span>
           </div>
@@ -651,7 +651,7 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
                 value={form.technicalSkill}
                 onChange={handleFormChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                className="w-full px-3 py-2 border border-border rounded-md text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
                 placeholder="Comma separated (e.g., JavaScript, React, Node.js)"
               />
             </div>
@@ -667,7 +667,7 @@ export const UploadResume: React.FC<UploadResumeProps> = ({
                 value={form.softSkill}
                 onChange={handleFormChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                className="w-full px-3 py-2 border border-border rounded-md text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
                 placeholder="Comma separated (e.g., Leadership, Communication)"
               />
             </div>

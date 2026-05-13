@@ -362,7 +362,7 @@ export default function ClientPage({ params }: PageProps) {
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center justify-center">
           <TriangleAlert className="size-4" />
-          <div className="text-gray-600">Something went wrong! Please try again later</div>
+          <div className="text-foreground">Something went wrong! Please try again later</div>
         </div>
       </div>
     );
@@ -373,7 +373,7 @@ export default function ClientPage({ params }: PageProps) {
       <div className="flex items-center justify-center h-full">
         <div className="flex items-center flex-col justify-center">
           <Loader className="size-6 animate-spin" />
-          <p className="text-gray-600">Loading client data...</p>
+          <p className="text-foreground">Loading client data...</p>
         </div>
       </div>
     );
@@ -419,12 +419,12 @@ export default function ClientPage({ params }: PageProps) {
       />
 
       {/* Header Section */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-card border-b shadow-sm">
         <div className="max-w-[1600px] mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{client.name || "Unnamed Client"}</h1>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">{client.name || "Unnamed Client"}</h1>
                 <div className="flex items-center gap-2">
                   <ClientStageBadge
                     id={client._id}
@@ -442,25 +442,25 @@ export default function ClientPage({ params }: PageProps) {
                 </div>
               </div>
               
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-slate-500">
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-muted-foreground">
                 {client.industry && (
                   <div className="flex items-center gap-1.5">
-                    <Forklift className="h-4 w-4 text-slate-400" />
+                    <Forklift className="h-4 w-4 text-muted-foreground" />
                     <span>{client.industry}</span>
                   </div>
                 )}
                 {(client.address || client.location) && (
-                  <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
-                    <MapPin  className="h-4 w-4 text-slate-400" />
+                  <div className="flex items-center gap-1.5 border-l border-border pl-4">
+                    <MapPin  className="h-4 w-4 text-muted-foreground" />
                     <span className="truncate max-w-xs">{ client.location ||client.address}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
+                <div className="flex items-center gap-1.5 border-l border-border pl-4">
                   <RefreshCcw 
                     className={`h-4 w-4 text-brand cursor-pointer hover:rotate-180 transition-transform duration-500 ${isLoading ? "animate-spin" : ""}`} 
                     onClick={handleRefresh}
                   />
-                  <span className="text-slate-400">Last updated: Just now</span>
+                  <span className="text-muted-foreground">Last updated: Just now</span>
                 </div>
               </div>
             </div>
@@ -479,7 +479,7 @@ export default function ClientPage({ params }: PageProps) {
       </div>
 
       {/* Button Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-slate-50/50 border-b gap-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-muted/50 border-b gap-4">
         <div className="flex items-center gap-3">
           {canModifyJobs && (
             <Button
@@ -499,7 +499,7 @@ export default function ClientPage({ params }: PageProps) {
                 ref={buttonRef}
                 size="sm"
                 variant="outline"
-                className="h-10 px-5 border-slate-200 hover:bg-white hover:text-brand hover:border-brand transition-all rounded-lg flex items-center gap-2 shadow-sm"
+                className="h-10 px-5 border-border hover:bg-card hover:text-brand hover:border-brand transition-all rounded-lg flex items-center gap-2 shadow-sm"
                 onClick={handleGenerateReportClick}
               >
                 <FileText className="h-4 w-4" />
@@ -507,7 +507,7 @@ export default function ClientPage({ params }: PageProps) {
               </Button>
             ) : reportStatus === "generating" ? (
               <div
-                className="relative h-10 rounded-lg bg-slate-200 overflow-hidden inline-flex items-center justify-center px-4"
+                className="relative h-10 rounded-lg bg-muted overflow-hidden inline-flex items-center justify-center px-4"
                 style={{ width: buttonWidth ? `${buttonWidth}px` : "auto", minWidth: "180px" }}
               >
                 <div

@@ -25,14 +25,14 @@ export default function LoginPage() {
 
   // Render login form when not authenticated
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50/50 p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-[1000px] flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl md:flex-row md:h-[600px]">
+    <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4 md:p-8">
+      <div className="mx-auto flex w-full max-w-[1000px] flex-col overflow-hidden rounded-[2rem] bg-card shadow-2xl md:flex-row md:h-[600px]">
         {/* Left Side: Purple Banner */}
         <div className="relative flex flex-col justify-center bg-brand p-10 text-brand-foreground md:w-1/2 overflow-hidden">
           {/* Decorative Elements */}
           <div className="absolute top-10 right-10 grid grid-cols-4 gap-2 opacity-50">
             {Array.from({ length: 24 }).map((_, i) => (
-              <div key={i} className="h-1.5 w-1.5 rounded-full bg-white/60"></div>
+              <div key={i} className="h-1.5 w-1.5 rounded-full bg-card/60"></div>
             ))}
           </div>
           <div className="absolute top-20 left-10 opacity-30">
