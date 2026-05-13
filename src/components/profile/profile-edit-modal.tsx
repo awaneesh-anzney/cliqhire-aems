@@ -100,9 +100,9 @@ export function ProfileEditModal({
               <Label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Phone Number</Label>
               <PhoneInput
                 phoneNumber={formData.phone}
-                onPhoneNumberChange={(val) => setFormData({ ...formData, phone: val })}
+                onPhoneNumberChange={(val) => setFormData((prev) => ({ ...prev, phone: val }))}
                 countryCode={formData.countryCode}
-                onCountryCodeChange={(val) => setFormData({ ...formData, countryCode: val })}
+                onCountryCodeChange={(val) => setFormData((prev) => ({ ...prev, countryCode: val }))}
               />
             </div>
 

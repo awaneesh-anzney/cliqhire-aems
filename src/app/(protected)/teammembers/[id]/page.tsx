@@ -326,9 +326,9 @@ export default function TeamMemberDetailsPage() {
                     ) : (
                       <PhoneInput
                         countryCode={editForm.countryCode}
-                        onCountryCodeChange={(code) => setEditForm({ ...editForm, countryCode: code })}
+                        onCountryCodeChange={(code) => setEditForm(prev => ({ ...prev, countryCode: code }))}
                         phoneNumber={editForm.phone}
-                        onPhoneNumberChange={(val) => setEditForm({ ...editForm, phone: val })}
+                        onPhoneNumberChange={(val) => setEditForm(prev => ({ ...prev, phone: val }))}
                       />
                     )}
                  </div>
