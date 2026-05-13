@@ -35,6 +35,7 @@
  }
  
  const headerArr = [
+   "ID",
    "Name",
    "Contact",
    "Location",
@@ -126,13 +127,13 @@
    const filteredTeamMembers = activeTab === "all" ? dataTeamMembers : dataTeamMembers.filter(member => {
        const selectedRole = roles.find(r => (r._id || r.id) === activeTab);
        if (!selectedRole) return true;
-       if (member.roleId === selectedRole._id || member.roleId === selectedRole.id) return true;
+       if (member.roleId && (member.roleId === selectedRole._id || member.roleId === selectedRole.id)) return true;
        return (member.teamRole || "").toLowerCase() === selectedRole.name.toLowerCase();
    });
  
    const getCountByRole = (roleItem: any) => {
      return dataTeamMembers.filter(member => {
-       if (member.roleId === roleItem._id || member.roleId === roleItem.id) return true;
+       if (member.roleId && (member.roleId === roleItem._id || member.roleId === roleItem.id)) return true;
        const roleName = roleItem.name.toLowerCase();
        return (member.teamRole || "").toLowerCase() === roleName;
      }).length;
@@ -170,6 +171,13 @@
            highlightId === member._id ? "bg-brand/[0.02]" : ""
          )}
        >
+         {/* ID */}
+         <TableCell className="px-3 py-2.5">
+           <span className="text-[11px] font-black uppercase tracking-wider text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md border border-border">
+             #{member.teamMemberId || member._id.slice(-6).toUpperCase()}
+           </span>
+         </TableCell>
+ 
          {/* Name */}
          <TableCell className="px-3 py-2.5">
            <Tooltip>
