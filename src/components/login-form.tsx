@@ -13,7 +13,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,12 +46,35 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     },
   });
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const rememberedEmail = localStorage.getItem("rememberedEmail");
+      const rememberedPassword = localStorage.getItem("rememberedPassword");
+      if (rememberedEmail && rememberedPassword) {
+        form.setValue("email", rememberedEmail);
+        form.setValue("password", rememberedPassword);
+        form.setValue("remember", true);
+      }
+    }
+  }, [form]);
+
   const onSubmit = async (values: LoginFormValues) => {
     try {
       const success = await login(values.email, values.password);
 
       if (success) {
         toast.success("Login successful!");
+        
+        if (typeof window !== "undefined") {
+          if (values.remember) {
+            localStorage.setItem("rememberedEmail", values.email);
+            localStorage.setItem("rememberedPassword", values.password);
+          } else {
+            localStorage.removeItem("rememberedEmail");
+            localStorage.removeItem("rememberedPassword");
+          }
+        }
+
         // Reset form after successful login
         form.reset();
 
