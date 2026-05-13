@@ -165,3 +165,52 @@ body::-webkit-scrollbar {
   display: none;
   /* Chrome, Safari, and Opera */
 }
+
+/* Modern Auth Styles */
+.auth-bg {
+  background: linear-gradient(-45deg, 
+    hsl(var(--brand-primary) / 0.15), 
+    hsl(var(--chart-2) / 0.15), 
+    hsl(var(--brand-primary) / 0.15), 
+    hsl(var(--chart-4) / 0.15)
+  );
+  background-size: 400% 400%;
+  animation: authGradient 15s ease infinite;
+}
+
+@keyframes authGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.dark .glass-card {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
