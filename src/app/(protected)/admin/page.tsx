@@ -1,116 +1,151 @@
 "use client"
 
-import { Plus, Filter, Download, ArrowRight, LayoutDashboard, Database, PieChart, Info, Users } from "lucide-react"
+import { useState } from "react"
+import { Download, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { StatsGrid } from "@/components/admin/stats-grid"
-import { ActivitySidebar } from "@/components/admin/activity-sidebar"
-import { JobsTable } from "@/components/admin/jobs-table"
-import { CandidatesTable } from "@/components/admin/candidates-table"
-import { AdminDashboardCharts } from "@/components/admin/admin-dashboard-charts"
+import { AdminStatsGrid } from "@/components/admin/admin-stats-grid"
+import { AdminCharts } from "@/components/admin/admin-charts"
+import { AdminDataTabs } from "@/components/admin/admin-data-tabs"
+import { AdminActivityFeed } from "@/components/admin/admin-activity-feed"
+import { AdminExportPanel } from "@/components/admin/admin-export-panel"
 import { useDashboardStats } from "@/hooks/useDashboard"
 import { useJobs } from "@/hooks/useJobs"
 import { useCandidates } from "@/hooks/useCandidate"
-import { useAuth } from "@/contexts/AuthContext"
-import Link from "next/link"
+
+export type TimeRange = "today" | "weekly" | "monthly" | "yearly"
+
+const TIME_RANGES: { label: string; value: TimeRange }[] = [
+  { label: "Today", value: "today" },
+  { label: "This Week", value: "weekly" },
+  { label: "This Month", value: "monthly" },
+  { label: "This Year", value: "yearly" },
+]
 
 export default function AdminPage() {
-  const { user } = useAuth()
-  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useDashboardStats()
-  const { data: jobsData, isLoading: jobsLoading, refetch: refetchJobs } = useJobs({ limit: 10 })
-  const { data: candidatesData, isLoading: candidatesLoading, refetch: refetchCandidates } = useCandidates({ limit: 10 })
+  const [timeRange, setTimeRange] = useState<TimeRange>("monthly")
+  const [exportOpen, setExportOpen] = useState(false)
+
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useDashboardStats()
+
+  const {
+    data: jobsData,
+    isLoading: jobsLoading,
+    refetch: refetchJobs,
+  } = useJobs({ limit: 50 })
+
+  const {
+    data: candidatesData,
+    isLoading: candidatesLoading,
+    refetch: refetchCandidates,
+  } = useCandidates({ limit: 50 })
+
+  const handleRefresh = () => {
+    refetchStats()
+    refetchJobs()
+    refetchCandidates()
+  }
+
+  // Filter jobs & candidates to last 7 days for the table view
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  const recentJobs = (jobsData?.jobs ?? []).filter(
+    (j) => j.createdAt && new Date(j.createdAt) >= sevenDaysAgo
+  )
+  const recentCandidates = (candidatesData?.candidates ?? []).filter(
+    (c) => c.createdAt && new Date(c.createdAt) >= sevenDaysAgo
+  )
 
   return (
-    <div className="flex flex-col w-full h-full bg-[hsl(var(--background))] overflow-y-auto">
-      {/* Breadcrumb Area */}
-      <div className="bg-card border-b border-[hsl(var(--border))] px-8 py-3 w-full">
-         <div className="flex items-center gap-2 text-[hsl(var(--muted-foreground))] font-medium text-sm">
-            <LayoutDashboard className="w-4 h-4 text-[hsl(var(--primary))]" />
-            <span>Administration</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-            <span className="text-[hsl(var(--foreground))] font-bold">Admin Dashboard</span>
-         </div>
-      </div>
+    <div className="flex flex-col w-full min-h-full bg-[hsl(var(--background))]">
+      <main className="flex-1 w-full p-6 space-y-6">
 
-      <main className="flex-1 w-full p-8 space-y-8">
-        
-        {/* Page Title & Actions */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Header Row — Title + Time Filter + Actions */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-[hsl(var(--foreground))] tracking-tight">System Overview</h2>
-            <p className="text-[hsl(var(--muted-foreground))] text-sm mt-1">Manage global records, active jobs, and core operations.</p>
+            <h2 className="text-2xl font-bold text-[hsl(var(--foreground))] tracking-tight">
+              System Overview
+            </h2>
+            <p className="text-[hsl(var(--muted-foreground))] text-sm mt-1">
+              Monitor global operations — jobs, candidates, clients, and team activity.
+            </p>
           </div>
-          
-          <div className="flex items-center gap-3">
-             <Button variant="outline" className="h-10 px-4 font-semibold text-sm border-[hsl(var(--border))]" onClick={() => alert("The export functionality is not fully hooked up in this demo.")}>
-               <Download className="w-4 h-4 mr-2" /> Export
-             </Button>
-             <Link href="/jobs" passHref>
-               <Button className="h-10 px-5 font-semibold text-sm bg-[hsl(var(--primary))] hover:opacity-90">
-                 <Plus className="w-4 h-4 mr-2" /> Quick Action
-               </Button>
-             </Link>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Time Range Toggle */}
+            <div className="flex items-center bg-[hsl(var(--muted))] rounded-lg p-1 gap-0.5">
+              {TIME_RANGES.map((tr) => (
+                <button
+                  key={tr.value}
+                  onClick={() => setTimeRange(tr.value)}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${timeRange === tr.value
+                    ? "bg-white text-[hsl(var(--primary))] shadow-sm"
+                    : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                    }`}
+                >
+                  {tr.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Refresh */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-3 border-[hsl(var(--border))]"
+              onClick={handleRefresh}
+            >
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+
+            {/* Export */}
+            <Button
+              size="sm"
+              className="h-9 px-4 font-semibold bg-[hsl(var(--primary))] hover:opacity-90"
+              onClick={() => setExportOpen(true)}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Data
+            </Button>
           </div>
         </div>
 
-        {/* Core Stats */}
-        <StatsGrid stats={stats} loading={statsLoading} />
+        {/* Stats Grid */}
+        <AdminStatsGrid stats={stats} loading={statsLoading} timeRange={timeRange} />
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Main Data Section (2/3 width) */}
-          <div className="xl:col-span-2 space-y-8">
-            
-            <Tabs defaultValue="jobs" className="w-full">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
-                <TabsList className="bg-[hsl(var(--muted))] p-1 rounded-lg">
-                  <TabsTrigger 
-                    value="jobs" 
-                    className="rounded-md px-6 py-2 font-semibold text-sm data-[state=active]:bg-card data-[state=active]:text-[hsl(var(--primary))] data-[state=active]:shadow-sm"
-                  >
-                    Active Jobs
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="talents" 
-                    className="rounded-md px-6 py-2 font-semibold text-sm data-[state=active]:bg-card data-[state=active]:text-[hsl(var(--primary))] data-[state=active]:shadow-sm"
-                  >
-                    Candidate Pool
-                  </TabsTrigger>
-                </TabsList>
-                
-                <Button onClick={() => alert("Filter functionality to be integrated")} variant="outline" size="sm" className="h-9 px-4 text-[hsl(var(--foreground))] font-medium text-sm border-[hsl(var(--border))] bg-card">
-                  <Filter className="w-4 h-4 mr-2" /> Filter
-                </Button>
-              </div>
+        {/* Charts Row */}
+        <AdminCharts timeRange={timeRange} stats={stats} loading={statsLoading} />
 
-              <TabsContent value="jobs" className="outline-none focus:ring-0">
-                <JobsTable jobs={jobsData?.jobs} loading={jobsLoading} />
-              </TabsContent>
-              
-              <TabsContent value="talents" className="outline-none focus:ring-0">
-                <CandidatesTable candidates={candidatesData?.candidates} loading={candidatesLoading} />
-              </TabsContent>
-            </Tabs>
-
-            {/* Analytics */}
-            <section className="space-y-4 pt-6 border-t border-[hsl(var(--border))]">
-               <div className="flex items-center justify-between">
-                  <div>
-                     <h3 className="text-xl font-bold text-[hsl(var(--foreground))]">Analytics & Metrics</h3>
-                     <p className="text-sm text-[hsl(var(--muted-foreground))] mt-0.5">Key performance indicators for the current period.</p>
-                  </div>
-               </div>
-               <div className="bg-card p-4 rounded-xl border border-[hsl(var(--border))] shadow-sm">
-                  <AdminDashboardCharts />
-               </div>
-            </section>
+        {/* Data Tables + Activity Sidebar */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2">
+            <AdminDataTabs
+              jobs={recentJobs}
+              candidates={recentCandidates}
+              jobsLoading={jobsLoading}
+              candidatesLoading={candidatesLoading}
+              timeRange={timeRange}
+            />
           </div>
-
-          {/* Sidebar Area (1/3 width) */}
-          <aside className="xl:col-span-1">
-             <ActivitySidebar jobs={jobsData?.jobs} candidates={candidatesData?.candidates} />
-          </aside>
+          <div className="xl:col-span-1">
+            <AdminActivityFeed
+              jobs={recentJobs}
+              candidates={recentCandidates}
+            />
+          </div>
         </div>
       </main>
+
+      {/* Export Panel (slide-in or modal) */}
+      <AdminExportPanel
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        timeRange={timeRange}
+      />
     </div>
   )
 }
