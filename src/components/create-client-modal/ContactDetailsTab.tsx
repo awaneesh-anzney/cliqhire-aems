@@ -1,5 +1,6 @@
 import PhoneInput from "@/components/phone/Phoneinput";
 import { LocationSuggestion } from "@/components/location/LocationSuggestion";
+import { CountrySelect } from "@/components/ui/country-select";
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 
 interface ContactDetailsTabProps {
@@ -59,19 +60,17 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           type="url"
           value={form.website}
           onChange={e => setField("website", e.target.value)}
-          placeholder="https://company.com"
-          className="h-9 border rounded-md px-2 text-sm"
+          placeholder="https://company.com or www.company.com"
+          className="h-9 border rounded-md px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-muted-foreground">Country of business</label>
-        <input
-          type="text"
+        <label className="text-xs text-muted-foreground font-bold uppercase tracking-wider ml-1">Country of business</label>
+        <CountrySelect
           value={form.countryOfBusiness}
-          onChange={e => setField("countryOfBusiness", e.target.value)}
-          placeholder="e.g. Saudi Arabia"
-          className="h-9 border rounded-md px-2 text-sm"
+          onChange={val => setField("countryOfBusiness", val)}
+          placeholder="Select country..."
         />
       </div>
 

@@ -55,6 +55,11 @@ export function SummaryContent({
   const [showConfirmSalesLead, setShowConfirmSalesLead] = useState(false);
   const [pendingSalesLeadName, setPendingSalesLeadName] = useState<string | null>(null);
 
+  // Referred By selection dialogs
+  const [showReferredByDialog, setShowReferredByDialog] = useState(false);
+  const [showConfirmReferredBy, setShowConfirmReferredBy] = useState(false);
+  const [pendingReferredByName, setPendingReferredByName] = useState<string | null>(null);
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const updateClientDetails = async (
@@ -265,6 +270,10 @@ export function SummaryContent({
                     value={clientData?.referredBy}
                     onUpdate={handleUpdateField("referredBy")}
                     disableInternalEdit={!canModify}
+                    customEdit={() => {
+                      if (!canModify) return;
+                      setShowReferredByDialog(true);
+                    }}
                   />
                   <DetailRow
                     label="Client Priority"
@@ -529,6 +538,58 @@ export function SummaryContent({
                 }
                 setShowConfirmSalesLead(false);
                 setPendingSalesLeadName(null);
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Referred By User Select Dialog */}
+      {canModify && (
+        <UserSelectDialog
+          open={showReferredByDialog}
+          onClose={() => setShowReferredByDialog(false)}
+          title="Select Referral Source"
+          initialShowTeam={false}
+          initialShowReferred={true}
+          onSelect={(user) => {
+            const name = user?.name || user?.email || "";
+            setPendingReferredByName(name || null);
+            setShowReferredByDialog(false);
+            setShowConfirmReferredBy(true);
+          }}
+        />
+      )}
+
+      {/* Confirm Referred By Update */}
+      <Dialog open={showConfirmReferredBy} onOpenChange={setShowConfirmReferredBy}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Referral Source</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-muted-foreground">
+            {pendingReferredByName
+              ? `Set "Referred By (External)" to ${pendingReferredByName}?`
+              : "No user selected."}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConfirmReferredBy(false);
+                setPendingReferredByName(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (pendingReferredByName) {
+                  await updateClientDetails("referredBy", pendingReferredByName);
+                }
+                setShowConfirmReferredBy(false);
+                setPendingReferredByName(null);
               }}
             >
               Confirm
