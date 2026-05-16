@@ -7,6 +7,7 @@ import { roleService } from '@/services/roleService';
 import { initializeAuth } from '@/lib/axios-config';
 import { useRouter } from 'next/navigation';
 import { Loader } from 'lucide-react';
+import { AuthLoading } from '@/components/auth-loading';
 
 interface AuthContextType {
   user: User | null;
@@ -198,11 +199,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Show loading spinner while authentication is being checked
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex items-center justify-center gap-2 flex-col">
-          <Loader className="size-6 animate-spin" />
-          <div className="text-center">Loading...</div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <AuthLoading />
       </div>
     );
   }

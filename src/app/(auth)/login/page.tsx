@@ -4,6 +4,8 @@ import { LoginForm } from "@/components/login-form"
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
+import { AuthLoading } from "@/components/auth-loading";
+
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -11,16 +13,12 @@ export default function LoginPage() {
   // If already authenticated, redirect to dashboard
   if (!isLoading && isAuthenticated) {
     router.push('/dashboard');
-    return null;
+    return <AuthLoading />;
   }
 
   // Show loading state while checking authentication
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand"></div>
-      </div>
-    );
+    return <AuthLoading />;
   }
 
   // Render login form when not authenticated
