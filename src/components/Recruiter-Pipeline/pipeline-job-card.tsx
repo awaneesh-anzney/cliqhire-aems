@@ -6,13 +6,17 @@
  import { Badge } from "@/components/ui/badge";
  import { cn } from "@/lib/utils";
  import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
  
  interface PipelineJobCardProps {
-   job: Job;
-   isHighlighted?: boolean;
- }
+  job: Job;
+  isHighlighted?: boolean;
+  isSelected?: boolean;
+  onSelect?: (checked: boolean) => void;
+  showCheckbox?: boolean;
+}
  
- export function PipelineJobCard({ job, isHighlighted = false }: PipelineJobCardProps) {
+ export function PipelineJobCard({ job, isHighlighted = false, isSelected = false, onSelect, showCheckbox = false }: PipelineJobCardProps) {
    const router = useRouter();
  
    return (
@@ -28,7 +32,17 @@
        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-brand opacity-0 group-hover:opacity-100 transition-all duration-500" />
  
        <div className="flex items-center w-full gap-5">
-         {/* Icon Container */}
+          {showCheckbox && (
+            <div className="pl-3 flex items-center" onClick={(e) => e.stopPropagation()}>
+              <Checkbox 
+                checked={isSelected} 
+                onCheckedChange={(checked) => onSelect?.(!!checked)} 
+                className="h-5 w-5 rounded-md border-brand/50 data-[state=checked]:bg-brand data-[state=checked]:border-brand shadow-sm" 
+              />
+            </div>
+          )}
+
+          {/* Icon Container */}
          <div className="h-12 w-12 shrink-0 rounded-xl bg-muted flex items-center justify-center text-muted-foreground border border-border transition-all duration-500 group-hover:bg-brand group-hover:text-white group-hover:rotate-6 group-hover:scale-110 shadow-sm">
            <Briefcase className="h-6 w-6" />
          </div>

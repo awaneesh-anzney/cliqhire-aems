@@ -21,6 +21,8 @@
  import { mapEntryToJob } from "@/components/Recruiter-Pipeline/pipeline-mapper";
  import { InterviewDetailsDialog } from "@/components/Recruiter-Pipeline/interview-details-dialog";
  import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { Input } from "@/components/ui/input";
  import { useAuth } from "@/contexts/AuthContext";
  import { TooltipProvider } from "@/components/ui/tooltip";
  import { cn } from "@/lib/utils";

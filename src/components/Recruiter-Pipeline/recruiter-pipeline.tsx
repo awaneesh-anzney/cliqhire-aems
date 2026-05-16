@@ -1,15 +1,25 @@
 "use client";
  
  import React, { useState } from "react";
- import { Search, ChevronLeft, ChevronRight, Loader, FilterX } from "lucide-react";
+ import { Search, ChevronLeft, ChevronRight, Loader, FilterX, Trash2 } from "lucide-react";
  import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
  import { KPISection } from "./kpi-section";
  import { PipelineJobCard } from "./pipeline-job-card";
  import { type Job } from "./dummy-data";
  import { convertPipelineListDataToJob } from "./utils/convert";
  import { Button } from "../ui/button";
  import { useAuth } from "@/contexts/AuthContext";
- import { getAllPipelineEntries } from "@/services/recruitmentPipelineService";
+ import { getAllPipelineEntries, deleteBulkPipelines } from "@/services/recruitmentPipelineService";
  import { useQuery } from "@tanstack/react-query";
  import { useEffect } from "react";
  import { usePermissions } from "@/contexts/PermissionContext";
@@ -21,11 +31,35 @@
    const isAdmin = user?.role === 'ADMIN';
  
    const canViewPipeline = isAdmin || hasPermission('pipeline', 'view');
+  const canDeletePipeline = isAdmin || hasPermission('pipeline', 'delete') || (user as any)?.role?.permissions?.pipeline?.delete === true;
  
    const [searchTerm, setSearchTerm] = useState("");
    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
    const [currentPage, setCurrentPage] = useState(1);
    const [pageSize] = useState(10);
+  const [selectedPipelines, setSelectedPipelines] = useState<string[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  const handleSelectPipeline = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedPipelines(prev => [...prev, id]);
+    } else {
+      setSelectedPipelines(prev => prev.filter(pId => pId !== id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!selectedPipelines.length) return;
+    try {
+      await deleteBulkPipelines(selectedPipelines);
+      setSelectedPipelines([]);
+      setIsDeleteDialogOpen(false);
+      refetch();
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message || 'Failed to delete pipelines');
+    }
+  };
  
    useEffect(() => {
      const timer = setTimeout(() => {
@@ -93,25 +127,31 @@
          <KPISection data={calculateKPIData()} />
        </div>
  
-       {/* Search Bar Container - Removed max-w, expanded to full width */}
-       <div className="flex-shrink-0 p-2 bg-card border-b border-border">
-         <div className="relative group w-full">
-           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-             <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-brand transition-colors" />
-           </div>
-           <Input
-             placeholder="Search jobs, clients, or pipeline notes..."
-             value={searchTerm}
-             onChange={(e) => setSearchTerm(e.target.value)}
-             className="h-10 pl-10 pr-4 bg-muted/50 border-border rounded-xl text-[13px] font-bold text-foreground placeholder:text-muted-foreground placeholder:font-medium focus:bg-card focus:ring-4 focus:ring-brand/5 focus:border-brand/20 transition-all shadow-sm"
-           />
-           {listLoading && (
-             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
-               <Loader className="h-4 w-4 text-brand animate-spin" />
-             </div>
-           )}
-         </div>
-       </div>
+               {/* Search Bar Container - Removed max-w, expanded to full width */}
+        <div className="flex-shrink-0 p-2 bg-card border-b border-border flex items-center gap-4">
+          <div className="relative group w-full">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-brand transition-colors" />
+            </div>
+            <Input
+              placeholder="Search jobs, clients, or pipeline notes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-10 pl-10 pr-4 bg-muted/50 border-border rounded-xl text-[13px] font-bold text-foreground placeholder:text-muted-foreground placeholder:font-medium focus:bg-card focus:ring-4 focus:ring-brand/5 focus:border-brand/20 transition-all shadow-sm"
+            />
+            {listLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
+                <Loader className="h-4 w-4 text-brand animate-spin" />
+              </div>
+            )}
+          </div>
+          {canDeletePipeline && selectedPipelines.length > 0 && (
+            <Button variant="destructive" size="sm" onClick={() => setIsDeleteDialogOpen(true)} className="h-10 px-4 rounded-xl flex-shrink-0 shadow-lg">
+               <Trash2 className="h-4 w-4 mr-2" />
+               Delete ({selectedPipelines.length})
+            </Button>
+          )}
+        </div>
  
        {/* Pipeline Content Area - Removed max-w, expanded to full width */}
        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 bg-muted/10">
@@ -125,11 +165,14 @@
          ) : renderJobs.length > 0 ? (
            <div className="flex flex-col gap-2 w-full">
              {renderJobs.map((job: Job) => (
-               <PipelineJobCard
-                 key={job.id}
-                 job={job}
-               />
-             ))}
+                <PipelineJobCard
+                  key={job.id}
+                  job={job}
+                  showCheckbox={canDeletePipeline}
+                  isSelected={selectedPipelines.includes(job.id)}
+                  onSelect={(checked) => handleSelectPipeline(job.id, checked)}
+                />
+              ))}
            </div>
          ) : (
            <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
@@ -194,6 +237,22 @@
            </div>
          )}
        </div>
-     </div>
-   );
- }
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {selectedPipelines.length} pipeline(s) and all associated candidate data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={listLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSelected} disabled={listLoading} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
