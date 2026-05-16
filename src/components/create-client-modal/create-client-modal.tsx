@@ -60,7 +60,7 @@ const FILE_FIELDS: (keyof ClientForm)[] = [
 ];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const URL_REGEX   = /^https?:\/\/.+/;
+const URL_REGEX   = /^(https?:\/\/|www\.).+/;
 
 function validateTab(tab: number, form: ClientForm): string | null {
   switch (tab) {
