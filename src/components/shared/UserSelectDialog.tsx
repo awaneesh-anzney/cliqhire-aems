@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getTeamMembers } from "@/services/teamMembersService";
 import { createReferredUser, getReferredList } from "@/services/referredService";
-import { Loader2, Search, Users, UserPlus } from "lucide-react";
+import { Loader2, Search, Users, UserPlus, Check, X, ShieldCheck, Mail, Phone, Briefcase } from "lucide-react";
 import { ReferredByDialog } from "@/components/Referred/referredBy-dialog";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type User = {
   _id?: string;
@@ -163,27 +164,39 @@ export default function UserSelectDialog({
             </div>
           </div>
           
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center p-1 bg-muted/50 rounded-lg border border-border/50">
               <button
                 type="button"
                 onClick={() => setShowTeam(!showTeam)}
-                className={`flex items-center gap-1 px-2 py-1 rounded-md ${showTeam ? 'bg-accent text-accent-foreground' : 'opacity-60'}`}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200",
+                  showTeam 
+                    ? "bg-background text-primary shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                <Users className="h-4 w-4" />
+                <Users className={cn("h-3.5 w-3.5", showTeam ? "text-primary" : "text-muted-foreground")} />
                 <span>Team</span>
+                {showTeam && <Check className="h-3 w-3 ml-0.5" />}
               </button>
               <button
                 type="button"
                 onClick={() => setShowReferred(!showReferred)}
-                className={`flex items-center gap-1 px-2 py-1 rounded-md ${showReferred ? 'bg-accent text-accent-foreground' : 'opacity-60'}`}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200",
+                  showReferred 
+                    ? "bg-background text-primary shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                <UserPlus className="h-4 w-4" />
+                <UserPlus className={cn("h-3.5 w-3.5", showReferred ? "text-primary" : "text-muted-foreground")} />
                 <span>Referred</span>
+                {showReferred && <Check className="h-3 w-3 ml-0.5" />}
               </button>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {filtered.length} {filtered.length === 1 ? 'result' : 'results'}
+            <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground bg-muted px-2 py-1 rounded-md">
+              {filtered.length} {filtered.length === 1 ? 'user' : 'users'} found
             </div>
           </div>
         </div>
@@ -197,33 +210,61 @@ export default function UserSelectDialog({
               </div>
             ) : (
               <ScrollArea className="h-80">
-                <div className="divide-y">
+                <div className="p-2 space-y-2">
                   {filtered.length === 0 && (
-                    <div className="p-4 text-sm text-muted-foreground">No users found</div>
+                    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                       <Users className="h-10 w-10 mb-2 opacity-10" />
+                       <p className="text-sm font-medium">No users found</p>
+                    </div>
                   )}
                   {filtered.map((u) => (
                     <button
                       key={u._id || u.id || `${u.email}-${u.name}`}
-                      className="w-full text-left p-3 hover:bg-accent hover:text-accent-foreground"
+                      className="group w-full text-left p-3 rounded-xl border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all duration-200 relative overflow-hidden"
                       onClick={() => {
                         const fullName = `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.name || u.email || "";
                         onSelect({ ...u, name: fullName });
                         onClose();
                       }}
                     >
-                      <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{u.name}</span>
-                      {u.type === 'referred' && (
-                        <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                          Referred
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {u.email || ''}
-                      {u.phone && ` • ${u.phone}`}
-                      {u.teamRole && ` • ${u.teamRole}`}
-                    </div>
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{u.name}</span>
+                          {u.type === 'team' && (
+                            <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />
+                          )}
+                        </div>
+                        {u.type === 'referred' ? (
+                          <span className="text-[9px] font-black uppercase tracking-tighter bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/10">
+                            Referred
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-black uppercase tracking-tighter bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full border border-blue-500/10">
+                            Internal
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                        {u.email && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                            <Mail className="h-3 w-3 opacity-50" />
+                            {u.email}
+                          </div>
+                        )}
+                        {u.phone && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                            <Phone className="h-3 w-3 opacity-50" />
+                            {u.phone}
+                          </div>
+                        )}
+                        {u.teamRole && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
+                            <Briefcase className="h-3 w-3 opacity-50" />
+                            {u.teamRole}
+                          </div>
+                        )}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -232,19 +273,19 @@ export default function UserSelectDialog({
           </div>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center pt-4 border-t border-border mt-4">
           <ReferredByDialog
             open={isReferredDialogOpen}
             onOpenChange={setIsReferredDialogOpen}
             onSave={handleSaveReferredUser}
             loading={isCreating}
           >
-            <Button variant="outline" type="button">
+            <Button variant="outline" type="button" className="rounded-xl border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all font-bold">
               <UserPlus className="mr-2 h-4 w-4" />
-              Add New Referred
+              Add New Referred User
             </Button>
           </ReferredByDialog>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="ghost" onClick={onClose} className="font-bold text-muted-foreground hover:text-foreground">Close</Button>
         </div>
       </DialogContent>
     </Dialog>
