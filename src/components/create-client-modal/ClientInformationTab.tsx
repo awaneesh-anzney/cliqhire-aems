@@ -18,7 +18,8 @@ interface ClientInformationTabProps {
 }
 
 export function ClientInformationTab({ form, setField }: ClientInformationTabProps) {
-  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [isSalesLeadDialogOpen, setIsSalesLeadDialogOpen] = useState(false);
+  const [isReferredDialogOpen, setIsReferredDialogOpen] = useState(false);
 
   return (
     <div className="grid grid-cols-2 gap-4 p-1">
@@ -68,8 +69,8 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
         <Button
           variant="outline"
           type="button"
-          onClick={() => setIsUserDialogOpen(true)}
-          className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start text-foreground"
+          onClick={() => setIsSalesLeadDialogOpen(true)}
+          className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start text-foreground shadow-sm hover:shadow-md"
         >
           <User className="w-4 h-4 mr-2 text-muted-foreground" />
           {form.salesLead || "Select Sales Lead..."}
@@ -78,13 +79,15 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Referred by</label>
-        <input
-          type="text"
-          value={form.referredBy}
-          onChange={e => setField("referredBy", e.target.value)}
-          placeholder="Referral name"
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => setIsReferredDialogOpen(true)}
+          className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start text-foreground shadow-sm hover:shadow-md"
+        >
+          <User className="w-4 h-4 mr-2 text-muted-foreground" />
+          {form.referredBy || "Select Referral Source..."}
+        </Button>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -153,10 +156,19 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
       </div>
 
       <UserSelectDialog
-        open={isUserDialogOpen}
-        onClose={() => setIsUserDialogOpen(false)}
+        open={isSalesLeadDialogOpen}
+        onClose={() => setIsSalesLeadDialogOpen(false)}
         onSelect={(u) => setField("salesLead", u.name || "")}
         title="Select Sales Lead"
+      />
+
+      <UserSelectDialog
+        open={isReferredDialogOpen}
+        onClose={() => setIsReferredDialogOpen(false)}
+        onSelect={(u) => setField("referredBy", u.name || "")}
+        title="Select Referral"
+        initialShowTeam={false}
+        initialShowReferred={true}
       />
     </div>
   );

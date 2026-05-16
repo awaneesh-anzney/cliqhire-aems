@@ -30,15 +30,24 @@ interface UserSelectDialogProps {
   onClose: () => void;
   onSelect: (user: User) => void;
   title?: string;
+  initialShowTeam?: boolean;
+  initialShowReferred?: boolean;
 }
 
-export default function UserSelectDialog({ open, onClose, onSelect, title = "Select User" }: UserSelectDialogProps) {
+export default function UserSelectDialog({ 
+  open, 
+  onClose, 
+  onSelect, 
+  title = "Select User",
+  initialShowTeam = true,
+  initialShowReferred = true
+}: UserSelectDialogProps) {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [searchBy, setSearchBy] = useState<"name" | "email" | "role">("name");
-  const [showTeam, setShowTeam] = useState(true);
-  const [showReferred, setShowReferred] = useState(true);
+  const [showTeam, setShowTeam] = useState(initialShowTeam);
+  const [showReferred, setShowReferred] = useState(initialShowReferred);
   const [isReferredDialogOpen, setIsReferredDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -93,8 +102,10 @@ export default function UserSelectDialog({ open, onClose, onSelect, title = "Sel
   useEffect(() => {
     if (open) {
       loadUsers();
+      setShowTeam(initialShowTeam);
+      setShowReferred(initialShowReferred);
     }
-  }, [open]);
+  }, [open, initialShowTeam, initialShowReferred]);
 
   const filtered = useMemo(() => {
     if (!users) return [];
