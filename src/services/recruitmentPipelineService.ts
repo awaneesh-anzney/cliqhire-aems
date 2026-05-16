@@ -262,7 +262,7 @@ export const createPipeline = createPipelineForJob;
  */
 export const getPipelineEntry = async (
   pipelineId: string,
-  options?: { page?: number; limit?: number; stage?: string; currentStatus?: string; priority?: string }
+  options?: { page?: number; limit?: number; stage?: string; currentStatus?: string; priority?: string; search?: string }
 ): Promise<any> => {
   try {
     const params: any = {};
@@ -271,6 +271,7 @@ export const getPipelineEntry = async (
     if (options?.stage) params.stage = options.stage;
     if (options?.currentStatus) params.currentStatus = options.currentStatus;
     if (options?.priority) params.priority = options.priority;
+    if (options?.search) params.search = options.search;
     
     const response = await api.get(`/api/recruiter-pipeline/entry/${pipelineId}`, { params });
     return response.data;
@@ -326,6 +327,22 @@ export const deletePipeline = async (
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || 'Failed to delete pipeline');
+  }
+};
+
+/**
+ * Delete multiple pipelines
+ */
+export const deleteBulkPipelines = async (
+  pipelineIds: string[]
+): Promise<{ success: boolean; message: string; data?: any }> => {
+  try {
+    const response = await api.delete('/api/recruiter-pipeline/bulk', {
+      data: { pipelineIds }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to delete pipelines');
   }
 };
 

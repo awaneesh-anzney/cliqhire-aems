@@ -139,6 +139,7 @@ export default function JobPage({ params }: PageProps) {
                   <span>{location}</span>
                 </div>
 
+
                 <div className="flex items-center gap-2 border-l border-border pl-6">
                   <div className="p-1.5 bg-muted rounded-md">
                     <Loader className={`h-4 w-4 text-brand cursor-pointer hover:rotate-180 transition-transform duration-500 ${isLoading ? "animate-spin" : ""}`} onClick={handleRefresh} />

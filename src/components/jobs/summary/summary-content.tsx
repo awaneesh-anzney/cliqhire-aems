@@ -359,6 +359,12 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                   customEdit={canEdit ? () => setIsDateRangeDialogOpen(true) : undefined}
                   disableInternalEdit={!canEdit}
                 />
+                <DetailRow
+                  label="Total Applicants"
+                  value={jobDetails.totalCVs?.toString() || "0"}
+                  onUpdate={handleUpdateField("totalCVs")}
+                  disableInternalEdit={!canEdit}
+                />
               </div>
             </div>
           </div>

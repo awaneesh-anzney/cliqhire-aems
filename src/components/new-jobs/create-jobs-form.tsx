@@ -37,6 +37,8 @@ import {
   Info
 } from "lucide-react";
 import { fetchClients } from "./clientApi";
+import { usePermissions } from "@/contexts/PermissionContext";
+import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -393,16 +395,11 @@ export function CreateJobRequirementForm({
 
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-foreground">Work Location</Label>
-                        <div className="relative group">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input
-                            name="location"
-                            value={form.location}
-                            onChange={handleChange}
-                            placeholder="e.g. Dubai, UAE (or Remote)"
-                            className="pl-10 h-12 border-border font-bold"
-                          />
-                        </div>
+                        <LocationSuggestion 
+                          value={form.location}
+                          onChange={(val) => setForm(prev => ({ ...prev, location: val }))}
+                          placeholder="e.g. Riyadh, Saudi Arabia"
+                        />
                       </div>
 
                       <div className="p-6 bg-muted rounded-2xl border border-border space-y-4">
