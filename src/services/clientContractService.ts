@@ -229,3 +229,17 @@ export const addContract = async (clientId: string, contractType: string, contra
     throw error;
   }
 };
+
+// Renew contract API function
+export const renewContract = async (clientId: string, contractType: string, notes?: string) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/api/contracts/renew/${clientId}/${contractType}`,
+      { notes }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Error renewing ${contractType} contract:`, error);
+    throw error;
+  }
+};

@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import BusinessForm from "@/components/contract-forms/business-form";
 import ConsultingForm from "@/components/contract-forms/consulting-form";
 import OutsourcingForm from "@/components/contract-forms/outsourcing-form";
@@ -35,6 +38,52 @@ const LEVEL_TYPE_MAPPING: { [key: string]: string } = {
   Other: "other",
 };
 
+const getContractStatus = (contract: any) => {
+  const now = new Date();
+
+  if (contract?.endDateType === 'open-ended') {
+    if (!contract.nextRenewalDate) return 'ACTIVE';
+    const daysToRenewal = Math.ceil(
+      (new Date(contract.nextRenewalDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysToRenewal <= 0)  return 'RENEWAL_OVERDUE';   // red
+    if (daysToRenewal <= 7)  return 'RENEWAL_SOON';      // orange
+    if (daysToRenewal <= 30) return 'RENEWAL_DUE';       // yellow
+    return 'ACTIVE';                                      // green
+  }
+
+  // Fixed end date
+  if (!contract?.contractEndDate) return 'ACTIVE';
+  const daysToExpiry = Math.ceil(
+    (new Date(contract.contractEndDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (daysToExpiry <= 0)  return 'EXPIRED';             // red
+  if (daysToExpiry <= 7)  return 'EXPIRING_SOON';       // orange
+  if (daysToExpiry <= 30) return 'EXPIRY_WARNING';      // yellow
+  return 'ACTIVE';                                      // green
+};
+
+const getStatusBadgeConfig = (status: string) => {
+  switch (status) {
+    case "ACTIVE":
+      return { label: "Active", className: "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20" };
+    case "RENEWAL_OVERDUE":
+      return { label: "Renewal Overdue", className: "bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20" };
+    case "RENEWAL_SOON":
+      return { label: "Renewal Soon", className: "bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 border-orange-500/20" };
+    case "RENEWAL_DUE":
+      return { label: "Renewal Due", className: "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20" };
+    case "EXPIRED":
+      return { label: "Expired", className: "bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20" };
+    case "EXPIRING_SOON":
+      return { label: "Expiring Soon", className: "bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 border-orange-500/20" };
+    case "EXPIRY_WARNING":
+      return { label: "Expiry Warning", className: "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20" };
+    default:
+      return { label: "Active", className: "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20" };
+  }
+};
+
 // Helper function to get form type based on business type
 const getFormType = (businessType: string) => {
   if (["Recruitment", "HR Managed Services", "IT & Technology"].includes(businessType)) {
@@ -54,8 +103,10 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   const [editDialogOpen, setEditDialogOpen] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
+  const [renewDialogOpen, setRenewDialogOpen] = useState<string | null>(null);
+  const [renewNotes, setRenewNotes] = useState("");
 
-  const { contractsQuery, updateContractMutation, deleteContractMutation } = useClientContracts(clientId);
+  const { contractsQuery, updateContractMutation, deleteContractMutation, renewContractMutation } = useClientContracts(clientId);
   const queryClient = useQueryClient();
   const router = useRouter();
   
@@ -76,6 +127,8 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         contractEndDate: contractData?.contractEndDate
           ? new Date(contractData.contractEndDate)
           : null,
+        endDateType: contractData?.endDateType || "fixed",
+        renewalPeriod: contractData?.renewalPeriod || "",
         contractType: contractData?.contractType || contractData?.ContractType || "",
         fixedPercentage: contractData?.fixedPercentage || 0,
         advanceMoneyCurrency: contractData?.advanceMoneyCurrency || "SAR",
@@ -127,6 +180,8 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         contractEndDate: contractData?.contractEndDate
           ? new Date(contractData.contractEndDate)
           : null,
+        endDateType: contractData?.endDateType || "fixed",
+        renewalPeriod: contractData?.renewalPeriod || "",
         
         contractType: contractData?.contractType || "",
         salaryCurrency: contractData?.salaryCurrency || "SAR",
@@ -168,6 +223,8 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         contractEndDate: contractData?.contractEndDate
           ? new Date(contractData.contractEndDate)
           : null,
+        endDateType: contractData?.endDateType || "fixed",
+        renewalPeriod: contractData?.renewalPeriod || "",
         contractType: contractData?.ContractType || contractData?.contractType || "",
         serviceCategory: contractData?.serviceCategory || "",
         numberOfResources: contractData?.numberOfResources || 0,
@@ -213,6 +270,19 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
       setDeleteDialogOpen(null);
     } catch (error) {
       console.error("Failed to delete contract:", error);
+    }
+  };
+
+  const handleRenewContract = async () => {
+    if (!canModify || !renewDialogOpen || !clientId) return;
+
+    try {
+      const contractKey = CONTRACT_MAPPING[renewDialogOpen as keyof typeof CONTRACT_MAPPING];
+      await renewContractMutation.mutateAsync({ contractType: contractKey, notes: renewNotes });
+      setRenewDialogOpen(null);
+      setRenewNotes("");
+    } catch (error) {
+      console.error("Failed to renew contract:", error);
     }
   };
 
@@ -280,7 +350,7 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
     );
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
     if (!dateString) return "Not set";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -298,6 +368,11 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
       ContractType?: string;
       startDate?: string;
       endDate?: string;
+      endDateType?: string;
+      renewalPeriod?: string;
+      nextRenewalDate?: string;
+      lastRenewedAt?: string;
+      renewalCount?: number;
       hasDocument: boolean;
       details?: string;
       hasTechProposal?: boolean;
@@ -306,6 +381,11 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
       contractType: contractData.ContractType || contractData.contractType || "Not specified",
       startDate: contractData.contractStartDate,
       endDate: contractData.contractEndDate,
+      endDateType: contractData.endDateType || "fixed",
+      renewalPeriod: contractData.renewalPeriod || "",
+      nextRenewalDate: contractData.nextRenewalDate,
+      lastRenewedAt: contractData.lastRenewedAt,
+      renewalCount: contractData.renewalCount || 0,
       hasDocument: !!contractData.contractDocument?.url,
     };
 
@@ -349,23 +429,82 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
   const renderContractDetails = (contractData: any, contractType: string) => {
     if (!contractData) return null;
 
+    const isOpenEnded = contractData.endDateType === "open-ended";
+
+    const RENEWAL_PERIOD_LABELS: Record<string, string> = {
+      "1_month": "Every Month",
+      "2_month": "Every 2 Months",
+      "3_month": "Every 3 Months",
+      "6_month": "Every 6 Months",
+      "1_year": "Every 1 Year",
+    };
+
     return (
-      <div className="p-2 bg-muted rounded-lg border space-y-3">
-        <div className="grid grid-cols-3 gap-4 text-sm">
+      <div className="p-4 bg-muted/60 rounded-xl border border-border space-y-4">
+        {/* Core details row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm bg-card p-4 rounded-lg border border-border shadow-sm">
           <div>
-            <span className="font-medium text-foreground">Contract Type:</span>
-            <p className="text-foreground">
+            <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block">Contract Line Type</span>
+            <p className="text-foreground font-semibold mt-0.5">
               {contractData.ContractType || contractData.contractType || "Not specified"}
             </p>
           </div>
           <div>
-            <span className="font-medium text-foreground">Duration:</span>
-            <p className="text-foreground">
-              {formatDate(contractData.contractStartDate)} -{" "}
-              {formatDate(contractData.contractEndDate)}
+            <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block">Contract Start Date</span>
+            <p className="text-foreground font-semibold mt-0.5">
+              {formatDate(contractData.contractStartDate)}
             </p>
           </div>
+          {!isOpenEnded ? (
+            <div>
+              <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block">Contract End Date</span>
+              <p className="text-foreground font-semibold mt-0.5">
+                {formatDate(contractData.contractEndDate)}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block">Renewal Cycle</span>
+              <p className="text-foreground font-semibold mt-0.5">
+                {RENEWAL_PERIOD_LABELS[contractData.renewalPeriod] || contractData.renewalPeriod || "—"}
+              </p>
+            </div>
+          )}
         </div>
+
+        {isOpenEnded && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm bg-card/60 p-4 rounded-lg border border-border/80 shadow-sm">
+            <div>
+              <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block">Next Renewal Due</span>
+              <p className="text-foreground font-bold mt-0.5 text-brand">
+                {formatDate(contractData.nextRenewalDate)}
+              </p>
+            </div>
+            <div>
+              <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block">Last Renewed At</span>
+              <p className="text-foreground font-medium mt-0.5">
+                {formatDate(contractData.lastRenewedAt)}
+              </p>
+            </div>
+            <div>
+              <span className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider block">Total Renewals</span>
+              <p className="text-foreground font-medium mt-0.5">
+                {contractData.renewalCount || 0} cycles
+              </p>
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="button"
+                onClick={() => setRenewDialogOpen(contractType)}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 h-9 transition-colors"
+                disabled={!canModify}
+              >
+                <Calendar className="w-4 h-4" />
+                Renew Contract
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Recruitment/IT specific details */}
         {(contractType === "Recruitment" ||
@@ -693,6 +832,40 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
             </div>
           </div>
         )}
+
+        {/* Renewal History Table */}
+        {isOpenEnded && contractData.renewalHistory && contractData.renewalHistory.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <h4 className="text-xs font-bold text-foreground mb-3 flex items-center gap-1.5 uppercase tracking-wider">
+              <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+              Renewal History
+            </h4>
+            <div className="overflow-hidden border border-border rounded-lg bg-card shadow-sm">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-muted/80 text-muted-foreground uppercase tracking-wider font-semibold text-[10px]">
+                  <tr>
+                    <th className="px-4 py-2.5">Renewed At</th>
+                    <th className="px-4 py-2.5">New Cycle Start</th>
+                    <th className="px-4 py-2.5">New Cycle End</th>
+                    <th className="px-4 py-2.5">Notes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border text-foreground">
+                  {contractData.renewalHistory.map((historyItem: any, index: number) => (
+                    <tr key={index} className="hover:bg-muted/50 transition-colors">
+                      <td className="px-4 py-2.5 font-medium">{formatDate(historyItem.renewedAt)}</td>
+                      <td className="px-4 py-2.5">{formatDate(historyItem.newCycleStart || historyItem.previousNextRenewalDate)}</td>
+                      <td className="px-4 py-2.5">{formatDate(historyItem.newCycleEnd || historyItem.newNextRenewalDate)}</td>
+                      <td className="px-4 py-2.5 text-muted-foreground max-w-[200px] truncate font-medium" title={historyItem.notes}>
+                        {historyItem.notes || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -750,22 +923,41 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
                 <>
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-sm font-semibold text-foreground">{businessType} Contract</h3>
                     <Badge variant="secondary" className="text-xs">
                       {summary?.contractType || summary?.ContractType}
                     </Badge>
+                    {contractData && (() => {
+                      const status = getContractStatus(contractData);
+                      const badgeConfig = getStatusBadgeConfig(status);
+                      return (
+                        <Badge variant="outline" className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ${badgeConfig.className}`}>
+                          {badgeConfig.label}
+                        </Badge>
+                      );
+                    })()}
                   </div>
 
                   {summary?.details && (
                     <p className="text-sm text-foreground mt-1">{summary.details}</p>
                   )}
 
-                  <div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
-                    {summary?.startDate && (
-                      <div className="flex items-center space-x-1">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>
+                        {summary?.endDateType === "open-ended"
+                          ? `Open-Ended • Started ${formatDate(summary.startDate)}`
+                          : summary?.startDate
+                            ? `${formatDate(summary.startDate)} - ${formatDate(summary.endDate)}`
+                            : "Duration not set"}
+                      </span>
+                    </div>
+                    {summary?.endDateType === "open-ended" && summary?.nextRenewalDate && (
+                      <div className="flex items-center space-x-1 bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded border border-amber-500/20 text-[10px] font-bold">
                         <Calendar className="h-3 w-3" />
-                        <span>{formatDate(summary.startDate)}</span>
+                        <span>NEXT RENEWAL: {formatDate(summary.nextRenewalDate)}</span>
                       </div>
                     )}
                     {summary?.hasDocument && (
@@ -845,6 +1037,52 @@ export function ContractSection({ clientId, clientData, canModify = true }: Cont
         disabled={!canModify}
         confirmVariant="destructive"
       />
+
+      {/* Renew Contract Modal */}
+      <Dialog open={!!renewDialogOpen} onOpenChange={(open) => !open && setRenewDialogOpen(null)}>
+        <DialogContent className="max-w-md w-full p-6 bg-card border border-border rounded-xl shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold flex items-center gap-2 text-foreground">
+              <Calendar className="w-5 h-5 text-emerald-500" />
+              Renew {renewDialogOpen} Contract
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 my-4">
+            <p className="text-sm text-muted-foreground">
+              This will initiate a new contract cycle based on the configured renewal period.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="renewNotes" className="text-sm font-medium">Renewal Notes</Label>
+              <Textarea
+                id="renewNotes"
+                placeholder="Enter any notes for this renewal cycle (e.g. Rate revision, terms update, Q3 renewal)..."
+                value={renewNotes}
+                onChange={(e) => setRenewNotes(e.target.value)}
+                className="min-h-[100px] resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRenewDialogOpen(null);
+                setRenewNotes("");
+              }}
+              disabled={renewContractMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRenewContract}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+              disabled={renewContractMutation.isPending}
+            >
+              {renewContractMutation.isPending ? "Renewing..." : "Confirm Renewal"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
