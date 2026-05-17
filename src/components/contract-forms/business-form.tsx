@@ -45,6 +45,8 @@ type StandardContractFormProps = {
   formData: {
     contractStartDate: Date | null;
     contractEndDate: Date | null;
+    endDateType?: string;
+    renewalPeriod?: string | null;
     contractType: string;
     fixedPercentage: number;
     advanceMoneyCurrency: string;
@@ -331,7 +333,7 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
 
   return (
     <div className="flex flex-col gap-4 mt-4">
-      <div className="flex flex-row gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {/* Contract Start Date */}
         <div className="flex-1 space-y-1">
           <Label htmlFor="contractStartDate">Contract Start Date</Label>
@@ -346,20 +348,86 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
             />
           </div>
         </div>
-        {/* Contract End Date */}
+
+        {/* End Date Type Toggle */}
         <div className="flex-1 space-y-1">
-          <Label htmlFor="contractEndDate">Contract End Date</Label>
-          <div className="grid gap-2">
-            <DatePicker
-              open={openEndDate}
-              setOpen={setOpenEndDate}
-              value={formData.contractEndDate!}
-              setValue={(value: Date) =>
-                setFormData((prev: typeof formData) => ({ ...prev, contractEndDate: value }))
-              }
-            />
+          <Label>End Date Type</Label>
+          <div className="flex border border-input rounded-md overflow-hidden h-10">
+            <button
+              type="button"
+              onClick={() => {
+                setFormData((prev: any) => ({
+                  ...prev,
+                  endDateType: "fixed",
+                  renewalPeriod: null,
+                }));
+              }}
+              className={`flex-1 text-xs font-semibold transition-colors ${
+                (formData.endDateType || "fixed") === "fixed"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background text-foreground hover:bg-muted"
+              }`}
+            >
+              Fixed End Date
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFormData((prev: any) => ({
+                  ...prev,
+                  endDateType: "open-ended",
+                  contractEndDate: null,
+                }));
+              }}
+              className={`flex-1 text-xs font-semibold transition-colors ${
+                formData.endDateType === "open-ended"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background text-foreground hover:bg-muted"
+              }`}
+            >
+              Open-Ended
+            </button>
           </div>
         </div>
+
+        {/* Conditional rendering of Contract End Date / Renewal Period */}
+        {(formData.endDateType || "fixed") === "fixed" ? (
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="contractEndDate">Contract End Date</Label>
+            <div className="grid gap-2">
+              <DatePicker
+                open={openEndDate}
+                setOpen={setOpenEndDate}
+                value={formData.contractEndDate!}
+                setValue={(value: Date) =>
+                  setFormData((prev: typeof formData) => ({ ...prev, contractEndDate: value }))
+                }
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="renewalPeriod">Renewal Period</Label>
+            <Select
+              value={formData.renewalPeriod || ""}
+              onValueChange={(value) =>
+                setFormData((prev: any) => ({ ...prev, renewalPeriod: value }))
+              }
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Select renewal period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1_month">1 Month</SelectItem>
+                <SelectItem value="2_month">2 Months</SelectItem>
+                <SelectItem value="3_month">3 Months</SelectItem>
+                <SelectItem value="6_month">6 Months</SelectItem>
+                <SelectItem value="1_year">1 Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Contract Type */}
         <div className="flex-1 space-y-1">
           <Label htmlFor="contractType">Contract Type</Label>
@@ -369,7 +437,7 @@ const BusinessForm = ({ formData, setFormData }: StandardContractFormProps) => {
               setFormData((prev: typeof formData) => ({ ...prev, contractType: value }))
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-10">
               <SelectValue placeholder="Select contract type" />
             </SelectTrigger>
             <SelectContent>

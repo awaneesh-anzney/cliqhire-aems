@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getClientContracts, getContractByType, addContract, updateContract, deleteContract } from "@/services/clientContractService";
+import { getClientContracts, getContractByType, addContract, updateContract, deleteContract, renewContract } from "@/services/clientContractService";
 import { toast } from "sonner";
 
 export const useClientContracts = (clientId: string) => {
@@ -52,10 +52,25 @@ export const useClientContracts = (clientId: string) => {
     }
   });
 
+  const renewContractMutation = useMutation({
+    mutationFn: ({ contractType, notes }: { contractType: string; notes?: string }) => 
+      renewContract(clientId, contractType, notes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clientContracts", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clientsData", clientId] });
+      toast.success("Contract renewed successfully!");
+    },
+    onError: (error) => {
+      console.error("Failed to renew contract:", error);
+      toast.error("Failed to renew contract. Please try again.");
+    }
+  });
+
   return {
     contractsQuery,
     addContractMutation,
     updateContractMutation,
     deleteContractMutation,
+    renewContractMutation,
   };
 };

@@ -90,6 +90,8 @@ export const levelValueAdvance = {
 export const businessInitialState = {
   contractStartDate: null,
   contractEndDate: null,
+  endDateType: "fixed",
+  renewalPeriod: null,
   contractType: "",
   //fixed with advance
   fixedPercentage: 0,
@@ -123,6 +125,8 @@ export const businessInitialState = {
 export const consultingInitialState = {
   contractStartDate: null,
   contractEndDate: null,
+  endDateType: "fixed",
+  renewalPeriod: null,
   contractType: "Fixed Fee", // Default for HRC
   salaryCurrency: "SAR",
   serviceScope: "",
@@ -158,6 +162,8 @@ export const primaryContactInitialState = {
 export const outsourcingInitialState = {
   contractStartDate: null,
   contractEndDate: null,
+  endDateType: "fixed",
+  renewalPeriod: null,
   contractType: "",
   serviceCategory: "",
   numberOfResources: 0,
