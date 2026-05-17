@@ -119,8 +119,7 @@
          return;
        }
      }
-     if (newStage === "Interview") setInterviewDialog({ isOpen: true, candidate });
-     else setStageChangeDialog({ isOpen: true, candidate, currentStage: candidate.currentStage, newStage });
+     setStageChangeDialog({ isOpen: true, candidate, currentStage: candidate.currentStage, newStage });
    };
  
    const handleConfirmStageChange = async () => {
@@ -252,13 +251,6 @@
          candidateName={stageChangeDialog.candidate?.name || ''}
          currentStage={stageChangeDialog.currentStage}
          newStage={stageChangeDialog.newStage}
-       />
- 
-       <InterviewDetailsDialog
-         isOpen={interviewDialog.isOpen}
-         onClose={() => setInterviewDialog({ isOpen: false, candidate: null })}
-         candidateName={interviewDialog.candidate?.name || ''}
-         onConfirm={handleConfirmInterviewDetails}
        />
  
        <Dialog

@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
  import { useAuth } from "@/contexts/AuthContext";
  import { TooltipProvider } from "@/components/ui/tooltip";
  import { cn } from "@/lib/utils";
+ import { toast } from "sonner";
  
  const Page = () => {
    const { id } = useParams() as { id: string };
@@ -127,16 +128,12 @@ import { Input } from "@/components/ui/input";
        }
      }
  
-     if (newStage === "Interview") {
-       setInterviewDialog({ isOpen: true, candidate, newStage });
-     } else {
-       setStageChangeDialog({
-         isOpen: true,
-         candidate,
-         currentStage: candidate.currentStage,
-         newStage,
-       });
-     }
+     setStageChangeDialog({
+       isOpen: true,
+       candidate,
+       currentStage: candidate.currentStage,
+       newStage,
+     });
    };
  
    const handleConfirmStageChange = async () => {
@@ -144,10 +141,13 @@ import { Input } from "@/components/ui/input";
      try {
        const backendStage = mapUIStageToBackendStage(stageChangeDialog.newStage);
        await updateCandidateStage(id, stageChangeDialog.candidate.id, { stage: backendStage });
+       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
        await refetch();
        setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
+       toast.success(`Stage updated to ${stageChangeDialog.newStage}`);
      } catch (err) {
        console.error("Failed to update stage:", err);
+       toast.error("Failed to update pipeline stage");
      }
    };
  
@@ -180,10 +180,13 @@ import { Input } from "@/components/ui/input";
      if (!statusChangeDialog.candidate || !id) return;
      try {
        await updateCandidateStatus(id, statusChangeDialog.candidate.id, { status: statusChangeDialog.newStatus });
+       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
        await refetch();
        setStatusChangeDialog(prev => ({ ...prev, isOpen: false }));
+       toast.success(`Status updated to ${statusChangeDialog.newStatus}`);
      } catch (err) {
        console.error("Failed to update status:", err);
+       toast.error("Failed to update candidate status");
      }
    };
  
@@ -200,10 +203,13 @@ import { Input } from "@/components/ui/input";
      if (!deleteCandidateDialog.candidate || !id) return;
      try {
        await deleteCandidateFromPipeline(id, deleteCandidateDialog.candidate.id);
+       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
        await refetch();
        setDeleteCandidateDialog({ isOpen: false, candidate: null });
+       toast.success("Candidate removed from pipeline");
      } catch (err) {
        console.error("Failed to delete candidate:", err);
+       toast.error("Failed to remove candidate");
      }
    };
  
@@ -262,10 +268,13 @@ import { Input } from "@/components/ui/input";
      if (!disqualificationDialog.candidate || !id) return;
      try {
        await updateCandidateStatus(id, disqualificationDialog.candidate.id, { status: "Disqualified", data: data });
+       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
        await refetch();
        setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
+       toast.success("Candidate disqualified successfully");
      } catch (err) {
        console.error("Failed to disqualify candidate:", err);
+       toast.error("Failed to disqualify candidate");
      }
    };
  
@@ -444,14 +453,29 @@ import { Input } from "@/components/ui/input";
          />
        )}
  
-       {interviewDialog.isOpen && (
-         <InterviewDetailsDialog
-           isOpen={interviewDialog.isOpen}
-           onClose={handleCloseInterviewDialog}
-           onConfirm={handleConfirmInterviewDetails}
-           candidateName={interviewDialog.candidate?.name}
-         />
-       )}
+        {statusChangeDialog.isOpen && (
+          <Dialog
+            open={statusChangeDialog.isOpen}
+            onOpenChange={(isOpen) => !isOpen && setStatusChangeDialog(prev => ({ ...prev, isOpen: false }))}
+          >
+            <DialogContent className="rounded-[2rem] border-border shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="font-black text-foreground tracking-tighter">Confirm Status Update</DialogTitle>
+                <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
+                  Confirm changing the status of <strong className="text-brand">{statusChangeDialog.candidate?.name}</strong> to <strong className="text-brand">{statusChangeDialog.newStatus}</strong>.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={handleCancelStatusChange} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmStatusChange} className="bg-brand hover:bg-brand/90 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-brand/20">
+                  Confirm Update
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
  
        {tempCandidateAlert.isOpen && (
          <TempCandidateAlertDialog
