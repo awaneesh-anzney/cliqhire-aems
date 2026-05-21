@@ -174,6 +174,19 @@ export function mapEntryToJob(entry: any): Job {
   console.log('DEBUG: Extracted hiring managers:', hiringManagers);
   console.log('DEBUG: Extracted recruiters:', recruiters);
 
+  const countSource = Array.isArray(entry.candidateIdArray) && entry.candidateIdArray.length > 0
+    ? entry.candidateIdArray
+    : (Array.isArray(entry.candidates?.data) ? entry.candidates.data : (Array.isArray(entry.candidates) ? entry.candidates : []));
+
+  const stageCounts: Record<string, number> = {};
+  countSource.forEach((c: any) => {
+    const rawStage = c?.currentStage || "Sourcing";
+    const uiStage = mapBackendStageToUIStage(rawStage);
+    if (uiStage) {
+      stageCounts[uiStage] = (stageCounts[uiStage] || 0) + 1;
+    }
+  });
+
   const mappedJob = {
     id: entry._id,
     title: jobData?.jobTitle || "",
@@ -188,6 +201,7 @@ export function mapEntryToJob(entry: any): Job {
     jobId: entry.jobId,
     jobIdString: jobData?.jobId,
     candidates,
+    stageCounts,
 
     // Pipeline meta
     priority: entry.priority,

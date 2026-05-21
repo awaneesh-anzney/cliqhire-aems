@@ -154,6 +154,7 @@ export interface Job {
   jobType: string;
   isExpanded: boolean;
   candidates: Candidate[];
+  stageCounts?: Record<string, number>;
   // Pipeline-specific fields from new API structure
   // Note: pipelineStatus is now derived from jobId.stage
   priority?: string;
