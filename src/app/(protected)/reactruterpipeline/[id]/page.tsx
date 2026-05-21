@@ -1,531 +1,674 @@
 "use client";
- import { useState, useMemo } from "react";
- import { useParams, useRouter } from "next/navigation";
- import { Loader2, ChevronLeft, LayoutDashboard, Search, Users, FilterX } from "lucide-react";
- import { Button } from "@/components/ui/button";
- import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
- import { type Job, type Candidate, mapUIStageToBackendStage } from "@/components/Recruiter-Pipeline/dummy-data";
- import { getPipelineEntry, updateCandidateStage, deleteCandidateFromPipeline, updateCandidateStatus } from "@/services/recruitmentPipelineService";
- import { StatusChangeConfirmationDialog } from "@/components/Recruiter-Pipeline/status-change-confirmation-dialog";
- import { AddCandidateDialog } from "@/components/Recruiter-Pipeline/add-candidate-dialog";
- import { AddExistingCandidateDialog } from "@/components/common/add-existing-candidate-dialog";
- import { CreateCandidateDialog, type CreateCandidateValues } from "@/components/Recruiter-Pipeline/create-candidate-dialog";
- import { CreateCandidateModal } from "@/components/candidates/create-candidate-modal";
- import { PDFViewer } from "@/components/ui/pdf-viewer";
- import { validateTempCandidateStageChange, validateTempCandidateStatusChange } from "@/lib/temp-candidate-validation";
- import { TempCandidateAlertDialog } from "@/components/Recruiter-Pipeline/temp-candidate-alert-dialog";
- import { DisqualificationDialog, type DisqualificationData } from "@/components/Recruiter-Pipeline/disqualification-dialog";
- import { PipelineJobHeader } from "@/components/Recruiter-Pipeline/PipelineJobHeader";
- import { PipelineStageFilters } from "@/components/Recruiter-Pipeline/PipelineStageFilters";
- import { PipelineCandidatesTable } from "@/components/Recruiter-Pipeline/PipelineCandidatesTable";
- import { mapEntryToJob } from "@/components/Recruiter-Pipeline/pipeline-mapper";
- import { InterviewDetailsDialog } from "@/components/Recruiter-Pipeline/interview-details-dialog";
- import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Loader2, ChevronLeft, ChevronRight, LayoutDashboard, Search, Users, FilterX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { type Job, type Candidate, mapUIStageToBackendStage } from "@/components/Recruiter-Pipeline/dummy-data";
+import { getPipelineEntry, updateCandidateStage, deleteCandidateFromPipeline, updateCandidateStatus } from "@/services/recruitmentPipelineService";
+import { StatusChangeConfirmationDialog } from "@/components/Recruiter-Pipeline/status-change-confirmation-dialog";
+import { AddCandidateDialog } from "@/components/Recruiter-Pipeline/add-candidate-dialog";
+import { AddExistingCandidateDialog } from "@/components/common/add-existing-candidate-dialog";
+import { CreateCandidateDialog, type CreateCandidateValues } from "@/components/Recruiter-Pipeline/create-candidate-dialog";
+import { CreateCandidateModal } from "@/components/candidates/create-candidate-modal";
+import { PDFViewer } from "@/components/ui/pdf-viewer";
+import { validateTempCandidateStageChange, validateTempCandidateStatusChange } from "@/lib/temp-candidate-validation";
+import { TempCandidateAlertDialog } from "@/components/Recruiter-Pipeline/temp-candidate-alert-dialog";
+import { DisqualificationDialog, type DisqualificationData } from "@/components/Recruiter-Pipeline/disqualification-dialog";
+import { PipelineJobHeader } from "@/components/Recruiter-Pipeline/PipelineJobHeader";
+import { PipelineStageFilters } from "@/components/Recruiter-Pipeline/PipelineStageFilters";
+import { PipelineCandidatesTable } from "@/components/Recruiter-Pipeline/PipelineCandidatesTable";
+import { mapEntryToJob } from "@/components/Recruiter-Pipeline/pipeline-mapper";
+import { InterviewDetailsDialog } from "@/components/Recruiter-Pipeline/interview-details-dialog";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
- import { useAuth } from "@/contexts/AuthContext";
- import { TooltipProvider } from "@/components/ui/tooltip";
- import { cn } from "@/lib/utils";
- import { toast } from "sonner";
- 
- const Page = () => {
-   const { id } = useParams() as { id: string };
-   const router = useRouter();
-   const queryClient = useQueryClient();
-   const { user } = useAuth();
-   const isAdmin = user?.role === 'ADMIN';
-   const { hasPermission } = usePermissions();
-   
-   const canViewPipeline = isAdmin || hasPermission('pipeline', 'view');
-   const canModifyPipeline = isAdmin || hasPermission('pipeline', 'edit');
- 
-   const { data: jobResponse, isLoading, error, refetch } = useQuery({
-     queryKey: ["pipelineEntry", id],
-     queryFn: () => getPipelineEntry(id),
-     enabled: !!id,
-   });
- 
-   const job = useMemo(() => {
-     if (!jobResponse?.data) return null;
-     return mapEntryToJob(jobResponse.data);
-   }, [jobResponse]);
- 
-   const [selectedStageFilter, setSelectedStageFilter] = useState<string | null>(null);
-   const [isAddCandidateOpen, setIsAddCandidateOpen] = useState(false);
-   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
-   const [isCreateCandidateOpen, setIsCreateCandidateOpen] = useState(false);
- 
-   // Dialog states
-   const [stageChangeDialog, setStageChangeDialog] = useState<{
-     isOpen: boolean;
-     candidate: Candidate | null;
-     currentStage: string;
-     newStage: string;
-   }>({ isOpen: false, candidate: null, currentStage: "", newStage: "" });
- 
-   const [statusChangeDialog, setStatusChangeDialog] = useState<{
-     isOpen: boolean;
-     candidate: Candidate | null;
-     newStatus: string;
-   }>({ isOpen: false, candidate: null, newStatus: "" });
- 
-   const [deleteCandidateDialog, setDeleteCandidateDialog] = useState<{
-     isOpen: boolean;
-     candidate: Candidate | null;
-   }>({ isOpen: false, candidate: null });
- 
-   const [pdfViewer, setPdfViewer] = useState<{
-     isOpen: boolean;
-     pdfUrl: string | null;
-     candidateName: string | null;
-   }>({ isOpen: false, pdfUrl: null, candidateName: null });
- 
-   const [interviewDialog, setInterviewDialog] = useState<{
-     isOpen: boolean;
-     candidate: Candidate | null;
-     newStage: string;
-   }>({ isOpen: false, candidate: null, newStage: "" });
- 
-   const [tempCandidateAlert, setTempCandidateAlert] = useState<{
-     isOpen: boolean;
-     candidateName: string | null;
-     message: string | null;
-   }>({ isOpen: false, candidateName: null, message: null });
- 
-   const [autoCreateCandidateDialog, setAutoCreateCandidateDialog] = useState<{
-     isOpen: boolean;
-     candidate: Candidate | null;
-   }>({ isOpen: false, candidate: null });
- 
-   const [disqualificationDialog, setDisqualificationDialog] = useState<{
-     isOpen: boolean;
-     candidate: Candidate | null;
-     newStatus: string;
-   }>({ isOpen: false, candidate: null, newStatus: "" });
- 
-   // Handler functions
-   const handleAddCandidate = () => setIsAddCandidateOpen(true);
-   const handleAddExistingCandidate = () => {
-     setIsAddCandidateOpen(false);
-     setIsAddExistingOpen(true);
-   };
-   const handleAddNewCandidate = () => {
-     setIsAddCandidateOpen(false);
-     setIsCreateCandidateOpen(true);
-   };
- 
-   const handleStageChange = (candidate: Candidate, newStage: string) => {
-     if (!canModifyPipeline) return;
-     if (candidate.isTempCandidate) {
-       const validation = validateTempCandidateStageChange(candidate, newStage);
-       if (!validation.canChangeStage) {
-         setTempCandidateAlert({
-           isOpen: true,
-           candidateName: candidate.name,
-           message: validation.message || null,
-         });
-         return;
-       }
-     }
- 
-     setStageChangeDialog({
-       isOpen: true,
-       candidate,
-       currentStage: candidate.currentStage,
-       newStage,
-     });
-   };
- 
-   const handleConfirmStageChange = async () => {
-     if (!stageChangeDialog.candidate || !id) return;
-     try {
-       const backendStage = mapUIStageToBackendStage(stageChangeDialog.newStage);
-       await updateCandidateStage(id, stageChangeDialog.candidate.id, { stage: backendStage });
-       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
-       await refetch();
-       setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
-       toast.success(`Stage updated to ${stageChangeDialog.newStage}`);
-     } catch (err) {
-       console.error("Failed to update stage:", err);
-       toast.error("Failed to update pipeline stage");
-     }
-   };
- 
-   const handleCancelStageChange = () => {
-     setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
-   };
- 
-   const handleStatusChange = (candidate: Candidate, newStatus: string) => {
-     if (!canModifyPipeline) return;
-     if (candidate.isTempCandidate) {
-       const validation = validateTempCandidateStatusChange(candidate, newStatus);
-       if (!validation.canChangeStage) {
-         setTempCandidateAlert({
-           isOpen: true,
-           candidateName: candidate.name,
-           message: validation.message || null,
-         });
-         return;
-       }
-     }
- 
-     if (newStatus === "Disqualified") {
-       setDisqualificationDialog({ isOpen: true, candidate, newStatus });
-     } else {
-       setStatusChangeDialog({ isOpen: true, candidate, newStatus });
-     }
-   };
- 
-   const handleConfirmStatusChange = async () => {
-     if (!statusChangeDialog.candidate || !id) return;
-     try {
-       await updateCandidateStatus(id, statusChangeDialog.candidate.id, { status: statusChangeDialog.newStatus });
-       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
-       await refetch();
-       setStatusChangeDialog(prev => ({ ...prev, isOpen: false }));
-       toast.success(`Status updated to ${statusChangeDialog.newStatus}`);
-     } catch (err) {
-       console.error("Failed to update status:", err);
-       toast.error("Failed to update candidate status");
-     }
-   };
- 
-   const handleCancelStatusChange = () => {
-     setStatusChangeDialog(prev => ({ ...prev, isOpen: false }));
-   };
- 
-   const handleDeleteCandidate = (candidate: Candidate) => {
-     if (!canModifyPipeline) return;
-     setDeleteCandidateDialog({ isOpen: true, candidate });
-   };
- 
-   const handleConfirmDeleteCandidate = async () => {
-     if (!deleteCandidateDialog.candidate || !id) return;
-     try {
-       await deleteCandidateFromPipeline(id, deleteCandidateDialog.candidate.id);
-       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
-       await refetch();
-       setDeleteCandidateDialog({ isOpen: false, candidate: null });
-       toast.success("Candidate removed from pipeline");
-     } catch (err) {
-       console.error("Failed to delete candidate:", err);
-       toast.error("Failed to remove candidate");
-     }
-   };
- 
-   const handleCancelDeleteCandidate = () => {
-     setDeleteCandidateDialog({ isOpen: false, candidate: null });
-   };
- 
-   const handleViewResume = (candidate: Candidate) => {
-     if (candidate.resume) {
-       setPdfViewer({
-         isOpen: true,
-         pdfUrl: candidate.resume,
-         candidateName: candidate.name,
-       });
-     }
-   };
- 
-   const handleClosePdfViewer = () => {
-     setPdfViewer({ isOpen: false, pdfUrl: null, candidateName: null });
-   };
- 
-   const handleConfirmInterviewDetails = async (details: any) => {
-     if (!interviewDialog.candidate || !id) return;
-     try {
-       await updateCandidateStage(id, interviewDialog.candidate.id, { stage: "Interview", data: details });
-       await refetch();
-       setInterviewDialog({ isOpen: false, candidate: null, newStage: "" });
-     } catch (err) {
-       console.error("Failed to update interview details:", err);
-     }
-   };
- 
-   const handleCloseInterviewDialog = () => {
-     setInterviewDialog({ isOpen: false, candidate: null, newStage: "" });
-   };
- 
-   const handleCloseTempCandidateAlert = () => {
-     setTempCandidateAlert({ isOpen: false, candidateName: null, message: null });
-   };
- 
-   const handleCreateCandidateSubmit = async (values: CreateCandidateValues) => {
-     setIsCreateCandidateOpen(false);
-     await refetch();
-   };
- 
-   const handleAutoCreateCandidateSubmit = async () => {
-     setAutoCreateCandidateDialog({ isOpen: false, candidate: null });
-     await refetch();
-   };
- 
-   const handleCloseAutoCreateDialog = () => {
-     setAutoCreateCandidateDialog({ isOpen: false, candidate: null });
-   };
- 
-   const handleConfirmDisqualification = async (data: DisqualificationData) => {
-     if (!disqualificationDialog.candidate || !id) return;
-     try {
-       await updateCandidateStatus(id, disqualificationDialog.candidate.id, { status: "Disqualified", data: data });
-       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
-       await refetch();
-       setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
-       toast.success("Candidate disqualified successfully");
-     } catch (err) {
-       console.error("Failed to disqualify candidate:", err);
-       toast.error("Failed to disqualify candidate");
-     }
-   };
- 
-   const handleCloseDisqualificationDialog = () => {
-     setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
-   };
- 
-   const getFilteredCandidates = useMemo(() => {
-     if (!job) return [];
-     if (!selectedStageFilter) return job.candidates;
-     return job.candidates.filter(c => c.currentStage === selectedStageFilter);
-   }, [job, selectedStageFilter]);
- 
-   if (isLoading) {
-     return (
-       <div className="flex flex-col items-center justify-center h-screen bg-muted/30 gap-4">
-         <div className="p-5 rounded-3xl bg-card shadow-2xl border border-border flex items-center gap-4 animate-in zoom-in-50 duration-700">
-           <Loader2 className="h-6 w-6 animate-spin text-brand" />
-           <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Building Pipeline...</span>
-         </div>
-       </div>
-     );
-   }
- 
-   if (error || !job) {
-     return (
-       <div className="flex flex-col items-center justify-center h-screen gap-6 bg-muted/50 p-6">
-         <div className="p-8 rounded-[2rem] bg-card shadow-xl border border-border text-center max-w-md">
-            <FilterX className="h-12 w-12 text-red-500 mx-auto mb-4 opacity-20" />
-            <h2 className="text-xl font-black text-foreground tracking-tighter mb-2">Sync Error</h2>
-            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">
-               {(error as any)?.message || "The requested pipeline could not be loaded."}
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => router.back()} 
-              className="w-full h-12 rounded-xl font-black text-xs uppercase tracking-widest border-border hover:bg-muted"
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" /> 
-              Return to Pipeline
-            </Button>
-         </div>
-       </div>
-     );
-   }
- 
-   if (!canViewPipeline) {
-     return (
-       <div className="flex flex-col items-center justify-center h-screen gap-4 text-center">
-          <div className="p-6 rounded-full bg-red-50 text-red-500">
-             <Users className="h-10 w-10" />
-          </div>
-          <div className="space-y-1">
-             <h2 className="text-xl font-black text-foreground tracking-tighter">Access Denied</h2>
-             <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">
-                Authorized credentials required for this pipeline.
-             </p>
-          </div>
-       </div>
-     );
-   }
- 
-   return (
-     <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
-         {/* Premium Job Header */}
-         <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-lg overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-1000 delay-100">
-           <PipelineJobHeader job={job} onAddCandidate={handleAddCandidate} />
-         </div>
- 
-         {/* Stage Navigation & Filters */}
-         <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-3 animate-in slide-in-from-top-2 duration-1000 delay-200">
-           <PipelineStageFilters
-             job={job}
-             selectedStage={selectedStageFilter}
-             onSelectStage={setSelectedStageFilter}
-           />
-         </div>
- 
-         {/* Candidates Table Area */}
-         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-300">
-           {selectedStageFilter && (
-             <div className="px-6 py-2 bg-muted/50 border-b border-border flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current View:</span>
-                   <span className="text-[11px] font-black text-brand uppercase tracking-widest">{selectedStageFilter}</span>
-                </div>
-                <div className="px-2 py-0.5 rounded-md bg-card border border-border text-[10px] font-black text-muted-foreground">
-                   {getFilteredCandidates.length} Active Candidates
-                </div>
-             </div>
-           )}
-           <div className="flex-1 overflow-auto relative custom-scrollbar">
-             <PipelineCandidatesTable
-               job={job}
-               candidates={getFilteredCandidates}
-               onStageChange={handleStageChange}
-               onStatusChange={handleStatusChange}
-               onViewResume={handleViewResume}
-               onDeleteCandidate={handleDeleteCandidate}
-             />
-           </div>
-         </div>
-       </div>
- 
-       {/* Dialog Overlays */}
-       {stageChangeDialog.isOpen && (
-         <StatusChangeConfirmationDialog
-           isOpen={stageChangeDialog.isOpen}
-           onClose={handleCancelStageChange}
-           onConfirm={handleConfirmStageChange}
-           candidateName={stageChangeDialog.candidate?.name || ''}
-           currentStage={stageChangeDialog.currentStage}
-           newStage={stageChangeDialog.newStage}
-         />
-       )}
- 
-       {isAddCandidateOpen && (
-         <AddCandidateDialog
-           open={isAddCandidateOpen}
-           onOpenChange={setIsAddCandidateOpen}
-           onAddExisting={handleAddExistingCandidate}
-           onAddNew={handleAddNewCandidate}
-           jobTitle={job.title}
-         />
-       )}
- 
-       {isAddExistingOpen && (
-         <AddExistingCandidateDialog
-           jobId={job.id}
-           jobTitle={job.title}
-           open={isAddExistingOpen}
-           onOpenChange={setIsAddExistingOpen}
-           isPipeline={true}
-           pipelineId={job.id}
-           onCandidatesAdded={async () => { await refetch(); }}
-         />
-       )}
- 
-       {isCreateCandidateOpen && (
-         <CreateCandidateDialog
-           open={isCreateCandidateOpen}
-           onOpenChange={setIsCreateCandidateOpen}
-           pipelineId={job.id}
-           onSubmit={handleCreateCandidateSubmit}
-         />
-       )}
- 
-       {deleteCandidateDialog.isOpen && (
-         <Dialog open={deleteCandidateDialog.isOpen} onOpenChange={(open) => setDeleteCandidateDialog(prev => ({ ...prev, isOpen: open }))}>
-           <DialogContent className="rounded-[2rem] border-border shadow-2xl">
-             <DialogHeader>
-               <DialogTitle className="font-black text-foreground tracking-tighter">Remove Candidate</DialogTitle>
-               <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
-                 Are you sure you want to remove <strong className="text-brand">{deleteCandidateDialog.candidate?.name}</strong> from this pipeline? This action is permanent.
-               </DialogDescription>
-             </DialogHeader>
-             <DialogFooter className="gap-2">
-               <Button variant="outline" onClick={handleCancelDeleteCandidate} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
-                 Cancel
-               </Button>
-               <Button variant="destructive" onClick={handleConfirmDeleteCandidate} className="rounded-xl font-black text-[10px] uppercase tracking-widest">
-                 Delete Permanently
-               </Button>
-             </DialogFooter>
-           </DialogContent>
-         </Dialog>
-       )}
- 
-       {pdfViewer.isOpen && (
-         <PDFViewer
-           isOpen={pdfViewer.isOpen}
-           onClose={handleClosePdfViewer}
-           pdfUrl={pdfViewer.pdfUrl || undefined}
-           candidateName={pdfViewer.candidateName || undefined}
-         />
-       )}
- 
-        {statusChangeDialog.isOpen && (
-          <Dialog
-            open={statusChangeDialog.isOpen}
-            onOpenChange={(isOpen) => !isOpen && setStatusChangeDialog(prev => ({ ...prev, isOpen: false }))}
+import { useAuth } from "@/contexts/AuthContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+const Page = () => {
+  const { id } = useParams() as { id: string };
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+  const { hasPermission } = usePermissions();
+
+  const canViewPipeline = isAdmin || hasPermission('pipeline', 'view');
+  const canModifyPipeline = isAdmin || hasPermission('pipeline', 'edit');
+
+  const [selectedStageFilter, setSelectedStageFilter] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
+
+  const { data: jobResponse, isLoading, error, refetch } = useQuery({
+    queryKey: ["pipelineEntry", id, currentPage, pageSize, selectedStageFilter],
+    queryFn: () => getPipelineEntry(id, {
+      page: currentPage,
+      limit: pageSize,
+      stage: selectedStageFilter ? mapUIStageToBackendStage(selectedStageFilter) : undefined
+    }),
+    enabled: !!id,
+  });
+
+  const job = useMemo(() => {
+    if (!jobResponse?.data) return null;
+    return mapEntryToJob(jobResponse.data);
+  }, [jobResponse]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedStageFilter]);
+  const [isAddCandidateOpen, setIsAddCandidateOpen] = useState(false);
+  const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
+  const [isCreateCandidateOpen, setIsCreateCandidateOpen] = useState(false);
+
+  // Dialog states
+  const [stageChangeDialog, setStageChangeDialog] = useState<{
+    isOpen: boolean;
+    candidate: Candidate | null;
+    currentStage: string;
+    newStage: string;
+  }>({ isOpen: false, candidate: null, currentStage: "", newStage: "" });
+
+  const [statusChangeDialog, setStatusChangeDialog] = useState<{
+    isOpen: boolean;
+    candidate: Candidate | null;
+    newStatus: string;
+  }>({ isOpen: false, candidate: null, newStatus: "" });
+
+  const [deleteCandidateDialog, setDeleteCandidateDialog] = useState<{
+    isOpen: boolean;
+    candidate: Candidate | null;
+  }>({ isOpen: false, candidate: null });
+
+  const [pdfViewer, setPdfViewer] = useState<{
+    isOpen: boolean;
+    pdfUrl: string | null;
+    candidateName: string | null;
+  }>({ isOpen: false, pdfUrl: null, candidateName: null });
+
+  const [interviewDialog, setInterviewDialog] = useState<{
+    isOpen: boolean;
+    candidate: Candidate | null;
+    newStage: string;
+  }>({ isOpen: false, candidate: null, newStage: "" });
+
+  const [tempCandidateAlert, setTempCandidateAlert] = useState<{
+    isOpen: boolean;
+    candidateName: string | null;
+    message: string | null;
+  }>({ isOpen: false, candidateName: null, message: null });
+
+  const [autoCreateCandidateDialog, setAutoCreateCandidateDialog] = useState<{
+    isOpen: boolean;
+    candidate: Candidate | null;
+  }>({ isOpen: false, candidate: null });
+
+  const [disqualificationDialog, setDisqualificationDialog] = useState<{
+    isOpen: boolean;
+    candidate: Candidate | null;
+    newStatus: string;
+  }>({ isOpen: false, candidate: null, newStatus: "" });
+
+  // Handler functions
+  const handleAddCandidate = () => setIsAddCandidateOpen(true);
+  const handleAddExistingCandidate = () => {
+    setIsAddCandidateOpen(false);
+    setIsAddExistingOpen(true);
+  };
+  const handleAddNewCandidate = () => {
+    setIsAddCandidateOpen(false);
+    setIsCreateCandidateOpen(true);
+  };
+
+  const handleStageChange = (candidate: Candidate, newStage: string) => {
+    if (!canModifyPipeline) return;
+    if (candidate.isTempCandidate) {
+      const validation = validateTempCandidateStageChange(candidate, newStage);
+      if (!validation.canChangeStage) {
+        setTempCandidateAlert({
+          isOpen: true,
+          candidateName: candidate.name,
+          message: validation.message || null,
+        });
+        return;
+      }
+    }
+
+    setStageChangeDialog({
+      isOpen: true,
+      candidate,
+      currentStage: candidate.currentStage,
+      newStage,
+    });
+  };
+
+  const handleConfirmStageChange = async () => {
+    if (!stageChangeDialog.candidate || !id) return;
+    try {
+      const backendStage = mapUIStageToBackendStage(stageChangeDialog.newStage);
+      await updateCandidateStage(id, stageChangeDialog.candidate.id, { stage: backendStage });
+      await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
+      await refetch();
+      setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
+      toast.success(`Stage updated to ${stageChangeDialog.newStage}`);
+    } catch (err) {
+      console.error("Failed to update stage:", err);
+      toast.error("Failed to update pipeline stage");
+    }
+  };
+
+  const handleCancelStageChange = () => {
+    setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleStatusChange = (candidate: Candidate, newStatus: string) => {
+    if (!canModifyPipeline) return;
+    if (candidate.isTempCandidate) {
+      const validation = validateTempCandidateStatusChange(candidate, newStatus);
+      if (!validation.canChangeStage) {
+        setTempCandidateAlert({
+          isOpen: true,
+          candidateName: candidate.name,
+          message: validation.message || null,
+        });
+        return;
+      }
+    }
+
+    if (newStatus === "Disqualified") {
+      setDisqualificationDialog({ isOpen: true, candidate, newStatus });
+    } else {
+      setStatusChangeDialog({ isOpen: true, candidate, newStatus });
+    }
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!statusChangeDialog.candidate || !id) return;
+    try {
+      await updateCandidateStatus(id, statusChangeDialog.candidate.id, { status: statusChangeDialog.newStatus });
+      await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
+      await refetch();
+      setStatusChangeDialog(prev => ({ ...prev, isOpen: false }));
+      toast.success(`Status updated to ${statusChangeDialog.newStatus}`);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      toast.error("Failed to update candidate status");
+    }
+  };
+
+  const handleCancelStatusChange = () => {
+    setStatusChangeDialog(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleDeleteCandidate = (candidate: Candidate) => {
+    if (!canModifyPipeline) return;
+    setDeleteCandidateDialog({ isOpen: true, candidate });
+  };
+
+  const handleConfirmDeleteCandidate = async () => {
+    if (!deleteCandidateDialog.candidate || !id) return;
+    try {
+      await deleteCandidateFromPipeline(id, deleteCandidateDialog.candidate.id);
+      await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
+      await refetch();
+      setDeleteCandidateDialog({ isOpen: false, candidate: null });
+      toast.success("Candidate removed from pipeline");
+    } catch (err) {
+      console.error("Failed to delete candidate:", err);
+      toast.error("Failed to remove candidate");
+    }
+  };
+
+  const handleCancelDeleteCandidate = () => {
+    setDeleteCandidateDialog({ isOpen: false, candidate: null });
+  };
+
+  const handleViewResume = (candidate: Candidate) => {
+    if (candidate.resume) {
+      setPdfViewer({
+        isOpen: true,
+        pdfUrl: candidate.resume,
+        candidateName: candidate.name,
+      });
+    }
+  };
+
+  const handleClosePdfViewer = () => {
+    setPdfViewer({ isOpen: false, pdfUrl: null, candidateName: null });
+  };
+
+  const handleConfirmInterviewDetails = async (details: any) => {
+    if (!interviewDialog.candidate || !id) return;
+    try {
+      await updateCandidateStage(id, interviewDialog.candidate.id, { stage: "Interview", data: details });
+      await refetch();
+      setInterviewDialog({ isOpen: false, candidate: null, newStage: "" });
+    } catch (err) {
+      console.error("Failed to update interview details:", err);
+    }
+  };
+
+  const handleCloseInterviewDialog = () => {
+    setInterviewDialog({ isOpen: false, candidate: null, newStage: "" });
+  };
+
+  const handleCloseTempCandidateAlert = () => {
+    setTempCandidateAlert({ isOpen: false, candidateName: null, message: null });
+  };
+
+  const handleCreateCandidateSubmit = async (values: CreateCandidateValues) => {
+    setIsCreateCandidateOpen(false);
+    await refetch();
+  };
+
+  const handleAutoCreateCandidateSubmit = async () => {
+    setAutoCreateCandidateDialog({ isOpen: false, candidate: null });
+    await refetch();
+  };
+
+  const handleCloseAutoCreateDialog = () => {
+    setAutoCreateCandidateDialog({ isOpen: false, candidate: null });
+  };
+
+  const handleConfirmDisqualification = async (data: DisqualificationData) => {
+    if (!disqualificationDialog.candidate || !id) return;
+    try {
+      await updateCandidateStatus(id, disqualificationDialog.candidate.id, { status: "Disqualified", data: data });
+      await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
+      await refetch();
+      setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
+      toast.success("Candidate disqualified successfully");
+    } catch (err) {
+      console.error("Failed to disqualify candidate:", err);
+      toast.error("Failed to disqualify candidate");
+    }
+  };
+
+  const handleCloseDisqualificationDialog = () => {
+    setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
+  };
+
+  const getFilteredCandidates = useMemo(() => {
+    if (!job) return [];
+    if (!selectedStageFilter) return job.candidates;
+    return job.candidates.filter(c => c.currentStage === selectedStageFilter);
+  }, [job, selectedStageFilter]);
+
+  const paginatedCandidates = useMemo(() => {
+    if (jobResponse?.data?.candidates?.pagination) {
+      return job?.candidates || [];
+    }
+    const startIndex = (currentPage - 1) * pageSize;
+    return getFilteredCandidates.slice(startIndex, startIndex + pageSize);
+  }, [jobResponse, job?.candidates, getFilteredCandidates, currentPage, pageSize]);
+
+  const totalCandidatesCount = useMemo(() => {
+    if (jobResponse?.data?.candidates?.pagination) {
+      return jobResponse.data.candidates.pagination.total;
+    }
+    return selectedStageFilter
+      ? getFilteredCandidates.length
+      : (job?.totalCandidates || job?.candidates?.length || 0);
+  }, [jobResponse, job?.totalCandidates, job?.candidates, getFilteredCandidates, selectedStageFilter]);
+
+  const totalPages = useMemo(() => {
+    if (jobResponse?.data?.candidates?.pagination) {
+      return jobResponse.data.candidates.pagination.totalPages;
+    }
+    return Math.ceil(totalCandidatesCount / pageSize) || 1;
+  }, [jobResponse, totalCandidatesCount, pageSize]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-muted/30 gap-4">
+        <div className="p-5 rounded-3xl bg-card shadow-2xl border border-border flex items-center gap-4 animate-in zoom-in-50 duration-700">
+          <Loader2 className="h-6 w-6 animate-spin text-brand" />
+          <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Building Pipeline...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-6 bg-muted/50 p-6">
+        <div className="p-8 rounded-[2rem] bg-card shadow-xl border border-border text-center max-w-md">
+          <FilterX className="h-12 w-12 text-red-500 mx-auto mb-4 opacity-20" />
+          <h2 className="text-xl font-black text-foreground tracking-tighter mb-2">Sync Error</h2>
+          <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">
+            {(error as any)?.message || "The requested pipeline could not be loaded."}
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            className="w-full h-12 rounded-xl font-black text-xs uppercase tracking-widest border-border hover:bg-muted"
           >
-            <DialogContent className="rounded-[2rem] border-border shadow-2xl">
-              <DialogHeader>
-                <DialogTitle className="font-black text-foreground tracking-tighter">Confirm Status Update</DialogTitle>
-                <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
-                  Confirm changing the status of <strong className="text-brand">{statusChangeDialog.candidate?.name}</strong> to <strong className="text-brand">{statusChangeDialog.newStatus}</strong>.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={handleCancelStatusChange} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
-                  Cancel
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Return to Pipeline
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!canViewPipeline) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4 text-center">
+        <div className="p-6 rounded-full bg-red-50 text-red-500">
+          <Users className="h-10 w-10" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-xl font-black text-foreground tracking-tighter">Access Denied</h2>
+          <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">
+            Authorized credentials required for this pipeline.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
+        {/* Premium Job Header */}
+        <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-lg overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-1000 delay-100">
+          <PipelineJobHeader job={job} onAddCandidate={handleAddCandidate} />
+        </div>
+
+        {/* Stage Navigation & Filters */}
+        <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-3 animate-in slide-in-from-top-2 duration-1000 delay-200">
+          <PipelineStageFilters
+            job={job}
+            selectedStage={selectedStageFilter}
+            onSelectStage={setSelectedStageFilter}
+          />
+        </div>
+
+        {/* Candidates Table Area */}
+        <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-300">
+          {selectedStageFilter && (
+            <div className="px-6 py-2 bg-muted/50 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current View:</span>
+                <span className="text-[11px] font-black text-brand uppercase tracking-widest">{selectedStageFilter}</span>
+              </div>
+              <div className="px-2 py-0.5 rounded-md bg-card border border-border text-[10px] font-black text-muted-foreground">
+                {totalCandidatesCount} Active Candidates
+              </div>
+            </div>
+          )}
+          <div className="flex-1 overflow-auto relative custom-scrollbar">
+            <PipelineCandidatesTable
+              job={job}
+              candidates={paginatedCandidates}
+              onStageChange={handleStageChange}
+              onStatusChange={handleStatusChange}
+              onViewResume={handleViewResume}
+              onDeleteCandidate={handleDeleteCandidate}
+            />
+          </div>
+
+          {/* Premium Pagination Footer */}
+          {totalCandidatesCount > 0 && (
+            <div className="flex-shrink-0 border-t border-border bg-card px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Left: Stats & Size Select */}
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Showing {totalCandidatesCount === 0 ? 0 : (currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalCandidatesCount)} of {totalCandidatesCount} Candidates
+                </span>
+
+                <div className="flex items-center gap-2 border-l border-border pl-4 h-4">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Show</span>
+                  <Select
+                    value={String(pageSize)}
+                    onValueChange={(val) => {
+                      setPageSize(Number(val));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="h-7 w-[65px] rounded-lg border-border bg-transparent text-[11px] font-bold px-2 py-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border">
+                      {[15, 30, 50, 100].map((size) => (
+                        <SelectItem key={size} value={String(size)} className="rounded-lg text-xs font-bold">
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Right: Page Navigation */}
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button onClick={handleConfirmStatusChange} className="bg-brand hover:bg-brand/90 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-brand/20">
-                  Confirm Update
+
+                {/* Page numbers */}
+                {(() => {
+                  const pages: (number | string)[] = [];
+                  const maxVisible = 5;
+
+                  if (totalPages <= maxVisible) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    if (currentPage <= 3) {
+                      pages.push(1, 2, 3, 4, '...', totalPages);
+                    } else if (currentPage >= totalPages - 2) {
+                      pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                    } else {
+                      pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                    }
+                  }
+
+                  return pages.map((page, idx) => {
+                    if (page === '...') {
+                      return (
+                        <span key={`ellipsis-${idx}`} className="px-1.5 text-xs font-bold text-muted-foreground">
+                          ...
+                        </span>
+                      );
+                    }
+
+                    const isCurrent = page === currentPage;
+                    return (
+                      <Button
+                        key={`page-${page}`}
+                        variant={isCurrent ? "default" : "outline"}
+                        className={cn(
+                          "h-8 w-8 rounded-lg text-xs font-black p-0 border-border transition-all duration-300",
+                          isCurrent
+                            ? "bg-brand hover:bg-brand/90 text-white shadow-md shadow-brand/10 border-brand"
+                            : "hover:bg-muted text-foreground"
+                        )}
+                        onClick={() => setCurrentPage(page as number)}
+                      >
+                        {page}
+                      </Button>
+                    );
+                  });
+                })()}
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
- 
-       {tempCandidateAlert.isOpen && (
-         <TempCandidateAlertDialog
-           isOpen={tempCandidateAlert.isOpen}
-           onClose={handleCloseTempCandidateAlert}
-           candidateName={tempCandidateAlert.candidateName || undefined}
-           message={tempCandidateAlert.message || undefined}
-         />
-       )}
- 
-       {autoCreateCandidateDialog.isOpen && (
-         <CreateCandidateModal
-           isOpen={autoCreateCandidateDialog.isOpen}
-           onClose={handleCloseAutoCreateDialog}
-           onCandidateCreated={handleAutoCreateCandidateSubmit}
-           tempCandidateData={autoCreateCandidateDialog.candidate ? {
-             name: autoCreateCandidateDialog.candidate.name,
-             email: autoCreateCandidateDialog.candidate.email,
-             phone: autoCreateCandidateDialog.candidate.phone,
-             location: autoCreateCandidateDialog.candidate.location,
-             description: autoCreateCandidateDialog.candidate.description,
-             gender: autoCreateCandidateDialog.candidate.gender,
-             dateOfBirth: autoCreateCandidateDialog.candidate.dateOfBirth,
-             country: autoCreateCandidateDialog.candidate.country,
-             nationality: autoCreateCandidateDialog.candidate.nationality,
-             willingToRelocate: autoCreateCandidateDialog.candidate.willingToRelocate,
-           } : undefined}
-           isTempCandidateConversion={true}
-           pipelineId={id}
-           tempCandidateId={autoCreateCandidateDialog.candidate?.id}
-         />
-       )}
- 
-       {disqualificationDialog.isOpen && (
-         <DisqualificationDialog
-           isOpen={disqualificationDialog.isOpen}
-           onClose={handleCloseDisqualificationDialog}
-           onConfirm={handleConfirmDisqualification}
-           candidateName={disqualificationDialog.candidate?.name || ''}
-           currentStage={disqualificationDialog.candidate?.currentStage || ''}
-           currentStageStatus={disqualificationDialog.candidate?.status || ''}
-         />
-       )}
-     </TooltipProvider>
-   );
- };
- 
- // Mock permissions check for the sake of completion since usePermissions wasn't imported in full snippet
- function usePermissions() {
-    return { hasPermission: (a: string, b: string) => true };
- }
- 
- export default Page;
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Dialog Overlays */}
+      {stageChangeDialog.isOpen && (
+        <StatusChangeConfirmationDialog
+          isOpen={stageChangeDialog.isOpen}
+          onClose={handleCancelStageChange}
+          onConfirm={handleConfirmStageChange}
+          candidateName={stageChangeDialog.candidate?.name || ''}
+          currentStage={stageChangeDialog.currentStage}
+          newStage={stageChangeDialog.newStage}
+        />
+      )}
+
+      {isAddCandidateOpen && (
+        <AddCandidateDialog
+          open={isAddCandidateOpen}
+          onOpenChange={setIsAddCandidateOpen}
+          onAddExisting={handleAddExistingCandidate}
+          onAddNew={handleAddNewCandidate}
+          jobTitle={job.title}
+        />
+      )}
+
+      {isAddExistingOpen && (
+        <AddExistingCandidateDialog
+          jobId={job.id}
+          jobTitle={job.title}
+          open={isAddExistingOpen}
+          onOpenChange={setIsAddExistingOpen}
+          isPipeline={true}
+          pipelineId={job.id}
+          onCandidatesAdded={async () => { await refetch(); }}
+        />
+      )}
+
+      {isCreateCandidateOpen && (
+        <CreateCandidateDialog
+          open={isCreateCandidateOpen}
+          onOpenChange={setIsCreateCandidateOpen}
+          pipelineId={job.id}
+          onSubmit={handleCreateCandidateSubmit}
+        />
+      )}
+
+      {deleteCandidateDialog.isOpen && (
+        <Dialog open={deleteCandidateDialog.isOpen} onOpenChange={(open) => setDeleteCandidateDialog(prev => ({ ...prev, isOpen: open }))}>
+          <DialogContent className="rounded-[2rem] border-border shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="font-black text-foreground tracking-tighter">Remove Candidate</DialogTitle>
+              <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
+                Are you sure you want to remove <strong className="text-brand">{deleteCandidateDialog.candidate?.name}</strong> from this pipeline? This action is permanent.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={handleCancelDeleteCandidate} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDeleteCandidate} className="rounded-xl font-black text-[10px] uppercase tracking-widest">
+                Delete Permanently
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {pdfViewer.isOpen && (
+        <PDFViewer
+          isOpen={pdfViewer.isOpen}
+          onClose={handleClosePdfViewer}
+          pdfUrl={pdfViewer.pdfUrl || undefined}
+          candidateName={pdfViewer.candidateName || undefined}
+        />
+      )}
+
+      {statusChangeDialog.isOpen && (
+        <Dialog
+          open={statusChangeDialog.isOpen}
+          onOpenChange={(isOpen) => !isOpen && setStatusChangeDialog(prev => ({ ...prev, isOpen: false }))}
+        >
+          <DialogContent className="rounded-[2rem] border-border shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="font-black text-foreground tracking-tighter">Confirm Status Update</DialogTitle>
+              <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
+                Confirm changing the status of <strong className="text-brand">{statusChangeDialog.candidate?.name}</strong> to <strong className="text-brand">{statusChangeDialog.newStatus}</strong>.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={handleCancelStatusChange} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
+                Cancel
+              </Button>
+              <Button onClick={handleConfirmStatusChange} className="bg-brand hover:bg-brand/90 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-brand/20">
+                Confirm Update
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {tempCandidateAlert.isOpen && (
+        <TempCandidateAlertDialog
+          isOpen={tempCandidateAlert.isOpen}
+          onClose={handleCloseTempCandidateAlert}
+          candidateName={tempCandidateAlert.candidateName || undefined}
+          message={tempCandidateAlert.message || undefined}
+        />
+      )}
+
+      {autoCreateCandidateDialog.isOpen && (
+        <CreateCandidateModal
+          isOpen={autoCreateCandidateDialog.isOpen}
+          onClose={handleCloseAutoCreateDialog}
+          onCandidateCreated={handleAutoCreateCandidateSubmit}
+          tempCandidateData={autoCreateCandidateDialog.candidate ? {
+            name: autoCreateCandidateDialog.candidate.name,
+            email: autoCreateCandidateDialog.candidate.email,
+            phone: autoCreateCandidateDialog.candidate.phone,
+            location: autoCreateCandidateDialog.candidate.location,
+            description: autoCreateCandidateDialog.candidate.description,
+            gender: autoCreateCandidateDialog.candidate.gender,
+            dateOfBirth: autoCreateCandidateDialog.candidate.dateOfBirth,
+            country: autoCreateCandidateDialog.candidate.country,
+            nationality: autoCreateCandidateDialog.candidate.nationality,
+            willingToRelocate: autoCreateCandidateDialog.candidate.willingToRelocate,
+          } : undefined}
+          isTempCandidateConversion={true}
+          pipelineId={id}
+          tempCandidateId={autoCreateCandidateDialog.candidate?.id}
+        />
+      )}
+
+      {disqualificationDialog.isOpen && (
+        <DisqualificationDialog
+          isOpen={disqualificationDialog.isOpen}
+          onClose={handleCloseDisqualificationDialog}
+          onConfirm={handleConfirmDisqualification}
+          candidateName={disqualificationDialog.candidate?.name || ''}
+          currentStage={disqualificationDialog.candidate?.currentStage || ''}
+          currentStageStatus={disqualificationDialog.candidate?.status || ''}
+        />
+      )}
+    </TooltipProvider>
+  );
+};
+
+// Mock permissions check for the sake of completion since usePermissions wasn't imported in full snippet
+function usePermissions() {
+  return { hasPermission: (a: string, b: string) => true };
+}
+
+export default Page;

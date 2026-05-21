@@ -35,12 +35,14 @@
            )}
            onClick={() => onSelectStage(null)}
          >
-           All Candidates ({job.candidates.length})
+           All Candidates ({job.totalCandidates ?? job.candidates.length})
          </Badge>
  
          {/* Stage Specific Filters */}
          {stages.map((stage) => {
-           const count = job.candidates.filter((c) => c.currentStage === stage).length;
+           const count = job.stageCounts 
+             ? (job.stageCounts[stage] || 0) 
+             : job.candidates.filter((c) => c.currentStage === stage).length;
            const isActive = selectedStage === stage;
            
            return (
