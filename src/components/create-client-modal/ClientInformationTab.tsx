@@ -32,7 +32,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
             if (val !== "Engaged") setField("clientSubStage", "");
           }}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
             <SelectValue placeholder="Select stage" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border shadow-xl">
@@ -50,7 +50,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           onValueChange={val => setField("clientSubStage", val)}
           disabled={form.clientStage !== "Engaged"}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold disabled:opacity-50">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold disabled:opacity-50 text-foreground data-[placeholder]:text-muted-foreground/60">
             <SelectValue placeholder={form.clientStage === "Engaged" ? "Select sub-stage" : "N/A"} />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border shadow-xl">
@@ -70,7 +70,9 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           variant="outline"
           type="button"
           onClick={() => setIsSalesLeadDialogOpen(true)}
-          className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start text-foreground shadow-sm hover:shadow-md"
+          className={`h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start ${
+            form.salesLead ? "text-foreground" : "text-muted-foreground/60"
+          }`}
         >
           <User className="w-4 h-4 mr-2 text-muted-foreground" />
           {form.salesLead || "Select Sales Lead..."}
@@ -79,15 +81,13 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Referred by</label>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => setIsReferredDialogOpen(true)}
-          className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start text-foreground shadow-sm hover:shadow-md"
-        >
-          <User className="w-4 h-4 mr-2 text-muted-foreground" />
-          {form.referredBy || "Select Referral Source..."}
-        </Button>
+        <input
+          type="text"
+          value={form.referredBy}
+          onChange={e => setField("referredBy", e.target.value)}
+          placeholder="Referral name"
+          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -96,7 +96,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           value={form.clientPriority}
           onValueChange={val => setField("clientPriority", val)}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
             <SelectValue placeholder="Select priority" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border shadow-xl">
@@ -113,7 +113,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           value={form.clientSegment}
           onValueChange={val => setField("clientSegment", val)}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
             <SelectValue placeholder="Select segment" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border shadow-xl">
@@ -130,7 +130,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           value={form.clientSource}
           onValueChange={val => setField("clientSource", val)}
         >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold">
+          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
             <SelectValue placeholder="Select source" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border shadow-xl">
@@ -151,6 +151,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
             value={form.industry} 
             onValueChange={val => setField("industry", val)} 
             modal
+            className="border-none bg-transparent hover:bg-transparent shadow-none px-0 h-full focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
           />
         </div>
       </div>

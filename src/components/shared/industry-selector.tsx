@@ -25,9 +25,10 @@ interface IndustrySelectorProps {
     onValueChange: (value: string) => void;
     modal?: boolean;
     disabled?: boolean;
+    className?: string;
 }
 
-export function IndustrySelector({ value, onValueChange, modal = false, disabled = false }: IndustrySelectorProps) {
+export function IndustrySelector({ value, onValueChange, modal = false, disabled = false, className }: IndustrySelectorProps) {
     const [open, setOpen] = useState(false);
     const { industries, addIndustry, isAdding } = useIndustries();
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -52,14 +53,18 @@ export function IndustrySelector({ value, onValueChange, modal = false, disabled
     );
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
             <Popover open={open} onOpenChange={setOpen} modal={modal}>
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
-                        className="w-full justify-between font-normal"
+                        className={cn(
+                            "w-full justify-between font-semibold",
+                            !value && "text-muted-foreground/60 font-semibold",
+                            className
+                        )}
                         disabled={disabled}
                     >
                         {value ? value : "Select industry..."}
