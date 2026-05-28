@@ -37,10 +37,10 @@
  
    return (
      <>
-       <div className="flex flex-col w-full min-h-full py-3 px-4 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-muted/50">
+       <div className="flex flex-col w-full min-h-full p-4 md:p-6 lg:p-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-muted/50">
          
          {/* Optimized Welcome Section - Brand Theme with Modern Animations */}
-         <div className="group relative overflow-hidden rounded-[2rem] bg-brand text-white py-5 px-8 shadow-2xl shadow-brand/20 border border-brand/10 transition-all duration-700 hover:shadow-brand/30">
+         <div className="group relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-brand text-white py-5 px-6 sm:px-8 shadow-2xl shadow-brand/20 border border-brand/10 transition-all duration-700 hover:shadow-brand/30">
            {/* Abstract Background Elements with Floating Animation */}
            <div className="absolute top-0 right-0 w-1/2 h-full overflow-hidden pointer-events-none">
              <div className="absolute -top-24 -right-24 w-64 h-64 bg-card/10 rounded-full blur-[80px] transition-all duration-1000 group-hover:scale-120 group-hover:-translate-x-12 animate-pulse" />
@@ -84,16 +84,16 @@
            {/* Action 1: Client Creation */}
            <button
              onClick={() => setOpen(true)}
-             className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-card border border-border shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden"
+             className="group relative flex flex-col items-start p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-card border border-border shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden"
            >
              <div className="absolute -top-12 -right-12 w-32 h-32 bg-muted rounded-full group-hover:scale-150 transition-transform duration-700 ease-out" />
              
-             <div className="relative z-10 p-3.5 bg-brand/5 rounded-xl text-brand group-hover:bg-brand group-hover:text-white transition-all duration-500 mb-5">
+             <div className="relative z-10 p-3.5 bg-brand/5 rounded-xl text-brand group-hover:bg-brand group-hover:text-white transition-all duration-500 mb-4 sm:mb-5">
                <Building2 className="w-6 h-6" />
              </div>
              
              <div className="relative z-10 space-y-2.5 flex-1">
-               <h2 className="text-xl font-black text-foreground tracking-tight leading-tight group-hover:text-brand transition-colors">
+               <h2 className="text-lg sm:text-xl font-black text-foreground tracking-tight leading-tight group-hover:text-brand transition-colors">
                  Onboard <br/>New Client
                </h2>
                <p className="text-muted-foreground text-[11px] font-bold leading-relaxed max-w-[180px]">
@@ -114,16 +114,16 @@
            {/* Action 2: Job Requirement */}
            <button
              onClick={() => setJobModal(true)}
-             className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-card border border-border shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden"
+             className="group relative flex flex-col items-start p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-card border border-border shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden"
            >
              <div className="absolute -top-12 -right-12 w-32 h-32 bg-muted rounded-full group-hover:scale-150 transition-transform duration-700 ease-out" />
              
-             <div className="relative z-10 p-3.5 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 mb-5">
+             <div className="relative z-10 p-3.5 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 mb-4 sm:mb-5">
                <Target className="w-6 h-6" />
              </div>
              
              <div className="relative z-10 space-y-2.5 flex-1">
-               <h2 className="text-xl font-black text-foreground tracking-tight leading-tight group-hover:text-blue-600 transition-colors">
+               <h2 className="text-lg sm:text-xl font-black text-foreground tracking-tight leading-tight group-hover:text-blue-600 transition-colors">
                  Post Job <br/>Requirement
                </h2>
                <p className="text-muted-foreground text-[11px] font-bold leading-relaxed max-w-[180px]">
@@ -143,15 +143,15 @@
  
            {/* Action 3: Candidate Creation */}
            <CreateCandidateButton className="p-0 border-none bg-transparent hover:bg-transparent shadow-none w-full h-full block">
-             <div className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-card border border-border shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden">
+             <div className="group relative flex flex-col items-start p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-card border border-border shadow-sm hover:shadow-2xl hover:shadow-brand/10 hover:border-brand/20 transition-all duration-500 text-left h-full overflow-hidden">
                <div className="absolute -top-12 -right-12 w-32 h-32 bg-muted rounded-full group-hover:scale-150 transition-transform duration-700 ease-out" />
                
-               <div className="relative z-10 p-3.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 mb-5">
+               <div className="relative z-10 p-3.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 mb-4 sm:mb-5">
                  <Rocket className="w-6 h-6" />
                </div>
                
                <div className="relative z-10 space-y-2.5 flex-1">
-                 <h2 className="text-xl font-black text-foreground tracking-tight leading-tight group-hover:text-emerald-600 transition-colors">
+                 <h2 className="text-lg sm:text-xl font-black text-foreground tracking-tight leading-tight group-hover:text-emerald-600 transition-colors">
                    Capture <br/>Top Talent
                  </h2>
                  <p className="text-muted-foreground text-[11px] font-bold leading-relaxed max-w-[180px]">
