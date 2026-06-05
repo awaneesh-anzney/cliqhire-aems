@@ -79,6 +79,17 @@ export interface ApplyJobResponse {
   message?: string;
 }
 
+export interface DuplicateCheckResponse {
+  status: string;
+  exists: boolean;
+  message: string;
+  data?: {
+    candidateId: string;
+    name: string;
+    profileId: string;
+  };
+}
+
 class CandidateService {
 
   /**
@@ -358,7 +369,23 @@ class CandidateService {
       throw error;
     }
   }
+
+  /**
+   * Check if a candidate already exists by email, phone, or linkedin
+   */
+  async checkDuplicate(field: 'email' | 'phone' | 'linkedin', value: string): Promise<DuplicateCheckResponse> {
+    try {
+      const response = await api.get(`/api/candidates/check-duplicate`, {
+        params: { field, value }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error checking duplicate for ${field}:`, error);
+      throw error;
+    }
+  }
 }
+
 
 // Export a singleton instance
 export const candidateService = new CandidateService();
