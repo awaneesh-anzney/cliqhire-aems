@@ -492,8 +492,13 @@ const getClients = async (queryParams: {
   page?: number;
   limit?: number;
   search?: string;
+  name?: string;
+  clientId?: string;
+  email?: string;
+  phoneNumber?: string;
   industry?: string;
-  clientStage?: "Lead" | "Engaged" | "Signed";
+  clientStage?: "Lead" | "Engaged" | "Signed" | string;
+  location?: string;
   clientTeam?: "Enterprise" | "SMB" | "Mid-Market";
 } = {}): Promise<ClientsPage> => {
   const limit = queryParams.limit ?? 10;

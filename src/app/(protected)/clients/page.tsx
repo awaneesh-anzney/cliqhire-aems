@@ -1,31 +1,31 @@
 "use client";
- import { useState, useMemo } from "react";
- import { Table, TableHead, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
- import { CreateClientModal } from "@/components/create-client-modal/create-client-modal";
- import {
-   updateClientStage,
-   updateClientStageStatus,
-   ClientStageStatus,
-   deleteClient,
- } from "@/services/clientService";
- 
- import Dashboardheader from "@/components/dashboard-header";
- import ClientTableRow from "@/components/clients/ClientTableRow";
- import ClientPaginationControls from "@/components/clients/ClientPaginationControls";
- import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
- import { Loader, Building2, Search, FilterX, Lock } from "lucide-react";
- import { useAuth } from "@/contexts/AuthContext";
- import { toast } from "sonner";
- import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
- import { FilterModal } from "@/components/filter-modal";
- import { Checkbox } from "@/components/ui/checkbox";
- import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
- import { useExportClients } from "@/hooks/useExportClients";
- import { useClients } from "@/hooks/useClient";
- import { usePermissions } from "@/contexts/PermissionContext";
- import { cn } from "@/lib/utils";
- import { Button } from "@/components/ui/button";
- import { TooltipProvider } from "@/components/ui/tooltip";
+ import { useState, useMemo, useEffect } from "react";
+import { Table, TableHead, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { CreateClientModal } from "@/components/create-client-modal/create-client-modal";
+import {
+  updateClientStage,
+  updateClientStageStatus,
+  ClientStageStatus,
+  deleteClient,
+} from "@/services/clientService";
+
+import Dashboardheader from "@/components/dashboard-header";
+import ClientTableRow from "@/components/clients/ClientTableRow";
+import ClientPaginationControls from "@/components/clients/ClientPaginationControls";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Loader, Building2, Search, SlidersHorizontal, X, Lock } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
+import { useExportClients } from "@/hooks/useExportClients";
+import { useClients } from "@/hooks/useClient";
+import { usePermissions } from "@/contexts/PermissionContext";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
  
  interface Client {
    clientId?: string;
@@ -49,11 +49,19 @@
    };
  }
  
- interface Filters {
-   name: string;
-   industry: string;
-   maxAge: string;
- }
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
  
  export default function ClientsPage() {
    const { user } = useAuth();
@@ -65,14 +73,28 @@
    const canDeleteClients = isAdmin || hasPermission("clients", "delete");
  
    const [open, setOpen] = useState(false);
-   const [filterOpen, setFilterOpen] = useState(false);
-   const [filterName, setFilterName] = useState("");
-   const [filterIndustry, setFilterIndustry] = useState("");
-   const [filterLocation, setFilterLocation] = useState("");
-   const [filterStages, setFilterStages] = useState<Client["clientStage"][]>([]);
    const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
    const [openExportDialog, setOpenExportDialog] = useState(false);
    const { mutateAsync: exportClientsMutation } = useExportClients();
+
+   const [searchInput, setSearchInput] = useState("");
+   const [nameInput, setNameInput] = useState("");
+   const [clientIdInput, setClientIdInput] = useState("");
+   const [emailInput, setEmailInput] = useState("");
+   const [phoneNumberInput, setPhoneNumberInput] = useState("");
+   const [industryInput, setIndustryInput] = useState("");
+   const [locationInput, setLocationInput] = useState("");
+   const [selectedClientStage, setSelectedClientStage] = useState<string>("All");
+
+   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+
+   const debouncedSearch = useDebounce(searchInput, 300);
+   const debouncedName = useDebounce(nameInput, 300);
+   const debouncedClientId = useDebounce(clientIdInput, 300);
+   const debouncedEmail = useDebounce(emailInput, 300);
+   const debouncedPhoneNumber = useDebounce(phoneNumberInput, 300);
+   const debouncedIndustry = useDebounce(industryInput, 300);
+   const debouncedLocation = useDebounce(locationInput, 300);
  
    const toggleRowSelection = (clientId: string) => {
      if (!canDeleteClients) return;
@@ -126,25 +148,50 @@
      }
    };
  
-   const [filters, setFilters] = useState<Filters>({
-     name: "",
-     industry: "",
-     maxAge: "",
-   });
- 
-   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-   const [pendingChange, setPendingChange] = useState<{ clientId: string; stage: Client["clientStage"]; } | null>(null);
-   const [pendingStatusChange, setPendingStatusChange] = useState<{ clientId: string; status: ClientStageStatus; } | null>(null);
-   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
-   const [currentPage, setCurrentPage] = useState<number>(1);
-   const [pageSize, setPageSize] = useState<number>(10);
- 
-   const { data: clientsPage, isLoading, isFetching, refetch } = useClients({
-     page: currentPage,
-     limit: pageSize,
-     ...(filterName.trim() && { search: filterName.trim() }),
-     ...(filterIndustry.trim() && { industry: filterIndustry.trim() }),
-   });
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [pendingChange, setPendingChange] = useState<{ clientId: string; stage: Client["clientStage"]; } | null>(null);
+    const [pendingStatusChange, setPendingStatusChange] = useState<{ clientId: string; status: ClientStageStatus; } | null>(null);
+    const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [pageSize, setPageSize] = useState<number>(10);
+
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [
+      debouncedSearch,
+      debouncedName,
+      debouncedClientId,
+      debouncedEmail,
+      debouncedPhoneNumber,
+      debouncedIndustry,
+      debouncedLocation,
+      selectedClientStage,
+    ]);
+
+    const clearAllFilters = () => {
+      setSearchInput("");
+      setNameInput("");
+      setClientIdInput("");
+      setEmailInput("");
+      setPhoneNumberInput("");
+      setIndustryInput("");
+      setLocationInput("");
+      setSelectedClientStage("All");
+      setCurrentPage(1);
+    };
+
+    const { data: clientsPage, isLoading, isFetching, refetch } = useClients({
+      page: currentPage,
+      limit: pageSize,
+      search: debouncedSearch || undefined,
+      name: debouncedName || undefined,
+      clientId: debouncedClientId || undefined,
+      email: debouncedEmail || undefined,
+      phoneNumber: debouncedPhoneNumber || undefined,
+      industry: debouncedIndustry || undefined,
+      location: debouncedLocation || undefined,
+      clientStage: selectedClientStage === "All" ? undefined : selectedClientStage,
+    });
  
    const allClients: Client[] = useMemo(() => {
      return (clientsPage?.clients ?? []).map((c) => ({
@@ -178,23 +225,7 @@
      setShowStatusConfirmDialog(true);
    };
  
-   const pagedClients = useMemo(() => {
-     let result = allClients;
-     const locQ = filterLocation.trim().toLowerCase();
-     const stagesQ = filterStages;
-     if (locQ) result = result.filter((c) => (c.countryOfBusiness || "").toLowerCase().includes(locQ));
-     if (stagesQ.length > 0) result = result.filter((c) => stagesQ.includes(c.clientStage));
-     if (filters.maxAge) {
-       const maxAgeMonths = parseInt(filters.maxAge);
-       if (!isNaN(maxAgeMonths)) {
-         result = result.filter((c) => {
-           if (!c.clientAge) return false;
-           return (c.clientAge.years * 12 + c.clientAge.months) <= maxAgeMonths;
-         });
-       }
-     }
-     return result;
-   }, [allClients, filterLocation, filterStages, filters.maxAge]);
+   const pagedClients = allClients;
  
    const totalClientsCalc = clientsPage?.totalCount ?? 0;
    const totalPagesCalc = clientsPage?.totalPages ?? 1;
@@ -267,30 +298,179 @@
          loading={isLoading}
          error={error}
        />
- 
        <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Compressed Sticky Header Section */}
          <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
            <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
-           <Dashboardheader
-             setOpen={setOpen}
-             setFilterOpen={setFilterOpen}
-             initialLoading={isLoading || isFetching}
-             heading="Clients"
-             buttonText="Create"
-             showCreateButton={canModifyClients}
-             onRefresh={() => refetch()}
-             selectedCount={selectedRows.size}
-             onDelete={handleDeleteSelected}
-             isFilterActive={Boolean(filterName || filterIndustry || filterLocation || filterStages.length > 0)}
-             filterCount={(filterName ? 1 : 0) + (filterIndustry ? 1 : 0) + (filterLocation ? 1 : 0) + (filterStages.length > 0 ? 1 : 0)}
-             onExport={() => setOpenExportDialog(true)}
-           />
-         </div>
- 
-         {/* Table Content Area - Optimized for No Horizontal Scroll */}
-         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
-           <div className="flex-1 overflow-auto custom-scrollbar relative">
+            <Dashboardheader
+              setOpen={setOpen}
+              setFilterOpen={() => setAdvancedFiltersOpen(prev => !prev)}
+              initialLoading={isFetching}
+              heading="Clients"
+              buttonText="Create"
+              showCreateButton={canModifyClients}
+              showFilterButton={true}
+              onRefresh={() => refetch()}
+              selectedCount={selectedRows.size}
+              onDelete={handleDeleteSelected}
+              isFilterActive={!!searchInput.trim() || !!nameInput.trim() || !!clientIdInput.trim() || !!emailInput.trim() || !!phoneNumberInput.trim() || !!industryInput.trim() || !!locationInput.trim() || selectedClientStage !== "All"}
+              filterCount={(searchInput.trim() ? 1 : 0) + (nameInput.trim() ? 1 : 0) + (clientIdInput.trim() ? 1 : 0) + (emailInput.trim() ? 1 : 0) + (phoneNumberInput.trim() ? 1 : 0) + (industryInput.trim() ? 1 : 0) + (locationInput.trim() ? 1 : 0) + (selectedClientStage !== "All" ? 1 : 0)}
+              onExport={() => setOpenExportDialog(true)}
+            />
+          </div>
+
+          {/* Real-time Filter Bar */}
+          <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-4 flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Global Search Input */}
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Global quick search (name or clientId)..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-sm bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium"
+                />
+                {searchInput && (
+                  <button
+                    onClick={() => setSearchInput("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Stage Filter Dropdown */}
+              <div className="w-[180px]">
+                <Select value={selectedClientStage} onValueChange={setSelectedClientStage}>
+                  <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl text-xs font-bold uppercase tracking-wider h-10">
+                    <SelectValue placeholder="Stage" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-border">
+                    <SelectItem value="All" className="text-xs font-bold uppercase tracking-wider">All Stages</SelectItem>
+                    <SelectItem value="Lead" className="text-xs font-bold uppercase tracking-wider">Lead</SelectItem>
+                    <SelectItem value="Engaged" className="text-xs font-bold uppercase tracking-wider">Engaged</SelectItem>
+                    <SelectItem value="Signed" className="text-xs font-bold uppercase tracking-wider">Signed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Advanced Filter Toggle */}
+              <Button
+                variant={advancedFiltersOpen ? "default" : "outline"}
+                size="sm"
+                onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
+                className="rounded-xl h-10 px-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                {advancedFiltersOpen ? "Hide Advanced" : "Advanced Filters"}
+                {(nameInput || clientIdInput || emailInput || phoneNumberInput || industryInput || locationInput) && (
+                  <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                )}
+              </Button>
+
+              {/* Reset All Filters Button */}
+              {(searchInput || nameInput || clientIdInput || emailInput || phoneNumberInput || industryInput || locationInput || selectedClientStage !== "All") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="rounded-xl h-10 px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+
+            {/* Collapsible Advanced Filters Panel */}
+            {advancedFiltersOpen && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pt-3 border-t border-border/60 animate-in slide-in-from-top-2 duration-300">
+                {/* Name Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Client Name</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by name..."
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Client ID Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Client ID</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by ID..."
+                    value={clientIdInput}
+                    onChange={(e) => setClientIdInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Email Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Email Address</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by email..."
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Phone Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Phone Number</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by phone..."
+                    value={phoneNumberInput}
+                    onChange={(e) => setPhoneNumberInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Industry Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Industry</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by industry..."
+                    value={industryInput}
+                    onChange={(e) => setIndustryInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Location Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Location</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by location..."
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+  
+          {/* Table Content Area - Optimized for No Horizontal Scroll */}
+          <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+            <div className="flex-1 overflow-auto custom-scrollbar relative">
+              {isFetching && !isLoading && (
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand/20 overflow-hidden z-50">
+                  <div className="h-full bg-brand animate-pulse w-full" />
+                </div>
+              )}
              <Table className="w-full border-separate border-spacing-0 table-auto">
                <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
                  <TableRow className="hover:bg-muted/95 transition-colors">
@@ -386,26 +566,6 @@
            confirmText={isDeleting ? "Processing..." : "Delete"}
            cancelText="Cancel"
            isDeleting={isDeleting}
-         />
- 
-         <FilterModal
-           open={filterOpen}
-           onOpenChange={setFilterOpen}
-           module="clients"
-           initialFilters={{
-             name: filterName,
-             industry: filterIndustry,
-             location: filterLocation,
-             stage: filterStages,
-           }}
-           onApplyFilters={(newFilters) => {
-             setFilterName(newFilters.name || "");
-             setFilterIndustry(newFilters.industry || "");
-             setFilterLocation(newFilters.location || "");
-             setFilterStages(newFilters.stage || []);
-             setCurrentPage(1);
-             setFilterOpen(false);
-           }}
          />
  
          <ExportDialog
