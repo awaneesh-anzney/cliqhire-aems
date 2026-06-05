@@ -25,7 +25,7 @@ interface Tab {
 
 interface Candidate {
   _id?: string;
-  profileId?: string
+  profileId?: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -34,6 +34,10 @@ interface Candidate {
   skills?: string[];
   resume?: string;
   status?: string;
+  highestDegree?: string;
+  graduation?: string;
+  certification?: string;
+  noticePeriod?: string;
 }
 
 export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId: string, tabs: Tab[] }) {
@@ -158,7 +162,23 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
     try {
       const id = candidate?._id;
       if (!id) throw new Error('Missing candidate id');
-      await updateCandidateMutation.mutateAsync({ id, updatedCandidate });
+
+      let payload: any = {};
+      if (fieldKey) {
+        if (fieldKey === "phone") {
+          payload.phone = updatedCandidate.phone;
+          payload.countryCode = updatedCandidate.countryCode;
+        } else if (fieldKey === "otherPhone") {
+          payload.otherPhone = updatedCandidate.otherPhone;
+          payload.otherCountryCode = updatedCandidate.otherCountryCode;
+        } else {
+          payload[fieldKey] = updatedCandidate[fieldKey];
+        }
+      } else {
+        payload = updatedCandidate;
+      }
+
+      await updateCandidateMutation.mutateAsync({ id, updatedCandidate: payload });
       if (fieldKey) {
         const allFields = [
           { key: "name", label: "Candidate Name" },
@@ -177,6 +197,9 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
           { key: "nationality", label: "Nationality" },
           { key: "universityName", label: "University Name" },
           { key: "educationDegree", label: "Education Degree/Certificate" },
+          { key: "highestDegree", label: "Highest Degree" },
+          { key: "graduation", label: "Graduation Details" },
+          { key: "certification", label: "Professional Certifications" },
           { key: "primaryLanguage", label: "Primary Language" },
           { key: "willingToRelocate", label: "Are you willing to relocate?" },
           { key: "iqama", label: "Iqama is transferable ?" },

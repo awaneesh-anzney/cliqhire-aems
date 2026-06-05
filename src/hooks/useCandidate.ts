@@ -11,6 +11,9 @@ export interface CandidateFilters {
   email?: string;
   experience?: string;
   location?: string;
+  profileId?: string;
+  phone?: string;
+  noticePeriod?: string;
 }
 
 export function useCandidates(params: CandidateFilters) {

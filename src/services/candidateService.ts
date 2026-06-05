@@ -22,6 +22,9 @@ export interface Candidate {
   nationality?: string;
   universityName?: string;
   educationDegree?: string;
+  highestDegree?: string;
+  graduation?: string;
+  certification?: string;
   primaryLanguage?: string;
   willingToRelocate?: string;
   description?: string;
@@ -210,6 +213,9 @@ class CandidateService {
     email?: string;
     experience?: string;
     location?: string;
+    profileId?: string;
+    phone?: string;
+    noticePeriod?: string;
   }): Promise<{
     candidates: Candidate[];
     total: number;
@@ -231,6 +237,9 @@ class CandidateService {
       if (params?.email) queryParams.append('email', params.email);
       if (params?.experience) queryParams.append('experience', params.experience);
       if (params?.location) queryParams.append('location', params.location);
+      if (params?.profileId) queryParams.append('profileId', params.profileId);
+      if (params?.phone) queryParams.append('phone', params.phone);
+      if (params?.noticePeriod) queryParams.append('noticePeriod', params.noticePeriod);
       
       const url = `/api/candidates?${queryParams.toString()}`;
       const response = await api.get(url);

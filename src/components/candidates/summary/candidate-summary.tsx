@@ -76,6 +76,9 @@ const detailsFields = [
   { key: "continent", label: "Continent" },
   { key: "universityName", label: "University Name" },
   { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
+  { key: "highestDegree", label: "Highest Degree" },
+  { key: "graduation", label: "Graduation Details", isTextarea: true },
+  { key: "certification", label: "Professional Certifications", isTextarea: true },
   { key: "primaryLanguage", label: "Primary Language" },
   { key: "willingToRelocate", label: "Are you willing to relocate ?" },
   { key: "iqama", label: "Iqama is transferable ?" },
@@ -328,6 +331,12 @@ const CandidateSummary = ({
                 isContinent={field.key === "continent"}
                 isPhone={field.key === "phone" || field.key === "otherPhone"}
                 countryCode={field.key === "phone" ? localCandidate?.countryCode : localCandidate?.otherCountryCode}
+                options={field.key === "noticePeriod" ? [
+                  { value: "15 Days", label: "15 Days" },
+                  { value: "1 Month", label: "1 Month" },
+                  { value: "2 Months", label: "2 Months" },
+                  { value: "3 Months", label: "3 Months" }
+                ] : undefined}
               />
             )}
 
