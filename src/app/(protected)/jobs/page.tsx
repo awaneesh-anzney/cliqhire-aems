@@ -1,17 +1,18 @@
 "use client";
- import { Button } from "@/components/ui/button";
- import { Plus, SlidersHorizontal, RefreshCcw, MoreVertical, Loader, X, Briefcase, MapPin, Users2, Calendar, Search, FilterX, Lock, Hash, DollarSign } from "lucide-react";
- import { toast } from "sonner";
- import { useState, useMemo } from "react";
- import { Checkbox } from "@/components/ui/checkbox";
- import { Label } from "@/components/ui/label";
- import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuLabel,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
- } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Plus, SlidersHorizontal, RefreshCcw, MoreVertical, Loader, X, Briefcase, MapPin, Users2, Calendar, Search, Lock, Hash, DollarSign } from "lucide-react";
+import { toast } from "sonner";
+import { useState, useMemo, useEffect } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
  import {
    Table,
    TableHead,
@@ -38,7 +39,6 @@
  import { JobPaginationControls } from "@/components/jobs/JobPaginationControls";
  import { useAuth } from "@/contexts/AuthContext";
  import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
- import { FilterModal } from "@/components/filter-modal";
  import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
  import { useExportJobs } from "@/hooks/useExportJobs";
  import { useJobs, useUpdateJobStage, useDeleteJob } from "@/hooks/useJobs";
@@ -46,7 +46,20 @@
  import { cn } from "@/lib/utils";
  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
  
- function ConfirmStageChangeDialog({
+ function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+function ConfirmStageChangeDialog({
    open,
    onOpenChange,
    onConfirm,
@@ -83,10 +96,30 @@
    const canDeleteJobs = isAdmin || hasPermission('jobs', 'delete');
  
    const [open, setOpen] = useState(false);
-   const [filterOpen, setFilterOpen] = useState(false);
-   const [filterPositionName, setFilterPositionName] = useState("");
-   const [filterJobOwner, setFilterJobOwner] = useState("");
-   const [selectedStages, setSelectedStages] = useState<JobStage[]>([]);
+   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+   const [openExportDialog, setOpenExportDialog] = useState(false);
+   const { mutateAsync: exportJobsMutation } = useExportJobs();
+
+   const [searchInput, setSearchInput] = useState("");
+   const [jobTitleInput, setJobTitleInput] = useState("");
+   const [jobIdInput, setJobIdInput] = useState("");
+   const [locationInput, setLocationInput] = useState("");
+   const [clientInput, setClientInput] = useState("");
+   const [headcountInput, setHeadcountInput] = useState("");
+   const [jobTypeInput, setJobTypeInput] = useState("");
+   const [selectedStage, setSelectedStage] = useState<string>("All");
+   const [includeInactiveInput, setIncludeInactiveInput] = useState(false);
+
+   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+
+   const debouncedSearch = useDebounce(searchInput, 300);
+   const debouncedJobTitle = useDebounce(jobTitleInput, 300);
+   const debouncedJobId = useDebounce(jobIdInput, 300);
+   const debouncedLocation = useDebounce(locationInput, 300);
+   const debouncedClient = useDebounce(clientInput, 300);
+   const debouncedHeadcount = useDebounce(headcountInput, 300);
+   const debouncedJobType = useDebounce(jobTypeInput, 300);
+
    const [confirmOpen, setConfirmOpen] = useState(false);
    const [pendingStageChange, setPendingStageChange] = useState<{
      jobId: string;
@@ -94,36 +127,55 @@
    } | null>(null);
    const [currentPage, setCurrentPage] = useState(1);
    const [pageSize, setPageSize] = useState(10);
-   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
    const [isDeleting, setIsDeleting] = useState(false);
-   const [openExportDialog, setOpenExportDialog] = useState(false);
-   const { mutateAsync: exportJobsMutation } = useExportJobs();
- 
+
    const router = useRouter();
    const { mutateAsync: updateStageMutation } = useUpdateJobStage();
    const { mutateAsync: deleteJobMutation } = useDeleteJob();
- 
+
+   useEffect(() => {
+     setCurrentPage(1);
+   }, [
+     debouncedSearch,
+     debouncedJobTitle,
+     debouncedJobId,
+     debouncedLocation,
+     debouncedClient,
+     debouncedHeadcount,
+     debouncedJobType,
+     selectedStage,
+     includeInactiveInput,
+   ]);
+
+   const clearAllFilters = () => {
+     setSearchInput("");
+     setJobTitleInput("");
+     setJobIdInput("");
+     setLocationInput("");
+     setClientInput("");
+     setHeadcountInput("");
+     setJobTypeInput("");
+     setSelectedStage("All");
+     setIncludeInactiveInput(false);
+     setCurrentPage(1);
+   };
+
    const { data: jobsData, isLoading, isFetching, refetch } = useJobs({
      page: currentPage,
      limit: pageSize,
-     ...(filterPositionName.trim() && { search: filterPositionName.trim() }),
+     search: debouncedSearch || undefined,
+     jobTitle: debouncedJobTitle || undefined,
+     jobId: debouncedJobId || undefined,
+     location: debouncedLocation || undefined,
+     client: debouncedClient || undefined,
+     headcount: debouncedHeadcount ? parseInt(debouncedHeadcount) || undefined : undefined,
+     jobType: debouncedJobType || undefined,
+     stage: selectedStage === "All" ? undefined : selectedStage,
+     includeInactive: includeInactiveInput || undefined,
    });
- 
-   const allJobs = useMemo(() => {
-       let result = jobsData?.jobs ?? [];
-       if (selectedStages.length > 0 || filterJobOwner) {
-           const owner = filterJobOwner.trim().toLowerCase();
-           result = result.filter((job: any) => {
-             const jobStage = (job.stage || job.jobStatus) as JobStage | undefined;
-             const matchesStage = selectedStages.length === 0 || (jobStage ? selectedStages.includes(jobStage) : false);
-             const clientLabel = typeof job.client === "object" ? (job.client?.name ?? "") : (job.client ?? "");
-             const matchesOwner = owner === "" || clientLabel.toLowerCase().includes(owner);
-             return matchesStage && matchesOwner;
-           });
-       }
-       return result;
-   }, [jobsData, selectedStages, filterJobOwner]);
+
+   const allJobs = jobsData?.jobs ?? [];
  
    const totalJobs = jobsData?.totalCount ?? 0;
    const totalPages = jobsData?.totalPages ?? 1;
@@ -220,25 +272,191 @@
          {/* Page Header */}
          <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
            <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
-           <Dashboardheader
-             setOpen={setOpen}
-             setFilterOpen={setFilterOpen}
-             initialLoading={isLoading || isFetching}
-             onRefresh={() => refetch()}
-             onDelete={handleDeleteSelected}
-             heading="Jobs"
-             buttonText="Add Job"
-             selectedCount={selectedRows.size}
-             showCreateButton={canModifyJobs}
-             isFilterActive={selectedStages.length > 0 || !!filterPositionName.trim() || !!filterJobOwner.trim()}
-             filterCount={(selectedStages.length > 0 ? 1 : 0) + (filterPositionName.trim() ? 1 : 0) + (filterJobOwner.trim() ? 1 : 0)}
-             onExport={() => setOpenExportDialog(true)}
-           />
-         </div>
- 
-         {/* Table Area */}
-         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
-           <div className="flex-1 overflow-auto custom-scrollbar relative">
+            <Dashboardheader
+              setOpen={setOpen}
+              setFilterOpen={() => setAdvancedFiltersOpen(prev => !prev)}
+              initialLoading={isFetching}
+              onRefresh={() => refetch()}
+              onDelete={handleDeleteSelected}
+              heading="Jobs"
+              buttonText="Add Job"
+              selectedCount={selectedRows.size}
+              showCreateButton={canModifyJobs}
+              showFilterButton={true}
+              isFilterActive={!!searchInput.trim() || !!jobTitleInput.trim() || !!jobIdInput.trim() || !!locationInput.trim() || !!clientInput.trim() || !!headcountInput.trim() || !!jobTypeInput.trim() || selectedStage !== "All" || includeInactiveInput}
+              filterCount={(searchInput.trim() ? 1 : 0) + (jobTitleInput.trim() ? 1 : 0) + (jobIdInput.trim() ? 1 : 0) + (locationInput.trim() ? 1 : 0) + (clientInput.trim() ? 1 : 0) + (headcountInput.trim() ? 1 : 0) + (jobTypeInput.trim() ? 1 : 0) + (selectedStage !== "All" ? 1 : 0) + (includeInactiveInput ? 1 : 0)}
+              onExport={() => setOpenExportDialog(true)}
+            />
+          </div>
+
+          {/* Real-time Filter Bar */}
+          <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-4 flex flex-col gap-3 animate-in fade-in duration-300">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Global Search Input */}
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Global quick search (title or ID)..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-sm bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium"
+                />
+                {searchInput && (
+                  <button
+                    onClick={() => setSearchInput("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Stage Filter Dropdown */}
+              <div className="w-[180px]">
+                <Select value={selectedStage} onValueChange={setSelectedStage}>
+                  <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl text-xs font-bold uppercase tracking-wider h-10">
+                    <SelectValue placeholder="Stage" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-border">
+                    <SelectItem value="All" className="text-xs font-bold uppercase tracking-wider">All Stages</SelectItem>
+                    <SelectItem value="Open" className="text-xs font-bold uppercase tracking-wider">Open</SelectItem>
+                    <SelectItem value="Hired" className="text-xs font-bold uppercase tracking-wider">Hired</SelectItem>
+                    <SelectItem value="On Hold" className="text-xs font-bold uppercase tracking-wider">On Hold</SelectItem>
+                    <SelectItem value="Closed" className="text-xs font-bold uppercase tracking-wider">Closed</SelectItem>
+                    <SelectItem value="Active" className="text-xs font-bold uppercase tracking-wider">Active</SelectItem>
+                    <SelectItem value="Onboarding" className="text-xs font-bold uppercase tracking-wider">Onboarding</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Advanced Filter Toggle */}
+              <Button
+                variant={advancedFiltersOpen ? "default" : "outline"}
+                size="sm"
+                onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
+                className="rounded-xl h-10 px-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                {advancedFiltersOpen ? "Hide Advanced" : "Advanced Filters"}
+                {(jobTitleInput || jobIdInput || locationInput || clientInput || headcountInput || jobTypeInput || includeInactiveInput) && (
+                  <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                )}
+              </Button>
+
+              {/* Reset All Filters Button */}
+              {(searchInput || jobTitleInput || jobIdInput || locationInput || clientInput || headcountInput || jobTypeInput || selectedStage !== "All" || includeInactiveInput) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="rounded-xl h-10 px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+
+            {/* Collapsible Advanced Filters Panel */}
+            {advancedFiltersOpen && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 pt-3 border-t border-border/60 animate-in slide-in-from-top-2 duration-300">
+                {/* Job Title Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Job Title</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by title..."
+                    value={jobTitleInput}
+                    onChange={(e) => setJobTitleInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Job ID Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Job ID</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by ID..."
+                    value={jobIdInput}
+                    onChange={(e) => setJobIdInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Location Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Location</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by location..."
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Client Name/ID Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Client (Name or ID)</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by client..."
+                    value={clientInput}
+                    onChange={(e) => setClientInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Headcount Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Headcount</label>
+                  <input
+                    type="number"
+                    placeholder="Exact headcount..."
+                    value={headcountInput}
+                    onChange={(e) => setHeadcountInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Job Type Filter */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Job Type</label>
+                  <input
+                    type="text"
+                    placeholder="Full-time, Contract..."
+                    value={jobTypeInput}
+                    onChange={(e) => setJobTypeInput(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                  />
+                </div>
+
+                {/* Include Inactive Checkbox */}
+                <div className="flex items-center gap-2 h-full min-h-[40px] pt-4">
+                  <Checkbox
+                    id="includeInactive"
+                    checked={includeInactiveInput}
+                    onCheckedChange={(checked) => setIncludeInactiveInput(checked === true)}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                  <Label htmlFor="includeInactive" className="text-[10px] font-black text-muted-foreground uppercase tracking-wider cursor-pointer select-none">
+                    Show Inactive
+                  </Label>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Table Area */}
+          <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+            <div className="flex-1 overflow-auto custom-scrollbar relative">
+              {isFetching && !isLoading && (
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand/20 overflow-hidden z-50">
+                  <div className="h-full bg-brand animate-pulse w-full" />
+                </div>
+              )}
              <Table className="w-full border-separate border-spacing-0 table-auto">
                <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
                  <TableRow className="hover:bg-muted/95 transition-colors">
@@ -444,24 +662,6 @@
          description={`Confirm deletion of ${selectedRows.size} job requirements.`}
          confirmText={isDeleting ? 'Processing...' : 'Delete Permanently'}
          isDeleting={isDeleting}
-       />
- 
-       <FilterModal
-         open={filterOpen}
-         onOpenChange={setFilterOpen}
-         module="jobs"
-         initialFilters={{
-           name: filterPositionName,
-           owner: filterJobOwner,
-           stage: selectedStages,
-         }}
-         onApplyFilters={(newFilters) => {
-           setFilterPositionName(newFilters.name || "");
-           setFilterJobOwner(newFilters.owner || "");
-           setSelectedStages(newFilters.stage || []);
-           setCurrentPage(1);
-           setFilterOpen(false);
-         }}
        />
  
        {canModifyJobs && <CreateJobRequirementForm open={open} onOpenChange={setOpen} />}

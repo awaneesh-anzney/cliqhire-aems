@@ -223,6 +223,10 @@ const getJobs = async (params?: {
   page?: number;
   limit?: number;
   sort?: string;
+  jobId?: string;
+  jobTitle?: string;
+  headcount?: number;
+  includeInactive?: any;
 }): Promise<JobsPage> => {
   const page = params?.page ?? 1;
   const limit = params?.limit ?? 10;
