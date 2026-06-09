@@ -174,18 +174,42 @@ export function mapEntryToJob(entry: any): Job {
   console.log('DEBUG: Extracted hiring managers:', hiringManagers);
   console.log('DEBUG: Extracted recruiters:', recruiters);
 
-  const countSource = Array.isArray(entry.candidateIdArray) && entry.candidateIdArray.length > 0
-    ? entry.candidateIdArray
-    : (Array.isArray(entry.candidates?.data) ? entry.candidates.data : (Array.isArray(entry.candidates) ? entry.candidates : []));
+  const countSource = Array.isArray(entry.candidates?.data)
+    ? entry.candidates.data
+    : (Array.isArray(entry.candidates)
+      ? entry.candidates
+      : (Array.isArray(entry.candidateIdArray) ? entry.candidateIdArray : []));
 
   const stageCounts: Record<string, number> = {};
-  countSource.forEach((c: any) => {
-    const rawStage = c?.currentStage || "Sourcing";
-    const uiStage = mapBackendStageToUIStage(rawStage);
-    if (uiStage) {
-      stageCounts[uiStage] = (stageCounts[uiStage] || 0) + 1;
-    }
-  });
+  
+  if (entry.stageCounts && typeof entry.stageCounts === "object") {
+    Object.entries(entry.stageCounts).forEach(([backendStage, count]) => {
+      // Exclude grand total and disqualified aggregates from individual stage filters
+      if (backendStage === 'total' || backendStage === 'disqualified') return;
+      const uiStage = mapBackendStageToUIStage(backendStage);
+      if (uiStage) {
+        stageCounts[uiStage] = (stageCounts[uiStage] || 0) + (count as number);
+      }
+    });
+  } else if (Array.isArray(entry.stages) && entry.stages.some((s: any) => s && (typeof s.candidateCount === "number" || typeof s.count === "number"))) {
+    entry.stages.forEach((s: any) => {
+      if (s && s.name) {
+        const uiStage = mapBackendStageToUIStage(s.name);
+        const count = typeof s.candidateCount === "number" ? s.candidateCount : (typeof s.count === "number" ? s.count : 0);
+        if (uiStage) {
+          stageCounts[uiStage] = (stageCounts[uiStage] || 0) + count;
+        }
+      }
+    });
+  } else {
+    countSource.forEach((c: any) => {
+      const rawStage = c?.currentStage || "Sourcing";
+      const uiStage = mapBackendStageToUIStage(rawStage);
+      if (uiStage) {
+        stageCounts[uiStage] = (stageCounts[uiStage] || 0) + 1;
+      }
+    });
+  }
 
   const mappedJob = {
     id: entry._id,
@@ -207,7 +231,12 @@ export function mapEntryToJob(entry: any): Job {
     priority: entry.priority,
     notes: entry.notes,
     assignedDate: entry.assignedDate || entry.createdAt,
-    totalCandidates: entry.totalCandidates,
+    totalCandidates: entry.totalCandidates ?? 
+      entry.candidates?.pagination?.total ?? 
+      entry.pagination?.total ?? 
+      (Object.keys(stageCounts).length > 0
+        ? Object.values(stageCounts).reduce((a, b) => a + b, 0)
+        : (Array.isArray(entry.candidateIdArray) ? entry.candidateIdArray.length : 0)),
     activeCandidates: entry.activeCandidates,
     completedCandidates: entry.completedCandidates,
     droppedCandidates: entry.droppedCandidates,

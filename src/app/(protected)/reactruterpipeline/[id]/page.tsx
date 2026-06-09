@@ -299,35 +299,29 @@ const Page = () => {
     setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
   };
 
-  const getFilteredCandidates = useMemo(() => {
-    if (!job) return [];
-    if (!selectedStageFilter) return job.candidates;
-    return job.candidates.filter(c => c.currentStage === selectedStageFilter);
-  }, [job, selectedStageFilter]);
+  const pagination = useMemo(() => {
+    return jobResponse?.data?.candidates?.pagination || jobResponse?.data?.pagination;
+  }, [jobResponse]);
 
   const paginatedCandidates = useMemo(() => {
-    if (jobResponse?.data?.candidates?.pagination) {
-      return job?.candidates || [];
-    }
-    const startIndex = (currentPage - 1) * pageSize;
-    return getFilteredCandidates.slice(startIndex, startIndex + pageSize);
-  }, [jobResponse, job?.candidates, getFilteredCandidates, currentPage, pageSize]);
+    return job?.candidates || [];
+  }, [job?.candidates]);
 
   const totalCandidatesCount = useMemo(() => {
-    if (jobResponse?.data?.candidates?.pagination) {
-      return jobResponse.data.candidates.pagination.total;
+    if (pagination) {
+      return pagination.total ?? pagination.totalCandidates ?? pagination.totalItems ?? 0;
     }
     return selectedStageFilter
-      ? getFilteredCandidates.length
-      : (job?.totalCandidates || job?.candidates?.length || 0);
-  }, [jobResponse, job?.totalCandidates, job?.candidates, getFilteredCandidates, selectedStageFilter]);
+      ? (job?.stageCounts?.[selectedStageFilter] || 0)
+      : (job?.totalCandidates || 0);
+  }, [pagination, job?.stageCounts, job?.totalCandidates, selectedStageFilter]);
 
   const totalPages = useMemo(() => {
-    if (jobResponse?.data?.candidates?.pagination) {
-      return jobResponse.data.candidates.pagination.totalPages;
+    if (pagination) {
+      return pagination.totalPages ?? pagination.pages ?? (Math.ceil(totalCandidatesCount / pageSize) || 1);
     }
     return Math.ceil(totalCandidatesCount / pageSize) || 1;
-  }, [jobResponse, totalCandidatesCount, pageSize]);
+  }, [pagination, totalCandidatesCount, pageSize]);
 
   if (isLoading) {
     return (

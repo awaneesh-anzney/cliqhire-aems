@@ -40,9 +40,7 @@
  
          {/* Stage Specific Filters */}
          {stages.map((stage) => {
-           const count = job.stageCounts 
-             ? (job.stageCounts[stage] || 0) 
-             : job.candidates.filter((c) => c.currentStage === stage).length;
+           const count = job.stageCounts?.[stage] || 0;
            const isActive = selectedStage === stage;
            
            return (
