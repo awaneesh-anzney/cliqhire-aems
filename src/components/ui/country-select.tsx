@@ -3,15 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Search, Loader2, ChevronDown } from "lucide-react";
-import axios from "axios";
 import { CONTINENTS } from "@/lib/constants";
-
-interface CountryData {
-    name: { common: string };
-    flags: { svg: string; png: string; alt: string };
-    demonyms?: { eng?: { m: string; f: string } };
-    cca2: string;
-}
+import { COUNTRIES_DATA, type CountryData } from "./countries-data";
 
 interface CountrySelectProps {
     value: string;
@@ -30,29 +23,13 @@ export function CountrySelect({
     className = "",
     error = false,
 }: CountrySelectProps) {
-    const [countries, setCountries] = useState<CountryData[]>([]);
+    const countries = COUNTRIES_DATA;
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState("");
-    const [loading, setLoading] = useState(false);
+    const loading = false;
 
     const debouncedSearch = useDebounce(search, 300);
     const wrapperRef = useRef<HTMLDivElement>(null);
-
-    // Fetch all countries initially
-    useEffect(() => {
-        const fetchCountries = async () => {
-            setLoading(true);
-            try {
-                const res = await axios.get("https://restcountries.com/v3.1/all?fields=name,flags,demonyms,cca2");
-                setCountries(res.data);
-            } catch (err) {
-                console.error("Failed to fetch countries", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCountries();
-    }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
