@@ -5,6 +5,7 @@ import { CandidateNotesContent } from '@/components/candidates/notes/notes-conte
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CandidateStatusBadge } from "@/components/candidate-status-badge";
 import { SlidersHorizontal, RefreshCcw, Plus, FileText, Users, Briefcase, Star, Activity, StickyNote, Paperclip, Clock, User, FileIcon, FilePen, Mail, Phone, MapPin, Calendar, Check, Loader, ArrowLeft } from "lucide-react";
 import { AttachmentsContent } from '@/components/candidates/attachments/attachments-content';
 import { JobsContent, JobsContentRef } from '@/components/candidates/jobs/jobs-content';
@@ -254,92 +255,85 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
   return (
     <div className="flex flex-col h-full bg-background font-sans">
       {/* Redesigned Premium Header Card Wrapper */}
-      <div className="max-w-[1600px] mx-auto w-full px-6 pt-6">
-        <div className="bg-card border border-border/60 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] relative overflow-hidden p-6">
+      <div className="max-w-[1600px] mx-auto w-full pb-2">
+        <div className="bg-card border border-border/60 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] relative overflow-hidden p-4 sm:py-4 sm:px-5">
           {/* Subtle decorative background gradient accent */}
           <div className="absolute top-0 right-0 w-80 h-32 bg-brand/5 blur-[80px] pointer-events-none rounded-full" />
           
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 relative z-10">
             {/* Left Column: Avatar + Basic Info */}
-            <div className="flex items-start gap-4 sm:gap-5 min-w-0">
+            <div className="flex items-start gap-4 min-w-0">
               <div className={cn(
-                "w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] sm:rounded-[24px] flex items-center justify-center text-xl sm:text-2xl font-bold text-white shrink-0 bg-gradient-to-tr shadow-md select-none",
+                "w-14 h-14 sm:w-16 sm:h-16 rounded-[16px] sm:rounded-[20px] flex items-center justify-center text-lg sm:text-xl font-bold text-white shrink-0 bg-gradient-to-tr shadow-md select-none",
                 getAvatarGradient(candidate.name)
               )}>
                 {getInitials(candidate.name)}
               </div>
               
-              <div className="space-y-3 min-w-0 flex-1">
+              <div className="space-y-2 min-w-0 flex-1">
                 <div className="space-y-1">
                   {/* Name + Badges */}
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight leading-none truncate max-w-[280px] sm:max-w-[450px]">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight leading-none truncate max-w-[280px] sm:max-w-[450px]">
                       {candidate.name || "Untitled Candidate"}
                     </h1>
                     
                     {candidate.profileId && (
-                      <span className="bg-[#EEEDFC] text-[#553C9A] border border-[#D6D3F8] rounded-full px-3.5 py-0.5 text-xs font-bold font-mono leading-none">
+                      <span className="bg-[#EEEDFC] text-[#553C9A] border border-[#D6D3F8] rounded-full px-2.5 py-0.5 text-xs font-bold font-mono leading-none">
                         # {candidate.profileId}
                       </span>
                     )}
                     
-                    <span className={cn(
-                      "border rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1 leading-none shrink-0",
-                      candidate.status === "Placed" || candidate.status === "Active" || !candidate.status
-                        ? "bg-[#EAF7EC] text-[#2E7D32] border-[#CEEAD6]"
-                        : candidate.status === "Interviewing"
-                        ? "bg-[#EBF3FC] text-[#0288D1] border-[#B3E5FC]"
-                        : candidate.status === "Offer"
-                        ? "bg-[#F3E5F5] text-[#7B1FA2] border-[#E1BEE7]"
-                        : "bg-[#FDEDEC] text-[#D32F2F] border-[#FADBD8]"
-                    )}>
-                      <span className="w-3.5 h-3.5 rounded-full border border-current flex items-center justify-center shrink-0">
-                        <Check className="w-2 h-2 stroke-[3]" />
-                      </span>
-                      {candidate.status || "Active"}
-                    </span>
+                    <CandidateStatusBadge
+                      id={candidate._id}
+                      status={(candidate.status as any) || "Active"}
+                      onStatusChange={async (id, newStatus) => {
+                        await handleCandidateUpdate({ status: newStatus }, "status");
+                      }}
+                      disabled={!canModifyCandidates}
+                    />
                   </div>
 
                   {/* Metadata Row */}
                   <div className="flex flex-wrap items-center gap-y-1 text-xs sm:text-sm font-medium text-muted-foreground">
                     <div className="flex items-center gap-1.5 hover:text-brand transition-colors cursor-pointer">
-                      <MapPin className="h-4 w-4 text-muted-foreground/60" />
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground/60" />
                       <span>{candidate.location || "Global"}</span>
                     </div>
 
-                    <span className="text-muted-foreground/30 mx-2.5 select-none">|</span>
+                    <span className="text-muted-foreground/30 mx-2 select-none">|</span>
 
                     <div className="flex items-center gap-1.5">
-                      <Briefcase className="h-4 w-4 text-muted-foreground/60" />
+                      <Briefcase className="h-3.5 w-3.5 text-muted-foreground/60" />
                       <span>{candidate.experience || "No experience info"}</span>
                     </div>
 
-                    <span className="text-muted-foreground/30 mx-2.5 select-none">|</span>
+                    <span className="text-muted-foreground/30 mx-2 select-none">|</span>
 
                     <div className="flex items-center gap-1.5">
-                      <Clock className="h-4 w-4 text-muted-foreground/60" />
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground/60" />
                       <span>Updated just now</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Quick Contact Links */}
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   {candidate.email && (
                     <a 
                       href={`mailto:${candidate.email}`} 
-                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-4 py-2 transition-colors cursor-pointer"
+                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
                     >
-                      <Mail className="h-4 w-4 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
+                      <Mail className="h-3.5 w-3.5 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
                       {candidate.email}
                     </a>
                   )}
                   {candidate.phone && (
                     <a 
                       href={`tel:${candidate.phone}`} 
-                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-4 py-2 transition-colors cursor-pointer"
+                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
                     >
-                      <Phone className="h-4 w-4 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
+                      <Phone className="h-3.5 w-3.5 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
                       {formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}
                     </a>
                   )}
@@ -348,14 +342,14 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
             </div>
 
             {/* Right Column: Actions */}
-            <div className="flex items-center shrink-0 self-start md:self-center mt-2 md:mt-0">
+            <div className="flex items-center shrink-0 self-start md:self-center mt-1 md:mt-0">
               <Button 
                 variant="outline" 
                 size="icon" 
                 onClick={handleRefresh} 
-                className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl border border-[#E2E8F0] dark:border-border bg-white dark:bg-background text-[#555] dark:text-muted-foreground hover:bg-muted shadow-sm flex items-center justify-center transition-all"
+                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl border border-[#E2E8F0] dark:border-border bg-white dark:bg-background text-[#555] dark:text-muted-foreground hover:bg-muted shadow-sm flex items-center justify-center transition-all"
               >
-                <RefreshCcw className="w-4 h-4" />
+                <RefreshCcw className="w-3.5 h-3.5" />
               </Button>
             </div>
           </div>
@@ -363,7 +357,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
       </div>
 
       {/* Modern Segmented Control Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full bg-card border border-border/60 rounded-2xl p-2">
         <div className="bg-card border-b border-border/60 sticky top-0 z-20 px-6 py-3">
           <TabsList className="inline-flex items-center h-11 p-1 bg-muted/80 rounded-2xl border border-border/50 shadow-inner max-w-full overflow-x-auto custom-scrollbar gap-1">
             {tabs.map((tab) => {
