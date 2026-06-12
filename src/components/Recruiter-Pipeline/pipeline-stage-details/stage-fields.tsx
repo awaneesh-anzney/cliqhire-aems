@@ -114,7 +114,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
       return [
         {
           key: "sourcingDate",
-          label: "Sourcing Date",
+          label: "CV Received Date",
           value: formatApiDate(sourcingData.sourcingDate),
           icon: <CalendarDays className="h-4 w-4" />,
           color: "bg-blue-50 text-blue-600",
@@ -213,7 +213,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
         },
         {
           key: "aemsInterviewDate",
-          label: "AEMS Interview Date",
+          label: "Internal Interview Date",
           value: formatApiDateTime(screeningData.aemsInterviewDate),
           icon: <CalendarDays className="h-4 w-4" />,
           color: "bg-green-50 text-green-600",

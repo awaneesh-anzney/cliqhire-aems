@@ -262,7 +262,20 @@ export const createPipeline = createPipelineForJob;
  */
 export const getPipelineEntry = async (
   pipelineId: string,
-  options?: { page?: number; limit?: number; stage?: string; currentStatus?: string; priority?: string; search?: string }
+  options?: {
+    page?: number;
+    limit?: number;
+    stage?: string;
+    currentStatus?: string;
+    priority?: string;
+    search?: string;
+    isTemp?: string | boolean;
+    addedFrom?: string;
+    addedTo?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    [key: string]: any;
+  }
 ): Promise<any> => {
   try {
     const params: any = {};
@@ -272,6 +285,13 @@ export const getPipelineEntry = async (
     if (options?.currentStatus) params.currentStatus = options.currentStatus;
     if (options?.priority) params.priority = options.priority;
     if (options?.search) params.search = options.search;
+    if (options?.isTemp !== undefined && options?.isTemp !== null && options?.isTemp !== '') {
+      params.isTemp = String(options.isTemp);
+    }
+    if (options?.addedFrom) params.addedFrom = options.addedFrom;
+    if (options?.addedTo) params.addedTo = options.addedTo;
+    if (options?.sortBy) params.sortBy = options.sortBy;
+    if (options?.sortOrder) params.sortOrder = options.sortOrder;
     
     const response = await api.get(`/api/recruiter-pipeline/entry/${pipelineId}`, { params });
     return response.data;
@@ -285,16 +305,59 @@ export const getPipelineEntry = async (
  * Get pipelines visible to the current user (role-scoped).
  * ADMIN sees all; others see only jobs they are assigned to.
  */
+export interface PipelineFilterOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  priority?: string;
+  jobType?: string;
+  location?: string;
+  clientName?: string;
+  minCandidates?: number;
+  maxCandidates?: number;
+  createdFrom?: string;
+  createdTo?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  isAdmin?: boolean;
+}
+
+/**
+ * Get pipelines visible to the current user (role-scoped).
+ * ADMIN sees all; others see only jobs they are assigned to.
+ */
 export const getAllPipelineEntries = async (
-  page: number = 1,
-  limit: number = 10,
-  search?: string
+  options: PipelineFilterOptions = {}
 ): Promise<GetAllPipelineEntriesResponse> => {
   try {
-    const params: any = { page, limit };
-    if (search) params.search = search;
-    const response = await api.get('/api/recruiter-pipeline/my', { params });
-    return response.data;
+    const { isAdmin, ...params } = options;
+    const endpoint = isAdmin ? '/api/recruiter-pipeline' : '/api/recruiter-pipeline/my';
+    const response = await api.get(endpoint, { params });
+    
+    const responseData = response.data;
+    if (responseData && responseData.success) {
+      // If Admin and response.data is directly the pipelines array, normalize it
+      if (isAdmin && Array.isArray(responseData.data)) {
+        return {
+          success: true,
+          data: {
+            pipelines: responseData.data,
+            pagination: responseData.pagination || {
+              currentPage: options.page || 1,
+              totalPages: 1,
+              total: responseData.data.length,
+              limit: options.limit || 10,
+              hasNextPage: false,
+              hasPrevPage: false,
+              totalPipelines: responseData.data.length
+            }
+          },
+          appliedFilters: responseData.appliedFilters || {}
+        } as any;
+      }
+    }
+    return responseData;
   } catch (error: any) {
     console.error('Error fetching pipeline entries:', error);
     throw new Error(error.response?.data?.message || 'Failed to fetch pipeline entries');
@@ -366,23 +429,27 @@ export const getPipelineStageStatuses = async (pipelineId: string): Promise<any>
  * Add a candidate to a pipeline.
  * If initialStage is omitted, defaults to the first non-terminal stage.
  */
+export interface AddCandidatesToPipelineRequest {
+  candidateIds: string[];
+  priority?: string;
+  notes?: string;
+  initialStage?: string;
+  force?: boolean;
+}
+
 export const addCandidateToPipeline = async (
   pipelineId: string,
-  candidateId: string,
-  options?: { priority?: string; notes?: string; initialStage?: string }
-): Promise<AddJobToPipelineResponse> => {
+  request: AddCandidatesToPipelineRequest
+): Promise<any> => {
   try {
     const response = await api.post(
       `/api/recruiter-pipeline/${pipelineId}/candidates`,
-      {
-        candidateId,  // ✅ string ko JSON object mein wrap kiya
-        ...options,
-      }
+      request
     );
     return response.data;
   } catch (error: any) {
-    console.error('Error adding candidate to pipeline:', error);
-    throw new Error(error.response?.data?.message || 'Failed to add candidate to pipeline');
+    console.error('Error adding candidates to pipeline:', error);
+    throw error;
   }
 };
 
@@ -635,7 +702,47 @@ export const exportCandidatesToExcel = async (
 export const addCandidateToPipelineOld = async (
   pipelineId: string,
   candidateId: string
-) => addCandidateToPipeline(pipelineId, candidateId);
+) => addCandidateToPipeline(pipelineId, { candidateIds: [candidateId] });
 
 /** @deprecated use updateCandidateStage */
 export const moveCandidateToStage = updateCandidateStage;
+
+/**
+ * Get candidate summary (complete journey)
+ */
+export const getCandidateSummary = async (
+  pipelineId: string,
+  candidateId: string
+): Promise<any> => {
+  try {
+    const response = await api.get(
+      `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/summary`
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching candidate summary:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch candidate summary');
+  }
+};
+
+/**
+ * Export candidate summary to Excel sheet
+ */
+export const exportCandidateSummaryExcel = async (
+  pipelineId: string,
+  candidateId: string
+): Promise<Blob> => {
+  try {
+    const response = await api.get(
+      `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/summary/export`,
+      {
+        responseType: 'blob',
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error exporting candidate summary:', error);
+    throw new Error(error.response?.data?.message || 'Failed to export candidate summary');
+  }
+};
+

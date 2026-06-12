@@ -170,9 +170,9 @@
    if (isLoading) {
      return (
        <div className="flex flex-col items-center justify-center h-screen bg-muted/30 gap-4">
-         <div className="p-5 rounded-3xl bg-card shadow-2xl border border-border flex items-center gap-4 animate-in zoom-in-50 duration-700">
-           <Loader2 className="h-6 w-6 animate-spin text-brand" />
-           <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Loading Candidate Profile...</span>
+         <div className="p-4 rounded-2xl bg-card shadow-lg border border-border flex items-center gap-3 animate-in zoom-in-50 duration-700">
+           <Loader2 className="h-5 w-5 animate-spin text-brand" />
+           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Loading Candidate Profile...</span>
          </div>
        </div>
      );
@@ -180,14 +180,14 @@
  
    if (error || !candidate || !job) {
      return (
-       <div className="flex flex-col items-center justify-center h-screen gap-6 bg-muted/50 p-6">
-         <div className="p-8 rounded-[2rem] bg-card shadow-xl border border-border text-center max-w-md">
-            <User2 className="h-12 w-12 text-red-500 mx-auto mb-4 opacity-20" />
-            <h2 className="text-xl font-black text-foreground tracking-tighter mb-2">Profile Unreachable</h2>
-            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6 leading-relaxed">
+       <div className="flex flex-col items-center justify-center h-screen gap-4 bg-muted/50 p-4">
+         <div className="p-6 rounded-2xl bg-card shadow-md border border-border text-center max-w-md">
+            <User2 className="h-10 w-10 text-red-500 mx-auto mb-3 opacity-20" />
+            <h2 className="text-lg font-bold text-foreground tracking-tight mb-2">Profile Unreachable</h2>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 leading-relaxed">
                {(error as any)?.message || "The candidate profile could not be synchronized."}
             </p>
-            <Button variant="outline" onClick={() => router.back()} className="w-full h-12 rounded-xl font-black text-xs uppercase tracking-widest border-border hover:bg-muted">
+            <Button variant="outline" onClick={() => router.back()} className="w-full h-10 rounded-xl font-semibold text-xs uppercase tracking-wider border-border hover:bg-muted">
               <ChevronLeft className="h-4 w-4 mr-2" /> Return to Pipeline
             </Button>
          </div>
@@ -209,6 +209,7 @@
              onStageChange={handleStageChange}
              onStatusChange={handleStatusChange}
              canModify={canModifyPipeline}
+             pipelineId={pipelineId}
            />
            <CandidateProgressCard
              candidate={candidate}
@@ -222,10 +223,10 @@
          <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-4 duration-1000 delay-200 pr-1">
            <CandidateDisqualificationCard candidate={candidate} />
  
-           <div className="bg-card rounded-[1.5rem] border border-border shadow-xl overflow-visible p-6">
-             <div className="flex items-center gap-3 mb-6">
-                <LayoutDashboard className="h-5 w-5 text-brand" />
-                <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Stage Intelligence</h3>
+           <div className="bg-card rounded-xl border border-border shadow-md overflow-visible p-4">
+             <div className="flex items-center gap-2 mb-4">
+                <LayoutDashboard className="h-4 w-4 text-brand" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stage Intelligence</h3>
              </div>
              <PipelineStageDetails
                candidate={candidate}
@@ -257,18 +258,18 @@
          open={statusChangeDialog.isOpen}
          onOpenChange={(isOpen) => !isOpen && setStatusChangeDialog({ isOpen: false, candidate: null, newStatus: null })}
        >
-         <DialogContent className="rounded-[2rem] border-border shadow-2xl">
+         <DialogContent className="rounded-xl border-border shadow-xl">
            <DialogHeader>
-             <DialogTitle className="font-black text-foreground tracking-tighter">Confirm Status Update</DialogTitle>
-             <DialogDescription className="font-bold text-muted-foreground uppercase tracking-widest text-[11px] leading-relaxed">
-               Confirm changing the status of <strong className="text-brand">{statusChangeDialog.candidate?.name}</strong> to <strong className="text-brand">{statusChangeDialog.newStatus}</strong>.
+             <DialogTitle className="font-bold text-foreground tracking-tight">Confirm Status Update</DialogTitle>
+             <DialogDescription className="font-semibold text-muted-foreground uppercase tracking-wider text-[11px] leading-relaxed">
+               Confirm changing the status of <strong className="text-brand font-bold">{statusChangeDialog.candidate?.name}</strong> to <strong className="text-brand font-bold">{statusChangeDialog.newStatus}</strong>.
              </DialogDescription>
            </DialogHeader>
            <DialogFooter className="gap-2">
-             <Button variant="outline" onClick={() => setStatusChangeDialog({ isOpen: false, candidate: null, newStatus: null })} className="rounded-xl font-black text-[10px] uppercase tracking-widest border-border">
+             <Button variant="outline" onClick={() => setStatusChangeDialog({ isOpen: false, candidate: null, newStatus: null })} className="rounded-xl font-semibold text-[10px] uppercase tracking-wider border-border">
                Cancel
              </Button>
-             <Button onClick={handleConfirmStatusChange} className="bg-brand hover:bg-brand/90 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-brand/20">
+             <Button onClick={handleConfirmStatusChange} className="bg-brand hover:bg-brand/90 rounded-xl font-semibold text-[10px] uppercase tracking-wider shadow-md shadow-brand/20">
                Confirm Update
              </Button>
            </DialogFooter>

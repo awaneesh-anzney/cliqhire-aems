@@ -73,6 +73,8 @@ export interface JobData {
   startDateByInternalTeam?: Date | undefined;
   endDateByInternalTeam?: Date | undefined;
   totalCVs?: number;
+  cvTargets?: CvTarget[];
+  cvTargetsSummary?: CvTargetsSummary | null;
   reportingTo?: string;
   teamSize?: number | string;
   link?: string;
@@ -81,6 +83,27 @@ export interface JobData {
   jobDescriptionInternal?: string;
   // New dynamic team assignment
   jobTeamMembers?: JobTeamMemberInput[] | JobTeamMember[];
+}
+
+export interface CvTarget {
+  _id?: string;
+  label?: string;
+  startDate: string;
+  endDate: string;
+  targetCount: number;
+  achievedCount?: number;
+  remaining?: number;
+  isCompleted?: boolean;
+  isExpired?: boolean;
+}
+
+export interface CvTargetsSummary {
+  totalSlots: number;
+  completedSlots: number;
+  expiredSlots: number;
+  totalTargetCVs: number;
+  totalAchievedCVs: number;
+  totalRemainingCVs: number;
 }
 
 export interface Job extends JobData {

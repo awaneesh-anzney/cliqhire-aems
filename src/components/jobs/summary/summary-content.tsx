@@ -2,7 +2,7 @@
 
 import { DetailRow } from "@/components/clients/summary/detail-row";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Pencil } from "lucide-react";
 import { EditFieldDialog } from "./edit-field-dialog";
 import { EditSalaryDialog } from "./edit-salary-dialog";
@@ -10,11 +10,12 @@ import { updateJobById, uploadJobFile } from "@/services/jobService";
 import { JDBenefitFilesSection } from "./jd-benefit-files-section";
 import { Briefcase, MapPin, Building2, Wallet, FileText, ClipboardList, Clock, GraduationCap, Users } from "lucide-react";
 import { toast } from "sonner";
-import { JobData } from "../types";
+import { JobData, CvTarget } from "../types";
 import { Label } from "@/components/ui/label";
 import { GenderSelector } from "./gender-selector";
 import { DeadlinePicker } from "./deadline-picker";
 import { DateRangePicker } from "./date-range-picker";
+import { EditCvTargetsDialog } from "./edit-cv-targets-dialog";
 import { NationalitySelector } from "./nationality-selector";
 import { JobStageSelector } from "./job-stage-selector";
 import { format } from "date-fns";
@@ -50,12 +51,17 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
   const [isGenderDialogOpen, setIsGenderDialogOpen] = useState(false);
   const [isDeadlineDialogOpen, setIsDeadlineDialogOpen] = useState(false);
   const [isDateRangeDialogOpen, setIsDateRangeDialogOpen] = useState(false);
+  const [isCvTargetsDialogOpen, setIsCvTargetsDialogOpen] = useState(false);
   const [isNationalityDialogOpen, setIsNationalityDialogOpen] = useState(false);
   const [isJobStageDialogOpen, setIsJobStageDialogOpen] = useState(false);
   const [isExperienceDialogOpen, setIsExperienceDialogOpen] = useState(false);
   const [isTeamSizeDialogOpen, setIsTeamSizeDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const canEdit = canModify ?? true;
+
+  useEffect(() => {
+    setJobDetails(jobData);
+  }, [jobData]);
 
   const handleFieldSave = async (editingField: any, newValue: string | Date) => {
     if (!editingField || !jobDetails) return;
@@ -164,6 +170,33 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
       toast.success("Date range and CV count updated successfully");
     } catch (err) {
       toast.error("Failed to update date range and CV count");
+    }
+  };
+
+  const handleCvTargetsSave = async (updatedTargets: CvTarget[]) => {
+    if (!jobDetails) return;
+    try {
+      const res = await updateJobById(jobId, {
+        cvTargets: updatedTargets,
+      });
+
+      const updatedDetails = {
+        ...jobDetails,
+        cvTargets: updatedTargets,
+      };
+      
+      if (res?.success && res.data) {
+        const jobVal = Array.isArray(res.data) ? res.data[0] : res.data;
+        setJobDetails(jobVal as any as JobData);
+      } else {
+        setJobDetails(updatedDetails);
+      }
+
+      toast.success("CV targets updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ["job", jobId] });
+    } catch (err) {
+      toast.error("Failed to update CV targets");
+      throw err;
     }
   };
 
@@ -352,20 +385,160 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                   customEdit={canEdit ? () => setIsDeadlineDialogOpen(true) : undefined}
                   disableInternalEdit={!canEdit}
                 />
-                <DetailRow
-                  label="Internal Date Range"
-                  value={jobDetails.startDateByInternalTeam && jobDetails.endDateByInternalTeam ? `${format(jobDetails.startDateByInternalTeam, "dd-MM-yyyy")} to ${format(jobDetails.endDateByInternalTeam, "dd-MM-yyyy")}` : ""}
-                  onUpdate={() => {}}
-                  customEdit={canEdit ? () => setIsDateRangeDialogOpen(true) : undefined}
-                  disableInternalEdit={!canEdit}
-                />
-                <DetailRow
-                  label="Total Applicants"
-                  value={jobDetails.totalCVs?.toString() || "0"}
-                  onUpdate={handleUpdateField("totalCVs")}
-                  disableInternalEdit={!canEdit}
-                />
               </div>
+            </div>
+          </div>
+
+          {/* CV Targets Card */}
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-brand/10 rounded-lg">
+                  <ClipboardList className="w-4 h-4 text-brand" />
+                </div>
+                <h4 className="text-base font-semibold text-foreground">CV Targets</h4>
+              </div>
+              {canEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-brand hover:bg-brand/10 font-bold"
+                  onClick={() => setIsCvTargetsDialogOpen(true)}
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
+            <div className="p-5 space-y-5">
+              {!jobDetails.cvTargets || jobDetails.cvTargets.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground bg-muted/20 border border-dashed border-border rounded-xl">
+                  <p className="text-sm font-medium">No CV target slots configured.</p>
+                  {canEdit && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => setIsCvTargetsDialogOpen(true)}
+                      className="text-brand font-bold mt-1"
+                    >
+                      Add targets
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {/* Overall progress */}
+                  {jobDetails.cvTargetsSummary && (
+                    <div className="bg-muted/30 p-4 rounded-xl border border-border space-y-2">
+                      <div className="flex justify-between text-sm font-bold text-foreground">
+                        <span>Overall Sourced Progress</span>
+                        <span>
+                          {jobDetails.cvTargetsSummary.totalAchievedCVs} / {jobDetails.cvTargetsSummary.totalTargetCVs} CVs
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-brand transition-all duration-500"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              (jobDetails.cvTargetsSummary.totalAchievedCVs /
+                                (jobDetails.cvTargetsSummary.totalTargetCVs || 1)) *
+                                100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                        <span>
+                          {Math.round(
+                            (jobDetails.cvTargetsSummary.totalAchievedCVs /
+                              (jobDetails.cvTargetsSummary.totalTargetCVs || 1)) *
+                              100
+                          )}
+                          % Completed
+                        </span>
+                        <span>
+                          {jobDetails.cvTargetsSummary.totalRemainingCVs} remaining
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Individual slots */}
+                  <div className="space-y-4 pt-1">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-1">Sourcing Phases</p>
+                    {jobDetails.cvTargets.map((slot) => {
+                      const achieved = slot.achievedCount || 0;
+                      const target = slot.targetCount || 1;
+                      const remaining = slot.remaining ?? Math.max(0, target - achieved);
+                      const isCompleted = slot.isCompleted || achieved >= target;
+                      const isExpired = slot.isExpired;
+
+                      // Badge configuration
+                      let badgeLabel = "Active";
+                      let badgeCls = "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+                      if (isCompleted) {
+                        badgeLabel = "Completed";
+                        badgeCls = "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+                      } else if (isExpired) {
+                        badgeLabel = "Expired";
+                        badgeCls = "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+                      }
+
+                      // Date format helper
+                      const formatDateRange = (startStr: string, endStr: string) => {
+                        try {
+                          const start = new Date(startStr);
+                          const end = new Date(endStr);
+                          return `${format(start, "d MMM")} – ${format(end, "d MMM yyyy")}`;
+                        } catch {
+                          return "";
+                        }
+                      };
+
+                      return (
+                        <div key={slot._id} className="p-3 bg-muted/20 border border-border rounded-xl space-y-2.5">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-sm font-bold text-foreground">
+                                {slot.label || `Sourcing Slot`}
+                              </p>
+                              <p className="text-xs text-muted-foreground font-semibold">
+                                {formatDateRange(slot.startDate, slot.endDate)}
+                              </p>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badgeCls}`}>
+                              {badgeLabel}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-full transition-all duration-500 ${
+                                  isCompleted ? "bg-green-500" : isExpired ? "bg-red-500" : "bg-blue-500"
+                                }`}
+                                style={{
+                                  width: `${Math.min(100, (achieved / target) * 100)}%`,
+                                }}
+                              />
+                            </div>
+                            <div className="flex justify-between text-[11px] font-bold text-muted-foreground">
+                              <span>
+                                {achieved} / {target} CVs
+                              </span>
+                              <span>
+                                {isCompleted ? "Goal Met" : `${remaining} remaining`}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -518,6 +691,16 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
           setIsDateRangeDialogOpen(false);
         }}
       />
+      )}
+
+      {/* CV Targets Dialog */}
+      {canEdit && (
+        <EditCvTargetsDialog
+          open={isCvTargetsDialogOpen}
+          onClose={() => setIsCvTargetsDialogOpen(false)}
+          cvTargets={jobDetails.cvTargets}
+          onSave={handleCvTargetsSave}
+        />
       )}
 
       {/* Nationality Selector Dialog */}

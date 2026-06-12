@@ -8,7 +8,7 @@
  import { StatusBadge } from "@/components/Recruiter-Pipeline/status-badge";
  import { useRouter } from "next/navigation";
  import { cn } from "@/lib/utils";
- import { Briefcase, Building2, User2, MapPin, Globe, ChevronLeft } from "lucide-react";
+ import { Briefcase, Building2, User2, MapPin, Globe, ChevronLeft, FileText } from "lucide-react";
  import { Button } from "@/components/ui/button";
  
  interface Props {
@@ -16,13 +16,14 @@
    onStageChange?: (candidate: Candidate, newStage: string) => void;
    onStatusChange?: (candidate: Candidate, newStatus: string) => void;
    canModify?: boolean;
+   pipelineId?: string;
  }
  
- export function CandidateHeaderCard({ candidate, onStageChange, onStatusChange, canModify = true }: Props) {
+ export function CandidateHeaderCard({ candidate, onStageChange, onStatusChange, canModify = true, pipelineId }: Props) {
    const router = useRouter();
  
    return (
-     <div className="relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-xl p-5">
+     <div className="relative overflow-hidden bg-card rounded-xl border border-border shadow-sm p-4">
        {/* Glassmorphic Background Glow */}
        <div className="absolute top-0 right-0 w-64 h-full bg-brand/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-16" />
  
@@ -30,9 +31,9 @@
          <div className="flex items-center gap-6">
            {/* Avatar with Status */}
            <div className="relative group shrink-0">
-             <Avatar className="h-20 w-20 rounded-[1.5rem] border-4 border-white shadow-lg ring-1 ring-border transition-all duration-500 group-hover:scale-105 group-hover:rotate-3">
+             <Avatar className="h-16 w-16 rounded-xl border-2 border-white shadow-md ring-1 ring-border transition-all duration-500 group-hover:scale-105 group-hover:rotate-3">
                <AvatarImage src={candidate.avatar} />
-               <AvatarFallback className="text-2xl font-black bg-brand/5 text-brand uppercase">
+               <AvatarFallback className="text-xl font-bold bg-brand/5 text-brand uppercase">
                  {candidate.name ? candidate.name.split(' ').map((n: string) => n[0]).join('') : 'NA'}
                </AvatarFallback>
              </Avatar>
@@ -45,29 +46,29 @@
            <div className="flex flex-col gap-1.5 min-w-0">
              <div className="flex items-center gap-3">
                <h2 
-                 className="text-2xl font-black text-foreground tracking-tighter cursor-pointer hover:text-brand transition-colors"
+                 className="text-xl font-bold text-foreground tracking-tight cursor-pointer hover:text-brand transition-colors"
                  onClick={() => router.push(`/candidates/${candidate.id}`)}
                >
                  {candidate.name || 'Anonymous Candidate'}
                </h2>
                {candidate.isTempCandidate && (
-                 <Badge className="bg-red-50 text-red-600 border-red-100 font-black text-[9px] uppercase tracking-widest px-2 py-0.5">
+                 <Badge className="bg-red-50 text-red-600 border-red-100 font-semibold text-[9px] uppercase tracking-wider px-2 py-0.5">
                    Temporary
                  </Badge>
                )}
              </div>
  
-             <div className="flex items-center gap-4">
+             <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                   <Briefcase className="h-4 w-4 text-muted-foreground" />
-                   <span className="text-[13px] font-bold text-foreground">
+                   <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
+                   <span className="text-xs font-semibold text-foreground">
                       {candidate.currentJobTitle || "Independent Professional"}
                    </span>
                 </div>
                 <div className="h-3 w-[1px] bg-muted" />
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                   <Globe className="h-4 w-4 text-muted-foreground" />
-                   <span className="text-[13px] font-medium text-muted-foreground">
+                   <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                   <span className="text-xs font-medium text-muted-foreground">
                       {candidate.source || "Organic Sourcing"}
                    </span>
                 </div>
@@ -108,16 +109,29 @@
            </div>
          </div>
  
-         {/* Back Action */}
-         <Button 
-           variant="outline" 
-           size="sm" 
-           onClick={() => router.back()}
-           className="h-10 px-5 rounded-xl border-border font-black text-[10px] uppercase tracking-widest hover:bg-muted transition-all shadow-sm group"
-         >
-           <ChevronLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-           Back to Pipeline
-         </Button>
+         {/* Action Buttons */}
+         <div className="flex items-center gap-2">
+           {pipelineId && (
+             <Button
+               variant="outline"
+               size="sm"
+               onClick={() => router.push(`/reactruterpipeline/${pipelineId}/candidate/${candidate.id}/summary`)}
+               className="h-9 px-4 rounded-lg border-border font-semibold text-[10px] uppercase tracking-wider hover:bg-muted transition-all shadow-sm group"
+             >
+               <FileText className="h-3.5 w-3.5 mr-1.5 text-brand group-hover:scale-110 transition-transform" />
+               Journey Summary
+             </Button>
+           )}
+           <Button 
+             variant="outline" 
+             size="sm" 
+             onClick={() => router.back()}
+             className="h-9 px-4 rounded-lg border-border font-semibold text-[10px] uppercase tracking-wider hover:bg-muted transition-all shadow-sm group"
+           >
+             <ChevronLeft className="h-3.5 w-3.5 mr-1.5 group-hover:-translate-x-1 transition-transform" />
+             Back to Pipeline
+           </Button>
+         </div>
        </div>
      </div>
    );

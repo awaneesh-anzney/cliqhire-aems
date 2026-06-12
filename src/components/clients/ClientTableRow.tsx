@@ -57,11 +57,11 @@
        <TableCell className="px-3 py-2.5">
          <Tooltip>
            <TooltipTrigger asChild>
-             <span className="text-[10px] font-bold text-muted-foreground block truncate max-w-[80px] cursor-help">
+             <span className="text-[10px] font-medium text-muted-foreground block truncate max-w-[80px] cursor-help">
                {client.clientId || "—"}
              </span>
            </TooltipTrigger>
-           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
              {client.clientId || "No ID"}
            </TooltipContent>
          </Tooltip>
@@ -75,12 +75,12 @@
                onClick={() => router.push(`/clients/${client.id}`)}
                className="cursor-pointer group/name truncate max-w-[150px]"
              >
-               <span className="text-[13px] font-bold text-foreground group-hover/name:text-brand transition-all block truncate">
+               <span className="text-[13px] font-semibold text-foreground group-hover/name:text-brand transition-all block truncate">
                  {client.name}
                </span>
              </div>
            </TooltipTrigger>
-           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[11px] border-none shadow-2xl">
+           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
              {client.name}
            </TooltipContent>
          </Tooltip>
@@ -97,7 +97,7 @@
                 </span>
              </div>
            </TooltipTrigger>
-           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
              {client.industry || "No Industry Listed"}
            </TooltipContent>
          </Tooltip>
@@ -114,7 +114,7 @@
                 </span>
              </div>
            </TooltipTrigger>
-           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
              {client.countryOfBusiness || "Global"}
            </TooltipContent>
          </Tooltip>
@@ -147,7 +147,7 @@
  
        {/* Age */}
        <TableCell className="px-3 py-2.5 text-center">
-         <span className="text-[10px] font-bold text-foreground whitespace-nowrap">
+         <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
            {formatClientAge(client.clientAge)}
          </span>
        </TableCell>
@@ -156,13 +156,13 @@
        <TableCell className="px-3 py-2.5 text-center">
          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted border border-border">
             <Briefcase className="w-2.5 h-2.5 text-brand shrink-0" />
-            <span className="text-[10px] font-bold text-foreground">{client.jobCount || 0}</span>
+            <span className="text-[10px] font-semibold text-foreground">{client.jobCount || 0}</span>
          </div>
        </TableCell>
  
        {/* Created By */}
        <TableCell className="px-3 py-2.5 text-right pr-6">
-         <span className="text-[11px] font-bold text-foreground block truncate max-w-[120px] ml-auto">
+         <span className="text-[11px] font-medium text-foreground block truncate max-w-[120px] ml-auto">
            {client.createdBy || "System"}
          </span>
        </TableCell>

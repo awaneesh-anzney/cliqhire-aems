@@ -6,26 +6,26 @@ export function CandidateDocumentsCard({ candidate }: { candidate: Candidate }) 
   if (!candidate.description && !candidate.resume) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {candidate.description && (
-        <div className="bg-card rounded-xl p-4 shadow-sm border border-border/60 h-full">
-          <h4 className="font-semibold text-foreground text-sm mb-3 flex items-center">
+        <div className="bg-card rounded-xl p-3.5 shadow-sm border border-border/60 h-full">
+          <h4 className="font-semibold text-foreground text-sm mb-2.5 flex items-center">
             <FileText className="h-4 w-4 text-muted-foreground mr-2" />
             Description
           </h4>
-          <div className="bg-muted p-3 rounded-lg border border-border/60 max-h-40 overflow-y-auto custom-scrollbar">
+          <div className="bg-muted p-2.5 rounded-lg border border-border/60 max-h-40 overflow-y-auto custom-scrollbar">
             <p className="text-xs text-foreground leading-relaxed">{candidate.description}</p>
           </div>
         </div>
       )}
 
       {candidate.resume && (
-        <div className="bg-card rounded-xl p-4 shadow-sm border border-border/60 h-full">
-          <h4 className="font-semibold text-foreground text-sm mb-3 flex items-center">
+        <div className="bg-card rounded-xl p-3.5 shadow-sm border border-border/60 h-full">
+          <h4 className="font-semibold text-foreground text-sm mb-2.5 flex items-center">
             <FileText className="h-4 w-4 text-blue-500 mr-2" />
             Documents
           </h4>
-          <div className="flex items-center space-x-3 bg-blue-50/30 p-3 rounded-lg border border-blue-100/50">
+          <div className="flex items-center space-x-3 bg-blue-50/30 p-2.5 rounded-lg border border-blue-100/50">
             <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center shrink-0">
               <FileText className="h-4 w-4 text-blue-600" />
             </div>

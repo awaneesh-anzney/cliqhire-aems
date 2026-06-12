@@ -142,7 +142,12 @@ export function AdminDataTabs({
                                             </div>
                                         </TableCell>
                                         <TableCell onClick={(e) => e.stopPropagation()}>
-                                            <span className="text-sm text-[hsl(var(--foreground))]">{job.totalCVs ?? 0} candidates</span>
+                                            <span className="text-sm text-[hsl(var(--foreground))]">
+                                                {job.cvTargets && Array.isArray(job.cvTargets) && job.cvTargets.length > 0
+                                                    ? job.cvTargets.reduce((sum: number, slot: any) => sum + (slot.targetCount || 0), 0)
+                                                    : (job.totalCVs ?? 0)
+                                                } candidates
+                                            </span>
                                         </TableCell>
                                         <TableCell onClick={(e) => e.stopPropagation()}>
                                             <JobStatusBadge stage={job.stage} />

@@ -270,8 +270,7 @@ function ConfirmStageChangeDialog({
      <TooltipProvider delayDuration={200}>
        <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Page Header */}
-         <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
-           <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
+         <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col">
             <Dashboardheader
               setOpen={setOpen}
               setFilterOpen={() => setAdvancedFiltersOpen(prev => !prev)}
@@ -290,42 +289,42 @@ function ConfirmStageChangeDialog({
           </div>
 
           {/* Real-time Filter Bar */}
-          <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-4 flex flex-col gap-3 animate-in fade-in duration-300">
+          <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm px-4 py-3 flex flex-col gap-2.5 animate-in fade-in duration-300">
             <div className="flex flex-wrap items-center gap-3">
               {/* Global Search Input */}
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
                 <input
                   type="text"
                   placeholder="Global quick search (title or ID)..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-sm bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium"
+                  className="w-full pl-9 pr-8 h-9 text-xs bg-muted/20 border border-border rounded-xl focus:outline-none focus-visible:ring-1 focus-visible:ring-brand focus:border-brand transition-all font-medium text-foreground"
                 />
                 {searchInput && (
                   <button
                     onClick={() => setSearchInput("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
               {/* Stage Filter Dropdown */}
-              <div className="w-[180px]">
+              <div className="w-[160px]">
                 <Select value={selectedStage} onValueChange={setSelectedStage}>
-                  <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl text-xs font-bold uppercase tracking-wider h-10">
+                  <SelectTrigger className="w-full bg-muted/20 border-border rounded-xl text-xs font-semibold h-9">
                     <SelectValue placeholder="Stage" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border">
-                    <SelectItem value="All" className="text-xs font-bold uppercase tracking-wider">All Stages</SelectItem>
-                    <SelectItem value="Open" className="text-xs font-bold uppercase tracking-wider">Open</SelectItem>
-                    <SelectItem value="Hired" className="text-xs font-bold uppercase tracking-wider">Hired</SelectItem>
-                    <SelectItem value="On Hold" className="text-xs font-bold uppercase tracking-wider">On Hold</SelectItem>
-                    <SelectItem value="Closed" className="text-xs font-bold uppercase tracking-wider">Closed</SelectItem>
-                    <SelectItem value="Active" className="text-xs font-bold uppercase tracking-wider">Active</SelectItem>
-                    <SelectItem value="Onboarding" className="text-xs font-bold uppercase tracking-wider">Onboarding</SelectItem>
+                    <SelectItem value="All" className="text-xs font-medium">All Stages</SelectItem>
+                    <SelectItem value="Open" className="text-xs font-medium">Open</SelectItem>
+                    <SelectItem value="Hired" className="text-xs font-medium">Hired</SelectItem>
+                    <SelectItem value="On Hold" className="text-xs font-medium">On Hold</SelectItem>
+                    <SelectItem value="Closed" className="text-xs font-medium">Closed</SelectItem>
+                    <SelectItem value="Active" className="text-xs font-medium">Active</SelectItem>
+                    <SelectItem value="Onboarding" className="text-xs font-medium">Onboarding</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -335,10 +334,10 @@ function ConfirmStageChangeDialog({
                 variant={advancedFiltersOpen ? "default" : "outline"}
                 size="sm"
                 onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
-                className="rounded-xl h-10 px-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider"
+                className="rounded-xl h-9 px-3.5 flex items-center gap-2 text-xs font-semibold transition-all"
               >
                 <SlidersHorizontal className="h-4 w-4" />
-                {advancedFiltersOpen ? "Hide Advanced" : "Advanced Filters"}
+                <span>{advancedFiltersOpen ? "Hide Advanced" : "Advanced Filters"}</span>
                 {(jobTitleInput || jobIdInput || locationInput || clientInput || headcountInput || jobTypeInput || includeInactiveInput) && (
                   <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 )}
@@ -350,7 +349,7 @@ function ConfirmStageChangeDialog({
                   variant="ghost"
                   size="sm"
                   onClick={clearAllFilters}
-                  className="rounded-xl h-10 px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
+                  className="rounded-xl h-9 px-3.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Clear All
@@ -363,85 +362,85 @@ function ConfirmStageChangeDialog({
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 pt-3 border-t border-border/60 animate-in slide-in-from-top-2 duration-300">
                 {/* Job Title Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Job Title</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Job Title</label>
                   <input
                     type="text"
                     placeholder="Filter by title..."
                     value={jobTitleInput}
                     onChange={(e) => setJobTitleInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Job ID Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Job ID</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Job ID</label>
                   <input
                     type="text"
                     placeholder="Filter by ID..."
                     value={jobIdInput}
                     onChange={(e) => setJobIdInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Location Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Location</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Location</label>
                   <input
                     type="text"
                     placeholder="Filter by location..."
                     value={locationInput}
                     onChange={(e) => setLocationInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Client Name/ID Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Client (Name or ID)</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Client (Name or ID)</label>
                   <input
                     type="text"
                     placeholder="Filter by client..."
                     value={clientInput}
                     onChange={(e) => setClientInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Headcount Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Headcount</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Headcount</label>
                   <input
                     type="number"
                     placeholder="Exact headcount..."
                     value={headcountInput}
                     onChange={(e) => setHeadcountInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Job Type Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Job Type</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Job Type</label>
                   <input
                     type="text"
                     placeholder="Full-time, Contract..."
                     value={jobTypeInput}
                     onChange={(e) => setJobTypeInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Include Inactive Checkbox */}
-                <div className="flex items-center gap-2 h-full min-h-[40px] pt-4">
+                <div className="flex items-center gap-2 h-full min-h-[40px] pt-3.5">
                   <Checkbox
                     id="includeInactive"
                     checked={includeInactiveInput}
                     onCheckedChange={(checked) => setIncludeInactiveInput(checked === true)}
                     className="h-4 w-4 rounded border-border"
                   />
-                  <Label htmlFor="includeInactive" className="text-[10px] font-black text-muted-foreground uppercase tracking-wider cursor-pointer select-none">
+                  <Label htmlFor="includeInactive" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none">
                     Show Inactive
                   </Label>
                 </div>
@@ -450,7 +449,7 @@ function ConfirmStageChangeDialog({
           </div>
 
           {/* Table Area */}
-          <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+          <div className="flex-1 min-h-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-700 delay-150">
             <div className="flex-1 overflow-auto custom-scrollbar relative">
               {isFetching && !isLoading && (
                 <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand/20 overflow-hidden z-50">
@@ -468,15 +467,15 @@ function ConfirmStageChangeDialog({
                        disabled={!canDeleteJobs}
                      />
                    </TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Job ID</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Position</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Type</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Location</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Headcount</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Stage</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Salary Range</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Client</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-right pr-6">Created By</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Job ID</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Position</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Location</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Headcount</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stage</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Salary Range</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Client</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right pr-6">Created By</TableHead>
                  </TableRow>
                </TableHeader>
                <TableBody>
@@ -500,7 +499,7 @@ function ConfirmStageChangeDialog({
                        key={job._id}
                        className={cn(
                          "group border-b border-border transition-all duration-300",
-                         "hover:bg-brand/[0.04] hover:shadow-inner hover:translate-x-1",
+                         "hover:bg-brand/[0.04] hover:shadow-inner",
                          selectedRows.has(job._id) ? "bg-brand/[0.02]" : ""
                        )}
                      >
@@ -519,13 +518,13 @@ function ConfirmStageChangeDialog({
                          <Tooltip>
                            <TooltipTrigger asChild>
                              <span 
-                               className="text-[10px] font-bold text-muted-foreground cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
+                               className="text-[10px] font-medium text-muted-foreground cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
                                onClick={() => router.push(`/jobs/${job._id}`)}
                              >
                                {job.jobId || "—"}
                              </span>
                            </TooltipTrigger>
-                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
                              {job.jobId}
                            </TooltipContent>
                          </Tooltip>
@@ -539,12 +538,12 @@ function ConfirmStageChangeDialog({
                                className="cursor-pointer group/title max-w-[160px] truncate"
                                onClick={() => router.push(`/jobs/${job._id}`)}
                              >
-                               <span className="text-[13px] font-bold text-foreground group-hover/title:text-brand transition-all block truncate">
+                               <span className="text-[13px] font-semibold text-foreground group-hover/title:text-brand transition-all block truncate">
                                  {job.jobTitle}
                                </span>
                              </div>
                            </TooltipTrigger>
-                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[11px] border-none shadow-2xl">
+                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
                              {job.jobTitle}
                            </TooltipContent>
                          </Tooltip>
@@ -571,7 +570,7 @@ function ConfirmStageChangeDialog({
                                 </span>
                              </div>
                            </TooltipTrigger>
-                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
                              {Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "Global"}
                            </TooltipContent>
                          </Tooltip>
@@ -581,7 +580,7 @@ function ConfirmStageChangeDialog({
                        <TableCell className="px-3 py-2.5 text-center">
                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted border border-border">
                             <Users2 className="w-2.5 h-2.5 text-muted-foreground shrink-0" />
-                            <span className="text-[10px] font-black text-foreground">{job.headcount}</span>
+                            <span className="text-[10px] font-semibold text-foreground">{job.headcount}</span>
                          </div>
                        </TableCell>
  
@@ -599,10 +598,10 @@ function ConfirmStageChangeDialog({
                        {/* Salary Range */}
                        <TableCell className="px-3 py-2.5 text-center">
                          <div className="flex flex-col items-center leading-none gap-0.5">
-                            <span className="text-[11px] font-black text-foreground">
+                            <span className="text-[11px] font-semibold text-foreground">
                                {job.salaryCurrency} {job.maximumSalary}
                             </span>
-                            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Max Range</span>
+                            <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">Max Range</span>
                          </div>
                        </TableCell>
  
@@ -610,11 +609,11 @@ function ConfirmStageChangeDialog({
                        <TableCell className="px-3 py-2.5">
                          <Tooltip>
                            <TooltipTrigger asChild>
-                             <span className="text-[11px] font-bold text-foreground block truncate max-w-[120px] cursor-help">
+                             <span className="text-[11px] font-medium text-foreground block truncate max-w-[120px] cursor-help">
                                 {typeof job.client === "object" ? job.client?.name : job.client || "—"}
                              </span>
                            </TooltipTrigger>
-                           <TooltipContent className="rounded-xl bg-brand text-white font-bold text-[10px] border-none shadow-2xl">
+                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
                              {typeof job.client === "object" ? job.client?.name : job.client || "No Client Specified"}
                            </TooltipContent>
                          </Tooltip>
@@ -622,7 +621,7 @@ function ConfirmStageChangeDialog({
  
                        {/* Created By */}
                        <TableCell className="px-3 py-2.5 text-right pr-6">
-                         <span className="text-[11px] font-bold text-foreground block truncate max-w-[120px] ml-auto">
+                         <span className="text-[11px] font-medium text-foreground block truncate max-w-[120px] ml-auto">
                             {job.createdBy?.name || (typeof job.createdBy === 'string' ? job.createdBy : "System")}
                          </span>
                        </TableCell>
@@ -634,7 +633,7 @@ function ConfirmStageChangeDialog({
            </div>
            
            {/* Pagination */}
-           <div className="flex-shrink-0 bg-card border-t border-border p-1.5">
+           <div className="flex-shrink-0 bg-card border-t border-border py-2 px-3">
              <JobPaginationControls
                currentPage={currentPage}
                totalPages={totalPages}

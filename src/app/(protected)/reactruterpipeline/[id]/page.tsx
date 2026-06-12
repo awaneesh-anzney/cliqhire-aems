@@ -1,8 +1,9 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Loader2, ChevronLeft, ChevronRight, LayoutDashboard, Search, Users, FilterX } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, LayoutDashboard, Search, Users, FilterX, X, ArrowDownWideNarrow, ArrowUpWideNarrow, SlidersHorizontal, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -31,9 +32,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 const Page = () => {
   const { id } = useParams() as { id: string };
@@ -50,13 +55,60 @@ const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
 
+  // Advanced Filters
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [priority, setPriority] = useState<string | null>(null);
+  const [isTemp, setIsTemp] = useState<string | null>("all");
+  const [addedFrom, setAddedFrom] = useState<Date | undefined>(undefined);
+  const [addedTo, setAddedTo] = useState<Date | undefined>(undefined);
+  const [sortBy, setSortBy] = useState<string>("lastUpdated");
+  const [sortOrder, setSortOrder] = useState<string>("desc");
+
+  // Search Debouncing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Reset to page 1 on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedStageFilter, debouncedSearch, currentStatus, priority, isTemp, addedFrom, addedTo, sortBy, sortOrder]);
+
   const { data: jobResponse, isLoading, error, refetch } = useQuery({
-    queryKey: ["pipelineEntry", id, currentPage, pageSize, selectedStageFilter],
-    queryFn: () => getPipelineEntry(id, {
-      page: currentPage,
-      limit: pageSize,
-      stage: selectedStageFilter ? mapUIStageToBackendStage(selectedStageFilter) : undefined
-    }),
+    queryKey: [
+      "pipelineEntry",
+      id,
+      currentPage,
+      pageSize,
+      selectedStageFilter,
+      debouncedSearch,
+      currentStatus,
+      priority,
+      isTemp,
+      addedFrom,
+      addedTo,
+      sortBy,
+      sortOrder,
+    ],
+    queryFn: () =>
+      getPipelineEntry(id, {
+        page: currentPage,
+        limit: pageSize,
+        stage: selectedStageFilter ? mapUIStageToBackendStage(selectedStageFilter) : undefined,
+        search: debouncedSearch || undefined,
+        currentStatus: currentStatus || undefined,
+        priority: priority || undefined,
+        isTemp: isTemp === "all" ? undefined : (isTemp ?? undefined),
+        addedFrom: addedFrom ? format(addedFrom, "yyyy-MM-dd") : undefined,
+        addedTo: addedTo ? format(addedTo, "yyyy-MM-dd") : undefined,
+        sortBy: sortBy || undefined,
+        sortOrder: sortOrder || undefined,
+      }),
     enabled: !!id,
   });
 
@@ -64,10 +116,6 @@ const Page = () => {
     if (!jobResponse?.data) return null;
     return mapEntryToJob(jobResponse.data);
   }, [jobResponse]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedStageFilter]);
   const [isAddCandidateOpen, setIsAddCandidateOpen] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [isCreateCandidateOpen, setIsCreateCandidateOpen] = useState(false);
@@ -299,6 +347,30 @@ const Page = () => {
     setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: "" });
   };
 
+  const clearAllFilters = () => {
+    setSelectedStageFilter(null);
+    setSearch("");
+    setCurrentStatus(null);
+    setPriority(null);
+    setIsTemp("all");
+    setAddedFrom(undefined);
+    setAddedTo(undefined);
+    setSortBy("lastUpdated");
+    setSortOrder("desc");
+  };
+
+  const hasActiveFilters = useMemo(() => {
+    return (
+      selectedStageFilter !== null ||
+      search !== "" ||
+      currentStatus !== null ||
+      priority !== null ||
+      (isTemp !== null && isTemp !== "all") ||
+      addedFrom !== undefined ||
+      addedTo !== undefined
+    );
+  }, [selectedStageFilter, search, currentStatus, priority, isTemp, addedFrom, addedTo]);
+
   const pagination = useMemo(() => {
     return jobResponse?.data?.candidates?.pagination || jobResponse?.data?.pagination;
   }, [jobResponse]);
@@ -374,31 +446,252 @@ const Page = () => {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/30 p-3 gap-3 animate-in fade-in duration-700">
         {/* Premium Job Header */}
-        <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-lg overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-1000 delay-100">
+        <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col animate-in slide-in-from-top-4 duration-700 delay-100">
           <PipelineJobHeader job={job} onAddCandidate={handleAddCandidate} />
         </div>
 
-        {/* Stage Navigation & Filters */}
-        <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-3 animate-in slide-in-from-top-2 duration-1000 delay-200">
+        {/* Stage Navigation, Advanced Search & Filters Panel */}
+        <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm px-4 py-3 flex flex-col gap-2.5 animate-in slide-in-from-top-2 duration-700 delay-200">
           <PipelineStageFilters
             job={job}
             selectedStage={selectedStageFilter}
             onSelectStage={setSelectedStageFilter}
           />
+          
+          <div className="border-t border-border/60" />
+
+          {/* Advanced Filters and Controls */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[240px] max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
+              <Input
+                placeholder="Search candidates by name, email, or phone..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-9 text-xs border-border bg-muted/20 focus-visible:ring-brand rounded-xl font-medium transition-all"
+              />
+            </div>
+
+            {/* Status Dropdown */}
+            <Select value={currentStatus || "all"} onValueChange={(val) => setCurrentStatus(val === "all" ? null : val)}>
+              <SelectTrigger className="h-9 w-[130px] rounded-xl text-xs font-medium border-border bg-card">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border">
+                <SelectItem value="all" className="rounded-lg text-xs font-medium">All Statuses</SelectItem>
+                {["Pending", "In Progress", "Completed", "Hired", "Disqualified", "On Hold", "Cancelled", "Rescheduled"].map((status) => (
+                  <SelectItem key={status} value={status} className="rounded-lg text-xs font-medium">{status}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Priority Dropdown */}
+            <Select value={priority || "all"} onValueChange={(val) => setPriority(val === "all" ? null : val)}>
+              <SelectTrigger className="h-9 w-[120px] rounded-xl text-xs font-medium border-border bg-card">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border">
+                <SelectItem value="all" className="rounded-lg text-xs font-medium">All Priorities</SelectItem>
+                {["High", "Medium", "Low"].map((prio) => (
+                  <SelectItem key={prio} value={prio} className="rounded-lg text-xs font-medium">{prio} Priority</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Candidate Type Dropdown */}
+            <Select value={isTemp || "all"} onValueChange={(val) => setIsTemp(val)}>
+              <SelectTrigger className="h-9 w-[140px] rounded-xl text-xs font-medium border-border bg-card">
+                <SelectValue placeholder="Candidate Type" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border">
+                <SelectItem value="all" className="rounded-lg text-xs font-medium">All Types</SelectItem>
+                <SelectItem value="false" className="rounded-lg text-xs font-medium">Real Candidates</SelectItem>
+                <SelectItem value="true" className="rounded-lg text-xs font-medium">Temp Only</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Date Filters */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase">From</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-9 w-[130px] justify-start text-left text-xs font-medium border-border bg-card rounded-xl px-3",
+                      !addedFrom && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                    {addedFrom ? format(addedFrom, "MMM dd, yyyy") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-xl border-border" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={addedFrom}
+                    onSelect={setAddedFrom}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase">To</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-9 w-[130px] justify-start text-left text-xs font-medium border-border bg-card rounded-xl px-3",
+                      !addedTo && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                    {addedTo ? format(addedTo, "MMM dd, yyyy") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-xl border-border" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={addedTo}
+                    onSelect={setAddedTo}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Sort & Order Controls */}
+            <div className="flex items-center gap-2 ml-auto">
+              <Select value={sortBy} onValueChange={(val) => setSortBy(val)}>
+                <SelectTrigger className="h-9 w-[150px] rounded-xl text-xs font-medium border-border bg-card">
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border">
+                  <SelectItem value="lastUpdated" className="rounded-lg text-xs font-medium">Recently Updated</SelectItem>
+                  <SelectItem value="addedAt" className="rounded-lg text-xs font-medium">Recently Added</SelectItem>
+                  <SelectItem value="name" className="rounded-lg text-xs font-medium">Candidate Name</SelectItem>
+                  <SelectItem value="priority" className="rounded-lg text-xs font-medium">Priority</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+                    className="h-9 w-9 rounded-xl border-border hover:bg-muted shrink-0"
+                  >
+                    {sortOrder === "desc" ? (
+                      <ArrowDownWideNarrow className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ArrowUpWideNarrow className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
+                  <span>{sortOrder === "desc" ? "Sort Descending" : "Sort Ascending"}</span>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+
+          {/* Active Chips Panel */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/60">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase mr-1">Active:</span>
+              
+              {selectedStageFilter && (
+                <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-lg text-xs font-semibold bg-brand/5 text-brand border border-brand/10 flex items-center gap-1">
+                  Stage: {selectedStageFilter}
+                  <button onClick={() => setSelectedStageFilter(null)} className="rounded-full p-0.5 hover:bg-brand/10 text-brand transition-all">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              
+              {search && (
+                <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-lg text-xs font-semibold bg-muted/60 text-foreground border border-border/80 flex items-center gap-1">
+                  Search: &quot;{search}&quot;
+                  <button onClick={() => setSearch("")} className="rounded-full p-0.5 hover:bg-muted-foreground/20 text-muted-foreground transition-all">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              
+              {currentStatus && (
+                <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-lg text-xs font-semibold bg-muted/60 text-foreground border border-border/80 flex items-center gap-1">
+                  Status: {currentStatus}
+                  <button onClick={() => setCurrentStatus(null)} className="rounded-full p-0.5 hover:bg-muted-foreground/20 text-muted-foreground transition-all">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              
+              {priority && (
+                <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-lg text-xs font-semibold bg-muted/60 text-foreground border border-border/80 flex items-center gap-1">
+                  Priority: {priority}
+                  <button onClick={() => setPriority(null)} className="rounded-full p-0.5 hover:bg-muted-foreground/20 text-muted-foreground transition-all">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              
+              {isTemp && isTemp !== "all" && (
+                <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-lg text-xs font-semibold bg-muted/60 text-foreground border border-border/80 flex items-center gap-1">
+                  Type: {isTemp === "true" ? "Temp Only" : "Real Only"}
+                  <button onClick={() => setIsTemp("all")} className="rounded-full p-0.5 hover:bg-muted-foreground/20 text-muted-foreground transition-all">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              
+              {addedFrom && (
+                <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-lg text-xs font-semibold bg-muted/60 text-foreground border border-border/80 flex items-center gap-1">
+                  From: {format(addedFrom, "yyyy-MM-dd")}
+                  <button onClick={() => setAddedFrom(undefined)} className="rounded-full p-0.5 hover:bg-muted-foreground/20 text-muted-foreground transition-all">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              
+              {addedTo && (
+                <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-lg text-xs font-semibold bg-muted/60 text-foreground border border-border/80 flex items-center gap-1">
+                  To: {format(addedTo, "yyyy-MM-dd")}
+                  <button onClick={() => setAddedTo(undefined)} className="rounded-full p-0.5 hover:bg-muted-foreground/20 text-muted-foreground transition-all">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="h-7 px-2.5 text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50/50 rounded-lg ml-auto"
+              >
+                Clear All
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Candidates Table Area */}
-        <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-300">
+        <div className="flex-1 min-h-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-700 delay-300">
           {selectedStageFilter && (
-            <div className="px-6 py-2 bg-muted/50 border-b border-border flex items-center justify-between">
+            <div className="px-6 py-2.5 bg-muted/10 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current View:</span>
-                <span className="text-[11px] font-black text-brand uppercase tracking-widest">{selectedStageFilter}</span>
+                <span className="text-xs font-semibold text-muted-foreground">Current View:</span>
+                <span className="text-xs font-bold text-brand uppercase tracking-wider">{selectedStageFilter}</span>
               </div>
-              <div className="px-2 py-0.5 rounded-md bg-card border border-border text-[10px] font-black text-muted-foreground">
-                {totalCandidatesCount} Active Candidates
+              <div className="px-2.5 py-0.5 rounded-md bg-card border border-border text-[10px] font-semibold text-muted-foreground uppercase">
+                {totalCandidatesCount} Candidates
               </div>
             </div>
           )}
@@ -415,15 +708,15 @@ const Page = () => {
 
           {/* Premium Pagination Footer */}
           {totalCandidatesCount > 0 && (
-            <div className="flex-shrink-0 border-t border-border bg-card px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex-shrink-0 border-t border-border bg-card px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
               {/* Left: Stats & Size Select */}
               <div className="flex flex-wrap items-center gap-4">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Showing {totalCandidatesCount === 0 ? 0 : (currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalCandidatesCount)} of {totalCandidatesCount} Candidates
+                <span className="text-xs font-medium text-muted-foreground">
+                  Showing {totalCandidatesCount === 0 ? 0 : (currentPage - 1) * pageSize + 1} – {Math.min(currentPage * pageSize, totalCandidatesCount)} of {totalCandidatesCount} Candidates
                 </span>
 
                 <div className="flex items-center gap-2 border-l border-border pl-4 h-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Show</span>
+                  <span className="text-xs font-medium text-muted-foreground">Show</span>
                   <Select
                     value={String(pageSize)}
                     onValueChange={(val) => {
@@ -431,12 +724,12 @@ const Page = () => {
                       setCurrentPage(1);
                     }}
                   >
-                    <SelectTrigger className="h-7 w-[65px] rounded-lg border-border bg-transparent text-[11px] font-bold px-2 py-0">
+                    <SelectTrigger className="h-8 w-[65px] rounded-lg border-border bg-transparent text-xs font-semibold px-2 py-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border">
                       {[15, 30, 50, 100].map((size) => (
-                        <SelectItem key={size} value={String(size)} className="rounded-lg text-xs font-bold">
+                        <SelectItem key={size} value={String(size)} className="rounded-lg text-xs font-semibold">
                           {size}
                         </SelectItem>
                       ))}
@@ -477,7 +770,7 @@ const Page = () => {
                   return pages.map((page, idx) => {
                     if (page === '...') {
                       return (
-                        <span key={`ellipsis-${idx}`} className="px-1.5 text-xs font-bold text-muted-foreground">
+                        <span key={`ellipsis-${idx}`} className="px-1.5 text-xs font-semibold text-muted-foreground">
                           ...
                         </span>
                       );
@@ -489,9 +782,9 @@ const Page = () => {
                         key={`page-${page}`}
                         variant={isCurrent ? "default" : "outline"}
                         className={cn(
-                          "h-8 w-8 rounded-lg text-xs font-black p-0 border-border transition-all duration-300",
+                          "h-8 w-8 rounded-lg text-xs font-semibold p-0 border-border transition-all duration-250",
                           isCurrent
-                            ? "bg-brand hover:bg-brand/90 text-white shadow-md shadow-brand/10 border-brand"
+                            ? "bg-brand hover:bg-brand/90 text-white shadow-sm shadow-brand/10 border-brand"
                             : "hover:bg-muted text-foreground"
                         )}
                         onClick={() => setCurrentPage(page as number)}
@@ -660,9 +953,6 @@ const Page = () => {
   );
 };
 
-// Mock permissions check for the sake of completion since usePermissions wasn't imported in full snippet
-function usePermissions() {
-  return { hasPermission: (a: string, b: string) => true };
-}
+
 
 export default Page;

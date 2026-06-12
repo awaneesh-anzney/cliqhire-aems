@@ -32,6 +32,8 @@ export interface JobData {
   startDateByInternalTeam: Date | undefined;
   endDateByInternalTeam: Date | undefined;
   totalCVs: number;
+  cvTargets?: CvTarget[];
+  cvTargetsSummary?: CvTargetsSummary | null;
   keySkills: string;
   jobDescriptionByInternalTeam: string;
   workVisa: { workVisa: string; visaCountries: string[] };
@@ -111,4 +113,25 @@ export interface JobData {
   };
   _id: string;
   jobId?: string
+}
+
+export interface CvTarget {
+  _id?: string;
+  label?: string;
+  startDate: string;
+  endDate: string;
+  targetCount: number;
+  achievedCount?: number;
+  remaining?: number;
+  isCompleted?: boolean;
+  isExpired?: boolean;
+}
+
+export interface CvTargetsSummary {
+  totalSlots: number;
+  completedSlots: number;
+  expiredSlots: number;
+  totalTargetCVs: number;
+  totalAchievedCVs: number;
+  totalRemainingCVs: number;
 }

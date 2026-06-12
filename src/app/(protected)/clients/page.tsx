@@ -300,8 +300,7 @@ function useDebounce<T>(value: T, delay: number): T {
        />
        <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
          {/* Compressed Sticky Header Section */}
-         <div className="flex-shrink-0 relative overflow-hidden bg-card rounded-[1.5rem] border border-border shadow-lg p-1.5">
-           <div className="absolute top-0 right-0 w-48 h-full bg-brand/5 rounded-full blur-2xl pointer-events-none" />
+         <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col">
             <Dashboardheader
               setOpen={setOpen}
               setFilterOpen={() => setAdvancedFiltersOpen(prev => !prev)}
@@ -320,39 +319,39 @@ function useDebounce<T>(value: T, delay: number): T {
           </div>
 
           {/* Real-time Filter Bar */}
-          <div className="flex-shrink-0 bg-card rounded-[1.5rem] border border-border shadow-md p-4 flex flex-col gap-3">
+          <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm px-4 py-3 flex flex-col gap-2.5">
             <div className="flex flex-wrap items-center gap-3">
               {/* Global Search Input */}
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
                 <input
                   type="text"
                   placeholder="Global quick search (name or clientId)..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-sm bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all font-medium"
+                  className="w-full pl-9 pr-8 h-9 text-xs bg-muted/20 border border-border rounded-xl focus:outline-none focus-visible:ring-1 focus-visible:ring-brand focus:border-brand transition-all font-medium text-foreground"
                 />
                 {searchInput && (
                   <button
                     onClick={() => setSearchInput("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
               {/* Stage Filter Dropdown */}
-              <div className="w-[180px]">
+              <div className="w-[160px]">
                 <Select value={selectedClientStage} onValueChange={setSelectedClientStage}>
-                  <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl text-xs font-bold uppercase tracking-wider h-10">
+                  <SelectTrigger className="w-full bg-muted/20 border-border rounded-xl text-xs font-semibold h-9">
                     <SelectValue placeholder="Stage" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border">
-                    <SelectItem value="All" className="text-xs font-bold uppercase tracking-wider">All Stages</SelectItem>
-                    <SelectItem value="Lead" className="text-xs font-bold uppercase tracking-wider">Lead</SelectItem>
-                    <SelectItem value="Engaged" className="text-xs font-bold uppercase tracking-wider">Engaged</SelectItem>
-                    <SelectItem value="Signed" className="text-xs font-bold uppercase tracking-wider">Signed</SelectItem>
+                    <SelectItem value="All" className="text-xs font-medium">All Stages</SelectItem>
+                    <SelectItem value="Lead" className="text-xs font-medium">Lead</SelectItem>
+                    <SelectItem value="Engaged" className="text-xs font-medium">Engaged</SelectItem>
+                    <SelectItem value="Signed" className="text-xs font-medium">Signed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -362,10 +361,10 @@ function useDebounce<T>(value: T, delay: number): T {
                 variant={advancedFiltersOpen ? "default" : "outline"}
                 size="sm"
                 onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
-                className="rounded-xl h-10 px-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider"
+                className="rounded-xl h-9 px-3.5 flex items-center gap-2 text-xs font-semibold transition-all"
               >
                 <SlidersHorizontal className="h-4 w-4" />
-                {advancedFiltersOpen ? "Hide Advanced" : "Advanced Filters"}
+                <span>{advancedFiltersOpen ? "Hide Advanced" : "Advanced Filters"}</span>
                 {(nameInput || clientIdInput || emailInput || phoneNumberInput || industryInput || locationInput) && (
                   <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 )}
@@ -377,7 +376,7 @@ function useDebounce<T>(value: T, delay: number): T {
                   variant="ghost"
                   size="sm"
                   onClick={clearAllFilters}
-                  className="rounded-xl h-10 px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
+                  className="rounded-xl h-9 px-3.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Clear All
@@ -390,81 +389,81 @@ function useDebounce<T>(value: T, delay: number): T {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pt-3 border-t border-border/60 animate-in slide-in-from-top-2 duration-300">
                 {/* Name Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Client Name</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Client Name</label>
                   <input
                     type="text"
                     placeholder="Filter by name..."
                     value={nameInput}
                     onChange={(e) => setNameInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Client ID Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Client ID</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Client ID</label>
                   <input
                     type="text"
                     placeholder="Filter by ID..."
                     value={clientIdInput}
                     onChange={(e) => setClientIdInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Email Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Email Address</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Email Address</label>
                   <input
                     type="text"
                     placeholder="Filter by email..."
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Phone Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Phone Number</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Phone Number</label>
                   <input
                     type="text"
                     placeholder="Filter by phone..."
                     value={phoneNumberInput}
                     onChange={(e) => setPhoneNumberInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Industry Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Industry</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Industry</label>
                   <input
                     type="text"
                     placeholder="Filter by industry..."
                     value={industryInput}
                     onChange={(e) => setIndustryInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
 
                 {/* Location Filter */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Location</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Location</label>
                   <input
                     type="text"
                     placeholder="Filter by location..."
                     value={locationInput}
                     onChange={(e) => setLocationInput(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-muted/30 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-semibold"
+                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
                   />
                 </div>
               </div>
             )}
           </div>
   
-          {/* Table Content Area - Optimized for No Horizontal Scroll */}
-          <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+          {/* Table Content Area */}
+          <div className="flex-1 min-h-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-700 delay-150">
             <div className="flex-1 overflow-auto custom-scrollbar relative">
               {isFetching && !isLoading && (
                 <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand/20 overflow-hidden z-50">
@@ -483,15 +482,15 @@ function useDebounce<T>(value: T, delay: number): T {
                        />
                      </div>
                    </TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">ID</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Name</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Industry</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Location</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground">Stage</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Status</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Age</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-center">Jobs</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[9px] font-black uppercase tracking-wider text-muted-foreground text-right pr-6">Created By</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">ID</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Name</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Industry</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Location</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stage</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Status</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Age</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Jobs</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right pr-6">Created By</TableHead>
                  </TableRow>
                </TableHeader>
                <TableBody>
@@ -542,7 +541,7 @@ function useDebounce<T>(value: T, delay: number): T {
            </div>
            
            {/* Compact Pagination Footer */}
-           <div className="flex-shrink-0 bg-card border-t border-border p-1.5">
+           <div className="flex-shrink-0 bg-card border-t border-border py-2 px-3">
              <ClientPaginationControls
                currentPage={currentPage}
                totalPages={totalPagesCalc}

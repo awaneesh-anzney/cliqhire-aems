@@ -5,11 +5,12 @@ import dynamicImport from 'next/dynamic';
 const TABS = [
   { label: "Summary", icon: <FileText className="w-4 h-4" /> },
   { label: "Jobs", icon: <Briefcase className="w-4 h-4" /> },
-  { label: "Activities", icon: <Activity className="w-4 h-4" /> },
+  // { label: "Activities", icon: <Activity className="w-4 h-4" /> },
   { label: "Notes", icon: <StickyNote className="w-4 h-4" /> },
-  { label: "Client Team", icon: <Users className="w-4 h-4" /> },
-  { label: "Contacts", icon: <User className="w-4 h-4" /> },
-  { label: "History", icon: <Clock className="w-4 h-4" /> },
+  { label: "Attachments", icon: <Paperclip className="w-4 h-4" /> },
+  // { label: "Client Team", icon: <Users className="w-4 h-4" /> },
+  // { label: "Contacts", icon: <User className="w-4 h-4" /> },
+  // { label: "History", icon: <Clock className="w-4 h-4" /> },
 ];
 
 // Dynamically import the client component for tabs and editing

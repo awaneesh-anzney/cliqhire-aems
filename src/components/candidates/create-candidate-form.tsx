@@ -240,11 +240,6 @@ export default function CreateCandidateForm({
       return;
     }
 
-    if (!form.cv && !isTempCandidateConversion) {
-      toast.error("Resume upload is required");
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       if (isTempCandidateConversion) {
