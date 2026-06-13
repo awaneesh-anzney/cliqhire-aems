@@ -14,6 +14,19 @@ import {
 } from "@/components/ui/select";
 import { getStageColor, mapUIStageToBackendStage, type Candidate } from "./dummy-data";
 import { format } from "date-fns";
+import { DatePickerField, DateTimePickerField } from "./pipeline-stage-details/field-inputs";
+import { 
+  Calendar, 
+  Star, 
+  MessageSquare, 
+  Link, 
+  User, 
+  Award, 
+  DollarSign, 
+  Briefcase, 
+  ArrowRight,
+  Sparkles
+} from "lucide-react";
 
 interface StatusChangeConfirmationDialogProps {
   isOpen: boolean;
@@ -42,7 +55,6 @@ const STAGE_FIELDS_MAP: Record<string, StageFieldConfig[]> = {
     { key: "notes", label: "Notes", type: "textarea", placeholder: "Enter sourcing notes..." }
   ],
   "Screening": [
-    { key: "sourcingDate", label: "CV Received Date", type: "date" },
     { key: "screeningDate", label: "Screening Date", type: "date" },
     { key: "aemsInterviewDate", label: "Internal Interview Date", type: "datetime" },
     { key: "rating", label: "Rating (1-5)", type: "rating", options: ["1", "2", "3", "4", "5"] },
@@ -162,6 +174,18 @@ const getFieldValue = (candidate: any, stage: string, key: string): string => {
   return String(val);
 };
 
+const getFieldIcon = (key: string) => {
+  const k = key.toLowerCase();
+  if (k.includes("date") || k.includes("time")) return <Calendar className="h-3.5 w-3.5 text-blue-500" />;
+  if (k.includes("rating")) return <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />;
+  if (k.includes("feedback") || k.includes("notes") || k.includes("reason")) return <MessageSquare className="h-3.5 w-3.5 text-purple-500" />;
+  if (k.includes("link")) return <Link className="h-3.5 w-3.5 text-indigo-500" />;
+  if (k.includes("channel") || k.includes("connection")) return <User className="h-3.5 w-3.5 text-green-500" />;
+  if (k.includes("assessment")) return <Award className="h-3.5 w-3.5 text-sky-500" />;
+  if (k.includes("salary") || k.includes("currency")) return <DollarSign className="h-3.5 w-3.5 text-emerald-500" />;
+  return <Briefcase className="h-3.5 w-3.5 text-muted-foreground/85" />;
+};
+
 export function StatusChangeConfirmationDialog({
   isOpen,
   onClose,
@@ -204,39 +228,33 @@ export function StatusChangeConfirmationDialog({
             value={value}
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
             placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-            className="w-full h-10 rounded-xl border-border bg-card focus-visible:ring-brand font-medium"
+            className="w-full h-10 rounded-xl border-border bg-card/60 focus-visible:ring-brand font-medium text-xs shadow-sm hover:border-brand/20 transition-colors"
           />
         );
       case "date":
         return (
-          <Input
-            id={`field-${field.key}`}
-            type="date"
+          <DatePickerField
             value={value}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)}
-            className="w-full h-10 rounded-xl border-border bg-card focus-visible:ring-brand font-medium"
+            onChange={(val) => handleFieldChange(field.key, val)}
           />
         );
       case "datetime":
         return (
-          <Input
-            id={`field-${field.key}`}
-            type="datetime-local"
+          <DateTimePickerField
             value={value}
-            onChange={(e) => handleFieldChange(field.key, e.target.value)}
-            className="w-full h-10 rounded-xl border-border bg-card focus-visible:ring-brand font-medium"
+            onChange={(val) => handleFieldChange(field.key, val)}
           />
         );
       case "select":
       case "rating":
         return (
           <Select value={value} onValueChange={(val) => handleFieldChange(field.key, val)}>
-            <SelectTrigger id={`field-${field.key}`} className="w-full h-10 rounded-xl border-border bg-card focus:ring-brand font-medium">
+            <SelectTrigger id={`field-${field.key}`} className="w-full h-10 rounded-xl border-border bg-card/60 focus:ring-brand font-medium text-xs shadow-sm hover:border-brand/20 transition-colors">
               <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-border">
               {field.options?.map((opt) => (
-                <SelectItem key={opt} value={opt} className="rounded-lg font-medium">
+                <SelectItem key={opt} value={opt} className="rounded-lg font-medium text-xs">
                   {opt}
                 </SelectItem>
               ))}
@@ -251,7 +269,7 @@ export function StatusChangeConfirmationDialog({
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
             placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
             rows={3}
-            className="w-full rounded-xl border-border bg-card focus-visible:ring-brand font-medium resize-none"
+            className="w-full rounded-xl border-border bg-card/60 focus-visible:ring-brand font-medium text-xs resize-none shadow-sm hover:border-brand/20 transition-colors"
           />
         );
       default:
@@ -261,62 +279,83 @@ export function StatusChangeConfirmationDialog({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <AlertDialogContent className="max-w-lg rounded-[2rem] border-border shadow-2xl bg-card flex flex-col max-h-[90vh]">
-        <AlertDialogHeader className="flex-shrink-0">
+      <AlertDialogContent className="max-w-lg rounded-[2rem] border border-border bg-card/95 backdrop-blur-md shadow-2xl flex flex-col max-h-[85vh] p-6 animate-in zoom-in-95 duration-200">
+        
+        {/* Header Section */}
+        <AlertDialogHeader className="flex-shrink-0 space-y-1">
+          <div className="flex items-center gap-2 text-brand">
+            <Sparkles className="h-5 w-5 fill-brand/10 animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Pipeline Intelligence</span>
+          </div>
           <AlertDialogTitle className="text-xl font-black text-foreground tracking-tight">
             Confirm Stage Change
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground font-semibold uppercase tracking-wider text-[11px] leading-relaxed">
-            Confirm moving candidate <strong className="text-brand font-bold">{candidateName}</strong> to the next stage.
+          <AlertDialogDescription className="text-muted-foreground font-bold uppercase tracking-wider text-[11px] leading-relaxed">
+            Move candidate <strong className="text-brand font-black">{candidateName}</strong> into the next stage of selection.
           </AlertDialogDescription>
         </AlertDialogHeader>
         
-        {/* Stages Indicators */}
-        <div className="flex items-center justify-center space-x-6 py-4 bg-muted/30 border border-border rounded-2xl my-2 flex-shrink-0">
-          <div className="text-center">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Current Stage</p>
-            <Badge variant="outline" className={`${getStageColor(currentStage)} border font-semibold`}>
+        {/* Stages Progress Indicator */}
+        <div className="flex items-center justify-between px-6 py-4 bg-muted/40 border border-border/60 rounded-2xl my-3 flex-shrink-0 shadow-inner">
+          <div className="text-center flex-1">
+            <p className="text-[9px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-1.5">Current Stage</p>
+            <Badge variant="outline" className={`${getStageColor(currentStage)} border font-black uppercase tracking-wider text-[10px] py-0.5 px-3 rounded-lg shadow-sm`}>
               {currentStage}
             </Badge>
           </div>
           
-          <div className="text-muted-foreground">
-            <svg className="w-5 h-5 text-muted-foreground/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
+          <div className="px-2 shrink-0">
+            <div className="h-8 w-8 rounded-full bg-brand/5 border border-brand/10 flex items-center justify-center">
+              <ArrowRight className="h-4 w-4 text-brand" />
+            </div>
           </div>
           
-          <div className="text-center">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">New Stage</p>
-            <Badge variant="outline" className={`${getStageColor(newStage)} border font-semibold`}>
+          <div className="text-center flex-1">
+            <p className="text-[9px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-1.5">New Stage</p>
+            <Badge variant="outline" className={`${getStageColor(newStage)} border font-black uppercase tracking-wider text-[10px] py-0.5 px-3 rounded-lg shadow-sm`}>
               {newStage}
             </Badge>
           </div>
         </div>
 
         {/* Dynamic Fields Section */}
-        {fields.length > 0 && (
-          <div className="flex-1 overflow-y-auto pr-2 my-2 min-h-0 space-y-4 custom-scrollbar">
-            <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border/60 pb-1 mb-3">
-              {newStage} Stage Specific Fields
+        {fields.length > 0 ? (
+          <div className="flex-1 overflow-y-auto pr-1.5 my-3 min-h-0 space-y-3.5 custom-scrollbar">
+            <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border pb-1.5 mb-3">
+              Required {newStage} Stage Intel
             </h4>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3.5">
               {fields.map((field) => (
-                <div key={field.key} className="space-y-1.5">
-                  <label htmlFor={`field-${field.key}`} className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                <div 
+                  key={field.key} 
+                  className="group relative flex flex-col gap-1.5 p-3.5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-card hover:border-brand/20 transition-all duration-300 shadow-sm hover:shadow-md"
+                >
+                  <label htmlFor={`field-${field.key}`} className="text-[10px] font-black text-muted-foreground/75 uppercase tracking-widest flex items-center gap-1.5">
+                    {getFieldIcon(field.key)}
                     {field.label}
                   </label>
-                  <div>
+                  <div className="w-full">
                     {renderField(field)}
                   </div>
                 </div>
               ))}
             </div>
           </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center border border-dashed border-border rounded-2xl bg-muted/20 my-3 gap-2 flex-shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-card border border-border/60 flex items-center justify-center shadow-sm text-muted-foreground/80">
+              <Sparkles className="h-4.5 w-4.5" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ready to Transition</p>
+              <p className="text-[11px] font-semibold text-muted-foreground/70">No additional fields required for the {newStage} stage.</p>
+            </div>
+          </div>
         )}
         
-        <AlertDialogFooter className="flex-shrink-0 gap-2 mt-4 pt-3 border-t border-border/60">
-          <AlertDialogCancel onClick={onClose} className="border-border rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-muted py-2.5">
+        {/* Footer Actions */}
+        <AlertDialogFooter className="flex-shrink-0 gap-2.5 mt-3 pt-3 border-t border-border">
+          <AlertDialogCancel onClick={onClose} className="border-border rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-muted py-2.5 px-4 shrink-0 transition-colors">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction 
@@ -339,7 +378,7 @@ export function StatusChangeConfirmationDialog({
               });
               onConfirm(finalData);
             }}
-            className="bg-brand hover:bg-brand/90 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-brand/20 py-2.5"
+            className="bg-brand hover:bg-brand/90 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-brand/20 py-2.5 px-4 transition-colors"
           >
             Confirm Change
           </AlertDialogAction>
