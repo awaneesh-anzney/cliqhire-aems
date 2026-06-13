@@ -67,6 +67,7 @@ interface Candidate {
   graduation?: string;
   certification?: string;
   noticePeriod?: string;
+  domains?: { _id: string; name: string; description?: string | null; isActive?: boolean }[];
 }
 
 export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId: string, tabs: Tab[] }) {
@@ -90,7 +91,11 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
   const updateCandidateMutation = useMutation({
     mutationFn: async ({ id, updatedCandidate }: { id: string; updatedCandidate: any }) => {
       await initializeAuth();
-      return candidateService.updateCandidate(id, updatedCandidate);
+      const apiPayload = { ...updatedCandidate };
+      if (apiPayload.domains) {
+        apiPayload.domains = apiPayload.domains.map((d: any) => typeof d === 'string' ? d : d._id);
+      }
+      return candidateService.updateCandidate(id, apiPayload);
     },
     onMutate: async ({ updatedCandidate }) => {
       await queryClient.cancelQueries({ queryKey: ["candidate", candidateId] });
@@ -242,7 +247,8 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
           { key: "reportingTo", label: "Reporting To" },
           { key: "totalStaffReporting", label: "Total Number of Staff Reporting to You" },
           { key: "softSkill", label: "Soft Skill" },
-          { key: "technicalSkill", label: "Technical Skill" }
+          { key: "technicalSkill", label: "Technical Skill" },
+          { key: "domains", label: "Candidate Domains" }
         ];
         const fieldLabel = allFields.find(field => field.key === fieldKey)?.label || fieldKey || 'Field';
         toast.success(`${fieldLabel} updated successfully`);

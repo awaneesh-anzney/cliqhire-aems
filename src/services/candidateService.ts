@@ -3,6 +3,15 @@ import { api } from "@/lib/axios-config";
 import { formatPhoneNumber } from "@/lib/countryCodes";
 import axios, { AxiosError } from "axios";
 
+export interface CandidateDomain {
+  _id: string;
+  name: string;
+  description?: string | null;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Candidate {
   _id?: string; // MongoDB ID from API response
   profileId?: string;
@@ -53,6 +62,7 @@ export interface Candidate {
     id: string;
     name: string;
   };
+  domains?: CandidateDomain[];
   createdAt?: string;
   updatedAt?: string;
 }

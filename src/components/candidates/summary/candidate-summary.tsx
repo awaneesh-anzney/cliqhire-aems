@@ -17,6 +17,7 @@ import SalaryRange from "./salary-range";
 import EditResumeDialog from "@/components/candidates/EditResumeDialog";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CandidateDomainDialog } from "./CandidateDomainDialog";
 // ReferredByList import removed as we're using UserSelectDialog instead
 
 const detailsFields = [
@@ -26,6 +27,14 @@ const detailsFields = [
   { key: "referredBy", label: "CV Referred By" },
   { key: "totalRelevantExperience", label: "Total Relevant Years of Experience" },
   { key: "noticePeriod", label: "Notice Period" },
+  {
+    key: "domains",
+    label: "Candidate Domains",
+    render: (val: any[] | undefined) => {
+      if (!val || val.length === 0) return undefined;
+      return val.map((d: any) => d.name).join(", ");
+    }
+  },
 
   {
     key: "resume",
@@ -85,8 +94,8 @@ const detailsFields = [
 ];
 
 // Split details fields into default visible and collapsible sections
-const defaultDetailsFields = detailsFields.slice(0, 7); // Up to "Referred By"
-const collapsibleDetailsFields = detailsFields.slice(7); // From "Gender" onwards
+const defaultDetailsFields = detailsFields.slice(0, 8); // Up to "Resume"
+const collapsibleDetailsFields = detailsFields.slice(8); // From "status" onwards
 
 const contactFields = [
   { 
@@ -149,7 +158,12 @@ const CandidateSummary = ({
 }: CandidateSummaryProps) => {
   const [editField, setEditField] = useState<string | null>(null);
   const [localCandidate, setLocalCandidate] = useState(candidate);
+  const [showDomainsDialog, setShowDomainsDialog] = useState(false);
   const [showEditResumeDialog, setShowEditResumeDialog] = useState(false);
+
+  useEffect(() => {
+    setLocalCandidate(candidate);
+  }, [candidate]);
   const [showDateOfBirthDialog, setShowDateOfBirthDialog] = useState(false);
   const [showMaritalStatusDialog, setShowMaritalStatusDialog] = useState(false);
   const [showGenderDialog, setShowGenderDialog] = useState(false);
@@ -274,6 +288,7 @@ const CandidateSummary = ({
       else if (field.key === "status") setShowStatusDialog(true);
       else if (field.key === "willingToRelocate") setShowWillingToRelocateDialog(true);
       else if (field.key === "referredBy") setShowReferredByDialog(true);
+      else if (field.key === "domains") setShowDomainsDialog(true);
       else setEditField(field.key);
     };
 
@@ -292,12 +307,22 @@ const CandidateSummary = ({
             {field.label}
           </span>
           <div className="flex flex-col">
-            <span className={cn(
-              "text-xs sm:text-sm font-bold tracking-tight truncate",
-              hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
-            )}>
-              {hasValue ? (field.key === 'referredBy' && typeof value === 'object' ? value.name || value.email : value) : "Not Provided"}
-            </span>
+            {field.key === 'domains' && hasValue ? (
+              <div className="flex flex-wrap gap-1 mt-1 max-w-full">
+                {(Array.isArray(rawValue) ? rawValue : []).map((d: any) => (
+                  <span key={d._id} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">
+                    {d.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className={cn(
+                "text-xs sm:text-sm font-bold tracking-tight truncate",
+                hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
+              )}>
+                {hasValue ? (field.key === 'referredBy' && typeof value === 'object' ? value.name || value.email : value) : "Not Provided"}
+              </span>
+            )}
             {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
               <span className="text-[10px] text-muted-foreground font-semibold truncate mt-0.5">
                 {localCandidate.referredBy.email}
@@ -318,7 +343,7 @@ const CandidateSummary = ({
             </Button>
             
             {/* Modal injections for fields that don't use dedicated dialogs */}
-            {field.key !== "referredBy" && !field.isUpload && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
+            {field.key !== "referredBy" && field.key !== "domains" && !field.isUpload && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
               <EditFieldModal
                 open={editField === field.key}
                 onClose={() => setEditField(null)}
@@ -623,6 +648,18 @@ const CandidateSummary = ({
           onSelect={handleReferredBySelect}
         />
       )} */}
+
+      {/* Domains Dialog */}
+      {canModify && (
+        <CandidateDomainDialog
+          open={showDomainsDialog}
+          onClose={() => setShowDomainsDialog(false)}
+          currentValues={localCandidate?.domains || []}
+          onSave={(newValue: { ids: string[]; domains: any[] }) => {
+            handleSave("domains", newValue.domains);
+          }}
+        />
+      )}
 
     </div>
   );
