@@ -201,11 +201,11 @@ const Page = () => {
     });
   };
 
-  const handleConfirmStageChange = async () => {
+  const handleConfirmStageChange = async (data?: Record<string, any>) => {
     if (!stageChangeDialog.candidate || !id) return;
     try {
       const backendStage = mapUIStageToBackendStage(stageChangeDialog.newStage);
-      await updateCandidateStage(id, stageChangeDialog.candidate.id, { stage: backendStage });
+      await updateCandidateStage(id, stageChangeDialog.candidate.id, { stage: backendStage, data });
       await queryClient.invalidateQueries({ queryKey: ["pipelineEntry", id] });
       await refetch();
       setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
@@ -819,6 +819,7 @@ const Page = () => {
           candidateName={stageChangeDialog.candidate?.name || ''}
           currentStage={stageChangeDialog.currentStage}
           newStage={stageChangeDialog.newStage}
+          candidate={stageChangeDialog.candidate}
         />
       )}
 

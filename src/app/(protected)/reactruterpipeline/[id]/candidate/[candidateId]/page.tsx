@@ -122,10 +122,13 @@
      setStageChangeDialog({ isOpen: true, candidate, currentStage: candidate.currentStage, newStage });
    };
  
-   const handleConfirmStageChange = async () => {
+   const handleConfirmStageChange = async (data?: Record<string, any>) => {
      if (!stageChangeDialog.candidate || !pipelineId) return;
      try {
-       await updateCandidateStage(pipelineId, stageChangeDialog.candidate.id, { stage: mapUIStageToBackendStage(stageChangeDialog.newStage) });
+       await updateCandidateStage(pipelineId, stageChangeDialog.candidate.id, { 
+         stage: mapUIStageToBackendStage(stageChangeDialog.newStage),
+         data 
+       });
        await refetch();
        setStageChangeDialog(prev => ({ ...prev, isOpen: false }));
        toast.success("Pipeline stage updated");
@@ -252,6 +255,7 @@
          candidateName={stageChangeDialog.candidate?.name || ''}
          currentStage={stageChangeDialog.currentStage}
          newStage={stageChangeDialog.newStage}
+         candidate={stageChangeDialog.candidate}
        />
  
        <Dialog
