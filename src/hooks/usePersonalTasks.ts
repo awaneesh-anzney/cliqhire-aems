@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { taskService, CreateTaskRequest, Task } from '@/services/taskService';
 import { toast } from 'sonner';
 
@@ -62,4 +62,22 @@ export const usePersonalTasks = () => {
         updatePersonalTaskStatus,
         deletePersonalTask
     };
+};
+
+export const usePersonalTasksQuery = (filters?: {
+  status?: string;
+  priority?: string;
+  category?: string;
+  search?: string;
+  dueBefore?: string;
+  dueAfter?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  return useQuery({
+    queryKey: ['personal-tasks', filters],
+    queryFn: () => taskService.getPersonalTasks(filters),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2,
+  });
 };

@@ -8,10 +8,12 @@ export interface Task {
   description: string;
   status: 'to-do' | 'inprogress' | 'completed';
   category: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   dueDate?: string;
   dueTime?: string;
   createdAt: string;
   updatedAt: string;
+  tags?: string[];
   // Follow-up specific fields
   followUpType?: "cv-received" | "candidate-response" | "client-feedback" | "interview-scheduled" | "offer-sent" | "other";
   followUpStatus?: "pending" | "in-progress" | "completed";
@@ -23,7 +25,7 @@ export interface Task {
 export interface CreateTaskRequest {
   title: string;
   description?: string;
-  priority?: 'high' | 'medium' | 'low';
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   dueDate?: string;
   dueTime?: string;
   category?: string;
@@ -42,7 +44,7 @@ export interface UpdateTaskRequest {
   id: string;
   title?: string;
   description?: string;
-  priority?: 'high' | 'medium' | 'low';
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   dueDate?: string;
   dueTime?: string;
   status?: 'pending' | 'in-progress' | 'completed';
@@ -112,6 +114,7 @@ export interface MyTasksResponse {
     personalTasks: number;
     reminderTasks: number;
   };
+  responseTime?: string;
 }
 
 export interface AssignedJobsApiResponse {
@@ -126,10 +129,19 @@ class TaskService {
   /**
    * Get personal tasks for the current user
    */
-  async getPersonalTasks(): Promise<Task[]> {
+  async getPersonalTasks(params?: {
+    status?: string;
+    priority?: string;
+    category?: string;
+    search?: string;
+    dueBefore?: string;
+    dueAfter?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ success: boolean; data: Task[]; count: number; pagination: any }> {
     try {
-      const response = await api.get('/api/tasks/personal');
-      return response.data.data;
+      const response = await api.get('/api/tasks/personal', { params });
+      return response.data;
     } catch (error) {
       console.error('TaskService: Error fetching personal tasks:', error);
       throw new Error('Failed to fetch personal tasks');
@@ -222,9 +234,19 @@ class TaskService {
   /**
    * Get all tasks (assigned jobs, personal tasks, reminders) for the current user
    */
-  async getMyTasks(): Promise<MyTasksResponse> {
+  async getMyTasks(params?: {
+    type?: string;
+    status?: string;
+    search?: string;
+    priority?: string;
+    category?: string;
+    dueBefore?: string;
+    dueAfter?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<MyTasksResponse> {
     try {
-      const response = await api.get('/api/tasks/my-tasks');
+      const response = await api.get('/api/tasks/my-tasks', { params });
       return response.data;
     } catch (error) {
       console.error('TaskService: Error fetching my tasks:', error);
