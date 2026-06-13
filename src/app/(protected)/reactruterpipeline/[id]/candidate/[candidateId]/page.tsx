@@ -144,7 +144,11 @@
          return;
        }
      }
-     setStatusChangeDialog({ isOpen: true, candidate, newStatus });
+     if (newStatus === "Disqualified") {
+       setDisqualificationDialog({ isOpen: true, candidate, newStatus });
+     } else {
+       setStatusChangeDialog({ isOpen: true, candidate, newStatus });
+     }
    };
  
    const handleConfirmStatusChange = async () => {
@@ -306,7 +310,7 @@
          />
        )}
  
-       {disqualificationDialog.candidate && (
+       {disqualificationDialog.isOpen && disqualificationDialog.candidate && (
          <DisqualificationDialog
            isOpen={disqualificationDialog.isOpen}
            onClose={() => setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: null })}
@@ -320,8 +324,10 @@
                    status: 'Disqualified',
                    stage: mapUIStageToBackendStage(disqualificationDialog.candidate.currentStage),
                    notes: data.disqualificationReason,
+                   data: data,
                  });
                  await refetch();
+                 setDisqualificationDialog({ isOpen: false, candidate: null, newStatus: null });
                  toast.success("Disqualification recorded");
                } catch (error) { console.error(error); }
              }
