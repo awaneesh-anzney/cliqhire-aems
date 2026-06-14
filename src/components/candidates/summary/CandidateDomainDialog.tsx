@@ -164,7 +164,7 @@ export function CandidateDomainDialog({
                 ) : filteredDomains.length === 0 ? (
                   <div className="text-center py-8 px-4">
                     <p className="text-xs text-muted-foreground mb-3 font-medium">
-                      No domains found matching "{searchQuery}"
+                      No domains found matching &quot;{searchQuery}&quot;
                     </p>
                     <Button
                       size="sm"
@@ -176,7 +176,7 @@ export function CandidateDomainDialog({
                       }}
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Add "{searchQuery}" as new Domain
+                      Add &quot;{searchQuery}&quot; as new Domain
                     </Button>
                   </div>
                 ) : (
