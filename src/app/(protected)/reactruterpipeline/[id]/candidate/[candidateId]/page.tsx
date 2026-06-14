@@ -1,6 +1,6 @@
 "use client";
  
- import React, { useState } from "react";
+ import React, { useState, useEffect } from "react";
  import { useParams, useRouter } from "next/navigation";
  import { useQuery, useQueryClient } from "@tanstack/react-query";
  import { Badge } from "@/components/ui/badge";
@@ -72,6 +72,13 @@
  
    const job = data?.job;
    const candidate = data?.candidate;
+ 
+   useEffect(() => {
+     if (candidate && candidate.isTempCandidate) {
+       toast.error("Access Denied", { description: "Temporary candidates do not have a details profile page." });
+       router.replace(`/reactruterpipeline/${pipelineId}`);
+     }
+   }, [candidate, pipelineId, router]);
  
    const [selectedStage, setSelectedStage] = useState<string | undefined>(undefined);
  

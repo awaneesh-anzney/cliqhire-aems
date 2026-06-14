@@ -46,8 +46,15 @@
            <div className="flex flex-col gap-1.5 min-w-0">
              <div className="flex items-center gap-3">
                <h2 
-                 className="text-xl font-bold text-foreground tracking-tight cursor-pointer hover:text-brand transition-colors"
-                 onClick={() => router.push(`/candidates/${candidate.id}`)}
+                 className={cn(
+                   "text-xl font-bold text-foreground tracking-tight transition-colors",
+                   candidate.isTempCandidate ? "cursor-default" : "cursor-pointer hover:text-brand"
+                 )}
+                 onClick={() => {
+                   if (!candidate.isTempCandidate) {
+                     router.push(`/candidates/${candidate.id}`);
+                   }
+                 }}
                >
                  {candidate.name || 'Anonymous Candidate'}
                </h2>
@@ -111,7 +118,7 @@
  
          {/* Action Buttons */}
          <div className="flex items-center gap-2">
-           {pipelineId && (
+           {pipelineId && !candidate.isTempCandidate && (
              <Button
                variant="outline"
                size="sm"

@@ -71,8 +71,15 @@ export function PipelineCandidatesTable({
             {/* Avatar Column */}
             <TableCell className="px-4 py-3 w-[60px]">
               <Avatar 
-                className="h-8 w-8 rounded-lg border border-border/85 shadow-sm transition-transform duration-200 group-hover:scale-105 cursor-pointer"
-                onClick={() => router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`)}
+                className={cn(
+                  "h-8 w-8 rounded-lg border border-border/85 shadow-sm transition-transform duration-200",
+                  candidate.isTempCandidate ? "cursor-default" : "group-hover:scale-105 cursor-pointer"
+                )}
+                onClick={() => {
+                  if (!candidate.isTempCandidate) {
+                    router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`);
+                  }
+                }}
               >
                 <AvatarImage src={candidate.avatar} />
                 <AvatarFallback className="text-xs font-semibold bg-brand/5 text-brand">
@@ -87,10 +94,20 @@ export function PipelineCandidatesTable({
                  <Tooltip>
                    <TooltipTrigger asChild>
                      <div 
-                        className="flex items-center gap-2 cursor-pointer group/name truncate"
-                        onClick={() => router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`)}
+                        className={cn(
+                          "flex items-center gap-2 truncate",
+                          candidate.isTempCandidate ? "cursor-default" : "cursor-pointer group/name"
+                        )}
+                        onClick={() => {
+                          if (!candidate.isTempCandidate) {
+                            router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`);
+                          }
+                        }}
                      >
-                        <span className="text-xs font-bold text-foreground group-hover/name:text-brand transition-colors truncate">
+                        <span className={cn(
+                          "text-xs font-bold text-foreground truncate transition-colors",
+                          !candidate.isTempCandidate && "group-hover/name:text-brand"
+                        )}>
                           {candidate.name || "Anonymous Candidate"}
                         </span>
                         {candidate.isTempCandidate && (
@@ -187,16 +204,18 @@ export function PipelineCandidatesTable({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-xl border border-border bg-card shadow-lg w-52 p-1.5">
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`);
-                    }}
-                    className="rounded-lg p-2 text-xs font-semibold flex items-center gap-2 cursor-pointer hover:bg-brand/5 hover:text-brand"
-                  >
-                    <Eye className="h-4 w-4" />
-                    View Profile
-                  </DropdownMenuItem>
+                  {!candidate.isTempCandidate && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`);
+                      }}
+                      className="rounded-lg p-2 text-xs font-semibold flex items-center gap-2 cursor-pointer hover:bg-brand/5 hover:text-brand"
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Profile
+                    </DropdownMenuItem>
+                  )}
                   {candidate.resume && (
                     <DropdownMenuItem
                       onClick={(e) => {

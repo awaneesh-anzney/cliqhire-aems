@@ -232,6 +232,14 @@ const Page = () => {
         });
         return;
       }
+
+      if (newStatus === "CV Received") {
+        setAutoCreateCandidateDialog({
+          isOpen: true,
+          candidate,
+        });
+        return;
+      }
     }
 
     if (newStatus === "Disqualified") {
