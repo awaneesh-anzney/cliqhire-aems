@@ -30,21 +30,21 @@ interface Props {
 
 function getProbationBadge(probation: ProbationObject) {
   if (probation.status === "Completed") {
-    return { label: "Completed", className: "bg-emerald-100 text-emerald-800 border-emerald-200" };
+    return { label: "✅ Completed", className: "bg-emerald-100 text-emerald-800 border-emerald-200" };
   }
   if (probation.status === "Terminated") {
-    return { label: "Terminated", className: "bg-rose-100 text-rose-800 border-rose-200" };
+    return { label: "❌ Terminated", className: "bg-rose-100 text-rose-800 border-rose-200" };
   }
   if (probation.status === "Extended") {
-    return { label: "Extended", className: "bg-amber-100 text-amber-800 border-amber-200" };
+    return { label: "🔄 Extended", className: "bg-amber-100 text-amber-800 border-amber-200" };
   }
   if (probation.isExpired) {
-    return { label: "Expired", className: "bg-red-100 text-red-800 border-red-200" };
+    return { label: "⚠️ Expired", className: "bg-red-100 text-red-800 border-red-200" };
   }
   if (probation.isExpiringSoon) {
-    return { label: "Expiring Soon", className: "bg-yellow-100 text-yellow-800 border-yellow-200" };
+    return { label: "⏰ Expiring Soon", className: "bg-yellow-100 text-yellow-800 border-yellow-200" };
   }
-  return { label: "Active", className: "bg-blue-100 text-blue-800 border-blue-200" };
+  return { label: "🟡 Active", className: "bg-blue-100 text-blue-800 border-blue-200" };
 }
 
 const formatDate = (dateString?: string) => {
@@ -70,10 +70,10 @@ export function CandidateProbationCard({ probation }: Props) {
   const isOver = probation.isExpired && probation.status !== "Completed" && probation.status !== "Terminated";
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-md overflow-hidden relative p-4">
+    <div className="bg-card rounded-xl border border-border shadow-md relative p-4">
       {/* Glow decorative effect */}
       <div className={cn(
-        "absolute top-0 right-0 w-48 h-full rounded-full blur-3xl pointer-events-none -mr-24 -mt-12 opacity-15 transition-all",
+        "absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none -mr-24 -mt-12 opacity-15 transition-all",
         probation.status === "Completed" && "bg-emerald-500",
         probation.status === "Terminated" && "bg-red-500",
         isOver && "bg-rose-500",

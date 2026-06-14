@@ -231,9 +231,9 @@
          <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-4 duration-1000 delay-200 pr-1">
            <CandidateDisqualificationCard candidate={candidate} />
  
-           {candidate.probation && (
-             <CandidateProbationCard probation={candidate.probation} />
-           )}
+           {candidate.probation && candidate.currentStage === "Hired" && (
+              <CandidateProbationCard probation={candidate.probation} />
+            )}
  
            <div className="bg-card rounded-xl border border-border shadow-md overflow-visible p-4">
              <div className="flex items-center gap-2 mb-4">

@@ -1,5 +1,5 @@
 import { type Job, type Candidate, mapBackendStageToUIStage } from "./dummy-data";
-import { getProbationPeriodLabel } from "./pipeline-stage-details/stage-fields";
+import { getProbationPeriodLabel, getProbationPeriodDays } from "./pipeline-stage-details/stage-fields";
 
 // ============================================================
 // pipeline-mapper.ts — Updated for API v2
@@ -151,11 +151,11 @@ export function mapEntryToJob(entry: any): Job {
       onboarding: onboardingData,
       hired: hiredData,
       disqualified: disqualifiedData,
-      probation: c?.probation || (hiredData.probationPeriod && hiredData.startDate && hiredData.endDate ? {
+      probation: mapBackendStageToUIStage(c?.currentStage || "Sourcing") === "Hired" ? (c?.probation || (hiredData.probationPeriod && hiredData.probationPeriod !== "none" && hiredData.startDate && hiredData.endDate ? {
         isOnProbation: true,
         period: hiredData.probationPeriod,
         periodLabel: getProbationPeriodLabel(hiredData.probationPeriod),
-        periodDays: hiredData.periodDays || 0,
+        periodDays: getProbationPeriodDays(hiredData.probationPeriod),
         joinDate: hiredData.startDate,
         startDate: hiredData.startDate,
         endDate: hiredData.endDate,
@@ -163,10 +163,10 @@ export function mapEntryToJob(entry: any): Job {
         notes: hiredData.probationNotes || "",
         remainingDays: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
         daysElapsed: Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))),
-        percentComplete: Math.min(100, Math.max(0, Math.round((Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))) / (hiredData.periodDays || 30)) * 100))),
+        percentComplete: Math.min(100, Math.max(0, Math.round((Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))) / (getProbationPeriodDays(hiredData.probationPeriod) || 30)) * 100))),
         isExpired: Date.now() > new Date(hiredData.endDate).getTime(),
         isExpiringSoon: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) <= 7
-      } : null),
+      } : null)) : null,
 
       interviewRounds: c?.interviewRounds || [],
       currentInterviewRound: c?.currentInterviewRound,
@@ -353,11 +353,11 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     onboarding: onboardingData,
     hired: hiredData,
     disqualified: disqualifiedData,
-    probation: data.probation || (hiredData.probationPeriod && hiredData.startDate && hiredData.endDate ? {
+    probation: mapBackendStageToUIStage(data.currentStage || "Sourcing") === "Hired" ? (data.probation || (hiredData.probationPeriod && hiredData.probationPeriod !== "none" && hiredData.startDate && hiredData.endDate ? {
       isOnProbation: true,
       period: hiredData.probationPeriod,
       periodLabel: getProbationPeriodLabel(hiredData.probationPeriod),
-      periodDays: hiredData.periodDays || 0,
+      periodDays: getProbationPeriodDays(hiredData.probationPeriod),
       joinDate: hiredData.startDate,
       startDate: hiredData.startDate,
       endDate: hiredData.endDate,
@@ -365,10 +365,10 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
       notes: hiredData.probationNotes || "",
       remainingDays: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
       daysElapsed: Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))),
-      percentComplete: Math.min(100, Math.max(0, Math.round((Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))) / (hiredData.periodDays || 30)) * 100))),
+      percentComplete: Math.min(100, Math.max(0, Math.round((Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))) / (getProbationPeriodDays(hiredData.probationPeriod) || 30)) * 100))),
       isExpired: Date.now() > new Date(hiredData.endDate).getTime(),
       isExpiringSoon: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) <= 7
-    } : null),
+    } : null)) : null,
     source: sourcingData?.connection || candidateInfo?.source || "",
     connection: sourcingData?.connection || candidateInfo?.source || "",
     interviewRounds: data.interviewRounds || [],

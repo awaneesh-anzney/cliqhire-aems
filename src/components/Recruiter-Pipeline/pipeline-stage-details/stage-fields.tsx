@@ -45,6 +45,18 @@ export const getProbationPeriodLabel = (value: string | null | undefined): strin
   return option ? option.label : value;
 };
 
+export const getProbationPeriodDays = (value: string | null | undefined): number => {
+  if (!value || value === "none") return 0;
+  const mapping: Record<string, number> = {
+    "1_month": 30,
+    "2_month": 60,
+    "3_month": 90,
+    "6_month": 180,
+    "1_year": 365
+  };
+  return mapping[value] || 0;
+};
+
 
 // Helper function to parse date string to Date object
 export const parseDateString = (dateString: string): Date | undefined => {
