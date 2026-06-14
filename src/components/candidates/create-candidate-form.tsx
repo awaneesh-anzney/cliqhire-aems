@@ -596,8 +596,8 @@ export default function CreateCandidateForm({
                   <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
                     <Upload className="w-10 h-10 text-primary animate-bounce" />
                   </div>
-                  <h3 className="text-2xl font-black text-foreground tracking-tight">Final Step: Attach Resume</h3>
-                  <p className="text-muted-foreground font-semibold max-w-sm mx-auto">Upload the official CV to complete the professional profile.</p>
+                  <h3 className="text-2xl font-black text-foreground tracking-tight">Final Step: Attach Resume <span className="text-sm font-normal text-muted-foreground">(Optional)</span></h3>
+                  <p className="text-muted-foreground font-semibold max-w-sm mx-auto">Upload the official CV to complete the professional profile, or click Finalize Profile to submit without one.</p>
                 </div>
 
                 <div 
