@@ -46,6 +46,7 @@ export const convertPipelineListDataToJob = (
     recruiterEmail: (pipelineData as any).recruiterId?.email || "",
     department: (pipelineData as any).jobId?.department,
     numberOfPositions: (pipelineData as any).jobId?.numberOfPositions,
+    stageCounts: (pipelineData as any).stageCounts,
   } as Job;
 };
 

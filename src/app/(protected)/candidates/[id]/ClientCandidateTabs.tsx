@@ -5,7 +5,8 @@ import { CandidateNotesContent } from '@/components/candidates/notes/notes-conte
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SlidersHorizontal, RefreshCcw, Plus, FileText, Users, Briefcase, Star, Activity, StickyNote, Paperclip, Clock, User, FileIcon, FilePen, Mail, Phone, MapPin, Calendar,Loader  } from "lucide-react";
+import { CandidateStatusBadge } from "@/components/candidate-status-badge";
+import { SlidersHorizontal, RefreshCcw, Plus, FileText, Users, Briefcase, Star, Activity, StickyNote, Paperclip, Clock, User, FileIcon, FilePen, Mail, Phone, MapPin, Calendar, Check, Loader, ArrowLeft } from "lucide-react";
 import { AttachmentsContent } from '@/components/candidates/attachments/attachments-content';
 import { JobsContent, JobsContentRef } from '@/components/candidates/jobs/jobs-content';
 import { AddToJobDialog } from '@/components/candidates/add-to-job-dialog';
@@ -17,6 +18,34 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+
+// Generate initials for candidate avatar
+function getInitials(name: string = "") {
+  const parts = name.trim().split(" ");
+  if (parts.length === 0 || !parts[0]) return "?";
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// Generate premium gradient based on candidate name
+function getAvatarGradient(name: string = "") {
+  const colors = [
+    "from-[#4776E6] to-[#8E54E9]", // Royal Purple
+    "from-[#8A2387] via-[#E94057] to-[#F27121]", // Sunset Magenta
+    "from-[#00c6ff] to-[#0072ff]", // Cool Blue
+    "from-[#ED5C6B] to-[#F57C59]", // Coral Orange (Matches "jjk" avatar in the design image)
+    "from-[#11998e] to-[#38ef7d]", // Emerald Mint
+    "from-[#FF416C] to-[#FF4B2B]", // Vibrant Rose
+    "from-[#f12711] to-[#f5af19]", // Sunny Orange
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+}
 
 interface Tab {
   label: string;
@@ -25,7 +54,7 @@ interface Tab {
 
 interface Candidate {
   _id?: string;
-  profileId?: string
+  profileId?: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -34,6 +63,11 @@ interface Candidate {
   skills?: string[];
   resume?: string;
   status?: string;
+  highestDegree?: string;
+  graduation?: string;
+  certification?: string;
+  noticePeriod?: string;
+  domains?: { _id: string; name: string; description?: string | null; isActive?: boolean }[];
 }
 
 export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId: string, tabs: Tab[] }) {
@@ -42,6 +76,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
   const jobsContentRef = useRef<JobsContentRef>(null);
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const router = useRouter();
   
   const { data: candidate, isLoading, isError, error, refetch } = useQuery<Candidate | null, any>({
     queryKey: ["candidate", candidateId],
@@ -56,7 +91,11 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
   const updateCandidateMutation = useMutation({
     mutationFn: async ({ id, updatedCandidate }: { id: string; updatedCandidate: any }) => {
       await initializeAuth();
-      return candidateService.updateCandidate(id, updatedCandidate);
+      const apiPayload = { ...updatedCandidate };
+      if (apiPayload.domains) {
+        apiPayload.domains = apiPayload.domains.map((d: any) => typeof d === 'string' ? d : d._id);
+      }
+      return candidateService.updateCandidate(id, apiPayload);
     },
     onMutate: async ({ updatedCandidate }) => {
       await queryClient.cancelQueries({ queryKey: ["candidate", candidateId] });
@@ -158,7 +197,23 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
     try {
       const id = candidate?._id;
       if (!id) throw new Error('Missing candidate id');
-      await updateCandidateMutation.mutateAsync({ id, updatedCandidate });
+
+      let payload: any = {};
+      if (fieldKey) {
+        if (fieldKey === "phone") {
+          payload.phone = updatedCandidate.phone;
+          payload.countryCode = updatedCandidate.countryCode;
+        } else if (fieldKey === "otherPhone") {
+          payload.otherPhone = updatedCandidate.otherPhone;
+          payload.otherCountryCode = updatedCandidate.otherCountryCode;
+        } else {
+          payload[fieldKey] = updatedCandidate[fieldKey];
+        }
+      } else {
+        payload = updatedCandidate;
+      }
+
+      await updateCandidateMutation.mutateAsync({ id, updatedCandidate: payload });
       if (fieldKey) {
         const allFields = [
           { key: "name", label: "Candidate Name" },
@@ -177,6 +232,9 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
           { key: "nationality", label: "Nationality" },
           { key: "universityName", label: "University Name" },
           { key: "educationDegree", label: "Education Degree/Certificate" },
+          { key: "highestDegree", label: "Highest Degree" },
+          { key: "graduation", label: "Graduation Details" },
+          { key: "certification", label: "Professional Certifications" },
           { key: "primaryLanguage", label: "Primary Language" },
           { key: "willingToRelocate", label: "Are you willing to relocate?" },
           { key: "iqama", label: "Iqama is transferable ?" },
@@ -189,7 +247,8 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
           { key: "reportingTo", label: "Reporting To" },
           { key: "totalStaffReporting", label: "Total Number of Staff Reporting to You" },
           { key: "softSkill", label: "Soft Skill" },
-          { key: "technicalSkill", label: "Technical Skill" }
+          { key: "technicalSkill", label: "Technical Skill" },
+          { key: "domains", label: "Candidate Domains" }
         ];
         const fieldLabel = allFields.find(field => field.key === fieldKey)?.label || fieldKey || 'Field';
         toast.success(`${fieldLabel} updated successfully`);
@@ -200,114 +259,126 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
   };
 
   return (
-    <div className="flex flex-col h-full bg-card">
-      {/* Header Section (Matching Jobs ID page) */}
-      <div className="bg-card border-b shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-6 py-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-foreground tracking-tight">{candidate.name || "Untitled Candidate"}</h1>
-                  <span className="text-xl text-muted-foreground font-medium font-mono">#{candidate.profileId || "—"}</span>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className={cn(
-                    "border-none px-3 py-1 text-xs font-semibold uppercase tracking-wider",
-                    candidate.status === "Placed" ? "bg-green-100 text-green-800" :
-                    candidate.status === "Interviewing" ? "bg-orange-100 text-orange-800" :
-                    "bg-muted text-foreground"
-                  )}
-                >
-                  {candidate.status || "New"}
-                </Badge>
+    <div className="flex flex-col h-full bg-background font-sans">
+      {/* Redesigned Premium Header Card Wrapper */}
+      <div className="max-w-[1600px] mx-auto w-full pb-2">
+        <div className="bg-card border border-border/60 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] relative overflow-hidden p-4 sm:py-4 sm:px-5">
+          {/* Subtle decorative background gradient accent */}
+          <div className="absolute top-0 right-0 w-80 h-32 bg-brand/5 blur-[80px] pointer-events-none rounded-full" />
+          
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 relative z-10">
+            {/* Left Column: Avatar + Basic Info */}
+            <div className="flex items-start gap-4 min-w-0">
+              <div className={cn(
+                "w-14 h-14 sm:w-16 sm:h-16 rounded-[16px] sm:rounded-[20px] flex items-center justify-center text-lg sm:text-xl font-bold text-white shrink-0 bg-gradient-to-tr shadow-md select-none",
+                getAvatarGradient(candidate.name)
+              )}>
+                {getInitials(candidate.name)}
               </div>
               
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2 group cursor-pointer hover:text-brand transition-colors">
-                  <div className="p-1.5 bg-muted rounded-md group-hover:bg-brand/10 transition-colors">
-                    <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-brand" />
+              <div className="space-y-2 min-w-0 flex-1">
+                <div className="space-y-1">
+                  {/* Name + Badges */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight leading-none truncate max-w-[280px] sm:max-w-[450px]">
+                      {candidate.name || "Untitled Candidate"}
+                    </h1>
+                    
+                    {candidate.profileId && (
+                      <span className="bg-[#EEEDFC] text-[#553C9A] border border-[#D6D3F8] rounded-full px-2.5 py-0.5 text-xs font-bold font-mono leading-none">
+                        # {candidate.profileId}
+                      </span>
+                    )}
+                    
+                    <CandidateStatusBadge
+                      id={candidate._id}
+                      status={(candidate.status as any) || "Active"}
+                      onStatusChange={async (id, newStatus) => {
+                        await handleCandidateUpdate({ status: newStatus }, "status");
+                      }}
+                      disabled={!canModifyCandidates}
+                    />
                   </div>
-                  <span className="font-medium text-foreground">{candidate.location || "No location"}</span>
+
+                  {/* Metadata Row */}
+                  <div className="flex flex-wrap items-center gap-y-1 text-xs sm:text-sm font-medium text-muted-foreground">
+                    <div className="flex items-center gap-1.5 hover:text-brand transition-colors cursor-pointer">
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span>{candidate.location || "Global"}</span>
+                    </div>
+
+                    <span className="text-muted-foreground/30 mx-2 select-none">|</span>
+
+                    <div className="flex items-center gap-1.5">
+                      <Briefcase className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span>{candidate.experience || "No experience info"}</span>
+                    </div>
+
+                    <span className="text-muted-foreground/30 mx-2 select-none">|</span>
+
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span>Updated just now</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 group border-l border-border pl-6">
-                  <div className="p-1.5 bg-muted rounded-md">
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <span>{candidate.experience || "No experience info"}</span>
-                </div>
-
-                <div className="flex items-center gap-2 border-l border-border pl-6">
-                  <div className="p-1.5 bg-muted rounded-md">
-                    <Loader className="h-4 w-4 text-brand" />
-                  </div>
-                  <span className="text-muted-foreground">Last updated: Just now</span>
+                {/* Quick Contact Links */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {candidate.email && (
+                    <a 
+                      href={`mailto:${candidate.email}`} 
+                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
+                    >
+                      <Mail className="h-3.5 w-3.5 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
+                      {candidate.email}
+                    </a>
+                  )}
+                  {candidate.phone && (
+                    <a 
+                      href={`tel:${candidate.phone}`} 
+                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
+                    >
+                      <Phone className="h-3.5 w-3.5 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
+                      {formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}
+                    </a>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Quick Contact Links */}
-              <div className="flex items-center gap-4 mt-2">
-                {candidate.email && (
-                  <a href={`mailto:${candidate.email}`} className="group flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-brand transition-colors">
-                    <div className="h-7 w-7 rounded-lg bg-muted group-hover:bg-brand/10 flex items-center justify-center transition-all">
-                      <Mail className="h-3.5 w-3.5" />
-                    </div>
-                    {candidate.email}
-                  </a>
-                )}
-                {candidate.phone && (
-                  <a href={`tel:${candidate.phone}`} className="group flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-brand transition-colors">
-                    <div className="h-7 w-7 rounded-lg bg-muted group-hover:bg-brand/10 flex items-center justify-center transition-all">
-                      <Phone className="h-3.5 w-3.5" />
-                    </div>
-                    {formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}
-                  </a>
-                )}
-              </div>
+            {/* Right Column: Actions */}
+            <div className="flex items-center shrink-0 self-start md:self-center mt-1 md:mt-0">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleRefresh} 
+                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl border border-[#E2E8F0] dark:border-border bg-white dark:bg-background text-[#555] dark:text-muted-foreground hover:bg-muted shadow-sm flex items-center justify-center transition-all"
+              >
+                <RefreshCcw className="w-3.5 h-3.5" />
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-     
-
       {/* Modern Segmented Control Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full bg-card border border-border/60 rounded-2xl p-2">
         <div className="bg-card border-b border-border/60 sticky top-0 z-20 px-6 py-3">
-          <TabsList className="inline-flex items-center h-12 p-1 bg-muted/80 rounded-2xl border border-border/50 shadow-inner">
-            <TabsTrigger
-              value="Summary"
-              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
-            >
-              <FileIcon className="h-4 w-4" />
-              Summary
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="Jobs"
-              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
-            >
-              <Briefcase className="h-4 w-4" />
-              Jobs
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="Notes"
-              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
-            >
-              <StickyNote className="h-4 w-4" />
-              Notes
-            </TabsTrigger>
-
-            <TabsTrigger
-              value="Attachments"
-              className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2.5 h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300"
-            >
-              <Paperclip className="h-4 w-4" />
-              Attachments
-            </TabsTrigger>
+          <TabsList className="inline-flex items-center h-11 p-1 bg-muted/80 rounded-2xl border border-border/50 shadow-inner max-w-full overflow-x-auto custom-scrollbar gap-1">
+            {tabs.map((tab) => {
+              const value = tab.label.replace(/\s+/g, "");
+              return (
+                <TabsTrigger
+                  key={tab.label}
+                  value={value}
+                  className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2 h-9 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300 shrink-0"
+                >
+                  {tab.icon}
+                  {tab.label}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
         </div>
 

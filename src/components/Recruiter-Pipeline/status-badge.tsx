@@ -82,6 +82,8 @@ const getDisplayLabel = (status: StatusType | string) => {
     case "Client Shortlisted":
       // Existing UX choice to display shorter label
       return "Shortlisted";
+    case "AEMS Interview":
+      return "Internal Interview";
     default:
       return status as string;
   }

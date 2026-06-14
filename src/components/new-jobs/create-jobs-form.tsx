@@ -100,6 +100,30 @@ export function CreateJobRequirementForm({
   const [errors, setErrors] = useState<{ clientName?: string; positionName?: string; clientId?: string }>({});
   const router = useRouter();
 
+  const [cvTargets, setCvTargets] = useState<{
+    label: string;
+    startDate: string;
+    endDate: string;
+    targetCount: number;
+  }[]>([]);
+
+  const handleAddSlot = () => {
+    setCvTargets((prev) => [
+      ...prev,
+      { label: "", startDate: "", endDate: "", targetCount: 1 },
+    ]);
+  };
+
+  const handleRemoveSlot = (index: number) => {
+    setCvTargets((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSlotChange = (index: number, key: string, value: any) => {
+    setCvTargets((prev) =>
+      prev.map((slot, i) => (i === index ? { ...slot, [key]: value } : slot))
+    );
+  };
+
   useEffect(() => {
     if (!lockedClientId) {
       setClientPage(1);
@@ -169,12 +193,40 @@ export function CreateJobRequirementForm({
 
   const validateCurrentStep = () => {
     let newErrors: typeof errors = {};
-    if (currentTab === 0) {
+    if (currentTab >= 0) {
       if (!lockedClientId && !form.clientId) newErrors.clientId = "Client selection is required.";
       if (!form.positionName.trim()) newErrors.positionName = "Position Name is required.";
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return false;
+    }
+
+    if (currentTab >= 1) {
+      for (let i = 0; i < cvTargets.length; i++) {
+        const slot = cvTargets[i];
+        if (!slot.startDate) {
+          toast.error(`Slot ${i + 1}: Start Date is required.`);
+          return false;
+        }
+        if (!slot.endDate) {
+          toast.error(`Slot ${i + 1}: End Date is required.`);
+          return false;
+        }
+        if (new Date(slot.endDate) < new Date(slot.startDate)) {
+          toast.error(`Slot ${i + 1}: End Date must be greater than or equal to Start Date.`);
+          return false;
+        }
+        if (!slot.targetCount || slot.targetCount < 1) {
+          toast.error(`Slot ${i + 1}: Target CVs must be at least 1.`);
+          return false;
+        }
+      }
+    }
+
+    setErrors({});
+    return true;
   };
 
   const handleNext = () => {
@@ -200,6 +252,12 @@ export function CreateJobRequirementForm({
       maximumSalary: form.maxSalary ? parseInt(form.maxSalary) : undefined,
       salaryCurrency: form.currency || undefined,
       jobDescription: form.jobDescription || undefined,
+      cvTargets: cvTargets.map(slot => ({
+        label: slot.label || "",
+        startDate: new Date(slot.startDate).toISOString(),
+        endDate: new Date(slot.endDate).toISOString(),
+        targetCount: slot.targetCount,
+      })),
     };
 
     try {
@@ -444,6 +502,90 @@ export function CreateJobRequirementForm({
                               className="h-11 border-border bg-card font-bold"
                             />
                           </div>
+                        </div>
+                      </div>
+
+                      {/* CV Target Slots Section */}
+                      <div className="p-6 bg-muted rounded-2xl border border-border space-y-4">
+                        <div className="flex justify-between items-center">
+                          <Label className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+                            <PlusIcon className="w-4 h-4 text-primary" /> CV Target Slots
+                          </Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleAddSlot}
+                            className="text-primary hover:bg-primary/10 border-primary/20 font-bold"
+                          >
+                            + Add Slot
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground font-semibold">
+                          Define date-range based CV targets for sourcing phases.
+                        </p>
+
+                        <div className="space-y-4">
+                          {cvTargets.map((slot, index) => (
+                            <div key={index} className="bg-card p-4 rounded-xl border border-border space-y-3 relative">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-bold text-foreground">Slot {index + 1}</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveSlot(index)}
+                                  className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2 rounded-lg font-bold"
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-bold text-muted-foreground">Label (optional)</Label>
+                                  <Input
+                                    placeholder="e.g. Phase 1"
+                                    value={slot.label}
+                                    onChange={(e) => handleSlotChange(index, "label", e.target.value)}
+                                    className="h-10 text-sm font-semibold"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-bold text-muted-foreground">Target CVs <span className="text-primary">*</span></Label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    placeholder="e.g. 5"
+                                    value={slot.targetCount || ""}
+                                    onChange={(e) => handleSlotChange(index, "targetCount", parseInt(e.target.value) || 0)}
+                                    className="h-10 text-sm font-semibold"
+                                    required
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-bold text-muted-foreground">Start Date <span className="text-primary">*</span></Label>
+                                  <Input
+                                    type="date"
+                                    value={slot.startDate}
+                                    onChange={(e) => handleSlotChange(index, "startDate", e.target.value)}
+                                    className="h-10 text-sm font-semibold"
+                                    required
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[11px] font-bold text-muted-foreground">End Date <span className="text-primary">*</span></Label>
+                                  <Input
+                                    type="date"
+                                    value={slot.endDate}
+                                    onChange={(e) => handleSlotChange(index, "endDate", e.target.value)}
+                                    className="h-10 text-sm font-semibold"
+                                    required
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>

@@ -32,6 +32,7 @@ interface PhoneInputProps {
   className?: string;
   error?: string;
   placeholder?: string;
+  onBlur?: () => void;
 }
 
 export default function PhoneInput({
@@ -49,6 +50,7 @@ export default function PhoneInput({
   className = "",
   error: externalError = "",
   placeholder,
+  onBlur,
 }: PhoneInputProps) {
   // ── State ────────────────────────────────────────────────────────────────
   const [selectedCountry, setSelectedCountry] = useState<Country>(
@@ -162,6 +164,7 @@ export default function PhoneInput({
   const handleBlur = () => {
     setTouched(true);
     updateData(selectedCountry, effectiveLocalNumber, true);
+    onBlur?.();
   };
 
   const displayError = externalError || (touched ? internalError : "");

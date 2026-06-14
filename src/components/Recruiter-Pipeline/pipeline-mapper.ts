@@ -1,4 +1,5 @@
 import { type Job, type Candidate, mapBackendStageToUIStage } from "./dummy-data";
+import { getProbationPeriodLabel, getProbationPeriodDays } from "./pipeline-stage-details/stage-fields";
 
 // ============================================================
 // pipeline-mapper.ts — Updated for API v2
@@ -83,7 +84,10 @@ export function mapEntryToJob(entry: any): Job {
     const interviewData = getStageDataFromHistory(stageHistory, "Interview") || c?.interview || {};
     const verificationData = getStageDataFromHistory(stageHistory, "Verification") || c?.verification || {};
     const onboardingData = getStageDataFromHistory(stageHistory, "Onboarding") || c?.onboarding || {};
-    const hiredData = getStageDataFromHistory(stageHistory, "Hired") || c?.hired || {};
+    let hiredData = getStageDataFromHistory(stageHistory, "Hired") || c?.hired || {};
+    if ((c?.currentStage === "Hired" || c?.currentStage === "hired") && c?.currentStageData) {
+      hiredData = { ...hiredData, ...c.currentStageData };
+    }
     const disqualifiedData = getStageDataFromHistory(stageHistory, "Disqualified") || c?.disqualified || {};
 
     return {
@@ -147,6 +151,22 @@ export function mapEntryToJob(entry: any): Job {
       onboarding: onboardingData,
       hired: hiredData,
       disqualified: disqualifiedData,
+      probation: mapBackendStageToUIStage(c?.currentStage || "Sourcing") === "Hired" ? (c?.probation || (hiredData.probationPeriod && hiredData.probationPeriod !== "none" && hiredData.startDate && hiredData.endDate ? {
+        isOnProbation: true,
+        period: hiredData.probationPeriod,
+        periodLabel: getProbationPeriodLabel(hiredData.probationPeriod),
+        periodDays: getProbationPeriodDays(hiredData.probationPeriod),
+        joinDate: hiredData.startDate,
+        startDate: hiredData.startDate,
+        endDate: hiredData.endDate,
+        status: "Active",
+        notes: hiredData.probationNotes || "",
+        remainingDays: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+        daysElapsed: Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))),
+        percentComplete: Math.min(100, Math.max(0, Math.round((Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))) / (getProbationPeriodDays(hiredData.probationPeriod) || 30)) * 100))),
+        isExpired: Date.now() > new Date(hiredData.endDate).getTime(),
+        isExpiringSoon: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) <= 7
+      } : null)) : null,
 
       interviewRounds: c?.interviewRounds || [],
       currentInterviewRound: c?.currentInterviewRound,
@@ -174,18 +194,42 @@ export function mapEntryToJob(entry: any): Job {
   console.log('DEBUG: Extracted hiring managers:', hiringManagers);
   console.log('DEBUG: Extracted recruiters:', recruiters);
 
-  const countSource = Array.isArray(entry.candidateIdArray) && entry.candidateIdArray.length > 0
-    ? entry.candidateIdArray
-    : (Array.isArray(entry.candidates?.data) ? entry.candidates.data : (Array.isArray(entry.candidates) ? entry.candidates : []));
+  const countSource = Array.isArray(entry.candidates?.data)
+    ? entry.candidates.data
+    : (Array.isArray(entry.candidates)
+      ? entry.candidates
+      : (Array.isArray(entry.candidateIdArray) ? entry.candidateIdArray : []));
 
   const stageCounts: Record<string, number> = {};
-  countSource.forEach((c: any) => {
-    const rawStage = c?.currentStage || "Sourcing";
-    const uiStage = mapBackendStageToUIStage(rawStage);
-    if (uiStage) {
-      stageCounts[uiStage] = (stageCounts[uiStage] || 0) + 1;
-    }
-  });
+  
+  if (entry.stageCounts && typeof entry.stageCounts === "object") {
+    Object.entries(entry.stageCounts).forEach(([backendStage, count]) => {
+      // Exclude grand total and disqualified aggregates from individual stage filters
+      if (backendStage === 'total' || backendStage === 'disqualified') return;
+      const uiStage = mapBackendStageToUIStage(backendStage);
+      if (uiStage) {
+        stageCounts[uiStage] = (stageCounts[uiStage] || 0) + (count as number);
+      }
+    });
+  } else if (Array.isArray(entry.stages) && entry.stages.some((s: any) => s && (typeof s.candidateCount === "number" || typeof s.count === "number"))) {
+    entry.stages.forEach((s: any) => {
+      if (s && s.name) {
+        const uiStage = mapBackendStageToUIStage(s.name);
+        const count = typeof s.candidateCount === "number" ? s.candidateCount : (typeof s.count === "number" ? s.count : 0);
+        if (uiStage) {
+          stageCounts[uiStage] = (stageCounts[uiStage] || 0) + count;
+        }
+      }
+    });
+  } else {
+    countSource.forEach((c: any) => {
+      const rawStage = c?.currentStage || "Sourcing";
+      const uiStage = mapBackendStageToUIStage(rawStage);
+      if (uiStage) {
+        stageCounts[uiStage] = (stageCounts[uiStage] || 0) + 1;
+      }
+    });
+  }
 
   const mappedJob = {
     id: entry._id,
@@ -207,7 +251,12 @@ export function mapEntryToJob(entry: any): Job {
     priority: entry.priority,
     notes: entry.notes,
     assignedDate: entry.assignedDate || entry.createdAt,
-    totalCandidates: entry.totalCandidates,
+    totalCandidates: entry.totalCandidates ?? 
+      entry.candidates?.pagination?.total ?? 
+      entry.pagination?.total ?? 
+      (Object.keys(stageCounts).length > 0
+        ? Object.values(stageCounts).reduce((a, b) => a + b, 0)
+        : (Array.isArray(entry.candidateIdArray) ? entry.candidateIdArray.length : 0)),
     activeCandidates: entry.activeCandidates,
     completedCandidates: entry.completedCandidates,
     droppedCandidates: entry.droppedCandidates,
@@ -259,7 +308,10 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
   const interviewData = getStageDataFromHistory(stageHistory, "Interview");
   const verificationData = getStageDataFromHistory(stageHistory, "Verification");
   const onboardingData = getStageDataFromHistory(stageHistory, "Onboarding");
-  const hiredData = getStageDataFromHistory(stageHistory, "Hired");
+  let hiredData = getStageDataFromHistory(stageHistory, "Hired");
+  if ((data.currentStage === "Hired" || data.currentStage === "hired") && data.currentStageData) {
+    hiredData = { ...hiredData, ...data.currentStageData };
+  }
   const disqualifiedData = getStageDataFromHistory(stageHistory, "Disqualified");
 
   const candidate: Candidate = {
@@ -301,6 +353,22 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     onboarding: onboardingData,
     hired: hiredData,
     disqualified: disqualifiedData,
+    probation: mapBackendStageToUIStage(data.currentStage || "Sourcing") === "Hired" ? (data.probation || (hiredData.probationPeriod && hiredData.probationPeriod !== "none" && hiredData.startDate && hiredData.endDate ? {
+      isOnProbation: true,
+      period: hiredData.probationPeriod,
+      periodLabel: getProbationPeriodLabel(hiredData.probationPeriod),
+      periodDays: getProbationPeriodDays(hiredData.probationPeriod),
+      joinDate: hiredData.startDate,
+      startDate: hiredData.startDate,
+      endDate: hiredData.endDate,
+      status: "Active",
+      notes: hiredData.probationNotes || "",
+      remainingDays: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+      daysElapsed: Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))),
+      percentComplete: Math.min(100, Math.max(0, Math.round((Math.max(0, Math.ceil((Date.now() - new Date(hiredData.startDate).getTime()) / (1000 * 60 * 60 * 24))) / (getProbationPeriodDays(hiredData.probationPeriod) || 30)) * 100))),
+      isExpired: Date.now() > new Date(hiredData.endDate).getTime(),
+      isExpiringSoon: Math.max(0, Math.ceil((new Date(hiredData.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) <= 7
+    } : null)) : null,
     source: sourcingData?.connection || candidateInfo?.source || "",
     connection: sourcingData?.connection || candidateInfo?.source || "",
     interviewRounds: data.interviewRounds || [],

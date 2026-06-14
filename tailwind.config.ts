@@ -72,6 +72,13 @@ const config: Config = {
 				brand: {
 					DEFAULT: 'hsl(var(--brand-primary))',
 					foreground: 'hsl(var(--brand-primary-foreground))',
+				},
+				protected: {
+					DEFAULT: 'hsl(var(--protected-bg))',
+				},
+				candidate: {
+					name: 'hsl(var(--candidate-name))',
+					id: 'hsl(var(--candidate-id))',
 				}
 			}
 		}

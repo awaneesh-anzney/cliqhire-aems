@@ -10,7 +10,7 @@
          {/* The header is usually handled by the layout or inside the RecruiterPipeline component if it has one.
              Based on the previous code, it was a simple container. 
              I'll wrap it in our premium container style. */}
-         <div className="flex-1 min-h-0 bg-card rounded-[1.5rem] border border-border shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-1000 delay-150">
+         <div className="flex-1 min-h-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-700 delay-150">
             <RecruiterPipeline />
          </div>
        </div>

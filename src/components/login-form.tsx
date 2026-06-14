@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -90,58 +91,68 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         }, 100);
       } else {
         toast.error("Email or password is incorrect");
-        // Reset form after failed login
         form.reset();
       }
     } catch (error) {
       console.error('LoginForm: Login error caught:', error);
       toast.error(error instanceof Error ? error.message : "Login failed");
-      // Reset form after error
       form.reset();
     }
   };
 
   return (
-    <div className={cn("flex w-full flex-col gap-8", className)} {...props}>
-      <h2 className="text-3xl font-bold tracking-tight text-[#2B3674] mb-2">Sign In</h2>
-
+    <div className={cn("flex w-full flex-col", className)} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-2">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                  Email Address
+                </label>
                 <FormControl>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground/60" />
                     <Input
                       type="email"
                       autoComplete="email"
-                      placeholder="Username or email"
-                      className="w-full pl-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
+                      placeholder="xyz@cliqhire.com"
+                      className="w-full pl-11 h-11 rounded-xl border border-input focus-visible:ring-primary focus-visible:ring-offset-0 bg-muted/20 text-xs font-semibold"
                       data-form-type="other"
                       {...field}
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
+
+          {/* Password Field */}
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    Password
+                  </label>
+                  <a href="/forgot-password" className="text-xs font-bold text-primary hover:underline uppercase tracking-wider">
+                    Forgot password?
+                  </a>
+                </div>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground/60" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      className="w-full pl-12 pr-12 h-12 rounded-full border-border focus-visible:ring-brand focus-visible:ring-offset-0 bg-card"
+                      className="w-full pl-11 pr-11 h-11 rounded-xl border border-input focus-visible:ring-primary focus-visible:ring-offset-0 bg-muted/20 text-xs font-semibold"
                       {...field}
-                      placeholder="Password"
+                      placeholder="•••••••••••••"
                       autoComplete="current-password"
                       data-form-type="other"
                     />
@@ -153,54 +164,54 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
+                        <EyeOff className="h-4.5 w-4.5 text-muted-foreground/80" />
                       ) : (
-                        <Eye className="h-5 w-5" />
+                        <Eye className="h-4.5 w-4.5 text-muted-foreground/80" />
                       )}
                     </Button>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
 
-          <div className="flex items-center justify-between mt-4">
-            <FormField
-              control={form.control}
-              name="remember"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-border text-brand focus:ring-brand"
-                      checked={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <label className="text-sm text-muted-foreground font-medium cursor-pointer" onClick={() => field.onChange(!field.value)}>
-                    Remember me
-                  </label>
-                </FormItem>
-              )}
-            />
-            <a href="/forgot-password" className="text-sm text-muted-foreground hover:text-brand">
-              Forgot password?
-            </a>
-          </div>
+          {/* Remember Me checkbox */}
+          <FormField
+            control={form.control}
+            name="remember"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-2 space-y-0 py-1">
+                <FormControl>
+                  <Checkbox
+                    className="h-4 w-4 border border-primary rounded-md text-primary focus:ring-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <label
+                  className="text-xs text-muted-foreground font-bold cursor-pointer select-none"
+                  onClick={() => field.onChange(!field.value)}
+                >
+                  Remember Me
+                </label>
+              </FormItem>
+            )}
+          />
 
+          {/* Sign In Button */}
           <Button
             type="submit"
-            className="w-full h-12 rounded-full bg-brand hover:bg-brand/90 text-white font-medium text-base mt-4 shadow-md transition-all shadow-brand/20"
+            className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-widest shadow-md transition-all shadow-primary/20 mt-2"
             disabled={isLoginLoading}
           >
             {isLoginLoading ? "Signing in..." : "Sign In"}
           </Button>
 
-          <div className="text-center text-sm text-muted-foreground mt-6">
+          {/* Create an Account link */}
+          <div className="text-center text-xs text-muted-foreground mt-4 font-semibold">
             New here?{" "}
-            <a href="/register" className="text-brand hover:underline font-medium">
+            <a href="/register" className="text-primary hover:underline font-bold">
               Create an Account
             </a>
           </div>

@@ -17,6 +17,7 @@ import SalaryRange from "./salary-range";
 import EditResumeDialog from "@/components/candidates/EditResumeDialog";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CandidateDomainDialog } from "./CandidateDomainDialog";
 // ReferredByList import removed as we're using UserSelectDialog instead
 
 const detailsFields = [
@@ -26,6 +27,14 @@ const detailsFields = [
   { key: "referredBy", label: "CV Referred By" },
   { key: "totalRelevantExperience", label: "Total Relevant Years of Experience" },
   { key: "noticePeriod", label: "Notice Period" },
+  {
+    key: "domains",
+    label: "Candidate Domains",
+    render: (val: any[] | undefined) => {
+      if (!val || val.length === 0) return undefined;
+      return val.map((d: any) => d.name).join(", ");
+    }
+  },
 
   {
     key: "resume",
@@ -76,14 +85,17 @@ const detailsFields = [
   { key: "continent", label: "Continent" },
   { key: "universityName", label: "University Name" },
   { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
+  { key: "highestDegree", label: "Highest Degree" },
+  { key: "graduation", label: "Graduation Details", isTextarea: true },
+  { key: "certification", label: "Professional Certifications", isTextarea: true },
   { key: "primaryLanguage", label: "Primary Language" },
   { key: "willingToRelocate", label: "Are you willing to relocate ?" },
   { key: "iqama", label: "Iqama is transferable ?" },
 ];
 
 // Split details fields into default visible and collapsible sections
-const defaultDetailsFields = detailsFields.slice(0, 7); // Up to "Referred By"
-const collapsibleDetailsFields = detailsFields.slice(7); // From "Gender" onwards
+const defaultDetailsFields = detailsFields.slice(0, 8); // Up to "Resume"
+const collapsibleDetailsFields = detailsFields.slice(8); // From "status" onwards
 
 const contactFields = [
   { 
@@ -146,7 +158,12 @@ const CandidateSummary = ({
 }: CandidateSummaryProps) => {
   const [editField, setEditField] = useState<string | null>(null);
   const [localCandidate, setLocalCandidate] = useState(candidate);
+  const [showDomainsDialog, setShowDomainsDialog] = useState(false);
   const [showEditResumeDialog, setShowEditResumeDialog] = useState(false);
+
+  useEffect(() => {
+    setLocalCandidate(candidate);
+  }, [candidate]);
   const [showDateOfBirthDialog, setShowDateOfBirthDialog] = useState(false);
   const [showMaritalStatusDialog, setShowMaritalStatusDialog] = useState(false);
   const [showGenderDialog, setShowGenderDialog] = useState(false);
@@ -263,6 +280,7 @@ const CandidateSummary = ({
     // Common click handler for specific fields
     const handleEditClick = (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (!canModify) return;
       if (field.isUpload) setShowEditResumeDialog(true);
       else if (field.key === "dateOfBirth") setShowDateOfBirthDialog(true);
       else if (field.key === "maritalStatus") setShowMaritalStatusDialog(true);
@@ -270,27 +288,43 @@ const CandidateSummary = ({
       else if (field.key === "status") setShowStatusDialog(true);
       else if (field.key === "willingToRelocate") setShowWillingToRelocateDialog(true);
       else if (field.key === "referredBy") setShowReferredByDialog(true);
+      else if (field.key === "domains") setShowDomainsDialog(true);
       else setEditField(field.key);
     };
 
     return (
       <div 
         key={field.key} 
-        className="group flex items-center justify-between py-3 px-4 rounded-xl hover:bg-muted/80 transition-all border border-transparent hover:border-border/60"
+        className={cn(
+          "group relative flex items-center justify-between p-3.5 rounded-xl bg-muted/20 border border-border/50 transition-all duration-300",
+          field.isTextarea ? "sm:col-span-2" : "",
+          canModify ? "cursor-pointer hover:bg-card hover:border-brand/35 hover:shadow-sm" : ""
+        )}
+        onClick={canModify ? handleEditClick : undefined}
       >
-        <div className="flex flex-col min-w-0">
-          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 leading-none">
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-[10px] font-black text-muted-foreground/85 uppercase tracking-wider mb-1.5 leading-none">
             {field.label}
           </span>
           <div className="flex flex-col">
-            <span className={cn(
-              "text-sm font-bold tracking-tight truncate",
-              hasValue ? "text-foreground" : "text-muted-foreground italic"
-            )}>
-              {hasValue ? (field.key === 'referredBy' && typeof value === 'object' ? value.name || value.email : value) : "Not Provided"}
-            </span>
+            {field.key === 'domains' && hasValue ? (
+              <div className="flex flex-wrap gap-1 mt-1 max-w-full">
+                {(Array.isArray(rawValue) ? rawValue : []).map((d: any) => (
+                  <span key={d._id} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">
+                    {d.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className={cn(
+                "text-xs sm:text-sm font-bold tracking-tight truncate",
+                hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
+              )}>
+                {hasValue ? (field.key === 'referredBy' && typeof value === 'object' ? value.name || value.email : value) : "Not Provided"}
+              </span>
+            )}
             {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
-              <span className="text-[10px] text-muted-foreground font-medium truncate mt-0.5">
+              <span className="text-[10px] text-muted-foreground font-semibold truncate mt-0.5">
                 {localCandidate.referredBy.email}
               </span>
             )}
@@ -298,18 +332,18 @@ const CandidateSummary = ({
         </div>
 
         {canModify && (
-          <div className="flex items-center ml-4 shrink-0">
+          <div className="flex items-center ml-4 shrink-0" onClick={(e) => e.stopPropagation()}>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-card hover:shadow-sm border-transparent hover:border-border"
+              className="h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
               onClick={handleEditClick}
             >
               <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
             </Button>
             
             {/* Modal injections for fields that don't use dedicated dialogs */}
-            {field.key !== "referredBy" && !field.isUpload && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
+            {field.key !== "referredBy" && field.key !== "domains" && !field.isUpload && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
               <EditFieldModal
                 open={editField === field.key}
                 onClose={() => setEditField(null)}
@@ -328,6 +362,12 @@ const CandidateSummary = ({
                 isContinent={field.key === "continent"}
                 isPhone={field.key === "phone" || field.key === "otherPhone"}
                 countryCode={field.key === "phone" ? localCandidate?.countryCode : localCandidate?.otherCountryCode}
+                options={field.key === "noticePeriod" ? [
+                  { value: "15 Days", label: "15 Days" },
+                  { value: "1 Month", label: "1 Month" },
+                  { value: "2 Months", label: "2 Months" },
+                  { value: "3 Months", label: "3 Months" }
+                ] : undefined}
               />
             )}
 
@@ -355,10 +395,17 @@ const CandidateSummary = ({
     // Display value: if array, join with commas; if string, use as is
     const displayValue = Array.isArray(rawValue) ? rawValue.join(", ") : rawValue;
     return (
-      <div key={field.key} className="group flex flex-col p-4 rounded-xl bg-muted/50 border border-border/60 hover:bg-card hover:shadow-md transition-all duration-300">
-        <div className="flex items-center justify-between mb-3">
+      <div 
+        key={field.key} 
+        className={cn(
+          "group flex flex-col p-4.5 rounded-xl bg-muted/20 border border-border/50 transition-all duration-300",
+          canModify ? "cursor-pointer hover:bg-card hover:border-brand/35 hover:shadow-sm" : ""
+        )}
+        onClick={canModify ? () => setEditField(field.key) : undefined}
+      >
+        <div className="flex items-center justify-between mb-3.5" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-2">
-             <div className="h-7 w-7 rounded-lg bg-card flex items-center justify-center text-brand border border-border shadow-sm">
+             <div className="h-7 w-7 rounded-lg bg-card flex items-center justify-center text-brand border border-border/60 shadow-sm">
                 <Star className="h-3.5 w-3.5" />
              </div>
              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{field.label}</span>
@@ -367,7 +414,7 @@ const CandidateSummary = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
+              className="h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
               onClick={() => setEditField(field.key)}
             >
               <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
@@ -375,29 +422,31 @@ const CandidateSummary = ({
           )}
         </div>
         <div className={cn(
-          "text-sm font-bold leading-relaxed",
-          hasValue ? "text-foreground" : "text-muted-foreground italic"
+          "text-xs sm:text-sm font-bold leading-relaxed",
+          hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
         )}>
           {hasValue ? displayValue : "Not Provided"}
         </div>
-        {canModify && (
-          <EditFieldModal
-            open={editField === field.key}
-            onClose={() => setEditField(null)}
-            fieldName={field.label}
-            currentValue={displayValue || ""}
-            onSave={(val: string) => {
-              // Convert comma-separated string back to array
-              const arrayValue = val.trim()
-                ? val
-                  .split(",")
-                  .map((item) => item.trim())
-                  .filter((item) => item)
-                : [];
-              handleSave(field.key, arrayValue);
-            }}
-            isTextarea={true}
-          />
+        {canModify && editField === field.key && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <EditFieldModal
+              open={editField === field.key}
+              onClose={() => setEditField(null)}
+              fieldName={field.label}
+              currentValue={displayValue || ""}
+              onSave={(val: string) => {
+                // Convert comma-separated string back to array
+                const arrayValue = val.trim()
+                  ? val
+                    .split(",")
+                    .map((item) => item.trim())
+                    .filter((item) => item)
+                  : [];
+                handleSave(field.key, arrayValue);
+              }}
+              isTextarea={true}
+            />
+          </div>
         )}
       </div>
     );
@@ -410,8 +459,8 @@ const CandidateSummary = ({
         {/* Left Column: Profile & Professional */}
         <div className="space-y-6">
           {/* Profile Details Card */}
-          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <User className="w-4 h-4 text-brand" />
               </div>
@@ -420,7 +469,7 @@ const CandidateSummary = ({
             <div className="p-5 space-y-6">
               <div className="space-y-4">
                 <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Identity & Sourcing</h5>
-                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
                   {defaultDetailsFields.map((field) => renderField(field, defaultDetailsFields))}
                 </div>
               </div>
@@ -428,8 +477,8 @@ const CandidateSummary = ({
           </div>
 
           {/* Professional Background Card */}
-          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Briefcase className="w-4 h-4 text-brand" />
               </div>
@@ -438,9 +487,9 @@ const CandidateSummary = ({
             <div className="p-5 space-y-6">
               <div className="space-y-4">
                 <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Role & Compensation</h5>
-                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
                   {previousCompanyFields.map((field) => renderField(field, previousCompanyFields))}
-                  <div className="pt-2 border-t border-border">
+                  <div className="pt-3 border-t border-border/60 sm:col-span-2">
                     <SalaryRange
                       candidate={localCandidate}
                       onCandidateUpdate={onCandidateUpdate}
@@ -453,8 +502,8 @@ const CandidateSummary = ({
           </div>
 
           {/* Skills Matrix Card */}
-          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Star className="w-4 h-4 text-brand" />
               </div>
@@ -462,7 +511,7 @@ const CandidateSummary = ({
             </div>
             <div className="p-5 space-y-4">
               <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Technical Assessment</h5>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {skillFields.map((field) => renderSkillField(field))}
               </div>
             </div>
@@ -472,23 +521,23 @@ const CandidateSummary = ({
         {/* Right Column: Contact & Personal */}
         <div className="space-y-6">
           {/* Contact Information Card */}
-          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <Globe className="w-4 h-4 text-brand" />
               </div>
               <h4 className="text-base font-semibold text-foreground">Contact Information</h4>
             </div>
             <div className="p-5">
-              <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
                 {contactFields.map((field) => renderField(field, contactFields))}
               </div>
             </div>
           </div>
 
           {/* Education & Personal Card */}
-          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
+            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
               <div className="p-2 bg-brand/10 rounded-lg">
                 <GraduationCap className="w-4 h-4 text-brand" />
               </div>
@@ -497,7 +546,7 @@ const CandidateSummary = ({
             <div className="p-5">
               <div className="space-y-4">
                  <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Background Details</h5>
-                 <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
                     {collapsibleDetailsFields.map((field) => renderField(field, collapsibleDetailsFields))}
                  </div>
               </div>
@@ -599,6 +648,18 @@ const CandidateSummary = ({
           onSelect={handleReferredBySelect}
         />
       )} */}
+
+      {/* Domains Dialog */}
+      {canModify && (
+        <CandidateDomainDialog
+          open={showDomainsDialog}
+          onClose={() => setShowDomainsDialog(false)}
+          currentValues={localCandidate?.domains || []}
+          onSave={(newValue: { ids: string[]; domains: any[] }) => {
+            handleSave("domains", newValue.domains);
+          }}
+        />
+      )}
 
     </div>
   );

@@ -225,31 +225,29 @@ export class RecruiterPipelineService {
 
   // ─── Candidate Management ────────────────────────────────────
 
-  /**
-   * Add a candidate to a pipeline
-   */
   static async addCandidateToPipeline(
     pipelineId: string,
-    candidateId: string,
-    options?: { priority?: string; notes?: string; initialStage?: string }
+    request: {
+      candidateIds: string[];
+      priority?: string;
+      notes?: string;
+      initialStage?: string;
+      force?: boolean;
+    }
   ): Promise<StageUpdateResponse> {
     try {
-      const requestBody = {
-        candidateId,           // ✅ JSON object ke andar bhej raha hai
-        ...options,
-      };
-
       const response = await api.post(
         `/api/recruiter-pipeline/${pipelineId}/candidates`,
-        requestBody,           // ✅ Axios automatically Content-Type: application/json lagata hai
+        request,
       );
 
-      return { success: true, message: 'Candidate added', data: response.data };
+      return { success: true, message: response.data?.message || 'Candidates added', data: response.data };
     } catch (error: any) {
       return {
         success: false,
-        message: 'Failed to add candidate',
+        message: error.response?.data?.message || 'Failed to add candidates',
         error: error.response?.data?.message || error.message,
+        data: error.response?.data,
       };
     }
   }

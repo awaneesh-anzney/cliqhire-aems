@@ -32,6 +32,8 @@ import { format, subDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { CountrySelect } from "@/components/ui/country-select";
 import { useCreateCandidate } from "@/hooks/useCandidate";
+import { useCheckDuplicate } from "@/hooks/useCheckDuplicate";
+import Link from "next/link";
 import { headhunterCandidatesService } from "@/services/headhunterCandidatesService";
 import { convertTempCandidateToReal, type ConvertTempCandidateRequest } from "@/services/recruitmentPipelineService";
 import { toast } from "sonner";
@@ -51,6 +53,63 @@ interface CreateCandidateFormProps {
 }
 
 const TABS = ["Identity", "Experience", "Background", "Summary"] as const;
+
+const FieldCheckIndicator = ({ 
+  checkResult, 
+  value,
+  fieldLabel
+}: { 
+  checkResult: any; 
+  value: string; 
+  fieldLabel: string;
+}) => {
+  if (!value || value.trim() === "") return null;
+  if (checkResult.isLoading || checkResult.isFetching) {
+    return (
+      <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground font-semibold animate-pulse">
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+        <span>Checking {fieldLabel.toLowerCase()}...</span>
+      </div>
+    );
+  }
+
+  if (checkResult.isError) {
+    return (
+      <div className="flex items-center gap-2 mt-1.5 text-xs text-red-500 font-bold">
+        <span>Failed to check {fieldLabel.toLowerCase()} availability.</span>
+      </div>
+    );
+  }
+
+  if (checkResult.data) {
+    if (checkResult.data.exists) {
+      const candidate = checkResult.data.data;
+      return (
+        <div className="flex flex-col gap-1 mt-1.5 p-2 rounded-lg bg-red-50 border border-red-200">
+          <div className="text-xs text-red-600 font-black uppercase tracking-wider">Candidate already exists</div>
+          <div className="text-sm font-bold text-red-950 flex items-center gap-1.5">
+            <span>Name:</span>
+            <Link 
+              href={`/candidates/${candidate?.candidateId}`}
+              className="text-primary hover:underline hover:text-primary/80 font-black"
+            >
+              {candidate?.name} ({candidate?.profileId})
+            </Link>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-1.5 mt-1.5 text-xs text-green-600 font-bold animate-in fade-in duration-300">
+          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+          <span>{fieldLabel} is available</span>
+        </div>
+      );
+    }
+  }
+
+  return null;
+};
 
 export default function CreateCandidateForm({
   onCandidateCreated,
@@ -99,9 +158,28 @@ export default function CreateCandidateForm({
   const router = useRouter();
   const { mutateAsync: createCandidateMutation } = useCreateCandidate();
 
+  const [emailCheckVal, setEmailCheckVal] = useState("");
+  const [phoneCheckVal, setPhoneCheckVal] = useState("");
+  const [linkedinCheckVal, setLinkedinCheckVal] = useState("");
+
+  const emailCheck = useCheckDuplicate("email", emailCheckVal);
+  const phoneCheck = useCheckDuplicate("phone", phoneCheckVal);
+  const linkedinCheck = useCheckDuplicate("linkedin", linkedinCheckVal);
+
+  const hasDuplicate = !!(
+    (emailCheckVal && emailCheck.data?.exists) ||
+    (phoneCheckVal && phoneCheck.data?.exists) ||
+    (linkedinCheckVal && linkedinCheck.data?.exists)
+  );
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "email") {
+      setEmailCheckVal("");
+    } else if (name === "linkedin") {
+      setLinkedinCheckVal("");
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -135,6 +213,15 @@ export default function CreateCandidateForm({
         toast.error("Please fill in required fields (Name, Email, Phone)");
         return false;
       }
+      if (hasDuplicate) {
+        toast.error("Please resolve duplicate candidate fields before proceeding");
+        return false;
+      }
+      if (emailCheck.isLoading || phoneCheck.isLoading || linkedinCheck.isLoading ||
+          emailCheck.isFetching || phoneCheck.isFetching || linkedinCheck.isFetching) {
+        toast.error("Please wait for the duplicate checks to finish");
+        return false;
+      }
     }
     return true;
   };
@@ -148,6 +235,11 @@ export default function CreateCandidateForm({
   const handlePrevious = () => setCurrentTab(prev => Math.max(prev - 1, 0));
 
   const handleSubmit = async () => {
+    if (hasDuplicate) {
+      toast.error("Please resolve duplicate candidate fields before submitting");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (isTempCandidateConversion) {
@@ -285,8 +377,20 @@ export default function CreateCandidateForm({
                     <Label className="text-sm font-bold text-foreground">Email Address <span className="text-primary">*</span></Label>
                     <div className="relative group">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      <Input name="email" value={form.email} onChange={handleChange} placeholder="candidate@email.com" className="pl-10 h-11 border-border focus:border-primary font-bold" />
+                      <Input 
+                        name="email" 
+                        value={form.email} 
+                        onChange={handleChange} 
+                        onBlur={() => {
+                          if (form.email && form.email.trim() !== "") {
+                            setEmailCheckVal(form.email);
+                          }
+                        }}
+                        placeholder="candidate@email.com" 
+                        className="pl-10 h-11 border-border focus:border-primary font-bold" 
+                      />
                     </div>
+                    <FieldCheckIndicator checkResult={emailCheck} value={emailCheckVal} fieldLabel="Email" />
                   </div>
                 </div>
 
@@ -296,8 +400,17 @@ export default function CreateCandidateForm({
                     countryCode={form.countryCode}
                     onCountryCodeChange={v => handleSelectChange('countryCode', v)}
                     phoneNumber={form.phone}
-                    onPhoneNumberChange={v => handleSelectChange('phone', v)}
+                    onPhoneNumberChange={v => {
+                      handleSelectChange('phone', v);
+                      setPhoneCheckVal("");
+                    }}
+                    onBlur={() => {
+                      if (form.phone && form.phone.trim() !== "") {
+                        setPhoneCheckVal(form.phone);
+                      }
+                    }}
                   />
+                  <FieldCheckIndicator checkResult={phoneCheck} value={phoneCheckVal} fieldLabel="Phone number" />
                 </div>
 
                 <div className="space-y-2">
@@ -314,8 +427,20 @@ export default function CreateCandidateForm({
                     <Label className="text-sm font-bold text-foreground">LinkedIn Profile</Label>
                     <div className="relative group">
                       <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      <Input name="linkedin" value={form.linkedin} onChange={handleChange} placeholder="linkedin.com/in/..." className="pl-10 h-11 border-border font-bold" />
+                      <Input 
+                        name="linkedin" 
+                        value={form.linkedin} 
+                        onChange={handleChange} 
+                        onBlur={() => {
+                          if (form.linkedin && form.linkedin.trim() !== "") {
+                            setLinkedinCheckVal(form.linkedin);
+                          }
+                        }}
+                        placeholder="linkedin.com/in/..." 
+                        className="pl-10 h-11 border-border font-bold" 
+                      />
                     </div>
+                    <FieldCheckIndicator checkResult={linkedinCheck} value={linkedinCheckVal} fieldLabel="LinkedIn profile" />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-bold text-foreground">Gender</Label>
@@ -538,6 +663,7 @@ export default function CreateCandidateForm({
               ) : (
                 <Button 
                   onClick={handleNext} 
+                  disabled={currentTab === 0 && (hasDuplicate || emailCheck.isLoading || phoneCheck.isLoading || linkedinCheck.isLoading || emailCheck.isFetching || phoneCheck.isFetching || linkedinCheck.isFetching)}
                   className="bg-primary hover:bg-primary/90 text-white px-8 font-black shadow-xl shadow-primary/30 h-11"
                 >
                   Continue <ChevronRight className="w-4 h-4 ml-2" />

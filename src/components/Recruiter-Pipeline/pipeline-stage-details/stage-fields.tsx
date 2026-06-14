@@ -14,7 +14,9 @@ import {
   FileText, 
   FileX, 
   DollarSign, 
-  XCircle 
+  XCircle,
+  Briefcase,
+  Building2
 } from "lucide-react";
 
 export interface StageField {
@@ -24,9 +26,37 @@ export interface StageField {
   icon: React.ReactNode;
   color: string;
   type: 'text' | 'date' | 'datetime' | 'select' | 'textarea' | 'url' | 'rating';
-  options?: string[];
+  options?: (string | { value: string; label: string })[];
   placeholder?: string;
 }
+
+export const PROBATION_PERIOD_OPTIONS = [
+  { value: 'none',     label: 'No Probation' },
+  { value: '1_month',  label: '1 Month (30 days)' },
+  { value: '2_month',  label: '2 Months (60 days)' },
+  { value: '3_month',  label: '3 Months (90 days)' },
+  { value: '6_month',  label: '6 Months (180 days)' },
+  { value: '1_year',   label: '1 Year (365 days)' },
+];
+
+export const getProbationPeriodLabel = (value: string | null | undefined): string => {
+  if (!value || value === "none") return "No Probation";
+  const option = PROBATION_PERIOD_OPTIONS.find(opt => opt.value === value);
+  return option ? option.label : value;
+};
+
+export const getProbationPeriodDays = (value: string | null | undefined): number => {
+  if (!value || value === "none") return 0;
+  const mapping: Record<string, number> = {
+    "1_month": 30,
+    "2_month": 60,
+    "3_month": 90,
+    "6_month": 180,
+    "1_year": 365
+  };
+  return mapping[value] || 0;
+};
+
 
 // Helper function to parse date string to Date object
 export const parseDateString = (dateString: string): Date | undefined => {
@@ -114,7 +144,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
       return [
         {
           key: "sourcingDate",
-          label: "Sourcing Date",
+          label: "CV Received Date",
           value: formatApiDate(sourcingData.sourcingDate),
           icon: <CalendarDays className="h-4 w-4" />,
           color: "bg-blue-50 text-blue-600",
@@ -213,7 +243,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
         },
         {
           key: "aemsInterviewDate",
-          label: "AEMS Interview Date",
+          label: "Internal Interview Date",
           value: formatApiDateTime(screeningData.aemsInterviewDate),
           icon: <CalendarDays className="h-4 w-4" />,
           color: "bg-green-50 text-green-600",
@@ -445,7 +475,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
 
     case "Hired":
       const hiredData = getStageData(candidate, "Hired");
-      return [
+      const hiredFields: StageField[] = [
         {
           key: "hireDate",
           label: "Hire Date",
@@ -463,31 +493,76 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           type: "date"
         },
         {
-          key: "offeredSalary",
-          label: "Offered Salary",
-          value: hiredData.offeredSalary?.toString() || "Not set",
+          key: "salary",
+          label: "Salary",
+          value: (hiredData.salary ?? hiredData.offeredSalary)?.toString() || "Not set",
           icon: <DollarSign className="h-4 w-4" />,
           color: "bg-emerald-50 text-emerald-600",
           type: "text",
           placeholder: "e.g., 15000"
         },
         {
-          key: "offeredSalaryCurrency",
+          key: "salaryCurrency",
           label: "Currency",
-          value: hiredData.offeredSalaryCurrency || "Not set",
+          value: hiredData.salaryCurrency || hiredData.offeredSalaryCurrency || "Not set",
           icon: <DollarSign className="h-4 w-4" />,
           color: "bg-muted text-foreground",
           type: "select",
-          options: ["SAR", "USD", "EUR", "GBP", "INR", "AED"]
+          options: ["SAR", "USD", "EUR", "GBP", "INR", "AED", "EGP"]
         },
         {
           key: "probationPeriod",
           label: "Probation Period",
-          value: hiredData.probationPeriod || "Not set",
+          value: hiredData.probationPeriod || "none",
           icon: <Clock className="h-4 w-4" />,
           color: "bg-orange-50 text-orange-600",
+          type: "select",
+          options: PROBATION_PERIOD_OPTIONS
+        },
+        {
+          key: "probationNotes",
+          label: "Probation Notes",
+          value: hiredData.probationNotes || "Not set",
+          icon: <MessageSquare className="h-4 w-4" />,
+          color: "bg-muted text-foreground",
+          type: "textarea",
+          placeholder: "Enter probation notes..."
+        },
+        {
+          key: "offerLetterNo",
+          label: "Offer Letter No",
+          value: hiredData.offerLetterNo || "Not set",
+          icon: <FileText className="h-4 w-4" />,
+          color: "bg-indigo-50 text-indigo-600",
           type: "text",
-          placeholder: "e.g., 3 months"
+          placeholder: "e.g., OL-2026-001"
+        },
+        {
+          key: "designation",
+          label: "Designation",
+          value: hiredData.designation || "Not set",
+          icon: <Briefcase className="h-4 w-4" />,
+          color: "bg-sky-50 text-sky-600",
+          type: "text",
+          placeholder: "e.g., Software Engineer"
+        },
+        {
+          key: "department",
+          label: "Department",
+          value: hiredData.department || "Not set",
+          icon: <Building2 className="h-4 w-4" />,
+          color: "bg-slate-50 text-slate-600",
+          type: "text",
+          placeholder: "e.g., Engineering"
+        },
+        {
+          key: "reportingTo",
+          label: "Reporting To",
+          value: hiredData.reportingTo || "Not set",
+          icon: <User className="h-4 w-4" />,
+          color: "bg-teal-50 text-teal-600",
+          type: "text",
+          placeholder: "e.g., Ahmed Al-Farsi"
         },
         {
           key: "hiringRating",
@@ -508,6 +583,22 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           options: ["Full Time", "Part Time", "Contract", "Internship"]
         }
       ];
+
+      if (candidate?.probation?.endDate) {
+        const pIdx = hiredFields.findIndex(f => f.key === "probationPeriod");
+        if (pIdx !== -1) {
+          hiredFields.splice(pIdx + 1, 0, {
+            key: "probationEndDate",
+            label: "Probation End Date",
+            value: formatApiDate(candidate.probation.endDate),
+            icon: <CalendarDays className="h-4 w-4" />,
+            color: "bg-rose-50 text-rose-600",
+            type: "date"
+          } as any);
+        }
+      }
+
+      return hiredFields;
 
     case "Disqualified":
       const disqualifiedData = getStageData(candidate, "Disqualified");

@@ -14,6 +14,10 @@ export interface JobsQueryParams {
   search?: string;
   gender?: string;
   sort?: string;
+  jobId?: string;
+  jobTitle?: string;
+  headcount?: number;
+  includeInactive?: any;
 }
 
 export function useJobs(params: JobsQueryParams = {}) {

@@ -59,7 +59,7 @@ body::-webkit-scrollbar {
     --popover: 0 0% 100%;
     --popover-foreground: 240 5% 20%;
     /* Light mode single-accent primary */
-    --primary: 252 64% 63%;
+    --primary: 141 59% 54%;
     --primary-foreground: 0 0% 100%;
     --secondary: 240 4.8% 96.5%;
     --secondary-foreground: 240 5.9% 18%;
@@ -71,23 +71,26 @@ body::-webkit-scrollbar {
     --destructive-foreground: 0 0% 98%;
     --border: 240 5% 92%;
     --input: 240 5% 92%;
-    --ring: 252 64% 63%;
+    --ring: 141 59% 54%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: var(--protected-bg);
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 252 64% 63%;
+    --sidebar-primary: 141 59% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 18%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 252 64% 63%;
-    --brand-primary: 252 64% 63%;
+    --sidebar-ring: 141 59% 54%;
+    --brand-primary: 141 59% 54%;
     --brand-primary-foreground: 0 0% 100%;
+    --protected-bg: 141 59% 77%; /* 50% lighter than brand-primary */
+    --candidate-name: 141 50% 25%;
+    --candidate-id: 141 15% 45%;
   }
 
   .dark {
@@ -98,7 +101,7 @@ body::-webkit-scrollbar {
     --card-foreground: 0 0% 74%;
     --popover: 240 5% 23%;
     --popover-foreground: 0 0% 74%;
-    --primary: 252 58% 62%;
+    --primary: 141 59% 54%;
     --primary-foreground: 0 0% 96%;
     --secondary: 240 4% 28%;
     --secondary-foreground: 0 0% 78%;
@@ -110,22 +113,25 @@ body::-webkit-scrollbar {
     --destructive-foreground: 0 0% 90%;
     --border: 240 4% 30%;
     --input: 240 4% 30%;
-    --ring: 240 5% 68%;
+    --ring: 141 59% 54%;
     --chart-1: 220 60% 52%;
     --chart-2: 160 50% 44%;
     --chart-3: 30 70% 52%;
     --chart-4: 280 55% 56%;
     --chart-5: 340 65% 52%;
-    --sidebar-background: 240 5% 17%;
+    --sidebar-background: var(--protected-bg);
     --sidebar-foreground: 240 5% 72%;
-    --sidebar-primary: 252 58% 62%;
+    --sidebar-primary: 141 59% 54%;
     --sidebar-primary-foreground: 0 0% 96%;
     --sidebar-accent: 240 4% 24%;
     --sidebar-accent-foreground: 240 5% 72%;
     --sidebar-border: 240 4% 26%;
-    --sidebar-ring: 252 58% 62%;
-    --brand-primary: 252 58% 62%;
+    --sidebar-ring: 141 59% 54%;
+    --brand-primary: 141 59% 54%;
     --brand-primary-foreground: 0 0% 96%;
+    --protected-bg: 141 59% 27%; /* 50% darker than brand-primary for dark mode */
+    --candidate-name: 141 60% 75%;
+    --candidate-id: 141 15% 60%;
   }
 }
 

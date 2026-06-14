@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LinkedInPostDialog } from "@/components/jobs/linkedin-post-dialog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePermissions } from "@/contexts/PermissionContext";
+import Link from "next/link";
 
 interface PageProps {
   params: { id: string };
@@ -129,7 +130,9 @@ export default function JobPage({ params }: PageProps) {
                   <div className="p-1.5 bg-muted rounded-md group-hover:bg-brand/10 transition-colors">
                     <Building2 className="h-4 w-4 text-muted-foreground group-hover:text-brand" />
                   </div>
-                  <span className="font-medium text-foreground">{job.client?.name || "Unknown Client"}</span>
+                  <Link href={`/clients/${job.client?._id}`}>
+                    <span className="font-medium text-foreground">{job.client?.name || "Unknown Client"}</span>
+                  </Link>
                 </div>
 
                 <div className="flex items-center gap-2 group border-l border-border pl-6">

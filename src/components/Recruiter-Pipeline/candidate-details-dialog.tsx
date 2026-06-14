@@ -28,6 +28,7 @@ import {
 import { type Candidate, pipelineStages } from "./dummy-data";
 import { candidateService, type Candidate as ApiCandidate } from "@/services/candidateService";
 import { PipelineStageDetails } from "./pipeline-stage-details/PipelineStageDetails";
+import { CandidateProgressCard } from "./candidate-details/CandidateProgressCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 
@@ -123,95 +124,13 @@ export function CandidateDetailsDialog({
               </div>
             </div>
           
-                     {/* Pipeline Progress Bar */}
-           <div className="w-full bg-gradient-to-r from-sky-200 to-indigo-200 rounded-xl p-2 shadow-sm border border-border">
-             <div className="flex items-center justify-between mb-4">
-               <h4 className="text-lg font-semibold text-foreground">Pipeline Progress</h4>
-               <div className="flex items-center space-x-4">
-                 <span className="text-xs text-muted-foreground italic">Click any stage to view details</span>
-                 <div className="flex items-center space-x-2">
-                   <div className={`w-2 h-2 rounded-full ${localCandidate.status === 'Disqualified' ? 'bg-red-500' : 'bg-indigo-500 animate-pulse'}`}></div>
-                   <span className="text-sm text-foreground">
-                     {localCandidate.status === 'Disqualified' 
-                       ? (localCandidate.disqualified?.disqualificationStage || 'Disqualified')
-                       : (localCandidate.status || 'No Status')
-                     }
-                   </span>
-                 </div>
-               </div>
-             </div>
-             <div className="relative">
-               {/* Progress Bar Background */}
-               <div className="w-full h-10 bg-muted rounded-full relative overflow-hidden shadow-inner hover:shadow-md transition-shadow duration-200">
-                 {/* Progress Bar Fill */}
-                 <div 
-                   className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out shadow-sm ${
-                     localCandidate.status === 'Disqualified' 
-                       ? 'bg-gradient-to-r from-red-300 to-red-400' 
-                       : 'bg-gradient-to-r from-blue-300 to-blue-400'
-                   }`}
-                   style={{ 
-                     width: `${(() => {
-                       if (localCandidate.status === 'Disqualified') {
-                         // For disqualified candidates, show progress up to the disqualification stage or current stage
-                         const disqualificationStage = localCandidate.disqualified?.disqualificationStage || localCandidate.currentStage;
-                         return ((pipelineStages.indexOf(disqualificationStage) + 1) / pipelineStages.length) * 100;
-                       }
-                       return ((pipelineStages.indexOf(localCandidate.currentStage) + 1) / pipelineStages.length) * 100;
-                     })()}%` 
-                   }}
-                 ></div>
-                 
-                 {/* Stage Names Inside Progress Bar */}
-                 <div className="absolute inset-0 flex items-center justify-between px-4">
-                   {pipelineStages.map((stage, index) => {
-                     // For disqualified candidates, show completed stages up to disqualification stage or current stage
-                     const disqualificationStage = localCandidate.disqualified?.disqualificationStage || localCandidate.currentStage;
-                     const isDisqualified = localCandidate.status === 'Disqualified';
-                     
-                     let isCompleted, isCurrent, isPrevious;
-                     if (isDisqualified) {
-                       const disqualificationIndex = pipelineStages.indexOf(disqualificationStage);
-                       isCompleted = disqualificationIndex >= index;
-                       isCurrent = disqualificationStage === stage;
-                       isPrevious = disqualificationIndex >= index; // All completed stages are clickable
-                     } else {
-                       const currentIndex = pipelineStages.indexOf(localCandidate.currentStage);
-                       isCompleted = currentIndex >= index;
-                       isCurrent = localCandidate.currentStage === stage;
-                       isPrevious = currentIndex >= index; // All completed stages are clickable
-                     }
-                     
-                     const isSelected = selectedStage === stage;
-                     const isClickable = isCompleted; // All completed stages (current + previous) are clickable
-                     
-                     return (
-                       <div 
-                         key={stage} 
-                         className={`flex items-center ${isClickable ? 'cursor-pointer group' : 'cursor-default'}`}
-                         onClick={() => isClickable ? setSelectedStage(stage) : undefined}
-                       >
-                         <div className={`w-5 h-5 rounded-full flex items-center justify-center mr-2 shadow-sm transition-all duration-200 ${
-                           isCompleted 
-                             ? isDisqualified 
-                               ? 'bg-card text-red-500 ring-2 ring-red-200' 
-                               : 'bg-card text-blue-500 ring-2 ring-blue-200'
-                             : 'bg-muted text-muted-foreground'
-                         } ${isSelected ? (isDisqualified ? 'ring-4 ring-red-300 scale-110' : 'ring-4 ring-blue-300 scale-110') : ''} `}>
-                           {isCompleted && <Check className="h-3 w-3" />}
-                         </div>
-                         <span className={`text-xs font-semibold transition-all duration-200 ${
-                           isCurrent ? 'text-white drop-shadow-sm' : isCompleted ? 'text-white drop-shadow-sm' : 'text-muted-foreground'
-                         } ${isSelected ? (isDisqualified ? 'text-red-100 font-bold' : 'text-blue-100 font-bold') : ''} `}>
-                           {stage}
-                         </span>
-                       </div>
-                     );
-                   })}
-                 </div>
-               </div>
-             </div>
-           </div>
+                   {/* Pipeline Progress Bar */}
+            <CandidateProgressCard
+              candidate={localCandidate}
+              selectedStage={selectedStage}
+              setSelectedStage={setSelectedStage}
+              stages={pipelineStages}
+            />
 
            {/* Disqualification Details - Show for all disqualified candidates */}
            {(() => {

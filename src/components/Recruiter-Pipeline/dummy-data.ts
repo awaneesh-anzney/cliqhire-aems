@@ -95,6 +95,7 @@ export interface Candidate {
   onboarding?: any;
   hired?: any;
   disqualified?: any;
+  probation?: any;
   interviewRounds?: InterviewRound[];
   currentInterviewRound?: number;
   // Additional pipeline fields
@@ -264,10 +265,24 @@ export const mapUIStageToBackendStage = (uiStage: string): string => {
 
 // Helper function to map backend stage names to UI stage names
 export const mapBackendStageToUIStage = (backendStage: string): string => {
+  if (!backendStage) return "";
+  
   const stageMapping: Record<string, string> = {
     "Client Screening": "Client Review",
-    // Add other mappings here if needed in the future
+    "clientScreening": "Client Review",
+    "clientreview": "Client Review",
+    "sourcing": "Sourcing",
+    "screening": "Screening",
+    "interview": "Interview",
+    "verification": "Verification",
+    "onboarding": "Onboarding",
+    "hired": "Hired",
+    "disqualified": "Disqualified"
   };
   
-  return stageMapping[backendStage] || backendStage;
+  const normalized = backendStage.trim();
+  if (stageMapping[normalized]) return stageMapping[normalized];
+  
+  // Fallback: Title case the normalized string
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 };
