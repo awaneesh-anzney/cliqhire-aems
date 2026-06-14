@@ -31,7 +31,7 @@ export interface StageField {
 }
 
 export const PROBATION_PERIOD_OPTIONS = [
-  { value: '',         label: 'No Probation' },
+  { value: 'none',     label: 'No Probation' },
   { value: '1_month',  label: '1 Month (30 days)' },
   { value: '2_month',  label: '2 Months (60 days)' },
   { value: '3_month',  label: '3 Months (90 days)' },
@@ -40,7 +40,7 @@ export const PROBATION_PERIOD_OPTIONS = [
 ];
 
 export const getProbationPeriodLabel = (value: string | null | undefined): string => {
-  if (!value) return "No Probation";
+  if (!value || value === "none") return "No Probation";
   const option = PROBATION_PERIOD_OPTIONS.find(opt => opt.value === value);
   return option ? option.label : value;
 };
@@ -501,7 +501,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
         {
           key: "probationPeriod",
           label: "Probation Period",
-          value: hiredData.probationPeriod || "Not set",
+          value: hiredData.probationPeriod || "none",
           icon: <Clock className="h-4 w-4" />,
           color: "bg-orange-50 text-orange-600",
           type: "select",

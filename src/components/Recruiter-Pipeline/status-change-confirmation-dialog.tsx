@@ -159,7 +159,9 @@ const getFieldValue = (candidate: any, stage: string, key: string): string => {
   };
 
   const val = combined[key] ?? candidate[key] ?? "";
-  if (val === null || val === undefined || val === "Not set") return "";
+  if (val === null || val === undefined || val === "Not set" || val === "") {
+    return key === "probationPeriod" ? "none" : "";
+  }
   
   if (key.toLowerCase().includes("date") || key.toLowerCase().includes("time")) {
     if (typeof val === "string" && val.length > 0) {
@@ -378,13 +380,13 @@ export function StatusChangeConfirmationDialog({
                 "interviewReschedules", "rating", "salary"
               ];
               
-              if (formData.probationPeriod && formData.probationPeriod !== "" && (!formData.startDate || formData.startDate === "")) {
+              if (formData.probationPeriod && formData.probationPeriod !== "none" && (!formData.startDate || formData.startDate === "")) {
                 toast.error("Start Date is required when a Probation Period is selected.");
                 return;
               }
 
               Object.entries(formData).forEach(([key, val]) => {
-                if (val === "" || val === undefined || val === null) {
+                if (val === "" || val === undefined || val === null || val === "none") {
                   finalData[key] = null;
                 } else if (numericFields.includes(key) && !isNaN(Number(val))) {
                   finalData[key] = Number(val);

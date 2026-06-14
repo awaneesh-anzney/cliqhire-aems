@@ -114,7 +114,7 @@ export function PipelineStageDetails({
     ];
 
     Object.entries(editValues).forEach(([key, val]) => {
-      if (val === "" || val === "Not set") {
+      if (val === "" || val === "Not set" || val === "none") {
         updatedFields[key] = null;
       } else if (numericFields.includes(key) && !isNaN(Number(val))) {
         updatedFields[key] = Number(val);
@@ -123,7 +123,7 @@ export function PipelineStageDetails({
       }
     });
 
-    if (updatedFields.probationPeriod && updatedFields.probationPeriod !== "" && (!updatedFields.startDate || updatedFields.startDate === "")) {
+    if (updatedFields.probationPeriod && updatedFields.probationPeriod !== "none" && (!updatedFields.startDate || updatedFields.startDate === "")) {
       toast.error("Start Date is required when a Probation Period is selected.");
       return;
     }
