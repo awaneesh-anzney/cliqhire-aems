@@ -147,6 +147,7 @@ export function mapEntryToJob(entry: any): Job {
       onboarding: onboardingData,
       hired: hiredData,
       disqualified: disqualifiedData,
+      probation: c?.probation || null,
 
       interviewRounds: c?.interviewRounds || [],
       currentInterviewRound: c?.currentInterviewRound,
@@ -330,6 +331,7 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     onboarding: onboardingData,
     hired: hiredData,
     disqualified: disqualifiedData,
+    probation: data.probation || null,
     source: sourcingData?.connection || candidateInfo?.source || "",
     connection: sourcingData?.connection || candidateInfo?.source || "",
     interviewRounds: data.interviewRounds || [],

@@ -34,6 +34,7 @@
  import { CandidateHeaderCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateHeaderCard";
  import { CandidateProgressCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateProgressCard";
  import { CandidateDisqualificationCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateDisqualificationCard";
+ import { CandidateProbationCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateProbationCard";
  import { CandidateInfoGrid } from "@/components/Recruiter-Pipeline/candidate-details/CandidateInfoGrid";
  import { CandidateDocumentsCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateDocumentsCard";
  
@@ -229,6 +230,10 @@
          {/* Content Area: Scrolling Sections */}
          <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-4 duration-1000 delay-200 pr-1">
            <CandidateDisqualificationCard candidate={candidate} />
+ 
+           {candidate.probation && (
+             <CandidateProbationCard probation={candidate.probation} />
+           )}
  
            <div className="bg-card rounded-xl border border-border shadow-md overflow-visible p-4">
              <div className="flex items-center gap-2 mb-4">

@@ -194,11 +194,15 @@ export const renderFieldInput = (
             <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
           </SelectTrigger>
           <SelectContent>
-            {field.options?.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
+            {field.options?.map((option) => {
+              const val = typeof option === "string" ? option : option.value;
+              const lbl = typeof option === "string" ? option : option.label;
+              return (
+                <SelectItem key={val} value={val}>
+                  {lbl}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       );
@@ -210,11 +214,15 @@ export const renderFieldInput = (
             <SelectValue placeholder="Select rating" />
           </SelectTrigger>
           <SelectContent>
-            {field.options?.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
+            {field.options?.map((option) => {
+              const val = typeof option === "string" ? option : option.value;
+              const lbl = typeof option === "string" ? option : option.label;
+              return (
+                <SelectItem key={val} value={val}>
+                  {lbl}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       );

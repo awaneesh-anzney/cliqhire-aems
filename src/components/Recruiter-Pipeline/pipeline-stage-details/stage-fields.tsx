@@ -14,7 +14,9 @@ import {
   FileText, 
   FileX, 
   DollarSign, 
-  XCircle 
+  XCircle,
+  Briefcase,
+  Building2
 } from "lucide-react";
 
 export interface StageField {
@@ -24,9 +26,25 @@ export interface StageField {
   icon: React.ReactNode;
   color: string;
   type: 'text' | 'date' | 'datetime' | 'select' | 'textarea' | 'url' | 'rating';
-  options?: string[];
+  options?: (string | { value: string; label: string })[];
   placeholder?: string;
 }
+
+export const PROBATION_PERIOD_OPTIONS = [
+  { value: '',         label: 'No Probation' },
+  { value: '1_month',  label: '1 Month (30 days)' },
+  { value: '2_month',  label: '2 Months (60 days)' },
+  { value: '3_month',  label: '3 Months (90 days)' },
+  { value: '6_month',  label: '6 Months (180 days)' },
+  { value: '1_year',   label: '1 Year (365 days)' },
+];
+
+export const getProbationPeriodLabel = (value: string | null | undefined): string => {
+  if (!value) return "No Probation";
+  const option = PROBATION_PERIOD_OPTIONS.find(opt => opt.value === value);
+  return option ? option.label : value;
+};
+
 
 // Helper function to parse date string to Date object
 export const parseDateString = (dateString: string): Date | undefined => {
@@ -463,22 +481,22 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           type: "date"
         },
         {
-          key: "offeredSalary",
-          label: "Offered Salary",
-          value: hiredData.offeredSalary?.toString() || "Not set",
+          key: "salary",
+          label: "Salary",
+          value: (hiredData.salary ?? hiredData.offeredSalary)?.toString() || "Not set",
           icon: <DollarSign className="h-4 w-4" />,
           color: "bg-emerald-50 text-emerald-600",
           type: "text",
           placeholder: "e.g., 15000"
         },
         {
-          key: "offeredSalaryCurrency",
+          key: "salaryCurrency",
           label: "Currency",
-          value: hiredData.offeredSalaryCurrency || "Not set",
+          value: hiredData.salaryCurrency || hiredData.offeredSalaryCurrency || "Not set",
           icon: <DollarSign className="h-4 w-4" />,
           color: "bg-muted text-foreground",
           type: "select",
-          options: ["SAR", "USD", "EUR", "GBP", "INR", "AED"]
+          options: ["SAR", "USD", "EUR", "GBP", "INR", "AED", "EGP"]
         },
         {
           key: "probationPeriod",
@@ -486,8 +504,53 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           value: hiredData.probationPeriod || "Not set",
           icon: <Clock className="h-4 w-4" />,
           color: "bg-orange-50 text-orange-600",
+          type: "select",
+          options: PROBATION_PERIOD_OPTIONS
+        },
+        {
+          key: "probationNotes",
+          label: "Probation Notes",
+          value: hiredData.probationNotes || "Not set",
+          icon: <MessageSquare className="h-4 w-4" />,
+          color: "bg-muted text-foreground",
+          type: "textarea",
+          placeholder: "Enter probation notes..."
+        },
+        {
+          key: "offerLetterNo",
+          label: "Offer Letter No",
+          value: hiredData.offerLetterNo || "Not set",
+          icon: <FileText className="h-4 w-4" />,
+          color: "bg-indigo-50 text-indigo-600",
           type: "text",
-          placeholder: "e.g., 3 months"
+          placeholder: "e.g., OL-2026-001"
+        },
+        {
+          key: "designation",
+          label: "Designation",
+          value: hiredData.designation || "Not set",
+          icon: <Briefcase className="h-4 w-4" />,
+          color: "bg-sky-50 text-sky-600",
+          type: "text",
+          placeholder: "e.g., Software Engineer"
+        },
+        {
+          key: "department",
+          label: "Department",
+          value: hiredData.department || "Not set",
+          icon: <Building2 className="h-4 w-4" />,
+          color: "bg-slate-50 text-slate-600",
+          type: "text",
+          placeholder: "e.g., Engineering"
+        },
+        {
+          key: "reportingTo",
+          label: "Reporting To",
+          value: hiredData.reportingTo || "Not set",
+          icon: <User className="h-4 w-4" />,
+          color: "bg-teal-50 text-teal-600",
+          type: "text",
+          placeholder: "e.g., Ahmed Al-Farsi"
         },
         {
           key: "hiringRating",

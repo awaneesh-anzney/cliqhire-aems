@@ -23,6 +23,7 @@ import {
   formatDateForDisplay,
   formatDateTimeForDisplay,
   StageField,
+  getProbationPeriodLabel,
 } from "./stage-fields";
 import { renderFieldInput } from "./field-inputs";
 import { 
@@ -109,7 +110,7 @@ export function PipelineStageDetails({
     const numericFields = [
       "sourcingRating", "screeningRating", "overallRating", "clientRating", 
       "hiringRating", "offeredSalary", "finalSalary", "interviewRoundNo", 
-      "interviewReschedules"
+      "interviewReschedules", "salary"
     ];
 
     Object.entries(editValues).forEach(([key, val]) => {
@@ -121,6 +122,11 @@ export function PipelineStageDetails({
         updatedFields[key] = val;
       }
     });
+
+    if (updatedFields.probationPeriod && updatedFields.probationPeriod !== "" && (!updatedFields.startDate || updatedFields.startDate === "")) {
+      toast.error("Start Date is required when a Probation Period is selected.");
+      return;
+    }
 
     if (!hasApiIntegration) {
       const stageKey = getStageKey(displayStage);
@@ -207,6 +213,9 @@ export function PipelineStageDetails({
   const renderFieldValue = (field: StageField) => {
     if (field.type === "date") return formatDateForDisplay(field.value?.toString() || "");
     if (field.type === "datetime") return formatDateTimeForDisplay(field.value?.toString() || "");
+    if (field.key === "probationPeriod" && field.value) {
+      return getProbationPeriodLabel(field.value.toString());
+    }
     return field.value?.toString() || "Not set";
   };
 

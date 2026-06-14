@@ -95,6 +95,7 @@ export interface Candidate {
   onboarding?: any;
   hired?: any;
   disqualified?: any;
+  probation?: any;
   interviewRounds?: InterviewRound[];
   currentInterviewRound?: number;
   // Additional pipeline fields

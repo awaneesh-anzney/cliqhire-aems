@@ -15,6 +15,8 @@ import {
 import { getStageColor, mapUIStageToBackendStage, type Candidate } from "./dummy-data";
 import { format } from "date-fns";
 import { DatePickerField, DateTimePickerField } from "./pipeline-stage-details/field-inputs";
+import { PROBATION_PERIOD_OPTIONS } from "./pipeline-stage-details/stage-fields";
+import { toast } from "sonner";
 import { 
   Calendar, 
   Star, 
@@ -42,7 +44,7 @@ interface StageFieldConfig {
   key: string;
   label: string;
   type: "text" | "date" | "datetime" | "select" | "textarea" | "rating";
-  options?: string[];
+  options?: (string | { value: string; label: string })[];
   placeholder?: string;
 }
 
@@ -97,9 +99,14 @@ const STAGE_FIELDS_MAP: Record<string, StageFieldConfig[]> = {
   "Hired": [
     { key: "hireDate", label: "Hire Date", type: "date" },
     { key: "startDate", label: "Start Date", type: "date" },
-    { key: "offeredSalary", label: "Offered Salary", type: "text", placeholder: "e.g. 15000" },
-    { key: "offeredSalaryCurrency", label: "Currency", type: "select", options: ["SAR", "USD", "EUR", "GBP", "INR", "AED"] },
-    { key: "probationPeriod", label: "Probation Period", type: "text", placeholder: "e.g. 3 months" },
+    { key: "salary", label: "Salary", type: "text", placeholder: "e.g. 15000" },
+    { key: "salaryCurrency", label: "Currency", type: "select", options: ["SAR", "USD", "EUR", "GBP", "INR", "AED", "EGP"] },
+    { key: "probationPeriod", label: "Probation Period", type: "select", options: PROBATION_PERIOD_OPTIONS },
+    { key: "probationNotes", label: "Probation Notes", type: "textarea", placeholder: "Enter probation notes..." },
+    { key: "offerLetterNo", label: "Offer Letter No", type: "text", placeholder: "e.g. OL-2026-001" },
+    { key: "designation", label: "Designation", type: "text", placeholder: "e.g. Software Engineer" },
+    { key: "department", label: "Department", type: "text", placeholder: "e.g. Engineering" },
+    { key: "reportingTo", label: "Reporting To", type: "text", placeholder: "e.g. Ahmed Al-Farsi" },
     { key: "hiringRating", label: "Hiring Rating (1-5)", type: "rating", options: ["1", "2", "3", "4", "5"] },
     { key: "contractType", label: "Contract Type", type: "select", options: ["Full Time", "Part Time", "Contract", "Internship"] },
     { key: "notes", label: "Notes", type: "textarea", placeholder: "Enter hire notes..." }
@@ -253,11 +260,15 @@ export function StatusChangeConfirmationDialog({
               <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-border">
-              {field.options?.map((opt) => (
-                <SelectItem key={opt} value={opt} className="rounded-lg font-medium text-xs">
-                  {opt}
-                </SelectItem>
-              ))}
+              {field.options?.map((opt) => {
+                const val = typeof opt === "string" ? opt : opt.value;
+                const lbl = typeof opt === "string" ? opt : opt.label;
+                return (
+                  <SelectItem key={val} value={val} className="rounded-lg font-medium text-xs">
+                    {lbl}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         );
@@ -364,9 +375,14 @@ export function StatusChangeConfirmationDialog({
               const numericFields = [
                 "sourcingRating", "screeningRating", "overallRating", "clientRating", 
                 "hiringRating", "offeredSalary", "finalSalary", "interviewRoundNo", 
-                "interviewReschedules", "rating"
+                "interviewReschedules", "rating", "salary"
               ];
               
+              if (formData.probationPeriod && formData.probationPeriod !== "" && (!formData.startDate || formData.startDate === "")) {
+                toast.error("Start Date is required when a Probation Period is selected.");
+                return;
+              }
+
               Object.entries(formData).forEach(([key, val]) => {
                 if (val === "" || val === undefined || val === null) {
                   finalData[key] = null;
