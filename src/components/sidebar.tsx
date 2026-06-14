@@ -66,7 +66,7 @@
    return (
      <UISidebar
        collapsible="icon"
-       className="border-r border-border bg-card shadow-xl shadow-black/10"
+       className="border-r border-border bg-protected shadow-xl shadow-black/10"
        data-variant="sidebar"
      >
        <SidebarHeader className="py-8 px-6 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center">

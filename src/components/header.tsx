@@ -70,7 +70,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/70 backdrop-blur-2xl transition-all duration-300">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-protected/70 backdrop-blur-2xl transition-all duration-300">
       <div className="flex h-16 items-center px-4 md:px-6 gap-4 md:gap-6">
         {showMobileSearch ? (
           /* Mobile Search Bar Mode */

@@ -78,7 +78,7 @@ body::-webkit-scrollbar {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: var(--protected-bg);
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 141 59% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -88,6 +88,7 @@ body::-webkit-scrollbar {
     --sidebar-ring: 141 59% 54%;
     --brand-primary: 141 59% 54%;
     --brand-primary-foreground: 0 0% 100%;
+    --protected-bg: 141 59% 77%; /* 50% lighter than brand-primary */
     --candidate-name: 141 50% 25%;
     --candidate-id: 141 15% 45%;
   }
@@ -118,7 +119,7 @@ body::-webkit-scrollbar {
     --chart-3: 30 70% 52%;
     --chart-4: 280 55% 56%;
     --chart-5: 340 65% 52%;
-    --sidebar-background: 240 5% 17%;
+    --sidebar-background: var(--protected-bg);
     --sidebar-foreground: 240 5% 72%;
     --sidebar-primary: 141 59% 54%;
     --sidebar-primary-foreground: 0 0% 96%;
@@ -128,6 +129,7 @@ body::-webkit-scrollbar {
     --sidebar-ring: 141 59% 54%;
     --brand-primary: 141 59% 54%;
     --brand-primary-foreground: 0 0% 96%;
+    --protected-bg: 141 59% 27%; /* 50% darker than brand-primary for dark mode */
     --candidate-name: 141 60% 75%;
     --candidate-id: 141 15% 60%;
   }
