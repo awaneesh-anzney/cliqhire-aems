@@ -182,6 +182,11 @@ export function CandidateProbationCard({ probation }: Props) {
             style={{ width: `${Math.min(100, Math.max(0, probation.percentComplete))}%` }}
           />
         </div>
+        {probation.endDate && probation.status !== "Completed" && probation.status !== "Terminated" && (
+          <p className="text-[10px] text-muted-foreground mt-2 font-medium">
+            The probation period will end on <span className="font-bold text-foreground">{formatDate(probation.endDate)}</span>.
+          </p>
+        )}
       </div>
 
       {/* Extension Details and Notes */}

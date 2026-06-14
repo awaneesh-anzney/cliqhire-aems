@@ -463,7 +463,7 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
 
     case "Hired":
       const hiredData = getStageData(candidate, "Hired");
-      return [
+      const hiredFields: StageField[] = [
         {
           key: "hireDate",
           label: "Hire Date",
@@ -571,6 +571,22 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           options: ["Full Time", "Part Time", "Contract", "Internship"]
         }
       ];
+
+      if (candidate?.probation?.endDate) {
+        const pIdx = hiredFields.findIndex(f => f.key === "probationPeriod");
+        if (pIdx !== -1) {
+          hiredFields.splice(pIdx + 1, 0, {
+            key: "probationEndDate",
+            label: "Probation End Date",
+            value: formatApiDate(candidate.probation.endDate),
+            icon: <CalendarDays className="h-4 w-4" />,
+            color: "bg-rose-50 text-rose-600",
+            type: "date"
+          } as any);
+        }
+      }
+
+      return hiredFields;
 
     case "Disqualified":
       const disqualifiedData = getStageData(candidate, "Disqualified");

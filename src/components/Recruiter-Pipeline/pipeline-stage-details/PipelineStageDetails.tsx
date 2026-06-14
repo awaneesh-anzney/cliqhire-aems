@@ -346,7 +346,7 @@ export function PipelineStageDetails({
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 group-hover:text-brand transition-colors">
                      {field.label}
                   </p>
-                  {isEditingStage ? (
+                  {isEditingStage && field.key !== "probationEndDate" ? (
                     <div className="mt-1">
                       {renderFieldInput(field, editValues[field.key] ?? "", (val) => handleUpdateFieldValue(field.key, val))}
                     </div>
