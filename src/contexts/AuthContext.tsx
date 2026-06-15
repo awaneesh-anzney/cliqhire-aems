@@ -6,8 +6,6 @@ import { taskService, Task } from '@/services/taskService';
 import { roleService } from '@/services/roleService';
 import { initializeAuth } from '@/lib/axios-config';
 import { useRouter } from 'next/navigation';
-import { Loader } from 'lucide-react';
-import { AuthLoading } from '@/components/auth-loading';
 
 interface AuthContextType {
   user: User | null;
@@ -195,15 +193,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     completeTask,
     updateFollowUpStatus,
   };
-
-  // Show loading spinner while authentication is being checked
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-        <AuthLoading />
-      </div>
-    );
-  }
 
   return (
     <AuthContext.Provider value={value}>

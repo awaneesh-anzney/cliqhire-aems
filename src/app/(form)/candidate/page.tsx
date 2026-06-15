@@ -71,7 +71,7 @@ const initialData: FormValues = {
   technicalSkill: [],
 };
 
-export default function ProtectedCandidateFormPage() {
+function CandidateFormContent() {
   const searchParams = useSearchParams();
   const jobFromQuery = searchParams?.get("job") || "";
   const headingTitle = `${jobFromQuery ? jobFromQuery : "Candidate"} Form`;
@@ -447,5 +447,13 @@ export default function ProtectedCandidateFormPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function ProtectedCandidateFormPage() {
+  return (
+    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <CandidateFormContent />
+    </React.Suspense>
   );
 }
