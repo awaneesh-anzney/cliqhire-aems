@@ -244,8 +244,3 @@ export { api };
 
 // Initialize the interceptors immediately
 initializeAxiosInterceptors();
-
-// Initialize authentication state
-if (typeof window !== 'undefined') {
-  initializeAuth();
-}
