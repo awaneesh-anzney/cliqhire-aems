@@ -224,35 +224,35 @@ body::-webkit-scrollbar {
 /* Dashboard Redesign Custom Styles */
 @layer components {
   .dashboard-container {
-    @apply flex flex-col w-full min-h-full p-4 md:p-5 lg:p-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-muted/40;
+    @apply flex flex-col w-full min-h-full p-3 md:p-4 lg:p-4 space-y-3.5 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-muted/40;
   }
 
   .dashboard-welcome-banner {
-    @apply relative overflow-hidden rounded-xl bg-gradient-to-r from-brand via-brand/90 to-emerald-600/90 text-white py-4 px-5 sm:px-6 shadow-md border border-brand/10 transition-all duration-500 hover:shadow-lg hover:shadow-brand/20;
+    @apply relative overflow-hidden rounded-xl bg-gradient-to-r from-brand via-brand/90 to-emerald-600/90 text-white py-3 px-4 sm:px-5 shadow-md border border-brand/10 transition-all duration-500 hover:shadow-lg hover:shadow-brand/20;
   }
 
   .dashboard-date-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 border border-white/10 text-[10px] font-bold tracking-wider backdrop-blur-md shadow-sm text-white transition-all duration-300 hover:bg-white/20 hover:scale-105 cursor-default;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 border border-white/10 text-[10px] font-bold tracking-wider backdrop-blur-md shadow-sm text-white transition-all duration-300 hover:bg-white/20 hover:scale-105 cursor-default;
   }
 
   .dashboard-kpi-card {
-    @apply relative bg-card border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.03)] rounded-xl p-4 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-brand/40 dark:hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between overflow-hidden;
+    @apply relative bg-card border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.03)] rounded-xl p-3.5 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-brand/40 dark:hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between overflow-hidden;
   }
 
   .dashboard-kpi-skeleton {
-    @apply p-4 rounded-xl bg-card border border-border/60 shadow-sm flex flex-col justify-between animate-pulse min-h-[160px];
+    @apply p-3.5 rounded-xl bg-card border border-border/60 shadow-sm flex flex-col justify-between animate-pulse min-h-[145px];
   }
 
   .dashboard-action-card {
-    @apply relative flex flex-col items-start p-4 sm:p-5 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.06)] hover:border-brand/30 transition-all duration-300 text-left h-full overflow-hidden;
+    @apply relative flex flex-col items-start p-3.5 sm:p-4 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.06)] hover:border-brand/30 transition-all duration-300 text-left h-full overflow-hidden;
   }
 
   .dashboard-action-icon {
-    @apply relative z-10 p-2.5 rounded-lg mb-3.5 transition-all duration-300;
+    @apply relative z-10 p-2 rounded-lg mb-2.5 transition-all duration-300;
   }
 
   .dashboard-action-badge {
-    @apply flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full;
+    @apply flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full;
   }
 
   .dashboard-action-circle {

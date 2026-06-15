@@ -86,13 +86,13 @@ export default function DashboardPage() {
             onClick={() => setOpen(true)}
             className="group dashboard-action-card"
           >
-            <div className="absolute -top-12 -right-12 w-28 h-28 bg-muted rounded-full group-hover:scale-125 transition-transform duration-500 ease-out" />
+            <div className="absolute -top-12 -right-12 w-24 h-24 bg-muted rounded-full group-hover:scale-125 transition-transform duration-500 ease-out" />
             
             <div className="dashboard-action-icon bg-brand/5 text-brand group-hover:bg-brand group-hover:text-white">
               <Building2 className="w-5 h-5" />
             </div>
             
-            <div className="relative z-10 space-y-1.5 flex-1">
+            <div className="relative z-10 space-y-1 flex-1">
               <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight leading-tight group-hover:text-brand transition-colors">
                 Onboard <br/>New Client
               </h2>
@@ -101,7 +101,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="relative z-10 mt-4 flex items-center justify-between w-full">
+            <div className="relative z-10 mt-3.5 flex items-center justify-between w-full">
               <div className="dashboard-action-badge bg-brand/10 text-brand">
                 <Plus className="w-2.5 h-2.5" /> Start
               </div>
@@ -116,13 +116,13 @@ export default function DashboardPage() {
             onClick={() => setJobModal(true)}
             className="group dashboard-action-card"
           >
-            <div className="absolute -top-12 -right-12 w-28 h-28 bg-muted rounded-full group-hover:scale-125 transition-transform duration-500 ease-out" />
+            <div className="absolute -top-12 -right-12 w-24 h-24 bg-muted rounded-full group-hover:scale-125 transition-transform duration-500 ease-out" />
             
             <div className="dashboard-action-icon bg-blue-500/5 text-blue-600 group-hover:bg-blue-600 group-hover:text-white">
               <Target className="w-5 h-5" />
             </div>
             
-            <div className="relative z-10 space-y-1.5 flex-1">
+            <div className="relative z-10 space-y-1 flex-1">
               <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight leading-tight group-hover:text-blue-600 transition-colors">
                 Post Job <br/>Requirement
               </h2>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="relative z-10 mt-4 flex items-center justify-between w-full">
+            <div className="relative z-10 mt-3.5 flex items-center justify-between w-full">
               <div className="dashboard-action-badge bg-blue-500/10 text-blue-600">
                 <Zap className="w-2.5 h-2.5" /> Post
               </div>
@@ -144,13 +144,13 @@ export default function DashboardPage() {
           {/* Action 3: Candidate Creation */}
           <CreateCandidateButton className="p-0 border-none bg-transparent hover:bg-transparent shadow-none w-full h-full block">
             <div className="group dashboard-action-card">
-              <div className="absolute -top-12 -right-12 w-28 h-28 bg-muted rounded-full group-hover:scale-125 transition-transform duration-500 ease-out" />
+              <div className="absolute -top-12 -right-12 w-24 h-24 bg-muted rounded-full group-hover:scale-125 transition-transform duration-500 ease-out" />
               
               <div className="dashboard-action-icon bg-emerald-500/5 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white">
                 <Rocket className="w-5 h-5" />
               </div>
               
-              <div className="relative z-10 space-y-1.5 flex-1">
+              <div className="relative z-10 space-y-1 flex-1">
                 <h2 className="text-base sm:text-lg font-black text-foreground tracking-tight leading-tight group-hover:text-emerald-600 transition-colors">
                   Capture <br/>Top Talent
                 </h2>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              <div className="relative z-10 mt-4 flex items-center justify-between w-full">
+              <div className="relative z-10 mt-3.5 flex items-center justify-between w-full">
                 <div className="dashboard-action-badge bg-emerald-500/10 text-emerald-600">
                   <Rocket className="w-2.5 h-2.5" /> Capture
                 </div>

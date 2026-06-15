@@ -348,8 +348,8 @@ export function DashboardKpiCards() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-border/40">
-                    <div className="flex flex-col justify-between space-y-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3 pt-2.5 border-t border-border/40">
+                    <div className="flex flex-col justify-between space-y-1">
                         <div className="flex items-center justify-between bg-blue-500/5 dark:bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-500/10 text-[11px] font-bold text-blue-600">
                             <span>Active Pipelines</span>
                             <span>{activePipelines}</span>
@@ -364,7 +364,7 @@ export function DashboardKpiCards() {
                         </div>
                     </div>
                     
-                    <div className="bg-muted/40 dark:bg-zinc-800/40 p-2.5 rounded-xl border border-border/40 flex flex-col justify-center space-y-1">
+                    <div className="bg-muted/40 dark:bg-zinc-800/40 p-2 rounded-lg border border-border/40 flex flex-col justify-center space-y-0.5">
                         <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-0.5 block">
                             Stage Breakdown
                         </span>
@@ -395,7 +395,7 @@ export function DashboardKpiCards() {
             {/* Column containing both Team Users and Contracts (Stretched to match Pipeline's height) */}
             <div className="flex flex-col md:flex-row lg:flex-col gap-4 md:col-span-2 lg:col-span-1">
                 {/* 5. Team Users Card */}
-                <div className="group dashboard-kpi-card flex-1 p-3.5">
+                <div className="group dashboard-kpi-card flex-1 p-3">
                     <div className="absolute -right-6 -bottom-6 w-20 h-20 rounded-full blur-xl opacity-0 group-hover:opacity-10 transition-all duration-700 bg-teal-500 pointer-events-none" />
                     
                     <div>
@@ -443,7 +443,7 @@ export function DashboardKpiCards() {
                 </div>
 
                 {/* 6. Contracts Card */}
-                <div className="group dashboard-kpi-card flex-1 p-3.5">
+                <div className="group dashboard-kpi-card flex-1 p-3">
                     <div className="absolute -right-6 -bottom-6 w-20 h-20 rounded-full blur-xl opacity-0 group-hover:opacity-10 transition-all duration-700 bg-pink-500 pointer-events-none" />
                     
                     <div>
