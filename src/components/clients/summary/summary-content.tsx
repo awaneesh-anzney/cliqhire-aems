@@ -557,8 +557,6 @@ export function SummaryContent({
           open={showReferredByDialog}
           onClose={() => setShowReferredByDialog(false)}
           title="Select Referral Source"
-          initialShowTeam={false}
-          initialShowReferred={true}
           onSelect={(user) => {
             const name = user?.name || user?.email || "";
             setPendingReferredByName(name || null);
