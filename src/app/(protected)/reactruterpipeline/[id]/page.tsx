@@ -53,7 +53,7 @@ const Page = () => {
 
   const [selectedStageFilter, setSelectedStageFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(15);
+  const [pageSize, setPageSize] = useState(30);
 
   // Advanced Filters
   const [search, setSearch] = useState("");

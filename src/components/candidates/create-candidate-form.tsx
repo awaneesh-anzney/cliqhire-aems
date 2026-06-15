@@ -152,7 +152,6 @@ export default function CreateCandidateForm({
 
   const [currentTab, setCurrentTab] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [skillInput, setSkillInput] = useState("");
   const [dobOpen, setDobOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -186,19 +185,7 @@ export default function CreateCandidateForm({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddSkill = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && skillInput.trim()) {
-      e.preventDefault();
-      if (!form.skills.includes(skillInput.trim())) {
-        setForm(prev => ({ ...prev, skills: [...prev.skills, skillInput.trim()] }));
-      }
-      setSkillInput("");
-    }
-  };
 
-  const removeSkill = (skill: string) => {
-    setForm(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -517,24 +504,18 @@ export default function CreateCandidateForm({
                       </Select>
                       <Input name="expectedSalary" type="number" value={form.expectedSalary} onChange={handleChange} placeholder="Expected Salary" className="h-11 border-border bg-card font-bold" />
                     </div>
-                    <div className="flex gap-2">
-                       <Input name="noticePeriod" value={form.noticePeriod} onChange={handleChange} placeholder="Notice Period (e.g. 30 days)" className="h-11 border-border bg-card font-bold" />
+                    <div className="flex gap-2 w-full">
+                      <Select value={form.noticePeriod} onValueChange={v => handleSelectChange('noticePeriod', v)}>
+                        <SelectTrigger className="w-full h-11 border-border bg-card font-bold">
+                          <SelectValue placeholder="Select Notice Period" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["15 Days", "1 Month", "2 Months", "3 Months"].map(n => (
+                            <SelectItem key={n} value={n} className="font-bold">{n}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold text-foreground">Key Skills <span className="text-[10px] text-muted-foreground font-bold ml-2">Press Enter</span></Label>
-                  <div className="relative group">
-                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={handleAddSkill} placeholder="Type skill and press Enter" className="pl-10 h-11 border-border font-bold focus:border-primary" />
-                  </div>
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {form.skills.map(s => (
-                      <span key={s} className="px-3 py-1 bg-primary/5 text-primary text-xs font-black rounded-full border border-primary/20 flex items-center gap-2">
-                        {s} <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => removeSkill(s)} />
-                      </span>
-                    ))}
                   </div>
                 </div>
               </div>

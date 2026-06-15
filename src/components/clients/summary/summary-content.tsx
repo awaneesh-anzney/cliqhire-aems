@@ -415,6 +415,12 @@ export function SummaryContent({
                     disableInternalEdit={!canModify}
                     isLocation={false}
                   />
+                  <DetailRow
+                    label="Country of Business"
+                    value={clientData?.countryOfBusiness}
+                    onUpdate={handleUpdateField("countryOfBusiness")}
+                    disableInternalEdit={!canModify}
+                  />
                 </div>
               </div>
 
@@ -551,8 +557,6 @@ export function SummaryContent({
           open={showReferredByDialog}
           onClose={() => setShowReferredByDialog(false)}
           title="Select Referral Source"
-          initialShowTeam={false}
-          initialShowReferred={true}
           onSelect={(user) => {
             const name = user?.name || user?.email || "";
             setPendingReferredByName(name || null);
