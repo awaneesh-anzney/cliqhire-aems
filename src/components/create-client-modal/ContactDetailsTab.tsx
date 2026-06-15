@@ -1,6 +1,7 @@
 import PhoneInput from "@/components/phone/Phoneinput";
 import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
+import { CountrySelect } from "@/components/ui/country-select";
 
 interface ContactDetailsTabProps {
   form: ClientForm;
@@ -64,14 +65,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5 justify-end">
         <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Country of business</label>
-        <input
-          type="text"
+        <CountrySelect
           value={form.countryOfBusiness}
-          onChange={e => setField("countryOfBusiness", e.target.value)}
-          placeholder="e.g. Saudi Arabia"
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+          onChange={val => setField("countryOfBusiness", val)}
+          type="country"
+          placeholder="Select country..."
         />
       </div>
 

@@ -415,6 +415,12 @@ export function SummaryContent({
                     disableInternalEdit={!canModify}
                     isLocation={false}
                   />
+                  <DetailRow
+                    label="Country of Business"
+                    value={clientData?.countryOfBusiness}
+                    onUpdate={handleUpdateField("countryOfBusiness")}
+                    disableInternalEdit={!canModify}
+                  />
                 </div>
               </div>
 
