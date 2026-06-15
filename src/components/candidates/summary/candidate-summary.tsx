@@ -46,7 +46,7 @@ const detailsFields = [
             ? val
             : `${process.env.NEXT_PUBLIC_API_URL || ''}${val.startsWith('/') ? '' : '/'}${val}`;
           return (
-            <a href={href} target="_blank" rel="noopener noreferrer" className="underline">
+            <a href={href} target="_blank" rel="noopener noreferrer" className="underline" onClick={(e) => e.stopPropagation()}>
               View Resume
             </a>
           );
@@ -123,6 +123,7 @@ const contactFields = [
             rel="noopener noreferrer"
             className="cursor-pointer hover:underline"
             style={{ textDecoration: "none" }}
+            onClick={(e) => e.stopPropagation()}
           >
             {val}
           </a>
