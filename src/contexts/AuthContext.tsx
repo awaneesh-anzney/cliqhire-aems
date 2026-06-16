@@ -62,28 +62,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = authService.getUserData();
 
       if (userData) {
-        // Token memory mein restore karo (localStorage ya cookie se)
-        const tokenRestored = await initializeAuth();
+        // OPTIMISTIC UI: User data milgaya — seedha set karo taaki user dashboard dekh sake
+        setUser(userData);
+        setIsAuthenticated(true);
+        
+        // Tasks localStorage se load karo (no API call on startup)
+        const storedTasks = authService.getUserTasks();
+        setTasks(storedTasks ?? []);
 
-        if (tokenRestored) {
-          // User data milgaya aur token valid hai — state set karo
-          setUser(userData);
-          setIsAuthenticated(true);
+        // Loading jaldi hatao taaki UI block na ho
+        setIsLoading(false);
 
-          // Tasks localStorage se load karo (no API call on startup)
-          const storedTasks = authService.getUserTasks();
-          setTasks(storedTasks ?? []);
-        } else {
-          // Token restore fail hua, matlab stale data hai — clear karo
-          if (typeof window !== "undefined") {
-            localStorage.removeItem("userData");
-            localStorage.removeItem("userTasks");
-            localStorage.removeItem("authToken");
+        // Background mein token restore karo (localStorage ya cookie se)
+        // Await nahi lagaya taaki loading spinner na dikhe
+        initializeAuth().then((tokenRestored) => {
+          if (!tokenRestored) {
+            // Agar seriously fail hua (e.g. 7 din baad expire), toh silently logout
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("userData");
+              localStorage.removeItem("userTasks");
+              localStorage.removeItem("authToken");
+            }
+            setUser(null);
+            setIsAuthenticated(false);
+            setTasks([]);
           }
-          setUser(null);
-          setIsAuthenticated(false);
-          setTasks([]);
-        }
+        }).catch(err => {
+            console.error("[AuthContext] Background initializeAuth error:", err);
+        });
+
+        // Yahan se return ho jaao taaki finally block dubara setIsLoading call na kare (already false)
+        return;
       } else {
         // localStorage mein kuch nahi — cookie se refresh try karo
         const tokenRestored = await initializeAuth();
