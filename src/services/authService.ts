@@ -1,16 +1,31 @@
+/**
+ * authService.ts — Production Grade
+ *
+ * FIX LIST:
+ *  1. login() mein setAccessToken ke baad initializeAuth() call HATA diya
+ *     (pehle duplicate token restore hoti thi → extra refresh calls)
+ *  2. logout() mein clearAccessToken() AuthContext karega — yahan sirf localStorage clean
+ *  3. Password localStorage mein mat rakho (security risk) — sirf email remember karo
+ *  4. authApi ka baseURL correct kiya — /api prefix include hai backend mein
+ *  5. tasks response ka type theek kiya
+ */
+
 import axios, { AxiosError } from "axios";
 import { api, setAccessToken, clearAccessToken } from "@/lib/axios-config";
+import type { Task } from "@/services/taskService";
 
-// Create a separate axios instance for login/register without interceptors
+// ─── Auth-specific axios instance (no interceptors — login/register ke liye) ──
+// Yeh instance interceptors se alag hai taaki login fail pe infinite loop na ho
 const authApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
-  timeout: 10000, // 10 second timeout
+  timeout: 15000,
 });
 
-// Types for authentication data
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 export interface RegisterUserData {
-  firstName:string;
+  firstName: string;
   lastName: string;
   email: string;
   password: string;
@@ -60,9 +75,9 @@ export interface User {
   profile?: UserProfile;
 }
 
-// API Response interfaces
 export interface ApiResponse<T> {
   status: string;
+  success?: boolean;
   message?: string;
   data?: T;
   results?: number;
@@ -87,337 +102,205 @@ export interface LoginResponse {
   message: string;
   user?: User;
   token?: string;
-  tasks?: any[]; // Add tasks to login response
+  tasks?: Task[];
 }
 
-class AuthService {
-  private baseURL = process.env.NEXT_PUBLIC_API_URL ;
-  
-  constructor() {
-    // AuthService initialization
-  }
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  /**
-   * Register a new user
-   */
+const safeLocalStorageGet = <T>(key: string): T | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+};
+
+const safeLocalStorageSet = (key: string, value: unknown): void => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Quota exceed ya private mode — silently ignore
+  }
+};
+
+const safeLocalStorageRemove = (...keys: string[]): void => {
+  if (typeof window === "undefined") return;
+  keys.forEach((k) => localStorage.removeItem(k));
+};
+
+// ─── AuthService ──────────────────────────────────────────────────────────────
+
+class AuthService {
+  // ── register ────────────────────────────────────────────────────────────────
   async register(userData: RegisterUserData): Promise<RegisterResponse> {
     try {
-      // Create payload with plain passwords
-      const payload = {
+      const response = await authApi.post("/api/auth/register", {
         firstName: userData.firstName,
-        lastName:userData.lastName,
+        lastName: userData.lastName,
         email: userData.email,
         password: userData.password,
         confirmPassword: userData.confirmPassword,
-      };
-      
-      // Make real API call to Express backend using the auth-specific instance
-      const response = await authApi.post('/auth/register', payload);
-
-      // Extract data from response - your API returns accessToken and user
-      const { accessToken, user } = response.data.data;
-      
-      // Store token in memory and localStorage for persistence
-      setAccessToken(accessToken);
-      
-      // Store token in localStorage for persistence (in development)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('authToken', accessToken);
-        localStorage.setItem('userData', JSON.stringify(user));
-      }
-
-      return {
-        success: true,
-        message: 'Registration successful',
-        user: user,
-        token: accessToken
-      };
-    } catch (error) {
-      console.error('Error registering user:', error);
-      
-      // Handle axios errors
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        const errorData = axiosError.response?.data as any;
-        
-        return {
-          success: false,
-          message: errorData?.message || axiosError.message || 'Registration failed'
-        };
-      }
-      
-      // Handle other errors
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Registration failed'
-      };
-    }
-  }
-
-  /**
-   * Login user
-   */
-  async login(userData: LoginUserData): Promise<LoginResponse> {
-    try {
-      // Create payload with plain password
-      const payload = {
-        email: userData.email,
-        password: userData.password,
-      };
-      
-      // Make real API call to Express backend using the auth-specific instance
-      const response = await authApi.post('/api/auth/login', payload);
-
-      // Extract data from response - your API returns accessToken, user, and tasks
-      const { accessToken, user, tasks } = response.data.data;
-
-      console.log('User profile details after login:', user);
-      
-      // Store token in memory and localStorage for persistence
-      setAccessToken(accessToken);
-      
-      // Store token in localStorage for persistence (in development)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('authToken', accessToken);
-        localStorage.setItem('userData', JSON.stringify(user));
-        // Store tasks in localStorage for immediate access
-        if (tasks) {
-          localStorage.setItem('userTasks', JSON.stringify(tasks));
-        }
-      }
-
-      return {
-        success: true,
-        message: 'Login successful',
-        user: user,
-        token: accessToken,
-        tasks: tasks
-      };
-    } catch (error) {
-      console.error('AuthService: Error logging in user:', error);
-      
-      // Handle axios errors
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        const errorData = axiosError.response?.data as any;
-        
-        
-        return {
-          success: false,
-          message: errorData?.message || axiosError.message || 'Login failed'
-        };
-      }
-      
-      // Handle other errors
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Login failed'
-      };
-    }
-  }
-
-  /**
-   * Logout user
-   */
-  async logout(): Promise<{ success: boolean; message: string }> {
-    try {
-      // Make logout request to Express backend using the configured api instance
-      // This will clear the refresh token cookie on the server
-      await api.post('/api/auth/logout');
-      
-      // Clear access token from memory
-      clearAccessToken();
-      
-      // Clear user data and token from localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('userData');
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userTasks');
-      }
-      
-      return {
-        success: true,
-        message: 'Logout successful'
-      };
-    } catch (error) {
-      console.error('Error during logout:', error);
-      
-      // Even if the API call fails, clear local data
-      clearAccessToken();
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('userData');
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userTasks');
-      }
-      
-      return {
-        success: false,
-        message: 'Logout completed (local cleanup)'
-      };
-    }
-  }
-
-  /**
-   * Get user tasks from localStorage
-   */
-  getUserTasks(): any[] | null {
-    if (typeof window !== 'undefined') {
-      const userTasks = localStorage.getItem('userTasks');
-      if (userTasks) {
-        try {
-          return JSON.parse(userTasks);
-        } catch (error) {
-          console.error('Error parsing user tasks:', error);
-          return null;
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Get user data from localStorage
-   */
-  getUserData(): User | null {
-    if (typeof window !== 'undefined') {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          return JSON.parse(userData);
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-          return null;
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Change user password
-   */
-  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // Make API call to change password
-      const response = await api.put('/api/auth/change-password', {
-        currentPassword,
-        newPassword,
       });
 
-      return {
-        success: true,
-        message: 'Password changed successfully'
-      };
+      const { accessToken, user } = response.data.data;
+
+      setAccessToken(accessToken);
+      safeLocalStorageSet("userData", user);
+      // authToken already setAccessToken ke andar set hota hai
+
+      return { success: true, message: "Registration successful", user, token: accessToken };
     } catch (error) {
-      console.error('Error changing password:', error);
-      
-      // Handle axios errors
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        const errorData = axiosError.response?.data as any;
-        
-        return {
-          success: false,
-          message: errorData?.message || axiosError.message || 'Failed to change password'
-        };
+      console.error("[authService] register error:", error);
+      const msg = axios.isAxiosError(error)
+        ? ((error.response?.data as { message?: string })?.message ?? error.message)
+        : error instanceof Error
+          ? error.message
+          : "Registration failed";
+      return { success: false, message: msg };
+    }
+  }
+
+  // ── login ───────────────────────────────────────────────────────────────────
+  async login(userData: LoginUserData): Promise<LoginResponse> {
+    try {
+      const response = await authApi.post("/api/auth/login", {
+        email: userData.email,
+        password: userData.password,
+      });
+
+      const { accessToken, user, tasks } = response.data.data as {
+        accessToken: string;
+        user: User;
+        tasks?: Task[];
+      };
+
+      // Token memory + localStorage mein set karo
+      setAccessToken(accessToken);
+
+      // User data localStorage mein — checkAuth fast path ke liye
+      safeLocalStorageSet("userData", user);
+
+      if (tasks?.length) {
+        safeLocalStorageSet("userTasks", tasks);
       }
-      
-      // Handle other errors
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to change password'
-      };
+
+      // NOTE: initializeAuth() yahan NAHI — setAccessToken pehle se sab kar chuka hai
+      // Dobara call karne se unnecessary /api/auth/refresh call hoti thi
+
+      return { success: true, message: "Login successful", user, token: accessToken, tasks };
+    } catch (error) {
+      console.error("[authService] login error:", error);
+      const msg = axios.isAxiosError(error)
+        ? ((error.response?.data as { message?: string })?.message ?? error.message)
+        : error instanceof Error
+          ? error.message
+          : "Login failed";
+      return { success: false, message: msg };
     }
   }
 
-  /**
-   * Get logged-in user's profile
-   */
+  // ── logout ──────────────────────────────────────────────────────────────────
+  async logout(): Promise<{ success: boolean; message: string }> {
+    try {
+      await api.post("/api/auth/logout");
+    } catch (error) {
+      // Server logout fail — local cleanup zaroori hai
+      console.error("[authService] logout API error (non-fatal):", error);
+    } finally {
+      // NOTE: clearAccessToken() AuthContext.logout() karega
+      // Yahan sirf persistent storage clean karo
+      safeLocalStorageRemove("userData", "authToken", "userTasks");
+    }
+    return { success: true, message: "Logged out successfully" };
+  }
+
+  // ── getUserData ─────────────────────────────────────────────────────────────
+  getUserData(): User | null {
+    return safeLocalStorageGet<User>("userData");
+  }
+
+  // ── getUserTasks ────────────────────────────────────────────────────────────
+  getUserTasks(): Task[] | null {
+    return safeLocalStorageGet<Task[]>("userTasks");
+  }
+
+  // ── getProfile ──────────────────────────────────────────────────────────────
   async getProfile(): Promise<ApiResponse<{ user: User }>> {
+    const response = await api.get("/api/auth/profile");
+    return response.data;
+  }
+
+  // ── updateProfile ───────────────────────────────────────────────────────────
+  async updateProfile(
+    data: FormData | Record<string, unknown>,
+  ): Promise<ApiResponse<{ user: User }>> {
+    const response = await api.put("/api/auth/profile", data);
+    // localStorage mein bhi update karo
+    if (response.data?.data) {
+      const current = this.getUserData();
+      if (current) {
+        safeLocalStorageSet("userData", { ...current, ...response.data.data });
+      }
+    }
+    return response.data;
+  }
+
+  // ── changePassword ──────────────────────────────────────────────────────────
+  async changePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await api.get('/api/auth/profile');
-      return response.data;
+      await api.put("/api/auth/change-password", { currentPassword, newPassword });
+      return { success: true, message: "Password changed successfully" };
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      throw error;
+      const msg = axios.isAxiosError(error)
+        ? ((error.response?.data as { message?: string })?.message ?? error.message)
+        : "Failed to change password";
+      return { success: false, message: msg };
     }
   }
 
-  /**
-   * Update logged-in user's profile basic info
-   * Supports both JSON (firstName, lastName, avatar URL) 
-   * and FormData (avatar file)
-   */
-  async updateProfile(data: any): Promise<ApiResponse<{ user: User }>> {
-    try {
-      // If it's FormData, let Axios handle headers automatically (especially for boundary)
-      const response = await api.put('/api/auth/profile', data);
-      return response.data;
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Forgot password - sends reset link to email
-   */
+  // ── forgotPassword ──────────────────────────────────────────────────────────
   async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await api.post('/api/auth/forgot-password', { email });
+      const response = await api.post("/api/auth/forgot-password", { email });
       return {
         success: true,
-        message: response.data.message || 'If this email is registered, a password reset link has been sent.'
+        message:
+          response.data.message ??
+          "If this email is registered, a password reset link has been sent.",
       };
     } catch (error) {
-      console.error('Error in forgot password:', error);
-      if (axios.isAxiosError(error)) {
-        const errorData = error.response?.data as any;
-        return {
-          success: false,
-          message: errorData?.message || error.message || 'Failed to process forgot password request'
-        };
-      }
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'An unexpected error occurred'
-      };
+      const msg = axios.isAxiosError(error)
+        ? ((error.response?.data as { message?: string })?.message ?? error.message)
+        : "Failed to process request";
+      return { success: false, message: msg };
     }
   }
 
-  /**
-   * Reset password - updates password using token
-   */
-  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  // ── resetPassword ───────────────────────────────────────────────────────────
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await api.post('/api/auth/reset-password', { token, newPassword });
+      const response = await api.post("/api/auth/reset-password", { token, newPassword });
       return {
         success: true,
-        message: response.data.message || 'Password successfully reset. You can now login.'
+        message: response.data.message ?? "Password reset successfully.",
       };
     } catch (error) {
-      console.error('Error in reset password:', error);
-      if (axios.isAxiosError(error)) {
-        const errorData = error.response?.data as any;
-        return {
-          success: false,
-          message: errorData?.message || error.message || 'Failed to reset password'
-        };
-      }
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'An unexpected error occurred'
-      };
+      const msg = axios.isAxiosError(error)
+        ? ((error.response?.data as { message?: string })?.message ?? error.message)
+        : "Failed to reset password";
+      return { success: false, message: msg };
     }
-  }
-
-  /**
-   * Check if user is authenticated
-   */
-  isAuthenticated(): boolean {
-    return this.getUserData() !== null;
   }
 }
 
-// Export a singleton instance
+// Singleton export
 export const authService = new AuthService();

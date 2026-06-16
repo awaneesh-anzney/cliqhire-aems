@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { api } from "@/lib/axios-config";
 
 export interface UserPermissions {
   id: string;
@@ -56,21 +56,17 @@ export interface ResetPermissionsResponse {
 }
 
 class PermissionService {
-  private baseURL: string;
-
-  constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-  }
+  constructor() {}
 
   /**
    * Get all users with their permissions
    */
   async getAllUsers(): Promise<ApiResponse<UsersPermissionsResponse>> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/users/permissions`);
+      const response = await api.get(`/api/users/permissions`);
       return response.data;
     } catch (error) {
-      console.error('Error in getAllUsers:', error);
+      console.error("Error in getAllUsers:", error);
       throw this.handleError(error);
     }
   }
@@ -80,10 +76,10 @@ class PermissionService {
    */
   async getUserPermissions(userId: string): Promise<ApiResponse<UserPermissionsResponse>> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/users/permissions/${userId}`);
+      const response = await api.get(`/api/users/permissions/${userId}`);
       return response.data;
     } catch (error) {
-      console.error('Error in getUserPermissions:', error);
+      console.error("Error in getUserPermissions:", error);
       throw this.handleError(error);
     }
   }
@@ -92,14 +88,14 @@ class PermissionService {
    * Update user permissions and/or role
    */
   async updateUserPermissions(
-    userId: string, 
-    data: UpdatePermissionsRequest
+    userId: string,
+    data: UpdatePermissionsRequest,
   ): Promise<ApiResponse<{ user: UserPermissions }>> {
     try {
-      const response = await axios.put(`${this.baseURL}/api/users/permissions/${userId}`, data);
+      const response = await api.put(`/api/users/permissions/${userId}`, data);
       return response.data;
     } catch (error) {
-      console.error('Error in updateUserPermissions:', error);
+      console.error("Error in updateUserPermissions:", error);
       throw this.handleError(error);
     }
   }
@@ -109,10 +105,10 @@ class PermissionService {
    */
   async resetUserPermissions(userId: string): Promise<ApiResponse<ResetPermissionsResponse>> {
     try {
-      const response = await axios.post(`${this.baseURL}/api/users/permissions/${userId}/reset`);
+      const response = await api.post(`/api/users/permissions/${userId}/reset`);
       return response.data;
     } catch (error) {
-      console.error('Error in resetUserPermissions:', error);
+      console.error("Error in resetUserPermissions:", error);
       throw this.handleError(error);
     }
   }
@@ -122,10 +118,10 @@ class PermissionService {
    */
   async getPermissionsInfo(): Promise<ApiResponse<PermissionsInfo>> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/users/permissions-info`);
+      const response = await api.get(`/api/users/permissions-info`);
       return response.data;
     } catch (error) {
-      console.error('Error in getPermissionsInfo:', error);
+      console.error("Error in getPermissionsInfo:", error);
       throw this.handleError(error);
     }
   }
@@ -134,37 +130,37 @@ class PermissionService {
    * Handle API errors and provide meaningful error messages
    */
   private handleError(error: any): Error {
-    console.error('Permission service error details:', {
+    console.error("Permission service error details:", {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
-      url: error.config?.url
+      url: error.config?.url,
     });
 
     if (error.response) {
       const { status, data } = error.response;
-      
+
       switch (status) {
         case 400:
-          return new Error(data.message || 'Invalid request data');
+          return new Error(data.message || "Invalid request data");
         case 401:
-          return new Error('Access denied. Please log in again.');
+          return new Error("Access denied. Please log in again.");
         case 403:
-          return new Error(data.message || 'You do not have permission to perform this action');
+          return new Error(data.message || "You do not have permission to perform this action");
         case 404:
-          return new Error(data.message || 'User not found');
+          return new Error(data.message || "User not found");
         case 500:
-          return new Error(data.message || 'Internal server error');
+          return new Error(data.message || "Internal server error");
         default:
           return new Error(data.message || `HTTP error! status: ${status}`);
       }
     }
-    
+
     if (error.request) {
-      return new Error('Network error. Please check your connection.');
+      return new Error("Network error. Please check your connection.");
     }
-    
-    return new Error(error.message || 'An unexpected error occurred');
+
+    return new Error(error.message || "An unexpected error occurred");
   }
 }
 

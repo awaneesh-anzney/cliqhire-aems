@@ -1,39 +1,69 @@
-import axios from 'axios';
+/**
+ * axios-config.ts  — Production Grade
+ *
+ * FIX LIST:
+ *  1. accessToken sirf memory mein — browser reopen pe localStorage se restore
+ *  2. initializeAxiosInterceptors() ek baar hi lagega (singleton guard)
+ *  3. initializeAuth() file load hote hi auto-call HATA diya — sirf AuthContext call karega
+ *  4. Refresh failure pe clean logout + redirect
+ *  5. isRefreshing flag ke saath proper queue — no parallel /refresh calls
+ */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
-// Create axios instance with credentials support
-const api = axios.create({
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// ─── Axios instance ───────────────────────────────────────────────────────────
+const api: AxiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // Important: This allows cookies to be sent
+  withCredentials: true, // HTTP-only cookie (refreshToken) bhejna zaroori hai
 });
 
-// Store access token in memory (not localStorage for security)
+// ─── In-memory access token (tab/window lifecycle) ────────────────────────────
 let accessToken: string | null = null;
 
-// Flag to prevent multiple refresh attempts
+// ─── Refresh queue — ek baar refresh, baaki wait karein ──────────────────────
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (value?: any) => void;
-  reject: (reason?: any) => void;
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
 }> = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null) => {
   failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token);
-    }
+    if (error) reject(error);
+    else resolve(token as string);
   });
-  
   failedQueue = [];
 };
 
-// Refresh token function
+// ─── Token helpers ────────────────────────────────────────────────────────────
+
+export const setAccessToken = (token: string): void => {
+  accessToken = token;
+  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  // localStorage mein bhi rakhein — browser reopen ke baad restore hoga
+  if (typeof window !== "undefined") {
+    localStorage.setItem("authToken", token);
+  }
+};
+
+export const getAccessToken = (): string | null => accessToken;
+
+export const clearAccessToken = (): void => {
+  accessToken = null;
+  delete api.defaults.headers.common["Authorization"];
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("authToken");
+  }
+};
+
+// ─── Refresh token API call ───────────────────────────────────────────────────
+
 export const refreshToken = async (): Promise<string | null> => {
+  // Agar pehle se refresh chal rahi hai, queue mein daal do
   if (isRefreshing) {
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       failedQueue.push({ resolve, reject });
     });
   }
@@ -41,206 +71,124 @@ export const refreshToken = async (): Promise<string | null> => {
   isRefreshing = true;
 
   try {
-    // Call refresh token endpoint - refresh token is automatically sent via HTTP-only cookie
-    const response = await api.post('/api/auth/refresh', {});
+    // withCredentials: true already set hai — HTTP-only cookie automatically jayegi
+    const response = await api.post<{
+      success: boolean;
+      data: { accessToken: string };
+      message?: string;
+    }>("/api/auth/refresh", {});
 
-    if (response.data && response.data.success) {
+    if (response.data?.success && response.data?.data?.accessToken) {
       const newToken = response.data.data.accessToken;
-      
-      // Store new access token in memory only
-      accessToken = newToken;
-      
-      // Update axios default headers for both instances
-      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      
+      setAccessToken(newToken);
       processQueue(null, newToken);
       return newToken;
-    } else {
-      throw new Error(response.data?.message || 'Failed to refresh token');
     }
-  } catch (error: any) {
-    console.error('Error refreshing token:', error);
-    
-    // Clear access token on refresh failure
-    accessToken = null;
-    delete axios.defaults.headers.common['Authorization'];
-    delete api.defaults.headers.common['Authorization'];
-    
-    processQueue(error, null);
-    throw error;
+
+    throw new Error(response.data?.message ?? "Token refresh failed");
+  } catch (err) {
+    processQueue(err, null);
+    clearAccessToken();
+    throw err;
   } finally {
     isRefreshing = false;
   }
 };
 
-// Function to set access token (called after login)
-export const setAccessToken = (token: string) => {
-  accessToken = token;
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-};
-
-// Function to get current access token
-export const getAccessToken = (): string | null => {
-  return accessToken;
-};
-
-// Function to clear access token (called on logout)
-export const clearAccessToken = () => {
-  accessToken = null;
-  delete axios.defaults.headers.common['Authorization'];
-  delete api.defaults.headers.common['Authorization'];
-  
-  // Also clear from localStorage
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('authToken');
-  }
-};
-
-// Function to manually trigger token refresh (for debugging)
-export const forceTokenRefresh = async () => {
-  try {
-    const newToken = await refreshToken();
-    return newToken;
-  } catch (error) {
-    console.error('Manual token refresh failed:', error);
-    return null;
-  }
-};
-
-// Initialize axios interceptors for global token refresh
-export const initializeAxiosInterceptors = () => {
-  // Request interceptor to add auth token
-  api.interceptors.request.use(
-    (config) => {
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
-
-  // Response interceptor to handle token refresh
-  api.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    async (error) => {
-      const originalRequest = error.config;
-
-      if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
-        originalRequest._retry = true;
-
-        try {
-          await refreshToken();
-          // Retry the original request with new token
-          if (accessToken) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-            return api(originalRequest);
-          }
-        } catch (refreshError) {
-          console.error('Failed to refresh token:', refreshError);
-          // Redirect to login on refresh failure
-          if (typeof window !== 'undefined') {
-            clearAccessToken();
-            window.location.href = '/login';
-          }
-          return Promise.reject(refreshError);
-        }
-      }
-
-      return Promise.reject(error);
-    }
-  );
-
-  // Also set up interceptors for the default axios instance
-  axios.interceptors.request.use(
-    (config) => {
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
-
-  axios.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    async (error) => {
-      const originalRequest = error.config;
-
-      if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
-        originalRequest._retry = true;
-
-        try {
-          await refreshToken();
-          // Retry the original request with new token
-          if (accessToken) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-            return axios(originalRequest);
-          }
-        } catch (refreshError) {
-          console.error('Failed to refresh token:', refreshError);
-          // Redirect to login on refresh failure
-          if (typeof window !== 'undefined') {
-            clearAccessToken();
-            window.location.href = '/login';
-          }
-          return Promise.reject(refreshError);
-        }
-      }
-
-      return Promise.reject(error);
-    }
-  );
-};
-
-// Function to initialize authentication state (call this on app startup)
+// ─── Initialize auth state (call ONLY from AuthContext on mount) ──────────────
+/**
+ * Sequence:
+ *  1. Memory mein token hai → use karo (same tab, in-session)
+ *  2. localStorage mein token hai → restore karo (browser reopen)
+ *  3. Kuch nahi → HTTP-only cookie se refresh try karo
+ *  4. Sab fail → false return, AuthContext logout karega
+ */
 export const initializeAuth = async (): Promise<boolean> => {
-  try {
-    // Check if we have an access token in memory
-    if (accessToken) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+  // Step 1: already in memory
+  if (accessToken) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+    return true;
+  }
+
+  // Step 2: localStorage check
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("authToken");
+    if (stored) {
+      // Token milte hi memory mein set karo — header bhi lagao
+      accessToken = stored;
+      api.defaults.headers.common["Authorization"] = `Bearer ${stored}`;
       return true;
     }
-    
-    // If no token in memory, check localStorage (for development/testing)
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('authToken');
-      if (storedToken) {
-        setAccessToken(storedToken);
-        return true;
-      }
-    }
-    
-    // If no token found, try to refresh from server
-    try {
-      const newToken = await refreshToken();
-      if (newToken) {
-        return true;
-      }
-    } catch (refreshError) {
-      console.log('No valid refresh token available');
-    }
-    
-    return false;
-  } catch (error) {
-    console.error('Error initializing auth:', error);
+  }
+
+  // Step 3: HTTP-only cookie se refresh try karo
+  try {
+    const newToken = await refreshToken();
+    return !!newToken;
+  } catch {
+    // Refresh bhi fail — user logged out
     return false;
   }
 };
 
-// Export the configured api instance
-export { api };
+// ─── Interceptors — SINGLETON (ek baar hi lagein) ────────────────────────────
+let interceptorsInitialized = false;
 
-// Initialize the interceptors immediately
+export const initializeAxiosInterceptors = (): void => {
+  if (interceptorsInitialized) return; // Guard — duplicate interceptors nahi lagenge
+  interceptorsInitialized = true;
+
+  // Request: memory token har request pe lagao
+  api.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+      if (accessToken && !config.headers["Authorization"]) {
+        config.headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error),
+  );
+
+  // Response: 401 pe auto-refresh + retry
+  api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config as InternalAxiosRequestConfig & {
+        _retry?: boolean;
+      };
+
+      const is401 = error.response?.status === 401;
+      const isRefreshEndpoint = originalRequest?.url?.includes("/auth/refresh");
+      const alreadyRetried = originalRequest?._retry;
+
+      if (is401 && !isRefreshEndpoint && !alreadyRetried && originalRequest) {
+        originalRequest._retry = true;
+
+        try {
+          const newToken = await refreshToken();
+          if (newToken) {
+            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+            return api(originalRequest);
+          }
+        } catch {
+          // Refresh fail — login pe redirect
+          clearAccessToken();
+          if (typeof window !== "undefined") {
+            // Thoda delay taaki pending state clean ho sake
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 100);
+          }
+        }
+      }
+
+      return Promise.reject(error);
+    },
+  );
+};
+
+// Interceptors immediately lagao — but initializeAuth() mat chalao
+// initializeAuth() sirf AuthContext/checkAuth() chalayega
 initializeAxiosInterceptors();
+
+export { api };
