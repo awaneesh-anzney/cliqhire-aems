@@ -57,6 +57,7 @@ export const clearAccessToken = (): void => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userData");
     localStorage.removeItem("userTasks");
+    localStorage.removeItem("refreshToken");
   }
 };
 
@@ -73,16 +74,23 @@ export const refreshToken = async (): Promise<string | null> => {
   isRefreshing = true;
 
   try {
+    const storedRefreshToken = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("refreshToken") || "null") : null;
+
     // withCredentials: true already set hai — HTTP-only cookie automatically jayegi
+    // Sat mein body mein bhi refreshToken bhejenge taaki third-party cookie block bypass ho
     const response = await api.post<{
       success: boolean;
-      data: { accessToken: string };
+      data: { accessToken: string; refreshToken?: string };
       message?: string;
-    }>("/api/auth/refresh", {});
+    }>("/api/auth/refresh", { refreshToken: storedRefreshToken });
 
     if (response.data?.success && response.data?.data?.accessToken) {
       const newToken = response.data.data.accessToken;
+      const newRefreshToken = response.data.data.refreshToken;
       setAccessToken(newToken);
+      if (newRefreshToken && typeof window !== "undefined") {
+        localStorage.setItem("refreshToken", JSON.stringify(newRefreshToken));
+      }
       processQueue(null, newToken);
       return newToken;
     }

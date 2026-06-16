@@ -102,6 +102,7 @@ export interface LoginResponse {
   message: string;
   user?: User;
   token?: string;
+  refreshToken?: string;
   tasks?: Task[];
 }
 
@@ -145,10 +146,11 @@ class AuthService {
         confirmPassword: userData.confirmPassword,
       });
 
-      const { accessToken, user } = response.data.data;
+      const { accessToken, refreshToken, user } = response.data.data;
 
       setAccessToken(accessToken);
       safeLocalStorageSet("userData", user);
+      if (refreshToken) safeLocalStorageSet("refreshToken", refreshToken);
       // authToken already setAccessToken ke andar set hota hai
 
       return { success: true, message: "Registration successful", user, token: accessToken };
@@ -171,8 +173,9 @@ class AuthService {
         password: userData.password,
       });
 
-      const { accessToken, user, tasks } = response.data.data as {
+      const { accessToken, refreshToken, user, tasks } = response.data.data as {
         accessToken: string;
+        refreshToken?: string;
         user: User;
         tasks?: Task[];
       };
@@ -182,6 +185,7 @@ class AuthService {
 
       // User data localStorage mein — checkAuth fast path ke liye
       safeLocalStorageSet("userData", user);
+      if (refreshToken) safeLocalStorageSet("refreshToken", refreshToken);
 
       if (tasks?.length) {
         safeLocalStorageSet("userTasks", tasks);
@@ -212,7 +216,7 @@ class AuthService {
     } finally {
       // NOTE: clearAccessToken() AuthContext.logout() karega
       // Yahan sirf persistent storage clean karo
-      safeLocalStorageRemove("userData", "authToken", "userTasks");
+      safeLocalStorageRemove("userData", "authToken", "refreshToken", "userTasks");
     }
     return { success: true, message: "Logged out successfully" };
   }
