@@ -55,6 +55,8 @@ export const clearAccessToken = (): void => {
   delete api.defaults.headers.common["Authorization"];
   if (typeof window !== "undefined") {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("userTasks");
   }
 };
 

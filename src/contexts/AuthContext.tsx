@@ -62,16 +62,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = authService.getUserData();
 
       if (userData) {
-        // User data milgaya — seedha set karo, token bhi restore hoga
-        setUser(userData);
-        setIsAuthenticated(true);
-
         // Token memory mein restore karo (localStorage ya cookie se)
-        await initializeAuth();
+        const tokenRestored = await initializeAuth();
 
-        // Tasks localStorage se load karo (no API call on startup)
-        const storedTasks = authService.getUserTasks();
-        setTasks(storedTasks ?? []);
+        if (tokenRestored) {
+          // User data milgaya aur token valid hai — state set karo
+          setUser(userData);
+          setIsAuthenticated(true);
+
+          // Tasks localStorage se load karo (no API call on startup)
+          const storedTasks = authService.getUserTasks();
+          setTasks(storedTasks ?? []);
+        } else {
+          // Token restore fail hua, matlab stale data hai — clear karo
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("userData");
+            localStorage.removeItem("userTasks");
+            localStorage.removeItem("authToken");
+          }
+          setUser(null);
+          setIsAuthenticated(false);
+          setTasks([]);
+        }
       } else {
         // localStorage mein kuch nahi — cookie se refresh try karo
         const tokenRestored = await initializeAuth();
