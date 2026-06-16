@@ -1,10 +1,9 @@
-import axios from "axios";
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+import { api } from "@/lib/axios-config";
 
 // Get all contracts for a client
 export const getClientContracts = async (clientId: string) => {
   try {
-    const response = await axios.get(`${API_URL}/api/contracts/client/${clientId}`);
+    const response = await api.get(`/api/contracts/client/${clientId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching client contracts:", error);
@@ -15,7 +14,7 @@ export const getClientContracts = async (clientId: string) => {
 // Get single contract type for a client
 export const getContractByType = async (clientId: string, contractType: string) => {
   try {
-    const response = await axios.get(`${API_URL}/api/contracts/${clientId}/${contractType}`);
+    const response = await api.get(`/api/contracts/${clientId}/${contractType}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching ${contractType} contract:`, error);
@@ -84,7 +83,7 @@ export const updateContract = async (clientId: string, contractType: string, con
         formData.append("outsourcingContractDocument", contractDocument);
       }
     }
-    
+
     // Append all contract data to FormData (excluding files which are handled above)
     Object.keys(contractData).forEach((key) => {
       const value = contractData[key];
@@ -103,9 +102,9 @@ export const updateContract = async (clientId: string, contractType: string, con
         appendToFormData(key, value);
       }
     });
-    
-    const response = await axios.patch(
-      `${API_URL}/api/contracts/updatecontracts/${clientId}/${contractType}`,
+
+    const response = await api.patch(
+      `/api/contracts/updatecontracts/${clientId}/${contractType}`,
       formData,
       {
         headers: {
@@ -124,9 +123,7 @@ export const updateContract = async (clientId: string, contractType: string, con
 // Delete contract API function
 export const deleteContract = async (clientId: string, contractType: string) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/api/contracts/deletecontracts/${clientId}/${contractType}`,
-    );
+    const response = await api.delete(`/api/contracts/deletecontracts/${clientId}/${contractType}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting contract:", error);
@@ -217,7 +214,7 @@ export const addContract = async (clientId: string, contractType: string, contra
       appendToFormData(key, value);
     });
 
-    const response = await axios.post(`${API_URL}/api/contracts/addContracts`, formData, {
+    const response = await api.post(`/api/contracts/addContracts`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -233,10 +230,7 @@ export const addContract = async (clientId: string, contractType: string, contra
 // Renew contract API function
 export const renewContract = async (clientId: string, contractType: string, notes?: string) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/api/contracts/renew/${clientId}/${contractType}`,
-      { notes }
-    );
+    const response = await api.post(`/api/contracts/renew/${clientId}/${contractType}`, { notes });
     return response.data;
   } catch (error) {
     console.error(`Error renewing ${contractType} contract:`, error);
