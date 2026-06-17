@@ -104,7 +104,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       {...field}
                       type="email"
                       placeholder="Email address"
-                      className="pl-11 h-12 rounded-xl bg-background/50 border-muted-foreground/20 focus-visible:ring-primary focus-visible:border-primary transition-all font-medium"
+                      className="pl-11 h-12 rounded-xl bg-background border-muted-foreground/20 focus-visible:ring-primary focus-visible:bg-background focus-visible:border-primary transition-all font-medium"
                       disabled={isLoginLoading}
                       autoComplete="email"
                     />
@@ -128,7 +128,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       {...field}
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="pl-11 pr-11 h-12 rounded-xl bg-background/50 border-muted-foreground/20 focus-visible:ring-primary focus-visible:border-primary transition-all font-medium"
+                      className="pl-11 pr-11 h-12 rounded-xl bg-background border-muted-foreground/20 focus-visible:ring-primary focus-visible:bg-background focus-visible:border-primary transition-all font-medium"
                       disabled={isLoginLoading}
                       autoComplete="current-password"
                     />

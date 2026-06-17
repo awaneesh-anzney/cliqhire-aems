@@ -52,13 +52,7 @@ export default function LoginPage() {
   // Not authenticated — login form dikhao
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-background">
-      {/* Abstract Animated Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] h-[50vw] w-[50vw] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-[20%] -right-[10%] h-[50vw] w-[50vw] rounded-full bg-blue-500/10 blur-[120px] animate-pulse delay-1000" />
-      </div>
-
-      <div className="relative z-10 flex min-h-screen w-full flex-col md:flex-row bg-card/60 backdrop-blur-xl animate-in fade-in duration-700">
+      <div className="flex min-h-screen w-full flex-col md:flex-row">
         {/* Left Side: Brand Banner */}
         <div className="relative hidden md:flex md:w-1/2 flex-col justify-between p-12 overflow-hidden bg-gradient-to-br from-primary/90 to-primary">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
@@ -100,16 +94,29 @@ export default function LoginPage() {
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="flex flex-1 flex-col justify-center p-8 md:p-16 bg-card/80 backdrop-blur-sm relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/5 pointer-events-none" />
-          <div className="mx-auto w-full max-w-[380px] relative z-10">
-            <div className="mb-8 space-y-2 text-center md:text-left">
-              <h2 className="text-3xl font-black tracking-tight text-foreground">Welcome back</h2>
-              <p className="text-sm font-medium text-muted-foreground">
-                Please enter your details to access your account.
+        <div className="flex flex-1 flex-col justify-center items-center p-8 md:p-16 relative bg-background text-foreground">
+          {/* Subtle background glow for the right half to avoid looking completely empty */}
+          <div className="absolute top-[-10%] right-[-10%] h-[50vw] w-[50vw] max-w-[600px] max-h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-[-10%] left-[-10%] h-[50vw] w-[50vw] max-w-[600px] max-h-[600px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="w-full max-w-[420px] relative z-10 animate-in slide-in-from-right-8 duration-700 fade-in">
+            <div className="mb-10 space-y-3 text-center md:text-left">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 md:hidden">
+                <Layers className="h-6 w-6" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black tracking-tight">Welcome back</h2>
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                Please enter your details to securely access your workspace and manage your dashboard.
               </p>
             </div>
+            
             <LoginForm />
+
+            <div className="mt-12 text-center">
+               <p className="text-xs text-muted-foreground font-medium">
+                 Need help signing in? <a href="#" className="text-primary hover:underline font-bold transition-all">Contact Support</a>
+               </p>
+            </div>
           </div>
         </div>
       </div>
