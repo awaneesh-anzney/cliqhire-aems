@@ -18,7 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -45,12 +45,15 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     defaultValues: { email: "", password: "", remember: false },
   });
 
-  // FIX: sirf email restore karo — password localStorage mein nahi rakhna (security)
   useEffect(() => {
     if (typeof window === "undefined") return;
     const rememberedEmail = localStorage.getItem("rememberedEmail");
+    const rememberedPassword = localStorage.getItem("rememberedPassword");
     if (rememberedEmail) {
       form.setValue("email", rememberedEmail);
+      if (rememberedPassword) {
+        form.setValue("password", rememberedPassword);
+      }
       form.setValue("remember", true);
     }
   }, [form]);
@@ -62,12 +65,13 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       if (success) {
         toast.success("Login successful!");
 
-        // FIX: sirf email remember karo
         if (typeof window !== "undefined") {
           if (values.remember) {
             localStorage.setItem("rememberedEmail", values.email);
+            localStorage.setItem("rememberedPassword", values.password);
           } else {
             localStorage.removeItem("rememberedEmail");
+            localStorage.removeItem("rememberedPassword");
           }
         }
 
@@ -86,7 +90,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           {/* Email */}
           <FormField
             control={form.control}
@@ -94,13 +98,13 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <div className="group relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                       {...field}
                       type="email"
                       placeholder="Email address"
-                      className="pl-10"
+                      className="pl-11 h-12 rounded-xl bg-background/50 border-muted-foreground/20 focus-visible:ring-primary focus-visible:border-primary transition-all font-medium"
                       disabled={isLoginLoading}
                       autoComplete="email"
                     />
@@ -118,23 +122,23 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <div className="group relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="pl-10 pr-10"
+                      className="pl-11 pr-11 h-12 rounded-xl bg-background/50 border-muted-foreground/20 focus-visible:ring-primary focus-visible:border-primary transition-all font-medium"
                       disabled={isLoginLoading}
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       tabIndex={-1}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </FormControl>
@@ -143,41 +147,61 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             )}
           />
 
-          {/* Remember me */}
-          <FormField
-            control={form.control}
-            name="remember"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="remember"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isLoginLoading}
-                    />
-                    <label
-                      htmlFor="remember"
-                      className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
-                    >
-                      Remember my email
-                    </label>
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          {/* Options */}
+          <div className="flex items-center justify-between pt-1">
+            <FormField
+              control={form.control}
+              name="remember"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className="flex items-center gap-2.5">
+                      <Checkbox
+                        id="remember"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isLoginLoading}
+                        className="rounded border-muted-foreground/30 data-[state=checked]:bg-primary"
+                      />
+                      <label
+                        htmlFor="remember"
+                        className="text-sm font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors"
+                      >
+                        Remember me
+                      </label>
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                toast.info("Forgot password flow goes here.");
+              }}
+              className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              Forgot password?
+            </a>
+          </div>
 
           {/* Submit */}
-          <Button type="submit" className="w-full font-bold" disabled={isLoginLoading}>
+          <Button 
+            type="submit" 
+            className="w-full h-12 rounded-xl font-bold text-base mt-2 group transition-all" 
+            disabled={isLoginLoading}
+          >
             {isLoginLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 Signing in...
               </>
             ) : (
-              "Sign In"
+              <span className="flex items-center justify-center">
+                Sign In
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </span>
             )}
           </Button>
         </form>
