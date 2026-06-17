@@ -35,21 +35,7 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Auth check chal raha hai
-  if (isLoading) {
-    return <AuthLoading />;
-  }
-
-  // Already authenticated — redirect ho raha hai, blank nahi dikhna chahiye
-  if (isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <AuthLoading />
-      </div>
-    );
-  }
-
-  // Not authenticated — login form dikhao
+  // We will handle isLoading and isAuthenticated within the split layout below.
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-background">
       <div className="flex min-h-screen w-full flex-col md:flex-row">
@@ -99,25 +85,29 @@ export default function LoginPage() {
           <div className="absolute top-[-10%] right-[-10%] h-[50vw] w-[50vw] max-w-[600px] max-h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-[-10%] left-[-10%] h-[50vw] w-[50vw] max-w-[600px] max-h-[600px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="w-full max-w-[420px] relative z-10 animate-in slide-in-from-right-8 duration-700 fade-in">
-            <div className="mb-10 space-y-3 text-center md:text-left">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 md:hidden">
-                <Layers className="h-6 w-6" />
+          {(isLoading || isAuthenticated) ? (
+            <AuthLoading />
+          ) : (
+            <div className="w-full max-w-[420px] relative z-10 animate-in slide-in-from-right-8 duration-700 fade-in">
+              <div className="mb-10 space-y-3 text-center md:text-left">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 md:hidden">
+                  <Layers className="h-6 w-6" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight">Welcome back</h2>
+                <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                  Please enter your details to securely access your workspace and manage your dashboard.
+                </p>
               </div>
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight">Welcome back</h2>
-              <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-                Please enter your details to securely access your workspace and manage your dashboard.
-              </p>
-            </div>
-            
-            <LoginForm />
+              
+              <LoginForm />
 
-            <div className="mt-12 text-center">
-               <p className="text-xs text-muted-foreground font-medium">
-                 Need help signing in? <a href="#" className="text-primary hover:underline font-bold transition-all">Contact Support</a>
-               </p>
+              <div className="mt-12 text-center">
+                 <p className="text-xs text-muted-foreground font-medium">
+                   Need help signing in? <a href="#" className="text-primary hover:underline font-bold transition-all">Contact Support</a>
+                 </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
