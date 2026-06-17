@@ -1,12 +1,9 @@
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { api } from "@/lib/axios-config";
 
 export const createClient = async (data: FormData) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/api/clients`,
-      // 'http://localhost:8000/api/clients',
+    const response = await api.post(
+      `/api/clients`,
       data,
       {
         headers: {
