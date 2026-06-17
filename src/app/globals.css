@@ -2,32 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hide scrollbars globally while maintaining scroll functionality */
-* {
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE and Edge */
-}
 
-*::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, and Opera */
-}
-
-html,
-body {
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE and Edge */
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, and Opera */
-}
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -145,31 +120,28 @@ body::-webkit-scrollbar {
   }
 }
 
-/* Hide scrollbars globally while maintaining scroll functionality */
+/* Modern Custom Scrollbar */
 * {
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE and Edge */
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.6) transparent;
 }
 
-*::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, and Opera */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-html,
-body {
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE and Edge */
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, and Opera */
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.6);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
 }
 
 /* Modern Auth Styles */
