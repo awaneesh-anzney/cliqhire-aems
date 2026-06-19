@@ -4,9 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, CalendarIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { CvTarget } from "../types";
 
 interface EditCvTargetsDialogProps {
@@ -25,21 +29,22 @@ export function EditCvTargetsDialog({
   const [slots, setSlots] = useState<{
     _id?: string;
     label: string;
-    startDate: string;
-    endDate: string;
+    startDate: Date | undefined;
+    endDate: Date | undefined;
     targetCount: number;
   }[]>([]);
   const [saving, setSaving] = useState(false);
 
-  // Helper to format ISO date string to yyyy-MM-dd
-  const formatDateForInput = (dateString?: string) => {
-    if (!dateString) return "";
+  // Helper to safely parse date avoiding timezone shifts
+  const parseDateSafely = (dateString?: string) => {
+    if (!dateString) return undefined;
     try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "";
-      return date.toISOString().split("T")[0];
+      const datePart = dateString.split('T')[0];
+      const date = new Date(datePart + 'T00:00:00');
+      if (isNaN(date.getTime())) return undefined;
+      return date;
     } catch {
-      return "";
+      return undefined;
     }
   };
 
@@ -49,8 +54,8 @@ export function EditCvTargetsDialog({
         cvTargets.map((t) => ({
           _id: t._id,
           label: t.label || "",
-          startDate: formatDateForInput(t.startDate),
-          endDate: formatDateForInput(t.endDate),
+          startDate: parseDateSafely(t.startDate),
+          endDate: parseDateSafely(t.endDate),
           targetCount: t.targetCount || 1,
         }))
       );
@@ -60,7 +65,7 @@ export function EditCvTargetsDialog({
   const handleAddSlot = () => {
     setSlots((prev) => [
       ...prev,
-      { label: "", startDate: "", endDate: "", targetCount: 1 },
+      { label: "", startDate: undefined, endDate: undefined, targetCount: 1 },
     ]);
   };
 
@@ -86,7 +91,7 @@ export function EditCvTargetsDialog({
         toast.error(`Slot ${i + 1}: End Date is required.`);
         return;
       }
-      if (new Date(slot.endDate) < new Date(slot.startDate)) {
+      if (slot.endDate < slot.startDate) {
         toast.error(`Slot ${i + 1}: End Date must be greater than or equal to Start Date.`);
         return;
       }
@@ -98,13 +103,25 @@ export function EditCvTargetsDialog({
 
     setSaving(true);
     try {
-      const formattedTargets = slots.map((s) => ({
-        ...(s._id ? { _id: s._id } : {}),
-        label: s.label,
-        startDate: new Date(s.startDate).toISOString(),
-        endDate: new Date(`${s.endDate}T23:59:59.999Z`).toISOString(), // Set end of day to align with backend
-        targetCount: s.targetCount,
-      }));
+      const formattedTargets = slots.map((s) => {
+        // Safe formatting to YYYY-MM-DD
+        const getYYYYMMDD = (d: Date) => {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        };
+        const startStr = getYYYYMMDD(s.startDate!);
+        const endStr = getYYYYMMDD(s.endDate!);
+
+        return {
+          ...(s._id ? { _id: s._id } : {}),
+          label: s.label,
+          startDate: new Date(`${startStr}T00:00:00.000Z`).toISOString(),
+          endDate: new Date(`${endStr}T23:59:59.999Z`).toISOString(), // Set end of day to align with backend
+          targetCount: s.targetCount,
+        };
+      });
 
       await onSave(formattedTargets);
       onClose();
@@ -186,23 +203,57 @@ export function EditCvTargetsDialog({
                     <Label className="text-[11px] font-bold text-muted-foreground">
                       Start Date <span className="text-primary">*</span>
                     </Label>
-                    <Input
-                      type="date"
-                      value={slot.startDate}
-                      onChange={(e) => handleSlotChange(index, "startDate", e.target.value)}
-                      className="h-10 text-sm font-semibold"
-                    />
+                    <Popover modal={true}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-10 text-sm font-semibold",
+                            !slot.startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {slot.startDate ? format(slot.startDate, "PPP") : <span>Pick start date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={slot.startDate}
+                          onSelect={(date) => handleSlotChange(index, "startDate", date)}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[11px] font-bold text-muted-foreground">
                       End Date <span className="text-primary">*</span>
                     </Label>
-                    <Input
-                      type="date"
-                      value={slot.endDate}
-                      onChange={(e) => handleSlotChange(index, "endDate", e.target.value)}
-                      className="h-10 text-sm font-semibold"
-                    />
+                    <Popover modal={true}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-10 text-sm font-semibold",
+                            !slot.endDate && "text-muted-foreground"
+                          )}
+                          disabled={!slot.startDate}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {slot.endDate ? format(slot.endDate, "PPP") : <span>Pick end date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={slot.endDate}
+                          onSelect={(date) => handleSlotChange(index, "endDate", date)}
+                          initialFocus
+                          disabled={(date) => (slot.startDate ? date < slot.startDate : false)}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               </div>
