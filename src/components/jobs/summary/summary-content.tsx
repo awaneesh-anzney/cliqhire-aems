@@ -489,8 +489,10 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                       // Date format helper
                       const formatDateRange = (startStr: string, endStr: string) => {
                         try {
-                          const start = new Date(startStr);
-                          const end = new Date(endStr);
+                          const safeStart = startStr ? startStr.split('T')[0] + 'T00:00:00' : '';
+                          const safeEnd = endStr ? endStr.split('T')[0] + 'T00:00:00' : '';
+                          const start = new Date(safeStart);
+                          const end = new Date(safeEnd);
                           return `${format(start, "d MMM")} – ${format(end, "d MMM yyyy")}`;
                         } catch {
                           return "";
