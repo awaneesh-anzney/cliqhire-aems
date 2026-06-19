@@ -431,7 +431,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                   {jobDetails.cvTargetsSummary && (
                     <div className="bg-muted/30 p-4 rounded-xl border border-border space-y-2">
                       <div className="flex justify-between text-sm font-bold text-foreground">
-                        <span>Overall Sourced Progress</span>
+                        <span>Overall Submission Progress</span>
                         <span>
                           {jobDetails.cvTargetsSummary.totalAchievedCVs} / {jobDetails.cvTargetsSummary.totalTargetCVs} CVs
                         </span>
@@ -467,7 +467,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
 
                   {/* Individual slots */}
                   <div className="space-y-4 pt-1">
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-1">Sourcing Phases</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-1">Client CV Submission</p>
                     {jobDetails.cvTargets.map((slot) => {
                       const achieved = slot.achievedCount || 0;
                       const target = slot.targetCount || 1;
@@ -502,7 +502,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="text-sm font-bold text-foreground">
-                                {slot.label || `Sourcing Slot`}
+                                {slot.label || `Submission Slot`}
                               </p>
                               <p className="text-xs text-muted-foreground font-semibold">
                                 {formatDateRange(slot.startDate, slot.endDate)}
