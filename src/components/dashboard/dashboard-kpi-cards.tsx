@@ -141,10 +141,11 @@ export function DashboardKpiCards() {
 
     // Calculations for Jobs
     const jobsTotal = dashboardStats?.jobs?.total || 0;
-    const jobsActive = dashboardStats?.jobs?.active || 0;
-    const jobsInactive = dashboardStats?.jobs?.inactive || 0;
-    const jobsActivePercent = jobsTotal > 0 ? (jobsActive / jobsTotal) * 100 : 0;
-    const jobsInactivePercent = jobsTotal > 0 ? (jobsInactive / jobsTotal) * 100 : 0;
+    const jobStageBreakdown = dashboardStats?.jobs?.stageBreakdown || [];
+    const jobsOpen = jobStageBreakdown.find((s: any) => s.stage === 'Open')?.count || 0;
+    const jobsActiveStage = jobStageBreakdown.find((s: any) => s.stage === 'Active')?.count || 0;
+    const jobsOpenPercent = jobsTotal > 0 ? (jobsOpen / jobsTotal) * 100 : 0;
+    const jobsActivePercent = jobsTotal > 0 ? (jobsActiveStage / jobsTotal) * 100 : 0;
 
     // Calculations for Clients
     const clientsTotal = dashboardStats?.clients?.total || 0;
@@ -193,7 +194,7 @@ export function DashboardKpiCards() {
                     </div>
                 </div>
 
-                <div className="mt-4 space-y-2">
+                <div className="mt-3 space-y-2">
                     {/* Segmented Ratio Bar */}
                     <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
                         <div 
@@ -220,53 +221,78 @@ export function DashboardKpiCards() {
             </div>
 
             {/* 2. Jobs Card */}
-            <div className="group dashboard-kpi-card">
-                <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-10 transition-all duration-700 bg-orange-500 pointer-events-none" />
+            <div className="group dashboard-kpi-card relative overflow-hidden bg-gradient-to-br from-card to-card/50 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full blur-[40px] opacity-0 group-hover:opacity-20 transition-all duration-700 bg-orange-500 pointer-events-none" />
+                <div className="absolute -left-6 -top-6 w-24 h-24 rounded-full blur-[30px] opacity-0 group-hover:opacity-10 transition-all duration-700 bg-blue-500 pointer-events-none" />
                 
-                <div>
+                <div className="relative z-10">
                     <div className="flex justify-between items-start mb-3">
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                            Active Jobs
+                            Job Requisitions
                         </span>
-                        <div className="p-1.5 rounded-lg bg-orange-500/5 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
+                        <div className="p-1.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-500/5 text-orange-600 ring-1 ring-orange-500/20 group-hover:ring-orange-500/40 group-hover:scale-110 transition-all duration-300">
                             <Briefcase className="w-4 h-4" />
                         </div>
                     </div>
                     
                     <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-extrabold tracking-tight text-foreground">
-                            {jobsActive}
+                        <span className="text-4xl font-extrabold tracking-tight text-foreground">
+                            {jobsTotal}
                         </span>
-                        <span className="text-[10px] font-semibold text-muted-foreground">open roles</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total Roles</span>
                     </div>
                 </div>
 
-                <div className="mt-4 space-y-2">
-                    {/* Segmented Ratio Bar */}
-                    <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
-                        <div 
-                            className="h-full bg-orange-500 transition-all duration-500" 
-                            style={{ width: `${jobsActivePercent}%` }} 
-                        />
-                        <div 
-                            className="h-full bg-slate-300 dark:bg-zinc-700 transition-all duration-500" 
-                            style={{ width: `${jobsInactivePercent}%` }} 
-                        />
+                <div className="mt-3 space-y-2.5 relative z-10">
+                    {/* Segmented Ratio Bar for Open and Active */}
+                    <div className="space-y-1.5">
+                        <div className="w-full h-1 bg-muted/50 rounded-full overflow-hidden flex">
+                            <div 
+                                className="h-full bg-blue-500 transition-all duration-700 ease-out" 
+                                style={{ width: `${jobsOpenPercent}%` }} 
+                            />
+                            <div 
+                                className="h-full bg-emerald-500 transition-all duration-700 ease-out" 
+                                style={{ width: `${jobsActivePercent}%` }} 
+                            />
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-[10px] font-bold">
+                            <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                {jobsOpen} Open
+                            </span>
+                            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                {jobsActiveStage} Active
+                            </span>
+                        </div>
                     </div>
-                    
-                    <div className="flex items-center justify-between text-[10px] font-bold">
-                        <span className="flex items-center gap-1.5 text-orange-600">
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                            {jobsActive} Recruiting
-                        </span>
-                        <span className="flex items-center gap-1.5 text-muted-foreground">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                            {jobsInactive} Inactive
-                        </span>
-                        <span className="text-muted-foreground ml-auto">
-                            {jobsTotal} Total
-                        </span>
-                    </div>
+
+                    {jobStageBreakdown.length > 0 && (
+                        <div className="flex flex-wrap gap-x-2.5 gap-y-1.5 mt-2.5 pt-2.5 border-t border-border/40">
+                            {jobStageBreakdown.map((stage: any, idx: number) => {
+                                const stageColors: Record<string, string> = {
+                                    'open': 'bg-blue-500',
+                                    'active': 'bg-emerald-500',
+                                    'on hold': 'bg-amber-500',
+                                    'closed': 'bg-slate-500',
+                                    'hired': 'bg-teal-500',
+                                    'onboarding': 'bg-indigo-500',
+                                };
+                                const type = stage.stage.toLowerCase() as string;
+                                const dotColor = stageColors[type] || 'bg-slate-400';
+                                
+                                return (
+                                    <div key={idx} className="flex items-center gap-1">
+                                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", dotColor)} />
+                                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{stage.stage}:</span>
+                                        <span className="text-[10px] font-black text-foreground">{stage.count}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -292,7 +318,7 @@ export function DashboardKpiCards() {
                     </div>
                 </div>
 
-                <div className="mt-4 space-y-2">
+                <div className="mt-3 space-y-2">
                     {/* Multi-segment Ratio Bar */}
                     <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
                         <div 

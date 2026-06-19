@@ -5,11 +5,19 @@ export interface DashboardStats {
         total: number;
         active: number;
         inactive: number;
+        stageBreakdown?: {
+            stage: string;
+            count: number;
+        }[];
     };
     candidates: {
         total: number;
         active: number;
         inactive: number;
+        stageBreakdown?: {
+            stage: string;
+            count: number;
+        }[];
     };
     clients: {
         total: number;
