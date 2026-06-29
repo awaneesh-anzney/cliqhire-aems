@@ -13,12 +13,6 @@ export interface UserPerformanceStats extends PerformanceStats {
   email: string;
 }
 
-export interface TeamPerformanceStats extends PerformanceStats {
-  teamId: string;
-  teamName: string;
-  members: (PerformanceStats & { profileId: string })[];
-}
-
 export interface PerformanceResponse<T> {
   success: boolean;
   data: T;
@@ -31,7 +25,32 @@ export interface PerformanceParams {
 }
 
 export interface TeamPerformanceParams extends PerformanceParams {
-  teamId?: string;
+  jobId?: string;
+  clientId?: string;
+}
+
+export interface JobTeamMemberPerformance extends UserPerformanceStats {}
+
+export interface JobTeamPosition {
+  position: string;
+  positionLabel: string;
+  users: JobTeamMemberPerformance[];
+}
+
+export interface JobPerformanceData {
+  jobId: string;
+  jobTitle: string;
+  client: {
+    _id: string;
+    name: string;
+  };
+  team: JobTeamPosition[];
+  jobTotals: PerformanceStats;
+}
+
+export interface JobBasedTeamPerformanceData {
+  jobs: JobPerformanceData[];
+  byPosition: Record<string, JobTeamMemberPerformance[]>;
 }
 
 export const getMyPerformance = async (params?: PerformanceParams): Promise<PerformanceStats> => {
@@ -44,7 +63,7 @@ export const getUsersPerformance = async (params?: PerformanceParams): Promise<U
   return response.data.data;
 };
 
-export const getTeamPerformance = async (params?: TeamPerformanceParams): Promise<TeamPerformanceStats[]> => {
-  const response = await api.get<PerformanceResponse<TeamPerformanceStats[]>>('/api/performance/team', { params });
+export const getTeamPerformance = async (params?: TeamPerformanceParams): Promise<JobBasedTeamPerformanceData> => {
+  const response = await api.get<PerformanceResponse<JobBasedTeamPerformanceData>>('/api/performance/team', { params });
   return response.data.data;
 };
