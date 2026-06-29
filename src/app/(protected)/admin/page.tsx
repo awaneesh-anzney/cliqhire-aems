@@ -1,24 +1,38 @@
 "use client"
 
 import { useState } from "react"
-import { RefreshCw, Activity, ShieldAlert } from "lucide-react"
+import { RefreshCw, Activity, ShieldAlert, BarChart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useQueryClient } from "@tanstack/react-query"
 import { AuditLogSummaryCards } from "@/components/admin/audit-log-summary"
 import { AuditLogFeed } from "@/components/admin/audit-log-feed"
+import { PerformanceTab } from "@/components/admin/performance-tab"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export type TimeRange = "today" | "weekly" | "monthly" | "yearly"
 
 export default function AdminPage() {
   const queryClient = useQueryClient()
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [activeTab, setActiveTab] = useState("audit-log")
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["auditLogs"] }),
-      queryClient.invalidateQueries({ queryKey: ["auditLogSummary"] })
-    ])
+    
+    const queries = []
+    
+    if (activeTab === "audit-log") {
+      queries.push(
+        queryClient.invalidateQueries({ queryKey: ["auditLogs"] }),
+        queryClient.invalidateQueries({ queryKey: ["auditLogSummary"] })
+      )
+    } else if (activeTab === "performance") {
+      queries.push(
+        queryClient.invalidateQueries({ queryKey: ["performance"] })
+      )
+    }
+
+    await Promise.all(queries)
     setTimeout(() => setIsRefreshing(false), 500)
   }
 
@@ -34,10 +48,10 @@ export default function AdminPage() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-foreground tracking-tight">
-                Admin Activity Log
+                Admin Dashboard
               </h2>
               <p className="text-muted-foreground text-sm mt-1">
-                Centralized audit trail for all system operations and user activities.
+                Centralized management for system operations, tracking, and metrics.
               </p>
             </div>
           </div>
@@ -56,20 +70,39 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-muted-foreground" />
-            <h3 className="text-lg font-semibold tracking-tight">Last 24 Hours Overview</h3>
-          </div>
-          <AuditLogSummaryCards />
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full sm:w-[400px] grid-cols-2">
+            <TabsTrigger value="audit-log" className="gap-2">
+              <Activity className="h-4 w-4" />
+              Audit Log
+            </TabsTrigger>
+            <TabsTrigger value="performance" className="gap-2">
+              <BarChart className="h-4 w-4" />
+              Performance
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Feed Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold tracking-tight">Detailed Activity Feed</h3>
-          <AuditLogFeed />
-        </div>
+          <TabsContent value="audit-log" className="space-y-8 mt-6">
+            {/* Stats Row */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-muted-foreground" />
+                <h3 className="text-lg font-semibold tracking-tight">Last 24 Hours Overview</h3>
+              </div>
+              <AuditLogSummaryCards />
+            </div>
+
+            {/* Feed Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold tracking-tight">Detailed Activity Feed</h3>
+              <AuditLogFeed />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="performance" className="mt-6">
+            <PerformanceTab />
+          </TabsContent>
+        </Tabs>
 
       </main>
     </div>
