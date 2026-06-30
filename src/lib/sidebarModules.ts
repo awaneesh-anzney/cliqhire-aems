@@ -15,6 +15,7 @@ export interface SidebarModule {
 
 export const SIDEBAR_MODULES: SidebarModule[] = [
   { name: "Home", href: "/", moduleKey: "home", alwaysVisible: true },
+  { name: "Administration", href: "/admin", moduleKey: "admin" },
   { name: "Today's Tasks", href: "/today-tasks", moduleKey: "today_tasks", alwaysVisible: true },
   { name: "Clients", href: "/clients", moduleKey: "clients" },
   { name: "Jobs", href: "/jobs", moduleKey: "jobs" },
@@ -26,7 +27,6 @@ export const SIDEBAR_MODULES: SidebarModule[] = [
   { name: "Team Members", href: "/teammembers", moduleKey: "teams" },
   { name: "Settings", href: "/settings", moduleKey: "settings" },
   { name: "Profile", href: "/profile", moduleKey: "profile", alwaysVisible: true },
-  { name: "Administration", href: "/admin", moduleKey: "admin" },
 ];
 
 /**
