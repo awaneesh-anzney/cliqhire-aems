@@ -13,6 +13,20 @@ export interface UserPerformanceStats extends PerformanceStats {
   email: string;
 }
 
+export interface PaginationData {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T;
+  pagination: PaginationData;
+  message?: string;
+}
+
 export interface PerformanceResponse<T> {
   success: boolean;
   data: T;
@@ -20,6 +34,11 @@ export interface PerformanceResponse<T> {
 }
 
 export interface PerformanceParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  order?: 'asc' | 'desc';
   from?: string;
   to?: string;
 }
@@ -27,6 +46,7 @@ export interface PerformanceParams {
 export interface TeamPerformanceParams extends PerformanceParams {
   jobId?: string;
   clientId?: string;
+  position?: string;
 }
 
 export interface JobTeamMemberPerformance extends UserPerformanceStats {}
@@ -53,17 +73,22 @@ export interface JobBasedTeamPerformanceData {
   byPosition: Record<string, JobTeamMemberPerformance[]>;
 }
 
+export interface PositionLeaderboardData {
+  position: string;
+  leaderboard: UserPerformanceStats[];
+}
+
 export const getMyPerformance = async (params?: PerformanceParams): Promise<PerformanceStats> => {
   const response = await api.get<PerformanceResponse<PerformanceStats>>('/api/performance/me', { params });
   return response.data.data;
 };
 
-export const getUsersPerformance = async (params?: PerformanceParams): Promise<UserPerformanceStats[]> => {
-  const response = await api.get<PerformanceResponse<UserPerformanceStats[]>>('/api/performance/users', { params });
-  return response.data.data;
+export const getUsersPerformance = async (params?: PerformanceParams): Promise<PaginatedResponse<UserPerformanceStats[]>> => {
+  const response = await api.get<PaginatedResponse<UserPerformanceStats[]>>('/api/performance/users', { params });
+  return response.data;
 };
 
-export const getTeamPerformance = async (params?: TeamPerformanceParams): Promise<JobBasedTeamPerformanceData> => {
-  const response = await api.get<PerformanceResponse<JobBasedTeamPerformanceData>>('/api/performance/team', { params });
-  return response.data.data;
+export const getTeamPerformance = async (params?: TeamPerformanceParams): Promise<PaginatedResponse<JobBasedTeamPerformanceData | PositionLeaderboardData>> => {
+  const response = await api.get<PaginatedResponse<JobBasedTeamPerformanceData | PositionLeaderboardData>>('/api/performance/team', { params });
+  return response.data;
 };
