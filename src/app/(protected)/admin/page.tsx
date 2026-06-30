@@ -37,74 +37,84 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex flex-col w-full min-h-full bg-background">
-      <main className="flex-1 w-full p-6 space-y-8 max-w-7xl mx-auto">
+    <div className="dashboard-container">
+      
+      {/* Optimized Welcome Section - Dark/Brand Theme with Modern Animations */}
+      <div className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-800 text-white py-4 px-5 shadow-md border border-zinc-800 transition-all duration-500 hover:shadow-lg hover:shadow-zinc-900/20">
+        {/* Abstract Background Elements with Floating Animation */}
+        <div className="absolute top-0 right-0 w-1/2 h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px] transition-all duration-1000 group-hover:scale-120 group-hover:-translate-x-12 animate-pulse" />
+          <div className="absolute top-1/2 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-[60px] transition-all duration-1000 group-hover:scale-110 group-hover:-translate-y-12" />
+        </div>
         
-        {/* Header Row — Title + Actions */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-4 border-b">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <ShieldAlert className="h-6 w-6 text-primary" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-primary/20 border border-primary/20 text-[9px] font-black uppercase tracking-wider text-primary-foreground">
+              <ShieldAlert className="w-3.5 h-3.5" />
+              System Management
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground tracking-tight">
-                Admin Dashboard
-              </h2>
-              <p className="text-muted-foreground text-sm mt-1">
-                Centralized management for system operations, tracking, and metrics.
-              </p>
-            </div>
+            <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white animate-in fade-in slide-in-from-left-6 duration-700 delay-100">
+              Admin Control Panel
+            </h3>
+            <p className="text-zinc-400 font-bold text-[11px] sm:text-xs max-w-xl animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
+              Monitor system logs, candidate conversions, team metrics, and tracking logs in real-time.
+            </p>
           </div>
-
-          <div className="flex items-center gap-3">
+          
+          <div className="flex-shrink-0 flex items-center gap-3 animate-in fade-in slide-in-from-right-10 duration-1000 delay-300">
             <Button
               variant="outline"
               size="sm"
-              className="h-9 px-4 gap-2"
+              className="h-9 px-4 gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white hover:text-white rounded-xl transition-all active:scale-95 shadow-sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              Refresh Data
+              <RefreshCw className={`h-4 w-4 text-primary ${isRefreshing ? "animate-spin" : ""}`} />
+              <span className="font-bold text-xs">Refresh Data</span>
             </Button>
           </div>
         </div>
+      </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full sm:w-[400px] grid-cols-2">
-            <TabsTrigger value="audit-log" className="gap-2">
-              <Activity className="h-4 w-4" />
-              Audit Log
-            </TabsTrigger>
-            <TabsTrigger value="performance" className="gap-2">
-              <BarChart className="h-4 w-4" />
-              Performance
-            </TabsTrigger>
-          </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
+        <TabsList className="flex w-full sm:w-[350px] bg-muted/65 p-1 rounded-xl border border-border/50 shadow-inner">
+          <TabsTrigger 
+            value="audit-log" 
+            className="flex-1 gap-2 rounded-lg py-2 font-black text-xs uppercase tracking-wider transition-all data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-sm"
+          >
+            <Activity className="h-3.5 w-3.5" />
+            Audit Log
+          </TabsTrigger>
+          <TabsTrigger 
+            value="performance" 
+            className="flex-1 gap-2 rounded-lg py-2 font-black text-xs uppercase tracking-wider transition-all data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-sm"
+          >
+            <BarChart className="h-3.5 w-3.5" />
+            Performance
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="audit-log" className="space-y-8 mt-6">
-            {/* Stats Row */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-muted-foreground" />
-                <h3 className="text-lg font-semibold tracking-tight">Last 24 Hours Overview</h3>
-              </div>
-              <AuditLogSummaryCards />
+        <TabsContent value="audit-log" className="space-y-6 mt-2">
+          {/* Stats Row */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Last 24 Hours Overview</h4>
             </div>
+            <AuditLogSummaryCards />
+          </div>
 
-            {/* Feed Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold tracking-tight">Detailed Activity Feed</h3>
-              <AuditLogFeed />
-            </div>
-          </TabsContent>
+          {/* Feed Section */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Detailed Activity Feed</h4>
+            <AuditLogFeed />
+          </div>
+        </TabsContent>
 
-          <TabsContent value="performance" className="mt-6">
-            <PerformanceTab />
-          </TabsContent>
-        </Tabs>
-
-      </main>
+        <TabsContent value="performance" className="mt-2">
+          <PerformanceTab />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
