@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Users, TrendingUp, CheckCircle2, XCircle, Briefcase, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Users, TrendingUp, CheckCircle2, XCircle, Briefcase } from "lucide-react"
 import { useUsersPerformance, useTeamPerformance } from "@/hooks/usePerformance"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
@@ -12,17 +12,10 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { useDebounce } from "@/hooks/use-debounce"
 import { JobBasedTeamPerformanceData, PositionLeaderboardData } from "@/services/performanceService"
+import { AdminFilters } from "@/components/admin/shared/admin-filters"
+import { AdminPagination } from "@/components/admin/shared/admin-pagination"
 
 const renderLeaderboardRow = (user: any, idx: number) => {
   const rank = idx + 1;
@@ -129,30 +122,119 @@ export function PerformanceTab() {
   const teamDataMode2 = isMode2 ? (teamResponse?.data as PositionLeaderboardData) : null;
   const teamPagination = teamResponse?.pagination;
 
+  const usersLeftFilters = [
+    {
+      id: "usersSearch",
+      type: "search" as const,
+      placeholder: "Search by name or email...",
+      value: usersSearch,
+      onChange: (val: string) => {
+        setUsersSearch(val)
+        setUsersPage(1)
+      },
+    },
+  ]
+
+  const usersRightFilters = [
+    {
+      id: "usersSortBy",
+      type: "select" as const,
+      placeholder: "Sort by",
+      value: usersSortBy,
+      onChange: (val: string) => {
+        setUsersSortBy(val)
+        setUsersPage(1)
+      },
+      options: [
+        { label: "Sort by Hired", value: "hired" },
+        { label: "Sort by Submitted", value: "submitted" },
+        { label: "Sort by Dropped", value: "dropped" },
+        { label: "Sort by Conv. Rate", value: "conversionRate" },
+      ],
+    },
+  ]
+
+  const teamLeftFilters = [
+    {
+      id: "teamPosition",
+      type: "select" as const,
+      placeholder: "Select View",
+      value: teamPosition,
+      onChange: (val: string) => {
+        setTeamPosition(val)
+        setTeamPage(1)
+      },
+      options: [
+        { label: "All Jobs (Overview)", value: "all" },
+        { label: "Recruiters", value: "recruiter" },
+        { label: "Team Leads", value: "teamLead" },
+        { label: "Hiring Managers", value: "hiringManager" },
+        { label: "Account Managers", value: "accountManager" },
+      ],
+      className: "w-[180px]",
+    },
+    ...(isMode2
+      ? [
+          {
+            id: "teamSearch",
+            type: "search" as const,
+            placeholder: "Search name...",
+            value: teamSearch,
+            onChange: (val: string) => {
+              setTeamSearch(val)
+              setTeamPage(1)
+            },
+          },
+        ]
+      : []),
+  ]
+
+  const teamRightFilters = [
+    ...(isMode2
+      ? [
+          {
+            id: "teamSortBy",
+            type: "select" as const,
+            placeholder: "Sort by",
+            value: teamSortBy,
+            onChange: (val: string) => {
+              setTeamSortBy(val)
+              setTeamPage(1)
+            },
+            options: [
+              { label: "Sort by Hired", value: "hired" },
+              { label: "Sort by Submitted", value: "submitted" },
+              { label: "Sort by Dropped", value: "dropped" },
+              { label: "Sort by Conv. Rate", value: "conversionRate" },
+            ],
+          },
+        ]
+      : []),
+  ]
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
+    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/40">
         <div>
           <h3 className="text-sm font-black uppercase tracking-wider text-foreground">Performance Tracking</h3>
           <p className="text-xs text-muted-foreground font-medium mt-0.5">Monitor candidate conversions across recruitment teams and users.</p>
         </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full space-y-4">
-        <TabsList className="flex w-full sm:w-[350px] bg-muted/65 p-1 rounded-xl border border-border/50 shadow-inner">
+        
+        <TabsList className="flex w-full sm:w-[320px] bg-muted/65 p-0.5 rounded-lg border border-border/50 shadow-inner shrink-0">
           <TabsTrigger 
             value="users"
-            className="flex-1 gap-2 rounded-lg py-2 font-black text-xs uppercase tracking-wider transition-all data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-sm"
+            className="flex-1 gap-1.5 rounded-md py-1 px-3.5 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-sm"
           >
             User Leaderboard
           </TabsTrigger>
           <TabsTrigger 
             value="team"
-            className="flex-1 gap-2 rounded-lg py-2 font-black text-xs uppercase tracking-wider transition-all data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-sm"
+            className="flex-1 gap-1.5 rounded-md py-1 px-3.5 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-sm"
           >
             Team Performance
           </TabsTrigger>
         </TabsList>
+      </div>
         
         <TabsContent value="users" className="mt-2">
           <Card className="border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.02)] rounded-xl overflow-hidden bg-card">
@@ -160,44 +242,11 @@ export function PerformanceTab() {
               <CardTitle className="text-base font-black text-foreground tracking-tight">User Leaderboard</CardTitle>
               <CardDescription className="text-xs font-medium text-muted-foreground">Performance metrics for all users, sorted by highest hires.</CardDescription>
             </CardHeader>
-            <div className="p-4 border-b border-border/40 bg-muted/10 flex flex-wrap gap-4 items-center justify-between">
-              <div className="relative w-full max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search by name or email..."
-                  className="pl-9 h-9 text-xs bg-background"
-                  value={usersSearch}
-                  onChange={(e) => {
-                    setUsersSearch(e.target.value)
-                    setUsersPage(1)
-                  }}
-                />
-              </div>
-              <div className="flex gap-2 items-center">
-                <Select value={usersSortBy} onValueChange={(v) => { setUsersSortBy(v); setUsersPage(1); }}>
-                  <SelectTrigger className="h-9 w-[130px] text-xs font-medium bg-background">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hired" className="text-xs">Sort by Hired</SelectItem>
-                    <SelectItem value="submitted" className="text-xs">Sort by Submitted</SelectItem>
-                    <SelectItem value="dropped" className="text-xs">Sort by Dropped</SelectItem>
-                    <SelectItem value="conversionRate" className="text-xs">Sort by Conv. Rate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={usersLimit.toString()} onValueChange={(v) => { setUsersLimit(Number(v)); setUsersPage(1); }}>
-                  <SelectTrigger className="h-9 w-[80px] text-xs font-medium bg-background">
-                    <SelectValue placeholder="Limit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5" className="text-xs">5 / page</SelectItem>
-                    <SelectItem value="10" className="text-xs">10 / page</SelectItem>
-                    <SelectItem value="20" className="text-xs">20 / page</SelectItem>
-                    <SelectItem value="50" className="text-xs">50 / page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="p-3 border-b border-border/40 bg-muted/5">
+              <AdminFilters
+                leftFields={usersLeftFilters}
+                rightFields={usersRightFilters}
+              />
             </div>
             <CardContent className="p-0">
               {isUsersLoading ? (
@@ -230,97 +279,31 @@ export function PerformanceTab() {
                   </TableBody>
                 </Table>
               )}
-              {usersPagination && usersPagination.totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t border-border/40 bg-muted/10">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Showing {(usersPagination.page - 1) * usersPagination.limit + 1} to {Math.min(usersPagination.page * usersPagination.limit, usersPagination.total)} of {usersPagination.total} users
-                  </span>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => setUsersPage(p => Math.max(1, p - 1))}
-                      disabled={usersPagination.page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="flex items-center justify-center h-8 px-3 text-xs font-medium border border-border/40 rounded-md bg-background">
-                      Page {usersPagination.page} of {usersPagination.totalPages}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => setUsersPage(p => Math.min(usersPagination.totalPages, p + 1))}
-                      disabled={usersPagination.page === usersPagination.totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+              {usersPagination && usersPagination.total > 0 && (
+                <AdminPagination
+                  page={usersPage}
+                  totalPages={usersPagination.totalPages}
+                  totalItems={usersPagination.total}
+                  limit={usersLimit}
+                  onPageChange={setUsersPage}
+                  onLimitChange={(v) => {
+                    setUsersLimit(v)
+                    setUsersPage(1)
+                  }}
+                  itemName="users"
+                  isLoading={isUsersLoading}
+                  limitOptions={[5, 10, 20, 50]}
+                />
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="team" className="mt-2 space-y-4">
-          <div className="flex flex-wrap gap-4 items-center justify-between bg-card p-4 rounded-xl border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.02)]">
-            <div className="flex gap-2 items-center w-full max-w-sm">
-              <Select value={teamPosition} onValueChange={(v) => { setTeamPosition(v); setTeamPage(1); }}>
-                <SelectTrigger className="h-9 w-[180px] text-xs font-medium bg-background">
-                  <SelectValue placeholder="Select View" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="text-xs">All Jobs (Overview)</SelectItem>
-                  <SelectItem value="recruiter" className="text-xs">Recruiters</SelectItem>
-                  <SelectItem value="teamLead" className="text-xs">Team Leads</SelectItem>
-                  <SelectItem value="hiringManager" className="text-xs">Hiring Managers</SelectItem>
-                  <SelectItem value="accountManager" className="text-xs">Account Managers</SelectItem>
-                </SelectContent>
-              </Select>
-              {isMode2 && (
-                <div className="relative w-full">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search name..."
-                    className="pl-9 h-9 text-xs bg-background"
-                    value={teamSearch}
-                    onChange={(e) => {
-                      setTeamSearch(e.target.value)
-                      setTeamPage(1)
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2 items-center">
-              {isMode2 && (
-                <Select value={teamSortBy} onValueChange={(v) => { setTeamSortBy(v); setTeamPage(1); }}>
-                  <SelectTrigger className="h-9 w-[130px] text-xs font-medium bg-background">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hired" className="text-xs">Sort by Hired</SelectItem>
-                    <SelectItem value="submitted" className="text-xs">Sort by Submitted</SelectItem>
-                    <SelectItem value="dropped" className="text-xs">Sort by Dropped</SelectItem>
-                    <SelectItem value="conversionRate" className="text-xs">Sort by Conv. Rate</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-              <Select value={teamLimit.toString()} onValueChange={(v) => { setTeamLimit(Number(v)); setTeamPage(1); }}>
-                <SelectTrigger className="h-9 w-[80px] text-xs font-medium bg-background">
-                  <SelectValue placeholder="Limit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5" className="text-xs">5 / page</SelectItem>
-                  <SelectItem value="10" className="text-xs">10 / page</SelectItem>
-                  <SelectItem value="20" className="text-xs">20 / page</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <AdminFilters
+            leftFields={teamLeftFilters}
+            rightFields={teamRightFilters}
+          />
 
           {isTeamLoading ? (
             <div className="space-y-4">
@@ -355,35 +338,21 @@ export function PerformanceTab() {
                     )}
                   </TableBody>
                 </Table>
-                {teamPagination && teamPagination.totalPages > 1 && (
-                  <div className="flex items-center justify-between px-6 py-4 border-t border-border/40 bg-muted/10">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      Showing {(teamPagination.page - 1) * teamPagination.limit + 1} to {Math.min(teamPagination.page * teamPagination.limit, teamPagination.total)} of {teamPagination.total} users
-                    </span>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-8 w-8 p-0" 
-                        onClick={() => setTeamPage(p => Math.max(1, p - 1))}
-                        disabled={teamPagination.page === 1}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <div className="flex items-center justify-center h-8 px-3 text-xs font-medium border border-border/40 rounded-md bg-background">
-                        Page {teamPagination.page} of {teamPagination.totalPages}
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-8 w-8 p-0" 
-                        onClick={() => setTeamPage(p => Math.min(teamPagination.totalPages, p + 1))}
-                        disabled={teamPagination.page === teamPagination.totalPages}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                {teamPagination && teamPagination.total > 0 && (
+                  <AdminPagination
+                    page={teamPage}
+                    totalPages={teamPagination.totalPages}
+                    totalItems={teamPagination.total}
+                    limit={teamLimit}
+                    onPageChange={setTeamPage}
+                    onLimitChange={(v) => {
+                      setTeamLimit(v)
+                      setTeamPage(1)
+                    }}
+                    itemName="users"
+                    isLoading={isTeamLoading}
+                    limitOptions={[5, 10, 20]}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -606,41 +575,28 @@ export function PerformanceTab() {
                   </div>
                 </div>
               )}
-              {teamPagination && teamPagination.totalPages > 1 && (
-                <div className="flex items-center justify-end px-4 py-2 mt-4">
-                  <span className="text-xs font-medium text-muted-foreground mr-4">
-                    Showing {(teamPagination.page - 1) * teamPagination.limit + 1} to {Math.min(teamPagination.page * teamPagination.limit, teamPagination.total)} of {teamPagination.total} jobs
-                  </span>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => setTeamPage(p => Math.max(1, p - 1))}
-                      disabled={teamPagination.page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="flex items-center justify-center h-8 px-3 text-xs font-medium border border-border/40 rounded-md bg-background">
-                      Page {teamPagination.page} of {teamPagination.totalPages}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-8 w-8 p-0" 
-                      onClick={() => setTeamPage(p => Math.min(teamPagination.totalPages, p + 1))}
-                      disabled={teamPagination.page === teamPagination.totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
+              {teamPagination && teamPagination.total > 0 && (
+                <div className="mt-4 border border-border/40 rounded-xl overflow-hidden">
+                  <AdminPagination
+                    page={teamPage}
+                    totalPages={teamPagination.totalPages}
+                    totalItems={teamPagination.total}
+                    limit={teamLimit}
+                    onPageChange={setTeamPage}
+                    onLimitChange={(v) => {
+                      setTeamLimit(v)
+                      setTeamPage(1)
+                    }}
+                    itemName="jobs"
+                    isLoading={isTeamLoading}
+                    limitOptions={[5, 10, 20]}
+                  />
                 </div>
               )}
             </div>
           )}
         </TabsContent>
       </Tabs>
-    </div>
   )
 }
 

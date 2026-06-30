@@ -2,13 +2,11 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { useAuditLogs } from "@/hooks/useAuditLog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ChevronLeft, ChevronRight, FilterX } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { AdminFilters } from "@/components/admin/shared/admin-filters";
+import { AdminPagination } from "@/components/admin/shared/admin-pagination";
 
 const ACTION_COLORS: Record<string, string> = {
   CREATED: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/10",
@@ -111,67 +109,69 @@ export function AuditLogFeed() {
     return <span className="text-muted-foreground/30">—</span>;
   };
 
+  const filterFields = [
+    {
+      id: "search",
+      type: "search" as const,
+      placeholder: "Search actor or entity...",
+      value: search,
+      onChange: (val: string) => {
+        setSearch(val);
+        setPage(1);
+      },
+    },
+  ];
+
+  const rightFilterFields = [
+    {
+      id: "entityType",
+      type: "select" as const,
+      placeholder: "Entity Type",
+      value: entityType,
+      onChange: (val: string) => {
+        setEntityType(val);
+        setPage(1);
+      },
+      options: [
+        { label: "All Entities", value: "ALL" },
+        { label: "Candidate", value: "Candidate" },
+        { label: "Job", value: "Job" },
+        { label: "Client", value: "Client" },
+        { label: "Pipeline", value: "Pipeline" },
+        { label: "Note", value: "Note" },
+        { label: "Attachment", value: "Attachment" },
+        { label: "Auth", value: "Auth" },
+      ],
+    },
+    {
+      id: "action",
+      type: "select" as const,
+      placeholder: "Action",
+      value: action,
+      onChange: (val: string) => {
+        setAction(val);
+        setPage(1);
+      },
+      options: [
+        { label: "All Actions", value: "ALL" },
+        { label: "CREATED", value: "CREATED" },
+        { label: "UPDATED", value: "UPDATED" },
+        { label: "DELETED", value: "DELETED" },
+        { label: "STAGE_CHANGED", value: "STAGE_CHANGED" },
+        { label: "LOGIN", value: "LOGIN" },
+        { label: "LOGOUT", value: "LOGOUT" },
+      ],
+    },
+  ];
+
   return (
     <div className="flex flex-col space-y-3.5">
-      <div className="flex flex-col md:flex-row gap-3 items-center justify-between bg-card p-3 rounded-xl border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.02)]">
-        <div className="relative w-full md:w-72 shrink-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/80" />
-          <Input
-            placeholder="Search actor or entity..."
-            className="pl-9 h-9 text-xs rounded-xl bg-muted/20 border-border/80 focus-visible:ring-1 focus-visible:ring-brand"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-        
-        <div className="flex flex-wrap w-full md:w-auto items-center gap-2.5">
-          <Select value={entityType} onValueChange={(val) => { setEntityType(val); setPage(1); }}>
-            <SelectTrigger className="w-[140px] h-9 text-xs rounded-xl bg-card border-border/80">
-              <SelectValue placeholder="Entity Type" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-border">
-              <SelectItem value="ALL" className="text-xs rounded-lg">All Entities</SelectItem>
-              <SelectItem value="Candidate" className="text-xs rounded-lg">Candidate</SelectItem>
-              <SelectItem value="Job" className="text-xs rounded-lg">Job</SelectItem>
-              <SelectItem value="Client" className="text-xs rounded-lg">Client</SelectItem>
-              <SelectItem value="Pipeline" className="text-xs rounded-lg">Pipeline</SelectItem>
-              <SelectItem value="Note" className="text-xs rounded-lg">Note</SelectItem>
-              <SelectItem value="Attachment" className="text-xs rounded-lg">Attachment</SelectItem>
-              <SelectItem value="Auth" className="text-xs rounded-lg">Auth</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={action} onValueChange={(val) => { setAction(val); setPage(1); }}>
-            <SelectTrigger className="w-[140px] h-9 text-xs rounded-xl bg-card border-border/80">
-              <SelectValue placeholder="Action" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-border">
-              <SelectItem value="ALL" className="text-xs rounded-lg">All Actions</SelectItem>
-              <SelectItem value="CREATED" className="text-xs rounded-lg">CREATED</SelectItem>
-              <SelectItem value="UPDATED" className="text-xs rounded-lg">UPDATED</SelectItem>
-              <SelectItem value="DELETED" className="text-xs rounded-lg">DELETED</SelectItem>
-              <SelectItem value="STAGE_CHANGED" className="text-xs rounded-lg">STAGE_CHANGED</SelectItem>
-              <SelectItem value="LOGIN" className="text-xs rounded-lg">LOGIN</SelectItem>
-              <SelectItem value="LOGOUT" className="text-xs rounded-lg">LOGOUT</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {(entityType !== "ALL" || action !== "ALL" || search !== "") && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-9 w-9 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground"
-              onClick={handleResetFilters} 
-              title="Reset filters"
-            >
-              <FilterX className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
+      <AdminFilters
+        leftFields={filterFields}
+        rightFields={rightFilterFields}
+        onReset={handleResetFilters}
+        showReset={entityType !== "ALL" || action !== "ALL" || search !== ""}
+      />
 
       <div className="bg-card border border-border/60 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.02)] overflow-hidden">
         <Table>
@@ -241,33 +241,15 @@ export function AuditLogFeed() {
       </div>
 
       {data?.pagination && data.pagination.totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 py-2.5">
-          <div className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">
-            Showing page {data.pagination.page} of {data.pagination.totalPages} ({data.pagination.total} total)
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all active:scale-95 bg-card hover:bg-muted border border-border"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1 || isLoading}
-            >
-              <ChevronLeft className="h-3.5 w-3.5 mr-1" />
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all active:scale-95 bg-card hover:bg-muted border border-border"
-              onClick={() => setPage(p => Math.min(data.pagination.totalPages, p + 1))}
-              disabled={page === data.pagination.totalPages || isLoading}
-            >
-              Next
-              <ChevronRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
-          </div>
-        </div>
+        <AdminPagination
+          page={page}
+          totalPages={data.pagination.totalPages}
+          totalItems={data.pagination.total}
+          limit={20}
+          onPageChange={setPage}
+          itemName="logs"
+          isLoading={isLoading}
+        />
       )}
     </div>
   );
