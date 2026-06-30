@@ -40,40 +40,40 @@ export default function AdminPage() {
     <div className="dashboard-container">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
         
-        {/* Redesigned Welcome Section - Compact Single-Row Dark/Brand Theme with Modern Animations */}
-        <div className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-800 text-white py-3.5 px-4 sm:px-5 shadow-md border border-zinc-800 transition-all duration-500 hover:shadow-lg hover:shadow-zinc-900/20">
+        {/* Redesigned Welcome Section - Compact Single-Row ATS Brand Theme with Modern Animations */}
+        <div className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-brand via-brand/90 to-emerald-600/90 text-white py-3.5 px-4 sm:px-5 shadow-md border border-brand/10 transition-all duration-500 hover:shadow-lg hover:shadow-brand/20">
           {/* Abstract Background Elements with Floating Animation */}
           <div className="absolute top-0 right-0 w-1/2 h-full overflow-hidden pointer-events-none">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px] transition-all duration-1000 group-hover:scale-120 group-hover:-translate-x-12 animate-pulse" />
-            <div className="absolute top-1/2 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-[60px] transition-all duration-1000 group-hover:scale-110 group-hover:-translate-y-12" />
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-[80px] transition-all duration-1000 group-hover:scale-120 group-hover:-translate-x-12 animate-pulse" />
+            <div className="absolute top-1/2 -right-12 w-48 h-48 bg-white/5 rounded-full blur-[60px] transition-all duration-1000 group-hover:scale-110 group-hover:-translate-y-12" />
           </div>
           
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="space-y-0.5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-primary/20 border border-primary/20 text-[9px] font-black uppercase tracking-wider text-primary-foreground">
-                <ShieldAlert className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-wider text-white">
+                <ShieldAlert className="w-3.5 h-3.5 text-white" />
                 System Management
               </div>
               <h3 className="text-lg sm:text-xl font-black tracking-tight text-white animate-in fade-in slide-in-from-left-6 duration-700 delay-100">
                 Admin Control Panel
               </h3>
-              <p className="text-zinc-400 font-bold text-[10px] sm:text-xs max-w-xl animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
+              <p className="text-emerald-50 font-bold text-[10px] sm:text-xs max-w-xl animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
                 Monitor system logs, candidate conversions, team metrics, and tracking logs in real-time.
               </p>
             </div>
             
             <div className="flex-shrink-0 flex items-center flex-wrap gap-3 animate-in fade-in slide-in-from-right-10 duration-1000 delay-300">
-              <TabsList className="bg-zinc-800/85 p-0.5 rounded-lg border border-zinc-700/50 shadow-inner flex">
+              <TabsList className="bg-white/10 p-0.5 rounded-lg border border-white/10 shadow-inner flex">
                 <TabsTrigger 
                   value="audit-log" 
-                  className="gap-1.5 rounded-md py-1 px-3 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-zinc-700 data-[state=active]:text-white text-zinc-400"
+                  className="gap-1.5 rounded-md py-1 px-3 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-white data-[state=active]:text-brand text-white/80 data-[state=active]:shadow-sm hover:text-white"
                 >
                   <Activity className="h-3.5 w-3.5" />
                   Audit Log
                 </TabsTrigger>
                 <TabsTrigger 
                   value="performance" 
-                  className="gap-1.5 rounded-md py-1 px-3 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-zinc-700 data-[state=active]:text-white text-zinc-400"
+                  className="gap-1.5 rounded-md py-1 px-3 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-white data-[state=active]:text-brand text-white/80 data-[state=active]:shadow-sm hover:text-white"
                 >
                   <BarChart className="h-3.5 w-3.5" />
                   Performance
@@ -83,11 +83,11 @@ export default function AdminPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-3.5 gap-1.5 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white hover:text-white rounded-lg transition-all active:scale-95 shadow-sm text-[10px] font-black uppercase tracking-wider"
+                className="h-8 px-3.5 gap-1.5 bg-white/10 hover:bg-white/20 border-white/10 text-white hover:text-white rounded-lg transition-all active:scale-95 shadow-sm text-[10px] font-black uppercase tracking-wider"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
-                <RefreshCw className={`h-3.5 w-3.5 text-primary ${isRefreshing ? "animate-spin" : ""}`} />
+                <RefreshCw className={`h-3.5 w-3.5 text-white ${isRefreshing ? "animate-spin" : ""}`} />
                 Refresh Data
               </Button>
             </div>
