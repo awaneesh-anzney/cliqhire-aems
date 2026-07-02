@@ -48,6 +48,7 @@
  import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
  import { TooltipProvider } from "@/components/ui/tooltip";
  import { cn } from "@/lib/utils";
+ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
  
  export default function CandidatePipelineDetailsPage() {
    const router = useRouter();
@@ -215,53 +216,195 @@
    };
  
    return (
-     <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
-         {/* Top Level Section: Header & Progress */}
-         <div className="flex-shrink-0 flex flex-col gap-3 animate-in slide-in-from-top-4 duration-1000 delay-100">
-           <CandidateHeaderCard
-             candidate={candidate}
-             onStageChange={handleStageChange}
-             onStatusChange={handleStatusChange}
-             canModify={canModifyPipeline}
-             pipelineId={pipelineId}
-           />
-           <CandidateProgressCard
-             candidate={candidate}
-             selectedStage={selectedStage}
-             setSelectedStage={setSelectedStage}
-             stages={job.stages}
-           />
-         </div>
- 
-         {/* Content Area: Scrolling Sections */}
-         <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom-4 duration-1000 delay-200 pr-1">
-           <CandidateDisqualificationCard candidate={candidate} />
- 
-           {candidate.probation && candidate.currentStage === "Hired" && (
-              <CandidateProbationCard probation={candidate.probation} />
-            )}
- 
-           <div className="bg-card rounded-xl border border-border shadow-md overflow-visible p-4">
-             <div className="flex items-center gap-2 mb-4">
-                <LayoutDashboard className="h-4 w-4 text-brand" />
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stage Intelligence</h3>
-             </div>
-             <PipelineStageDetails
-               candidate={candidate}
-               selectedStage={selectedStage}
-               onStageSelect={setSelectedStage}
-               onUpdateCandidate={handleUpdateCandidate}
-               pipelineId={pipelineId}
-               candidateId={candidateId}
-               canModify={canModifyPipeline}
-             />
-           </div>
- 
-           <CandidateInfoGrid candidate={candidate} />
-           <CandidateDocumentsCard candidate={candidate} />
-         </div>
-       </div>
+      <TooltipProvider delayDuration={200}>
+        <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
+          {/* Top Level Section: Header & Progress */}
+          <div className="flex-shrink-0 flex flex-col gap-3 animate-in slide-in-from-top-4 duration-1000 delay-100">
+            <CandidateHeaderCard
+              candidate={candidate}
+              onStageChange={handleStageChange}
+              onStatusChange={handleStatusChange}
+              canModify={canModifyPipeline}
+              pipelineId={pipelineId}
+            />
+            <CandidateProgressCard
+              candidate={candidate}
+              selectedStage={selectedStage}
+              setSelectedStage={setSelectedStage}
+              stages={job.stages}
+            />
+          </div>
+  
+          {/* Content Area: Tabs Wrapper */}
+          <Tabs defaultValue="pipeline" className="flex-1 min-h-0 flex flex-col gap-3">
+            <TabsList className="flex-shrink-0 self-start bg-card border border-border shadow-sm p-1 rounded-xl h-10">
+              <TabsTrigger value="pipeline" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-muted">
+                <LayoutDashboard className="h-3.5 w-3.5 text-brand" />
+                Pipeline & Stage Info
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-muted">
+                <User2 className="h-3.5 w-3.5 text-brand" />
+                Candidate Profile
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-muted">
+                <FileText className="h-3.5 w-3.5 text-brand" />
+                Documents
+              </TabsTrigger>
+            </TabsList>
+  
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 pb-4">
+              <TabsContent value="pipeline" className="mt-0 space-y-3 focus-visible:outline-none">
+                <CandidateDisqualificationCard candidate={candidate} />
+  
+                {candidate.probation && candidate.currentStage === "Hired" && (
+                   <CandidateProbationCard probation={candidate.probation} />
+                 )}
+  
+                <div className="bg-card rounded-xl border border-border shadow-md overflow-visible p-4">
+                  <div className="flex items-center gap-2 mb-4">
+                     <LayoutDashboard className="h-4 w-4 text-brand" />
+                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stage Intelligence</h3>
+                  </div>
+                  <PipelineStageDetails
+                    candidate={candidate}
+                    selectedStage={selectedStage}
+                    onStageSelect={setSelectedStage}
+                    onUpdateCandidate={handleUpdateCandidate}
+                    pipelineId={pipelineId}
+                    candidateId={candidateId}
+                    canModify={canModifyPipeline}
+                  />
+                </div>
+  
+                <CandidateInfoGrid candidate={candidate} />
+              </TabsContent>
+  
+              <TabsContent value="profile" className="mt-0 space-y-4 focus-visible:outline-none">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Work Experience & Salary Details */}
+                  <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4">
+                    <h4 className="font-bold text-sm text-foreground flex items-center border-b pb-2">
+                      <Briefcase className="h-4 w-4 text-brand mr-2" />
+                      Salary & Work Experience
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Total Experience</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.experience ? (candidate.experience.toLowerCase().includes("year") ? candidate.experience : `${candidate.experience} Year(s)`) : "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Relevant Experience</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.totalRelevantExperience ? (candidate.totalRelevantExperience.toLowerCase().includes("year") ? candidate.totalRelevantExperience : `${candidate.totalRelevantExperience} Year(s)`) : "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Current Salary</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.currentSalary ? `${candidate.currentSalaryCurrency || ""} ${candidate.currentSalary}` : "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Expected Salary</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.expectedSalary ? `${candidate.expectedSalaryCurrency || ""} ${candidate.expectedSalary}` : "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Notice Period</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.noticePeriod || "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Current Position</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.currentJobTitle || "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Current Company</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.previousCompanyName || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+  
+                  {/* Skills Details */}
+                  <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4">
+                    <h4 className="font-bold text-sm text-foreground flex items-center border-b pb-2">
+                      <Award className="h-4 w-4 text-brand mr-2" />
+                      Key Skills Matrix
+                    </h4>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px] mb-2">Technical Skills</p>
+                        {candidate.technicalSkill && candidate.technicalSkill.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {candidate.technicalSkill.flatMap((skill: string) => skill.split('\n')).map((skill: string, index: number) => (
+                              <Badge key={index} variant="secondary" className="font-bold text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">None provided</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px] mb-2">Soft Skills</p>
+                        {candidate.softSkill && candidate.softSkill.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {candidate.softSkill.map((skill: string, index: number) => (
+                              <Badge key={index} variant="secondary" className="font-bold text-xs bg-slate-100 text-slate-800">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">None provided</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+  
+                  {/* Personal & Demographic Details */}
+                  <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4 md:col-span-2">
+                    <h4 className="font-bold text-sm text-foreground flex items-center border-b pb-2">
+                      <User2 className="h-4 w-4 text-brand mr-2" />
+                      Personal & Demographic Details
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Gender</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">{candidate.gender || "Not specified"}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Nationality</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">{candidate.nationality || "Not specified"}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Country of Residence</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">{candidate.country || "Not specified"}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Willing to Relocate?</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">{candidate.willingToRelocate || "Not specified"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+  
+              <TabsContent value="documents" className="mt-0 focus-visible:outline-none">
+                <CandidateDocumentsCard candidate={candidate} />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
  
        {/* Dialog Overlays */}
        <StatusChangeConfirmationDialog
