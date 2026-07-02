@@ -217,6 +217,12 @@ const CandidateSummary = ({
     } else if (fieldKey === 'referredBy' && newValue && typeof newValue === 'object') {
       const name = newValue.name || newValue.email || '';
       updatedCandidate = { ...updatedCandidate, [fieldKey]: name };
+    } else if (fieldKey === "experience" || fieldKey === "totalRelevantExperience") {
+      let val = typeof newValue === "string" ? newValue.trim() : String(newValue || "");
+      if (val && !val.toLowerCase().includes('year')) {
+        val = `${val} Year(s)`;
+      }
+      updatedCandidate = { ...updatedCandidate, [fieldKey]: val };
     } else {
       // LinkedIn validation
       if (fieldKey === "linkedin" && newValue && typeof newValue === "string" && newValue.trim()) {
@@ -368,6 +374,11 @@ const CandidateSummary = ({
                   { value: "1 Month", label: "1 Month" },
                   { value: "2 Months", label: "2 Months" },
                   { value: "3 Months", label: "3 Months" }
+                ] : field.key === "iqama" ? [
+                  { value: "Yes", label: "Yes" },
+                  { value: "No", label: "No" },
+                  { value: "Saudi Citizen", label: "Saudi Citizen" },
+                  { value: "Premium Resident", label: "Premium Resident" }
                 ] : undefined}
               />
             )}
