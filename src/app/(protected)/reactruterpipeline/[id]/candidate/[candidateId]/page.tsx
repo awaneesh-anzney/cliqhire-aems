@@ -35,7 +35,7 @@
  import { CandidateProgressCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateProgressCard";
  import { CandidateDisqualificationCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateDisqualificationCard";
  import { CandidateProbationCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateProbationCard";
- import { CandidateInfoGrid } from "@/components/Recruiter-Pipeline/candidate-details/CandidateInfoGrid";
+
  import { CandidateDocumentsCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateDocumentsCard";
  
  // Dialog imports
@@ -276,7 +276,7 @@
                   />
                 </div>
   
-                <CandidateInfoGrid candidate={candidate} />
+
               </TabsContent>
   
               <TabsContent value="profile" className="mt-0 space-y-4 focus-visible:outline-none">
