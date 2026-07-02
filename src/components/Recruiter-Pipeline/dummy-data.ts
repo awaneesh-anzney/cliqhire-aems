@@ -50,9 +50,11 @@ export interface Candidate {
   currentStage: string;
   avatar?: string;
   experience?: string;
-  currentSalary?: number;
+  totalRelevantExperience?: string;
+  noticePeriod?: string;
+  currentSalary?: number | string;
   currentSalaryCurrency?: string;
-  expectedSalary?: number;
+  expectedSalary?: number | string;
   expectedSalaryCurrency?: string;
   currentJobTitle?: string;
   previousCompanyName?: string;
@@ -74,6 +76,7 @@ export interface Candidate {
   gender?: string;
   dateOfBirth?: string;
   country?: string;
+  countryCode?: string;
   nationality?: string;
   educationDegree?: string;
   willingToRelocate?: string;
