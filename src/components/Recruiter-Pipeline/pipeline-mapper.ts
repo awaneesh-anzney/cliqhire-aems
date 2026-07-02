@@ -348,6 +348,7 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     country: candidateInfo.country || "",
     nationality: candidateInfo.nationality || "",
     resume: candidateInfo.resume || "",
+    countryCode: candidateInfo.countryCode || "",
     isTempCandidate: candidateInfo.isTempCandidate || candidateInfo.isTemp || data.isTemp || false,
     priority: data.priority,
     notes: data.notes || (stageHistory.length > 0 ? stageHistory[stageHistory.length - 1].notes : ""),

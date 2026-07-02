@@ -49,6 +49,7 @@
  import { TooltipProvider } from "@/components/ui/tooltip";
  import { cn } from "@/lib/utils";
  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+ import { formatPhoneNumber } from "@/lib/countryCodes";
  
  export default function CandidatePipelineDetailsPage() {
    const router = useRouter();
@@ -393,6 +394,38 @@
                       <div>
                         <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Willing to Relocate?</p>
                         <p className="text-sm text-foreground font-semibold mt-1">{candidate.willingToRelocate || "Not specified"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Details */}
+                  <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4 md:col-span-2">
+                    <h4 className="font-bold text-sm text-foreground flex items-center border-b pb-2">
+                      <Mail className="h-4 w-4 text-brand mr-2" />
+                      Contact Details
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Email Address</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.email ? (
+                            <a href={`mailto:${candidate.email}`} className="text-brand hover:underline font-medium">
+                              {candidate.email}
+                            </a>
+                          ) : "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Phone Number</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.phone ? formatPhoneNumber(candidate.phone, candidate.countryCode) : "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Current Location</p>
+                        <p className="text-sm text-foreground font-semibold mt-1">
+                          {candidate.location || "Not specified"}
+                        </p>
                       </div>
                     </div>
                   </div>
