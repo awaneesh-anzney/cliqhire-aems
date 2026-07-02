@@ -186,14 +186,14 @@ export const getStageFields = (stage: string, candidate: any): StageField[] => {
           type: "select",
           options: ["Email", "Phone", "LinkedIn Message", "WhatsApp", "Other"]
         },
-        {
-          key: "sourcingDueDate",
-          label: "Sourcing Due Date",
-          value: formatApiDate(sourcingData.sourcingDueDate),
-          icon: <CalendarDays className="h-4 w-4" />,
-          color: "bg-red-50 text-red-600",
-          type: "date"
-        },
+        // {
+        //   key: "sourcingDueDate",
+        //   label: "Sourcing Due Date",
+        //   value: formatApiDate(sourcingData.sourcingDueDate),
+        //   icon: <CalendarDays className="h-4 w-4" />,
+        //   color: "bg-red-50 text-red-600",
+        //   type: "date"
+        // },
         {
           key: "followUpDateTime",
           label: "Follow-up Date & Time",
