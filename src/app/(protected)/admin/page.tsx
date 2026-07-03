@@ -1,151 +1,120 @@
 "use client"
 
 import { useState } from "react"
-import { Download, RefreshCw } from "lucide-react"
+import { RefreshCw, Activity, ShieldAlert, BarChart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { AdminStatsGrid } from "@/components/admin/admin-stats-grid"
-import { AdminCharts } from "@/components/admin/admin-charts"
-import { AdminDataTabs } from "@/components/admin/admin-data-tabs"
-import { AdminActivityFeed } from "@/components/admin/admin-activity-feed"
-import { AdminExportPanel } from "@/components/admin/admin-export-panel"
-import { useDashboardStats } from "@/hooks/useDashboard"
-import { useJobs } from "@/hooks/useJobs"
-import { useCandidates } from "@/hooks/useCandidate"
+import { useQueryClient } from "@tanstack/react-query"
+import { AuditLogSummaryCards } from "@/components/admin/audit-log-summary"
+import { AuditLogFeed } from "@/components/admin/audit-log-feed"
+import { PerformanceTab } from "@/components/admin/performance-tab"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export type TimeRange = "today" | "weekly" | "monthly" | "yearly"
 
-const TIME_RANGES: { label: string; value: TimeRange }[] = [
-  { label: "Today", value: "today" },
-  { label: "This Week", value: "weekly" },
-  { label: "This Month", value: "monthly" },
-  { label: "This Year", value: "yearly" },
-]
-
 export default function AdminPage() {
-  const [timeRange, setTimeRange] = useState<TimeRange>("monthly")
-  const [exportOpen, setExportOpen] = useState(false)
+  const queryClient = useQueryClient()
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [activeTab, setActiveTab] = useState("audit-log")
 
-  const {
-    data: stats,
-    isLoading: statsLoading,
-    refetch: refetchStats,
-  } = useDashboardStats()
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    
+    const queries = []
+    
+    if (activeTab === "audit-log") {
+      queries.push(
+        queryClient.invalidateQueries({ queryKey: ["auditLogs"] }),
+        queryClient.invalidateQueries({ queryKey: ["auditLogSummary"] })
+      )
+    } else if (activeTab === "performance") {
+      queries.push(
+        queryClient.invalidateQueries({ queryKey: ["performance"] })
+      )
+    }
 
-  const {
-    data: jobsData,
-    isLoading: jobsLoading,
-    refetch: refetchJobs,
-  } = useJobs({ limit: 50 })
-
-  const {
-    data: candidatesData,
-    isLoading: candidatesLoading,
-    refetch: refetchCandidates,
-  } = useCandidates({ limit: 50 })
-
-  const handleRefresh = () => {
-    refetchStats()
-    refetchJobs()
-    refetchCandidates()
+    await Promise.all(queries)
+    setTimeout(() => setIsRefreshing(false), 500)
   }
 
-  // Filter jobs & candidates to last 7 days for the table view
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
-  const recentJobs = (jobsData?.jobs ?? []).filter(
-    (j) => j.createdAt && new Date(j.createdAt) >= sevenDaysAgo
-  )
-  const recentCandidates = (candidatesData?.candidates ?? []).filter(
-    (c) => c.createdAt && new Date(c.createdAt) >= sevenDaysAgo
-  )
-
   return (
-    <div className="flex flex-col w-full min-h-full bg-[hsl(var(--background))]">
-      <main className="flex-1 w-full p-6 space-y-6">
-
-        {/* Header Row — Title + Time Filter + Actions */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-[hsl(var(--foreground))] tracking-tight">
-              System Overview
-            </h2>
-            <p className="text-[hsl(var(--muted-foreground))] text-sm mt-1">
-              Monitor global operations — jobs, candidates, clients, and team activity.
-            </p>
+    <div className="dashboard-container">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
+        
+        {/* Redesigned Welcome Section - Compact Single-Row ATS Brand Theme with Modern Animations */}
+        <div className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-brand via-brand/90 to-emerald-600/90 text-white py-3.5 px-4 sm:px-5 shadow-md border border-brand/10 transition-all duration-500 hover:shadow-lg hover:shadow-brand/20">
+          {/* Abstract Background Elements with Floating Animation */}
+          <div className="absolute top-0 right-0 w-1/2 h-full overflow-hidden pointer-events-none">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-[80px] transition-all duration-1000 group-hover:scale-120 group-hover:-translate-x-12 animate-pulse" />
+            <div className="absolute top-1/2 -right-12 w-48 h-48 bg-white/5 rounded-full blur-[60px] transition-all duration-1000 group-hover:scale-110 group-hover:-translate-y-12" />
           </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Time Range Toggle */}
-            <div className="flex items-center bg-[hsl(var(--muted))] rounded-lg p-1 gap-0.5">
-              {TIME_RANGES.map((tr) => (
-                <button
-                  key={tr.value}
-                  onClick={() => setTimeRange(tr.value)}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${timeRange === tr.value
-                    ? "bg-white text-[hsl(var(--primary))] shadow-sm"
-                    : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-                    }`}
-                >
-                  {tr.label}
-                </button>
-              ))}
+          
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/20 border border-white/20 text-[9px] font-black uppercase tracking-wider text-white">
+                <ShieldAlert className="w-3.5 h-3.5 text-white" />
+                System Management
+              </div>
+              <h3 className="text-lg sm:text-xl font-black tracking-tight text-white animate-in fade-in slide-in-from-left-6 duration-700 delay-100">
+                Admin Control Panel
+              </h3>
+              <p className="text-emerald-50 font-bold text-[10px] sm:text-xs max-w-xl animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
+                Monitor system logs, candidate conversions, team metrics, and tracking logs in real-time.
+              </p>
             </div>
+            
+            <div className="flex-shrink-0 flex items-center flex-wrap gap-3 animate-in fade-in slide-in-from-right-10 duration-1000 delay-300">
+              <TabsList className="bg-white/10 p-0.5 rounded-lg border border-white/10 shadow-inner flex">
+                <TabsTrigger 
+                  value="audit-log" 
+                  className="gap-1.5 rounded-md py-1 px-3 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-white data-[state=active]:text-brand text-white/80 data-[state=active]:shadow-sm hover:text-white"
+                >
+                  <Activity className="h-3.5 w-3.5" />
+                  Audit Log
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="performance" 
+                  className="gap-1.5 rounded-md py-1 px-3 font-black text-[10px] uppercase tracking-wider transition-all data-[state=active]:bg-white data-[state=active]:text-brand text-white/80 data-[state=active]:shadow-sm hover:text-white"
+                >
+                  <BarChart className="h-3.5 w-3.5" />
+                  Performance
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Refresh */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 px-3 border-[hsl(var(--border))]"
-              onClick={handleRefresh}
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-
-            {/* Export */}
-            <Button
-              size="sm"
-              className="h-9 px-4 font-semibold bg-[hsl(var(--primary))] hover:opacity-90"
-              onClick={() => setExportOpen(true)}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export Data
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3.5 gap-1.5 bg-white/10 hover:bg-white/20 border-white/10 text-white hover:text-white rounded-lg transition-all active:scale-95 shadow-sm text-[10px] font-black uppercase tracking-wider"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`h-3.5 w-3.5 text-white ${isRefreshing ? "animate-spin" : ""}`} />
+                Refresh Data
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <AdminStatsGrid stats={stats} loading={statsLoading} timeRange={timeRange} />
-
-        {/* Charts Row */}
-        <AdminCharts timeRange={timeRange} stats={stats} loading={statsLoading} />
-
-        {/* Data Tables + Activity Sidebar */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2">
-            <AdminDataTabs
-              jobs={recentJobs}
-              candidates={recentCandidates}
-              jobsLoading={jobsLoading}
-              candidatesLoading={candidatesLoading}
-              timeRange={timeRange}
-            />
+        <TabsContent value="audit-log" className="space-y-4 mt-2">
+          {/* Stats Row */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Last 24 Hours Overview</h4>
+            </div>
+            <AuditLogSummaryCards />
           </div>
-          <div className="xl:col-span-1">
-            <AdminActivityFeed
-              jobs={recentJobs}
-              candidates={recentCandidates}
-            />
-          </div>
-        </div>
-      </main>
 
-      {/* Export Panel (slide-in or modal) */}
-      <AdminExportPanel
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
-        timeRange={timeRange}
-      />
+          {/* Feed Section */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Detailed Activity Feed</h4>
+            <AuditLogFeed />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="performance" className="mt-2">
+          <PerformanceTab />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
