@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Gift, HelpCircle, Plus, ArrowLeft, User, LogOut, Settings, Search } from "lucide-react";
+import { Gift, HelpCircle, Plus, ArrowLeft, User, LogOut, Settings, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
 
 export function Header() {
   const pathname = usePathname();
@@ -130,14 +131,7 @@ export function Header() {
 
               <div className="hidden sm:flex items-center gap-1.5 p-1 bg-muted/70 rounded-xl border border-border/40">
                 <ModeToggle />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative rounded-lg hover:bg-card hover:text-brand transition-all shadow-none h-8 w-8 text-muted-foreground"
-                >
-                  <Bell className="h-3.5 w-3.5" />
-                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-brand rounded-full border border-border ring-2 ring-brand/20 animate-pulse" />
-                </Button>
+                <NotificationDropdown />
                 <Button
                   variant="ghost"
                   size="icon"
