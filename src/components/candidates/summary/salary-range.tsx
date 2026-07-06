@@ -4,7 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Pencil } from "lucide-react";
+import { Pencil, Check, ChevronsUpDown } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import { EditFieldModal } from "./edit-field-modal";
 import { toast } from "sonner";
 import { currencies } from "country-data-list";
@@ -67,6 +70,9 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
   const [editCurrentSalaryCurrency, setEditCurrentSalaryCurrency] = useState<string>("SAR");
   const [editExpectedSalary, setEditExpectedSalary] = useState<string | number>("");
   const [editExpectedSalaryCurrency, setEditExpectedSalaryCurrency] = useState<string>("SAR");
+
+  const [openCurrentCurrency, setOpenCurrentCurrency] = useState(false);
+  const [openExpectedCurrency, setOpenExpectedCurrency] = useState(false);
 
   // When opening modals, initialize temp states
   useEffect(() => {
@@ -179,36 +185,62 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Currency</Label>
-                <Select 
-                  value={editCurrentSalaryCurrency}
-                  onValueChange={(val) => setEditCurrentSalaryCurrency(val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue>
-                      {localCandidate?.currentSalaryCurrency && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-3">
-                            <CurrencyFlag currency={localCandidate.currentSalaryCurrency} size="sm" />
+                <Popover open={openCurrentCurrency} onOpenChange={setOpenCurrentCurrency} modal={true}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openCurrentCurrency}
+                      className="w-full justify-between font-normal"
+                    >
+                      {editCurrentSalaryCurrency ? (
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <div className="w-4 h-3 flex-shrink-0 flex items-center justify-center">
+                            <CurrencyFlag currency={editCurrentSalaryCurrency} size="sm" />
                           </div>
-                          <span>{localCandidate.currentSalaryCurrency}</span>
+                          <span className="truncate">{currencyOptions.find(c => c.code === editCurrentSalaryCurrency)?.name || editCurrentSalaryCurrency}</span>
                         </div>
+                      ) : (
+                        "Select currency..."
                       )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencyOptions.map((currency) => (
-                      <SelectItem key={currency.code} value={currency.code}>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-3">
-                            <CurrencyFlag currency={currency.code} size="sm" />
-                          </div>
-                          <span>{currency.name}</span>
-                          <span className="text-muted-foreground ml-auto">{currency.symbol}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search currency..." />
+                      <CommandList>
+                        <CommandEmpty>No currency found.</CommandEmpty>
+                        <CommandGroup>
+                          {currencyOptions.map((currency) => (
+                            <CommandItem
+                              key={currency.code}
+                              value={`${currency.name} ${currency.code}`}
+                              onSelect={() => {
+                                setEditCurrentSalaryCurrency(currency.code);
+                                setOpenCurrentCurrency(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  editCurrentSalaryCurrency === currency.code ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex items-center gap-2 flex-1">
+                                <div className="w-4 h-3 flex items-center justify-center">
+                                  <CurrencyFlag currency={currency.code} size="sm" />
+                                </div>
+                                <span>{currency.name}</span>
+                                <span className="text-muted-foreground ml-auto">{currency.symbol}</span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2">
                 <Label>Current Salary</Label>
@@ -245,36 +277,62 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Currency</Label>
-                <Select 
-                  value={editExpectedSalaryCurrency}
-                  onValueChange={(val) => setEditExpectedSalaryCurrency(val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue>
-                      {localCandidate?.expectedSalaryCurrency && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-3">
-                            <CurrencyFlag currency={localCandidate.expectedSalaryCurrency} size="sm" />
+                <Popover open={openExpectedCurrency} onOpenChange={setOpenExpectedCurrency} modal={true}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openExpectedCurrency}
+                      className="w-full justify-between font-normal"
+                    >
+                      {editExpectedSalaryCurrency ? (
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <div className="w-4 h-3 flex-shrink-0 flex items-center justify-center">
+                            <CurrencyFlag currency={editExpectedSalaryCurrency} size="sm" />
                           </div>
-                          <span>{localCandidate.expectedSalaryCurrency}</span>
+                          <span className="truncate">{currencyOptions.find(c => c.code === editExpectedSalaryCurrency)?.name || editExpectedSalaryCurrency}</span>
                         </div>
+                      ) : (
+                        "Select currency..."
                       )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencyOptions.map((currency) => (
-                      <SelectItem key={currency.code} value={currency.code}>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-3">
-                            <CurrencyFlag currency={currency.code} size="sm" />
-                          </div>
-                          <span>{currency.name}</span>
-                          <span className="text-muted-foreground ml-auto">{currency.symbol}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search currency..." />
+                      <CommandList>
+                        <CommandEmpty>No currency found.</CommandEmpty>
+                        <CommandGroup>
+                          {currencyOptions.map((currency) => (
+                            <CommandItem
+                              key={currency.code}
+                              value={`${currency.name} ${currency.code}`}
+                              onSelect={() => {
+                                setEditExpectedSalaryCurrency(currency.code);
+                                setOpenExpectedCurrency(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  editExpectedSalaryCurrency === currency.code ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex items-center gap-2 flex-1">
+                                <div className="w-4 h-3 flex items-center justify-center">
+                                  <CurrencyFlag currency={currency.code} size="sm" />
+                                </div>
+                                <span>{currency.name}</span>
+                                <span className="text-muted-foreground ml-auto">{currency.symbol}</span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2">
                 <Label>Expected Salary</Label>

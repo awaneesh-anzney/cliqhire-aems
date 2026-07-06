@@ -172,7 +172,12 @@ export default function CreateCandidateForm({
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    if (name === "email") {
+      value = value.replace(/\s/g, '');
+    }
+
     setForm((prev) => ({ ...prev, [name]: value }));
     if (name === "email") {
       setEmailCheckVal("");
@@ -482,19 +487,52 @@ export default function CreateCandidateForm({
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-sm font-bold text-foreground">Total Experience</Label>
-                    <Input name="experience" value={form.experience} onChange={handleChange} placeholder="e.g. 8 years" className="h-11 border-border font-bold" />
+                    <Input 
+                      name="experience" 
+                      value={form.experience} 
+                      onChange={handleChange}
+                      onBlur={(e) => {
+                        const val = e.target.value.trim();
+                        if (val && !val.toLowerCase().includes('year')) {
+                          setForm(prev => ({ ...prev, experience: `${val} Year(s)` }));
+                        }
+                      }}
+                      placeholder="e.g. 8" 
+                      className="h-11 border-border font-bold" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-bold text-foreground">Relevant Experience</Label>
-                    <Input name="totalRelevantExperience" value={form.totalRelevantExperience} onChange={handleChange} placeholder="e.g. 5 years" className="h-11 border-border font-bold" />
+                    <Input 
+                      name="totalRelevantExperience" 
+                      value={form.totalRelevantExperience} 
+                      onChange={handleChange}
+                      onBlur={(e) => {
+                        const val = e.target.value.trim();
+                        if (val && !val.toLowerCase().includes('year')) {
+                          setForm(prev => ({ ...prev, totalRelevantExperience: `${val} Year(s)` }));
+                        }
+                      }}
+                      placeholder="e.g. 5" 
+                      className="h-11 border-border font-bold" 
+                    />
                   </div>
                 </div>
 
                 <div className="p-6 bg-muted rounded-2xl border border-border space-y-4">
                    <Label className="text-[10px] font-black text-foreground uppercase tracking-widest flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-primary" /> Salary Expectation
+                    <CreditCard className="w-4 h-4 text-primary" /> Salary & Notice Period
                   </Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex gap-2">
+                      <Select value={form.currentSalaryCurrency} onValueChange={v => handleSelectChange('currentSalaryCurrency', v)}>
+                        <SelectTrigger className="w-20 h-11 border-border bg-card font-bold"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {["SAR", "INR", "USD", "AED", "GBP", "EUR"].map(c => <SelectItem key={c} value={c} className="font-bold">{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Input name="currentSalary" type="number" value={form.currentSalary} onChange={handleChange} placeholder="Current Salary" className="h-11 border-border bg-card font-bold" />
+                    </div>
                     <div className="flex gap-2">
                       <Select value={form.expectedSalaryCurrency} onValueChange={v => handleSelectChange('expectedSalaryCurrency', v)}>
                         <SelectTrigger className="w-20 h-11 border-border bg-card font-bold"><SelectValue /></SelectTrigger>
@@ -504,7 +542,7 @@ export default function CreateCandidateForm({
                       </Select>
                       <Input name="expectedSalary" type="number" value={form.expectedSalary} onChange={handleChange} placeholder="Expected Salary" className="h-11 border-border bg-card font-bold" />
                     </div>
-                    <div className="flex gap-2 w-full">
+                    <div className="flex gap-2 w-full md:col-span-2">
                       <Select value={form.noticePeriod} onValueChange={v => handleSelectChange('noticePeriod', v)}>
                         <SelectTrigger className="w-full h-11 border-border bg-card font-bold">
                           <SelectValue placeholder="Select Notice Period" />
@@ -554,8 +592,8 @@ export default function CreateCandidateForm({
                     <Select value={form.willingToRelocate} onValueChange={v => handleSelectChange('willingToRelocate', v)}>
                       <SelectTrigger className="h-11 border-border bg-card font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="yes" className="font-bold">Yes, Global</SelectItem>
-                        <SelectItem value="no" className="font-bold">No, Static</SelectItem>
+                        <SelectItem value="yes" className="font-bold">Yes</SelectItem>
+                        <SelectItem value="no" className="font-bold">No</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

@@ -121,17 +121,18 @@ export function EditFieldModal({
                 </SelectContent>
               </Select>
             ) : options ? (
-              <select
-                className="w-full p-2 border rounded text-sm"
-                value={value}
-                onChange={e => setValue(e.target.value)}
-              >
-                {options.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <Select value={value} onValueChange={setValue}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={`Select ${fieldName.toLowerCase()}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             ) : isCountry ? (
               <div className="space-y-2">
                 <CountrySelect
