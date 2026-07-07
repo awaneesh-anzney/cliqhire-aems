@@ -18,7 +18,8 @@
    ChevronRight,
    LogOut,
    HelpCircle,
-   Sparkles
+   Sparkles,
+   Bell
  } from "lucide-react";
  import { cn } from "@/lib/utils";
  import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +55,7 @@
    settings:       Settings,
    profile:        CircleUser,
    admin:          Lock,
+   notifications:  Bell,
  };
  
 export function Sidebar() {

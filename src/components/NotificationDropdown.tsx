@@ -63,10 +63,12 @@ import {
 } from '@/hooks/useNotifications';
 import { Notification } from '@/services/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSocket } from '@/contexts/SocketProvider';
 import { useRouter } from 'next/navigation';
 
 export function NotificationDropdown() {
   const { isAuthenticated } = useAuth();
+  const { isConnected } = useSocket();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
@@ -253,6 +255,10 @@ export function NotificationDropdown() {
                 {unreadCount}
               </span>
             )}
+            <div 
+              className={cn("h-2 w-2 rounded-full", isConnected ? "bg-green-500" : "bg-red-500 animate-pulse")} 
+              title={isConnected ? "Real-time updates active" : "Reconnecting real-time updates..."}
+            />
           </div>
           <div className="flex items-center gap-1.5">
             {unreadCount > 0 && (
@@ -391,6 +397,20 @@ export function NotificationDropdown() {
             </div>
           )}
         </ScrollArea>
+        
+        {/* Footer */}
+        <div className="p-2 border-t border-border/60 bg-muted/10">
+          <Button 
+            variant="ghost" 
+            className="w-full text-xs font-bold text-brand hover:text-brand hover:bg-brand/10 transition-colors h-8"
+            onClick={() => {
+              setIsOpen(false);
+              router.push('/notifications');
+            }}
+          >
+            View All Notifications
+          </Button>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

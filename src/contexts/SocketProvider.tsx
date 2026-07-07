@@ -29,9 +29,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     // Connect socket if user is authenticated
     if (isAuthenticated) {
       const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-      let socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      // Strip trailing /api or trailing slashes to get the server root for Socket.IO
-      socketUrl = socketUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+      let rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      // Strip trailing /api, trailing slashes, quotes and spaces
+      let socketUrl = rawUrl.replace(/['"]/g, '').trim().replace(/\/api\/?$/, '').replace(/\/+$/, '');
 
       console.log('🔌 [Socket] Connecting to:', socketUrl);
 
