@@ -260,10 +260,10 @@ export default function TodoPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-background p-6 gap-6 animate-in fade-in duration-500">
+    <div className="flex flex-col h-screen w-full overflow-hidden bg-background p-2 gap-2 animate-in fade-in duration-500">
       
       {/* Premium Header Container */}
-      <div className="flex-shrink-0 bg-card border border-border shadow-sm rounded-2xl p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex-shrink-0 bg-card border border-border shadow-sm rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-2">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="h-4.5 w-4.5 text-primary fill-primary/10" />

@@ -16,7 +16,7 @@ interface TodoStatsProps {
 
 export function TodoStats({ counts, responseTime, isLoading }: TodoStatsProps) {
   return (
-    <div className="flex-shrink-0 grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="flex-shrink-0 grid grid-cols-2 lg:grid-cols-3 gap-2">
       {/* Card 1: Assigned Jobs */}
       <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4 hover:shadow-sm hover:border-primary/20 transition-all group">
         <div className="h-11 w-11 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform dark:text-blue-400">
@@ -63,7 +63,7 @@ export function TodoStats({ counts, responseTime, isLoading }: TodoStatsProps) {
       </div>
 
       {/* Card 4: Performance */}
-      <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4 hover:shadow-sm hover:border-primary/20 transition-all group">
+      {/* <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4 hover:shadow-sm hover:border-primary/20 transition-all group">
         <div className="h-11 w-11 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform dark:text-indigo-400">
           <Zap className="h-5.5 w-5.5" />
         </div>
@@ -77,7 +77,7 @@ export function TodoStats({ counts, responseTime, isLoading }: TodoStatsProps) {
             </h3>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
