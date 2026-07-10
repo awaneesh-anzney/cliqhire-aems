@@ -1,0 +1,344 @@
+"use client";
+
+import React from "react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Briefcase,
+  Bell,
+  CheckCircle2,
+  Calendar as CalendarIcon,
+  ExternalLink,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  GripVertical
+} from "lucide-react";
+
+interface TodoCardProps {
+  task: any;
+  taskType: "assignedJob" | "reminderTask" | "personalTask";
+  onStatusChange: (taskId: string, taskType: string, status: "to-do" | "inprogress" | "completed") => void;
+  onToggleComplete?: (task: any) => void;
+  onView?: (task: any) => void;
+  onEdit?: (task: any) => void;
+  onDelete?: (taskId: string) => void;
+}
+
+export function TodoCard({
+  task,
+  taskType,
+  onStatusChange,
+  onToggleComplete,
+  onView,
+  onEdit,
+  onDelete,
+}: TodoCardProps) {
+  const isCompleted = (task.status || "").toLowerCase().trim() === "completed";
+
+  const getPriorityBadge = (priority: string) => {
+    const styles: Record<string, string> = {
+      low: "bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400",
+      medium: "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400",
+      high: "bg-orange-500/10 text-orange-600 border-orange-500/20 dark:text-orange-400",
+      urgent: "bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400 animate-pulse",
+    };
+    return (
+      <Badge variant="outline" className={cn("text-[9px] font-bold tracking-wider uppercase rounded-lg px-2 py-0.5", styles[priority] || "bg-muted text-muted-foreground")}>
+        {priority}
+      </Badge>
+    );
+  };
+
+  const getStatusBadge = (status: string) => {
+    const normalized = (status || "").toLowerCase().trim();
+    let label = "TO DO";
+    let style = "bg-slate-500/10 text-slate-600 border-slate-500/20 dark:text-slate-400";
+    
+    if (normalized === "completed" || normalized === "complete" || normalized === "done") {
+      label = "COMPLETED";
+      style = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400";
+    } else if (normalized === "inprogress" || normalized === "in-progress" || normalized === "active") {
+      label = "IN PROGRESS";
+      style = "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400";
+    } else if (normalized === "pending") {
+      label = "PENDING";
+      style = "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400";
+    } else if (normalized === "to-do" || normalized === "todo") {
+      label = "TO DO";
+      style = "bg-slate-500/10 text-slate-600 border-slate-500/20 dark:text-slate-400";
+    } else if (normalized) {
+      label = status.toUpperCase();
+      style = "bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400";
+    }
+    
+    return (
+      <Badge variant="outline" className={cn("text-[9px] font-bold tracking-wider uppercase rounded-lg px-2 py-0.5", style)}>
+        {label}
+      </Badge>
+    );
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData("text/plain", JSON.stringify({ taskId: task.id, taskType }));
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  if (taskType === "assignedJob") {
+    return (
+      <div
+        draggable
+        onDragStart={handleDragStart}
+        className="group relative flex flex-col justify-between p-4 bg-card border border-border/80 hover:shadow-sm rounded-xl transition-all duration-300 border-l-4 border-l-blue-500 cursor-grab active:cursor-grabbing hover:border-blue-500/20"
+      >
+        <div className="space-y-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <GripVertical className="h-3.5 w-3.5 text-muted-foreground/45 shrink-0 group-hover:text-muted-foreground/80 transition-colors" />
+              <h4 className="font-bold text-xs text-foreground truncate group-hover:text-primary transition-colors">
+                {task.jobTitle || task.position}
+              </h4>
+            </div>
+            {getStatusBadge(task.status)}
+          </div>
+          <p className="text-[11px] font-medium text-muted-foreground pl-5">{task.clientName}</p>
+          {task.content && (
+            <p className="text-[10px] text-muted-foreground/80 mt-2 leading-relaxed pl-5 line-clamp-2">
+              {task.content}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 flex-wrap gap-2 pl-5">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-[9px] font-semibold py-0.5 px-2 bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:text-blue-400">
+              {task.candidateCount || 0} Candidates
+            </Badge>
+            <Badge variant="outline" className="text-[9px] font-bold tracking-wider uppercase bg-muted">
+              {task.role || "Recruiter"}
+            </Badge>
+          </div>
+
+          <Select
+            value={task.status}
+            onValueChange={(val: any) => onStatusChange(task.id, taskType, val)}
+          >
+            <SelectTrigger className="h-7 w-[105px] rounded-lg text-[10px] font-bold border-border bg-card">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border">
+              <SelectItem value="to-do" className="rounded-lg text-xs font-medium">To-Do</SelectItem>
+              <SelectItem value="inprogress" className="rounded-lg text-xs font-medium">In Progress</SelectItem>
+              <SelectItem value="completed" className="rounded-lg text-xs font-medium">Completed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    );
+  }
+
+  if (taskType === "reminderTask") {
+    return (
+      <div
+        draggable
+        onDragStart={handleDragStart}
+        className="group relative flex flex-col justify-between p-4 bg-card border border-border/80 hover:shadow-sm rounded-xl transition-all duration-300 border-l-4 border-l-emerald-500 cursor-grab active:cursor-grabbing hover:border-emerald-500/20"
+      >
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <GripVertical className="h-3.5 w-3.5 text-muted-foreground/45 shrink-0 group-hover:text-muted-foreground/80 transition-colors" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 dark:text-emerald-400">
+                <Bell className="h-4 w-4" />
+              </div>
+              <h4 className="font-bold text-xs text-foreground truncate">
+                {task.candidateName || task.jobTitle || "Reminder"}
+              </h4>
+            </div>
+            {getStatusBadge(task.status)}
+          </div>
+
+          <div className="pl-5 space-y-1">
+            {task.candidateEmail && (
+              <p className="text-[9px] text-muted-foreground/70 font-semibold">{task.candidateEmail}</p>
+            )}
+            <p className="text-[10px] font-medium text-muted-foreground leading-relaxed line-clamp-2">
+              {task.content || `Action item related to ${task.jobTitle}`}
+            </p>
+            {task.clientName && (
+              <p className="text-[9px] text-muted-foreground/60 font-semibold">
+                Client: {task.clientName}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 flex-wrap gap-2 pl-5">
+          {task.interviewDateTime ? (
+            <div className="text-left shrink-0">
+              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Scheduled For</p>
+              <p className="text-[10px] font-semibold text-foreground">
+                {format(new Date(task.interviewDateTime), "MMM dd - hh:mm a")}
+              </p>
+            </div>
+          ) : (
+            <div />
+          )}
+
+          <div className="flex items-center gap-2">
+            {task.interviewMeetingLinks && task.interviewMeetingLinks.length > 0 && (
+              <Button
+                onClick={() => window.open(task.interviewMeetingLinks[0], "_blank")}
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider h-7 px-2.5 flex items-center gap-1 shadow-sm"
+              >
+                Join Call
+                <ExternalLink className="h-2.5 w-2.5" />
+              </Button>
+            )}
+
+            <Select
+              value={task.status || "to-do"}
+              onValueChange={(val: any) => onStatusChange(task.id, taskType, val)}
+            >
+              <SelectTrigger className="h-7 w-[105px] rounded-lg text-[10px] font-bold border-border bg-card">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border">
+                <SelectItem value="to-do" className="rounded-lg text-xs font-medium">To-Do</SelectItem>
+                <SelectItem value="inprogress" className="rounded-lg text-xs font-medium">In Progress</SelectItem>
+                <SelectItem value="completed" className="rounded-lg text-xs font-medium">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Personal Tasks Card
+  return (
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      className={cn(
+        "group relative flex flex-col justify-between p-4 border rounded-xl transition-all duration-300 border-l-4 border-l-amber-500 cursor-grab active:cursor-grabbing",
+        isCompleted
+          ? "bg-emerald-500/5 border-emerald-500/10 opacity-75 hover:border-emerald-500/20"
+          : "bg-card border-border/80 hover:shadow-sm hover:border-amber-500/20"
+      )}
+    >
+      <div className="space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <GripVertical className="h-3.5 w-3.5 text-muted-foreground/45 shrink-0 group-hover:text-muted-foreground/80 transition-colors" />
+            {onToggleComplete && (
+              <Checkbox
+                checked={isCompleted}
+                onCheckedChange={() => onToggleComplete(task)}
+                className="data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 rounded h-4.5 w-4.5 border-border shrink-0"
+              />
+            )}
+            <h4
+              onClick={() => onView && onView(task)}
+              className={cn(
+                "font-bold text-xs text-foreground cursor-pointer hover:text-primary transition-colors truncate",
+                isCompleted && "line-through text-muted-foreground/60"
+              )}
+            >
+              {task.title}
+            </h4>
+          </div>
+          {getStatusBadge(task.status)}
+        </div>
+        {task.description && (
+          <p className={cn("text-[10px] text-muted-foreground pl-10 leading-relaxed line-clamp-2", isCompleted && "line-through text-muted-foreground/50")}>
+            {task.description}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 flex-wrap gap-2 pl-10">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {task.category && (
+            <Badge variant="secondary" className="text-[8px] font-bold tracking-wider py-0.5 px-1.5 bg-muted border border-border/60 uppercase">
+              {task.category}
+            </Badge>
+          )}
+          {task.priority && getPriorityBadge(task.priority)}
+
+          {task.dueDate && (
+            <div className="flex items-center gap-1 text-[8px] font-semibold text-muted-foreground shrink-0 border border-border/50 rounded-lg py-0.5 px-1.5 bg-card/60">
+              <CalendarIcon className="h-2.5 w-2.5 text-muted-foreground/70" />
+              <span>{format(new Date(task.dueDate), "MMM dd")}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Select
+            value={task.status || "to-do"}
+            onValueChange={(val: any) => onStatusChange(task.id, taskType, val)}
+          >
+            <SelectTrigger className="h-7 w-[105px] rounded-lg text-[10px] font-bold border-border bg-card">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border">
+              <SelectItem value="to-do" className="rounded-lg text-xs font-medium">To-Do</SelectItem>
+              <SelectItem value="inprogress" className="rounded-lg text-xs font-medium">In Progress</SelectItem>
+              <SelectItem value="completed" className="rounded-lg text-xs font-medium">Completed</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg border border-border/40 hover:bg-muted shrink-0">
+                <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground/80" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-xl border-border shadow-lg">
+              <DropdownMenuItem
+                onClick={() => onView && onView(task)}
+                className="rounded-lg text-xs font-semibold py-1.5 cursor-pointer"
+              >
+                <Eye className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onEdit && onEdit(task)}
+                className="rounded-lg text-xs font-semibold py-1.5 cursor-pointer"
+              >
+                <Edit className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                Edit Task
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onDelete && onDelete(task.id)}
+                className="rounded-lg text-xs font-semibold py-1.5 cursor-pointer text-red-500 hover:text-red-600 focus:text-red-600"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </div>
+  );
+}

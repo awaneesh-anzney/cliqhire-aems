@@ -310,7 +310,7 @@ class TaskService {
       const response = await api.put(`/api/tasks/personal/${taskId}`, {
         status
       });
-      return response.data.data.task;
+      return response.data.data?.task || response.data.data;
     } catch (error) {
       console.error('TaskService: Error updating personal task status:', error);
       throw new Error('Failed to update personal task status');
@@ -334,7 +334,7 @@ class TaskService {
   }): Promise<Task> {
     try {
       const response = await api.put(`/api/tasks/personal/${taskId}`, taskData);
-      return response.data.data.task;
+      return response.data.data?.task || response.data.data;
     } catch (error) {
       console.error('TaskService: Error updating personal task:', error);
       throw new Error('Failed to update personal task');

@@ -42,7 +42,7 @@
  // Map moduleKey → lucide icon
  const MODULE_ICONS: Record<string, React.ElementType> = {
    home:           Home,
-   today_tasks:    ListTodo,
+   todo:           ListTodo,
    clients:        Building2,
    jobs:           Briefcase,
    candidates:     Users,
@@ -96,7 +96,7 @@ export function Sidebar() {
             ) : (
               <SidebarMenu className="group-data-[collapsible=icon]:gap-1 space-y-1">
                 {SIDEBAR_MODULES.filter((item) => {
-                  if (isAdmin && ["recruiter", "today_tasks", "headhunter"].includes(item.moduleKey)) return false;
+                  if (isAdmin && ["recruiter", "todo", "headhunter"].includes(item.moduleKey)) return false;
                   if (item.alwaysVisible) return true;
                   if (isAdmin) return true;
                   return hasPermission(item.moduleKey, "view");
