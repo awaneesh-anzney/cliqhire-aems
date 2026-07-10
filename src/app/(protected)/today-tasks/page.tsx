@@ -209,6 +209,16 @@ export default function TodayTasksPage() {
     updatePersonalTaskStatus.mutate({ taskId, status });
   };
 
+  const handleReminderStatusChange = async (taskId: string, status: "to-do" | "inprogress" | "completed") => {
+    try {
+      await taskService.updateReminderTaskStatus(taskId, status);
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+      toast.success("Reminder status updated");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update reminder status");
+    }
+  };
+
   const getPriorityBadge = (priority: string) => {
     const styles: Record<string, string> = {
       low: "bg-green-500/10 text-green-500 border-green-500/20",
@@ -545,6 +555,20 @@ export default function TodayTasksPage() {
                               <ExternalLink className="h-3 w-3" />
                             </Button>
                           )}
+                          
+                          <Select 
+                            value={reminder.status || 'to-do'} 
+                            onValueChange={(val: any) => handleReminderStatusChange(reminder.id, val)}
+                          >
+                            <SelectTrigger className="h-8 w-[110px] rounded-lg text-xs font-bold border-border bg-card">
+                              <SelectValue placeholder="Update Status" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border">
+                              <SelectItem value="to-do" className="rounded-lg text-xs font-medium">To-Do</SelectItem>
+                              <SelectItem value="inprogress" className="rounded-lg text-xs font-medium">In Progress</SelectItem>
+                              <SelectItem value="completed" className="rounded-lg text-xs font-medium">Completed</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     ))}

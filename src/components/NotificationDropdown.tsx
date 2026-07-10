@@ -137,6 +137,10 @@ export function NotificationDropdown() {
         return { icon: Award, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
       case 'PIPELINE_CANDIDATE_REJECTED':
         return { icon: Ban, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
+      case 'PIPELINE_STAGE_DATA_UPDATED':
+        return { icon: Edit3, bg: 'bg-cyan-100 dark:bg-cyan-900/30', color: 'text-cyan-600 dark:text-cyan-400' };
+      case 'PIPELINE_PROBATION_SET':
+        return { icon: Shield, bg: 'bg-teal-100 dark:bg-teal-900/30', color: 'text-teal-600 dark:text-teal-400' };
 
       // --- Phase 3: Job & Team Notifications ---
       case 'JOB_CREATED':

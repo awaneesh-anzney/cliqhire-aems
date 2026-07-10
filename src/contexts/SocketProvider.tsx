@@ -53,6 +53,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socketInstance.on('connect', () => {
         console.log('✅ [Socket] Connected successfully with ID:', socketInstance.id);
         setIsConnected(true);
+        
+        // Refetch queries on connect/reconnect to catch up on missed events
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
       });
 
       socketInstance.on('disconnect', (reason) => {
@@ -99,6 +104,27 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socketInstance.on('notification_count_update', (data: { count: number }) => {
         console.log('📊 [Socket] Notification count updated:', data);
         queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+      });
+
+      // Task events
+      socketInstance.on('new_task', (data: any) => {
+        console.log('✅ [Socket] New task received:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+      });
+
+      socketInstance.on('task_updated', (data: any) => {
+        console.log('🔄 [Socket] Task updated:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+      });
+
+      socketInstance.on('task_deleted', (data: any) => {
+        console.log('🗑️ [Socket] Task deleted:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+      });
+
+      socketInstance.on('task_count_update', (data: any) => {
+        console.log('📊 [Socket] Task count updated:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
       });
 
       return () => {

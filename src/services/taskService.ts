@@ -80,7 +80,9 @@ export interface AssignedJobApiResponse {
   updatedAt: string;
   status: string;
   _id?: string; // Made optional as per new response might not have it or it might be 'id'
-  position: string;
+  position?: string;
+  jobTitle?: string;
+  role?: string;
   clientName: string;
   candidateCount: number;
   jobId: string;
@@ -283,6 +285,20 @@ class TaskService {
     } catch (error) {
       console.error('TaskService: Error updating assigned job status:', error);
       throw new Error('Failed to update assigned job status');
+    }
+  }
+
+  /**
+   * Update reminder task status
+   */
+  async updateReminderTaskStatus(taskId: string, status: 'to-do' | 'inprogress' | 'completed'): Promise<void> {
+    try {
+      await api.patch(`/api/tasks/reminders/${taskId}`, {
+        status
+      });
+    } catch (error) {
+      console.error('TaskService: Error updating reminder task status:', error);
+      throw new Error('Failed to update reminder task status');
     }
   }
 
