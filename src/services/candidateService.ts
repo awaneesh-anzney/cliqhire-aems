@@ -12,19 +12,6 @@ export interface CandidateDomain {
   updatedAt?: string;
 }
 
-export interface DegreeLevel {
-  degreeName?: string;
-  universityName?: string;
-  passingYear?: number;
-  status?: "Completed" | "Appearing" | "";
-}
-
-export interface CandidateEducation {
-  diploma?: DegreeLevel;
-  bachelor?: DegreeLevel;
-  master?: DegreeLevel;
-}
-
 export interface Candidate {
   _id?: string; // MongoDB ID from API response
   profileId?: string;
@@ -44,7 +31,8 @@ export interface Candidate {
   nationality?: string;
   universityName?: string;
   educationDegree?: string;
-  education?: CandidateEducation;
+  highestDegree?: string;
+  graduation?: string;
   certification?: string;
   primaryLanguage?: string;
   willingToRelocate?: string;

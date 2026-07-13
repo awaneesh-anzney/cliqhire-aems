@@ -10,7 +10,7 @@ import { SlidersHorizontal, RefreshCcw, Plus, FileText, Users, Briefcase, Star, 
 import { AttachmentsContent } from '@/components/candidates/attachments/attachments-content';
 import { JobsContent, JobsContentRef } from '@/components/candidates/jobs/jobs-content';
 import { AddToJobDialog } from '@/components/candidates/add-to-job-dialog';
-import { candidateService, type Candidate, type CandidateEducation } from '@/services/candidateService';
+import { candidateService } from '@/services/candidateService';
 import { toast } from "sonner";
 import { initializeAuth } from '@/lib/axios-config';
 import { formatPhoneNumber } from "@/lib/countryCodes";
@@ -52,7 +52,23 @@ interface Tab {
   icon: React.ReactNode;
 }
 
-
+interface Candidate {
+  _id?: string;
+  profileId?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  experience?: string;
+  skills?: string[];
+  resume?: string;
+  status?: string;
+  highestDegree?: string;
+  graduation?: string;
+  certification?: string;
+  noticePeriod?: string;
+  domains?: { _id: string; name: string; description?: string | null; isActive?: boolean }[];
+}
 
 export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId: string, tabs: Tab[] }) {
   // All hooks must be called at the top level
@@ -190,8 +206,6 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
         } else if (fieldKey === "otherPhone") {
           payload.otherPhone = updatedCandidate.otherPhone;
           payload.otherCountryCode = updatedCandidate.otherCountryCode;
-        } else if (fieldKey.startsWith("education.")) {
-          payload.education = updatedCandidate.education;
         } else {
           payload[fieldKey] = updatedCandidate[fieldKey];
         }
@@ -218,9 +232,8 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
           { key: "nationality", label: "Nationality" },
           { key: "universityName", label: "University Name" },
           { key: "educationDegree", label: "Education Degree/Certificate" },
-          { key: "education.diploma", label: "Diploma Details" },
-          { key: "education.bachelor", label: "Bachelor's Details" },
-          { key: "education.master", label: "Master's Details" },
+          { key: "highestDegree", label: "Highest Degree" },
+          { key: "graduation", label: "Graduation Details" },
           { key: "certification", label: "Professional Certifications" },
           { key: "primaryLanguage", label: "Primary Language" },
           { key: "willingToRelocate", label: "Are you willing to relocate?" },
