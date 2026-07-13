@@ -287,6 +287,12 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                     onUpdate={handleUpdateField("headcount")}
                     disableInternalEdit={!canEdit}
                   />
+                  <DetailRow
+                    label="Reporting To"
+                    value={jobDetails.reportingTo || ""}
+                    onUpdate={handleUpdateField("reportingTo")}
+                    disableInternalEdit={!canEdit}
+                  />
                 </div>
               </div>
 
