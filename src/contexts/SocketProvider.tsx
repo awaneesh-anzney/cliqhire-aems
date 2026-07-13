@@ -29,9 +29,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     // Connect socket if user is authenticated
     if (isAuthenticated) {
       const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-      let socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      // Strip trailing /api or trailing slashes to get the server root for Socket.IO
-      socketUrl = socketUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+      let rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      // Strip trailing /api, trailing slashes, quotes and spaces
+      let socketUrl = rawUrl.replace(/['"]/g, '').trim().replace(/\/api\/?$/, '').replace(/\/+$/, '');
 
       console.log('🔌 [Socket] Connecting to:', socketUrl);
 
@@ -53,6 +53,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socketInstance.on('connect', () => {
         console.log('✅ [Socket] Connected successfully with ID:', socketInstance.id);
         setIsConnected(true);
+        
+        // Refetch queries on connect/reconnect to catch up on missed events
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
       });
 
       socketInstance.on('disconnect', (reason) => {
@@ -99,6 +104,27 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socketInstance.on('notification_count_update', (data: { count: number }) => {
         console.log('📊 [Socket] Notification count updated:', data);
         queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+      });
+
+      // Task events
+      socketInstance.on('new_task', (data: any) => {
+        console.log('✅ [Socket] New task received:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+      });
+
+      socketInstance.on('task_updated', (data: any) => {
+        console.log('🔄 [Socket] Task updated:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+      });
+
+      socketInstance.on('task_deleted', (data: any) => {
+        console.log('🗑️ [Socket] Task deleted:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
+      });
+
+      socketInstance.on('task_count_update', (data: any) => {
+        console.log('📊 [Socket] Task count updated:', data);
+        queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
       });
 
       return () => {

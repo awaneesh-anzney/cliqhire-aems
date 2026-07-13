@@ -80,7 +80,9 @@ export interface AssignedJobApiResponse {
   updatedAt: string;
   status: string;
   _id?: string; // Made optional as per new response might not have it or it might be 'id'
-  position: string;
+  position?: string;
+  jobTitle?: string;
+  role?: string;
   clientName: string;
   candidateCount: number;
   jobId: string;
@@ -287,6 +289,20 @@ class TaskService {
   }
 
   /**
+   * Update reminder task status
+   */
+  async updateReminderTaskStatus(taskId: string, status: 'to-do' | 'inprogress' | 'completed'): Promise<void> {
+    try {
+      await api.patch(`/api/tasks/reminders/${taskId}`, {
+        status
+      });
+    } catch (error) {
+      console.error('TaskService: Error updating reminder task status:', error);
+      throw new Error('Failed to update reminder task status');
+    }
+  }
+
+  /**
    * Update personal task status
    */
   async updatePersonalTaskStatus(taskId: string, status: 'to-do' | 'inprogress' | 'completed'): Promise<Task> {
@@ -294,7 +310,7 @@ class TaskService {
       const response = await api.put(`/api/tasks/personal/${taskId}`, {
         status
       });
-      return response.data.data.task;
+      return response.data.data?.task || response.data.data;
     } catch (error) {
       console.error('TaskService: Error updating personal task status:', error);
       throw new Error('Failed to update personal task status');
@@ -318,7 +334,7 @@ class TaskService {
   }): Promise<Task> {
     try {
       const response = await api.put(`/api/tasks/personal/${taskId}`, taskData);
-      return response.data.data.task;
+      return response.data.data?.task || response.data.data;
     } catch (error) {
       console.error('TaskService: Error updating personal task:', error);
       throw new Error('Failed to update personal task');
