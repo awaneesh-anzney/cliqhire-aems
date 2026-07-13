@@ -10,7 +10,6 @@ import {
   GenderDialog,
   StatusDialog,
   WillingToRelocateDialog,
-  EducationDialog,
 } from "./personal-info-edit-dialog";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +54,11 @@ const detailsFields = [
       ) : undefined,
     isUpload: true,
   },
+  /*   {
+      key: "skills",
+      label: "Skills",
+      render: (val: string[] | undefined) => (val && val.length ? val.join(", ") : undefined),
+    }, */
   { key: "status", label: "Status" },
   { key: "gender", label: "Gender" },
   {
@@ -79,15 +83,14 @@ const detailsFields = [
   { key: "country", label: "Country" },
   { key: "nationality", label: "Nationality" },
   { key: "continent", label: "Continent" },
+  { key: "universityName", label: "University Name" },
+  { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
+  { key: "highestDegree", label: "Highest Degree" },
+  { key: "graduation", label: "Graduation Details", isTextarea: true },
+  { key: "certification", label: "Professional Certifications", isTextarea: true },
   { key: "primaryLanguage", label: "Primary Language" },
   { key: "willingToRelocate", label: "Are you willing to relocate ?" },
   { key: "iqama", label: "Iqama is transferable ?" },
-];
-
-const academicFields = [
-  { key: "universityName", label: "University Name" },
-  { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
-  { key: "certification", label: "Professional Certifications", isTextarea: true },
 ];
 
 // Split details fields into default visible and collapsible sections
@@ -158,8 +161,6 @@ const CandidateSummary = ({
   const [localCandidate, setLocalCandidate] = useState(candidate);
   const [showDomainsDialog, setShowDomainsDialog] = useState(false);
   const [showEditResumeDialog, setShowEditResumeDialog] = useState(false);
-  const [showEducationDialog, setShowEducationDialog] = useState(false);
-  const [editEducationLevel, setEditEducationLevel] = useState<"diploma" | "bachelor" | "master" | null>(null);
 
   useEffect(() => {
     setLocalCandidate(candidate);
@@ -274,120 +275,14 @@ const CandidateSummary = ({
     setShowWillingToRelocateDialog(false);
   };
 
-  const handleEducationSave = (level: "diploma" | "bachelor" | "master", value: any) => {
-    const currentEducation = localCandidate?.education || {};
-    const updatedEducation = {
-      ...currentEducation,
-      [level]: value,
-    };
-    const updatedCandidate = {
-      ...localCandidate,
-      education: updatedEducation
-    };
-    setLocalCandidate(updatedCandidate);
-    if (onCandidateUpdate) {
-      onCandidateUpdate(updatedCandidate, `education.${level}`);
-    }
-    setShowEducationDialog(false);
-  };
-
-  const getNestedValue = (obj: any, path: string) => {
-    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-  };
-
-  const renderEducationLevelCard = (level: "diploma" | "bachelor" | "master", label: string) => {
-    const data = localCandidate?.education?.[level];
-    const hasData = data && (data.degreeName || data.universityName || data.passingYear || data.status);
-
-    const handleEditClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (!canModify) return;
-      setEditEducationLevel(level);
-      setShowEducationDialog(true);
-    };
-
-    return (
-      <div
-        onClick={canModify ? handleEditClick : undefined}
-        className={cn(
-          "group relative flex items-start gap-4 p-4 rounded-xl border transition-all duration-300",
-          hasData
-            ? "bg-card border-border/70 hover:border-primary/45 hover:shadow-sm"
-            : "bg-muted/10 border-dashed border-border/50 opacity-60 hover:opacity-100",
-          canModify ? "cursor-pointer" : ""
-        )}
-      >
-        <div className={cn(
-          "p-2.5 rounded-lg shrink-0 border",
-          hasData ? "bg-primary/5 border-primary/10 text-primary" : "bg-muted border-border text-muted-foreground"
-        )}>
-          <GraduationCap className="w-5 h-5" />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-wider">
-              {label}
-            </span>
-            {hasData && data.status && (
-              <span className={cn(
-                "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border leading-none",
-                data.status === "Completed"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
-                  : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
-              )}>
-                {data.status}
-              </span>
-            )}
-          </div>
-
-          {hasData ? (
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold text-foreground truncate">
-                {data.degreeName || "Unspecified Degree"}
-              </h4>
-              <p className="text-xs text-muted-foreground/90 font-semibold truncate">
-                {data.universityName || "Unspecified University"}
-              </p>
-              {data.passingYear && (
-                <p className="text-[10px] font-bold text-primary bg-primary/5 border border-primary/10 rounded px-1.5 py-0.5 inline-block mt-1">
-                  Passing Year: {data.passingYear}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="py-1">
-              <span className="text-xs font-bold text-muted-foreground/50 italic">Not Provided</span>
-              <p className="text-[10px] font-medium text-muted-foreground/40 mt-0.5">Click to add {label.toLowerCase()} details</p>
-            </div>
-          )}
-        </div>
-
-        {canModify && (
-          <div className="flex items-center ml-4 shrink-0" onClick={(e) => e.stopPropagation()}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
-              onClick={handleEditClick}
-            >
-              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const renderField = (field: any, fieldArray: any[]) => {
-    const rawValue = field.key.includes('.') ? getNestedValue(localCandidate, field.key) : localCandidate?.[field.key];
+    const rawValue = localCandidate?.[field.key];
     const value = field.render ? field.render(rawValue, localCandidate) : rawValue;
     const hasValue =
       rawValue !== undefined &&
       rawValue !== null &&
       rawValue !== "" &&
-      (!Array.isArray(rawValue) || rawValue.length > 0) &&
-      (typeof rawValue !== "object" || Object.values(rawValue).some(v => v !== undefined && v !== null && v !== ""));
+      (!Array.isArray(rawValue) || rawValue.length > 0);
 
     // Common click handler for specific fields
     const handleEditClick = (e: React.MouseEvent) => {
@@ -401,11 +296,6 @@ const CandidateSummary = ({
       else if (field.key === "willingToRelocate") setShowWillingToRelocateDialog(true);
       else if (field.key === "referredBy") setShowReferredByDialog(true);
       else if (field.key === "domains") setShowDomainsDialog(true);
-      else if (field.key.startsWith("education.")) {
-        const level = field.key.split(".")[1];
-        setEditEducationLevel(level as "diploma" | "bachelor" | "master");
-        setShowEducationDialog(true);
-      }
       else setEditField(field.key);
     };
 
@@ -460,7 +350,7 @@ const CandidateSummary = ({
             </Button>
             
             {/* Modal injections for fields that don't use dedicated dialogs */}
-            {field.key !== "referredBy" && field.key !== "domains" && !field.isUpload && !field.key.startsWith("education.") && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
+            {field.key !== "referredBy" && field.key !== "domains" && !field.isUpload && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
               <EditFieldModal
                 open={editField === field.key}
                 onClose={() => setEditField(null)}
@@ -657,13 +547,13 @@ const CandidateSummary = ({
             </div>
           </div>
 
-          {/* Personal Details Card */}
+          {/* Education & Personal Card */}
           <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
             <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
               <div className="p-2 bg-brand/10 rounded-lg">
-                <User className="w-4 h-4 text-brand" />
+                <GraduationCap className="w-4 h-4 text-brand" />
               </div>
-              <h4 className="text-base font-semibold text-foreground">Personal Details</h4>
+              <h4 className="text-base font-semibold text-foreground">Education & Personal</h4>
             </div>
             <div className="p-5">
               <div className="space-y-4">
@@ -671,35 +561,6 @@ const CandidateSummary = ({
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
                     {collapsibleDetailsFields.map((field) => renderField(field, collapsibleDetailsFields))}
                  </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Education & Academic Credentials Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <GraduationCap className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Education & Academic Credentials</h4>
-            </div>
-            <div className="p-5 space-y-6">
-              {/* Structured Education Levels */}
-              <div className="space-y-3">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Academic Degrees</h5>
-                <div className="flex flex-col gap-3">
-                  {renderEducationLevelCard("master", "Master's Degree")}
-                  {renderEducationLevelCard("bachelor", "Bachelor's Degree")}
-                  {renderEducationLevelCard("diploma", "Diploma")}
-                </div>
-              </div>
-
-              {/* General Academic Fields */}
-              <div className="space-y-3 pt-4 border-t border-border/60">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Other Qualifications</h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
-                  {academicFields.map((field) => renderField(field, academicFields))}
-                </div>
               </div>
             </div>
           </div>
@@ -809,20 +670,6 @@ const CandidateSummary = ({
           onSave={(newValue: { ids: string[]; domains: any[] }) => {
             handleSave("domains", newValue.domains);
           }}
-        />
-      )}
-
-      {/* Education Dialog */}
-      {canModify && showEducationDialog && editEducationLevel && (
-        <EducationDialog
-          open={showEducationDialog}
-          onClose={() => {
-            setShowEducationDialog(false);
-            setEditEducationLevel(null);
-          }}
-          level={editEducationLevel}
-          currentValue={localCandidate?.education?.[editEducationLevel]}
-          onSave={handleEducationSave}
         />
       )}
 
