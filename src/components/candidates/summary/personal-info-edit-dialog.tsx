@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 // Date of Birth Dialog
 interface DateOfBirthDialogProps {
@@ -412,6 +413,136 @@ export function WillingToRelocateDialog({
                     {option.label}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            Save Changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Education Dialog
+interface EducationDialogProps {
+  open: boolean;
+  onClose: () => void;
+  level: "diploma" | "bachelor" | "master";
+  currentValue?: {
+    degreeName?: string;
+    universityName?: string;
+    passingYear?: number;
+    status?: "Completed" | "Appearing" | "";
+  };
+  onSave: (level: "diploma" | "bachelor" | "master", value: any) => void;
+}
+
+export function EducationDialog({
+  open,
+  onClose,
+  level,
+  currentValue,
+  onSave,
+}: EducationDialogProps) {
+  const [degreeName, setDegreeName] = useState(currentValue?.degreeName || "");
+  const [universityName, setUniversityName] = useState(currentValue?.universityName || "");
+  const [passingYear, setPassingYear] = useState<string>(currentValue?.passingYear?.toString() || "");
+  const [status, setStatus] = useState<string>(currentValue?.status || "");
+
+  // Reset form when dialog opens/closes or current value changes
+  useEffect(() => {
+    if (open) {
+      setDegreeName(currentValue?.degreeName || "");
+      setUniversityName(currentValue?.universityName || "");
+      setPassingYear(currentValue?.passingYear?.toString() || "");
+      setStatus(currentValue?.status || "");
+    }
+  }, [open, currentValue]);
+
+  const handleSave = () => {
+    onSave(level, {
+      degreeName: degreeName || undefined,
+      universityName: universityName || undefined,
+      passingYear: passingYear ? parseInt(passingYear, 10) : undefined,
+      status: status || undefined,
+    });
+    onClose();
+  };
+
+  const handleCancel = () => {
+    onClose();
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 70 }, (_, i) => (currentYear + 10 - i).toString());
+
+  const levelLabels = {
+    diploma: "Diploma",
+    bachelor: "Bachelor's Degree",
+    master: "Master's Degree",
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit {levelLabels[level] || "Education"}</DialogTitle>
+        </DialogHeader>
+        
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="degreeName">Degree Name</Label>
+            <Input
+              id="degreeName"
+              placeholder="e.g. BCA, B.Tech, MBA"
+              value={degreeName}
+              onChange={(e) => setDegreeName(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="universityName">University Name</Label>
+            <Input
+              id="universityName"
+              placeholder="Enter university name"
+              value={universityName}
+              onChange={(e) => setUniversityName(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="passingYear">Passing Year</Label>
+            <Select value={passingYear} onValueChange={setPassingYear}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select passing year" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[200px]">
+                {years.map((y) => (
+                  <SelectItem key={y} value={y}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="status">Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Appearing">Appearing</SelectItem>
               </SelectContent>
             </Select>
           </div>
