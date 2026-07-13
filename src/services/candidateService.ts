@@ -13,6 +13,7 @@ export interface CandidateDomain {
 }
 
 export interface DegreeLevel {
+  degreeName?: string;
   universityName?: string;
   passingYear?: number;
   status?: "Completed" | "Appearing" | "";

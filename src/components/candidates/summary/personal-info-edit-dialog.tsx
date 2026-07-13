@@ -437,6 +437,7 @@ interface EducationDialogProps {
   onClose: () => void;
   level: "diploma" | "bachelor" | "master";
   currentValue?: {
+    degreeName?: string;
     universityName?: string;
     passingYear?: number;
     status?: "Completed" | "Appearing" | "";
@@ -451,6 +452,7 @@ export function EducationDialog({
   currentValue,
   onSave,
 }: EducationDialogProps) {
+  const [degreeName, setDegreeName] = useState(currentValue?.degreeName || "");
   const [universityName, setUniversityName] = useState(currentValue?.universityName || "");
   const [passingYear, setPassingYear] = useState<string>(currentValue?.passingYear?.toString() || "");
   const [status, setStatus] = useState<string>(currentValue?.status || "");
@@ -458,6 +460,7 @@ export function EducationDialog({
   // Reset form when dialog opens/closes or current value changes
   useEffect(() => {
     if (open) {
+      setDegreeName(currentValue?.degreeName || "");
       setUniversityName(currentValue?.universityName || "");
       setPassingYear(currentValue?.passingYear?.toString() || "");
       setStatus(currentValue?.status || "");
@@ -466,6 +469,7 @@ export function EducationDialog({
 
   const handleSave = () => {
     onSave(level, {
+      degreeName: degreeName || undefined,
       universityName: universityName || undefined,
       passingYear: passingYear ? parseInt(passingYear, 10) : undefined,
       status: status || undefined,
@@ -494,6 +498,16 @@ export function EducationDialog({
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="degreeName">Degree Name</Label>
+            <Input
+              id="degreeName"
+              placeholder="e.g. BCA, B.Tech, MBA"
+              value={degreeName}
+              onChange={(e) => setDegreeName(e.target.value)}
+            />
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="universityName">University Name</Label>
             <Input
