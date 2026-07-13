@@ -10,6 +10,7 @@ import {
   GenderDialog,
   StatusDialog,
   WillingToRelocateDialog,
+  EducationDialog,
 } from "./personal-info-edit-dialog";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,8 +86,51 @@ const detailsFields = [
   { key: "continent", label: "Continent" },
   { key: "universityName", label: "University Name" },
   { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
-  { key: "highestDegree", label: "Highest Degree" },
-  { key: "graduation", label: "Graduation Details", isTextarea: true },
+  {
+    key: "education.diploma",
+    label: "Diploma Details",
+    render: (val: any, record: any) => {
+      const diploma = record?.education?.diploma;
+      if (!diploma || (!diploma.universityName && !diploma.passingYear && !diploma.status)) return undefined;
+      const university = diploma.universityName || "";
+      const year = diploma.passingYear ? `(${diploma.passingYear})` : "";
+      const status = diploma.status || "";
+      return [
+        [university, year].filter(Boolean).join(" "),
+        status
+      ].filter(Boolean).join(" - ");
+    }
+  },
+  {
+    key: "education.bachelor",
+    label: "Bachelor's Details",
+    render: (val: any, record: any) => {
+      const bachelor = record?.education?.bachelor;
+      if (!bachelor || (!bachelor.universityName && !bachelor.passingYear && !bachelor.status)) return undefined;
+      const university = bachelor.universityName || "";
+      const year = bachelor.passingYear ? `(${bachelor.passingYear})` : "";
+      const status = bachelor.status || "";
+      return [
+        [university, year].filter(Boolean).join(" "),
+        status
+      ].filter(Boolean).join(" - ");
+    }
+  },
+  {
+    key: "education.master",
+    label: "Master's Details",
+    render: (val: any, record: any) => {
+      const master = record?.education?.master;
+      if (!master || (!master.universityName && !master.passingYear && !master.status)) return undefined;
+      const university = master.universityName || "";
+      const year = master.passingYear ? `(${master.passingYear})` : "";
+      const status = master.status || "";
+      return [
+        [university, year].filter(Boolean).join(" "),
+        status
+      ].filter(Boolean).join(" - ");
+    }
+  },
   { key: "certification", label: "Professional Certifications", isTextarea: true },
   { key: "primaryLanguage", label: "Primary Language" },
   { key: "willingToRelocate", label: "Are you willing to relocate ?" },
@@ -161,6 +205,8 @@ const CandidateSummary = ({
   const [localCandidate, setLocalCandidate] = useState(candidate);
   const [showDomainsDialog, setShowDomainsDialog] = useState(false);
   const [showEditResumeDialog, setShowEditResumeDialog] = useState(false);
+  const [showEducationDialog, setShowEducationDialog] = useState(false);
+  const [editEducationLevel, setEditEducationLevel] = useState<"diploma" | "bachelor" | "master" | null>(null);
 
   useEffect(() => {
     setLocalCandidate(candidate);
@@ -275,14 +321,36 @@ const CandidateSummary = ({
     setShowWillingToRelocateDialog(false);
   };
 
+  const handleEducationSave = (level: "diploma" | "bachelor" | "master", value: any) => {
+    const currentEducation = localCandidate?.education || {};
+    const updatedEducation = {
+      ...currentEducation,
+      [level]: value,
+    };
+    const updatedCandidate = {
+      ...localCandidate,
+      education: updatedEducation
+    };
+    setLocalCandidate(updatedCandidate);
+    if (onCandidateUpdate) {
+      onCandidateUpdate(updatedCandidate, `education.${level}`);
+    }
+    setShowEducationDialog(false);
+  };
+
+  const getNestedValue = (obj: any, path: string) => {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+  };
+
   const renderField = (field: any, fieldArray: any[]) => {
-    const rawValue = localCandidate?.[field.key];
+    const rawValue = field.key.includes('.') ? getNestedValue(localCandidate, field.key) : localCandidate?.[field.key];
     const value = field.render ? field.render(rawValue, localCandidate) : rawValue;
     const hasValue =
       rawValue !== undefined &&
       rawValue !== null &&
       rawValue !== "" &&
-      (!Array.isArray(rawValue) || rawValue.length > 0);
+      (!Array.isArray(rawValue) || rawValue.length > 0) &&
+      (typeof rawValue !== "object" || Object.values(rawValue).some(v => v !== undefined && v !== null && v !== ""));
 
     // Common click handler for specific fields
     const handleEditClick = (e: React.MouseEvent) => {
@@ -296,6 +364,11 @@ const CandidateSummary = ({
       else if (field.key === "willingToRelocate") setShowWillingToRelocateDialog(true);
       else if (field.key === "referredBy") setShowReferredByDialog(true);
       else if (field.key === "domains") setShowDomainsDialog(true);
+      else if (field.key.startsWith("education.")) {
+        const level = field.key.split(".")[1];
+        setEditEducationLevel(level as "diploma" | "bachelor" | "master");
+        setShowEducationDialog(true);
+      }
       else setEditField(field.key);
     };
 
@@ -350,7 +423,7 @@ const CandidateSummary = ({
             </Button>
             
             {/* Modal injections for fields that don't use dedicated dialogs */}
-            {field.key !== "referredBy" && field.key !== "domains" && !field.isUpload && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
+            {field.key !== "referredBy" && field.key !== "domains" && !field.isUpload && !field.key.startsWith("education.") && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
               <EditFieldModal
                 open={editField === field.key}
                 onClose={() => setEditField(null)}
@@ -670,6 +743,20 @@ const CandidateSummary = ({
           onSave={(newValue: { ids: string[]; domains: any[] }) => {
             handleSave("domains", newValue.domains);
           }}
+        />
+      )}
+
+      {/* Education Dialog */}
+      {canModify && showEducationDialog && editEducationLevel && (
+        <EducationDialog
+          open={showEducationDialog}
+          onClose={() => {
+            setShowEducationDialog(false);
+            setEditEducationLevel(null);
+          }}
+          level={editEducationLevel}
+          currentValue={localCandidate?.education?.[editEducationLevel]}
+          onSave={handleEducationSave}
         />
       )}
 
