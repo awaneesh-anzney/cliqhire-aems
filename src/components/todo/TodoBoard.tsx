@@ -12,6 +12,7 @@ interface TodoBoardProps {
   assignedJobs: any[];
   reminderTasks: any[];
   personalTasks: any[];
+  cvSubmissions?: any[];
   onStatusChange: (taskId: string, taskType: string, status: "to-do" | "inprogress" | "completed") => void;
   onToggleComplete?: (task: any) => void;
   onView?: (task: any) => void;
@@ -23,6 +24,7 @@ export function TodoBoard({
   assignedJobs,
   reminderTasks,
   personalTasks,
+  cvSubmissions = [],
   onStatusChange,
   onToggleComplete,
   onView,
@@ -61,6 +63,7 @@ export function TodoBoard({
           status="to-do"
           title="To Do"
           tasks={todoTasks}
+          cvSubmissions={cvSubmissions}
           accentClass="bg-slate-400"
           onStatusChange={onStatusChange}
           onToggleComplete={onToggleComplete}
@@ -74,6 +77,7 @@ export function TodoBoard({
           status="inprogress"
           title="In Progress"
           tasks={inprogressTasks}
+          cvSubmissions={cvSubmissions}
           accentClass="bg-blue-500"
           onStatusChange={onStatusChange}
           onToggleComplete={onToggleComplete}
@@ -87,6 +91,7 @@ export function TodoBoard({
           status="completed"
           title="Completed"
           tasks={completedTasks}
+          cvSubmissions={cvSubmissions}
           accentClass="bg-emerald-500"
           onStatusChange={onStatusChange}
           onToggleComplete={onToggleComplete}

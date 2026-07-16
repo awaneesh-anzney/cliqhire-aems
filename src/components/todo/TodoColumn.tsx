@@ -11,6 +11,7 @@ interface TodoColumnProps {
     task: any;
     type: "assignedJob" | "reminderTask" | "personalTask";
   }>;
+  cvSubmissions?: any[];
   accentClass: string;
   onStatusChange: (taskId: string, taskType: string, status: "to-do" | "inprogress" | "completed") => void;
   onToggleComplete?: (task: any) => void;
@@ -23,6 +24,7 @@ export function TodoColumn({
   status,
   title,
   tasks,
+  cvSubmissions = [],
   accentClass,
   onStatusChange,
   onToggleComplete,
@@ -89,6 +91,7 @@ export function TodoColumn({
               key={task.id}
               task={task}
               taskType={type}
+              cvSubmissions={cvSubmissions}
               onStatusChange={onStatusChange}
               onToggleComplete={onToggleComplete}
               onView={onView}

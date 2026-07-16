@@ -33,6 +33,7 @@ import {
 } from "../dummy-data";
 import { InterviewRoundsList } from "../InterviewRoundsList";
 import { InterviewRoundDialog } from "../InterviewRoundDialog";
+import { CvSubmissionResponsibility } from "../cv-submission/CvSubmissionResponsibility";
 import { cn } from "@/lib/utils";
 
 // Helper to get stage key from stage name (for local state only)
@@ -49,6 +50,8 @@ interface PipelineStageDetailsProps {
   onUpdateCandidate?: (updatedCandidate?: any) => void;
   pipelineId?: string;
   candidateId?: string;
+  jobId?: string;
+  jobTeamMembers?: any[];
   canModify?: boolean;
 }
 
@@ -59,6 +62,8 @@ export function PipelineStageDetails({
   onUpdateCandidate,
   pipelineId,
   candidateId,
+  jobId,
+  jobTeamMembers,
   canModify = true,
 }: PipelineStageDetailsProps) {
   const [isEditingStage, setIsEditingStage] = useState(false);
@@ -310,6 +315,18 @@ export function PipelineStageDetails({
 
       {/* Main Content Grid */}
       <div className="relative">
+        {displayStage === "Screening" && pipelineId && candidateId && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 mb-4">
+             <CvSubmissionResponsibility 
+                pipelineId={pipelineId}
+                candidateId={candidateId}
+                jobId={jobId || (candidate as any)?.jobId?._id}
+                jobTeamMembers={jobTeamMembers || []}
+                canModify={canModify}
+             />
+          </div>
+        )}
+
         {displayStage === "Interview" ? (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <InterviewRoundsList 

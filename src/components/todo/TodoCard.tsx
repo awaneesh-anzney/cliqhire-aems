@@ -2,6 +2,8 @@
 
 import React from "react";
 import { format } from "date-fns";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +15,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -23,18 +34,22 @@ import {
   Briefcase,
   Bell,
   CheckCircle2,
+  AlertTriangle,
   Calendar as CalendarIcon,
   ExternalLink,
   MoreHorizontal,
   Eye,
   Edit,
   Trash2,
-  GripVertical
+  GripVertical,
+  Loader2
 } from "lucide-react";
+import { cvSubmissionService } from "@/services/cvSubmissionService";
 
 interface TodoCardProps {
   task: any;
   taskType: "assignedJob" | "reminderTask" | "personalTask";
+  cvSubmissions?: any[];
   onStatusChange: (taskId: string, taskType: string, status: "to-do" | "inprogress" | "completed") => void;
   onToggleComplete?: (task: any) => void;
   onView?: (task: any) => void;
@@ -45,13 +60,44 @@ interface TodoCardProps {
 export function TodoCard({
   task,
   taskType,
+  cvSubmissions = [],
   onStatusChange,
   onToggleComplete,
   onView,
   onEdit,
   onDelete,
 }: TodoCardProps) {
+  const [reasonOpen, setReasonOpen] = React.useState(false);
+  const [delayReason, setDelayReason] = React.useState("");
+  const queryClient = useQueryClient();
+
   const isCompleted = (task.status || "").toLowerCase().trim() === "completed";
+
+  const isCvSubmission = taskType === "reminderTask" && task.id?.startsWith("cvsubmit_");
+  const relatedCvSubmission = isCvSubmission ? cvSubmissions.find((cv: any) => 
+    `cvsubmit_${cv.candidate?._id || cv.candidate?.id}_${cv.job?._id || cv.job?.id}` === task.id
+  ) : null;
+  const isOverdue = relatedCvSubmission?.status === 'OVERDUE';
+
+  const reasonMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => 
+      cvSubmissionService.submitReason(id, reason),
+    onSuccess: () => {
+      toast.success("Reason logged. SLA timer restarted.");
+      setReasonOpen(false);
+      setDelayReason("");
+      queryClient.invalidateQueries({ queryKey: ["cv-submissions-my-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to submit reason");
+    }
+  });
+
+  const handleSubmitReason = () => {
+    if (!delayReason.trim() || !relatedCvSubmission) return;
+    reasonMutation.mutate({ id: relatedCvSubmission._id, reason: delayReason });
+  };
 
   const getPriorityBadge = (priority: string) => {
     const styles: Record<string, string> = {
@@ -84,6 +130,9 @@ export function TodoCard({
     } else if (normalized === "to-do" || normalized === "todo") {
       label = "TO DO";
       style = "bg-slate-500/10 text-slate-600 border-slate-500/20 dark:text-slate-400";
+    } else if (normalized === "overdue") {
+      label = "OVERDUE";
+      style = "bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400 animate-pulse";
     } else if (normalized) {
       label = status.toUpperCase();
       style = "bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400";
@@ -172,7 +221,7 @@ export function TodoCard({
                 {task.candidateName || task.jobTitle || "Reminder"}
               </h4>
             </div>
-            {getStatusBadge(task.status)}
+            {isOverdue ? getStatusBadge("OVERDUE") : getStatusBadge(task.status)}
           </div>
 
           <div className="pl-5 space-y-1">
@@ -214,9 +263,28 @@ export function TodoCard({
               </Button>
             )}
 
+            {isOverdue && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setReasonOpen(true)}
+                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 h-7 text-[10px] font-bold uppercase tracking-wider"
+              >
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                Submit Reason
+              </Button>
+            )}
+
             <Select
               value={task.status || "to-do"}
-              onValueChange={(val: any) => onStatusChange(task.id, taskType, val)}
+              onValueChange={(val: any) => {
+                if (isOverdue && val === "completed") {
+                  toast.error("You must submit a delay reason first.");
+                  setReasonOpen(true);
+                  return;
+                }
+                onStatusChange(task.id, taskType, val);
+              }}
             >
               <SelectTrigger className="h-7 w-[105px] rounded-lg text-[10px] font-bold border-border bg-card">
                 <SelectValue placeholder="Status" />
@@ -229,6 +297,47 @@ export function TodoCard({
             </Select>
           </div>
         </div>
+
+        {/* Reason Dialog */}
+        <Dialog open={reasonOpen} onOpenChange={setReasonOpen}>
+          <DialogContent className="max-w-md rounded-2xl border border-red-200 bg-card shadow-2xl p-6">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-red-600 mb-2">
+                <AlertTriangle className="h-5 w-5" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">SLA Breached</span>
+              </div>
+              <DialogTitle className="text-lg font-extrabold tracking-tight">Provide Delay Reason</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground font-medium">
+                The 24-hour SLA for this CV submission has expired. Please provide a valid reason for the delay to reset the timer.
+              </p>
+              <div className="space-y-2">
+                <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Reason for Delay</Label>
+                <Textarea 
+                  placeholder="e.g. Waiting on candidate's updated portfolio..."
+                  value={delayReason}
+                  onChange={(e) => setDelayReason(e.target.value)}
+                  className="min-h-[100px] text-xs resize-none"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReasonOpen(false)} className="rounded-xl font-bold text-xs uppercase tracking-wider">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmitReason}
+                disabled={!delayReason.trim() || reasonMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider"
+              >
+                {reasonMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Submit & Reopen
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
       </div>
     );
   }

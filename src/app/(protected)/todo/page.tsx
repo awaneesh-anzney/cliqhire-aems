@@ -26,6 +26,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMyTasks } from "@/hooks/useMyTasks";
 import { usePersonalTasks } from "@/hooks/usePersonalTasks";
 import { taskService } from "@/services/taskService";
+import { cvSubmissionService } from "@/services/cvSubmissionService";
 import { format } from "date-fns";
 import {
   Plus,
@@ -102,6 +103,14 @@ export default function TodoPage() {
   const personalTasks = myTasksData?.data?.personalTasks || [];
   const reminderTasks = myTasksData?.data?.reminderTasks || [];
   const counts = myTasksData?.counts || { assignedJobs: 0, personalTasks: 0, reminderTasks: 0 };
+
+  // Fetch CV Submission Tasks
+  const { data: cvSubmissionData } = useQuery({
+    queryKey: ["cv-submissions-my-tasks"],
+    queryFn: () => cvSubmissionService.getMyTasks()
+  });
+  
+  const cvSubmissions = cvSubmissionData?.data || [];
 
   // Handlers for personal task creation/editing
   const handleOpenCreateDialog = () => {
@@ -354,6 +363,7 @@ export default function TodoPage() {
               assignedJobs={assignedJobs}
               reminderTasks={reminderTasks}
               personalTasks={personalTasks}
+              cvSubmissions={cvSubmissions}
               onStatusChange={handleStatusChange}
               onToggleComplete={handleTogglePersonalTaskComplete}
               onView={(task) => {
