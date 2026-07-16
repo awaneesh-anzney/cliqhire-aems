@@ -74,6 +74,30 @@ export function CvSubmissionResponsibility({
     (record) => record.status === 'PENDING' || record.status === 'OVERDUE'
   );
 
+  const getAssignedUser = () => {
+    if (!activeResponsibility) return null;
+    
+    const assigned = activeResponsibility.assignedTo;
+    if (assigned && typeof assigned === 'object' && assigned._id) {
+      return assigned;
+    }
+    
+    // Fallback if it's just a string ID
+    const memberId = typeof assigned === 'object' ? assigned.toString() : assigned;
+    const member = allTeamMembers.find((m: any) => m._id === memberId);
+    if (member) {
+      return {
+        _id: member._id,
+        name: [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email,
+      };
+    }
+    return { _id: memberId, name: 'Unknown User' };
+  };
+
+  const assignedUser = getAssignedUser();
+  const isAssignee = assignedUser?._id === user?.id || activeResponsibility?.assignedTo === user?.id;
+  const canUserModify = canModify || isAssignee;
+
   const assignMutation = useMutation({
     mutationFn: (userId: string) => cvSubmissionService.assign({
       pipelineId,
@@ -239,12 +263,12 @@ export function CvSubmissionResponsibility({
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10 border border-border">
                   <AvatarFallback className="text-xs font-bold bg-muted">
-                    {activeResponsibility.assignedTo?.name?.substring(0, 2).toUpperCase() || 'U'}
+                    {assignedUser?.name?.substring(0, 2).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Responsible Person</p>
-                  <p className="text-sm font-bold text-foreground">{activeResponsibility.assignedTo?.name}</p>
+                  <p className="text-sm font-bold text-foreground">{assignedUser?.name}</p>
                 </div>
               </div>
 
@@ -260,7 +284,7 @@ export function CvSubmissionResponsibility({
                   </p>
                 </div>
                 
-                {(canModify || activeResponsibility.assignedTo?._id === user?.id) && (
+                {canUserModify && (
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -285,7 +309,7 @@ export function CvSubmissionResponsibility({
             </div>
 
             {/* Reassign UI */}
-            {isReassigning && (canModify || activeResponsibility.assignedTo?._id === user?.id) && (
+            {isReassigning && canUserModify && (
               <div className="p-3 bg-muted/30 border border-border rounded-xl flex items-center gap-2 animate-in fade-in zoom-in-95">
                 <Select value={reassignTo} onValueChange={setReassignTo}>
                   <SelectTrigger className="h-8 text-xs flex-1">
@@ -327,7 +351,7 @@ export function CvSubmissionResponsibility({
                   The 24-hour SLA has expired. Please provide a reason for the delay to restart the timer.
                 </p>
                 
-                {canModify && activeResponsibility.assignedTo?._id === user?.id && (
+                {canUserModify && isAssignee && (
                   <div className="space-y-2 mt-2">
                     <Textarea 
                       placeholder="Why was the CV not submitted on time?"
@@ -347,9 +371,9 @@ export function CvSubmissionResponsibility({
                     </div>
                   </div>
                 )}
-                {canModify && activeResponsibility.assignedTo?._id !== user?.id && (
+                {canModify && !isAssignee && (
                   <p className="text-[11px] font-medium text-destructive/80 italic border-t border-destructive/20 pt-2">
-                    Only the assigned person ({activeResponsibility.assignedTo?.name}) can log the reason.
+                    Only the assigned person ({assignedUser?.name}) can log the reason.
                   </p>
                 )}
               </div>
