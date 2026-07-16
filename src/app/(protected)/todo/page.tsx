@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useMyTasks } from "@/hooks/useMyTasks";
 import { usePersonalTasks } from "@/hooks/usePersonalTasks";
 import { taskService } from "@/services/taskService";

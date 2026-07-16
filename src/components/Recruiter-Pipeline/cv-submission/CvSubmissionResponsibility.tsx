@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cvSubmissionService, CvSubmissionResponsibility as ICvSubmission } from "@/services/cvSubmissionService";
+import { getTeamMembers } from "@/services/teamMembersService";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -60,7 +61,13 @@ export function CvSubmissionResponsibility({
     enabled: !!candidateId && !!jobId
   });
 
+  const { data: teamData, isLoading: teamLoading } = useQuery({
+    queryKey: ["team-members"],
+    queryFn: () => getTeamMembers(),
+  });
+
   const historyRecords = data?.data || [];
+  const allTeamMembers = teamData?.teamMembers || [];
   
   // Find the active responsibility (PENDING or OVERDUE)
   const activeResponsibility = historyRecords.find(
@@ -125,24 +132,19 @@ export function CvSubmissionResponsibility({
   };
 
   const getTeamMemberOptions = () => {
-    if (!jobTeamMembers || jobTeamMembers.length === 0) return [];
+    if (!allTeamMembers || allTeamMembers.length === 0) return [];
     
-    // Extract unique users from jobTeamMembers array
-    const users = new Map();
-    jobTeamMembers.forEach(member => {
-      if (member.users && Array.isArray(member.users)) {
-        member.users.forEach((u: any) => {
-          if (u._id) users.set(u._id, u);
-        });
-      }
-    });
-    
-    return Array.from(users.values());
+    return allTeamMembers
+      .filter((m: any) => m.status === "Active" || m.isActive === "Active")
+      .map((m: any) => ({
+        _id: m._id,
+        name: [m.firstName, m.lastName].filter(Boolean).join(" ") || m.email || "Unknown User"
+      }));
   };
 
   const teamMembers = getTeamMemberOptions();
 
-  if (isLoading) {
+  if (isLoading || teamLoading) {
     return (
       <div className="flex items-center justify-center p-8 bg-card border border-border rounded-xl">
         <Loader2 className="h-6 w-6 animate-spin text-brand" />
@@ -155,7 +157,7 @@ export function CvSubmissionResponsibility({
       {/* Header */}
       <div className="bg-muted/30 p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <Send className="h-4 w-4" />
           </div>
           <div>
@@ -168,7 +170,7 @@ export function CvSubmissionResponsibility({
         {activeResponsibility && (
           <Badge variant="outline" className={cn(
             "uppercase tracking-wider text-[10px] font-bold px-2 py-0.5",
-            activeResponsibility.status === 'OVERDUE' ? "bg-red-50 text-red-600 border-red-200" : "bg-blue-50 text-blue-600 border-blue-200"
+            activeResponsibility.status === 'OVERDUE' ? "bg-destructive/10 text-destructive border-destructive/20" : "bg-primary/10 text-primary border-primary/20"
           )}>
             {activeResponsibility.status}
           </Badge>
@@ -204,7 +206,7 @@ export function CvSubmissionResponsibility({
                 <Button 
                   onClick={handleAssign}
                   disabled={!assignedTo || assignMutation.isPending}
-                  className="h-9 px-4 text-xs font-bold uppercase tracking-wider bg-indigo-600 hover:bg-indigo-700 text-white"
+                  className="h-9 px-4 text-xs font-bold uppercase tracking-wider bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {assignMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Assign"}
                 </Button>
@@ -216,7 +218,7 @@ export function CvSubmissionResponsibility({
           <div className="space-y-4">
             <div className={cn(
               "p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4",
-              activeResponsibility.status === 'OVERDUE' ? "bg-red-50/50 border-red-100" : "bg-blue-50/30 border-blue-100"
+              activeResponsibility.status === 'OVERDUE' ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
             )}>
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10 border border-border">
@@ -235,7 +237,7 @@ export function CvSubmissionResponsibility({
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Deadline</p>
                   <p className={cn(
                     "text-sm font-bold flex items-center gap-1.5",
-                    activeResponsibility.status === 'OVERDUE' ? "text-red-600" : "text-foreground"
+                    activeResponsibility.status === 'OVERDUE' ? "text-destructive" : "text-foreground"
                   )}>
                     <Clock className="h-3.5 w-3.5" />
                     {format(new Date(activeResponsibility.dueAt), "MMM dd, hh:mm a")}
@@ -273,7 +275,7 @@ export function CvSubmissionResponsibility({
                 <Button 
                   onClick={handleReassign}
                   disabled={!reassignTo || reassignMutation.isPending}
-                  className="h-8 text-[10px] font-bold uppercase tracking-wider bg-brand text-white"
+                  className="h-8 text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground"
                 >
                   Confirm
                 </Button>
@@ -289,12 +291,12 @@ export function CvSubmissionResponsibility({
 
             {/* Overdue Reason UI */}
             {activeResponsibility.status === 'OVERDUE' && (
-              <div className="p-4 bg-red-50/80 border border-red-200 rounded-xl space-y-3">
-                <div className="flex items-center gap-2 text-red-700">
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl space-y-3">
+                <div className="flex items-center gap-2 text-destructive">
                   <AlertTriangle className="h-4 w-4" />
                   <h4 className="text-xs font-bold uppercase tracking-wider">SLA Breached</h4>
                 </div>
-                <p className="text-xs text-red-600/80 font-medium">
+                <p className="text-xs text-destructive/90 font-medium">
                   The 24-hour SLA has expired. Please provide a reason for the delay to restart the timer.
                 </p>
                 
@@ -304,13 +306,13 @@ export function CvSubmissionResponsibility({
                       placeholder="Why was the CV not submitted on time?"
                       value={delayReason}
                       onChange={(e) => setDelayReason(e.target.value)}
-                      className="text-xs min-h-[80px] bg-white border-red-200 focus-visible:ring-red-500"
+                      className="text-xs min-h-[80px] bg-card border-destructive/30 focus-visible:ring-destructive"
                     />
                     <div className="flex justify-end">
                       <Button 
                         onClick={handleSubmitReason}
                         disabled={!delayReason.trim() || reasonMutation.isPending}
-                        className="h-8 text-[10px] font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 text-white"
+                        className="h-8 text-[10px] font-bold uppercase tracking-wider bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                       >
                         {reasonMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : null}
                         Submit Reason & Reset
@@ -319,7 +321,7 @@ export function CvSubmissionResponsibility({
                   </div>
                 )}
                 {canModify && activeResponsibility.assignedTo?._id !== user?.id && (
-                  <p className="text-[11px] font-medium text-red-500 italic border-t border-red-200 pt-2">
+                  <p className="text-[11px] font-medium text-destructive/80 italic border-t border-destructive/20 pt-2">
                     Only the assigned person ({activeResponsibility.assignedTo?.name}) can log the reason.
                   </p>
                 )}
@@ -365,7 +367,7 @@ export function CvSubmissionResponsibility({
                             </p>
                           )}
                           {event.event === 'SUBMITTED' && (
-                            <p className="text-muted-foreground text-[11px] text-emerald-600 flex items-center gap-1">
+                            <p className="text-muted-foreground text-[11px] text-primary flex items-center gap-1">
                               <CheckCircle2 className="h-3 w-3" /> Submitted by {event.by?.name}
                             </p>
                           )}
