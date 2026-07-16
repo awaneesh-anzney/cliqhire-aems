@@ -116,6 +116,17 @@ export function CvSubmissionResponsibility({
     }
   });
 
+  const submitMutation = useMutation({
+    mutationFn: (id: string) => cvSubmissionService.submit(id),
+    onSuccess: () => {
+      toast.success("CV marked as submitted! SLA fulfilled.");
+      refetch();
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to submit CV");
+    }
+  });
+
   const handleAssign = () => {
     if (!assignedTo) return;
     assignMutation.mutate(assignedTo);
@@ -129,6 +140,11 @@ export function CvSubmissionResponsibility({
   const handleReassign = () => {
     if (!reassignTo || !activeResponsibility) return;
     reassignMutation.mutate({ id: activeResponsibility._id, newUserId: reassignTo });
+  };
+
+  const handleMarkSubmitted = () => {
+    if (!activeResponsibility) return;
+    submitMutation.mutate(activeResponsibility._id);
   };
 
   const getTeamMemberOptions = () => {
@@ -244,21 +260,32 @@ export function CvSubmissionResponsibility({
                   </p>
                 </div>
                 
-                {canModify && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsReassigning(!isReassigning)}
-                    className="h-8 text-[10px] font-bold uppercase tracking-wider"
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1.5" /> Reassign
-                  </Button>
+                {(canModify || activeResponsibility.assignedTo?._id === user?.id) && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsReassigning(!isReassigning)}
+                      className="h-8 text-[10px] font-bold uppercase tracking-wider"
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1.5" /> Reassign
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleMarkSubmitted}
+                      disabled={submitMutation.isPending || (activeResponsibility.status === 'OVERDUE')}
+                      className="h-8 text-[10px] font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      {submitMutation.isPending ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <CheckCircle2 className="h-3 w-3 mr-1.5" />}
+                      Mark Submitted
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Reassign UI */}
-            {isReassigning && canModify && (
+            {isReassigning && (canModify || activeResponsibility.assignedTo?._id === user?.id) && (
               <div className="p-3 bg-muted/30 border border-border rounded-xl flex items-center gap-2 animate-in fade-in zoom-in-95">
                 <Select value={reassignTo} onValueChange={setReassignTo}>
                   <SelectTrigger className="h-8 text-xs flex-1">
@@ -331,7 +358,7 @@ export function CvSubmissionResponsibility({
         )}
 
         {/* History / Audit Log */}
-        {historyRecords.length > 0 && (
+        {historyRecords.length > 0 ? (
           <div className="mt-6 border-t border-border pt-4">
             <h4 className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-4">
               <History className="h-3.5 w-3.5" /> Audit History
@@ -340,44 +367,57 @@ export function CvSubmissionResponsibility({
               <div className="space-y-4">
                 {historyRecords.map((record) => (
                   <div key={record._id} className="space-y-3 pb-4 border-b border-border/50 last:border-0 last:pb-0">
-                    {record.history?.slice().reverse().map((event, idx) => (
-                      <div key={idx} className="flex gap-3 text-xs">
-                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mt-1.5 shrink-0" />
-                        <div className="flex-1 space-y-1">
-                          <p className="text-foreground">
-                            <span className="font-semibold">{event.event.replace(/_/g, ' ')}</span>
-                            {" • "}
-                            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">
-                              {format(new Date(event.at), "MMM dd, hh:mm a")}
-                            </span>
-                          </p>
-                          {event.event === 'ASSIGNED' && event.to && (
-                            <p className="text-muted-foreground text-[11px]">
-                              Assigned to {event.to?.name} by {event.by?.name}
+                    {(!record.history || record.history.length === 0) ? (
+                      <p className="text-[10px] text-muted-foreground italic">No events recorded.</p>
+                    ) : (
+                      record.history.slice().reverse().map((event, idx) => (
+                        <div key={idx} className="flex gap-3 text-xs">
+                          <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mt-1.5 shrink-0" />
+                          <div className="flex-1 space-y-1">
+                            <p className="text-foreground">
+                              <span className="font-semibold">{event.event.replace(/_/g, ' ')}</span>
+                              {" • "}
+                              <span className="text-muted-foreground text-[10px] uppercase tracking-wider">
+                                {format(new Date(event.at), "MMM dd, hh:mm a")}
+                              </span>
                             </p>
-                          )}
-                          {event.event === 'REOPENED_WITH_REASON' && (
-                            <p className="text-muted-foreground text-[11px] bg-muted/40 p-2 rounded-lg italic border border-border/50">
-                              &quot;{event.reason}&quot; - {event.by?.name}
-                            </p>
-                          )}
-                          {event.event === 'REASSIGNED' && (
-                            <p className="text-muted-foreground text-[11px]">
-                              From {event.from?.name} to {event.to?.name} {event.reason ? ` - "${event.reason}"` : ""}
-                            </p>
-                          )}
-                          {event.event === 'SUBMITTED' && (
-                            <p className="text-muted-foreground text-[11px] text-primary flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" /> Submitted by {event.by?.name}
-                            </p>
-                          )}
+                            {event.event === 'ASSIGNED' && event.to && (
+                              <p className="text-muted-foreground text-[11px]">
+                                Assigned to {event.to?.name} by {event.by?.name}
+                              </p>
+                            )}
+                            {event.event === 'REOPENED_WITH_REASON' && (
+                              <p className="text-muted-foreground text-[11px] bg-muted/40 p-2 rounded-lg italic border border-border/50">
+                                &quot;{event.reason}&quot; - {event.by?.name}
+                              </p>
+                            )}
+                            {event.event === 'REASSIGNED' && (
+                              <p className="text-muted-foreground text-[11px]">
+                                From {event.from?.name} to {event.to?.name} {event.reason ? ` - "${event.reason}"` : ""}
+                              </p>
+                            )}
+                            {event.event === 'SUBMITTED' && (
+                              <p className="text-muted-foreground text-[11px] text-primary flex items-center gap-1">
+                                <CheckCircle2 className="h-3 w-3" /> Submitted by {event.by?.name}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 ))}
               </div>
             </ScrollArea>
+          </div>
+        ) : (
+          <div className="mt-6 border-t border-border pt-4">
+             <h4 className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-4">
+              <History className="h-3.5 w-3.5" /> Audit History
+            </h4>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider bg-muted/30 p-4 rounded-xl border border-dashed text-center">
+              No tracking information available yet.
+            </p>
           </div>
         )}
       </div>

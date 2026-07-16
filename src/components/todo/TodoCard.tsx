@@ -99,6 +99,18 @@ export function TodoCard({
     reasonMutation.mutate({ id: relatedCvSubmission._id, reason: delayReason });
   };
 
+  const submitCvMutation = useMutation({
+    mutationFn: (id: string) => cvSubmissionService.submit(id),
+    onSuccess: () => {
+      toast.success("CV marked as submitted! SLA fulfilled.");
+      queryClient.invalidateQueries({ queryKey: ["cv-submissions-my-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to submit CV");
+    }
+  });
+
   const getPriorityBadge = (priority: string) => {
     const styles: Record<string, string> = {
       low: "bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400",
@@ -278,15 +290,24 @@ export function TodoCard({
             <Select
               value={task.status || "to-do"}
               onValueChange={(val: any) => {
-                if (isOverdue && val === "completed") {
-                  toast.error("You must submit a delay reason first.");
-                  setReasonOpen(true);
+                if (isCvSubmission && val === "completed") {
+                  if (isOverdue) {
+                    toast.error("You must submit a delay reason first.");
+                    setReasonOpen(true);
+                    return;
+                  }
+                  // Fulfill the CV Submission SLA directly
+                  if (relatedCvSubmission?._id) {
+                    submitCvMutation.mutate(relatedCvSubmission._id);
+                  }
                   return;
                 }
                 onStatusChange(task.id, taskType, val);
               }}
+              disabled={submitCvMutation.isPending}
             >
               <SelectTrigger className="h-7 w-[105px] rounded-lg text-[10px] font-bold border-border bg-card">
+                {submitCvMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border">

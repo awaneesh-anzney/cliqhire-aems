@@ -55,6 +55,12 @@ export default function ReportsPage() {
               icon={<SalesIcon />}
               href="/reports/sales"
             />
+            <ReportCard
+              title="CV Submission SLA"
+              description="View all internal-to-client CV submission SLA compliance and metrics."
+              icon={<CandidatesIcon />}
+              href="/reports/cv-submissions"
+            />
           </div>
         </div>
       </div>
