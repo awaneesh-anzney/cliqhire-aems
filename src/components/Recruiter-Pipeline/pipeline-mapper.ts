@@ -416,6 +416,7 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
   const jobData = data.job || {};
   const job: Job = {
     id: data.pipelineId,
+    jobId: jobData,
     title: jobData.jobTitle || "",
     clientName: jobData.client?.name || "",
     location: jobData.location || "",

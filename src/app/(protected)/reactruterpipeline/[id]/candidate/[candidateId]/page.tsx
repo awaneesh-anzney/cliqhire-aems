@@ -273,7 +273,7 @@
                     onUpdateCandidate={handleUpdateCandidate}
                     pipelineId={pipelineId}
                     candidateId={candidateId}
-                    jobId={job.id}
+                    jobId={job.jobId?._id || (typeof job.jobId === 'string' ? job.jobId : job.id)}
                     jobTeamMembers={job.jobTeamMembers}
                     canModify={canModifyPipeline}
                   />
