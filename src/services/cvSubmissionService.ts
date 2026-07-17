@@ -107,6 +107,22 @@ class CvSubmissionService {
   }
 
   /**
+   * Get the current active record for a specific candidate and job
+   */
+  async getCurrentForCandidate(candidateId: string, jobId: string): Promise<CvSubmissionResponse> {
+    const response = await api.get(`/api/cv-submission/candidate/${candidateId}/job/${jobId}/current`);
+    return response.data;
+  }
+
+  /**
+   * Get a specific record by ID
+   */
+  async getById(id: string): Promise<CvSubmissionResponse> {
+    const response = await api.get(`/api/cv-submission/${id}`);
+    return response.data;
+  }
+
+  /**
    * Get active tasks for the current user
    */
   async getMyTasks(): Promise<CvSubmissionListResponse> {

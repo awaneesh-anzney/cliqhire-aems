@@ -42,7 +42,8 @@ import {
   Edit,
   Trash2,
   GripVertical,
-  Loader2
+  Loader2,
+  Send
 } from "lucide-react";
 import { cvSubmissionService } from "@/services/cvSubmissionService";
 
@@ -74,10 +75,11 @@ export function TodoCard({
   const isCompleted = (task.status || "").toLowerCase().trim() === "completed";
 
   const isCvSubmission = taskType === "reminderTask" && task.id?.startsWith("cvsubmit_");
-  const relatedCvSubmission = isCvSubmission ? cvSubmissions.find((cv: any) => 
-    `cvsubmit_${cv.candidate?._id || cv.candidate?.id}_${cv.job?._id || cv.job?.id}` === task.id
-  ) : null;
-  const isOverdue = relatedCvSubmission?.status === 'OVERDUE';
+  const isOverdue = task.status === 'OVERDUE' || task.status === 'overdue'; // Initial visual state based on task
+
+  // State for CV Confirm Modal
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [activeResponsibilityId, setActiveResponsibilityId] = React.useState<string | null>(null);
 
   const reasonMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => 
@@ -95,8 +97,8 @@ export function TodoCard({
   });
 
   const handleSubmitReason = () => {
-    if (!delayReason.trim() || !relatedCvSubmission) return;
-    reasonMutation.mutate({ id: relatedCvSubmission._id, reason: delayReason });
+    if (!delayReason.trim() || !activeResponsibilityId) return;
+    reasonMutation.mutate({ id: activeResponsibilityId, reason: delayReason });
   };
 
   const submitCvMutation = useMutation({
@@ -110,6 +112,44 @@ export function TodoCard({
       toast.error(error?.response?.data?.message || "Failed to submit CV");
     }
   });
+
+  const handleCvSubmissionComplete = async () => {
+    if (!task.candidateId || !task.jobId) {
+      toast.error("Missing candidate or job information on task");
+      return;
+    }
+    
+    try {
+      // 1. Fetch current responsibility
+      const response = await cvSubmissionService.getCurrentForCandidate(task.candidateId, task.jobId);
+      const currentRecord = response?.data;
+      
+      if (!currentRecord) {
+        toast.error("No active CV submission responsibility found.");
+        return;
+      }
+
+      setActiveResponsibilityId(currentRecord._id);
+
+      // 2. Check status
+      if (currentRecord.status === 'OVERDUE') {
+        toast.error("You must submit a delay reason first.");
+        setReasonOpen(true);
+      } else {
+        // PENDING - Show confirm modal
+        setConfirmOpen(true);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to verify CV submission status");
+    }
+  };
+
+  const handleConfirmSubmit = () => {
+    if (!activeResponsibilityId) return;
+    submitCvMutation.mutate(activeResponsibilityId);
+    setConfirmOpen(false);
+  };
 
   const getPriorityBadge = (priority: string) => {
     const styles: Record<string, string> = {
@@ -226,12 +266,20 @@ export function TodoCard({
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-1.5 min-w-0">
               <GripVertical className="h-3.5 w-3.5 text-muted-foreground/45 shrink-0 group-hover:text-muted-foreground/80 transition-colors" />
-              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 dark:text-emerald-400">
-                <Bell className="h-4 w-4" />
+              <div className={cn(
+                "h-7 w-7 rounded-lg flex items-center justify-center shrink-0",
+                isCvSubmission ? "bg-primary/10 text-primary" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              )}>
+                {isCvSubmission ? <Send className="h-3.5 w-3.5" /> : <Bell className="h-4 w-4" />}
               </div>
               <h4 className="font-bold text-xs text-foreground truncate">
                 {task.candidateName || task.jobTitle || "Reminder"}
               </h4>
+              {isCvSubmission && (
+                <Badge variant="outline" className="ml-2 bg-primary/10 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
+                  CV Submission
+                </Badge>
+              )}
             </div>
             {isOverdue ? getStatusBadge("OVERDUE") : getStatusBadge(task.status)}
           </div>
@@ -279,11 +327,11 @@ export function TodoCard({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setReasonOpen(true)}
+                onClick={() => handleCvSubmissionComplete()}
                 className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 h-7 text-[10px] font-bold uppercase tracking-wider"
               >
                 <AlertTriangle className="h-3 w-3 mr-1" />
-                Submit Reason
+                Fix SLA Breach
               </Button>
             )}
 
@@ -291,15 +339,7 @@ export function TodoCard({
               value={task.status || "to-do"}
               onValueChange={(val: any) => {
                 if (isCvSubmission && val === "completed") {
-                  if (isOverdue) {
-                    toast.error("You must submit a delay reason first.");
-                    setReasonOpen(true);
-                    return;
-                  }
-                  // Fulfill the CV Submission SLA directly
-                  if (relatedCvSubmission?._id) {
-                    submitCvMutation.mutate(relatedCvSubmission._id);
-                  }
+                  handleCvSubmissionComplete();
                   return;
                 }
                 onStatusChange(task.id, taskType, val);
@@ -358,6 +398,36 @@ export function TodoCard({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+      {/* Confirm Submit Dialog */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="max-w-md rounded-2xl border border-border bg-card shadow-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold tracking-tight flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              Confirm CV Sent
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground font-medium">
+              Are you sure you have sent the CV to the client? This will mark the task as completed and notify the team.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)} className="rounded-xl font-bold text-xs uppercase tracking-wider">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmSubmit}
+              disabled={submitCvMutation.isPending}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider"
+            >
+              {submitCvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Yes, CV is Sent
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       </div>
     );

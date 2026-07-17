@@ -55,9 +55,15 @@ export function CvSubmissionResponsibility({
   const [isReassigning, setIsReassigning] = useState<boolean>(false);
   const [reassignTo, setReassignTo] = useState<string>("");
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ["cv-submission-history", candidateId, jobId],
     queryFn: () => cvSubmissionService.getHistory(candidateId, jobId),
+    enabled: !!candidateId && !!jobId
+  });
+
+  const { data: currentData, isLoading: currentLoading, refetch: refetchCurrent } = useQuery({
+    queryKey: ["cv-submission-current", candidateId, jobId],
+    queryFn: () => cvSubmissionService.getCurrentForCandidate(candidateId, jobId),
     enabled: !!candidateId && !!jobId
   });
 
@@ -66,13 +72,21 @@ export function CvSubmissionResponsibility({
     queryFn: () => getTeamMembers(),
   });
 
-  const historyRecords = data?.data || [];
+  const historyRecords = historyData?.data || [];
   const allTeamMembers = teamData?.teamMembers || [];
   
-  // Find the active responsibility (PENDING or OVERDUE)
-  const activeResponsibility = historyRecords.find(
-    (record) => record.status === 'PENDING' || record.status === 'OVERDUE'
-  );
+  // Find the active responsibility (PENDING or OVERDUE) from the /current endpoint
+  // The /current endpoint returns the active record if one exists, or the latest submitted record, or null.
+  const currentRecord = currentData?.data;
+  const activeResponsibility = (currentRecord?.status === 'PENDING' || currentRecord?.status === 'OVERDUE') 
+    ? currentRecord 
+    : null;
+
+  const refetch = () => {
+    refetchCurrent();
+    queryClient.invalidateQueries({ queryKey: ["cv-submission-history", candidateId, jobId] });
+    queryClient.invalidateQueries({ queryKey: ["cv-submission-job-summary"] });
+  };
 
   const getAssignedUser = () => {
     if (!activeResponsibility) return null;
@@ -184,7 +198,7 @@ export function CvSubmissionResponsibility({
 
   const teamMembers = getTeamMemberOptions();
 
-  if (isLoading || teamLoading) {
+  if (historyLoading || currentLoading || teamLoading) {
     return (
       <div className="flex items-center justify-center p-8 bg-card border border-border rounded-xl">
         <Loader2 className="h-6 w-6 animate-spin text-brand" />
@@ -270,18 +284,33 @@ export function CvSubmissionResponsibility({
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Responsible Person</p>
                   <p className="text-sm font-bold text-foreground">{assignedUser?.name}</p>
                 </div>
+                
+                {activeResponsibility.assignedBy && (
+                  <div className="ml-4 pl-4 border-l border-border/60">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Assigned By</p>
+                    <p className="text-sm font-medium text-muted-foreground">{activeResponsibility.assignedBy.name || "Unknown"}</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="text-right">
+                <div className="text-right flex flex-col justify-center">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Deadline</p>
                   <p className={cn(
-                    "text-sm font-bold flex items-center gap-1.5",
+                    "text-sm font-bold flex items-center justify-end gap-1.5",
                     activeResponsibility.status === 'OVERDUE' ? "text-destructive" : "text-foreground"
                   )}>
                     <Clock className="h-3.5 w-3.5" />
                     {format(new Date(activeResponsibility.dueAt), "MMM dd, hh:mm a")}
                   </p>
+                  {activeResponsibility.hoursRemaining !== undefined && (
+                    <p className={cn(
+                      "text-[10px] font-bold tracking-wider uppercase mt-0.5",
+                      activeResponsibility.status === 'OVERDUE' ? "text-destructive animate-pulse" : "text-muted-foreground"
+                    )}>
+                      {activeResponsibility.status === 'OVERDUE' ? "Overdue - Reason Pending" : `Due in ${Math.round(activeResponsibility.hoursRemaining)}h`}
+                    </p>
+                  )}
                 </div>
                 
                 {canUserModify && (
