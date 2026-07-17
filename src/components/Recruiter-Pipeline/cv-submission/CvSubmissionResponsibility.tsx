@@ -93,7 +93,10 @@ export function CvSubmissionResponsibility({
     
     const assigned = activeResponsibility.assignedTo;
     if (assigned && typeof assigned === 'object' && assigned._id) {
-      return assigned;
+      return {
+        ...assigned,
+        name: assigned.fullName || [assigned.firstName, assigned.lastName].filter(Boolean).join(" ") || assigned.name || assigned.email,
+      };
     }
     
     // Fallback if it's just a string ID
@@ -102,7 +105,7 @@ export function CvSubmissionResponsibility({
     if (member) {
       return {
         _id: member._id,
-        name: [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email,
+        name: member.fullName || [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email,
       };
     }
     return { _id: memberId, name: 'Unknown User' };
@@ -288,7 +291,11 @@ export function CvSubmissionResponsibility({
                 {activeResponsibility.assignedBy && (
                   <div className="ml-4 pl-4 border-l border-border/60">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Assigned By</p>
-                    <p className="text-sm font-medium text-muted-foreground">{activeResponsibility.assignedBy.name || "Unknown"}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {activeResponsibility.assignedBy.fullName || 
+                       [activeResponsibility.assignedBy.firstName, activeResponsibility.assignedBy.lastName].filter(Boolean).join(" ") || 
+                       activeResponsibility.assignedBy.name || "Unknown"}
+                    </p>
                   </div>
                 )}
               </div>
@@ -436,22 +443,22 @@ export function CvSubmissionResponsibility({
                             </p>
                             {event.event === 'ASSIGNED' && event.to && (
                               <p className="text-muted-foreground text-[11px]">
-                                Assigned to {event.to?.name} by {event.by?.name}
+                                Assigned to {event.to?.fullName || [event.to?.firstName, event.to?.lastName].filter(Boolean).join(" ") || event.to?.name} by {event.by?.fullName || [event.by?.firstName, event.by?.lastName].filter(Boolean).join(" ") || event.by?.name}
                               </p>
                             )}
                             {event.event === 'REOPENED_WITH_REASON' && (
                               <p className="text-muted-foreground text-[11px] bg-muted/40 p-2 rounded-lg italic border border-border/50">
-                                &quot;{event.reason}&quot; - {event.by?.name}
+                                &quot;{event.reason}&quot; - {event.by?.fullName || [event.by?.firstName, event.by?.lastName].filter(Boolean).join(" ") || event.by?.name}
                               </p>
                             )}
                             {event.event === 'REASSIGNED' && (
                               <p className="text-muted-foreground text-[11px]">
-                                From {event.from?.name} to {event.to?.name} {event.reason ? ` - "${event.reason}"` : ""}
+                                From {event.from?.fullName || [event.from?.firstName, event.from?.lastName].filter(Boolean).join(" ") || event.from?.name} to {event.to?.fullName || [event.to?.firstName, event.to?.lastName].filter(Boolean).join(" ") || event.to?.name} {event.reason ? ` - "${event.reason}"` : ""}
                               </p>
                             )}
                             {event.event === 'SUBMITTED' && (
                               <p className="text-muted-foreground text-[11px] text-primary flex items-center gap-1">
-                                <CheckCircle2 className="h-3 w-3" /> Submitted by {event.by?.name}
+                                <CheckCircle2 className="h-3 w-3" /> Submitted by {event.by?.fullName || [event.by?.firstName, event.by?.lastName].filter(Boolean).join(" ") || event.by?.name}
                               </p>
                             )}
                           </div>
