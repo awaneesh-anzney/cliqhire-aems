@@ -105,7 +105,7 @@ export function CvSubmissionResponsibility({
     if (member) {
       return {
         _id: member._id,
-        name: member.fullName || [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email,
+        name: (member as any).fullName || [(member as any).firstName, (member as any).lastName].filter(Boolean).join(" ") || (member as any).email,
       };
     }
     return { _id: memberId, name: 'Unknown User' };
@@ -310,12 +310,12 @@ export function CvSubmissionResponsibility({
                     <Clock className="h-3.5 w-3.5" />
                     {format(new Date(activeResponsibility.dueAt), "MMM dd, hh:mm a")}
                   </p>
-                  {activeResponsibility.hoursRemaining !== undefined && (
+                  {(activeResponsibility as any).hoursRemaining !== undefined && (
                     <p className={cn(
                       "text-[10px] font-bold tracking-wider uppercase mt-0.5",
                       activeResponsibility.status === 'OVERDUE' ? "text-destructive animate-pulse" : "text-muted-foreground"
                     )}>
-                      {activeResponsibility.status === 'OVERDUE' ? "Overdue - Reason Pending" : `Due in ${Math.round(activeResponsibility.hoursRemaining)}h`}
+                      {activeResponsibility.status === 'OVERDUE' ? "Overdue - Reason Pending" : `Due in ${Math.round((activeResponsibility as any).hoursRemaining)}h`}
                     </p>
                   )}
                 </div>
