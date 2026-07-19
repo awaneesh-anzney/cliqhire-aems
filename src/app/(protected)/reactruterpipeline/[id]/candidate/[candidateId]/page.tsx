@@ -218,7 +218,7 @@
  
    return (
       <TooltipProvider delayDuration={200}>
-        <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
+        <div className="flex flex-col min-h-full w-full bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
           {/* Top Level Section: Header & Progress */}
           <div className="flex-shrink-0 flex flex-col gap-3 animate-in slide-in-from-top-4 duration-1000 delay-100">
             <CandidateHeaderCard
@@ -237,7 +237,7 @@
           </div>
   
           {/* Content Area: Tabs Wrapper */}
-          <Tabs defaultValue="pipeline" className="flex-1 min-h-0 flex flex-col gap-3">
+          <Tabs defaultValue="pipeline" className="w-full flex flex-col gap-3">
             <TabsList className="flex-shrink-0 self-start bg-card border border-border shadow-sm p-1 rounded-xl h-10">
               <TabsTrigger value="pipeline" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-muted">
                 <LayoutDashboard className="h-3.5 w-3.5 text-brand" />
@@ -253,7 +253,7 @@
               </TabsTrigger>
             </TabsList>
   
-            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 pb-4">
+            <div className="w-full pr-1 pb-4">
               <TabsContent value="pipeline" className="mt-0 space-y-3 focus-visible:outline-none">
                 <CandidateDisqualificationCard candidate={candidate} />
   
@@ -273,6 +273,8 @@
                     onUpdateCandidate={handleUpdateCandidate}
                     pipelineId={pipelineId}
                     candidateId={candidateId}
+                    jobId={job.jobId?._id || (typeof job.jobId === 'string' ? job.jobId : job.id)}
+                    jobTeamMembers={job.jobTeamMembers}
                     canModify={canModifyPipeline}
                   />
                 </div>

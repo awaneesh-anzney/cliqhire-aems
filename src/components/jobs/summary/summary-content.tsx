@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditExperienceDialog } from "./edit-experience-dialog";
 import { EditTeamSizeDialog } from "./edit-team-size-dialog";
+import { JobCvSubmissionSummary } from "./JobCvSubmissionSummary";
 
 interface SummaryContentProps {
   jobId: string;
@@ -249,6 +250,8 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
 
   return (
     <div className="p-2 space-y-6 bg-muted/50 rounded-2xl">
+      <JobCvSubmissionSummary jobId={jobId} />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Job Details & Requirements */}
         <div className="space-y-6">

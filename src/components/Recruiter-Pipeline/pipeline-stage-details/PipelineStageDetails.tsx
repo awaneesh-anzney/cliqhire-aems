@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Target, Clock, Edit3, Check, X, Loader2, Sparkles, User2, Calendar } from "lucide-react";
+import { Target, Clock, Edit3, Check, X, Loader2, Sparkles, User2, Calendar, Undo } from "lucide-react";
 import { RecruiterPipelineService } from "@/services/recruiterPipelineService";
 import { toast } from "sonner";
 import {
@@ -33,6 +33,7 @@ import {
 } from "../dummy-data";
 import { InterviewRoundsList } from "../InterviewRoundsList";
 import { InterviewRoundDialog } from "../InterviewRoundDialog";
+import { CvSubmissionResponsibility } from "../cv-submission/CvSubmissionResponsibility";
 import { cn } from "@/lib/utils";
 
 // Helper to get stage key from stage name (for local state only)
@@ -49,6 +50,8 @@ interface PipelineStageDetailsProps {
   onUpdateCandidate?: (updatedCandidate?: any) => void;
   pipelineId?: string;
   candidateId?: string;
+  jobId?: string;
+  jobTeamMembers?: any[];
   canModify?: boolean;
 }
 
@@ -59,6 +62,8 @@ export function PipelineStageDetails({
   onUpdateCandidate,
   pipelineId,
   candidateId,
+  jobId,
+  jobTeamMembers,
   canModify = true,
 }: PipelineStageDetailsProps) {
   const [isEditingStage, setIsEditingStage] = useState(false);
@@ -310,6 +315,18 @@ export function PipelineStageDetails({
 
       {/* Main Content Grid */}
       <div className="relative">
+        {displayStage === "Screening" && pipelineId && candidateId && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 mb-4">
+             <CvSubmissionResponsibility 
+                pipelineId={pipelineId}
+                candidateId={candidateId}
+                jobId={jobId || (candidate as any)?.jobId?._id}
+                jobTeamMembers={jobTeamMembers || []}
+                canModify={canModify}
+             />
+          </div>
+        )}
+
         {displayStage === "Interview" ? (
           <div className="animate-in fade-in slide-in-from-bottom-2">
             <InterviewRoundsList 
@@ -331,33 +348,55 @@ export function PipelineStageDetails({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 animate-in fade-in slide-in-from-bottom-2">
-            {stageFields.map((field) => (
-              <div 
-                 key={field.key} 
-                 className={cn(
-                   "group relative flex items-start gap-3.5 p-3 rounded-xl border transition-all duration-300",
-                   isEditingStage ? "bg-card border-brand/20 shadow-md ring-2 ring-brand/5" : "bg-muted/50 border-border hover:bg-card hover:border-brand/10 hover:shadow-lg"
-                 )}
-              >
-                <div className={cn("p-1.5 rounded-lg shrink-0 transition-transform group-hover:scale-110", field.color)}>
-                   {field.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 group-hover:text-brand transition-colors">
-                     {field.label}
-                  </p>
-                  {isEditingStage && field.key !== "probationEndDate" ? (
-                    <div className="mt-1">
-                      {renderFieldInput(field, editValues[field.key] ?? "", (val) => handleUpdateFieldValue(field.key, val))}
+            {stageFields.map((field) => {
+              const originalVal = (field.value?.toString() || "") === "Not set" ? "" : (field.value?.toString() || "");
+              const currentVal = editValues[field.key] ?? "";
+              const isEditable = isEditingStage && field.key !== "probationEndDate";
+              const isModified = isEditable && currentVal !== originalVal;
+
+              return (
+                <div 
+                   key={field.key} 
+                   className={cn(
+                     "group relative flex items-start gap-3.5 p-3 rounded-xl border transition-all duration-300",
+                     isEditingStage ? "bg-card border-brand/20 shadow-md ring-2 ring-brand/5" : "bg-muted/50 border-border hover:bg-card hover:border-brand/10 hover:shadow-lg"
+                   )}
+                >
+                  <div className={cn("p-1.5 rounded-lg shrink-0 transition-transform group-hover:scale-110", field.color)}>
+                     {field.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider group-hover:text-brand transition-colors">
+                         {field.label}
+                      </p>
+                      {isModified && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUpdateFieldValue(field.key, originalVal)}
+                          className="h-5 px-1.5 text-[9px] font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded border border-amber-200/50 bg-amber-50/30 flex items-center gap-1 transition-all"
+                          title="Revert to original value"
+                        >
+                          <Undo className="h-3 w-3" />
+                          Revert
+                        </Button>
+                      )}
                     </div>
-                  ) : (
-                    <p className="text-[13px] font-semibold text-foreground truncate">
-                       {renderFieldValue(field)}
-                    </p>
-                  )}
+                    {isEditable ? (
+                      <div className="mt-1">
+                        {renderFieldInput(field, currentVal, (val) => handleUpdateFieldValue(field.key, val))}
+                      </div>
+                    ) : (
+                      <p className="text-[13px] font-semibold text-foreground truncate">
+                         {renderFieldValue(field)}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

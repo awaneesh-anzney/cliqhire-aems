@@ -13,7 +13,6 @@ import {
   Mail, 
   MapPin, 
   Briefcase, 
-  GraduationCap, 
   FileText, 
   Upload, 
   CheckCircle2, 
@@ -573,14 +572,7 @@ export default function CreateCandidateForm({
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                   <Label className="text-sm font-bold text-foreground">Education Background</Label>
-                   <div className="relative group">
-                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input name="educationDegree" value={form.educationDegree} onChange={handleChange} placeholder="e.g. Master's in Computer Science" className="pl-10 h-11 border-border font-bold" />
-                  </div>
-                  <Input name="universityName" value={form.universityName} onChange={handleChange} placeholder="University Name" className="h-11 border-border font-bold" />
-                </div>
+
 
                 <div className="grid grid-cols-2 gap-6 p-6 bg-muted border border-border rounded-2xl">
                   <div className="space-y-2 flex flex-col">

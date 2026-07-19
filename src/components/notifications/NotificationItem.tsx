@@ -130,6 +130,16 @@ export function NotificationItem({
       case 'CV_TARGET_SLOT_COMPLETED': return { icon: Target, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
       case 'CV_TARGET_SLOT_EXPIRED': return { icon: FileWarning, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
 
+      // CV Submission Responsibility
+      case 'CV_SUBMISSION_ASSIGNED': return { icon: UserCheck, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
+      case 'CV_SUBMISSION_REMINDER_12H':
+      case 'CV_SUBMISSION_REMINDER_4H':
+      case 'CV_SUBMISSION_REMINDER_1H': return { icon: Clock, bg: 'bg-yellow-100 dark:bg-yellow-900/30', color: 'text-yellow-600 dark:text-yellow-400' };
+      case 'CV_SUBMISSION_OVERDUE': return { icon: AlertTriangle, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
+      case 'CV_SUBMISSION_REOPENED': return { icon: RefreshCw, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
+      case 'CV_SUBMISSION_REASSIGNED': return { icon: RefreshCw, bg: 'bg-purple-100 dark:bg-purple-900/30', color: 'text-purple-600 dark:text-purple-400' };
+      case 'CV_SUBMISSION_COMPLETED': return { icon: CheckCircle2, bg: 'bg-green-100 dark:bg-green-900/30', color: 'text-green-600 dark:text-green-400' };
+
       default: return { icon: Bell, bg: 'bg-muted/70', color: 'text-muted-foreground' };
     }
   };

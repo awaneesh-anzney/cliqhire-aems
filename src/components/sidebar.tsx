@@ -19,7 +19,11 @@
    LogOut,
    HelpCircle,
    Sparkles,
-   Bell
+   Bell,
+   ShieldCheck,
+   UserRoundCog,
+   Workflow,
+   User,
  } from "lucide-react";
  import { cn } from "@/lib/utils";
  import { useAuth } from "@/contexts/AuthContext";
@@ -45,16 +49,16 @@
    todo:           ListTodo,
    clients:        Building2,
    jobs:           Briefcase,
-   candidates:     Users,
-   pipeline:       Route,
+   candidates:     User,
+   pipeline:       Workflow,
    recruiter:      UserPlus,
    headhunter:     UserRoundSearch,
-   tem_candidates: Users,
+   tem_candidates: UserRoundCog,
    teams:          Users,
    roles:          LockKeyhole,
    settings:       Settings,
    profile:        CircleUser,
-   admin:          Lock,
+   admin:          ShieldCheck,
    notifications:  Bell,
  };
  
