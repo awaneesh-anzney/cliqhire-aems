@@ -317,7 +317,7 @@ export function ExportCandidatesDialog({
                     {!downloadUrl ? (
                         <Button
                             onClick={handleExport}
-                            disabled={isExporting || selectedStages.length === 0 || (exportMode === "custom" && selectedFields.length === 0)}
+                            disabled={isExporting}
                             className="w-full sm:w-auto sm:ml-2 min-w-[100px]"
                         >
                             Export
