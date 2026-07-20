@@ -676,16 +676,37 @@ export const convertTempCandidateToReal = async (
 };
 
 /**
+ * Fetch available export fields
+ */
+export const getExportFields = async (): Promise<any> => {
+  try {
+    const response = await api.get(`/api/recruiter-pipeline/export-fields`);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching export fields:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch export fields');
+  }
+};
+
+/**
  * Export candidates from a pipeline to Excel.
  * If stages is empty, exports all candidates.
  */
 export const exportCandidatesToExcel = async (
   pipelineId: string,
-  stages: string[] = []
+  stages: string[] = [],
+  fields: string[] = []
 ): Promise<Blob> => {
   try {
+    const params: any = { stages: stages.join(',') };
+    if (fields.length > 0 && !fields.includes('all')) {
+      params.fields = fields.join(',');
+    } else if (fields.includes('all')) {
+      params.fields = 'all';
+    }
+    
     const response = await api.get(`/api/recruiter-pipeline/${pipelineId}/export`, {
-      params: { stages: stages.join(',') },
+      params,
       responseType: 'blob',
     });
     return response.data;
