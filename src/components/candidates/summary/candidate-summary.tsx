@@ -87,7 +87,7 @@ const detailsFields = [
 const academicFields = [
   { key: "universityName", label: "University Name" },
   { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
-  { key: "certification", label: "Professional Certifications", isTextarea: true },
+  { key: "certification", label: "Professional Certifications", isArray: true },
 ];
 
 // Split details fields into default visible and collapsible sections
@@ -466,11 +466,13 @@ const CandidateSummary = ({
                 onClose={() => setEditField(null)}
                 fieldName={field.label}
                 currentValue={
-                  typeof rawValue === "string"
+                  field.isArray 
                     ? rawValue
-                    : Array.isArray(rawValue)
-                      ? rawValue.join(", ")
-                      : ""
+                    : typeof rawValue === "string"
+                      ? rawValue
+                      : Array.isArray(rawValue)
+                        ? rawValue.join(", ")
+                        : ""
                 }
                 onSave={(val: any) => handleSave(field.key, val)}
                 isLocation={field.key === "location"}
@@ -478,6 +480,7 @@ const CandidateSummary = ({
                 isNationality={field.key === "nationality"}
                 isContinent={field.key === "continent"}
                 isPhone={field.key === "phone" || field.key === "otherPhone"}
+                isArray={field.isArray}
                 countryCode={field.key === "phone" ? localCandidate?.countryCode : localCandidate?.otherCountryCode}
                 options={field.key === "noticePeriod" ? [
                   { value: "15 Days", label: "15 Days" },
@@ -555,18 +558,9 @@ const CandidateSummary = ({
               open={editField === field.key}
               onClose={() => setEditField(null)}
               fieldName={field.label}
-              currentValue={displayValue || ""}
-              onSave={(val: string) => {
-                // Convert comma-separated string back to array
-                const arrayValue = val.trim()
-                  ? val
-                    .split(",")
-                    .map((item) => item.trim())
-                    .filter((item) => item)
-                  : [];
-                handleSave(field.key, arrayValue);
-              }}
-              isTextarea={true}
+              currentValue={rawValue}
+              onSave={(val: any) => handleSave(field.key, val)}
+              isArray={true}
             />
           </div>
         )}
