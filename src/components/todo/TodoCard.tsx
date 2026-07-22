@@ -43,7 +43,8 @@ import {
   Trash2,
   GripVertical,
   Loader2,
-  Send
+  Send,
+  ClipboardList
 } from "lucide-react";
 import { cvSubmissionService } from "@/services/cvSubmissionService";
 
@@ -75,6 +76,7 @@ export function TodoCard({
   const isCompleted = (task.status || "").toLowerCase().trim() === "completed";
 
   const isCvSubmission = taskType === "reminderTask" && task.id?.startsWith("cvsubmit_");
+  const isScreeningFollowUp = taskType === "reminderTask" && task.kind === "screening_followup";
   const isOverdue = task.status === 'OVERDUE' || task.status === 'overdue'; // Initial visual state based on task
 
   // State for CV Confirm Modal
@@ -268,9 +270,13 @@ export function TodoCard({
               <GripVertical className="h-3.5 w-3.5 text-muted-foreground/45 shrink-0 group-hover:text-muted-foreground/80 transition-colors" />
               <div className={cn(
                 "h-7 w-7 rounded-lg flex items-center justify-center shrink-0",
-                isCvSubmission ? "bg-primary/10 text-primary" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                isCvSubmission ? "bg-primary/10 text-primary" : 
+                isScreeningFollowUp ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" :
+                "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
               )}>
-                {isCvSubmission ? <Send className="h-3.5 w-3.5" /> : <Bell className="h-4 w-4" />}
+                {isCvSubmission ? <Send className="h-3.5 w-3.5" /> : 
+                 isScreeningFollowUp ? <ClipboardList className="h-3.5 w-3.5" /> : 
+                 <Bell className="h-4 w-4" />}
               </div>
               <h4 className="font-bold text-xs text-foreground truncate">
                 {task.candidateName || task.jobTitle || "Reminder"}
@@ -278,6 +284,11 @@ export function TodoCard({
               {isCvSubmission && (
                 <Badge variant="outline" className="ml-2 bg-primary/10 text-primary border-primary/20 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
                   CV Submission
+                </Badge>
+              )}
+              {isScreeningFollowUp && (
+                <Badge variant="outline" className="ml-2 bg-teal-500/10 text-teal-600 border-teal-500/20 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
+                  Screening Due
                 </Badge>
               )}
             </div>
