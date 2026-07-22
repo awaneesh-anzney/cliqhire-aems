@@ -87,7 +87,7 @@ const detailsFields = [
 const academicFields = [
   { key: "universityName", label: "University Name" },
   { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
-  { key: "certification", label: "Professional Certifications", isTextarea: true },
+  { key: "certification", label: "Professional Certifications", isArray: true },
 ];
 
 // Split details fields into default visible and collapsible sections
@@ -427,8 +427,16 @@ const CandidateSummary = ({
             {field.key === 'domains' && hasValue ? (
               <div className="flex flex-wrap gap-1 mt-1 max-w-full">
                 {(Array.isArray(rawValue) ? rawValue : []).map((d: any) => (
-                  <span key={d._id} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">
-                    {d.name}
+                  <span key={d._id || d.name || d} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">
+                    {d.name || d}
+                  </span>
+                ))}
+              </div>
+            ) : field.key === 'certification' && hasValue ? (
+              <div className="flex flex-wrap gap-1 mt-1 max-w-full">
+                {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map(s => s.trim()).filter(Boolean) : [])).map((cert: string, idx: number) => (
+                  <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
+                    {cert}
                   </span>
                 ))}
               </div>
@@ -437,7 +445,13 @@ const CandidateSummary = ({
                 "text-xs sm:text-sm font-bold tracking-tight truncate",
                 hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
               )}>
-                {hasValue ? (field.key === 'referredBy' && typeof value === 'object' ? value.name || value.email : value) : "Not Provided"}
+                {hasValue 
+                  ? (field.key === 'referredBy' && typeof value === 'object' 
+                      ? value.name || value.email 
+                      : Array.isArray(value) 
+                        ? value.join(", ") 
+                        : value) 
+                  : "Not Provided"}
               </span>
             )}
             {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
@@ -466,11 +480,13 @@ const CandidateSummary = ({
                 onClose={() => setEditField(null)}
                 fieldName={field.label}
                 currentValue={
-                  typeof rawValue === "string"
+                  field.isArray 
                     ? rawValue
-                    : Array.isArray(rawValue)
-                      ? rawValue.join(", ")
-                      : ""
+                    : typeof rawValue === "string"
+                      ? rawValue
+                      : Array.isArray(rawValue)
+                        ? rawValue.join(", ")
+                        : ""
                 }
                 onSave={(val: any) => handleSave(field.key, val)}
                 isLocation={field.key === "location"}
@@ -478,6 +494,7 @@ const CandidateSummary = ({
                 isNationality={field.key === "nationality"}
                 isContinent={field.key === "continent"}
                 isPhone={field.key === "phone" || field.key === "otherPhone"}
+                isArray={field.isArray}
                 countryCode={field.key === "phone" ? localCandidate?.countryCode : localCandidate?.otherCountryCode}
                 options={field.key === "noticePeriod" ? [
                   { value: "15 Days", label: "15 Days" },
@@ -547,7 +564,15 @@ const CandidateSummary = ({
           "text-xs sm:text-sm font-bold leading-relaxed",
           hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
         )}>
-          {hasValue ? displayValue : "Not Provided"}
+          {hasValue ? (
+            <div className="flex flex-wrap gap-1.5">
+              {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map(s => s.trim()).filter(Boolean) : [])).map((skill: string, idx: number) => (
+                <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-muted text-muted-foreground border border-border/50">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          ) : "Not Provided"}
         </div>
         {canModify && editField === field.key && (
           <div onClick={(e) => e.stopPropagation()}>
@@ -555,18 +580,9 @@ const CandidateSummary = ({
               open={editField === field.key}
               onClose={() => setEditField(null)}
               fieldName={field.label}
-              currentValue={displayValue || ""}
-              onSave={(val: string) => {
-                // Convert comma-separated string back to array
-                const arrayValue = val.trim()
-                  ? val
-                    .split(",")
-                    .map((item) => item.trim())
-                    .filter((item) => item)
-                  : [];
-                handleSave(field.key, arrayValue);
-              }}
-              isTextarea={true}
+              currentValue={rawValue}
+              onSave={(val: any) => handleSave(field.key, val)}
+              isArray={true}
             />
           </div>
         )}

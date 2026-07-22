@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
@@ -24,6 +26,7 @@ interface EditFieldModalProps {
   isNumber?: boolean;
   isCurrency?: boolean;
   isTextarea?: boolean;
+  isArray?: boolean;
   isCountry?: boolean;
   isNationality?: boolean;
   isContinent?: boolean;
@@ -44,6 +47,7 @@ export function EditFieldModal({
   isDate,
   isCurrency,
   isTextarea,
+  isArray,
   isCountry,
   isNationality,
   isContinent,
@@ -58,9 +62,34 @@ export function EditFieldModal({
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     currentValue ? new Date(currentValue) : null
   );
+  
+  const [arrayValue, setArrayValue] = useState<string[]>(
+    Array.isArray(currentValue) 
+      ? currentValue 
+      : typeof currentValue === 'string' && currentValue 
+        ? currentValue.split(',').map(s => s.trim()).filter(Boolean) 
+        : []
+  );
+  const [tagInput, setTagInput] = useState("");
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      e.preventDefault();
+      if (!arrayValue.includes(tagInput.trim())) {
+        setArrayValue([...arrayValue, tagInput.trim()]);
+      }
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (index: number) => {
+    setArrayValue(arrayValue.filter((_, i) => i !== index));
+  };
 
   const handleSave = () => {
-    if (isDate && selectedDate) {
+    if (isArray) {
+      onSave(arrayValue);
+    } else if (isDate && selectedDate) {
       onSave(selectedDate.toISOString().split("T")[0]);
     } else if (isPhone) {
       onSave({ phone: value, countryCode: phoneCountryCode });
@@ -195,6 +224,29 @@ export function EditFieldModal({
                 placeholder={`Enter ${fieldName.toLowerCase()}`}
                 className="min-h-[120px] resize-none"
               />
+            ) : isArray ? (
+              <div className="space-y-3">
+                <Input
+                  id="tag-input"
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={handleAddTag}
+                  placeholder={`Type and press Enter to add...`}
+                />
+                {arrayValue.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {arrayValue.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="px-2 py-1 flex items-center gap-1">
+                        {tag}
+                        <X 
+                          className="h-3 w-3 cursor-pointer hover:text-red-500" 
+                          onClick={() => handleRemoveTag(index)} 
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : (
               <Input
                 id="value"
