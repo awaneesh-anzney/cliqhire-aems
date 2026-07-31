@@ -23,7 +23,6 @@ import { api } from "@/lib/axios-config"; // Import directly as used in jobs-con
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryContent } from "@/components/clients/summary/summary-content";
-import { ComplianceContent } from "@/components/clients/compliance/compliance-content";
 import { ActivitiesContent } from "@/components/clients/activities/activities-content";
 import { TimelineContent } from "@/components/clients/timeline/timeline-content";
 import { NotesContent } from "@/components/clients/notes/notes-content";
@@ -98,7 +97,7 @@ export default function ClientPage({ params }: PageProps) {
   // const [isLoading, setIsLoading] = useState(false);
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [jobsAvailable, setJobsAvailable] = useState(false);
-  const [activeTab, setActiveTab] = useState("Timeline");
+  const [activeTab, setActiveTab] = useState("Summary");
   const [reportStatus, setReportStatus] = useState<"idle" | "generating" | "completed">("idle");
   const [reportProgress, setReportProgress] = useState(0);
   const [buttonWidth, setButtonWidth] = useState<number | null>(null);
@@ -403,7 +402,7 @@ export default function ClientPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full max-w-full overflow-x-hidden">
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
@@ -451,12 +450,12 @@ export default function ClientPage({ params }: PageProps) {
       />
 
       {/* Header Section */}
-      <div className="bg-card border-b shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-6 py-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-foreground tracking-tight">{client.name || "Unnamed Client"}</h1>
+      <div className="bg-card border-b shadow-sm w-full overflow-hidden">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 w-full">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 min-w-0">
+            <div className="space-y-3 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight break-words max-w-full">{client.name || "Unnamed Client"}</h1>
                 <div className="flex items-center gap-2">
                   <ClientStageBadge
                     id={client._id}
@@ -474,16 +473,16 @@ export default function ClientPage({ params }: PageProps) {
                 </div>
               </div>
               
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-muted-foreground min-w-0 max-w-full">
                 {client.industry && (
-                  <div className="flex items-center gap-1.5">
-                    <Forklift className="h-4 w-4 text-muted-foreground" />
-                    <span>{client.industry}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Forklift className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="truncate">{client.industry}</span>
                   </div>
                 )}
                 {(client.address || client.location) && (
-                  <div className="flex items-center gap-1.5 border-l border-border pl-4">
-                    <MapPin  className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex items-center gap-1.5 border-l border-border pl-4 min-w-0">
+                    <MapPin  className="h-4 w-4 text-muted-foreground shrink-0" />
                     <span className="truncate max-w-xs">{ client.location ||client.address}</span>
                   </div>
                 )}
@@ -509,18 +508,18 @@ export default function ClientPage({ params }: PageProps) {
           </div>
           
           {/* Follow-up Widget */}
-          <div className="mt-4 flex items-center gap-2 bg-muted/30 w-fit px-4 py-2 rounded-xl border border-border shadow-sm">
-            <Clock className={`h-4 w-4 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500' : 'text-brand'}`} />
-            <span className="text-sm font-semibold text-foreground">Next Follow-up:</span>
-            <span className={`text-sm ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
+          <div className="mt-4 flex flex-wrap items-center gap-2 bg-muted/30 w-fit max-w-full px-4 py-2 rounded-xl border border-border shadow-sm min-w-0">
+            <Clock className={`h-4 w-4 shrink-0 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500' : 'text-brand'}`} />
+            <span className="text-sm font-semibold text-foreground shrink-0">Next Follow-up:</span>
+            <span className={`text-sm shrink-0 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
               {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "Not Set"}
             </span>
             {client.nextFollowUpOwner && (
-               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1">
+               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1 truncate max-w-[150px]">
                  {typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : (client.nextFollowUpOwner as any)?.firstName || 'Owner'}
                </span>
             )}
-            <Button variant="ghost" size="sm" className="h-6 px-2 text-brand hover:bg-brand/10 ml-2" onClick={() => setIsFollowUpModalOpen(true)}>
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-brand hover:bg-brand/10 ml-2 shrink-0" onClick={() => setIsFollowUpModalOpen(true)}>
               Edit
             </Button>
           </div>
@@ -590,19 +589,11 @@ export default function ClientPage({ params }: PageProps) {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0 overflow-x-auto">
-          <TabsTrigger
-            value="Compliance"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
-          >
-            <TriangleAlert className="h-4 w-4" />
-            Compliance
-          </TabsTrigger>
-
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-full min-w-0 overflow-hidden">
+        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0 overflow-x-auto max-w-full min-w-0">
           <TabsTrigger
             value="Summary"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 shrink-0"
           >
             <FileIcon className="h-4 w-4" />
             Summary
@@ -668,19 +659,11 @@ export default function ClientPage({ params }: PageProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="Jobs" className="p-0 mt-0">
+        <TabsContent value="Jobs" className="p-0 mt-0 max-w-full overflow-x-auto">
           <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
         </TabsContent>
 
-        <TabsContent value="Compliance" className="p-4">
-          <ComplianceContent
-            clientId={id}
-            clientData={client}
-            canModify={canModifyClients}
-          />
-        </TabsContent>
-
-        <TabsContent value="Summary" className="p-4">
+        <TabsContent value="Summary" className="p-2 sm:p-4 max-w-full overflow-x-hidden">
           <SummaryContent
             clientId={id}
             clientData={client}

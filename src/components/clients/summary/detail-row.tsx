@@ -90,15 +90,15 @@ export function DetailRow({
   };
 
   return (
-    <div className="border-b last:border-b-0">
-      <div className="flex items-center py-2">
-        <span className="text-sm text-muted-foreground w-1/3">
+    <div className="border-b last:border-b-0 min-w-0">
+      <div className="flex items-center py-2 gap-2 min-w-0">
+        <span className="text-sm text-muted-foreground w-1/3 shrink-0">
           {label}
           {optional && <span className="text-xs ml-1">(optional)</span>}
         </span>
-        <div className="flex items-center justify-between flex-1">
+        <div className="flex items-center justify-between flex-1 min-w-0 gap-2">
           {customInput ? (
-            <div className="w-full">{customInput}</div>
+            <div className="w-full min-w-0">{customInput}</div>
           ) : isSelect ? (
             <Select
               value={
@@ -106,7 +106,7 @@ export function DetailRow({
               }
               onValueChange={(value) => onUpdate(value)}
             >
-              <SelectTrigger className="w-full p-2 border rounded text-sm">
+              <SelectTrigger className="w-full p-2 border rounded text-sm min-w-0">
                 <SelectValue placeholder="Select an option" />
               </SelectTrigger>
               {options?.map((option) => (
@@ -116,7 +116,7 @@ export function DetailRow({
               ))}
             </Select>
           ) : (
-            <span className="text-sm">
+            <span className="text-sm truncate min-w-0 max-w-full break-all">
               {formattedValue ? (
                 formattedValue
               ) : displayValue() ? (
