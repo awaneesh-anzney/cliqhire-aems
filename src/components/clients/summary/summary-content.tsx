@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   getCountryByCode,
@@ -370,7 +370,114 @@ export function SummaryContent({
           </div> */}
         </div>
 
-        {/* Right Column was moved to ComplianceContent */}
+        {/* Right Column: Location & Documents */}
+        <div className="space-y-6">
+          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
+              <div className="p-2 bg-brand/10 rounded-lg">
+                <Users className="w-4 h-4 text-brand" />
+              </div>
+              <h4 className="text-base font-semibold text-foreground">Presence & Compliance</h4>
+            </div>
+            <div className="p-5 space-y-6">
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Online & Location</h5>
+                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
+                  <DetailRow
+                    label="Client Website"
+                    value={clientData?.website}
+                    onUpdate={handleUpdateField("website")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="LinkedIn Profile"
+                    value={clientData?.linkedInProfile}
+                    onUpdate={handleUpdateField("linkedInProfile")}
+                    optional
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Google Maps"
+                    value={clientData?.googleMapsLink}
+                    onUpdate={handleUpdateField("googleMapsLink")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Location"
+                    value={clientData?.location}
+                    onUpdate={handleUpdateField("location")}
+                    disableInternalEdit={!canModify}
+                  />
+                  <DetailRow
+                    label="Address"
+                    value={clientData?.address}
+                    onUpdate={handleUpdateField("address")}
+                    disableInternalEdit={!canModify}
+                    isLocation={false}
+                  />
+                  <DetailRow
+                    label="Country of Business"
+                    value={clientData?.countryOfBusiness}
+                    onUpdate={handleUpdateField("countryOfBusiness")}
+                    disableInternalEdit={!canModify}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Compliance Documents</h5>
+                <div className="grid grid-cols-1 gap-3">
+                  <FileUploadRow
+                    id="vat-copy-upload"
+                    label="VAT Copy"
+                    onFileSelect={canModify ? handleFileUpload("vatCopy") : () => { }}
+                    onUploadClick={canModify ? () => handleOpenFileUploadModal("vatCopy", "VAT Copy") : () => { }}
+                    docUrl={clientData?.vatCopy?.url}
+                    currentFileName={clientData?.vatCopy?.fileName}
+                    onPreview={() =>
+                      handlePreviewFile(
+                        clientData?.vatCopy?.url || "",
+                        clientData?.vatCopy?.fileName,
+                      )
+                    }
+                    onDownload={() => handleDownloadFile(clientData?.vatCopy?.url || "")}
+                  />
+                  <FileUploadRow
+                    id="cr-copy-upload"
+                    label="CR Copy"
+                    onFileSelect={canModify ? handleFileUpload("crCopy") : () => { }}
+                    onUploadClick={canModify ? () => handleOpenFileUploadModal("crCopy", "CR Copy") : () => { }}
+                    docUrl={clientData?.crCopy?.url}
+                    currentFileName={clientData?.crCopy?.fileName}
+                    onPreview={() =>
+                      handlePreviewFile(
+                        clientData?.crCopy?.url || "",
+                        clientData?.crCopy?.fileName,
+                      )
+                    }
+                    onDownload={() => handleDownloadFile(clientData?.crCopy?.url || "")}
+                  />
+                  <FileUploadRow
+                    id="gst-tin-document-upload"
+                    label="GST IN Doc"
+                    onFileSelect={canModify ? handleFileUpload("gstTinDocument") : () => { }}
+                    onUploadClick={canModify ? () =>
+                      handleOpenFileUploadModal("gstTinDocument", "GST TIN Document") : () => { }}
+                    docUrl={clientData?.gstTinDocument?.url}
+                    currentFileName={clientData?.gstTinDocument?.fileName}
+                    onPreview={() =>
+                      handlePreviewFile(
+                        clientData?.gstTinDocument?.url || "",
+                        clientData?.gstTinDocument?.fileName,
+                      )
+                    }
+                    onDownload={() => handleDownloadFile(clientData?.gstTinDocument?.url || "")}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
 

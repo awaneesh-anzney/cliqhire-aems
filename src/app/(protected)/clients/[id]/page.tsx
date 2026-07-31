@@ -39,6 +39,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ClientStageBadge } from "@/components/client-stage-badge";
 import { ClientStageStatusBadge } from "@/components/client-stage-status-badge";
 import { EmailTemplatesContent } from "@/components/clients/email-templates";
+import { FollowUpModal } from "@/components/clients/modals/follow-up-modal";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -97,7 +98,7 @@ export default function ClientPage({ params }: PageProps) {
   // const [isLoading, setIsLoading] = useState(false);
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [jobsAvailable, setJobsAvailable] = useState(false);
-  const [activeTab, setActiveTab] = useState("Summary");
+  const [activeTab, setActiveTab] = useState("Timeline");
   const [reportStatus, setReportStatus] = useState<"idle" | "generating" | "completed">("idle");
   const [reportProgress, setReportProgress] = useState(0);
   const [buttonWidth, setButtonWidth] = useState<number | null>(null);
@@ -134,6 +135,7 @@ export default function ClientPage({ params }: PageProps) {
     clientId: string;
     status: ClientStageStatus;
   } | null>(null);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
 
   const {
     data: client,
@@ -505,8 +507,33 @@ export default function ClientPage({ params }: PageProps) {
               </Button>
             </div>
           </div>
+          
+          {/* Follow-up Widget */}
+          <div className="mt-4 flex items-center gap-2 bg-muted/30 w-fit px-4 py-2 rounded-xl border border-border shadow-sm">
+            <Clock className={`h-4 w-4 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500' : 'text-brand'}`} />
+            <span className="text-sm font-semibold text-foreground">Next Follow-up:</span>
+            <span className={`text-sm ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
+              {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "Not Set"}
+            </span>
+            {client.nextFollowUpOwner && (
+               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1">
+                 {typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : (client.nextFollowUpOwner as any)?.firstName || 'Owner'}
+               </span>
+            )}
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-brand hover:bg-brand/10 ml-2" onClick={() => setIsFollowUpModalOpen(true)}>
+              Edit
+            </Button>
+          </div>
         </div>
       </div>
+
+      <FollowUpModal 
+        clientId={id} 
+        open={isFollowUpModalOpen} 
+        onOpenChange={setIsFollowUpModalOpen} 
+        currentDate={client.nextFollowUpDate} 
+        currentOwner={typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : (client.nextFollowUpOwner as any)?._id}
+      />
 
       {/* Button Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-muted/50 border-b gap-4">

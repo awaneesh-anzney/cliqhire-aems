@@ -1,320 +1,302 @@
-# Client CRM — New API Reference
+# Client Lifecycle Guide — Lead se Sign tak (Complete Tracking + Frontend Mapping)
 
-Ye doc sirf **naye 6 CRM endpoints** ke liye hai jo is upgrade me add hue hain. Purane client endpoints (`POST /clients`, `GET /clients`, `PATCH /clients/:id`, etc.) bilkul waise hi hain, unme koi change nahi.
-
-Base path: `/api/clients` (jo bhi tumhara `API_PREFIX` hai)
-
-Sab routes `Authorization: Bearer <token>` header maangte hain (`authenticate` middleware) + relevant permission (`clients.view` ya `clients.edit`) — same pattern jo baaki client routes me hai.
+Ye doc `CLIENT_CRM_API.md` (jo pure endpoint reference hai) ka companion hai — yaha **poora lifecycle ek real journey ki tarah** dikhaya hai: client Lead banne se leke Sign hone tak, har step pe konsa API call hoga, uska req.body/response kya hoga, aur **frontend pe wo screen/component kaise banega**.
 
 ---
 
-## Kya naya bana (quick recap)
+## Part 1 — Poora Lifecycle, Step-by-Step
 
-| File | Kya hai |
-|---|---|
-| `src/models/clientStageHistoryModel.js` | Stage-period tracking (Lead/Engaged/Signed, start-end dates) |
-| `src/models/clientActivityModel.js` | Call/WhatsApp/LinkedIn/Email/Meeting/Negotiation log |
-| `src/controllers/client/clientStageController.js` | Stage change + stage-history |
-| `src/controllers/client/clientActivityController.js` | Activity log + stage-wise timeline |
-| `src/controllers/client/clientFollowUpController.js` | Manual follow-up update |
-| `src/services/cronService.js` → `checkClientFollowUpDeadlines()` | Har 6 ghante follow-up due/overdue check karta hai |
+### Step 0 — Client bana (Lead stage se shuru)
 
-`Client` model me naye fields: `clientType`, `leadDate`, `stageChangedAt`, `nextFollowUpDate`, `nextFollowUpOwner`, `lastContactedAt` (+ internal reminder-guard fields). `clientRm` jaisa purana field bilkul waisa hi hai (String, ObjectId nahi banaya — taaki kahin kuch na toote).
+Ye existing endpoint hai (`POST /api/clients`), koi change nahi. Bas note karo: create hote hi `clientStage = 'Lead'` (default) set hota hai, `leadDate` pehli baar stage change pe automatically fill hota hai (ya migration se backfill).
 
 ---
 
-## 1. `PATCH /api/clients/:id/stage`
+### Step 1 — Lead stage me pehli activity log hoti hai (intro call)
 
-Client ka stage change karta hai (Lead → Engaged → Signed, ya koi bhi combination) — purane open stage-period ko close karke naya period start karta hai.
+Rep client ko call karta hai. Frontend "Log Activity" form submit karta hai:
 
-**Permission:** `clients.edit`
-
-### Request body
+**`POST /api/clients/665f.../activities`**
 ```json
 {
-  "stage": "Engaged",
-  "reason": "Client ne proposal accept kiya",
-  "closureSummary": "Lead stage me 3 calls hue, pricing discuss hui"
-}
-```
-
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| `stage` | String | ✅ | `Lead` \| `Engaged` \| `Signed` |
-| `reason` | String | ❌ | Naye stage-period ke saath save hota hai |
-| `closureSummary` | String | ❌ | **Band ho rahe (purane) period** me save hota hai — "us stage me overall kya hua" |
-
-### Success response — `200 OK`
-```json
-{
-  "success": true,
-  "message": "Client stage changed from 'Lead' to 'Engaged'.",
-  "data": {
-    "client": { "...": "poora updated client object, clientStage/stageChangedAt updated" },
-    "closedPeriod": { "_id": "...", "stage": "Lead", "startedAt": "...", "endedAt": "2026-07-30T..." },
-    "newPeriod": { "_id": "...", "stage": "Engaged", "startedAt": "2026-07-30T...", "endedAt": null }
-  }
-}
-```
-
-### No-change response — `200 OK`
-Agar client already usi stage me hai:
-```json
-{ "success": true, "message": "No change detected; client is already in this stage.", "data": { "...client..." } }
-```
-
-### Error responses
-- `400` — invalid client ID, ya `stage` missing/invalid enum
-- `404` — client not found
-- `500` — server error (`error` field me message)
-
-**Notification:** Agar client ka `nextFollowUpOwner` set hai, to usi ek user ko `CLIENT_STAGE_CHANGED` notification jaata hai (poori team ko broadcast nahi).
-
----
-
-## 2. `GET /api/clients/:id/stage-history`
-
-Client ke saare stage-periods (Lead/Engaged/Signed cycles) — naye se purane order me.
-
-**Permission:** `clients.view`
-
-### Response — `200 OK`
-```json
-{
-  "success": true,
-  "message": "Client stage history fetched successfully",
-  "count": 2,
-  "data": [
-    {
-      "_id": "...",
-      "client_id": "...",
-      "stage": "Engaged",
-      "startedAt": "2026-07-30T10:00:00.000Z",
-      "endedAt": null,
-      "changedBy": { "_id": "...", "firstName": "Ayesha", "lastName": "Khan", "email": "..." },
-      "reason": "Client ne proposal accept kiya",
-      "closureSummary": "",
-      "activityCount": 2
-    },
-    {
-      "_id": "...",
-      "stage": "Lead",
-      "startedAt": "2026-07-01T09:00:00.000Z",
-      "endedAt": "2026-07-30T10:00:00.000Z",
-      "closureSummary": "Lead stage me 3 calls hue, pricing discuss hui",
-      "activityCount": 3
-    }
-  ]
-}
-```
-
----
-
-## 3. `POST /api/clients/:id/activities`
-
-Ek call/WhatsApp/LinkedIn/email/meeting/negotiation log karta hai. Har call ek naya row hai — kitni bhi log ki ja sakti hain, koi limit nahi.
-
-**Permission:** `clients.edit`
-
-### Request body
-```json
-{
-  "contactId": "665f1b2c3a4d5e6f7a8b9c0d",
-  "repId": "665f1b2c3a4d5e6f7a8b9c0e",
-  "interactionScope": "Client-facing",
-  "activityType": "Negotiation",
-  "activityDate": "2026-07-30T14:00:00.000Z",
-  "activityTime": "14:00",
+  "activityType": "Call",
+  "activityDate": "2026-07-01T09:00:00.000Z",
+  "activityTime": "09:00",
   "attempts": 1,
-  "isMeeting": false,
-  "discussionSummary": "Pricing pe negotiation hui, client 10% discount maang raha hai",
-  "outcome": "Follow-up call agle hafte",
-  "negotiationDetails": {
-    "dealValue": 50000,
-    "proposedTerms": "12-month retainer",
-    "objections": "Pricing thodi high lag rahi hai",
-    "competitorMentioned": "XYZ Consulting",
-    "expectedClosureDate": "2026-08-15",
-    "negotiationStatus": "Ongoing"
-  },
-  "revenue": null,
-  "nextFollowUpDate": "2026-08-06T10:00:00.000Z",
-  "nextFollowUpOwner": "665f1b2c3a4d5e6f7a8b9c0e"
+  "discussionSummary": "Intro call — client ko requirement samjhaya",
+  "outcome": "Client interested, pricing bhejni hai",
+  "nextFollowUpDate": "2026-07-05T10:00:00.000Z",
+  "nextFollowUpOwner": "665f...repId"
 }
 ```
 
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| `contactId` | ObjectId | ❌ | `PrimaryContact._id` — client ki taraf se kaun mila |
-| `repId` | ObjectId | ❌ | Default: logged-in user. **Ye field hi track karta hai ki kaunsa system-user is contact se baat kar raha hai** |
-| `interactionScope` | String | ❌ | `Client-facing` (default) \| `Internal` |
-| `activityType` | String | ✅ | `Call` \| `WhatsApp` \| `LinkedIn` \| `Email` \| `Meeting` \| `Data Update` \| `Negotiation` \| `Proposal Sent` |
-| `activityDate` | Date | ❌ | Default: now |
-| `activityTime` | String | ❌ | Free-text time, e.g. `"14:00"` |
-| `attempts` | Number | ❌ | Default: 1 |
-| `isMeeting` | Boolean | ❌ | Default: auto-true agar `activityType = Meeting` |
-| `discussionSummary` | String | ❌ | Kya baat hui |
-| `outcome` | String | ❌ | Result/decision |
-| `negotiationDetails` | Object | ❌ | Sirf `Negotiation`/`Proposal Sent` ke liye meaningful — `dealValue`, `proposedTerms`, `objections`, `competitorMentioned`, `expectedClosureDate`, `negotiationStatus` (`Ongoing`\|`Stuck`\|`Agreed`\|`Rejected`) |
-| `revenue` | Number | ❌ | SAR me |
-| `nextFollowUpDate` | Date | ❌ | Diya jaaye to `Client.nextFollowUpDate` bhi update hoga |
-| `nextFollowUpOwner` | ObjectId | ❌ | Diya jaaye to `Client.nextFollowUpOwner` bhi update hoga |
-
-**Auto-fill (bina bheje bhi ho jata hai):** `stagePeriodId` aur `stageAtTime` — system khud current active stage-period se link kar deta hai, tumhe kuch bhejna nahi hai.
-
-### Success response — `201 Created`
+**Response — `201 Created`**
 ```json
 {
   "success": true,
   "message": "Client activity logged successfully",
   "data": {
-    "_id": "...",
-    "client_id": "...",
-    "stagePeriodId": "...",
-    "stageAtTime": "Engaged",
-    "contactId": "...",
-    "repId": "...",
-    "interactionScope": "Client-facing",
-    "activityType": "Negotiation",
-    "activityDate": "2026-07-30T14:00:00.000Z",
-    "activityTime": "14:00",
-    "attempts": 1,
-    "isMeeting": false,
-    "discussionSummary": "Pricing pe negotiation hui...",
-    "outcome": "Follow-up call agle hafte",
-    "negotiationDetails": { "dealValue": 50000, "negotiationStatus": "Ongoing", "...": "..." },
-    "revenue": null,
-    "nextFollowUpDate": "2026-08-06T10:00:00.000Z",
-    "nextFollowUpOwner": "665f1b2c3a4d5e6f7a8b9c0e",
-    "createdBy": "...",
-    "createdAt": "...",
-    "updatedAt": "..."
+    "_id": "act_001",
+    "stagePeriodId": "period_lead_001",
+    "stageAtTime": "Lead",
+    "activityType": "Call",
+    "activityDate": "2026-07-01T09:00:00.000Z",
+    "nextFollowUpDate": "2026-07-05T10:00:00.000Z",
+    "nextFollowUpOwner": "665f...repId",
+    "...": "..."
   }
 }
 ```
 
-### Error responses
-- `400` — invalid client ID, missing/invalid `activityType`, ya `repId` resolve nahi ho paaya
-- `404` — client not found
-- `500` — server error
+`stagePeriodId`/`stageAtTime` automatically `Lead` set ho gaya (system ne khud kiya, frontend ko bhejna nahi padta). Client ka `nextFollowUpDate`/`nextFollowUpOwner` bhi automatically update ho gaya.
 
-**Notification:** Agar activity save hone se pehle client ka koi `nextFollowUpOwner` tha (aur wo khud activity log karne wala rep nahi hai), to usko `CLIENT_ACTIVITY_LOGGED` jaata hai. Agar `activityType` Negotiation/Proposal Sent hai aur `negotiationStatus` diya hai, to `CLIENT_NEGOTIATION_UPDATED` bhi jaata hai — dono sirf usi ek owner ko, broadcast nahi.
+### Step 2 — Aur bhi activities (WhatsApp, email, demo meeting) — sab Lead ke andar hi group hongi
 
----
+```json
+{ "activityType": "Email", "discussionSummary": "Pricing PDF bheji", "attempts": 1 }
+```
+```json
+{ "activityType": "Meeting", "isMeeting": true, "discussionSummary": "In-person demo", "outcome": "Client ne management se baat karne ko kaha" }
+```
 
-## 4. `GET /api/clients/:id/activities`
+Ye sab `POST /activities` se, bas `activityType` badalta rehta hai. Sab `stagePeriodId = period_lead_001` se hi link honge — jab tak stage Lead hai.
 
-Client ki activities list — filter/paginate ke saath.
+### Step 3 — Follow-up due hone wala hai — reminder aata hai
 
-**Permission:** `clients.view`
+Koi frontend action nahi lagta — background cron (`checkClientFollowUpDeadlines`, har 6 ghante) khud check karta hai. Jab `nextFollowUpDate` 24 ghante ke andar aata hai, `nextFollowUpOwner` (yaha wahi rep) ko ek in-app notification milti hai (existing notification bell/socket system se hi, koi naya UI nahi banana):
 
-### Query params (sab optional)
-| Param | Notes |
-|---|---|
-| `activityType` | e.g. `?activityType=Negotiation` |
-| `stage` | e.g. `?stage=Lead` (filters by `stageAtTime`) |
-| `repId` | Kisi specific rep ki activities |
-| `page` | Default 1 |
-| `limit` | Default 20 |
+```json
+{ "type": "CLIENT_FOLLOWUP_DUE", "title": "⏰ Follow-up Due Soon — ABC Pvt Ltd", "message": "Follow-up with \"ABC Pvt Ltd\" is due on 05 Jul 2026." }
+```
 
-### Response — `200 OK`
+### Step 4 — Client ne proposal accept kar liya → Stage change: Lead → Engaged
+
+Frontend pe "Move to Engaged" button/dropdown se:
+
+**`PATCH /api/clients/665f.../stage`**
 ```json
 {
-  "success": true,
-  "message": "Client activities fetched successfully",
-  "count": 20,
-  "total": 47,
-  "page": 1,
-  "totalPages": 3,
-  "data": [ /* array of ClientActivity docs, contactId/repId/createdBy populated with names */ ]
+  "stage": "Engaged",
+  "reason": "Proposal accept ho gaya",
+  "closureSummary": "Lead stage me 3 touchpoints (call, email, demo meeting) hue"
 }
 ```
 
----
-
-## 5. `GET /api/clients/:id/timeline`
-
-**Stage-wise grouped view** — har stage-period ke andar uski activities. Isi endpoint se UI pe "Lead ke under ye sab hua, Engaged ke under ye sab hua" dikhega.
-
-**Permission:** `clients.view`
-
-### Response — `200 OK`
+**Response — `200 OK`**
 ```json
 {
   "success": true,
-  "message": "Client timeline fetched successfully",
+  "message": "Client stage changed from 'Lead' to 'Engaged'.",
+  "data": {
+    "client": { "clientStage": "Engaged", "stageChangedAt": "2026-07-10T...", "leadDate": "2026-07-01T..." },
+    "closedPeriod": { "_id": "period_lead_001", "stage": "Lead", "endedAt": "2026-07-10T...", "activityCount": 3 },
+    "newPeriod": { "_id": "period_engaged_001", "stage": "Engaged", "startedAt": "2026-07-10T...", "endedAt": null }
+  }
+}
+```
+
+`period_lead_001` humesha ke liye "closed" ho gaya (3 activities ke saath). Ab se koi bhi nayi activity `period_engaged_001` se link hogi.
+
+### Step 5 — Engaged stage me negotiation chalti hai (multiple rounds)
+
+**Round 1:**
+```json
+{
+  "activityType": "Negotiation",
+  "discussionSummary": "Pricing discuss hui",
+  "negotiationDetails": {
+    "dealValue": 50000,
+    "proposedTerms": "12-month retainer",
+    "objections": "10% discount maang rahe hain",
+    "negotiationStatus": "Ongoing"
+  },
+  "nextFollowUpDate": "2026-07-15T10:00:00.000Z"
+}
+```
+
+**Round 2 (kuch din baad):**
+```json
+{
+  "activityType": "Negotiation",
+  "discussionSummary": "Discount pe consensus bana",
+  "negotiationDetails": { "dealValue": 47000, "negotiationStatus": "Agreed" }
+}
+```
+
+Dono `period_engaged_001` ke andar group ho jayengi. Jab `negotiationStatus` set ho, previous `nextFollowUpOwner` ko `CLIENT_NEGOTIATION_UPDATED` notification bhi jaati hai.
+
+### Step 6 — Deal ho gaya → Stage change: Engaged → Signed
+
+```json
+{ "stage": "Signed", "reason": "Contract sign ho gaya", "closureSummary": "2 negotiation rounds, final value 47000 SAR" }
+```
+
+`period_engaged_001` close, `period_signed_001` open.
+
+### Step 7 — Poora lifecycle ek jagah dekhna (dashboard/detail page ke liye)
+
+**`GET /api/clients/665f.../timeline`**
+
+```json
+{
+  "success": true,
   "data": [
+    { "stage": "Signed", "startedAt": "2026-07-20T...", "endedAt": null, "activityCount": 0, "activities": [] },
     {
-      "_id": "period_engaged_id",
       "stage": "Engaged",
-      "startedAt": "2026-07-30T10:00:00.000Z",
-      "endedAt": null,
-      "changedBy": { "firstName": "Ayesha", "lastName": "Khan" },
+      "startedAt": "2026-07-10T...",
+      "endedAt": "2026-07-20T...",
+      "closureSummary": "2 negotiation rounds, final value 47000 SAR",
       "activityCount": 2,
-      "activities": [
-        { "activityType": "Negotiation", "activityDate": "2026-07-30T14:00:00.000Z", "...": "..." },
-        { "activityType": "Call", "activityDate": "2026-07-30T09:00:00.000Z", "...": "..." }
-      ]
+      "activities": [ "...negotiation round 2...", "...negotiation round 1..." ]
     },
     {
-      "_id": "period_lead_id",
       "stage": "Lead",
-      "startedAt": "2026-07-01T09:00:00.000Z",
-      "endedAt": "2026-07-30T10:00:00.000Z",
-      "closureSummary": "Lead stage me 3 calls hue, pricing discuss hui",
+      "startedAt": "2026-07-01T...",
+      "endedAt": "2026-07-10T...",
+      "closureSummary": "Lead stage me 3 touchpoints hue",
       "activityCount": 3,
-      "activities": [ "... 3 activity objects ..." ]
+      "activities": [ "...meeting...", "...email...", "...call..." ]
     }
   ]
 }
 ```
 
-Naya period (jismein abhi activities na hui ho) empty `activities: []` array ke saath aayega — array hamesha present rahega.
+Ye ek hi response poori client-history de deta hai — Lead se Signed tak, har stage ke andar uski activities, kis stage me kitna time laga (`startedAt`→`endedAt`), aur negotiation ka poora trail.
 
 ---
 
-## 6. `PATCH /api/clients/:id/follow-up`
+## Part 2 — Frontend pe Kaise Map Karna Hai
 
-Sirf follow-up date/owner update karna ho (bina koi activity log kiye) — jaise rep ne phone pe hi date reschedule kar li.
+### A) Client Detail Page — Layout
 
-**Permission:** `clients.edit`
-
-### Request body (dono optional, kam se kam ek zaroor)
-```json
-{
-  "nextFollowUpDate": "2026-08-10T10:00:00.000Z",
-  "nextFollowUpOwner": "665f1b2c3a4d5e6f7a8b9c0e"
-}
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ABC Pvt Ltd            [Lead ▾]  Priority: 1   New Client   │  ← Header
+│  Next Follow-up: 05 Jul 2026 (Ayesha Khan)      [Edit]        │  ← Follow-up widget
+├─────────────────────────────────────────────────────────────┤
+│  [Overview] [Timeline] [Stage History] [Documents] [Contacts] │  ← Tabs
+├─────────────────────────────────────────────────────────────┤
+│   ... selected tab ka content ...                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Success response — `200 OK`
-```json
-{
-  "success": true,
-  "message": "Client follow-up updated successfully",
-  "data": { "...": "poora updated client object" }
-}
+| UI Element | Data Source | Notes |
+|---|---|---|
+| Header stage badge (`Lead ▾`) | `client.clientStage` (existing `GET /clients/:id`) | Dropdown click → confirm modal → `PATCH /:id/stage` |
+| Priority / New-Existing tags | `client.clientPriority`, `client.clientType` (existing fields) | Read-only chips |
+| Follow-up widget | `client.nextFollowUpDate`, `client.nextFollowUpOwner` | "Edit" button → date-picker + owner-dropdown modal → `PATCH /:id/follow-up` |
+| Overdue highlight | Frontend compares `nextFollowUpDate < now` | Red badge/icon agar overdue |
+
+### B) "Change Stage" Modal
+
+Trigger: header ka stage-dropdown.
+
+| Form Field | Input Type | Maps to |
+|---|---|---|
+| New Stage | Radio/Select (`Lead`/`Engaged`/`Signed`, current disabled) | `stage` |
+| Reason | Text input (optional) | `reason` |
+| Stage Summary (kya hua is stage me) | Textarea (optional, "closing this stage" hint) | `closureSummary` |
+
+Submit → `PATCH /:id/stage` → response se `client` update karo (header refresh) + Timeline tab ko invalidate/refetch karo (naya period ban gaya hai).
+
+### C) "Log Activity" Modal (sabse zyada use hoga)
+
+| Form Field | Input Type | Maps to | Notes |
+|---|---|---|---|
+| Channel | Select: Call / WhatsApp / LinkedIn / Email / Meeting / Data Update / Negotiation / Proposal Sent | `activityType` | Required |
+| Contact Person | Select (client ke `PrimaryContact` list se) | `contactId` | `GET /clients/:id/primary-contacts` se options |
+| Client-facing or Internal | Toggle | `interactionScope` | Default: Client-facing |
+| Date & Time | Date-picker + time-picker | `activityDate`, `activityTime` | Default: now |
+| Attempts | Number stepper | `attempts` | Default: 1 |
+| Meeting? | Checkbox | `isMeeting` | Auto-check agar Channel = Meeting |
+| Discussion | Textarea | `discussionSummary` | |
+| Outcome / Next Action | Textarea | `outcome` | |
+| **— sirf jab Channel = Negotiation/Proposal Sent —** | | | Conditional section, form me dikhana/hide karna |
+| Deal Value (SAR) | Number | `negotiationDetails.dealValue` | |
+| Proposed Terms | Textarea | `negotiationDetails.proposedTerms` | |
+| Objections | Textarea | `negotiationDetails.objections` | |
+| Competitor Mentioned | Text | `negotiationDetails.competitorMentioned` | |
+| Expected Closure | Date-picker | `negotiationDetails.expectedClosureDate` | |
+| Negotiation Status | Select: Ongoing/Stuck/Agreed/Rejected | `negotiationDetails.negotiationStatus` | |
+| **— optional footer —** | | | |
+| Revenue (SAR) | Number | `revenue` | |
+| Set Next Follow-up | Date-picker (optional) | `nextFollowUpDate` | Agar bhara, follow-up widget bhi turant update dikhao |
+| Follow-up Owner | Select (rep/user list) | `nextFollowUpOwner` | Default: current logged-in user |
+
+Submit → `POST /:id/activities` → response ki activity ko **Timeline tab ke top pe turant prepend** kar do (optimistic-ish update), aur agar `nextFollowUpDate` bheja tha to header ka follow-up widget bhi turant refresh karo.
+
+### D) Timeline Tab (`GET /:id/timeline`) — Stage-wise Accordion
+
+```
+▾ Engaged  (10 Jul – ongoing)              2 activities
+    🤝 Negotiation — 15 Jul — Agreed, ₹47,000
+    🤝 Negotiation — 12 Jul — Ongoing, ₹50,000
+
+▸ Lead  (01 Jul – 10 Jul)                  3 activities   [collapsed]
+    "Lead stage me 3 touchpoints hue"   ← closureSummary, collapsed header ke neeche chhoti line me
 ```
 
-### Error responses
-- `400` — dono fields missing, ya `nextFollowUpOwner` invalid ObjectId
-- `404` — client not found
-- `500` — server error
+- Har item `response.data` array ka ek object hai — **default sabse upar wala (current/active period) khula rahe**, baaki collapsed.
+- Har period ke andar `activities` array ko cards/list-items me render karo — icon `activityType` ke hisaab se (📞 Call, 💬 WhatsApp, 🤝 Negotiation, etc.), `activityDate` format karke dikhao.
+- Negotiation type ki activity ho to `negotiationDetails.dealValue` + `negotiationStatus` ko ek chhota badge ki tarah card pe dikha do (jaise upar example me).
+- Empty `activities: []` wale period (abhi-abhi bana naya stage) ke liye "Koi activity abhi tak nahi" placeholder.
+
+### E) Stage History Tab (`GET /:id/stage-history`) — halka version
+
+Agar Timeline tab already sab kuch de raha hai (periods + activities), ye tab optional hai — sirf ek compact table jaisa view ho sakta hai:
+
+| Stage | Start | End | Duration | Activities | Changed By |
+|---|---|---|---|---|---|
+| Engaged | 10 Jul | — (current) | 20 days | 2 | Ayesha Khan |
+| Lead | 01 Jul | 10 Jul | 9 days | 3 | Ayesha Khan |
+
+Ye "kis stage me kitna time laga" jaise reporting/funnel-analysis ke liye useful hai.
+
+### F) List/Dashboard Page (saare clients ki list)
+
+Existing `GET /clients` list endpoint me naye fields already aa rahe honge (`clientType`, `nextFollowUpDate`, `nextFollowUpOwner`, `lastContactedAt`) — table me naye columns/filters add kar sakte ho:
+
+| Column | Field | UI treatment |
+|---|---|---|
+| Stage | `clientStage` | Colored badge (Lead=grey, Engaged=blue, Signed=green) |
+| Next Follow-up | `nextFollowUpDate` | Red text agar overdue, orange agar aaj/kal me hai |
+| Last Contacted | `lastContactedAt` | "3 din pehle" jaisa relative format |
+| New/Existing | `clientType` | Small tag |
+
+Filter bar me `Pipeline`/stage filter already tha, wahi reuse hoga.
+
+### G) Notifications (frontend, existing system reuse)
+
+Koi naya notification-UI nahi banana — existing bell/socket component me ye 4 naye types already aayenge (backend se), bas inke liye icon/label map kar dena:
+
+| `type` | Suggested icon/label |
+|---|---|
+| `CLIENT_STAGE_CHANGED` | 📊 "Stage changed" |
+| `CLIENT_ACTIVITY_LOGGED` | 📞 "New activity" |
+| `CLIENT_NEGOTIATION_UPDATED` | 🤝 "Negotiation update" |
+| `CLIENT_FOLLOWUP_DUE` / `CLIENT_FOLLOWUP_OVERDUE` | ⏰ / 🚨 "Follow-up due/overdue" |
+
+Har notification me `actionUrl: /clients/:id` already aata hai (backend se) — click pe seedha us client ke detail page pe le jao, `relatedClient` field se client id bhi mil jayega agar chahiye.
+
+### H) State/Data-fetching suggestion (React ke liye, generic)
+
+- Client detail page load hote hi: `GET /clients/:id` (header ke liye) + `GET /clients/:id/timeline` (default tab) parallel fetch karo.
+- "Log Activity" ya "Change Stage" submit ke baad: response me mile updated `client`/`activity` se local state turant update karo (optimistic feel ke liye), phir background me `timeline` ko revalidate/refetch kar do taaki `activityCount`/grouping sahi rahe.
+- `Stage History` aur `Activities` (flat list, filter wala) tabs **lazy-load** karo — jab tak user unpe click na kare tab tak call mat karo.
 
 ---
 
-## Follow-up Reminder Cron
+## Quick Reference — Konsa UI Action, Konsa API
 
-`checkClientFollowUpDeadlines()` — har 6 ghante chalta hai (`0 */6 * * *`, Asia/Kolkata):
+| Frontend Action | API Call |
+|---|---|
+| Client detail page open | `GET /clients/:id` |
+| Timeline tab open | `GET /clients/:id/timeline` |
+| Stage history tab open | `GET /clients/:id/stage-history` |
+| "Log Activity" submit | `POST /clients/:id/activities` |
+| Activities tab (filtered flat list) | `GET /clients/:id/activities?activityType=...&stage=...` |
+| "Change Stage" submit | `PATCH /clients/:id/stage` |
+| Follow-up widget "Edit" submit | `PATCH /clients/:id/follow-up` |
 
-- **Due soon** (`nextFollowUpDate` 24 ghante ke andar): ek baar `CLIENT_FOLLOWUP_DUE` notification `nextFollowUpOwner` ko
-- **Overdue**: turant `CLIENT_FOLLOWUP_OVERDUE`, phir har 12 ghante me repeat — jab tak koi nayi activity log na ho ya follow-up manually update na ho (dono cases me guard reset ho jata hai, fresh reminder cycle shuru hoti hai)
-- Recipient hamesha sirf `Client.nextFollowUpOwner` — koi broadcast nahi. **Note:** agar kisi client ka `nextFollowUpOwner` set hi nahi hai, cron use skip kar dega — is liye Section 6 (`/follow-up`) ya Section 3 (`/activities`) se ye field set karna zaroori hai.
-
----
-
-## Purane behavior me kya kya waisa hi rakha gaya
-
-- `PATCH /api/clients/:id` (generic update) aur `PATCH /api/clients/:id` → single-field wala `updateClientField` — dono bilkul waise hi kaam karte hain jaise pehle karte the, apne existing (aur kahin-kahin buggy — jaise `stage` vs `clientStage` field-name mismatch) logic ke saath. Naye stage endpoint (#1) inko replace nahi karte, sirf ek proper additional tarika hain.
-- `clientRm` field type nahi badla (ab bhi plain String) kyunki `adminExportController.js` jaisi jagah is per depend karti hai — isko todne se Excel export toot jata.
-- `Note` model bhi waisa hi hai — quick text comments ke liye, `ClientActivity` structured records ke liye.
+Poore field-level req.body/response ke liye `CLIENT_CRM_API.md` dekho — ye doc sirf flow aur UI-mapping ke liye hai.
