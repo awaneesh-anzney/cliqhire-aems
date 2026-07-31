@@ -5,10 +5,8 @@ import { ClientStageStatusBadge } from "@/components/client-stage-status-badge";
 import { useRouter } from "next/navigation";
 import { ClientStageStatus } from "@/services/clientService";
 import React from "react";
-import { Building2, MapPin, Briefcase, Calendar, Clock, Tag } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Building2, MapPin, Briefcase } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatDistanceToNow } from "date-fns";
 
 export interface ClientTableRowProps {
   client: {
@@ -90,14 +88,38 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
         </Tooltip>
       </TableCell>
 
-      {/* Type */}
+      {/* Industry */}
       <TableCell className="px-3 py-2.5">
-        <div className="flex items-center gap-1.5 overflow-hidden max-w-[100px]">
-           <Tag className="w-3 h-3 text-muted-foreground shrink-0" />
-           <span className="text-[11px] font-medium text-foreground truncate">
-             {client.clientType || "New"}
-           </span>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-1.5 overflow-hidden max-w-[120px] cursor-help">
+               <Building2 className="w-3 h-3 text-muted-foreground shrink-0" />
+               <span className="text-[11px] font-medium text-foreground truncate">
+                 {client.industry || "—"}
+               </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
+            {client.industry || "No Industry Listed"}
+          </TooltipContent>
+        </Tooltip>
+      </TableCell>
+
+      {/* Location */}
+      <TableCell className="px-3 py-2.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-1.5 overflow-hidden max-w-[100px] cursor-help">
+               <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+               <span className="text-[11px] font-medium text-foreground truncate">
+                 {client.countryOfBusiness || "Global"}
+               </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
+            {client.countryOfBusiness || "Global"}
+          </TooltipContent>
+        </Tooltip>
       </TableCell>
 
       {/* Stage */}
@@ -125,24 +147,11 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
         </div>
       </TableCell>
 
-      {/* Next Follow-up */}
-      <TableCell className="px-3 py-2.5">
-        <div className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap">
-          <Calendar className={cn("w-3 h-3 shrink-0", client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? "text-red-500" : "text-muted-foreground")} />
-          <span className={cn("text-[11px] font-medium truncate", client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? "text-red-500 font-bold" : "text-foreground")}>
-            {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : "—"}
-          </span>
-        </div>
-      </TableCell>
-
-      {/* Last Contacted */}
-      <TableCell className="px-3 py-2.5">
-        <div className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap">
-          <Clock className="w-3 h-3 text-muted-foreground shrink-0" />
-          <span className="text-[11px] font-medium text-foreground truncate">
-            {client.lastContactedAt ? formatDistanceToNow(new Date(client.lastContactedAt), { addSuffix: true }) : "—"}
-          </span>
-        </div>
+      {/* Age */}
+      <TableCell className="px-3 py-2.5 text-center">
+        <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
+          {formatClientAge(client.clientAge)}
+        </span>
       </TableCell>
 
       {/* Job Count */}

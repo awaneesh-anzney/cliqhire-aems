@@ -490,11 +490,11 @@ function useDebounce<T>(value: T, delay: number): T {
                    </TableHead>
                    <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">ID</TableHead>
                    <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Name</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Industry</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Location</TableHead>
                    <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stage</TableHead>
                    <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Status</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Next Follow-up</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Last Contacted</TableHead>
+                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Age</TableHead>
                    <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Jobs</TableHead>
                    <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right pr-6">Created By</TableHead>
                  </TableRow>
