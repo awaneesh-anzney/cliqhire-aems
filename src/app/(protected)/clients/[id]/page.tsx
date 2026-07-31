@@ -23,13 +23,16 @@ import { api } from "@/lib/axios-config"; // Import directly as used in jobs-con
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryContent } from "@/components/clients/summary/summary-content";
+import { ComplianceContent } from "@/components/clients/compliance/compliance-content";
+import { ActivitiesContent } from "@/components/clients/activities/activities-content";
+import { TimelineContent } from "@/components/clients/timeline/timeline-content";
 import { NotesContent } from "@/components/clients/notes/notes-content";
 import { AttachmentsContent } from "@/components/clients/attachments/attachments-content";
 import TeamContent from "@/components/clients/team/team-content";
 import { ContactsContent } from "@/components/clients/contacts/contacts-content";
 import { HistoryContent } from "@/components/clients/history/history-content";
 import { JobsContent } from "@/components/clients/jobs/jobs-content";
-import { getClientById, updateClientStage, updateClientStageStatus, ClientStageStatus } from "@/services/clientService";
+import { getClientById, updateClientStageStatus, ClientStageStatus, changeClientStage } from "@/services/clientService";
 import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
 import { useClientById } from "@/hooks/useClient";
 import { useQuery } from "@tanstack/react-query";
@@ -125,6 +128,8 @@ export default function ClientPage({ params }: PageProps) {
     clientId: string;
     stage: any;
   } | null>(null);
+  const [stageChangeReason, setStageChangeReason] = useState("");
+  const [stageChangeClosureSummary, setStageChangeClosureSummary] = useState("");
   const [pendingStatusChange, setPendingStatusChange] = useState<{
     clientId: string;
     status: ClientStageStatus;
@@ -227,9 +232,15 @@ export default function ClientPage({ params }: PageProps) {
     setError(null);
     try {
       if (pendingChange.stage) {
-        await updateClientStage(pendingChange.clientId, pendingChange.stage);
+        await changeClientStage(pendingChange.clientId, {
+          stage: pendingChange.stage,
+          reason: stageChangeReason,
+          closureSummary: stageChangeClosureSummary
+        });
       }
       setShowConfirmDialog(false);
+      setStageChangeReason("");
+      setStageChangeClosureSummary("");
       refetch();
     } catch (error: any) {
       console.error("Error updating client stage:", error);
@@ -391,19 +402,38 @@ export default function ClientPage({ params }: PageProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <ConfirmDialog
-        open={showConfirmDialog}
-        onOpenChange={setShowConfirmDialog}
-        onConfirm={handleConfirmChange}
-        onCancel={() => { setShowConfirmDialog(false); setError(null); }}
-        title="Confirm Stage Change"
-        description="Are you sure you want to update the client stage?"
-        confirmText="Confirm"
-        cancelText="Cancel"
-        loading={isLoading}
-        error={error}
-        confirmVariant="default"
-      />
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Stage Change</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to update the client stage to {pendingChange?.stage}?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Reason (Optional)</Label>
+              <Input 
+                value={stageChangeReason} 
+                onChange={(e) => setStageChangeReason(e.target.value)}
+                placeholder="e.g. Client agreed to terms"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Closure Summary (Optional)</Label>
+              <Input 
+                value={stageChangeClosureSummary} 
+                onChange={(e) => setStageChangeClosureSummary(e.target.value)}
+                placeholder="Summary of the previous stage"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmChange} disabled={isLoading}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog
         open={showStatusConfirmDialog}
         onOpenChange={setShowStatusConfirmDialog}
@@ -534,7 +564,15 @@ export default function ClientPage({ params }: PageProps) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0">
+        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0 overflow-x-auto">
+          <TabsTrigger
+            value="Compliance"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+          >
+            <TriangleAlert className="h-4 w-4" />
+            Compliance
+          </TabsTrigger>
+
           <TabsTrigger
             value="Summary"
             className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
@@ -581,6 +619,20 @@ export default function ClientPage({ params }: PageProps) {
             History
           </TabsTrigger>
           <TabsTrigger
+            value="Activities"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+          >
+            <Clock className="h-4 w-4" />
+            Activities
+          </TabsTrigger>
+          <TabsTrigger
+            value="Timeline"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+          >
+            <Clock className="h-4 w-4" />
+            Timeline
+          </TabsTrigger>
+          <TabsTrigger
             value="EmailTemplates"
             className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
           >
@@ -591,6 +643,14 @@ export default function ClientPage({ params }: PageProps) {
 
         <TabsContent value="Jobs" className="p-0 mt-0">
           <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
+        </TabsContent>
+
+        <TabsContent value="Compliance" className="p-4">
+          <ComplianceContent
+            clientId={id}
+            clientData={client}
+            canModify={canModifyClients}
+          />
         </TabsContent>
 
         <TabsContent value="Summary" className="p-4">
@@ -620,6 +680,14 @@ export default function ClientPage({ params }: PageProps) {
 
         <TabsContent value="History" className="p-4">
           <HistoryContent clientId={id} />
+        </TabsContent>
+
+        <TabsContent value="Activities" className="p-4">
+          <ActivitiesContent clientId={id} />
+        </TabsContent>
+
+        <TabsContent value="Timeline" className="p-4">
+          <TimelineContent clientId={id} />
         </TabsContent>
 
         <TabsContent value="EmailTemplates" className="p-4">
