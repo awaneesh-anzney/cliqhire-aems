@@ -122,7 +122,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
                       {period.endedAt ? ` – ${format(new Date(period.endedAt), "MMM d, yyyy")}` : ' – Ongoing'}
                     </p>
                     {period.closureSummary && (
-                      <p className="text-xs text-muted-foreground italic mt-2">"{period.closureSummary}"</p>
+                      <p className="text-xs text-muted-foreground italic mt-2">&quot;{period.closureSummary}&quot;</p>
                     )}
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mr-2">

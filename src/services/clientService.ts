@@ -99,6 +99,8 @@ export interface ClientResponse {
     id: string;
     name: string;
   };
+  nextFollowUpDate?: string;
+  nextFollowUpOwner?: string;
   createdAt: string;
   updatedAt?: string;
   __v?: number;
