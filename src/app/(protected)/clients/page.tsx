@@ -47,6 +47,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
      months: number;
      days: number;
    };
+   clientType?: string;
+   nextFollowUpDate?: string;
+   lastContactedAt?: string;
  }
  
 
@@ -210,6 +213,9 @@ function useDebounce<T>(value: T, delay: number): T {
        incorporationDate: (c as any).incorporationDate ?? "",
        createdBy: c.createdBy?.name || (typeof c.createdBy === 'string' ? c.createdBy : ""),
        clientAge: (c as any).clientAge,
+       clientType: (c as any).clientType || "",
+       nextFollowUpDate: (c as any).nextFollowUpDate || "",
+       lastContactedAt: (c as any).lastContactedAt || "",
      }));
    }, [clientsPage]);
  

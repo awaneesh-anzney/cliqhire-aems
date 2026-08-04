@@ -1,72 +1,150 @@
 // create-activity.tsx
-import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import {
-  CalendarIcon,
-  Phone,
-  Video,
-  ClipboardList,
-  Mail,
-  Users,
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  Link2,
-  List,
-  ListOrdered,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Undo2,
-  Type,
-  LayoutList,
-  Paperclip
-} from "lucide-react";
-import { useState } from "react";
+import { Loader2, Calendar as CalendarIcon, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { logClientActivity } from "@/services/clientService";
+import { getTeamMembers } from "@/services/teamMembersService";
+import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
-export function CreateActivityModal() {
-  const [date, setDate] = useState<Date>();
-  const [activityType, setActivityType] = useState("call");
+interface CreateActivityModalProps {
+  clientId: string;
+  onActivityCreated: () => void;
+  onClose: () => void;
+}
+
+const ACTIVITY_TYPES = [
+  "Call", "WhatsApp", "LinkedIn", "Email", "Meeting", "Data Update", "Negotiation", "Proposal Sent"
+];
+
+const NEGOTIATION_STATUSES = [
+  "Ongoing", "Stuck", "Agreed", "Rejected"
+];
+
+// Generate 24-hour time slots in 30-min intervals
+const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
+  const hours = Math.floor(i / 2);
+  const minutes = i % 2 === 0 ? "00" : "30";
+  return `${String(hours).padStart(2, "0")}:${minutes}`;
+});
+
+export function CreateActivityModal({ clientId, onActivityCreated, onClose }: CreateActivityModalProps) {
+  const [activityType, setActivityType] = useState("Call");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Date states for Shadcn Popover + Calendar
+  const [activityDate, setActivityDate] = useState<Date>(new Date());
+  const [expectedClosureDate, setExpectedClosureDate] = useState<Date | undefined>(undefined);
+  const [nextFollowUpDate, setNextFollowUpDate] = useState<Date | undefined>(undefined);
+  
+  // Popover open states
+  const [activityDateOpen, setActivityDateOpen] = useState(false);
+  const [expectedClosureOpen, setExpectedClosureOpen] = useState(false);
+  const [nextFollowUpOpen, setNextFollowUpOpen] = useState(false);
+
+  // Team users for dropdown
+  const [teamUsers, setTeamUsers] = useState<{ id: string; name: string; role?: string }[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
   const [formData, setFormData] = useState({
-    title: "",
-    activity: "",
-    date: "",
-    startTime: "09:00",
-    endTime: "09:15",
-    location: "",
-    relatedTo: "",
-    assignees: "",
-    attendees: "",
-    onlineMeetingType: "manual",
-    onlineMeetingUrl: "",
-    importance: "low",
-    description: "",
-    attachments: [] as File[],
-    sharedWithGuests: false,
-    inviteAsBcc: false,
+    interactionScope: "Client-facing",
+    activityTime: "09:00",
+    attempts: 1,
+    isMeeting: false,
+    discussionSummary: "",
+    outcome: "",
+    
+    // Negotiation fields
+    dealValue: "",
+    proposedTerms: "",
+    objections: "",
+    competitorMentioned: "",
+    negotiationStatus: "Ongoing",
+    
+    // Footer fields
+    revenue: "",
+    nextFollowUpOwner: "",
   });
+
+  // Fetch team members for Follow-up Owner ID dropdown
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        setIsLoadingUsers(true);
+        const res = await getTeamMembers();
+        const members = (res.teamMembers || []).map((user: any) => ({
+          id: user._id || user.id || "",
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.name || user.email || "Unknown User",
+          role: user.teamRole || user.department || "",
+        }));
+        setTeamUsers(members);
+      } catch (error) {
+        console.error("Error fetching team users:", error);
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+    fetchTeamMembers();
+  }, []);
+
+  // Auto-check isMeeting if activityType is Meeting
+  useEffect(() => {
+    if (activityType === "Meeting") {
+      setFormData(prev => ({ ...prev, isMeeting: true }));
+    }
+  }, [activityType]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
-    const API_URL = process.env.NEXT_PUBLIC_API_URL ;
-    
+    if (!clientId) return;
+
     try {
-      const response = await axios.post(`${API_URL}/api/activities`, formData);
+      setIsSubmitting(true);
+      
+      const payload: any = {
+        activityType,
+        interactionScope: formData.interactionScope,
+        activityDate: (activityDate || new Date()).toISOString(),
+        activityTime: formData.activityTime,
+        attempts: Number(formData.attempts),
+        isMeeting: formData.isMeeting,
+        discussionSummary: formData.discussionSummary,
+        outcome: formData.outcome,
+      };
+
+      if (activityType === "Negotiation" || activityType === "Proposal Sent") {
+        payload.negotiationDetails = {
+          dealValue: formData.dealValue ? Number(formData.dealValue) : undefined,
+          proposedTerms: formData.proposedTerms,
+          objections: formData.objections,
+          competitorMentioned: formData.competitorMentioned,
+          expectedClosureDate: expectedClosureDate ? expectedClosureDate.toISOString() : undefined,
+          negotiationStatus: formData.negotiationStatus
+        };
+      }
+
+      if (formData.revenue) payload.revenue = Number(formData.revenue);
+      if (nextFollowUpDate) payload.nextFollowUpDate = nextFollowUpDate.toISOString();
+      if (formData.nextFollowUpOwner) payload.nextFollowUpOwner = formData.nextFollowUpOwner;
+
+      await logClientActivity(clientId, payload);
+      toast.success("Activity logged successfully");
+      onActivityCreated();
+      onClose();
     } catch (error: any) {
-      console.error('Error creating activity:', error.response.data);
+      console.error('Error creating activity:', error);
+      toast.error(error.message || "Failed to log activity");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -77,359 +155,287 @@ export function CreateActivityModal() {
     }));
   };
 
-  const handleSelectChange = (key: string) => (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleCheckboxChange = (key: string) => (checked: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: checked,
-    }));
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const fileList = Array.from(event.target.files);
-      setFormData((prev) => ({
-        ...prev,
-        attachments: [...prev.attachments, ...fileList],
-      }));
-    }
-  };
-
-  const removeAttachment = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index),
-    }));
-  };
-
-  // Calculate duration in minutes
-  const calculateDuration = () => {
-    if (!formData.startTime || !formData.endTime) return 0;
-
-    const [startHours, startMinutes] = formData.startTime.split(':').map(Number);
-    const [endHours, endMinutes] = formData.endTime.split(':').map(Number);
-
-    const startTotalMinutes = startHours * 60 + startMinutes;
-    const endTotalMinutes = endHours * 60 + endMinutes;
-
-    return endTotalMinutes - startTotalMinutes;
-  };
-
-  const duration = calculateDuration();
-
-  const handleDateSelect = (newDate: Date | undefined) => {
-    setDate(newDate);
-    if (newDate) {
-      setFormData((prev) => ({
-        ...prev,
-        date: format(newDate, "yyyy-MM-dd"),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        date: "",
-      }));
-    }
-  };
+  const isNegotiation = activityType === "Negotiation" || activityType === "Proposal Sent";
 
   return (
-    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+    <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle className="text-2xl font-bold">Create Activity</DialogTitle>
+        <DialogTitle className="text-2xl font-bold">Log Activity</DialogTitle>
       </DialogHeader>
       <form onSubmit={handleSubmit}>
         <div className="space-y-6 py-4">
-          {/* Add the rest of the content here */}
-        </div>
-         
-        <div className="space-y-2">
-            <Label htmlFor="title">Add Title *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={handleInputChange("title")}
-              placeholder="Enter activity title"
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Channel / Type</Label>
+              <Select value={activityType} onValueChange={setActivityType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ACTIVITY_TYPES.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Interaction Scope</Label>
+              <Select 
+                value={formData.interactionScope} 
+                onValueChange={(val) => setFormData(prev => ({ ...prev, interactionScope: val }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Client-facing">Client-facing</SelectItem>
+                  <SelectItem value="Internal">Internal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-[2fr,1.5fr,1fr,1fr] gap-4 items-center">
+            {/* Shadcn UI Date Picker */}
+            <div className="space-y-2">
+              <Label>Date</Label>
+              <Popover open={activityDateOpen} onOpenChange={setActivityDateOpen} modal>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-10 border-border",
+                      !activityDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                    {activityDate ? format(activityDate, "PPP") : <span>Pick date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={activityDate}
+                    onSelect={(date) => {
+                      if (date) setActivityDate(date);
+                      setActivityDateOpen(false);
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Shadcn UI Time Select */}
+            <div className="space-y-2">
+              <Label>Time</Label>
+              <Select
+                value={formData.activityTime}
+                onValueChange={(val) => setFormData((prev) => ({ ...prev, activityTime: val }))}
+              >
+                <SelectTrigger className="w-full h-10 border-border">
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Select time" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60 overflow-y-auto z-50">
+                  {TIME_SLOTS.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Attempts</Label>
+              <Input
+                type="number"
+                min="1"
+                value={formData.attempts}
+                onChange={handleInputChange("attempts")}
+                required
+              />
+            </div>
+            <div className="space-y-2 pt-6 flex justify-center">
+               <label className="flex items-center gap-2 text-sm cursor-pointer">
+                 <Checkbox 
+                   checked={formData.isMeeting} 
+                   onCheckedChange={(checked) => setFormData(p => ({ ...p, isMeeting: checked as boolean }))}
+                 />
+                 Meeting?
+               </label>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Discussion / Summary</Label>
+            <Textarea
+              placeholder="What was discussed?"
+              className="min-h-[80px]"
+              value={formData.discussionSummary}
+              onChange={handleInputChange("discussionSummary")}
               required
             />
           </div>
 
-          <Tabs value={activityType} onValueChange={setActivityType} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 gap-4">
-              <TabsTrigger value="call" className="data-[state=active]:bg-blue-100">
-                <Phone className="h-4 w-4 mr-2" />
-                CALL
-              </TabsTrigger>
-              <TabsTrigger value="meeting" className="data-[state=active]:bg-blue-100">
-                <Video className="h-4 w-4 mr-2" />
-                MEETING
-              </TabsTrigger>
-              <TabsTrigger value="task" className="data-[state=active]:bg-blue-100">
-                <ClipboardList className="h-4 w-4 mr-2" />
-                TASK
-              </TabsTrigger>
-              <TabsTrigger value="email" className="data-[state=active]:bg-blue-100">
-                <Mail className="h-4 w-4 mr-2" />
-                EMAIL
-              </TabsTrigger>
-              <TabsTrigger value="interview" className="data-[state=active]:bg-blue-100">
-                <Users className="h-4 w-4 mr-2" />
-                INTERVIEW
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <div className="grid grid-cols-[2fr,1fr,1fr] gap-4 items-center">
-
-            <div className="relative flex items-center">
-              <Input
-                id="date"
-                type="date"
-                placeholder="Select date"
-                value={formData.date}
-                onChange={handleInputChange("date")}
-                className="w-full inline-block"
-              />
-            </div>
-
-
-            <Input
-              type="time"
-              value={formData.startTime}
-              onChange={handleInputChange("startTime")}
-            />
-            <Input
-              type="time"
-              value={formData.endTime}
-              onChange={handleInputChange("endTime")}
-            />
-            <div className="col-span-3 text-muted-foreground text-sm">
-              ({duration} Minutes)
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="share"
-              checked={formData.sharedWithGuests}
-              onCheckedChange={handleCheckboxChange("sharedWithGuests")}
-            />
-            <label
-              htmlFor="share"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Share with guests
-            </label>
-          </div>
-
           <div className="space-y-2">
-            <Label>Location</Label>
+            <Label>Outcome / Next Action</Label>
             <Input
-              value={formData.location}
-              onChange={handleInputChange("location")}
-              placeholder="Search Location"
+              value={formData.outcome}
+              onChange={handleInputChange("outcome")}
+              placeholder="e.g. Scheduled a follow-up call"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Related to</Label>
-            <Input
-              value={formData.relatedTo}
-              onChange={handleInputChange("relatedTo")}
-              placeholder="Client"
-            />
-          </div>
+          {/* Conditional Negotiation Section */}
+          {isNegotiation && (
+            <div className="p-4 bg-muted/30 rounded-xl border border-border space-y-4">
+              <h4 className="font-semibold text-sm">Negotiation Details</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Deal Value (SAR)</Label>
+                  <Input type="number" placeholder="e.g. 50000" value={formData.dealValue} onChange={handleInputChange("dealValue")} />
+                </div>
 
-          <div className="space-y-2">
-            <Label>Assignees</Label>
-            <Input
-              value={formData.assignees}
-              onChange={handleInputChange("assignees")}
-              placeholder="Enter the email address of assignee"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Attendees</Label>
-            <Input
-              value={formData.attendees}
-              onChange={handleInputChange("attendees")}
-              placeholder="Enter the email address of attendees"
-            />
-            <div className="flex items-center space-x-2 mt-2">
-              <Checkbox
-                id="bcc"
-                checked={formData.inviteAsBcc}
-                onCheckedChange={handleCheckboxChange("inviteAsBcc")}
-              />
-              <label
-                htmlFor="bcc"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Invite as BCC
-              </label>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Online meeting type</Label>
-            <Select
-              value={formData.onlineMeetingType}
-              onValueChange={handleSelectChange("onlineMeetingType")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Manual URL" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="manual">Manual URL</SelectItem>
-                <SelectItem value="zoom">Zoom Meeting</SelectItem>
-                <SelectItem value="teams">Microsoft Teams</SelectItem>
-                <SelectItem value="meet">Google Meet</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              placeholder="Enter the URL"
-              className="mt-2"
-              value={formData.onlineMeetingUrl}
-              onChange={handleInputChange("onlineMeetingUrl")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Importance</Label>
-            <Select
-              value={formData.importance}
-              onValueChange={handleSelectChange("importance")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select importance" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <div className="border rounded-lg">
-              <div className="flex flex-wrap gap-0.5 border-b p-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Bold className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Italic className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Underline className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Strikethrough className="h-4 w-4" />
-                </Button>
-                <div className="h-8 w-[1px] bg-border mx-1" />
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Link2 className="h-4 w-4" />
-                </Button>
-                <div className="h-8 w-[1px] bg-border mx-1" />
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <ListOrdered className="h-4 w-4" />
-                </Button>
-                <div className="h-8 w-[1px] bg-border mx-1" />
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <AlignLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <AlignCenter className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <AlignRight className="h-4 w-4" />
-                </Button>
-                <div className="h-8 w-[1px] bg-border mx-1" />
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Undo2 className="h-4 w-4" />
-                </Button>
-                <div className="h-8 w-[1px] bg-border mx-1" />
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Type className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <LayoutList className="h-4 w-4" />
-                </Button>
+                {/* Expected Closure Date Picker */}
+                <div className="space-y-2">
+                  <Label>Expected Closure</Label>
+                  <Popover open={expectedClosureOpen} onOpenChange={setExpectedClosureOpen} modal>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-10 border-border bg-background",
+                          !expectedClosureDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {expectedClosureDate ? format(expectedClosureDate, "PPP") : <span>Pick closure date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={expectedClosureDate}
+                        onSelect={(date) => {
+                          setExpectedClosureDate(date);
+                          setExpectedClosureOpen(false);
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
-              <Textarea
-                placeholder="Add description"
-                className="border-0 rounded-none min-h-[200px]"
-                value={formData.description}
-                onChange={handleInputChange("description")}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Attachments</Label>
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
-              <div className="flex flex-col items-center gap-2">
-                <Paperclip className="h-8 w-8 text-muted-foreground" />
-                <div className="relative">
-                <Button variant="secondary" className="mt-2">Select Files</Button>
-                <input
-                  type="file"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onChange={handleFileChange}
-                  multiple
-                />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Proposed Terms</Label>
+                  <Textarea placeholder="12-month retainer..." value={formData.proposedTerms} onChange={handleInputChange("proposedTerms")} className="min-h-[60px]" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Objections</Label>
+                  <Textarea placeholder="Client asking for discount..." value={formData.objections} onChange={handleInputChange("objections")} className="min-h-[60px]" />
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">or drop files here</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Supported file types (max 20MB): .doc, .docx, .gif, .jpeg, .jpg, .odt,
-.pdf, .png, .rar, .svg, .xls, .xlsx, .zip, .mov, .mp4, .avi, .pptx
-              </p>
-            </div>
-          </div>
 
-          {formData.attachments.length > 0 && (
-            <div className="mt-4">
-              <h4 className="text-sm font-medium mb-2">Selected Files:</h4>
-              <ul className="space-y-2">
-                {formData.attachments.map((file, index) => (
-                  <li key={index} className="flex items-center justify-between bg-muted p-2 rounded-md">
-                    <div className="flex items-center">
-                      <Paperclip className="h-4 w-4 mr-2" />
-                      <span className="text-sm truncate max-w-[300px]">{file.name}</span>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        ({(file.size / 1024).toFixed(1)} KB)
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeAttachment(index)}
-                      type="button"
-                    >
-                      Remove
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Competitor Mentioned</Label>
+                  <Input placeholder="Competitor XYZ" value={formData.competitorMentioned} onChange={handleInputChange("competitorMentioned")} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Negotiation Status</Label>
+                  <Select 
+                    value={formData.negotiationStatus} 
+                    onValueChange={(val) => setFormData(prev => ({ ...prev, negotiationStatus: val }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {NEGOTIATION_STATUSES.map(status => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           )}
+
+          {/* Footer fields */}
+          <div className="border-t pt-4 grid grid-cols-3 gap-4">
+             <div className="space-y-2">
+                <Label>Revenue (SAR)</Label>
+                <Input type="number" placeholder="Actual Revenue" value={formData.revenue} onChange={handleInputChange("revenue")} />
+             </div>
+
+             {/* Set Next Follow-up Date */}
+             <div className="space-y-2">
+                <Label>Set Next Follow-up</Label>
+                <Popover open={nextFollowUpOpen} onOpenChange={setNextFollowUpOpen} modal>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-10 border-border bg-background",
+                        !nextFollowUpDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                      {nextFollowUpDate ? format(nextFollowUpDate, "PPP") : <span>Follow-up date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-50" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={nextFollowUpDate}
+                      onSelect={(date) => {
+                        setNextFollowUpDate(date);
+                        setNextFollowUpOpen(false);
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+             </div>
+
+             {/* Follow-up Owner Dropdown */}
+             <div className="space-y-2">
+                <Label>Follow-up Owner ID</Label>
+                <Select 
+                  value={formData.nextFollowUpOwner} 
+                  onValueChange={(val) => setFormData(prev => ({ ...prev, nextFollowUpOwner: val }))}
+                >
+                  <SelectTrigger className="w-full h-10 border-border">
+                    <SelectValue placeholder={isLoadingUsers ? "Loading users..." : "Select team user"} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60 overflow-y-auto z-50">
+                    {teamUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} {user.role ? `(${user.role})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+             </div>
+          </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" className="mr-2" type="button">Cancel</Button>
-          <Button type="submit">Create Activity</Button>
+          <Button variant="outline" className="mr-2" type="button" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Activity
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>
   );
-}  
+}

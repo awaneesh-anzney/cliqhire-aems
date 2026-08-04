@@ -99,6 +99,13 @@ export interface ClientResponse {
     id: string;
     name: string;
   };
+  nextFollowUpDate?: string;
+  nextFollowUpOwner?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string;
   createdAt: string;
   updatedAt?: string;
   __v?: number;
@@ -873,6 +880,117 @@ const getPrimaryContacts = async (clientId: string): Promise<PrimaryContact[]> =
   }
 };
 
+// --- New Client CRM API Endpoints ---
+
+export interface ClientActivity {
+  _id?: string;
+  client_id?: string;
+  stagePeriodId?: string;
+  stageAtTime?: string;
+  contactId?: string;
+  repId?: string;
+  interactionScope?: string;
+  activityType: string;
+  activityDate?: string;
+  activityTime?: string;
+  attempts?: number;
+  isMeeting?: boolean;
+  discussionSummary?: string;
+  outcome?: string;
+  negotiationDetails?: any;
+  revenue?: number | null;
+  nextFollowUpDate?: string | null;
+  nextFollowUpOwner?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string | null;
+  createdBy?: any;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ClientStageHistory {
+  _id: string;
+  client_id: string;
+  stage: string;
+  startedAt: string;
+  endedAt: string | null;
+  changedBy: any;
+  reason?: string;
+  closureSummary?: string;
+  activityCount?: number;
+  activities?: ClientActivity[];
+}
+
+// 1. PATCH /api/clients/:id/stage
+const changeClientStage = async (
+  id: string,
+  data: {
+    stage: "Lead" | "Engaged" | "Signed";
+    reason?: string;
+    closureSummary?: string;
+  }
+): Promise<{ client: ClientResponse, closedPeriod?: ClientStageHistory, newPeriod?: ClientStageHistory }> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/stage`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// 2. GET /api/clients/:id/stage-history
+const getClientStageHistory = async (id: string): Promise<ClientStageHistory[]> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/stage-history`, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// 3. POST /api/clients/:id/activities
+const logClientActivity = async (id: string, data: Partial<ClientActivity>): Promise<ClientActivity> => {
+  try {
+    const response = await api.post(`/api/clients/${id}/activities`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// 4. GET /api/clients/:id/activities
+const getClientActivities = async (id: string, params?: any): Promise<{ data: ClientActivity[], count: number, total: number, page: number, totalPages: number }> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/activities`, { params, timeout: 15000 });
+    return response.data; 
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// 5. GET /api/clients/:id/timeline
+const getClientTimeline = async (id: string): Promise<ClientStageHistory[]> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/timeline`, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// 6. PATCH /api/clients/:id/follow-up
+const updateClientFollowUp = async (id: string, data: { nextFollowUpDate?: string, nextFollowUpOwner?: string }): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/follow-up`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -887,4 +1005,10 @@ export {
   updatePrimaryContact,
   deletePrimaryContact,
   getPrimaryContacts,
+  changeClientStage,
+  getClientStageHistory,
+  logClientActivity,
+  getClientActivities,
+  getClientTimeline,
+  updateClientFollowUp,
 };

@@ -34,13 +34,13 @@ export const FileUploadRow = ({
   };
 
   return (
-    <div className={`flex items-center justify-between py-2 ${className || ""}`}>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <div className="flex items-center gap-10">
-        <span className="text-sm text-foreground truncate" title={currentFileName || "No Details"}>
+    <div className={`flex items-center justify-between py-2 gap-2 min-w-0 ${className || ""}`}>
+      <p className="text-sm text-muted-foreground shrink-0">{label}</p>
+      <div className="flex items-center justify-end gap-3 sm:gap-6 min-w-0 flex-1">
+        <span className="text-sm text-foreground truncate min-w-0 max-w-[150px] sm:max-w-[220px]" title={currentFileName || "No Details"}>
           {currentFileName || <span className="text-muted-foreground">No Details</span>}
         </span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {onPreview && (
             <Button variant="ghost" className="p-2 h-auto" onClick={onPreview} title="Preview">
               <Eye className="h-4 w-4" />

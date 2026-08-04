@@ -21,21 +21,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios-config"; // Import directly as used in jobs-content
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryContent } from "@/components/clients/summary/summary-content";
+import { ActivitiesContent } from "@/components/clients/activities/activities-content";
+import { TimelineContent } from "@/components/clients/timeline/timeline-content";
 import { NotesContent } from "@/components/clients/notes/notes-content";
 import { AttachmentsContent } from "@/components/clients/attachments/attachments-content";
 import TeamContent from "@/components/clients/team/team-content";
 import { ContactsContent } from "@/components/clients/contacts/contacts-content";
 import { HistoryContent } from "@/components/clients/history/history-content";
 import { JobsContent } from "@/components/clients/jobs/jobs-content";
-import { getClientById, updateClientStage, updateClientStageStatus, ClientStageStatus } from "@/services/clientService";
+import { getClientById, updateClientStageStatus, ClientStageStatus, changeClientStage } from "@/services/clientService";
 import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
 import { useClientById } from "@/hooks/useClient";
 import { useQuery } from "@tanstack/react-query";
 import { ClientStageBadge } from "@/components/client-stage-badge";
 import { ClientStageStatusBadge } from "@/components/client-stage-status-badge";
 import { EmailTemplatesContent } from "@/components/clients/email-templates";
+import { FollowUpModal } from "@/components/clients/modals/follow-up-modal";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -125,10 +129,13 @@ export default function ClientPage({ params }: PageProps) {
     clientId: string;
     stage: any;
   } | null>(null);
+  const [stageChangeReason, setStageChangeReason] = useState("");
+  const [stageChangeClosureSummary, setStageChangeClosureSummary] = useState("");
   const [pendingStatusChange, setPendingStatusChange] = useState<{
     clientId: string;
     status: ClientStageStatus;
   } | null>(null);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
 
   const {
     data: client,
@@ -227,9 +234,15 @@ export default function ClientPage({ params }: PageProps) {
     setError(null);
     try {
       if (pendingChange.stage) {
-        await updateClientStage(pendingChange.clientId, pendingChange.stage);
+        await changeClientStage(pendingChange.clientId, {
+          stage: pendingChange.stage,
+          reason: stageChangeReason,
+          closureSummary: stageChangeClosureSummary
+        });
       }
       setShowConfirmDialog(false);
+      setStageChangeReason("");
+      setStageChangeClosureSummary("");
       refetch();
     } catch (error: any) {
       console.error("Error updating client stage:", error);
@@ -390,20 +403,39 @@ export default function ClientPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <ConfirmDialog
-        open={showConfirmDialog}
-        onOpenChange={setShowConfirmDialog}
-        onConfirm={handleConfirmChange}
-        onCancel={() => { setShowConfirmDialog(false); setError(null); }}
-        title="Confirm Stage Change"
-        description="Are you sure you want to update the client stage?"
-        confirmText="Confirm"
-        cancelText="Cancel"
-        loading={isLoading}
-        error={error}
-        confirmVariant="default"
-      />
+    <div className="flex flex-col h-full w-full max-w-full overflow-x-hidden">
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Stage Change</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to update the client stage to {pendingChange?.stage}?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Reason (Optional)</Label>
+              <Input 
+                value={stageChangeReason} 
+                onChange={(e) => setStageChangeReason(e.target.value)}
+                placeholder="e.g. Client agreed to terms"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Closure Summary (Optional)</Label>
+              <Input 
+                value={stageChangeClosureSummary} 
+                onChange={(e) => setStageChangeClosureSummary(e.target.value)}
+                placeholder="Summary of the previous stage"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmChange} disabled={isLoading}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog
         open={showStatusConfirmDialog}
         onOpenChange={setShowStatusConfirmDialog}
@@ -419,12 +451,12 @@ export default function ClientPage({ params }: PageProps) {
       />
 
       {/* Header Section */}
-      <div className="bg-card border-b shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-6 py-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-foreground tracking-tight">{client.name || "Unnamed Client"}</h1>
+      <div className="bg-card border-b shadow-sm w-full overflow-hidden">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 w-full">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 min-w-0">
+            <div className="space-y-3 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight break-words max-w-full">{client.name || "Unnamed Client"}</h1>
                 <div className="flex items-center gap-2">
                   <ClientStageBadge
                     id={client._id}
@@ -442,16 +474,16 @@ export default function ClientPage({ params }: PageProps) {
                 </div>
               </div>
               
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-muted-foreground min-w-0 max-w-full">
                 {client.industry && (
-                  <div className="flex items-center gap-1.5">
-                    <Forklift className="h-4 w-4 text-muted-foreground" />
-                    <span>{client.industry}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Forklift className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="truncate">{client.industry}</span>
                   </div>
                 )}
                 {(client.address || client.location) && (
-                  <div className="flex items-center gap-1.5 border-l border-border pl-4">
-                    <MapPin  className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex items-center gap-1.5 border-l border-border pl-4 min-w-0">
+                    <MapPin  className="h-4 w-4 text-muted-foreground shrink-0" />
                     <span className="truncate max-w-xs">{ client.location ||client.address}</span>
                   </div>
                 )}
@@ -475,8 +507,46 @@ export default function ClientPage({ params }: PageProps) {
               </Button>
             </div>
           </div>
+          
+          {/* Follow-up Widget */}
+          <div className="mt-4 flex flex-wrap items-center gap-2 bg-muted/30 w-fit max-w-full px-4 py-2 rounded-xl border border-border shadow-sm min-w-0">
+            <Clock className={`h-4 w-4 shrink-0 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500' : 'text-brand'}`} />
+            <span className="text-sm font-semibold text-foreground shrink-0">Next Follow-up:</span>
+            <span className={`text-sm shrink-0 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
+              {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "Not Set"}
+            </span>
+            {client.nextFollowUpOwner && (
+               <TooltipProvider>
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1 truncate max-w-[150px] cursor-default">
+                       {typeof client.nextFollowUpOwner === 'string' 
+                         ? client.nextFollowUpOwner 
+                         : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`}
+                     </span>
+                   </TooltipTrigger>
+                   {typeof client.nextFollowUpOwner !== 'string' && client.nextFollowUpOwner.email && (
+                     <TooltipContent>
+                       <p>{client.nextFollowUpOwner.email}</p>
+                     </TooltipContent>
+                   )}
+                 </Tooltip>
+               </TooltipProvider>
+            )}
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-brand hover:bg-brand/10 ml-2 shrink-0" onClick={() => setIsFollowUpModalOpen(true)}>
+              Edit
+            </Button>
+          </div>
         </div>
       </div>
+
+      <FollowUpModal 
+        clientId={id} 
+        open={isFollowUpModalOpen} 
+        onOpenChange={setIsFollowUpModalOpen} 
+        currentDate={client.nextFollowUpDate} 
+        currentOwner={typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : client.nextFollowUpOwner?._id}
+      />
 
       {/* Button Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-muted/50 border-b gap-4">
@@ -533,11 +603,11 @@ export default function ClientPage({ params }: PageProps) {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-full min-w-0 overflow-hidden">
+        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0 overflow-x-auto max-w-full min-w-0">
           <TabsTrigger
             value="Summary"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 shrink-0"
           >
             <FileIcon className="h-4 w-4" />
             Summary
@@ -581,6 +651,20 @@ export default function ClientPage({ params }: PageProps) {
             History
           </TabsTrigger>
           <TabsTrigger
+            value="Activities"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+          >
+            <Clock className="h-4 w-4" />
+            Activities
+          </TabsTrigger>
+          <TabsTrigger
+            value="Timeline"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+          >
+            <Clock className="h-4 w-4" />
+            Timeline
+          </TabsTrigger>
+          <TabsTrigger
             value="EmailTemplates"
             className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
           >
@@ -589,11 +673,11 @@ export default function ClientPage({ params }: PageProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="Jobs" className="p-0 mt-0">
+        <TabsContent value="Jobs" className="p-0 mt-0 max-w-full overflow-x-auto">
           <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
         </TabsContent>
 
-        <TabsContent value="Summary" className="p-4">
+        <TabsContent value="Summary" className="p-2 sm:p-4 max-w-full overflow-x-hidden">
           <SummaryContent
             clientId={id}
             clientData={client}
@@ -620,6 +704,14 @@ export default function ClientPage({ params }: PageProps) {
 
         <TabsContent value="History" className="p-4">
           <HistoryContent clientId={id} />
+        </TabsContent>
+
+        <TabsContent value="Activities" className="p-4">
+          <ActivitiesContent clientId={id} />
+        </TabsContent>
+
+        <TabsContent value="Timeline" className="p-4">
+          <TimelineContent clientId={id} />
         </TabsContent>
 
         <TabsContent value="EmailTemplates" className="p-4">
