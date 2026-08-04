@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios-config"; // Import directly as used in jobs-content
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryContent } from "@/components/clients/summary/summary-content";
 import { ActivitiesContent } from "@/components/clients/activities/activities-content";
@@ -515,11 +516,22 @@ export default function ClientPage({ params }: PageProps) {
               {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "Not Set"}
             </span>
             {client.nextFollowUpOwner && (
-               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1 truncate max-w-[250px]">
-                 {typeof client.nextFollowUpOwner === 'string' 
-                   ? client.nextFollowUpOwner 
-                   : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName} (${client.nextFollowUpOwner.email})`}
-               </span>
+               <TooltipProvider>
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1 truncate max-w-[150px] cursor-default">
+                       {typeof client.nextFollowUpOwner === 'string' 
+                         ? client.nextFollowUpOwner 
+                         : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`}
+                     </span>
+                   </TooltipTrigger>
+                   {typeof client.nextFollowUpOwner !== 'string' && client.nextFollowUpOwner.email && (
+                     <TooltipContent>
+                       <p>{client.nextFollowUpOwner.email}</p>
+                     </TooltipContent>
+                   )}
+                 </Tooltip>
+               </TooltipProvider>
             )}
             <Button variant="ghost" size="sm" className="h-6 px-2 text-brand hover:bg-brand/10 ml-2 shrink-0" onClick={() => setIsFollowUpModalOpen(true)}>
               Edit
