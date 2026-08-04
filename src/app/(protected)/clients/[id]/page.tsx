@@ -515,8 +515,10 @@ export default function ClientPage({ params }: PageProps) {
               {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "Not Set"}
             </span>
             {client.nextFollowUpOwner && (
-               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1 truncate max-w-[150px]">
-                 {typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : (client.nextFollowUpOwner as any)?.firstName || 'Owner'}
+               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1 truncate max-w-[250px]">
+                 {typeof client.nextFollowUpOwner === 'string' 
+                   ? client.nextFollowUpOwner 
+                   : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName} (${client.nextFollowUpOwner.email})`}
                </span>
             )}
             <Button variant="ghost" size="sm" className="h-6 px-2 text-brand hover:bg-brand/10 ml-2 shrink-0" onClick={() => setIsFollowUpModalOpen(true)}>
@@ -531,7 +533,7 @@ export default function ClientPage({ params }: PageProps) {
         open={isFollowUpModalOpen} 
         onOpenChange={setIsFollowUpModalOpen} 
         currentDate={client.nextFollowUpDate} 
-        currentOwner={typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : (client.nextFollowUpOwner as any)?._id}
+        currentOwner={typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : client.nextFollowUpOwner?._id}
       />
 
       {/* Button Bar */}

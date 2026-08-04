@@ -100,7 +100,12 @@ export interface ClientResponse {
     name: string;
   };
   nextFollowUpDate?: string;
-  nextFollowUpOwner?: string;
+  nextFollowUpOwner?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string;
   createdAt: string;
   updatedAt?: string;
   __v?: number;
@@ -895,7 +900,12 @@ export interface ClientActivity {
   negotiationDetails?: any;
   revenue?: number | null;
   nextFollowUpDate?: string | null;
-  nextFollowUpOwner?: string | null;
+  nextFollowUpOwner?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string | null;
   createdBy?: any;
   createdAt?: string;
   updatedAt?: string;
