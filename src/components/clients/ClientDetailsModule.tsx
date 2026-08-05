@@ -662,7 +662,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   className="w-full flex-1 max-w-full min-w-0 overflow-hidden flex flex-col"
 >
   {/* Tabs Header Navigation */}
-  <div className="w-full border-b border-emerald-900/10 bg-white/40 dark:bg-black/20 backdrop-blur-md px-1 pt-1">
+  <div className="w-full border-b border-emerald-900/10 bg-white/40 dark:bg-black/20 backdrop-blur-md ">
     <TabsList className="flex w-full items-center justify-start gap-1 p-1 bg-transparent overflow-x-auto scrollbar-none max-w-full min-w-0 h-auto">
       
       {/* Summary */}
@@ -753,7 +753,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   <div className="flex-1 min-h-0 overflow-y-auto">
     <TabsContent 
       value="Summary" 
-      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+      className="p-2 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
     >
       <SummaryContent
         clientId={id}
