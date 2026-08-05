@@ -23,54 +23,111 @@ interface JobTabsProps {
   canModify?: boolean;
 }
 
-export function JobTabs({ jobId, jobData, reloadToken, activeTab = "summary", onTabChange, canModify }: JobTabsProps) {
+export function JobTabs({ 
+  jobId, 
+  jobData, 
+  reloadToken, 
+  activeTab = "summary", 
+  onTabChange, 
+  canModify 
+}: JobTabsProps) {
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+    <Tabs 
+      value={activeTab} 
+      onValueChange={onTabChange} 
+      className="w-full flex-1 max-w-full min-w-0 flex flex-col overflow-hidden"
+    >
+      {/* Modern Tabs Navigation Bar */}
       <JobTabsList />
       
-      <JobTabContent value="candidates">
-        <CandidatesContent jobId={jobId} jobTitle={jobData.jobTitle} reloadToken={reloadToken} />
-      </JobTabContent>
-      
-      <JobTabContent value="summary">
-      
-        <SummaryContent jobId={jobId} jobData={jobData} canModify={canModify} />
-      </JobTabContent>
-      
-      <JobTabContent value="team">
-      
-        <TeamContent jobId={jobId} jobData={jobData} canModify={canModify} />
-      </JobTabContent>
+      {/* Dynamic Tab Content Wrapper with Fade-In Animation */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-5">
+        
+        {/* Candidates Content */}
+        <JobTabContent 
+          value="candidates"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+        >
+          <CandidatesContent 
+            jobId={jobId} 
+            jobTitle={jobData.jobTitle} 
+            reloadToken={reloadToken} 
+          />
+        </JobTabContent>
+        
+        {/* Summary Content */}
+        <JobTabContent 
+          value="summary"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+        >
+          <SummaryContent 
+            jobId={jobId} 
+            jobData={jobData} 
+            canModify={canModify} 
+          />
+        </JobTabContent>
+        
+        {/* Team Content */}
+        <JobTabContent 
+          value="team"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+        >
+          <TeamContent 
+            jobId={jobId} 
+            jobData={jobData} 
+            canModify={canModify} 
+          />
+        </JobTabContent>
 
-      {/* <JobTabContent value="recommendations">
-      
-        <RecommendationsContent jobId={jobId} />
-      </JobTabContent> */}
-      
-      {/* <JobTabContent value="activities">
-      
-        <ActivitiesContent jobId={jobId} />
-      </JobTabContent> */}
-      
-      <JobTabContent value="notes">
-      
-        <NotesContent jobId={jobId} jobData={jobData} canModify={canModify} />
-      </JobTabContent>
-      
-      <JobTabContent value="attachments">
-      
-        <AttachmentsContent jobId={jobId} canModify={canModify} />
-      </JobTabContent>
+        {/* Commented Out Content Tabs (Uncomment when needed) */}
+        {/* 
+        <JobTabContent value="recommendations" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+          <RecommendationsContent jobId={jobId} />
+        </JobTabContent> 
+        */}
+        
+        {/* 
+        <JobTabContent value="activities" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+          <ActivitiesContent jobId={jobId} />
+        </JobTabContent> 
+        */}
+        
+        {/* Notes Content */}
+        <JobTabContent 
+          value="notes"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+        >
+          <NotesContent 
+            jobId={jobId} 
+            jobData={jobData} 
+            canModify={canModify} 
+          />
+        </JobTabContent>
+        
+        {/* Attachments Content */}
+        <JobTabContent 
+          value="attachments"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+        >
+          <AttachmentsContent 
+            jobId={jobId} 
+            canModify={canModify} 
+          />
+        </JobTabContent>
 
-      {/* <JobTabContent value="sourcing">
-      
-        <SourcingContent jobId={jobId} />
-      </JobTabContent> */}
+        {/* 
+        <JobTabContent value="sourcing" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+          <SourcingContent jobId={jobId} />
+        </JobTabContent> 
+        */}
 
-      {/* <JobTabContent value="reports">
-      
-        <ReportsContent jobId={jobId} />
-      </JobTabContent> */}
+        {/* 
+        <JobTabContent value="reports" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+          <ReportsContent jobId={jobId} />
+        </JobTabContent> 
+        */}
+
+      </div>
     </Tabs>
   )
 }
