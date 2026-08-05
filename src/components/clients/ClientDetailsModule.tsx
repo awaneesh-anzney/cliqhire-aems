@@ -17,6 +17,11 @@ import {
   Download,
   MapPin,
   Forklift,
+  LayoutDashboard,
+  Briefcase,
+  History,
+  Activity,
+  GitCommit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios-config"; // Import directly as used in jobs-content
@@ -650,121 +655,178 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
       />
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 max-w-full min-w-0 overflow-hidden flex flex-col">
-        <TabsList className="flex border-b border-border/60 w-full rounded-none justify-start  bg-card/50 backdrop-blur-sm p-0 overflow-x-auto custom-scrollbar mt-2 max-w-full min-w-0 ">
-          <TabsTrigger
-            value="Summary"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <FileIcon className="h-4 w-4" />
-            Summary
-          </TabsTrigger>
 
-          <TabsTrigger
-            value="Jobs"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <FileIcon className="h-4 w-4" />
-            Jobs
-          </TabsTrigger>
+<Tabs 
+  value={activeTab} 
+  onValueChange={setActiveTab} 
+  className="w-full flex-1 max-w-full min-w-0 overflow-hidden flex flex-col"
+>
+  {/* Tabs Header Navigation */}
+  <div className="w-full border-b border-emerald-900/10 bg-white/40 dark:bg-black/20 backdrop-blur-md px-1 pt-1">
+    <TabsList className="flex w-full items-center justify-start gap-1 p-1 bg-transparent overflow-x-auto scrollbar-none max-w-full min-w-0 h-auto">
+      
+      {/* Summary */}
+      <TabsTrigger
+        value="Summary"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <LayoutDashboard className="h-3.5 w-3.5 text-emerald-600" />
+        <span>Summary</span>
+      </TabsTrigger>
 
-          <TabsTrigger
-            value="Notes"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <StickyNote className="h-4 w-4" />
-            Notes
-          </TabsTrigger>
-          <TabsTrigger
-            value="Attachments"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <Paperclip className="h-4 w-4" />
-            Attachments
-          </TabsTrigger>
+      {/* Jobs */}
+      <TabsTrigger
+        value="Jobs"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <Briefcase className="h-3.5 w-3.5 text-emerald-600" />
+        <span>Jobs</span>
+      </TabsTrigger>
 
-          <TabsTrigger
-            value="Contacts"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <Users className="h-4 w-4" />
-            Contacts
-          </TabsTrigger>
-          <TabsTrigger
-            value="History"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <Clock className="h-4 w-4" />
-            History
-          </TabsTrigger>
-          <TabsTrigger
-            value="Activities"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <Clock className="h-4 w-4" />
-            Activities
-          </TabsTrigger>
-          <TabsTrigger
-            value="Timeline"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <Clock className="h-4 w-4" />
-            Timeline
-          </TabsTrigger>
-          <TabsTrigger
-            value="EmailTemplates"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <Mail className="h-4 w-4" />
-            Email Templates
-          </TabsTrigger>
-        </TabsList>
+      {/* Notes */}
+      <TabsTrigger
+        value="Notes"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <StickyNote className="h-3.5 w-3.5 text-amber-500" />
+        <span>Notes</span>
+      </TabsTrigger>
 
-        <TabsContent value="Jobs" className="p-0 mt-0 max-w-full overflow-x-auto">
-          <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
-        </TabsContent>
+      {/* Attachments */}
+      <TabsTrigger
+        value="Attachments"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <Paperclip className="h-3.5 w-3.5 text-blue-500" />
+        <span>Attachments</span>
+      </TabsTrigger>
 
-        <TabsContent value="Summary" className="p-2 sm:p-4 max-w-full overflow-x-hidden">
-          <SummaryContent
-            clientId={id}
-            clientData={client}
-            onTabSwitch={handleTabSwitch}
-            canModify={canModifyClients}
-          />
-        </TabsContent>
+      {/* Contacts */}
+      <TabsTrigger
+        value="Contacts"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <Users className="h-3.5 w-3.5 text-indigo-500" />
+        <span>Contacts</span>
+      </TabsTrigger>
 
-        <TabsContent value="Notes" className="p-4">
-          <NotesContent clientId={id} canModify={canModifyClients} />
-        </TabsContent>
+      {/* History */}
+      <TabsTrigger
+        value="History"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <History className="h-3.5 w-3.5 text-purple-500" />
+        <span>History</span>
+      </TabsTrigger>
 
-        <TabsContent value="Attachments" className="p-4">
-          <AttachmentsContent clientId={id} canModify={canModifyClients} />
-        </TabsContent>
+      {/* Activities */}
+      <TabsTrigger
+        value="Activities"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <Activity className="h-3.5 w-3.5 text-teal-600" />
+        <span>Activities</span>
+      </TabsTrigger>
 
-        <TabsContent value="ClientTeam" className="p-4">
-          <TeamContent clientId={id} />
-        </TabsContent>
+      {/* Timeline */}
+      <TabsTrigger
+        value="Timeline"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <GitCommit className="h-3.5 w-3.5 text-cyan-600" />
+        <span>Timeline</span>
+      </TabsTrigger>
 
-        <TabsContent value="Contacts" className="p-4">
-          <ContactsContent clientId={id} clientData={client} canModify={canModifyClients} />
-        </TabsContent>
+      {/* Email Templates */}
+      <TabsTrigger
+        value="EmailTemplates"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <Mail className="h-3.5 w-3.5 text-rose-500" />
+        <span>Email Templates</span>
+      </TabsTrigger>
 
-        <TabsContent value="History" className="p-4">
-          <HistoryContent clientId={id} />
-        </TabsContent>
+    </TabsList>
+  </div>
 
-        <TabsContent value="Activities" className="p-4">
-          <ActivitiesContent clientId={id} />
-        </TabsContent>
+  {/* Tab Contents with Fade-In Smooth Animation */}
+  <div className="flex-1 min-h-0 overflow-y-auto">
+    <TabsContent 
+      value="Summary" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <SummaryContent
+        clientId={id}
+        clientData={client}
+        onTabSwitch={handleTabSwitch}
+        canModify={canModifyClients}
+      />
+    </TabsContent>
 
-        <TabsContent value="Timeline" className="p-4">
-          <TimelineContent clientId={id} />
-        </TabsContent>
+    <TabsContent 
+      value="Jobs" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
+    </TabsContent>
 
-        <TabsContent value="EmailTemplates" className="p-4">
-          <EmailTemplatesContent clientId={id} clientData={client} canModify={canModifyClients} />
-        </TabsContent>
-      </Tabs>
+    <TabsContent 
+      value="Notes" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <NotesContent clientId={id} canModify={canModifyClients} />
+    </TabsContent>
+
+    <TabsContent 
+      value="Attachments" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <AttachmentsContent clientId={id} canModify={canModifyClients} />
+    </TabsContent>
+
+    <TabsContent 
+      value="ClientTeam" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <TeamContent clientId={id} />
+    </TabsContent>
+
+    <TabsContent 
+      value="Contacts" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <ContactsContent clientId={id} clientData={client} canModify={canModifyClients} />
+    </TabsContent>
+
+    <TabsContent 
+      value="History" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <HistoryContent clientId={id} />
+    </TabsContent>
+
+    <TabsContent 
+      value="Activities" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <ActivitiesContent clientId={id} />
+    </TabsContent>
+
+    <TabsContent 
+      value="Timeline" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <TimelineContent clientId={id} />
+    </TabsContent>
+
+    <TabsContent 
+      value="EmailTemplates" 
+      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <EmailTemplatesContent clientId={id} clientData={client} canModify={canModifyClients} />
+    </TabsContent>
+  </div>
+</Tabs>
 
       {/* Create Job Modal */}
       {canModifyJobs && (
