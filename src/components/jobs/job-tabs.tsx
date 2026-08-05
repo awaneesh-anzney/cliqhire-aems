@@ -41,7 +41,7 @@ export function JobTabs({
       <JobTabsList />
       
       {/* Dynamic Tab Content Wrapper with Fade-In Animation */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-5">
+      <div className="flex-1 min-h-0 overflow-y-auto p-2">
         
         {/* Candidates Content */}
         <JobTabContent 
