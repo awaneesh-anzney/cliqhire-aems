@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pencil,
@@ -31,7 +30,6 @@ interface EditState {
   currentUserIds: string[];
 }
 
-// Default positions — used when /api/job-positions returns empty or fails
 const DEFAULT_POSITIONS = [
   { _id: "hiringManager", name: "hiringManager", label: "Hiring Manager", maxUsers: 1 as number | null, canViewPipeline: true, canModifyPipeline: true, order: 1, isActive: true },
   { _id: "teamLead",      name: "teamLead",      label: "Team Lead",      maxUsers: 1 as number | null, canViewPipeline: true, canModifyPipeline: true, order: 2, isActive: true },
@@ -40,16 +38,15 @@ const DEFAULT_POSITIONS = [
 ];
 
 const POSITION_COLORS: Record<string, string> = {
-  hiringManager: "text-blue-700 bg-blue-50 border-blue-200",
-  teamLead:      "text-green-700 bg-green-50 border-green-200",
-  recruiter:     "text-purple-700 bg-purple-50 border-purple-200",
-  headhunter:    "text-orange-700 bg-orange-50 border-orange-200",
+  hiringManager: "text-blue-700 dark:text-blue-400 bg-blue-500/10 border-blue-500/20",
+  teamLead:      "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  recruiter:     "text-purple-700 dark:text-purple-400 bg-purple-500/10 border-purple-500/20",
+  headhunter:    "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
 };
 
 export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
   const [editState, setEditState] = useState<EditState | null>(null);
 
-  // Fetch dynamic positions from /api/job-positions
   const {
     data: apiPositions,
     isLoading: positionsLoading,
@@ -57,7 +54,6 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
     refetch: refetchPositions,
   } = useJobPositions();
 
-  // Fetch & mutate team from /api/jobs/:id/team
   const {
     isLoading: teamLoading,
     isError: teamError,
@@ -69,7 +65,6 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
     refetch: refetchTeam,
   } = useJobTeam({ jobId, enabled: !!jobId });
 
-  // Use API positions if they returned data, else use defaults
   const positions =
     apiPositions && apiPositions.length > 0
       ? apiPositions.filter((p) => p.isActive)
@@ -77,17 +72,10 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
 
   const isLoading = positionsLoading || teamLoading;
 
-  /**
-   * Get users for a position.
-   * Priority:
-   *   1. Live data from useJobTeam hook (/api/jobs/:id/team)
-   *   2. Fallback from jobData.jobTeamMembers (populated by getJobById)
-   */
   const getUsersForPos = (positionName: string): PopulatedUser[] => {
     const liveUsers = getUsersForPosition(positionName);
     if (liveUsers.length > 0) return liveUsers;
 
-    // Fallback: parse from jobData already in memory
     if (jobData?.jobTeamMembers && Array.isArray(jobData.jobTeamMembers)) {
       const slot = jobData.jobTeamMembers.find(
         (s: any) => s.position === positionName
@@ -117,13 +105,13 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-lg border px-4 py-4 h-[56vh] overflow-y-auto space-y-4">
+      <div className="bg-card rounded-2xl border border-border/60 p-4 space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Skeleton className="h-4 w-4 rounded" />
           <Skeleton className="h-5 w-32" />
         </div>
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-24 w-full rounded-lg" />
+          <Skeleton key={i} className="h-20 w-full rounded-xl" />
         ))}
       </div>
     );
@@ -135,15 +123,16 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
   );
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden flex flex-col h-full min-h-[500px]">
+    <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden flex flex-col h-full">
+      
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
+      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand/10 rounded-lg">
-            <Users className="h-4 w-4 text-brand" />
+          <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
+            <Users className="h-4 w-4" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-foreground">Internal Team</h2>
+            <h2 className="text-sm font-semibold text-foreground">Internal Team</h2>
             {totalAssigned > 0 && (
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
                 {totalAssigned} Members Assigned
@@ -151,59 +140,56 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {teamError && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
-              onClick={() => refetchTeam()}
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-              Retry
-            </Button>
-          )}
-        </div>
+
+        {teamError && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-500/10"
+            onClick={() => refetchTeam()}
+          >
+            <RefreshCw className="h-3.5 w-3.5 mr-1" />
+            Retry
+          </Button>
+        )}
       </div>
 
-      <div className="flex-1 overflow-auto p-5">
-        {/* Soft warning if positions API failed */}
+      {/* Main Content Area */}
+      <div className="p-4 space-y-5 flex-1 overflow-y-auto">
+        
+        {/* Soft Warning if Positions API fails */}
         {positionsError && (
-          <div className="flex items-center gap-2 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-100 rounded-lg p-3 mb-4">
+          <div className="flex items-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>
               Using default positions — server sync failed.{" "}
-              <button className="underline hover:text-amber-700 ml-1" onClick={() => refetchPositions()}>
+              <button className="underline hover:text-amber-800 ml-1 font-bold" onClick={() => refetchPositions()}>
                 Retry sync
               </button>
             </span>
           </div>
         )}
 
-        {/* Position cards */}
-        <div className="space-y-6">
+        {/* Position Cards */}
+        <div className="space-y-5">
           {positions.map((pos) => {
             const assignedUsers = getUsersForPos(pos.name);
             const isFull =
               pos.maxUsers !== null && assignedUsers.length >= pos.maxUsers;
             const colorClass =
-              POSITION_COLORS[pos.name] || "text-foreground bg-muted border-border";
+              POSITION_COLORS[pos.name] || "text-foreground bg-muted border-border/50";
 
             return (
-              <div
-                key={pos._id || pos.name}
-                className="space-y-3"
-              >
-                {/* Row: label + button */}
+              <div key={pos._id || pos.name} className="space-y-2.5">
+                
+                {/* Position Header Row */}
                 <div className="flex items-center justify-between px-1">
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-[0.05em] px-2.5 py-1 rounded-md border ${colorClass}`}
-                    >
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border ${colorClass}`}>
                       {pos.label}
                     </span>
                     {pos.maxUsers !== null && (
-                      <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded border border-border">
+                      <span className="text-[10px] font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md border border-border/40">
                         {assignedUsers.length} / {pos.maxUsers}
                       </span>
                     )}
@@ -213,7 +199,7 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2 text-[10px] font-bold uppercase text-brand hover:bg-brand/10 transition-colors"
+                      className="h-6 px-2 text-[10px] font-bold uppercase text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                       onClick={() =>
                         setEditState({
                           position:      pos.name,
@@ -225,11 +211,11 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                       disabled={isAssigning || isRemoving}
                     >
                       {isAssigning ? (
-                        <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
                       ) : assignedUsers.length === 0 ? (
-                        <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                        <UserPlus className="h-3 w-3 mr-1" />
                       ) : (
-                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                        <Pencil className="h-3 w-3 mr-1" />
                       )}
                       {assignedUsers.length === 0
                         ? "Assign"
@@ -240,46 +226,49 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                   )}
                 </div>
 
-                {/* Assigned member rows */}
+                {/* Assigned Member Cards */}
                 {assignedUsers.length > 0 ? (
                   <div className="grid grid-cols-1 gap-2">
                     {assignedUsers.map((user) => (
                       <div
                         key={user._id}
-                        className="flex items-center justify-between bg-card border border-border rounded-xl p-3 shadow-sm hover:border-border transition-all group"
+                        className="flex items-center justify-between bg-muted/20 border border-border/40 rounded-xl p-2.5 shadow-sm hover:border-emerald-500/30 transition-all group"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs border border-border">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          
+                          {/* Avatar Circle */}
+                          <div className="h-8 w-8 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-extrabold text-xs flex items-center justify-center border border-emerald-500/20 shrink-0">
                             {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                           </div>
+
+                          {/* Member Meta */}
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-foreground truncate">
+                            <p className="text-xs font-bold text-foreground truncate leading-tight">
                               {user.firstName} {user.lastName}
                             </p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <p className="text-[10px] text-muted-foreground truncate max-w-[120px]">
-                                {user.email}
-                              </p>
+                            <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground">
+                              <span className="truncate max-w-[130px]">{user.email}</span>
                               {user.department && (
                                 <>
-                                  <span className="text-muted-foreground">•</span>
-                                  <p className="text-[10px] text-brand/70 font-medium truncate">
+                                  <span>•</span>
+                                  <span className="text-emerald-600 dark:text-emerald-400 font-medium truncate">
                                     {user.department}
-                                  </p>
+                                  </span>
                                 </>
                               )}
                             </div>
                           </div>
+
                         </div>
+
+                        {/* Actions */}
                         <div className="flex items-center gap-1 ml-2 shrink-0">
                           {canModify && (
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() =>
-                                removeFromPosition(pos.name, user._id)
-                              }
+                              className="h-7 w-7 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 rounded-lg opacity-80 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeFromPosition(pos.name, user._id)}
                               disabled={isRemoving}
                             >
                               {isRemoving ? (
@@ -289,26 +278,29 @@ export function InternalTeam({ jobId, jobData, canModify }: InternalTeamProps) {
                               )}
                             </Button>
                           )}
-                          <div className="h-5 w-5 rounded-full bg-green-50 flex items-center justify-center border border-green-100">
-                            <CheckCircle className="h-3 w-3 text-green-500" />
+                          <div className="h-4 w-4 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                            <CheckCircle className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
                           </div>
                         </div>
+
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground bg-muted/50 border border-dashed border-border rounded-xl py-4 justify-center">
+                  /* Empty State Row */
+                  <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/80 bg-muted/20 border border-dashed border-border/60 rounded-xl py-3 justify-center">
                     <AlertCircle className="h-3.5 w-3.5" />
-                    No {pos.label} assigned yet
+                    <span>No {pos.label} assigned yet</span>
                   </div>
                 )}
+
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Assignment dialog */}
+      {/* Dynamic Member Selection Dialog */}
       {editState && (
         <DynamicMemberSelectionDialog
           open={!!editState}
