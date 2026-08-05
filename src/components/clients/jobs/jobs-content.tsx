@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { MapPin, Briefcase, IndianRupee, Layers, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Job, getJobs, updateJobById } from "@/services/jobService";
 import { api, initializeAuth } from "@/lib/axios-config";
@@ -249,79 +250,139 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
   };
 
   return (
-    <>
-      <div className="border-b py-2 px-4">
-        <div className="flex items-center">
-          {/* <Checkbox id="selectAll" className="mr-4 border-border" /> */}
-          <div className="grid grid-cols-7 w-full text-sm font-medium text-muted-foreground">
-            {[
-              "Position Name",
-              "Job Type",
-              "Location",
-              "Headcount",
-              "Stage",
-              "Minimum Salary",
-              "Maximum Salary",
-            ].map((item, index) => (
-              <div key={index}>{item}</div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="overflow-auto">
-        {clientJobs && clientJobs.length > 0 ? (
-          clientJobs.map((job) => (
-            <div
-              key={job._id}
-              className="border-b hover:bg-muted py-3 px-4 cursor-pointer"
-              onClick={() => router.push(`/jobs/${job._id}`)}
-            >
-              <div className="flex items-center">
-                {/* <Checkbox id={`job-${job._id}`} className="mr-4 border-border" /> */}
-                <div className="grid grid-cols-7  w-full px-0 mx-0">
-                  <div className="font-medium">{job.jobTitle}</div>
-                  <div className="capitalize">{job.jobType || "N/A"}</div>
-                  <div>
-                    {Array.isArray((job as any).location)
-                      ? (job as any).location.join(", ")
-                      : (job as any).location || "N/A"}
-                  </div>
-                  <div>{job.headcount}</div>
-                  <div>
-                    {(() => {
-                      const displayStage: JobStage = (job.stage as JobStage) || "Open";
-                      return (
-                        <Badge
-                          className={`${stageColors[displayStage]} cursor-pointer`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStageChange(job._id, displayStage);
-                          }}
-                        >
-                          {displayStage}
-                        </Badge>
-                      );
-                    })()}
-                  </div>
-                  <div>{job.minimumSalary}</div>
-                  <div>{job.maximumSalary}</div>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="flex items-center justify-center h-32 text-muted-foreground">
-            No jobs found. Create a new job requirement.
-          </div>
-        )}
-      </div>
 
-      <ConfirmStageChangeDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        onConfirm={confirmStageChange}
-      />
-    </>
+<>
+  <div className="w-full overflow-x-auto">
+    <table className="w-full text-left text-sm border-separate border-spacing-y-1.5">
+      
+      {/* Modern Floating Header (No Border) */}
+      <thead className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider select-none">
+        <tr>
+          <th className="py-2.5 px-4 font-semibold">Position Name</th>
+          <th className="py-2.5 px-4 font-semibold">Job Type</th>
+          <th className="py-2.5 px-4 font-semibold">Location</th>
+          <th className="py-2.5 px-4 font-semibold text-center">Headcount</th>
+          <th className="py-2.5 px-4 font-semibold">Stage</th>
+          <th className="py-2.5 px-4 font-semibold">Min Salary</th>
+          <th className="py-2.5 px-4 font-semibold">Max Salary</th>
+        </tr>
+      </thead>
+
+      {/* Table Body with Floating Hover Rows */}
+      <tbody>
+        {clientJobs && clientJobs.length > 0 ? (
+          clientJobs.map((job) => {
+            const displayStage: JobStage = (job.stage as JobStage) || "Open";
+
+            return (
+              <tr
+                key={job._id}
+                onClick={() => router.push(`/jobs/${job._id}`)}
+                className="group transition-all duration-200 hover:bg-white/80 dark:hover:bg-slate-900/80 hover:shadow-sm rounded-xl cursor-pointer"
+              >
+                {/* Position Name */}
+                <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-100 rounded-l-xl group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400">
+                      <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                    </div>
+                    <span>{job.jobTitle}</span>
+                  </div>
+                </td>
+
+                {/* Job Type */}
+                <td className="py-3 px-4">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300 capitalize">
+                    {job.jobType || "N/A"}
+                  </span>
+                </td>
+
+                {/* Location */}
+                <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-1 text-xs max-w-[150px] truncate" title={Array.isArray((job as any).location) ? (job as any).location.join(", ") : (job as any).location}>
+                    <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    <span>
+                      {Array.isArray((job as any).location)
+                        ? (job as any).location.join(", ")
+                        : (job as any).location || "N/A"}
+                    </span>
+                  </div>
+                </td>
+
+                {/* Headcount */}
+                <td className="py-3 px-4 text-center">
+                  <span className="inline-flex items-center justify-center gap-1 text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-800 dark:text-emerald-300">
+                    <Users className="h-3 w-3 text-emerald-600" />
+                    <span>{job.headcount || 0}</span>
+                  </span>
+                </td>
+
+                {/* Stage Badge */}
+                <td className="py-3 px-4">
+                  <Badge
+                    className={`${stageColors[displayStage]} cursor-pointer border-none shadow-none font-semibold px-2.5 py-0.5 rounded-md`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStageChange(job._id, displayStage);
+                    }}
+                  >
+                    {displayStage}
+                  </Badge>
+                </td>
+
+                {/* Min Salary */}
+                <td className="py-3 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {job.minimumSalary ? (
+                    typeof job.minimumSalary === "number" ? (
+                      `$${job.minimumSalary.toLocaleString()}`
+                    ) : (
+                      job.minimumSalary
+                    )
+                  ) : (
+                    <span className="text-muted-foreground/40">—</span>
+                  )}
+                </td>
+
+                {/* Max Salary */}
+                <td className="py-3 px-4 text-xs font-semibold text-slate-700 dark:text-slate-300 rounded-r-xl">
+                  {job.maximumSalary ? (
+                    typeof job.maximumSalary === "number" ? (
+                      `$${job.maximumSalary.toLocaleString()}`
+                    ) : (
+                      job.maximumSalary
+                    )
+                  ) : (
+                    <span className="text-muted-foreground/40">—</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })
+        ) : (
+          /* Empty State */
+          <tr>
+            <td colSpan={7} className="py-12 text-center">
+              <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                <div className="p-3.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                  <Briefcase className="h-6 w-6" />
+                </div>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No jobs posted yet</p>
+                <p className="text-xs text-muted-foreground">Create a new job requirement to view it here.</p>
+              </div>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+
+  {/* Modal Dialog */}
+  <ConfirmStageChangeDialog
+    open={confirmOpen}
+    onOpenChange={setConfirmOpen}
+    onConfirm={confirmStageChange}
+  />
+</>
   );
 }
 
