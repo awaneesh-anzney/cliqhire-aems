@@ -452,95 +452,180 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
         confirmVariant="default"
       />
 
-      {/* Header Section */}
-      <div className="bg-card border-b shadow-sm w-full overflow-hidden">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 w-full">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 min-w-0">
-            <div className="space-y-3 min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight break-words max-w-full">{client.name || `Unnamed ${entityName}`}</h1>
-                <div className="flex items-center gap-2">
-                  <ClientStageBadge
-                    id={client._id}
-                    stage={client.clientStage || "Lead"}
-                    onStageChange={handleStageChange}
-                    disabled={!canModifyClients}
-                  />
-                  <ClientStageStatusBadge
-                    id={client._id}
-                    status={(client.clientSubStage || "") as any}
-                    stage={client.clientStage || "Lead"}
-                    onStatusChange={handleStageStatusChange}
-                    disabled={!canModifyClients}
-                  />
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-muted-foreground min-w-0 max-w-full">
-                {client.industry && (
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Forklift className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="truncate">{client.industry}</span>
-                  </div>
-                )}
-                {(client.address || client.location) && (
-                  <div className="flex items-center gap-1.5 border-l border-border pl-4 min-w-0">
-                    <MapPin  className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="truncate max-w-xs">{ client.location ||client.address}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-1.5 border-l border-border pl-4">
-                  <RefreshCcw 
-                    className={`h-4 w-4 text-brand cursor-pointer hover:rotate-180 transition-transform duration-500 ${isLoading ? "animate-spin" : ""}`} 
-                    onClick={handleRefresh}
-                  />
-                  <span className="text-muted-foreground">Last updated: Just now</span>
-                </div>
-              </div>
-            </div>
+      {/* Compact Modern Header */}
+      <div className="w-full border-2 border-border border-b">
+  <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center bg-brand/50">
+    {/* Left */}
+    <section className="flex-1 min-w-0 p-3">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <h1 className="max-w-full truncate text-xl font-bold tracking-tight text-foreground md:max-w-[400px]">
+          {client.name || `Unnamed ${entityName}`}
+        </h1>
 
-            <div className="flex items-center gap-3">
-              <Button
-                className="bg-brand text-white hover:bg-brand/90 font-semibold shadow-md px-6 h-11 transition-all active:scale-95"
-                onClick={() => router.push(`/clients/${id}/contract`)}
+        <ClientStageBadge
+          id={client._id}
+          stage={client.clientStage || "Lead"}
+          onStageChange={handleStageChange}
+          disabled={!canModifyClients}
+        />
+
+        <ClientStageStatusBadge
+          id={client._id}
+          status={(client.clientSubStage || "") as any}
+          stage={client.clientStage || "Lead"}
+          onStatusChange={handleStageStatusChange}
+          disabled={!canModifyClients}
+        />
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => setIsFollowUpModalOpen(true)}
+                className="ml-1 flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs transition-colors hover:bg-muted"
               >
-                <FilePen className="h-4 w-4 mr-2" />
-                View Contract
-              </Button>
-            </div>
-          </div>
-          
-          {/* Follow-up Widget */}
-          <div className="mt-4 flex flex-wrap items-center gap-2 bg-muted/30 w-fit max-w-full px-4 py-2 rounded-xl border border-border shadow-sm min-w-0">
-            <Clock className={`h-4 w-4 shrink-0 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500' : 'text-brand'}`} />
-            <span className="text-sm font-semibold text-foreground shrink-0">Next Follow-up:</span>
-            <span className={`text-sm shrink-0 ${client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date() ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
-              {client.nextFollowUpDate ? new Date(client.nextFollowUpDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "Not Set"}
-            </span>
+                <Clock
+                  className={`h-3.5 w-3.5 ${
+                    client.nextFollowUpDate &&
+                    new Date(client.nextFollowUpDate) < new Date()
+                      ? "text-destructive"
+                      : "text-brand"
+                  }`}
+                />
+                <span
+                  className={`font-semibold ${
+                    client.nextFollowUpDate &&
+                    new Date(client.nextFollowUpDate) < new Date()
+                      ? "text-destructive"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {client.nextFollowUpDate
+                    ? new Date(client.nextFollowUpDate).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                        }
+                      )
+                    : "Set Follow-up"}
+                </span>
+              </button>
+            </TooltipTrigger>
+
             {client.nextFollowUpOwner && (
-               <TooltipProvider>
-                 <Tooltip>
-                   <TooltipTrigger asChild>
-                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-1 truncate max-w-[150px] cursor-default">
-                       {typeof client.nextFollowUpOwner === 'string' 
-                         ? client.nextFollowUpOwner 
-                         : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`}
-                     </span>
-                   </TooltipTrigger>
-                   {typeof client.nextFollowUpOwner !== 'string' && client.nextFollowUpOwner.email && (
-                     <TooltipContent>
-                       <p>{client.nextFollowUpOwner.email}</p>
-                     </TooltipContent>
-                   )}
-                 </Tooltip>
-               </TooltipProvider>
+              <TooltipContent className="text-xs">
+                {typeof client.nextFollowUpOwner === "string"
+                  ? client.nextFollowUpOwner
+                  : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`}
+              </TooltipContent>
             )}
-            <Button variant="ghost" size="sm" className="h-6 px-2 text-brand hover:bg-brand/10 ml-2 shrink-0" onClick={() => setIsFollowUpModalOpen(true)}>
-              Edit
-            </Button>
-          </div>
-        </div>
+          </Tooltip>
+        </TooltipProvider>
       </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        {client.industry && (
+          <span className="flex items-center gap-1.5">
+            <Forklift className="h-3.5 w-3.5 text-muted-foreground/70" />
+            <span className="truncate">{client.industry}</span>
+          </span>
+        )}
+
+        {(client.address || client.location) && (
+          <span className="flex items-center gap-1.5 border-l border-border pl-4">
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
+            <span className="max-w-[200px] truncate">
+              {client.location || client.address}
+            </span>
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={handleRefresh}
+          className="group flex items-center gap-1.5 border-l border-border pl-4 transition-colors hover:text-foreground"
+        >
+          <RefreshCcw
+            className={`h-3.5 w-3.5 text-brand transition-transform duration-500 group-hover:rotate-180 ${
+              isLoading ? "animate-spin" : ""
+            }`}
+          />
+          <span>Just now</span>
+        </button>
+      </div>
+    </section>
+
+    {/* Right */}
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-8 rounded-lg border-border bg-card px-3 text-xs font-semibold shadow-sm hover:bg-muted"
+        onClick={() =>
+          router.push(
+            `/${moduleType === "leads" ? "leads" : "clients"}/${id}/contract`
+          )
+        }
+      >
+        <FilePen className="mr-1.5 h-3.5 w-3.5" />
+        Contract
+      </Button>
+
+      {jobsAvailable &&
+        (reportStatus === "idle" ? (
+          <Button
+            ref={buttonRef}
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-lg border-brand/30 px-3 text-xs font-semibold text-brand shadow-sm hover:bg-brand/10"
+            onClick={handleGenerateReportClick}
+          >
+            <FileText className="mr-1.5 h-3.5 w-3.5" />
+            Report
+          </Button>
+        ) : reportStatus === "generating" ? (
+          <div
+            className="relative inline-flex h-8 min-w-[100px] items-center justify-center overflow-hidden rounded-lg border border-border bg-muted px-3 shadow-inner"
+            style={{
+              width: buttonWidth ? `${buttonWidth}px` : undefined,
+            }}
+          >
+            <div
+              className="absolute inset-y-0 left-0 bg-brand/20 transition-all duration-100"
+              style={{ width: `${reportProgress}%` }}
+            />
+
+            <span className="relative z-10 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider">
+              <Loader className="h-3 w-3 animate-spin text-brand" />
+              {reportProgress}%
+            </span>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            className="h-8 rounded-lg bg-emerald-600 px-3 text-xs font-semibold text-white animate-in zoom-in duration-300 hover:bg-emerald-700"
+            onClick={handleDownloadReport}
+          >
+            <Download className="mr-1.5 h-3.5 w-3.5" />
+            Download
+          </Button>
+        ))}
+
+      {canModifyJobs && (
+        <Button
+          size="sm"
+          className="h-8 rounded-lg bg-brand px-3 text-xs font-semibold text-primary-foreground shadow-md transition-all active:scale-95 hover:bg-brand/90"
+          onClick={() => setIsCreateJobOpen(true)}
+        >
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
+          New Job
+        </Button>
+      )}
+    </div>
+  </div>
+</div>
 
       <FollowUpModal 
         clientId={id} 
@@ -550,66 +635,12 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
         currentOwner={typeof client.nextFollowUpOwner === 'string' ? client.nextFollowUpOwner : client.nextFollowUpOwner?._id}
       />
 
-      {/* Button Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-muted/50 border-b gap-4">
-        <div className="flex items-center gap-3">
-          {canModifyJobs && (
-            <Button
-              className="bg-brand text-brand-foreground hover:bg-brand/90 rounded-lg flex items-center gap-2 h-10 px-5 shadow-sm transition-all active:scale-95"
-              onClick={() => setIsCreateJobOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Create Job Requirement
-            </Button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {jobsAvailable &&
-            (reportStatus === "idle" ? (
-              <Button
-                ref={buttonRef}
-                size="sm"
-                variant="outline"
-                className="h-10 px-5 border-border hover:bg-card hover:text-brand hover:border-brand transition-all rounded-lg flex items-center gap-2 shadow-sm"
-                onClick={handleGenerateReportClick}
-              >
-                <FileText className="h-4 w-4" />
-                Generate Weekly Report
-              </Button>
-            ) : reportStatus === "generating" ? (
-              <div
-                className="relative h-10 rounded-lg bg-muted overflow-hidden inline-flex items-center justify-center px-4"
-                style={{ width: buttonWidth ? `${buttonWidth}px` : "auto", minWidth: "180px" }}
-              >
-                <div
-                  className="absolute left-0 top-0 h-full bg-brand transition-all duration-100 ease-linear"
-                  style={{ width: `${reportProgress}%` }}
-                />
-                <div className="relative z-10 flex items-center gap-2 text-xs font-semibold text-white whitespace-nowrap">
-                  <Loader className="h-4 w-4 animate-spin" />
-                  Generating ({reportProgress}%)
-                </div>
-              </div>
-            ) : (
-              <Button
-                size="sm"
-                className="h-10 px-5 bg-green-600 text-white hover:bg-green-700 rounded-lg flex items-center gap-2 shadow-sm animate-in fade-in zoom-in duration-300"
-                onClick={handleDownloadReport}
-              >
-                <Download className="h-4 w-4" />
-                Download Report
-              </Button>
-            ))}
-        </div>
-      </div>
-
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-full min-w-0 overflow-hidden">
-        <TabsList className="flex border-b w-full rounded-none justify-start h-12 bg-transparent p-0 overflow-x-auto max-w-full min-w-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 max-w-full min-w-0 overflow-hidden flex flex-col">
+        <TabsList className="flex border-b border-border/60 w-full rounded-none justify-start  bg-card/50 backdrop-blur-sm p-0 overflow-x-auto custom-scrollbar mt-2 max-w-full min-w-0 ">
           <TabsTrigger
             value="Summary"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6 shrink-0"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <FileIcon className="h-4 w-4" />
             Summary
@@ -617,7 +648,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
           <TabsTrigger
             value="Jobs"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <FileIcon className="h-4 w-4" />
             Jobs
@@ -625,14 +656,14 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
           <TabsTrigger
             value="Notes"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <StickyNote className="h-4 w-4" />
             Notes
           </TabsTrigger>
           <TabsTrigger
             value="Attachments"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <Paperclip className="h-4 w-4" />
             Attachments
@@ -640,35 +671,35 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
           <TabsTrigger
             value="Contacts"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <Users className="h-4 w-4" />
             Contacts
           </TabsTrigger>
           <TabsTrigger
             value="History"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <Clock className="h-4 w-4" />
             History
           </TabsTrigger>
           <TabsTrigger
             value="Activities"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <Clock className="h-4 w-4" />
             Activities
           </TabsTrigger>
           <TabsTrigger
             value="Timeline"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <Clock className="h-4 w-4" />
             Timeline
           </TabsTrigger>
           <TabsTrigger
             value="EmailTemplates"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-12 px-6"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none rounded-none flex items-center gap-2 h-11 px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             <Mail className="h-4 w-4" />
             Email Templates
