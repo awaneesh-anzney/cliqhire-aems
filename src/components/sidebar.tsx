@@ -47,6 +47,7 @@
  const MODULE_ICONS: Record<string, React.ElementType> = {
    home:           Home,
    todo:           ListTodo,
+   Leads:          Building2,
    clients:        Building2,
    jobs:           Briefcase,
    candidates:     User,
