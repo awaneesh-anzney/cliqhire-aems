@@ -43,6 +43,7 @@ import { FollowUpModal } from "@/components/clients/modals/follow-up-modal";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Ensure Avatar component is imported
 import {
   Dialog,
   DialogContent,
@@ -453,77 +454,90 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
       />
 
       {/* Compact Modern Header */}
-      <div className="w-full border-2 border-border border-b">
-  <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center bg-brand/50">
+      <div className="w-full">
+  <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center ">
     {/* Left */}
     <section className="flex-1 min-w-0 p-3">
-      <div className="flex flex-wrap items-center gap-2.5">
-        <h1 className="max-w-full truncate text-xl font-bold tracking-tight text-foreground md:max-w-[400px]">
-          {client.name || `Unnamed ${entityName}`}
-        </h1>
 
-        <ClientStageBadge
-          id={client._id}
-          stage={client.clientStage || "Lead"}
-          onStageChange={handleStageChange}
-          disabled={!canModifyClients}
-        />
+<div className="flex flex-wrap items-center gap-2.5">
+  {/* Client Avatar Section */}
+  <Avatar className="h-8 w-8 border border-white/40 shadow-sm ring-2 ring-emerald-400/30">
+    <AvatarImage 
+      src={client.avatarUrl || client.logo} 
+      alt={client.name || "Client"} 
+    />
+    <AvatarFallback className="bg-gradient-to-br from-teal-500 to-emerald-700 text-white font-extrabold text-xs">
+      {client.name ? client.name.slice(0, 2).toUpperCase() : "CL"}
+    </AvatarFallback>
+  </Avatar>
 
-        <ClientStageStatusBadge
-          id={client._id}
-          status={(client.clientSubStage || "") as any}
-          stage={client.clientStage || "Lead"}
-          onStatusChange={handleStageStatusChange}
-          disabled={!canModifyClients}
-        />
+  {/* Vibrant & Colorful Client Name (No Black/Dark Shadow) */}
+  <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-800 via-teal-700 to-cyan-700 bg-clip-text text-transparent tracking-tight">
+    {client.name || `Unnamed ${entityName}`}
+  </h1>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={() => setIsFollowUpModalOpen(true)}
-                className="ml-1 flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs transition-colors hover:bg-muted"
-              >
-                <Clock
-                  className={`h-3.5 w-3.5 ${
-                    client.nextFollowUpDate &&
-                    new Date(client.nextFollowUpDate) < new Date()
-                      ? "text-destructive"
-                      : "text-brand"
-                  }`}
-                />
-                <span
-                  className={`font-semibold ${
-                    client.nextFollowUpDate &&
-                    new Date(client.nextFollowUpDate) < new Date()
-                      ? "text-destructive"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {client.nextFollowUpDate
-                    ? new Date(client.nextFollowUpDate).toLocaleDateString(
-                        "en-GB",
-                        {
-                          day: "2-digit",
-                          month: "short",
-                        }
-                      )
-                    : "Set Follow-up"}
-                </span>
-              </button>
-            </TooltipTrigger>
+  <ClientStageBadge
+    id={client._id}
+    stage={client.clientStage || "Lead"}
+    onStageChange={handleStageChange}
+    disabled={!canModifyClients}
+  />
 
-            {client.nextFollowUpOwner && (
-              <TooltipContent className="text-xs">
-                {typeof client.nextFollowUpOwner === "string"
-                  ? client.nextFollowUpOwner
-                  : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`}
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+  <ClientStageStatusBadge
+    id={client._id}
+    status={(client.clientSubStage || "") as any}
+    stage={client.clientStage || "Lead"}
+    onStageChange={handleStageStatusChange}
+    disabled={!canModifyClients}
+  />
+
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={() => setIsFollowUpModalOpen(true)}
+          className="ml-1 flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs transition-colors hover:bg-muted"
+        >
+          <Clock
+            className={`h-3.5 w-3.5 ${
+              client.nextFollowUpDate &&
+              new Date(client.nextFollowUpDate) < new Date()
+                ? "text-destructive"
+                : "text-brand"
+            }`}
+          />
+          <span
+            className={`font-semibold ${
+              client.nextFollowUpDate &&
+              new Date(client.nextFollowUpDate) < new Date()
+                ? "text-destructive"
+                : "text-muted-foreground"
+            }`}
+          >
+            {client.nextFollowUpDate
+              ? new Date(client.nextFollowUpDate).toLocaleDateString(
+                  "en-GB",
+                  {
+                    day: "2-digit",
+                    month: "short",
+                  }
+                )
+              : "Set Follow-up"}
+          </span>
+        </button>
+      </TooltipTrigger>
+
+      {client.nextFollowUpOwner && (
+        <TooltipContent className="text-xs">
+          {typeof client.nextFollowUpOwner === "string"
+            ? client.nextFollowUpOwner
+            : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`}
+        </TooltipContent>
+      )}
+    </Tooltip>
+  </TooltipProvider>
+</div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         {client.industry && (
