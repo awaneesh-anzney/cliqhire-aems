@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus ,StickyNote,Clock, Edit2, Trash2} from "lucide-react";
 import { useEffect, useState } from "react";
 import { AddNoteDialog } from "./add-note-dialog";
 import { NotesList } from "./notes-list";
@@ -92,72 +92,95 @@ export function NotesContent({
   }
 
   return (
-    <div className="bg-muted/50 rounded-2xl p-6 flex flex-col h-full">
-      {canModify && (
-        <div className="mb-6 flex justify-between items-center bg-card p-4 rounded-xl border border-border shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-brand/10 rounded-lg">
-              <Plus className="w-4 h-4 text-brand" />
-            </div>
-            <h2 className="text-base font-semibold text-foreground">Client Notes</h2>
-          </div>
-          <Button
-            onClick={() => setIsAddDialogOpen(true)}
-            className="hover:bg-brand/90 transition-colors bg-brand text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" /> Add Note
-          </Button>
-        </div>
-      )}
+<div className="space-y-4 h-full">
+  {/* Header Action Bar */}
+  <div className="flex items-center justify-between p-4 rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
+    <div className="flex items-center gap-2.5">
+      <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400">
+        <StickyNote className="w-4 h-4" />
+      </div>
+      <div>
+        <h2 className="text-sm font-semibold text-foreground">Client Notes</h2>
+        <p className="text-[11px] text-muted-foreground">
+          Keep track of important client updates and history
+        </p>
+      </div>
+    </div>
 
-      {notes.length > 0 ? (
-        <div className="bg-card rounded-xl border border-border shadow-sm transition-all p-5">
-          <NotesList
-            notes={notes}
-            canModify={canModify}
-            onEdit={(note) => {
-              setEditNote(note);
-              setTimeout(() => {
-                setIsEditDialogOpen(true);
-              }, 0);
-            }}
-            onDelete={handleDeleteNote}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center text-center bg-card rounded-xl border border-border shadow-sm p-12">
-          <div className="w-24 h-24 mb-6 bg-muted rounded-full flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No notes yet</h3>
-          <p className="text-muted-foreground text-center max-w-sm mb-6">
-            Add your first note to keep track of important information.
-          </p>
-        </div>
-      )}
+    {canModify && (
+      <Button
+        onClick={() => setIsAddDialogOpen(true)}
+        size="sm"
+        className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-medium transition-all"
+      >
+        <Plus className="h-4 w-4 mr-1.5" /> Add Note
+      </Button>
+    )}
+  </div>
 
-      {canModify && (
-        <AddNoteDialog
-          open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onSubmit={handleAddNote}
-        />
-      )}
-
-      {canModify && editNote && (
-        <AddNoteDialog
-          open={isEditDialogOpen}
-          onOpenChange={(open) => {
-            setIsEditDialogOpen(open);
-            if (!open) setEditNote(null);
+  {/* Modern Data View Container */}
+  {notes.length > 0 ? (
+    <div className="space-y-3">
+      {/* 
+        Notes List wrapper: Subtle Glassmorphism, smooth inner borders, 
+        aur hover par card elevation 
+      */}
+      <div className="rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm p-2 shadow-sm hover:border-emerald-500/30 transition-all">
+        <NotesList
+          notes={notes}
+          canModify={canModify}
+          onEdit={(note) => {
+            setEditNote(note);
+            setTimeout(() => setIsEditDialogOpen(true), 0);
           }}
-          onSubmit={handleUpdateNote}
-          initialContent={editNote.content}
-          isEdit
+          onDelete={handleDeleteNote}
         />
+      </div>
+    </div>
+  ) : (
+    /* Modern Empty State */
+    <div className="flex flex-col items-center justify-center text-center bg-card/40 rounded-xl border border-dashed border-border/80 p-10 min-h-[260px]">
+      <div className="w-12 h-12 mb-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center">
+        <StickyNote className="w-6 h-6" />
+      </div>
+      <h3 className="text-sm font-bold text-foreground">No notes recorded yet</h3>
+      <p className="text-xs text-muted-foreground max-w-xs mt-1 mb-4">
+        Add your first note to keep track of key details, meetings, or preferences.
+      </p>
+      {canModify && (
+        <Button
+          onClick={() => setIsAddDialogOpen(true)}
+          variant="outline"
+          size="sm"
+          className="border-emerald-600/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10"
+        >
+          <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
+        </Button>
       )}
     </div>
+  )}
+
+  {/* Modals & Dialogs */}
+  {canModify && (
+    <AddNoteDialog
+      open={isAddDialogOpen}
+      onOpenChange={setIsAddDialogOpen}
+      onSubmit={handleAddNote}
+    />
+  )}
+
+  {canModify && editNote && (
+    <AddNoteDialog
+      open={isEditDialogOpen}
+      onOpenChange={(open) => {
+        setIsEditDialogOpen(open);
+        if (!open) setEditNote(null);
+      }}
+      onSubmit={handleUpdateNote}
+      initialContent={editNote.content}
+      isEdit
+    />
+  )}
+</div>
   );
 }

@@ -765,14 +765,14 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
     <TabsContent 
       value="Jobs" 
-      className=" max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+      className="p-2 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
     >
       <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
     </TabsContent>
 
     <TabsContent 
       value="Notes" 
-      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+      className="p-2 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
     >
       <NotesContent clientId={id} canModify={canModifyClients} />
     </TabsContent>
