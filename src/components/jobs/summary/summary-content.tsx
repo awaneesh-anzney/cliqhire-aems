@@ -189,19 +189,19 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Top CV Submission Bar Component */}
       <JobCvSubmissionSummary jobId={jobId} />
 
       {/* Main Grid Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         
         {/* Left Column: Position Details & Requirements */}
-        <div className="space-y-6">
+        <div className="space-y-2">
           <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
             
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
+            <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
               <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
                 <Briefcase className="w-4 h-4" />
               </div>
@@ -209,7 +209,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-5">
+            <div className="p-2 space-y-2">
               
               {/* Basic Info */}
               <div>
@@ -291,11 +291,11 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
         </div>
 
         {/* Right Column: Compensation, Timelines, CV Targets & Descriptions */}
-        <div className="space-y-6">
+        <div className="space-y-2">
           
           {/* Compensation & Benefits */}
           <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
+            <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
               <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
                 <Wallet className="w-4 h-4" />
               </div>
@@ -337,7 +337,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
 
           {/* Timelines & Status */}
           <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
+            <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
               <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
                 <Clock className="w-4 h-4" />
               </div>
@@ -366,7 +366,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
 
           {/* CV Targets Card */}
           <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
+            <div className="flex items-center justify-between p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
                   <ClipboardList className="w-4 h-4" />

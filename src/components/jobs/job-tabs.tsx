@@ -58,7 +58,7 @@ export function JobTabs({
         {/* Summary Content */}
         <JobTabContent 
           value="summary"
-          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+          className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
         >
           <SummaryContent 
             jobId={jobId} 
