@@ -26,6 +26,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface Client {
   clientId?: string;
@@ -161,6 +164,8 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
   const [pendingChange, setPendingChange] = useState<{ clientId: string; stage: Client["clientStage"]; } | null>(null);
   const [pendingStatusChange, setPendingStatusChange] = useState<{ clientId: string; status: ClientStageStatus; } | null>(null);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
+  const [subStageChannel, setSubStageChannel] = useState<string>("Email");
+  const [subStageSentDate, setSubStageSentDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
@@ -252,7 +257,15 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     if (!pendingStatusChange) return;
     setError(null);
     try {
-      await updateClientStageStatus(pendingStatusChange.clientId, pendingStatusChange.status);
+      let channel: string | undefined = undefined;
+      let sentDate: string | undefined = undefined;
+
+      if (pendingStatusChange.status === "Profile Sent") {
+        channel = subStageChannel;
+        sentDate = subStageSentDate ? new Date(subStageSentDate).toISOString() : undefined;
+      }
+
+      await updateClientStageStatus(pendingStatusChange.clientId, pendingStatusChange.status, channel, sentDate);
       refetch();
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
@@ -300,18 +313,46 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
         error={error}
       />
 
-      <ConfirmDialog
-        open={showStatusConfirmDialog}
-        onOpenChange={setShowStatusConfirmDialog}
-        onConfirm={handleConfirmStatusChange}
-        onCancel={() => setShowStatusConfirmDialog(false)}
-        title="Confirm Status Change"
-        description={`This will update the ${entityName.toLowerCase()}'s stage status.`}
-        confirmText="Confirm"
-        cancelText="Cancel"
-        loading={isLoading}
-        error={error}
-      />
+      <Dialog open={showStatusConfirmDialog} onOpenChange={setShowStatusConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Status Change</DialogTitle>
+            <DialogDescription>
+              This will update the {entityName.toLowerCase()}'s stage status.
+            </DialogDescription>
+          </DialogHeader>
+          {pendingStatusChange?.status === "Profile Sent" && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label>Channel <span className="text-red-500">*</span></Label>
+                <Select value={subStageChannel} onValueChange={setSubStageChannel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select channel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Email">Email</SelectItem>
+                    <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                    <SelectItem value="WhatsApp">WhatsApp</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Sent Date (Optional)</Label>
+                <Input 
+                  type="date"
+                  value={subStageSentDate} 
+                  onChange={(e) => setSubStageSentDate(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          {error && <div className="text-red-500 text-sm">{error}</div>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStatusConfirmDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmStatusChange} disabled={isLoading}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
         {/* Compressed Sticky Header Section */}
         <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col">

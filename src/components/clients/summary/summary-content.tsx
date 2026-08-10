@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   getCountryByCode,
@@ -445,6 +445,16 @@ export function SummaryContent({
                 currentFileName={clientData?.gstTinDocument?.fileName}
                 onPreview={() => handlePreviewFile(clientData?.gstTinDocument?.url || "", clientData?.gstTinDocument?.fileName)}
                 onDownload={() => handleDownloadFile(clientData?.gstTinDocument?.url || "")}
+              />
+              <FileUploadRow
+                id="national-address-cert-upload"
+                label="National Address Cert"
+                onFileSelect={canModify ? handleFileUpload("nationalAddressCertificate") : () => {}}
+                onUploadClick={canModify ? () => handleOpenFileUploadModal("nationalAddressCertificate", "National Address Certificate") : () => {}}
+                docUrl={clientData?.nationalAddressCertificate?.url}
+                currentFileName={clientData?.nationalAddressCertificate?.fileName}
+                onPreview={() => handlePreviewFile(clientData?.nationalAddressCertificate?.url || "", clientData?.nationalAddressCertificate?.fileName)}
+                onDownload={() => handleDownloadFile(clientData?.nationalAddressCertificate?.url || "")}
               />
             </div>
           </div>

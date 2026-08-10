@@ -143,6 +143,8 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
     clientId: string;
     status: ClientStageStatus;
   } | null>(null);
+  const [subStageChannel, setSubStageChannel] = useState<string>("Email");
+  const [subStageSentDate, setSubStageSentDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
 
   const {
@@ -262,9 +264,15 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
     if (!pendingStatusChange) return;
     setError(null);
     try {
-      if (pendingStatusChange.status) {
-        await updateClientStageStatus(pendingStatusChange.clientId, pendingStatusChange.status);
+      let channel: string | undefined = undefined;
+      let sentDate: string | undefined = undefined;
+
+      if (pendingStatusChange.status === "Profile Sent") {
+        channel = subStageChannel;
+        sentDate = subStageSentDate ? new Date(subStageSentDate).toISOString() : undefined;
       }
+
+      await updateClientStageStatus(pendingStatusChange.clientId, pendingStatusChange.status, channel, sentDate);
       setShowStatusConfirmDialog(false);
       refetch();
     } catch (err: any) {
@@ -444,19 +452,46 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ConfirmDialog
-        open={showStatusConfirmDialog}
-        onOpenChange={setShowStatusConfirmDialog}
-        onConfirm={handleConfirmStatusChange}
-        onCancel={() => { setShowStatusConfirmDialog(false); setError(null); }}
-        title="Are you sure?"
-        description={`This will update the ${entityNameLower}'s stage status.`}
-        confirmText="Confirm"
-        cancelText="Cancel"
-        loading={isLoading}
-        error={error}
-        confirmVariant="default"
-      />
+      <Dialog open={showStatusConfirmDialog} onOpenChange={setShowStatusConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Status Change</DialogTitle>
+            <DialogDescription>
+              This will update the {entityName.toLowerCase()}'s stage status.
+            </DialogDescription>
+          </DialogHeader>
+          {pendingStatusChange?.status === "Profile Sent" && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label>Channel <span className="text-red-500">*</span></Label>
+                <Select value={subStageChannel} onValueChange={setSubStageChannel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select channel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Email">Email</SelectItem>
+                    <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                    <SelectItem value="WhatsApp">WhatsApp</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Sent Date (Optional)</Label>
+                <Input 
+                  type="date"
+                  value={subStageSentDate} 
+                  onChange={(e) => setSubStageSentDate(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          {error && <div className="text-red-500 text-sm">{error}</div>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStatusConfirmDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmStatusChange} disabled={isLoading}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Compact Modern Header */}
       <div className="w-full">

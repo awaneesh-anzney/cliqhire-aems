@@ -20,12 +20,15 @@ export interface PrimaryContact {
 }
 
 export const clientStageStatuses = [
-  "Replied to a message",
-  "Calls",
-  "Attended a meeting",
+  "Call",
   "Profile Sent",
   "Contract Sent",
+  "Attended a meeting",
+  "Replied to a message",
   "Contract Negotiation",
+  "LinkedIn message Sent",
+  "WA message sent",
+  "Email sent",
 ] as const;
 
 export type ClientStageStatus = (typeof clientStageStatuses)[number];
@@ -695,43 +698,19 @@ const updateClientStage = async (
 const updateClientStageStatus = async (
   id: string,
   status: ClientStageStatus,
+  channel?: string,
+  sentDate?: string
 ): Promise<ClientResponse> => {
   try {
-    // Fetch the full client data to avoid backend issues with partial updates.
-    const currentClient = await getClientById(id);
+    const payload: any = { subStage: status };
+    if (channel) payload.channel = channel;
+    if (sentDate) payload.sentDate = sentDate;
 
-    const dataToUpdate = {
-      ...currentClient,
-      clientSubStage: status,
-    };
-
-    // Remove fields that should not be sent in an update payload.
-    const { _id, createdAt, updatedAt, __v, ...updatePayload } = dataToUpdate;
-
-    // Manually remove file URL fields to prevent backend errors.
-    const fileFields = [
-      "profileImage",
-      "crCopy",
-      "vatCopy",
-      "gstTinDocument",
-      "fixedPercentage",
-      "fixedPercentageAdvance",
-      "variablePercentageCLevel",
-      "variablePercentageBelowCLevel",
-      "fixWithoutAdvance",
-      "seniorLevel",
-      "executives",
-      "nonExecutives",
-      "other",
-    ];
-    fileFields.forEach((field) => delete (updatePayload as any)[field]);
-
-    // Call the main updateClient function to reuse its logic, including validation.
-    return await updateClient(id, updatePayload);
+    const response = await api.patch(`/api/clients/${id}/sub-stage`, payload);
+    return response.data.data.client;
   } catch (error: any) {
     console.error("Error updating client stage status:", error);
-    // The error is already handled by `updateClient`, so we just re-throw it.
-    throw error;
+    throw handleError(error);
   }
 };
 
@@ -889,7 +868,7 @@ export interface ClientActivity {
   stageAtTime?: string;
   contactId?: string;
   repId?: string;
-  interactionScope?: string;
+  mode?: string;
   activityType: string;
   activityDate?: string;
   activityTime?: string;

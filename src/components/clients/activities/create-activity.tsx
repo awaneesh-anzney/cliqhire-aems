@@ -56,10 +56,8 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   const [formData, setFormData] = useState({
-    interactionScope: "Client-facing",
+    mode: "Virtual",
     activityTime: "09:00",
-    attempts: 1,
-    isMeeting: false,
     discussionSummary: "",
     outcome: "",
     
@@ -96,13 +94,6 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
     fetchTeamMembers();
   }, []);
 
-  // Auto-check isMeeting if activityType is Meeting
-  useEffect(() => {
-    if (activityType === "Meeting") {
-      setFormData(prev => ({ ...prev, isMeeting: true }));
-    }
-  }, [activityType]);
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!clientId) return;
@@ -112,11 +103,9 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
       
       const payload: any = {
         activityType,
-        interactionScope: formData.interactionScope,
+        mode: formData.mode,
         activityDate: (activityDate || new Date()).toISOString(),
         activityTime: formData.activityTime,
-        attempts: Number(formData.attempts),
-        isMeeting: formData.isMeeting,
         discussionSummary: formData.discussionSummary,
         outcome: formData.outcome,
       };
@@ -181,23 +170,25 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
             </div>
             
             <div className="space-y-2">
-              <Label>Interaction Scope</Label>
+              <Label>Mode {activityType === "Meeting" && <span className="text-red-500">*</span>}</Label>
               <Select 
-                value={formData.interactionScope} 
-                onValueChange={(val) => setFormData(prev => ({ ...prev, interactionScope: val }))}
+                value={formData.mode} 
+                onValueChange={(val) => setFormData(prev => ({ ...prev, mode: val }))}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select mode" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Client-facing">Client-facing</SelectItem>
+                  <SelectItem value="In Person">In Person</SelectItem>
+                  <SelectItem value="Virtual">Virtual</SelectItem>
+                  <SelectItem value="Phone Call">Phone Call</SelectItem>
                   <SelectItem value="Internal">Internal</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="grid grid-cols-[2fr,1.5fr,1fr,1fr] gap-4 items-center">
+          <div className="grid grid-cols-[2fr,1.5fr] gap-4 items-center">
             {/* Shadcn UI Date Picker */}
             <div className="space-y-2">
               <Label>Date</Label>
@@ -249,25 +240,7 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Attempts</Label>
-              <Input
-                type="number"
-                min="1"
-                value={formData.attempts}
-                onChange={handleInputChange("attempts")}
-                required
-              />
-            </div>
-            <div className="space-y-2 pt-6 flex justify-center">
-               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                 <Checkbox 
-                   checked={formData.isMeeting} 
-                   onCheckedChange={(checked) => setFormData(p => ({ ...p, isMeeting: checked as boolean }))}
-                 />
-                 Meeting?
-               </label>
-            </div>
+
           </div>
 
           <div className="space-y-2">
