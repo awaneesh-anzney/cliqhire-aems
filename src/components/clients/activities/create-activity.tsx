@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Loader2, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { logClientActivity, getPrimaryContacts, PrimaryContact } from "@/services/clientService";
+import { logClientActivity } from "@/services/clientService";
 import { getTeamMembers } from "@/services/teamMembersService";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -48,12 +48,7 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
   const [activityDateOpen, setActivityDateOpen] = useState(false);
   const [expectedClosureOpen, setExpectedClosureOpen] = useState(false);
 
-  // Client contacts
-  const [contacts, setContacts] = useState<PrimaryContact[]>([]);
-  const [isLoadingContacts, setIsLoadingContacts] = useState(false);
-
   const [formData, setFormData] = useState({
-    contactId: "",
     mode: "Virtual",
     activityTime: "09:00",
     discussionSummary: "",
@@ -72,19 +67,6 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
 
   useEffect(() => {
 
-    const fetchContacts = async () => {
-      try {
-        setIsLoadingContacts(true);
-        const res = await getPrimaryContacts(clientId);
-        setContacts(res || []);
-      } catch (error) {
-        console.error("Error fetching client contacts:", error);
-      } finally {
-        setIsLoadingContacts(false);
-      }
-    };
-
-    if (clientId) fetchContacts();
   }, [clientId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -102,8 +84,6 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
         discussionSummary: formData.discussionSummary,
         outcome: formData.outcome,
       };
-
-      if (formData.contactId) payload.contactId = formData.contactId;
 
       if (activityType === "Negotiation" || activityType === "Proposal Sent") {
         payload.negotiationDetails = {
@@ -147,63 +127,46 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
       <form onSubmit={handleSubmit}>
         <div className="space-y-6 py-4">
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Client Contact</Label>
-              <Select value={formData.contactId} onValueChange={(val) => setFormData(prev => ({ ...prev, contactId: val === "none" ? "" : val }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isLoadingContacts ? "Loading..." : "Select contact (optional)"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No specific contact</SelectItem>
-                  {contacts.map(contact => (
-                    <SelectItem key={contact._id} value={contact._id as string}>
-                      {contact.name || `${contact.firstName} ${contact.lastName}`.trim()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Channel / Type</Label>
-              <Select value={activityType} onValueChange={setActivityType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACTIVITY_TYPES.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label>Channel / Type</Label>
+            <Select value={activityType} onValueChange={setActivityType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {ACTIVITY_TYPES.map(type => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="grid grid-cols-[1fr,2fr,1.5fr] gap-4 items-center">
+          <div className={`grid gap-4 items-center ${activityType === "Meeting" ? "grid-cols-[1fr,2fr,1.5fr]" : "grid-cols-[2fr,1.5fr]"}`}>
             
-            <div className="space-y-2">
-              <Label>Mode {activityType === "Meeting" && <span className="text-red-500">*</span>}</Label>
-              <Select 
-                value={formData.mode} 
-                onValueChange={(val) => setFormData(prev => ({ ...prev, mode: val }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="In Person">In Person</SelectItem>
-                  <SelectItem value="Virtual">Virtual</SelectItem>
-                  <SelectItem value="Phone Call">Phone Call</SelectItem>
-                  <SelectItem value="Internal">Internal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {activityType === "Meeting" && (
+              <div className="space-y-2">
+                <Label>Mode <span className="text-red-500">*</span></Label>
+                <Select 
+                  value={formData.mode} 
+                  onValueChange={(val) => setFormData(prev => ({ ...prev, mode: val }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="In Person">In Person</SelectItem>
+                    <SelectItem value="Virtual">Virtual</SelectItem>
+                    <SelectItem value="Phone Call">Phone Call</SelectItem>
+                    <SelectItem value="Internal">Internal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Shadcn UI Date Picker */}
             <div className="space-y-2">
               <Label>Date</Label>
-              <Popover open={activityDateOpen} onOpenChange={setActivityDateOpen} modal>
+              <Popover open={activityDateOpen} onOpenChange={setActivityDateOpen} modal={true}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -230,25 +193,18 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
               </Popover>
             </div>
 
-            {/* Shadcn UI Time Select */}
+            {/* Shadcn UI Time Input */}
             <div className="space-y-2">
               <Label>Time</Label>
-              <Select
-                value={formData.activityTime}
-                onValueChange={(val) => setFormData((prev) => ({ ...prev, activityTime: val }))}
-              >
-                <SelectTrigger className="w-full h-10 border-border">
-                  <Clock className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 overflow-y-auto z-50">
-                  {TIME_SLOTS.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="time"
+                  value={formData.activityTime}
+                  onChange={(e) => setFormData(prev => ({ ...prev, activityTime: e.target.value }))}
+                  className="pl-9 w-full h-10 border-border"
+                />
+              </div>
             </div>
 
 
