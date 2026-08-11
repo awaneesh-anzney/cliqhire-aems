@@ -779,7 +779,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
       {/* Activities */}
       <TabsTrigger
         value="Activities"
-        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9  text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
       >
         <Activity className="h-3.5 w-3.5 text-teal-600" />
         <span>Activities</span>
@@ -864,7 +864,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
     <TabsContent 
       value="Activities" 
-      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+      className="p-2 max-w-full outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
     >
       <ActivitiesContent clientId={id} />
     </TabsContent>
