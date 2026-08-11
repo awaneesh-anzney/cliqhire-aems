@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getClientTimeline, ClientStageHistory } from "@/services/clientService";
+import { getClientTimeline, getClientSubStageHistory, ClientStageHistory, ClientSubStageHistory } from "@/services/clientService";
 import { Loader2, Calendar, Clock, MessageSquare, Phone, Mail, Users, FileText, CheckCircle2, ChevronDown, Handshake } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
@@ -29,6 +29,7 @@ const getActivityIcon = (type: string) => {
 
 export function TimelineContent({ clientId }: TimelineContentProps) {
   const [timeline, setTimeline] = useState<ClientStageHistory[]>([]);
+  const [subStageTimeline, setSubStageTimeline] = useState<ClientSubStageHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set([0]));
 
@@ -36,8 +37,12 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
     const fetchTimeline = async () => {
       try {
         setIsLoading(true);
-        const data = await getClientTimeline(clientId);
+        const [data, subData] = await Promise.all([
+          getClientTimeline(clientId),
+          getClientSubStageHistory(clientId).catch(() => [])
+        ]);
         setTimeline(data || []);
+        setSubStageTimeline(subData || []);
       } catch (error) {
         console.error("Failed to fetch timeline:", error);
         toast.error("Failed to load client timeline");
@@ -71,7 +76,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
     );
   }
 
-  if (timeline.length === 0) {
+  if (timeline.length === 0 && subStageTimeline.length === 0) {
     return (
       <div className="bg-card rounded-3xl border-2 border-dashed border-border p-20 text-center flex flex-col items-center">
         <div className="w-20 h-20 bg-muted rounded-3xl flex items-center justify-center mb-6 shadow-inner">
@@ -98,9 +103,45 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
         </div>
       </div>
 
-      <div className="flex-1 relative">
-        <div className="w-full space-y-4">
-          {timeline.map((period, index) => {
+      <div className="flex-1 relative space-y-8">
+        
+        {subStageTimeline.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-foreground mb-4">Sub-Stage Timeline</h3>
+            <div className="bg-card rounded-xl border border-border p-6 space-y-6">
+              {subStageTimeline.map((row, index) => {
+                const userName = typeof row.changedBy === 'object' ? `${row.changedBy.firstName} ${row.changedBy.lastName}` : "Unknown";
+                
+                return (
+                  <div key={row._id} className="relative pl-6 before:absolute before:left-2 before:top-6 before:bottom-[-24px] before:w-px before:bg-border last:before:hidden">
+                    <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-brand border-2 border-card z-10" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-foreground text-sm">{row.subStage}</span>
+                        {row.channel && (
+                          <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted" title={row.channel}>
+                            {getActivityIcon(row.channel)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Sent on: {row.sentDate ? format(new Date(row.sentDate), "MMM d, yyyy") : '— (not specified)'}
+                      </div>
+                      <div className="mt-1 text-[10px] text-muted-foreground/60 uppercase tracking-widest">
+                        Logged by {userName} · {format(new Date(row.createdAt), "MMM d, h:mm a")}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {timeline.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-foreground mb-4">Stage History</h3>
+            {timeline.map((period, index) => {
             const userName = period.changedBy?.name || period.changedBy?.firstName || "System User";
             const isCurrent = index === 0;
             const isExpanded = expandedItems.has(index);
@@ -187,8 +228,9 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
                 </div>
               </div>
             );
-          })}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

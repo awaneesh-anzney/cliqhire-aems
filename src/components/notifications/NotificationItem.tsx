@@ -106,7 +106,12 @@ export function NotificationItem({
 
       // Phase 5
       case 'CLIENT_CREATED': return { icon: Users, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'CLIENT_STAGE_CHANGED': return { icon: TrendingUp, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
+      case 'CLIENT_STAGE_CHANGED':
+      case 'CLIENT_SUB_STAGE_CHANGED': return { icon: TrendingUp, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
+      case 'CLIENT_ACTIVITY_LOGGED': return { icon: ClipboardList, bg: 'bg-teal-100 dark:bg-teal-900/30', color: 'text-teal-600 dark:text-teal-400' };
+      case 'CLIENT_NEGOTIATION_UPDATED': return { icon: Briefcase, bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400' };
+      case 'CLIENT_FOLLOWUP_DUE': return { icon: Clock, bg: 'bg-yellow-100 dark:bg-yellow-900/30', color: 'text-yellow-600 dark:text-yellow-400' };
+      case 'CLIENT_FOLLOWUP_OVERDUE': return { icon: AlertTriangle, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
       case 'CLIENT_DELETED': return { icon: Building2, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
       case 'CONTRACT_CREATED': return { icon: FileText, bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400' };
       case 'CONTRACT_UPDATED':

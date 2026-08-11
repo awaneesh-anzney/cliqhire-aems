@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Loader2, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { logClientActivity } from "@/services/clientService";
+import { logClientActivity, getPrimaryContacts, PrimaryContact } from "@/services/clientService";
 import { getTeamMembers } from "@/services/teamMembersService";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -55,7 +55,12 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
   const [teamUsers, setTeamUsers] = useState<{ id: string; name: string; role?: string }[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
+  // Client contacts
+  const [contacts, setContacts] = useState<PrimaryContact[]>([]);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(false);
+
   const [formData, setFormData] = useState({
+    contactId: "",
     mode: "Virtual",
     activityTime: "09:00",
     discussionSummary: "",
@@ -91,8 +96,22 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
         setIsLoadingUsers(false);
       }
     };
+
+    const fetchContacts = async () => {
+      try {
+        setIsLoadingContacts(true);
+        const res = await getPrimaryContacts(clientId);
+        setContacts(res || []);
+      } catch (error) {
+        console.error("Error fetching client contacts:", error);
+      } finally {
+        setIsLoadingContacts(false);
+      }
+    };
+
     fetchTeamMembers();
-  }, []);
+    if (clientId) fetchContacts();
+  }, [clientId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -109,6 +128,8 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
         discussionSummary: formData.discussionSummary,
         outcome: formData.outcome,
       };
+
+      if (formData.contactId) payload.contactId = formData.contactId;
 
       if (activityType === "Negotiation" || activityType === "Proposal Sent") {
         payload.negotiationDetails = {
@@ -156,6 +177,23 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label>Client Contact</Label>
+              <Select value={formData.contactId} onValueChange={(val) => setFormData(prev => ({ ...prev, contactId: val === "none" ? "" : val }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingContacts ? "Loading..." : "Select contact (optional)"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No specific contact</SelectItem>
+                  {contacts.map(contact => (
+                    <SelectItem key={contact._id} value={contact._id as string}>
+                      {contact.name || `${contact.firstName} ${contact.lastName}`.trim()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
               <Label>Channel / Type</Label>
               <Select value={activityType} onValueChange={setActivityType}>
                 <SelectTrigger>
@@ -168,6 +206,9 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-[1fr,2fr,1.5fr] gap-4 items-center">
             
             <div className="space-y-2">
               <Label>Mode {activityType === "Meeting" && <span className="text-red-500">*</span>}</Label>
@@ -186,9 +227,7 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="grid grid-cols-[2fr,1.5fr] gap-4 items-center">
             {/* Shadcn UI Date Picker */}
             <div className="space-y-2">
               <Label>Date</Label>

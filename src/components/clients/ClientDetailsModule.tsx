@@ -503,7 +503,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   {/* Client Avatar Section */}
   <Avatar className="h-8 w-8 border border-white/40 shadow-sm ring-2 ring-emerald-400/30">
     <AvatarImage 
-      src={client.avatarUrl || client.logo} 
+      src={(client as any).avatarUrl || (client as any).logo} 
       alt={client.name || "Client"} 
     />
     <AvatarFallback className="bg-gradient-to-br from-teal-500 to-emerald-700 text-white font-extrabold text-xs">
@@ -527,7 +527,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
     id={client._id}
     status={(client.clientSubStage || "") as any}
     stage={client.clientStage || "Lead"}
-    onStageChange={handleStageStatusChange}
+    onStatusChange={handleStageStatusChange}
     disabled={!canModifyClients}
   />
 

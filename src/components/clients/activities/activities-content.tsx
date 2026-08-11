@@ -125,6 +125,18 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
                   <span className="text-muted-foreground">Type:</span>
                   <span className="ml-2">{activity.activityType}</span>
                 </div>
+                {activity.mode && (
+                  <div>
+                    <span className="text-muted-foreground">Mode:</span>
+                    <span className="ml-2">{activity.mode}</span>
+                  </div>
+                )}
+                {activity.attempts !== undefined && (
+                  <div>
+                    <span className="text-muted-foreground">Attempts:</span>
+                    <span className="ml-2">{activity.attempts}</span>
+                  </div>
+                )}
                 {activity.outcome && (
                   <div>
                     <span className="text-muted-foreground">Outcome:</span>
@@ -135,6 +147,12 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
                   <div>
                     <span className="text-muted-foreground">Stage at Time:</span>
                     <span className="ml-2">{activity.stageAtTime}</span>
+                  </div>
+                )}
+                {activity.nextFollowUpDate && (
+                  <div>
+                    <span className="text-muted-foreground">Next Follow-up:</span>
+                    <span className="ml-2">{new Date(activity.nextFollowUpDate).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>

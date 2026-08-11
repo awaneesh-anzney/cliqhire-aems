@@ -903,6 +903,23 @@ export interface ClientStageHistory {
   activities?: ClientActivity[];
 }
 
+export interface ClientSubStageHistory {
+  _id: string;
+  client_id: string;
+  clientStage: string;
+  subStage: string;
+  channel: string | null;
+  sentDate: string | null;
+  changedBy: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // 1. PATCH /api/clients/:id/stage
 const changeClientStage = async (
   id: string,
@@ -914,6 +931,16 @@ const changeClientStage = async (
 ): Promise<{ client: ClientResponse, closedPeriod?: ClientStageHistory, newPeriod?: ClientStageHistory }> => {
   try {
     const response = await api.patch(`/api/clients/${id}/stage`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/:id/sub-stage-history
+const getClientSubStageHistory = async (id: string): Promise<ClientSubStageHistory[]> => {
+  try {
+    const response = await api.get<ApiResponse<ClientSubStageHistory[]>>(`/api/clients/${id}/sub-stage-history`);
     return response.data.data;
   } catch (error: any) {
     throw handleError(error);
@@ -986,8 +1013,9 @@ export {
   getPrimaryContacts,
   changeClientStage,
   getClientStageHistory,
+  getClientTimeline,
+  getClientSubStageHistory,
   logClientActivity,
   getClientActivities,
-  getClientTimeline,
   updateClientFollowUp,
 };
