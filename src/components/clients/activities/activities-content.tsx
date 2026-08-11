@@ -7,8 +7,10 @@ import { CreateActivityModal } from "./create-activity";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
-import { getClientActivities, ClientActivity } from "@/services/clientService";
+import { getClientActivities, getClientFollowUps, ClientActivity } from "@/services/clientService";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { CompleteFollowUpModal } from "@/components/todo/CompleteFollowUpModal";
 
 interface ActivitiesContentProps {
   clientId: string;
@@ -16,14 +18,31 @@ interface ActivitiesContentProps {
 
 export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [activities, setActivities] = useState<ClientActivity[]>([]);
+  const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Follow-up completion modal state
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [selectedFollowUpId, setSelectedFollowUpId] = useState<string | null>(null);
 
   const fetchActivities = async () => {
     try {
       setIsLoading(true);
-      const response = await getClientActivities(clientId);
-      setActivities(response.data || []);
+      const [activitiesRes, followUpsRes] = await Promise.all([
+        getClientActivities(clientId),
+        getClientFollowUps(clientId)
+      ]);
+      
+      const actList = (activitiesRes.data || []).map((a: any) => ({ ...a, _type: 'activity' }));
+      const folList = (followUpsRes.data || []).map((f: any) => ({ ...f, _type: 'followup' }));
+      
+      const combined = [...actList, ...folList].sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+      
+      setTimelineEvents(combined);
     } catch (error) {
       console.error("Failed to fetch activities", error);
       toast.error("Failed to load activities");
@@ -45,7 +64,7 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
     );
   }
 
-  if (activities.length === 0) {
+  if (timelineEvents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-240px)]">
         <div className="w-48 h-48 mb-6">
@@ -90,76 +109,159 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
       </div>
 
       <div className="space-y-4">
-        {activities.map((activity) => (
-          <div key={activity._id} className="bg-card rounded-lg border p-4">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8 bg-blue-500">
-                  <AvatarFallback>{activity.createdBy?.firstName?.[0] || "U"}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">
-                      {activity.createdBy?.firstName} {activity.createdBy?.lastName}
-                    </span>
+        {timelineEvents.map((event) => {
+          if (event._type === 'activity') {
+            const activity = event;
+            return (
+              <div key={`act-${activity._id}`} className="bg-card rounded-lg border p-4">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8 bg-blue-500">
+                      <AvatarFallback>{activity.createdBy?.firstName?.[0] || "U"}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {activity.createdBy?.firstName} {activity.createdBy?.lastName}
+                        </span>
+                        <Badge variant="outline">Activity</Badge>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {activity.activityDate 
+                          ? formatDistanceToNow(new Date(activity.activityDate), { addSuffix: true })
+                          : "Recently"}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {activity.activityDate 
-                      ? formatDistanceToNow(new Date(activity.activityDate), { addSuffix: true })
-                      : "Recently"}
-                  </span>
                 </div>
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <h3 className="font-medium">{activity.discussionSummary || "No summary provided"}</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm mt-4">
-                {activity.activityDate && (
-                  <div>
-                    <span className="text-muted-foreground">Date:</span>
-                    <span className="ml-2">{new Date(activity.activityDate).toLocaleDateString()} {activity.activityTime}</span>
+                <div className="space-y-2">
+                  <h3 className="font-medium">{activity.discussionSummary || "No summary provided"}</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+                    {activity.activityDate && (
+                      <div>
+                        <span className="text-muted-foreground">Date:</span>
+                        <span className="ml-2">{new Date(activity.activityDate).toLocaleDateString()} {activity.activityTime}</span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-muted-foreground">Type:</span>
+                      <span className="ml-2">{activity.activityType}</span>
+                    </div>
+                    {activity.mode && (
+                      <div>
+                        <span className="text-muted-foreground">Mode:</span>
+                        <span className="ml-2">{activity.mode}</span>
+                      </div>
+                    )}
+                    {activity.outcome && (
+                      <div>
+                        <span className="text-muted-foreground">Outcome:</span>
+                        <span className="ml-2">{activity.outcome}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                <div>
-                  <span className="text-muted-foreground">Type:</span>
-                  <span className="ml-2">{activity.activityType}</span>
                 </div>
-                {activity.mode && (
-                  <div>
-                    <span className="text-muted-foreground">Mode:</span>
-                    <span className="ml-2">{activity.mode}</span>
-                  </div>
-                )}
-                {activity.attempts !== undefined && (
-                  <div>
-                    <span className="text-muted-foreground">Attempts:</span>
-                    <span className="ml-2">{activity.attempts}</span>
-                  </div>
-                )}
-                {activity.outcome && (
-                  <div>
-                    <span className="text-muted-foreground">Outcome:</span>
-                    <span className="ml-2">{activity.outcome}</span>
-                  </div>
-                )}
-                {activity.stageAtTime && (
-                  <div>
-                    <span className="text-muted-foreground">Stage at Time:</span>
-                    <span className="ml-2">{activity.stageAtTime}</span>
-                  </div>
-                )}
-                {activity.nextFollowUpDate && (
-                  <div>
-                    <span className="text-muted-foreground">Next Follow-up:</span>
-                    <span className="ml-2">{new Date(activity.nextFollowUpDate).toLocaleDateString()}</span>
-                  </div>
-                )}
               </div>
-            </div>
-          </div>
-        ))}
+            );
+          }
+
+          if (event._type === 'followup') {
+            const fol = event;
+            const isCompleted = fol.status === "Completed";
+            const isCancelled = fol.status === "Cancelled";
+            const isPending = fol.status === "Pending";
+            
+            return (
+              <div key={`fol-${fol._id}`} className={`rounded-lg border p-4 ${isPending ? 'bg-blue-50/50 dark:bg-blue-950/20' : 'bg-card'}`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8 bg-brand">
+                      <AvatarFallback>{(isCompleted ? fol.completedBy?.firstName?.[0] : fol.owner?.firstName?.[0]) || "U"}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {isCompleted ? `${fol.completedBy?.firstName} ${fol.completedBy?.lastName}` : (fol.owner ? `${fol.owner?.firstName} ${fol.owner?.lastName}` : 'Unassigned')}
+                        </span>
+                        <Badge 
+                          variant={isCompleted ? "default" : isPending ? "secondary" : "destructive"}
+                          className={isCompleted ? "bg-green-500 hover:bg-green-600" : isPending ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-500 hover:bg-gray-600"}
+                        >
+                          {fol.status} Follow-up
+                        </Badge>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {fol.createdAt ? `Created ${formatDistanceToNow(new Date(fol.createdAt), { addSuffix: true })}` : ""}
+                      </span>
+                    </div>
+                  </div>
+                  {isPending && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="ml-2 bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                      onClick={() => {
+                        setSelectedFollowUpId(fol._id);
+                        setCompleteModalOpen(true);
+                      }}
+                    >
+                      Complete
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="border-l-2 border-brand/20 pl-4 py-1">
+                    <h3 className="font-medium text-lg">
+                      Scheduled for: {fol.scheduledDate ? new Date(fol.scheduledDate).toLocaleDateString() : "TBD"}
+                    </h3>
+                    {fol.notes && <p className="text-sm text-muted-foreground mt-1">{fol.notes}</p>}
+                  </div>
+
+                  {isCompleted && (
+                    <div className="mt-4 bg-muted/30 p-3 rounded-md border">
+                      <h4 className="font-medium mb-1">Completion Notes:</h4>
+                      <p className="text-sm">{fol.completionNotes}</p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 text-xs text-muted-foreground mt-3 pt-3 border-t">
+                        <div>
+                          <span className="font-medium">Completed on:</span> 
+                          {fol.completionDate ? new Date(fol.completionDate).toLocaleDateString() : "Not specified"}
+                        </div>
+                        <div>
+                          <span className="font-medium">Logged at:</span> 
+                          {fol.completedAt ? new Date(fol.completedAt).toLocaleString() : ""}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {isCancelled && (
+                    <div className="mt-4 bg-muted/30 p-3 rounded-md border border-red-200 dark:border-red-900/30">
+                      <h4 className="font-medium mb-1 text-red-600 dark:text-red-400">Cancel Reason:</h4>
+                      <p className="text-sm">{fol.cancelReason || "No reason provided"}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          }
+        })}
       </div>
+      
+      {selectedFollowUpId && (
+        <CompleteFollowUpModal
+          clientId={clientId}
+          followUpId={selectedFollowUpId}
+          open={completeModalOpen}
+          onOpenChange={(open) => {
+            setCompleteModalOpen(open);
+            if (!open) setSelectedFollowUpId(null);
+          }}
+          onSuccess={fetchActivities}
+        />
+      )}
     </div>
   );
 }

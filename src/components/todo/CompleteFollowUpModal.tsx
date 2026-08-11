@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { taskService } from "@/services/taskService";
+import { completeClientFollowUp } from "@/services/clientService";
 import { toast } from "sonner";
 import { Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -13,13 +14,15 @@ import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface CompleteFollowUpModalProps {
-  taskId: string;
+  taskId?: string;
+  clientId?: string;
+  followUpId?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
 
-export function CompleteFollowUpModal({ taskId, open, onOpenChange, onSuccess }: CompleteFollowUpModalProps) {
+export function CompleteFollowUpModal({ taskId, clientId, followUpId, open, onOpenChange, onSuccess }: CompleteFollowUpModalProps) {
   const queryClient = useQueryClient();
   const [completionNotes, setCompletionNotes] = useState("");
   const [completionDate, setCompletionDate] = useState<Date | undefined>(new Date());
@@ -35,12 +38,24 @@ export function CompleteFollowUpModal({ taskId, open, onOpenChange, onSuccess }:
 
     setIsSubmitting(true);
     try {
-      await taskService.completeFollowUpTask(taskId, {
+      const payload = {
         completionNotes: completionNotes.trim(),
         completionDate: completionDate ? completionDate.toISOString() : undefined
-      });
+      };
+
+      if (taskId) {
+        await taskService.completeFollowUpTask(taskId, payload);
+      } else if (clientId && followUpId) {
+        await completeClientFollowUp(clientId, followUpId, payload);
+      } else {
+        throw new Error("Missing task or client IDs for follow-up completion.");
+      }
+
       toast.success("Follow-up completed successfully!");
       queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+      if (clientId) {
+        queryClient.invalidateQueries({ queryKey: ["client", clientId] });
+      }
       onOpenChange(false);
       if (onSuccess) onSuccess();
       // Reset state for next open
