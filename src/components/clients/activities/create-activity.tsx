@@ -44,16 +44,9 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
   // Date states for Shadcn Popover + Calendar
   const [activityDate, setActivityDate] = useState<Date>(new Date());
   const [expectedClosureDate, setExpectedClosureDate] = useState<Date | undefined>(undefined);
-  const [nextFollowUpDate, setNextFollowUpDate] = useState<Date | undefined>(undefined);
-  
   // Popover open states
   const [activityDateOpen, setActivityDateOpen] = useState(false);
   const [expectedClosureOpen, setExpectedClosureOpen] = useState(false);
-  const [nextFollowUpOpen, setNextFollowUpOpen] = useState(false);
-
-  // Team users for dropdown
-  const [teamUsers, setTeamUsers] = useState<{ id: string; name: string; role?: string }[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Client contacts
   const [contacts, setContacts] = useState<PrimaryContact[]>([]);
@@ -75,27 +68,9 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
     
     // Footer fields
     revenue: "",
-    nextFollowUpOwner: "",
   });
 
-  // Fetch team members for Follow-up Owner ID dropdown
   useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        setIsLoadingUsers(true);
-        const res = await getTeamMembers();
-        const members = (res.teamMembers || []).map((user: any) => ({
-          id: user._id || user.id || "",
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.name || user.email || "Unknown User",
-          role: user.teamRole || user.department || "",
-        }));
-        setTeamUsers(members);
-      } catch (error) {
-        console.error("Error fetching team users:", error);
-      } finally {
-        setIsLoadingUsers(false);
-      }
-    };
 
     const fetchContacts = async () => {
       try {
@@ -109,7 +84,6 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
       }
     };
 
-    fetchTeamMembers();
     if (clientId) fetchContacts();
   }, [clientId]);
 
@@ -143,8 +117,6 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
       }
 
       if (formData.revenue) payload.revenue = Number(formData.revenue);
-      if (nextFollowUpDate) payload.nextFollowUpDate = nextFollowUpDate.toISOString();
-      if (formData.nextFollowUpOwner) payload.nextFollowUpOwner = formData.nextFollowUpOwner;
 
       await logClientActivity(clientId, payload);
       toast.success("Activity logged successfully");
@@ -384,57 +356,7 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
              <div className="space-y-2">
                 <Label>Revenue (SAR)</Label>
                 <Input type="number" placeholder="Actual Revenue" value={formData.revenue} onChange={handleInputChange("revenue")} />
-             </div>
-
-             {/* Set Next Follow-up Date */}
-             <div className="space-y-2">
-                <Label>Set Next Follow-up</Label>
-                <Popover open={nextFollowUpOpen} onOpenChange={setNextFollowUpOpen} modal>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal h-10 border-border bg-background",
-                        !nextFollowUpDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {nextFollowUpDate ? format(nextFollowUpDate, "PPP") : <span>Follow-up date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={nextFollowUpDate}
-                      onSelect={(date) => {
-                        setNextFollowUpDate(date);
-                        setNextFollowUpOpen(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-             </div>
-
-             {/* Follow-up Owner Dropdown */}
-             <div className="space-y-2">
-                <Label>Follow-up Owner ID</Label>
-                <Select 
-                  value={formData.nextFollowUpOwner} 
-                  onValueChange={(val) => setFormData(prev => ({ ...prev, nextFollowUpOwner: val }))}
-                >
-                  <SelectTrigger className="w-full h-10 border-border">
-                    <SelectValue placeholder={isLoadingUsers ? "Loading users..." : "Select team user"} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60 overflow-y-auto z-50">
-                    {teamUsers.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name} {user.role ? `(${user.role})` : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-             </div>
+           </div>
           </div>
         </div>
 

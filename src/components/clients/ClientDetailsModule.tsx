@@ -145,6 +145,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   } | null>(null);
   const [subStageChannel, setSubStageChannel] = useState<string>("Email");
   const [subStageSentDate, setSubStageSentDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [scheduleFollowUpOnSubstage, setScheduleFollowUpOnSubstage] = useState(false);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
 
   const {
@@ -236,6 +237,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   const handleStageStatusChange = (clientId: string, newStatus: ClientStageStatus) => {
     if (!canModifyClients) return;
     setPendingStatusChange({ clientId, status: newStatus });
+    setScheduleFollowUpOnSubstage(false);
     setTimeout(() => setShowStatusConfirmDialog(true), 0);
   };
 
@@ -274,6 +276,12 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
       await updateClientStageStatus(pendingStatusChange.clientId, pendingStatusChange.status, channel, sentDate);
       setShowStatusConfirmDialog(false);
+      
+      if (scheduleFollowUpOnSubstage) {
+        // Automatically open the follow up modal after stage update
+        setTimeout(() => setIsFollowUpModalOpen(true), 300);
+      }
+      
       refetch();
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
@@ -485,6 +493,20 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
               </div>
             </div>
           )}
+          
+          <div className="grid gap-2 py-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="schedule-followup" 
+                checked={scheduleFollowUpOnSubstage}
+                onCheckedChange={(checked) => setScheduleFollowUpOnSubstage(checked === true)}
+              />
+              <Label htmlFor="schedule-followup" className="cursor-pointer">
+                Schedule Follow-up for this Activity
+              </Label>
+            </div>
+          </div>
+          
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowStatusConfirmDialog(false)}>Cancel</Button>

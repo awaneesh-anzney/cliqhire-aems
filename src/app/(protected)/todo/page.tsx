@@ -45,6 +45,7 @@ import { cn } from "@/lib/utils";
 import { TodoStats } from "@/components/todo/TodoStats";
 import { TodoFilters } from "@/components/todo/TodoFilters";
 import { TodoBoard } from "@/components/todo/TodoBoard";
+import { CompleteFollowUpModal } from "@/components/todo/CompleteFollowUpModal";
 
 export default function TodoPage() {
   const queryClient = useQueryClient();
@@ -61,6 +62,8 @@ export default function TodoPage() {
   const [newTaskOpen, setNewTaskOpen] = useState(false);
   const [editTaskOpen, setEditTaskOpen] = useState(false);
   const [viewTaskOpen, setViewTaskOpen] = useState(false);
+  const [completeFollowUpModalOpen, setCompleteFollowUpModalOpen] = useState(false);
+  const [completeFollowUpTaskId, setCompleteFollowUpTaskId] = useState<string | null>(null);
   
   // Selected task for View / Edit
   const [selectedTask, setSelectedTask] = useState<any>(null);
@@ -204,6 +207,13 @@ export default function TodoPage() {
         toast.error(err.message || "Failed to update job status");
       }
     } else if (taskType === "reminderTask") {
+      const task = reminderTasks.find((t: any) => t.id === taskId);
+      if (task && (task as any).kind === "client_followup" && status === "completed") {
+        setCompleteFollowUpTaskId(taskId);
+        setCompleteFollowUpModalOpen(true);
+        return;
+      }
+      
       try {
         await taskService.updateReminderTaskStatus(taskId, status);
         queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
@@ -684,6 +694,17 @@ export default function TodoPage() {
           )}
         </DialogContent>
       </Dialog>
+      
+      {completeFollowUpTaskId && (
+        <CompleteFollowUpModal 
+          taskId={completeFollowUpTaskId}
+          open={completeFollowUpModalOpen}
+          onOpenChange={(open) => {
+            setCompleteFollowUpModalOpen(open);
+            if (!open) setCompleteFollowUpTaskId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

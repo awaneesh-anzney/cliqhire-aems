@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { updateClientFollowUp } from "@/services/clientService";
+import { scheduleClientFollowUp } from "@/services/clientService";
 import { getTeamMembers } from "@/services/teamMembersService";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
@@ -34,6 +35,7 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
   const [owner, setOwner] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
+  const [notes, setNotes] = useState("");
 
   const [teamUsers, setTeamUsers] = useState<{ id: string; name: string; role?: string }[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -54,6 +56,7 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
         setSelectedTime("09:00");
       }
       setOwner(currentOwner || "");
+      setNotes("");
 
       const fetchTeamMembers = async () => {
         try {
@@ -89,12 +92,15 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
         const [hours, minutes] = selectedTime.split(":").map(Number);
         const finalDate = new Date(selectedDate);
         finalDate.setHours(hours || 0, minutes || 0, 0, 0);
-        payload.nextFollowUpDate = finalDate.toISOString();
+        payload.scheduledDate = finalDate.toISOString();
       }
       if (owner) {
-        payload.nextFollowUpOwner = owner;
+        payload.owner = owner;
       }
-      await updateClientFollowUp(clientId, payload);
+      if (notes) {
+        payload.notes = notes;
+      }
+      await scheduleClientFollowUp(clientId, payload);
       toast.success("Follow-up updated successfully");
       queryClient.invalidateQueries({ queryKey: ["client", clientId] });
       onOpenChange(false);
@@ -178,6 +184,16 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
                 </SelectContent>
               </Select>
               <p className="text-[10px] text-muted-foreground">Select team user to assign as follow-up owner.</p>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label>Notes (Optional)</Label>
+              <Textarea 
+                value={notes} 
+                onChange={(e) => setNotes(e.target.value)} 
+                placeholder="What is the plan for this follow-up?"
+                rows={3}
+              />
             </div>
           </div>
           <DialogFooter>

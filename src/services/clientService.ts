@@ -987,11 +987,51 @@ const getClientTimeline = async (id: string): Promise<ClientStageHistory[]> => {
   }
 };
 
-// 6. PATCH /api/clients/:id/follow-up
-const updateClientFollowUp = async (id: string, data: { nextFollowUpDate?: string, nextFollowUpOwner?: string }): Promise<ClientResponse> => {
+// 6. POST /api/clients/:id/follow-up
+const scheduleClientFollowUp = async (id: string, data: { scheduledDate?: string, owner?: string, notes?: string }): Promise<any> => {
   try {
-    const response = await api.patch(`/api/clients/${id}/follow-up`, data, { timeout: 15000 });
+    const response = await api.post(`/api/clients/${id}/follow-up`, data, { timeout: 15000 });
     return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/follow-up/:followUpId
+const editClientFollowUp = async (id: string, followUpId: string, data: { scheduledDate?: string, owner?: string, notes?: string }): Promise<any> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/follow-up/${followUpId}`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/follow-up/:followUpId/complete
+const completeClientFollowUp = async (id: string, followUpId: string, data: { completionNotes: string, completionDate?: string }): Promise<any> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/follow-up/${followUpId}/complete`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/follow-up/:followUpId/cancel
+const cancelClientFollowUp = async (id: string, followUpId: string, data: { cancelReason?: string }): Promise<any> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/follow-up/${followUpId}/cancel`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/:id/follow-ups
+const getClientFollowUps = async (id: string, params?: { status?: string }): Promise<any> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/follow-ups`, { params, timeout: 15000 });
+    return response.data; 
   } catch (error: any) {
     throw handleError(error);
   }
@@ -1017,5 +1057,9 @@ export {
   getClientSubStageHistory,
   logClientActivity,
   getClientActivities,
-  updateClientFollowUp,
+  scheduleClientFollowUp,
+  editClientFollowUp,
+  completeClientFollowUp,
+  cancelClientFollowUp,
+  getClientFollowUps,
 };
