@@ -871,7 +871,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
     <TabsContent 
       value="Timeline" 
-      className="p-3 sm:p-5 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+      className="p-2 max-w-full outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
     >
       <TimelineContent clientId={id} />
     </TabsContent>

@@ -1,9 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getClientTimeline, getClientSubStageHistory, ClientStageHistory, ClientSubStageHistory } from "@/services/clientService";
-import { Loader2, Calendar, Clock, MessageSquare, Phone, Mail, Users, FileText, CheckCircle2, ChevronDown, Handshake } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  getClientTimeline,
+  getClientSubStageHistory,
+  ClientStageHistory,
+  ClientSubStageHistory,
+} from "@/services/clientService";
+import {
+  Loader2,
+  Calendar,
+  Clock,
+  MessageSquare,
+  Phone,
+  Mail,
+  Users,
+  FileText,
+  ChevronDown,
+  Handshake,
+  Layers,
+  History,
+} from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -15,15 +32,24 @@ interface TimelineContentProps {
 
 const getActivityIcon = (type: string) => {
   switch (type?.toLowerCase()) {
-    case 'call': return <Phone className="w-4 h-4 text-blue-500" />;
-    case 'whatsapp': return <MessageSquare className="w-4 h-4 text-green-500" />;
-    case 'linkedin': return <Users className="w-4 h-4 text-blue-700" />;
-    case 'email': return <Mail className="w-4 h-4 text-orange-500" />;
-    case 'meeting': return <Users className="w-4 h-4 text-purple-500" />;
-    case 'data update': return <FileText className="w-4 h-4 text-gray-500" />;
-    case 'negotiation': return <Handshake className="w-4 h-4 text-brand" />;
-    case 'proposal sent': return <FileText className="w-4 h-4 text-red-500" />;
-    default: return <MessageSquare className="w-4 h-4 text-muted-foreground" />;
+    case "call":
+      return <Phone className="w-3.5 h-3.5 text-blue-500" />;
+    case "whatsapp":
+      return <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />;
+    case "linkedin":
+      return <Users className="w-3.5 h-3.5 text-sky-600" />;
+    case "email":
+      return <Mail className="w-3.5 h-3.5 text-amber-500" />;
+    case "meeting":
+      return <Users className="w-3.5 h-3.5 text-purple-500" />;
+    case "data update":
+      return <FileText className="w-3.5 h-3.5 text-slate-500" />;
+    case "negotiation":
+      return <Handshake className="w-3.5 h-3.5 text-indigo-500" />;
+    case "proposal sent":
+      return <FileText className="w-3.5 h-3.5 text-rose-500" />;
+    default:
+      return <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />;
   }
 };
 
@@ -39,7 +65,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
         setIsLoading(true);
         const [data, subData] = await Promise.all([
           getClientTimeline(clientId),
-          getClientSubStageHistory(clientId).catch(() => [])
+          getClientSubStageHistory(clientId).catch(() => []),
         ]);
         setTimeline(data || []);
         setSubStageTimeline(subData || []);
@@ -54,7 +80,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
   }, [clientId]);
 
   const toggleItem = (index: number) => {
-    setExpandedItems(prev => {
+    setExpandedItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(index)) {
         newSet.delete(index);
@@ -67,9 +93,9 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-24 space-y-4">
-        <Loader2 className="w-10 h-10 text-brand animate-spin" />
-        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] animate-pulse">
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Loading Timeline...
         </p>
       </div>
@@ -78,160 +104,222 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
 
   if (timeline.length === 0 && subStageTimeline.length === 0) {
     return (
-      <div className="bg-card rounded-3xl border-2 border-dashed border-border p-20 text-center flex flex-col items-center">
-        <div className="w-20 h-20 bg-muted rounded-3xl flex items-center justify-center mb-6 shadow-inner">
-          <Calendar className="w-10 h-10 text-muted-foreground" />
+      <div className="border border-dashed rounded-xl p-12 text-center flex flex-col items-center bg-card/50 my-6">
+        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
+          <Calendar className="w-6 h-6" />
         </div>
-        <h3 className="text-xl font-black text-foreground">No Timeline Available</h3>
-        <p className="text-muted-foreground text-sm font-semibold max-w-sm mx-auto mt-2 mb-8">
-          This client does not have any stage history yet.
+        <h3 className="text-base font-semibold text-foreground">No Timeline Available</h3>
+        <p className="text-xs text-muted-foreground max-w-xs mt-1">
+          This client does not have any stage history or activity progression recorded yet.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-muted/30 rounded-3xl p-8 space-y-6 animate-in fade-in duration-500 min-h-[600px] flex flex-col">
-      <div className="flex items-center justify-between px-2">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-3">
-            Client Stage Timeline
-          </h2>
-          <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
-            Stage progression and activities
-          </p>
-        </div>
+    <div className="w-full mx-auto space-y-2">
+      {/* Header */}
+      <div className="border-b pb-4">
+        <h2 className="text-xl font-bold tracking-tight text-foreground">Stage & Journey Progress</h2>
+        <p className="text-xs text-muted-foreground">Historical progression and stage transition logs</p>
       </div>
 
-      <div className="flex-1 relative space-y-8">
-        
-        {subStageTimeline.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-foreground mb-4">Sub-Stage Timeline</h3>
-            <div className="bg-card rounded-xl border border-border p-6 space-y-6">
-              {subStageTimeline.map((row, index) => {
-                const userName = typeof row.changedBy === 'object' ? `${row.changedBy.firstName} ${row.changedBy.lastName}` : "Unknown";
-                
-                return (
-                  <div key={row._id} className="relative pl-6 before:absolute before:left-2 before:top-6 before:bottom-[-24px] before:w-px before:bg-border last:before:hidden">
-                    <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-brand border-2 border-card z-10" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-foreground text-sm">{row.subStage}</span>
-                        {row.channel && (
-                          <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted" title={row.channel}>
-                            {getActivityIcon(row.channel)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        Sent on: {row.sentDate ? format(new Date(row.sentDate), "MMM d, yyyy") : '— (not specified)'}
-                      </div>
-                      <div className="mt-1 text-[10px] text-muted-foreground/60 uppercase tracking-widest">
-                        Logged by {userName} · {format(new Date(row.createdAt), "MMM d, h:mm a")}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+      {/* Sub-Stage Progression Stream */}
+      {subStageTimeline.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+              Sub-Stage Transitions
+            </h3>
           </div>
-        )}
 
-        {timeline.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-foreground mb-4">Stage History</h3>
-            {timeline.map((period, index) => {
-            const userName = period.changedBy?.name || period.changedBy?.firstName || "System User";
-            const isCurrent = index === 0;
-            const isExpanded = expandedItems.has(index);
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {subStageTimeline.map((row) => {
+              const userName =
+                typeof row.changedBy === "object"
+                  ? `${row.changedBy.firstName} ${row.changedBy.lastName}`
+                  : "Unknown";
 
-            return (
-              <div key={period._id || index} className="border bg-card rounded-xl px-4 shadow-sm overflow-hidden">
-                <button
-                  onClick={() => toggleItem(index)}
-                  className="w-full py-4 flex flex-1 items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-t-xl"
+              return (
+                <div
+                  key={row._id}
+                  className="bg-card border rounded-lg p-3 shadow-xs space-y-2 relative overflow-hidden"
                 >
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-bold text-foreground">Stage: {period.stage}</h3>
-                      {isCurrent && <Badge variant="secondary" className="bg-brand/10 text-brand">Current</Badge>}
-                    </div>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {period.startedAt ? format(new Date(period.startedAt), "MMM d, yyyy") : 'Unknown'} 
-                      {period.endedAt ? ` – ${format(new Date(period.endedAt), "MMM d, yyyy")}` : ' – Ongoing'}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-sm text-foreground truncate">{row.subStage}</span>
+                    {row.channel && (
+                      <span className="p-1 rounded bg-muted shrink-0" title={row.channel}>
+                        {getActivityIcon(row.channel)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-0.5">
+                    <p>Sent: {row.sentDate ? format(new Date(row.sentDate), "MMM d, yyyy") : "—"}</p>
+                    <p className="text-[11px] text-muted-foreground/70">
+                      By {userName} • {format(new Date(row.createdAt), "MMM d, h:mm a")}
                     </p>
-                    {period.closureSummary && (
-                      <p className="text-xs text-muted-foreground italic mt-2">&quot;{period.closureSummary}&quot;</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mr-2">
-                    <span>{period.activityCount || 0} activities</span>
-                    <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-200", isExpanded ? "rotate-180" : "")} />
-                  </div>
-                </button>
-                
-                <div className={cn("overflow-hidden transition-all duration-300 ease-in-out", isExpanded ? "max-h-[2000px] opacity-100 mb-6" : "max-h-0 opacity-0")}>
-                  <div className="pt-2">
-                    {period.reason && (
-                      <div className="mb-6 bg-muted/50 p-4 rounded-lg">
-                        <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Reason for Stage Change</h4>
-                        <p className="text-sm text-foreground">{period.reason}</p>
-                      </div>
-                    )}
-
-                    <div className="space-y-4 pl-2">
-                      {period.activities && period.activities.length > 0 ? (
-                        period.activities.map((activity: any) => (
-                          <div key={activity._id} className="relative pl-6 before:absolute before:left-[11px] before:top-8 before:bottom-[-16px] before:w-px before:bg-border last:before:hidden">
-                            <div className="absolute left-0 top-1.5 w-6 h-6 rounded-full bg-card border-2 border-border flex items-center justify-center z-10">
-                              {getActivityIcon(activity.activityType)}
-                            </div>
-                            <div className="bg-muted/30 rounded-xl p-4 border border-border">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <span className="font-bold text-foreground">{activity.activityType}</span>
-                                  {activity.isMeeting && <Badge variant="outline" className="ml-2 text-[10px]">Meeting</Badge>}
-                                </div>
-                                <span className="text-xs font-medium text-muted-foreground">
-                                  {activity.activityDate && format(new Date(activity.activityDate), "MMM d, yyyy")}
-                                </span>
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-3">{activity.discussionSummary}</p>
-                              
-                              {(activity.activityType === "Negotiation" || activity.activityType === "Proposal Sent") && activity.negotiationDetails && (
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                  {activity.negotiationDetails.dealValue && (
-                                    <Badge variant="secondary" className="bg-brand/10 text-brand border-brand/20">
-                                      Deal Value: SAR {activity.negotiationDetails.dealValue}
-                                    </Badge>
-                                  )}
-                                  {activity.negotiationDetails.negotiationStatus && (
-                                    <Badge variant="outline" className={cn(
-                                      activity.negotiationDetails.negotiationStatus === 'Agreed' ? 'text-green-600 border-green-200 bg-green-50' : '',
-                                      activity.negotiationDetails.negotiationStatus === 'Stuck' ? 'text-red-600 border-red-200 bg-red-50' : '',
-                                    )}>
-                                      Status: {activity.negotiationDetails.negotiationStatus}
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground italic pl-6">No activities recorded in this stage yet.</p>
-                      )}
-                    </div>
                   </div>
                 </div>
-              </div>
-            );
+              );
             })}
           </div>
-        )}
-      </div>
+        </section>
+      )}
+
+      {/* Main Stage History Timeline */}
+      {timeline.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
+              Stage History
+            </h3>
+          </div>
+
+          <div className="space-y-3">
+            {timeline.map((period, index) => {
+              const isCurrent = index === 0;
+              const isExpanded = expandedItems.has(index);
+
+              return (
+                <div
+                  key={period._id || index}
+                  className={cn(
+                    "border bg-card rounded-xl shadow-xs transition-all duration-200 overflow-hidden",
+                    isCurrent && "border-primary/50 ring-1 ring-primary/20"
+                  )}
+                >
+                  {/* Collapsible Header */}
+                  <button
+                    type="button"
+                    onClick={() => toggleItem(index)}
+                    className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2.5">
+                        <h4 className="text-base font-bold text-foreground">Stage: {period.stage}</h4>
+                        {isCurrent && (
+                          <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 text-[11px] font-medium">
+                            Current Stage
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {period.startedAt ? format(new Date(period.startedAt), "MMM d, yyyy") : "Unknown"}
+                        {period.endedAt
+                          ? ` – ${format(new Date(period.endedAt), "MMM d, yyyy")}`
+                          : " – Ongoing"}
+                      </p>
+                      {period.closureSummary && (
+                        <p className="text-xs text-muted-foreground italic mt-1">
+                          &quot;{period.closureSummary}&quot;
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="hidden sm:inline font-medium bg-muted px-2.5 py-1 rounded-md">
+                        {period.activityCount || 0} activities
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-transform duration-200",
+                          isExpanded && "rotate-180"
+                        )}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Collapsible Body */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 pt-1 border-t space-y-4 bg-muted/10">
+                      {period.reason && (
+                        <div className="bg-muted/40 p-3 rounded-lg text-xs space-y-1 border">
+                          <span className="font-semibold text-foreground uppercase text-[10px] tracking-wider">
+                            Reason for Stage Transition
+                          </span>
+                          <p className="text-muted-foreground">{period.reason}</p>
+                        </div>
+                      )}
+
+                      {/* Activities Section */}
+                      <div className="space-y-3">
+                        {period.activities && period.activities.length > 0 ? (
+                          period.activities.map((activity: any) => (
+                            <div
+                              key={activity._id}
+                              className="p-3 rounded-lg border bg-card space-y-2 text-xs"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="p-1 rounded bg-muted">
+                                    {getActivityIcon(activity.activityType)}
+                                  </span>
+                                  <span className="font-bold text-foreground text-sm">
+                                    {activity.activityType}
+                                  </span>
+                                  {activity.isMeeting && (
+                                    <Badge variant="outline" className="text-[10px] py-0 h-4">
+                                      Meeting
+                                    </Badge>
+                                  )}
+                                </div>
+                                <span className="text-muted-foreground text-[11px]">
+                                  {activity.activityDate &&
+                                    format(new Date(activity.activityDate), "MMM d, yyyy")}
+                                </span>
+                              </div>
+
+                              <p className="text-muted-foreground leading-relaxed pl-7">
+                                {activity.discussionSummary}
+                              </p>
+
+                              {(activity.activityType === "Negotiation" ||
+                                activity.activityType === "Proposal Sent") &&
+                                activity.negotiationDetails && (
+                                  <div className="flex flex-wrap gap-2 pl-7 pt-1">
+                                    {activity.negotiationDetails.dealValue && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="bg-primary/10 text-primary border-primary/20 text-[11px]"
+                                      >
+                                        Value: SAR {activity.negotiationDetails.dealValue}
+                                      </Badge>
+                                    )}
+                                    {activity.negotiationDetails.negotiationStatus && (
+                                      <Badge
+                                        variant="outline"
+                                        className={cn(
+                                          "text-[11px]",
+                                          activity.negotiationDetails.negotiationStatus === "Agreed" &&
+                                            "text-emerald-600 border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30",
+                                          activity.negotiationDetails.negotiationStatus === "Stuck" &&
+                                            "text-rose-600 border-rose-200 bg-rose-50 dark:bg-rose-950/30"
+                                        )}
+                                      >
+                                        Status: {activity.negotiationDetails.negotiationStatus}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic py-2">
+                            No activities recorded during this stage.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
