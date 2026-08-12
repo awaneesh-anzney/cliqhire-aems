@@ -11,6 +11,10 @@ import { getClientActivities, getClientFollowUps } from "@/services/clientServic
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { CompleteFollowUpModal } from "@/components/todo/CompleteFollowUpModal";
+import { EditFollowUpModal } from "@/components/clients/modals/edit-follow-up-modal";
+import { CancelFollowUpModal } from "@/components/clients/modals/cancel-follow-up-modal";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 
 interface ActivitiesContentProps {
   clientId: string;
@@ -23,7 +27,11 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
 
   // Follow-up completion modal state
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  
   const [selectedFollowUpId, setSelectedFollowUpId] = useState<string | null>(null);
+  const [selectedFollowUpData, setSelectedFollowUpData] = useState<any>(null);
 
   const fetchActivities = async () => {
     try {
@@ -234,6 +242,16 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
                             {isCancelled && <XCircle className="h-3 w-3" />}
                             {fol.status} Follow-up
                           </Badge>
+                          {fol.attempts && (
+                            <Badge variant="outline" className="text-[10px] font-normal px-1.5 bg-muted/50">
+                              Attempt #{fol.attempts}
+                            </Badge>
+                          )}
+                          {fol.stageAtTime && (
+                            <span className="text-[10px] text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded border">
+                              Stage: {fol.stageAtTime}
+                            </span>
+                          )}
                         </div>
                         <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                           <Clock className="h-3 w-3" />
@@ -243,17 +261,48 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
                     </div>
 
                     {isPending && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800"
-                        onClick={() => {
-                          setSelectedFollowUpId(fol._id);
-                          setCompleteModalOpen(true);
-                        }}
-                      >
-                        Complete
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800"
+                          onClick={() => {
+                            setSelectedFollowUpId(fol._id);
+                            setCompleteModalOpen(true);
+                          }}
+                        >
+                          Complete
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedFollowUpId(fol._id);
+                                setSelectedFollowUpData(fol);
+                                setEditModalOpen(true);
+                              }}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => {
+                                setSelectedFollowUpId(fol._id);
+                                setCancelModalOpen(true);
+                              }}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Cancel
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     )}
                   </div>
 
@@ -268,6 +317,11 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
 
                     {isCompleted && (
                       <div className="mt-3 bg-muted/40 p-3 rounded-lg text-xs space-y-2 border">
+                        {fol.completionReason && (
+                          <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-primary/10 text-primary mb-2">
+                            {fol.completionReason}
+                          </div>
+                        )}
                         <div className="flex items-start gap-2">
                           <MessageSquare className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
                           <div>
@@ -303,16 +357,44 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
       </div>
 
       {selectedFollowUpId && (
-        <CompleteFollowUpModal
-          clientId={clientId}
-          followUpId={selectedFollowUpId}
-          open={completeModalOpen}
-          onOpenChange={(open) => {
-            setCompleteModalOpen(open);
-            if (!open) setSelectedFollowUpId(null);
-          }}
-          onSuccess={fetchActivities}
-        />
+        <>
+          <CompleteFollowUpModal
+            clientId={clientId}
+            followUpId={selectedFollowUpId}
+            open={completeModalOpen}
+            onOpenChange={(open) => {
+              setCompleteModalOpen(open);
+              if (!open) setSelectedFollowUpId(null);
+            }}
+            onSuccess={fetchActivities}
+          />
+          <EditFollowUpModal
+            clientId={clientId}
+            followUpId={selectedFollowUpId}
+            open={editModalOpen}
+            onOpenChange={(open) => {
+              setEditModalOpen(open);
+              if (!open) {
+                setSelectedFollowUpId(null);
+                setSelectedFollowUpData(null);
+              }
+            }}
+            currentDate={selectedFollowUpData?.scheduledDate}
+            currentOwnerId={selectedFollowUpData?.owner?._id || selectedFollowUpData?.owner}
+            currentNotes={selectedFollowUpData?.notes}
+            onSuccess={fetchActivities}
+          />
+          <CancelFollowUpModal
+            clientId={clientId}
+            followUpId={selectedFollowUpId}
+            open={cancelModalOpen}
+            onOpenChange={(open) => {
+              setCancelModalOpen(open);
+              if (!open) setSelectedFollowUpId(null);
+            }}
+            onSuccess={fetchActivities}
+          />
+        </>
       )}
     </div>
   );

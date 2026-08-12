@@ -1008,7 +1008,7 @@ const editClientFollowUp = async (id: string, followUpId: string, data: { schedu
 };
 
 // PATCH /api/clients/:id/follow-up/:followUpId/complete
-const completeClientFollowUp = async (id: string, followUpId: string, data: { completionNotes: string, completionDate?: string }): Promise<any> => {
+const completeClientFollowUp = async (id: string, followUpId: string, data: { completionNotes: string, completionDate?: string, completionReason?: string }): Promise<any> => {
   try {
     const response = await api.patch(`/api/clients/${id}/follow-up/${followUpId}/complete`, data, { timeout: 15000 });
     return response.data.data;

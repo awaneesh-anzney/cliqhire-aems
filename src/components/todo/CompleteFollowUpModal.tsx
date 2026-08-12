@@ -25,6 +25,7 @@ interface CompleteFollowUpModalProps {
 export function CompleteFollowUpModal({ taskId, clientId, followUpId, open, onOpenChange, onSuccess }: CompleteFollowUpModalProps) {
   const queryClient = useQueryClient();
   const [completionNotes, setCompletionNotes] = useState("");
+  const [completionReason, setCompletionReason] = useState("");
   const [completionDate, setCompletionDate] = useState<Date | undefined>(new Date());
   const [dateOpen, setDateOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +41,7 @@ export function CompleteFollowUpModal({ taskId, clientId, followUpId, open, onOp
     try {
       const payload = {
         completionNotes: completionNotes.trim(),
+        completionReason: completionReason.trim() || undefined,
         completionDate: completionDate ? completionDate.toISOString() : undefined
       };
 
@@ -60,6 +62,7 @@ export function CompleteFollowUpModal({ taskId, clientId, followUpId, open, onOp
       if (onSuccess) onSuccess();
       // Reset state for next open
       setCompletionNotes("");
+      setCompletionReason("");
       setCompletionDate(new Date());
     } catch (err: any) {
       toast.error(err.message || "Failed to complete follow-up");
@@ -91,8 +94,19 @@ export function CompleteFollowUpModal({ taskId, clientId, followUpId, open, onOp
             </div>
             
             <div className="space-y-2">
+              <Label>Completion Reason (Optional)</Label>
+              <Textarea
+                placeholder="e.g. Deal closed, No response"
+                value={completionReason}
+                onChange={(e) => setCompletionReason(e.target.value)}
+                rows={1}
+                className="resize-none"
+              />
+            </div>
+            
+            <div className="space-y-2">
               <Label>Completion Date (Optional)</Label>
-              <Popover open={dateOpen} onOpenChange={setDateOpen} modal>
+              <Popover open={dateOpen} onOpenChange={setDateOpen} modal={true}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"

@@ -305,7 +305,7 @@ class TaskService {
   /**
    * Complete client follow-up reminder task
    */
-  async completeFollowUpTask(taskId: string, payload: { completionNotes: string; completionDate?: string }): Promise<void> {
+  async completeFollowUpTask(taskId: string, payload: { completionNotes: string; completionDate?: string; completionReason?: string }): Promise<void> {
     try {
       await api.patch(`/api/tasks/reminders/${taskId}/complete-followup`, payload);
     } catch (error) {
