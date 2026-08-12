@@ -48,7 +48,17 @@ export function NotificationsClient() {
   const { markAsRead, markAllAsRead, clearRead, deleteNotification } = useNotificationActions();
 
   const unreadCount = countData?.count || 0;
-  const notifications = notificationsData?.data || [];
+  
+  const priorityOrder: Record<string, number> = { URGENT: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+  const notifications = [...(notificationsData?.data || [])].sort((a, b) => {
+    const priorityA = priorityOrder[a.priority] || 0;
+    const priorityB = priorityOrder[b.priority] || 0;
+    if (priorityA !== priorityB) {
+      return priorityB - priorityA; // Higher priority first
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // Newer first
+  });
+
   const totalPages = notificationsData?.pages || 1;
   const totalItems = notificationsData?.total || 0;
 

@@ -189,6 +189,11 @@ export function NotificationItem({
               Urgent
             </span>
           )}
+          {notification.priority === 'HIGH' && (
+            <span className="px-2 py-0.5 text-[10px] font-black bg-orange-100 text-orange-600 rounded-md uppercase tracking-wider shadow-sm">
+              High
+            </span>
+          )}
           {!notification.isRead && (
             <span className="h-2 w-2 rounded-full bg-brand shadow-[0_0_8px_rgba(var(--brand),0.5)] ml-1 animate-pulse" />
           )}
