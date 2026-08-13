@@ -320,7 +320,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
           <DialogHeader>
             <DialogTitle>Confirm Status Change</DialogTitle>
             <DialogDescription>
-              This will update the {entityName.toLowerCase()}'s stage status.
+              This will update the {entityName.toLowerCase()}&apos;s stage status.
             </DialogDescription>
           </DialogHeader>
           {pendingStatusChange?.status === "Profile Sent" && (

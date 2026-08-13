@@ -51,7 +51,7 @@ export function CancelFollowUpModal({ clientId, followUpId, open, onOpenChange, 
         <DialogHeader>
           <DialogTitle>Cancel Follow-up</DialogTitle>
           <DialogDescription>
-            Are you sure you want to cancel this follow-up? This action will remove it from the owner's Todo list.
+            Are you sure you want to cancel this follow-up? This action will remove it from the owner&apos;s Todo list.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>

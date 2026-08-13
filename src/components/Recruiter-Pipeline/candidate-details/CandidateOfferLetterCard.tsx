@@ -7,7 +7,7 @@ import { FileSignature, UploadCloud, Trash2, ExternalLink, Loader2, FileText, Ch
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { RecruiterPipelineService } from "@/services/recruiterPipelineService";
-import { Candidate } from "../../dummy-data";
+import { Candidate } from "../dummy-data";
 
 interface CandidateOfferLetterCardProps {
   candidate: Candidate;
