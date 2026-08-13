@@ -384,7 +384,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
                <input
                  type="text"
-                 placeholder="Global quick search (name or ID)..."
+                 placeholder="Search name, ID, or contact (name/email/phone)..."
                  value={searchInput}
                  onChange={(e) => setSearchInput(e.target.value)}
                  className="w-full pl-9 pr-8 h-9 text-xs bg-muted/20 border border-border rounded-xl focus:outline-none focus-visible:ring-1 focus-visible:ring-brand focus:border-brand transition-all font-medium text-foreground"
