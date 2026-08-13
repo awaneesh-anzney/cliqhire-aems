@@ -3,9 +3,9 @@ import { api } from '@/lib/axios-config';
 export interface ReferredUser {
   _id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
-  position: string;
+  position?: string;
   createdAt: string;
   __v: number;
 }

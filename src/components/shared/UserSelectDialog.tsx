@@ -52,7 +52,7 @@ export default function UserSelectDialog({
   const [isReferredDialogOpen, setIsReferredDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleSaveReferredUser = async (data: { name: string; email: string; phone: string; position: string ;}) => {
+  const handleSaveReferredUser = async (data: { name: string; phone: string; email?: string; position?: string; countryCode?: string }) => {
     try {
       setIsCreating(true);
       await createReferredUser(data);
