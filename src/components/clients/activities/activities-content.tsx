@@ -282,9 +282,11 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() => {
-                                setSelectedFollowUpId(fol._id);
-                                setSelectedFollowUpData(fol);
-                                setEditModalOpen(true);
+                                setTimeout(() => {
+                                  setSelectedFollowUpId(fol._id);
+                                  setSelectedFollowUpData(fol);
+                                  setEditModalOpen(true);
+                                }, 0);
                               }}
                             >
                               <Edit className="mr-2 h-4 w-4" />
@@ -293,8 +295,10 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
                             <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
                               onClick={() => {
-                                setSelectedFollowUpId(fol._id);
-                                setCancelModalOpen(true);
+                                setTimeout(() => {
+                                  setSelectedFollowUpId(fol._id);
+                                  setCancelModalOpen(true);
+                                }, 0);
                               }}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
