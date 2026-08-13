@@ -1037,6 +1037,34 @@ const getClientFollowUps = async (id: string, params?: { status?: string }): Pro
   }
 };
 
+// GET /api/clients/bulk-upload/template
+const downloadClientBulkTemplate = async (): Promise<Blob> => {
+  try {
+    const response = await api.get(`/api/clients/bulk-upload/template`, {
+      responseType: 'blob',
+      timeout: 30000,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// POST /api/clients/bulk-upload
+const bulkUploadClients = async (file: File): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await api.post(`/api/clients/bulk-upload`, formData, {
+      timeout: 60000,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -1062,4 +1090,6 @@ export {
   completeClientFollowUp,
   cancelClientFollowUp,
   getClientFollowUps,
+  downloadClientBulkTemplate,
+  bulkUploadClients,
 };

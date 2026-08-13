@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Table, TableHead, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { CreateClientModal } from "@/components/create-client-modal/create-client-modal";
+import { BulkClientUploadDialog } from "@/components/clients/BulkClientUploadDialog";
 import {
   updateClientStage,
   updateClientStageStatus,
@@ -82,6 +83,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
   const canDeleteClients = isAdmin || hasPermission("clients", "delete");
 
   const [open, setOpen] = useState(false);
+  const [openBulkUpload, setOpenBulkUpload] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const { mutateAsync: exportClientsMutation } = useExportClients();
@@ -370,6 +372,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
              isFilterActive={!!searchInput.trim() || !!nameInput.trim() || !!clientIdInput.trim() || !!emailInput.trim() || !!phoneNumberInput.trim() || !!industryInput.trim() || !!locationInput.trim() || selectedClientStage !== "All"}
              filterCount={(searchInput.trim() ? 1 : 0) + (nameInput.trim() ? 1 : 0) + (clientIdInput.trim() ? 1 : 0) + (emailInput.trim() ? 1 : 0) + (phoneNumberInput.trim() ? 1 : 0) + (industryInput.trim() ? 1 : 0) + (locationInput.trim() ? 1 : 0) + (selectedClientStage !== "All" && moduleType === 'leads' ? 1 : 0)}
              onExport={() => setOpenExportDialog(true)}
+             onImport={canModifyClients ? () => setOpenBulkUpload(true) : undefined}
            />
          </div>
 
@@ -612,6 +615,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
         </div>
 
         {canModifyClients && <CreateClientModal open={open} onOpenChange={setOpen} />}
+        {canModifyClients && <BulkClientUploadDialog open={openBulkUpload} onOpenChange={setOpenBulkUpload} entityName={entityNamePlural} />}
 
         <DeleteConfirmationDialog
           isOpen={showDeleteDialog}
