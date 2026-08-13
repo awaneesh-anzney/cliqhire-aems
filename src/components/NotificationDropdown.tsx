@@ -45,6 +45,7 @@ import {
   FilePlus,
   FileMinus,
   FileWarning,
+  UploadCloud,
   LucideIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -183,6 +184,8 @@ export function NotificationDropdown() {
         return { icon: AlertTriangle, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
       case 'CLIENT_DELETED':
         return { icon: Building2, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
+      case 'CLIENT_BULK_IMPORTED':
+        return { icon: UploadCloud, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
       case 'CONTRACT_CREATED':
         return { icon: FileText, bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400' };
       case 'CONTRACT_UPDATED':

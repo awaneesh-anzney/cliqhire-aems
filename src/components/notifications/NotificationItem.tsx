@@ -43,6 +43,7 @@ import {
   FilePlus,
   FileMinus,
   FileWarning,
+  UploadCloud,
   LucideIcon
 } from 'lucide-react';
 
@@ -116,6 +117,7 @@ export function NotificationItem({
       case 'CLIENT_FOLLOWUP_DUE': return { icon: Clock, bg: 'bg-yellow-100 dark:bg-yellow-900/30', color: 'text-yellow-600 dark:text-yellow-400' };
       case 'CLIENT_FOLLOWUP_OVERDUE': return { icon: AlertTriangle, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
       case 'CLIENT_DELETED': return { icon: Building2, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
+      case 'CLIENT_BULK_IMPORTED': return { icon: UploadCloud, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
       case 'CONTRACT_CREATED': return { icon: FileText, bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400' };
       case 'CONTRACT_UPDATED':
       case 'CONTRACT_RENEWED': return { icon: RefreshCw, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
