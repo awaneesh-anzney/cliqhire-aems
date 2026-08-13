@@ -16,18 +16,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ["--sidebar-width" as string]: "16rem",
             ["--sidebar-width-icon" as string]: "4rem",
           }}
-          className="bg-[#7ce0ad] min-h-screen w-full !m-0 !p-0 flex"
+          className="bg-[hsl(var(--protected-bg))] min-h-screen w-full !m-0 !p-0 flex text-foreground antialiased transition-colors duration-300"
         >
+          {/* Main Sidebar */}
           <Sidebar />
-          
-          {/* 
-            FIX: !m-0, !p-0, !rounded-none, !border-none, !shadow-none 
-            Completely removes default Shadcn SidebarInset margins, paddings, borders, and rounded corners.
-          */}
-          <SidebarInset className="!m-0 !p-0 !rounded-none !border-none !shadow-none flex-1 flex flex-col min-w-0 min-h-screen bg-[#7ce0ad]">
+
+          {/* Main Content Area */}
+          <SidebarInset className="!m-0 !p-0 !rounded-none !border-none !shadow-none flex-1 flex flex-col min-w-0 min-h-screen bg-[hsl(var(--protected-bg))] text-foreground">
             <Header />
-            <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-[#7ce0ad] !m-0 !p-0">
-              <div className="flex-1 overflow-auto">{children}</div>
+            
+            <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-[hsl(var(--protected-bg))] !m-0 !p-0">
+              <div className="flex-1 overflow-auto">
+                {children}
+              </div>
             </main>
           </SidebarInset>
         </SidebarProvider>
