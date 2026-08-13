@@ -53,7 +53,9 @@ export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disa
     return (event: React.MouseEvent) => {
       event.stopPropagation()
       if (id && onStatusChange) {
-        onStatusChange(id, option)
+        setTimeout(() => {
+          onStatusChange(id, option)
+        }, 0);
       } else {
         console.error('Cannot change status: id is undefined or onStatusChange is not provided')
       }
@@ -62,7 +64,7 @@ export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disa
 
   const currentStatusColor = (stageStatusColors as any)[status] || "bg-muted text-foreground";
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={true}>
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
