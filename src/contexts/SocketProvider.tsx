@@ -72,30 +72,48 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
       // Business event listeners
       socketInstance.on('new_notification', (data: { 
-        notification?: { title: string; message: string; type: string; actionUrl?: string };
+        notification?: { title: string; message: string; type: string; actionUrl?: string; priority?: string };
         title?: string;
         message?: string;
         actionUrl?: string;
+        timestamp?: string;
       }) => {
         console.log('🔔 [Socket] New notification received:', data);
         
         const title = data.notification?.title || data.title || 'New Alert';
         const message = data.notification?.message || data.message || '';
         const actionUrl = data.notification?.actionUrl || data.actionUrl;
+        const priority = data.notification?.priority || 'LOW';
 
         // Show real-time interactive toast
-        toast(title, {
-          description: message,
-          action: actionUrl ? {
-            label: 'View',
-            onClick: () => {
-              if (typeof window !== 'undefined') {
-                window.location.href = actionUrl;
+        if (priority === 'URGENT') {
+          toast.error(title, {
+            description: message,
+            action: actionUrl ? {
+              label: 'View',
+              onClick: () => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = actionUrl;
+                }
               }
-            }
-          } : undefined,
-          duration: 6000,
-        });
+            } : undefined,
+            duration: 8000,
+            icon: '🚨',
+          });
+        } else {
+          toast(title, {
+            description: message,
+            action: actionUrl ? {
+              label: 'View',
+              onClick: () => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = actionUrl;
+                }
+              }
+            } : undefined,
+            duration: 6000,
+          });
+        }
 
         // Invalidate notifications queries to fetch latest list & count
         queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -103,6 +121,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
       socketInstance.on('notification_count_update', (data: { count: number }) => {
         console.log('📊 [Socket] Notification count updated:', data);
+        // Direct cache update for instant UI feedback
+        queryClient.setQueryData(['notifications', 'unread-count'], { count: data.count, success: true });
+        // Still invalidate to ensure it stays in sync if any other components rely on fresh fetch
         queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
       });
 

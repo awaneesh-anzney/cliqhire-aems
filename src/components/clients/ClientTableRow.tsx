@@ -35,6 +35,7 @@ export interface ClientTableRowProps {
   onStageChange: (clientId: string, newStage: "Lead" | "Engaged" | "Signed") => void;
   onStatusChange: (clientId: string, newStatus: ClientStageStatus) => void;
   canModify?: boolean;
+  moduleType?: "clients" | "leads";
 }
 
 const formatClientAge = (age?: { years: number; months: number; days: number }) => {
@@ -50,6 +51,7 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
   onStageChange,
   onStatusChange,
   canModify = false,
+  moduleType = "clients",
 }) => {
   const router = useRouter();
 
@@ -74,7 +76,7 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <div 
-              onClick={() => router.push(`/clients/${client.id}`)}
+              onClick={() => router.push(`/${moduleType === "leads" ? "leads" : "clients"}/${client.id}`)}
               className="cursor-pointer group/name truncate max-w-[150px]"
             >
               <span className="text-[13px] font-semibold text-foreground group-hover/name:text-brand transition-all block truncate">

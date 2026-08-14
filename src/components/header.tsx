@@ -71,7 +71,7 @@ export function Header() {
   };
 
   return (
-    <header className="app-header">
+    <header className="app-header bg-[#7ce0ad] border-b border-emerald-900/10 shadow-none !m-0 !p-0">
       <div className="flex h-14 items-center px-4 md:px-5 gap-4">
         {showMobileSearch ? (
           /* Mobile Search Bar Mode */
@@ -80,7 +80,7 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setShowMobileSearch(false)}
-              className="rounded-lg h-8 w-8 text-muted-foreground hover:bg-muted"
+              className="rounded-lg h-8 w-8 text-emerald-950 hover:bg-white/40"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -93,8 +93,8 @@ export function Header() {
           <>
             {/* Left: Nav & Toggle */}
             <div className="flex items-center gap-2.5">
-              <div className="p-0.5 rounded-lg bg-muted/70 hover:bg-brand/10 hover:text-brand transition-all border border-border/40 active:scale-95">
-                <SidebarTrigger className="h-7 w-7 text-muted-foreground" />
+              <div className="p-0.5 rounded-lg bg-white/40 hover:bg-white/70 text-emerald-950 transition-all border border-emerald-900/10 active:scale-95">
+                <SidebarTrigger className="h-7 w-7 text-emerald-950" />
               </div>
 
               {isOnIdPage && (
@@ -102,7 +102,7 @@ export function Header() {
                   variant="ghost"
                   size="sm"
                   onClick={handleBack}
-                  className="flex items-center gap-1.5 text-muted-foreground font-black text-[10px] uppercase tracking-widest hover:text-brand hover:bg-brand/10 transition-all rounded-lg px-3 h-8 border border-border hover:border-brand/20 bg-card shadow-sm"
+                  className="flex items-center gap-1.5 text-emerald-950 font-black text-[10px] uppercase tracking-widest hover:text-emerald-950 hover:bg-white/70 transition-all rounded-lg px-3 h-8 border border-emerald-900/10 bg-white/40 shadow-sm"
                 >
                   <ArrowLeft className="h-3 w-3" />
                   <span className="hidden md:inline">{getBackNavigation().label}</span>
@@ -124,70 +124,70 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowMobileSearch(true)}
-                className="flex md:hidden rounded-lg hover:bg-muted text-muted-foreground h-8 w-8"
+                className="flex md:hidden rounded-lg hover:bg-white/40 text-emerald-950 h-8 w-8"
               >
                 <Search className="h-4 w-4" />
               </Button>
 
-              <div className="hidden sm:flex items-center gap-1.5 p-1 bg-muted/70 rounded-xl border border-border/40">
+              <div className="hidden sm:flex items-center gap-1.5 p-1 bg-white/40 rounded-xl border border-emerald-900/10">
                 <ModeToggle />
                 <NotificationDropdown />
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-lg hover:bg-card hover:text-blue-500 transition-all shadow-none h-8 w-8 text-muted-foreground"
+                  className="rounded-lg hover:bg-white/60 text-emerald-950 transition-all shadow-none h-8 w-8"
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                 </Button>
               </div>
 
-              <div className="h-7 w-[1px] bg-muted mx-1.5 hidden md:block" />
+              <div className="h-7 w-[1px] bg-emerald-900/15 mx-1.5 hidden md:block" />
 
               {/* Profile Dropdown Trigger */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl cursor-pointer group hover:bg-muted/65 transition-all border border-transparent hover:border-border active:scale-[0.98]">
-                    <Avatar className="h-8 w-8 ring-2 ring-transparent group-hover:ring-brand/30 transition-all shadow-md shrink-0">
+                  <div className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl cursor-pointer group hover:bg-white/40 transition-all border border-transparent hover:border-emerald-900/10 active:scale-[0.98]">
+                    <Avatar className="h-8 w-8 ring-2 ring-emerald-950/20 group-hover:ring-emerald-950/40 transition-all shadow-md shrink-0">
                       <AvatarImage src={user?.avatar} alt={user?.name} className="object-cover" />
-                      <AvatarFallback className="bg-brand/10 text-brand font-black text-[10px]">
+                      <AvatarFallback className="bg-[#064e3b] text-[#7ce0ad] font-black text-[10px]">
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden md:flex flex-col items-start">
-                      <span className="text-[11px] font-black text-foreground leading-none group-hover:text-brand transition-colors tracking-tight">
+                      <span className="text-[11px] font-black text-emerald-950 leading-none group-hover:text-emerald-900 transition-colors tracking-tight">
                         {user?.name || 'User'}
                       </span>
-                      <span className="text-[8px] text-muted-foreground uppercase tracking-widest font-black mt-0.5">
+                      <span className="text-[8px] text-emerald-900/80 uppercase tracking-widest font-black mt-0.5">
                         {user?.role || 'Member'}
                       </span>
                     </div>
                   </div>
                 </DropdownMenuTrigger>
                 
-                <DropdownMenuContent className="w-60 mt-2 rounded-2xl shadow-2xl border-border p-2 animate-in zoom-in-95 duration-200" align="end" forceMount>
+                <DropdownMenuContent className="w-60 mt-2 rounded-2xl shadow-2xl border-emerald-900/10 p-2 animate-in zoom-in-95 duration-200" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal p-2.5">
                     <div className="flex flex-col space-y-1.5">
                       <div className="flex items-center gap-2.5">
-                        <Avatar className="h-9 w-9 shadow-inner border border-border">
+                        <Avatar className="h-9 w-9 shadow-inner border border-emerald-900/10">
                            <AvatarImage src={user?.avatar} />
-                           <AvatarFallback className="bg-brand/10 text-brand font-black text-xs">{getUserInitials()}</AvatarFallback>
+                           <AvatarFallback className="bg-[#064e3b] text-[#7ce0ad] font-black text-xs">{getUserInitials()}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col min-w-0">
                            <p className="text-xs font-black text-foreground leading-none truncate">{user?.name}</p>
                            <p className="text-[9px] font-bold text-muted-foreground mt-0.5 truncate">{user?.email}</p>
                         </div>
                       </div>
-                      <div className="mt-1 bg-brand/5 rounded-xl p-2 flex items-center justify-between">
-                         <span className="text-[9px] font-black text-brand uppercase tracking-widest">Account Status</span>
-                         <span className="px-1.5 py-0.5 bg-brand text-white text-[8px] font-black rounded-md uppercase tracking-tight shadow-sm">Verified</span>
+                      <div className="mt-1 bg-emerald-950/5 rounded-xl p-2 flex items-center justify-between">
+                         <span className="text-[9px] font-black text-emerald-950 uppercase tracking-widest">Account Status</span>
+                         <span className="px-1.5 py-0.5 bg-[#064e3b] text-white text-[8px] font-black rounded-md uppercase tracking-tight shadow-sm">Verified</span>
                       </div>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-muted my-1.5" />
                   <div className="space-y-0.5">
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center gap-2.5 p-2 cursor-pointer rounded-xl hover:bg-brand/5 focus:bg-brand/5 transition-all outline-none group/item">
-                        <div className="h-8 w-8 rounded-lg bg-muted group-hover/item:bg-brand/10 flex items-center justify-center text-muted-foreground group-hover/item:text-brand transition-colors">
+                      <Link href="/profile" className="flex items-center gap-2.5 p-2 cursor-pointer rounded-xl hover:bg-emerald-950/5 focus:bg-emerald-950/5 transition-all outline-none group/item">
+                        <div className="h-8 w-8 rounded-lg bg-muted group-hover/item:bg-emerald-950/10 flex items-center justify-center text-muted-foreground group-hover/item:text-emerald-950 transition-colors">
                           <User className="h-3.5 w-3.5" />
                         </div>
                         <span className="font-black text-[12.5px] text-foreground">My Profile</span>

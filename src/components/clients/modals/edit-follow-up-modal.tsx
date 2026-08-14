@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { scheduleClientFollowUp } from "@/services/clientService";
+import { editClientFollowUp } from "@/services/clientService";
 import { getTeamMembers } from "@/services/teamMembersService";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -14,12 +14,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
-interface FollowUpModalProps {
+interface EditFollowUpModalProps {
   clientId: string;
+  followUpId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentDate?: string;
-  currentOwner?: string;
+  currentOwnerId?: string;
+  currentNotes?: string;
+  onSuccess?: () => void;
 }
 
 const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
@@ -28,14 +31,14 @@ const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
   return `${String(hours).padStart(2, "0")}:${minutes}`;
 });
 
-export function FollowUpModal({ clientId, open, onOpenChange, currentDate, currentOwner }: FollowUpModalProps) {
+export function EditFollowUpModal({ clientId, followUpId, open, onOpenChange, currentDate, currentOwnerId, currentNotes, onSuccess }: EditFollowUpModalProps) {
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState("09:00");
   const [owner, setOwner] = useState("");
+  const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
-  const [notes, setNotes] = useState("");
 
   const [teamUsers, setTeamUsers] = useState<{ id: string; name: string; role?: string }[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -55,8 +58,8 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
         setSelectedDate(undefined);
         setSelectedTime("09:00");
       }
-      setOwner(currentOwner || "");
-      setNotes("");
+      setOwner(currentOwnerId || "");
+      setNotes(currentNotes || "");
 
       const fetchTeamMembers = async () => {
         try {
@@ -76,12 +79,12 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
       };
       fetchTeamMembers();
     }
-  }, [open, currentDate, currentOwner]);
+  }, [open, currentDate, currentOwnerId, currentNotes]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDate && !owner) {
-      toast.error("Please provide at least a date or an owner");
+    if (!selectedDate && !owner && !notes) {
+      toast.error("Please provide at least a date, owner, or notes to update");
       return;
     }
 
@@ -100,10 +103,12 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
       if (notes) {
         payload.notes = notes;
       }
-      await scheduleClientFollowUp(clientId, payload);
+      await editClientFollowUp(clientId, followUpId, payload);
       toast.success("Follow-up updated successfully");
       queryClient.invalidateQueries({ queryKey: ["client", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
       onOpenChange(false);
+      if (onSuccess) onSuccess();
     } catch (err: any) {
       toast.error(err.message || "Failed to update follow-up");
     } finally {
@@ -115,15 +120,17 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Next Follow-up</DialogTitle>
+          <DialogTitle>Edit Follow-up</DialogTitle>
+          <DialogDescription>
+            Update the scheduled date, owner, or notes for this pending follow-up.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            {/* Date & Time selection */}
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Follow-up Date</Label>
-                <Popover open={dateOpen} onOpenChange={setDateOpen} modal>
+                <Popover open={dateOpen} onOpenChange={setDateOpen} modal={true}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -168,9 +175,8 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
               </div>
             </div>
 
-            {/* Follow-up Owner Dropdown */}
             <div className="grid gap-2">
-              <Label>Follow-up Owner ID</Label>
+              <Label>Follow-up Owner</Label>
               <Select value={owner} onValueChange={setOwner}>
                 <SelectTrigger className="w-full h-10 border-border">
                   <SelectValue placeholder={isLoadingUsers ? "Loading users..." : "Select team user"} />
@@ -183,11 +189,10 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-[10px] text-muted-foreground">Select team user to assign as follow-up owner.</p>
             </div>
             
             <div className="grid gap-2">
-              <Label>Notes (Optional)</Label>
+              <Label>Notes</Label>
               <Textarea 
                 value={notes} 
                 onChange={(e) => setNotes(e.target.value)} 
@@ -202,7 +207,7 @@ export function FollowUpModal({ clientId, open, onOpenChange, currentDate, curre
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Save
+              Save Changes
             </Button>
           </DialogFooter>
         </form>

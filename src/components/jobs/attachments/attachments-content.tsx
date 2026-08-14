@@ -1,17 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Plus , RefreshCcw, Loader } from "lucide-react";
+import { Plus, Paperclip, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   createJobAttachment,
   getJobAttachmentsByJobId,
-  deleteJobAttachment
+  deleteJobAttachment,
 } from "@/services/attachmentService";
 
-// Reuse the UploadAttachment and AttachmentList components from the client attachments folder
 import { UploadAttachment } from "@/components/clients/attachments/uploadAttachment";
 import { AttachmentList } from "@/components/clients/attachments/attachmentList";
 
@@ -26,8 +24,6 @@ interface AttachmentsContentProps {
   jobId: string;
   canModify?: boolean;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps) {
   const [showUploadBox, setShowUploadBox] = useState(false);
@@ -52,7 +48,7 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
   // Bulk delete selected attachments
   const handleBulkDelete = async (ids: string[]) => {
     try {
-      await Promise.all(ids.map(id => deleteJobAttachment(id)));
+      await Promise.all(ids.map((id) => deleteJobAttachment(id)));
       fetchAttachments();
       toast.success("Files deleted successfully");
     } catch (error) {
@@ -66,7 +62,6 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
     if (!jobId) return;
     try {
       await createJobAttachment(file, jobId);
-      // Always refresh list after upload to ensure new file appears
       await fetchAttachments();
       toast.success("File uploaded successfully");
     } catch (error) {
@@ -95,19 +90,35 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
   }, [jobId]);
 
   return (
-    <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">Upload File</h3>
-        <Button
-          onClick={() => setShowUploadBox(true)}
-          className="flex items-center gap-2 bg-black text-white hover:bg-foreground"
-          disabled={showUploadBox || !canModify}
-        >
-          <Plus className="w-4 h-4" />
-          Upload File
-        </Button>
+    <div className="space-y-4 h-full">
+      
+      {/* Header Action Bar */}
+      <div className="flex items-center justify-between p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
+            <Paperclip className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Job Attachments</h2>
+            <p className="text-[11px] text-muted-foreground">
+              Manage relevant documents, resumes, or client specs
+            </p>
+          </div>
+        </div>
+
+        {canModify && (
+          <Button
+            onClick={() => setShowUploadBox(true)}
+            size="sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-medium transition-all text-xs"
+            disabled={showUploadBox}
+          >
+            <Plus className="w-4 h-4 mr-1.5" /> Upload File
+          </Button>
+        )}
       </div>
 
+      {/* Upload Modal / Component */}
       <UploadAttachment
         show={showUploadBox}
         setShow={setShowUploadBox}
@@ -115,32 +126,45 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
         attachments={attachments}
       />
 
+      {/* Dynamic Content Views */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <Loader className="size-6 animate-spin" />
-          <div className="text-lg text-foreground mt-2">Loading Attachments Details ......</div>
-        </div>
-      ) : attachments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-48 h-48 mb-6">
-            <svg viewBox="0 0 200 200" className="w-full h-full text-blue-500">
-              <rect x="50" y="80" width="100" height="60" rx="10" fill="currentColor" opacity="0.1" />
-              <rect x="70" y="100" width="60" height="20" rx="4" fill="currentColor" opacity="0.2" />
-              <circle cx="100" cy="120" r="8" fill="currentColor" opacity="0.2" />
-              <rect x="120" y="90" width="20" height="8" rx="2" fill="currentColor" opacity="0.3" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold mb-2">No attachments yet</h2>
-          <p className="text-muted-foreground mb-4">
-            Add your first attachment to share files with your team.
+        /* Modern Clean Centered Loader */
+        <div className="flex flex-col items-center justify-center p-12 bg-card/40 rounded-2xl border border-border/60 min-h-[260px]">
+          <Loader2 className="h-6 w-6 text-emerald-600 animate-spin mb-2" />
+          <p className="text-xs font-medium text-muted-foreground">
+            Loading attachments...
           </p>
         </div>
+      ) : attachments.length === 0 ? (
+        /* Modern Empty State Card */
+        <div className="flex flex-col items-center justify-center text-center bg-card/40 rounded-2xl border border-dashed border-border/80 p-10 min-h-[260px]">
+          <div className="w-12 h-12 mb-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center">
+            <Paperclip className="w-6 h-6" />
+          </div>
+          <h3 className="text-sm font-bold text-foreground">No attachments uploaded</h3>
+          <p className="text-xs text-muted-foreground max-w-xs mt-1 mb-4">
+            Upload candidate files, job specs, or compliance documents to share with your team.
+          </p>
+          {canModify && (
+            <Button
+              onClick={() => setShowUploadBox(true)}
+              variant="outline"
+              size="sm"
+              className="border-emerald-600/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs"
+            >
+              <Plus className="h-3.5 w-3.5 mr-1" /> Add Attachment
+            </Button>
+          )}
+        </div>
       ) : (
-        <AttachmentList
-          attachments={attachments}
-          onDelete={handleDelete}
-          onDeleteSelected={handleBulkDelete}
-        />
+        /* Attachments List Container */
+        <div className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-sm p-4 shadow-sm">
+          <AttachmentList
+            attachments={attachments}
+            onDelete={handleDelete}
+            onDeleteSelected={handleBulkDelete}
+          />
+        </div>
       )}
     </div>
   );

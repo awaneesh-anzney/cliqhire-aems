@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getClients, getClientById, ClientResponse } from "@/services/clientService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getClients, getClientById, ClientResponse, bulkUploadClients } from "@/services/clientService";
 
 export interface ClientsQueryParams {
   page?: number;
@@ -37,5 +37,16 @@ export function useClientById(id: string) {
     queryKey: ["clientsData", id],
     queryFn: () => getClientById(id),
     enabled: Boolean(id),
+  });
+}
+
+export function useBulkUploadClients() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => bulkUploadClients(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+    },
   });
 }

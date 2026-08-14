@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   getCountryByCode,
@@ -240,367 +240,342 @@ export function SummaryContent({
   ];
 
   return (
-    <div className="p-2 bg-muted/50 rounded-2xl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Engagement & Basic Info */}
-        <div className="space-y-6">
-          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <FileText className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Engagement & Identity</h4>
-            </div>
-            <div className="p-5 space-y-6">
-              <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Engagement Details</h5>
-                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
-                  <DetailRow
-                    label="Sales Lead (Internal)"
-                    value={clientData?.salesLead}
-                    onUpdate={handleUpdateField("salesLead")}
-                    disableInternalEdit={!canModify}
-                    customEdit={() => {
-                      if (!canModify) return;
-                      setShowSalesLeadDialog(true);
-                    }}
-                  />
-                  <DetailRow
-                    label="Referred By (External)"
-                    value={clientData?.referredBy}
-                    onUpdate={handleUpdateField("referredBy")}
-                    disableInternalEdit={!canModify}
-                    customEdit={() => {
-                      if (!canModify) return;
-                      setShowReferredByDialog(true);
-                    }}
-                  />
-                  <DetailRow
-                    label="Client Priority"
-                    value={clientData?.clientPriority}
-                    onUpdate={handleUpdateField("clientPriority")}
-                    options={[
-                      { value: "High", label: "High" },
-                      { value: "Medium", label: "Medium" },
-                      { value: "Low", label: "Low" },
-                    ]}
-                    disableInternalEdit={!canModify}
-                  />
-                  <DetailRow
-                    label="Client Segment"
-                    value={clientData?.clientSegment}
-                    onUpdate={handleUpdateField("clientSegment")}
-                    options={[
-                      { value: "Silver", label: "Silver" },
-                      { value: "Gold", label: "Gold" },
-                      { value: "Premium", label: "Premium" },
-                    ]}
-                    disableInternalEdit={!canModify}
-                  />
-                </div>
-              </div>
+    <div className="space-y-2">
+  {/* Main Dashboard Grid */}
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+    
+    {/* Left Column: Engagement & Basic Info */}
+    <div className="space-y-2">
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
+        
+        {/* Card Header */}
+        <div className="flex items-center gap-3 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
+          <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
+            <FileText className="w-4 h-4" />
+          </div>
+          <h4 className="text-sm font-semibold text-foreground">Engagement & Identity</h4>
+        </div>
 
-              <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Basic Information</h5>
-                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
-                  <DetailRow
-                    label="Client Name"
-                    value={clientData?.name}
-                    onUpdate={handleUpdateField("name")}
-                    disableInternalEdit={!canModify}
-                  />
-                  <DetailRow
-                    label="Client Industry"
+        {/* Card Body */}
+        <div className="p-4 space-y-5">
+          {/* Section 1: Engagement Details */}
+          <div>
+            <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">
+              Engagement Details
+            </h5>
+            <div className="space-y-2 bg-muted/20 p-3 rounded-xl border border-border/40">
+              <DetailRow
+                label="Sales Lead (Internal)"
+                value={clientData?.salesLead}
+                onUpdate={handleUpdateField("salesLead")}
+                disableInternalEdit={!canModify}
+                customEdit={() => canModify && setShowSalesLeadDialog(true)}
+              />
+              <DetailRow
+                label="Referred By (External)"
+                value={clientData?.referredBy}
+                onUpdate={handleUpdateField("referredBy")}
+                disableInternalEdit={!canModify}
+                customEdit={() => canModify && setShowReferredByDialog(true)}
+              />
+              <DetailRow
+                label="Client Priority"
+                value={clientData?.clientPriority}
+                onUpdate={handleUpdateField("clientPriority")}
+                options={[
+                  { value: "High", label: "High" },
+                  { value: "Medium", label: "Medium" },
+                  { value: "Low", label: "Low" },
+                ]}
+                disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="Client Segment"
+                value={clientData?.clientSegment}
+                onUpdate={handleUpdateField("clientSegment")}
+                options={[
+                  { value: "Silver", label: "Silver" },
+                  { value: "Gold", label: "Gold" },
+                  { value: "Premium", label: "Premium" },
+                ]}
+                disableInternalEdit={!canModify}
+              />
+            </div>
+          </div>
+
+          {/* Section 2: Basic Information */}
+          <div>
+            <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">
+              Basic Information
+            </h5>
+            <div className="space-y-2 bg-muted/20 p-3 rounded-xl border border-border/40">
+              <DetailRow
+                label="Client Name"
+                value={clientData?.name}
+                onUpdate={handleUpdateField("name")}
+                disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="Client Industry"
+                value={clientData?.industry}
+                onUpdate={handleUpdateField("industry")}
+                disableInternalEdit={true}
+                customInput={
+                  <IndustrySelector
                     value={clientData?.industry}
-                    onUpdate={handleUpdateField("industry")}
-                    disableInternalEdit={true}
-                    customInput={
-                      <IndustrySelector
-                        value={clientData?.industry}
-                        onValueChange={handleUpdateField("industry")}
-                        disabled={!canModify}
-                      />
-                    }
+                    onValueChange={handleUpdateField("industry")}
+                    disabled={!canModify}
                   />
-                  <DetailRow
-                    label="Client Phone Number"
-                    value={clientData?.phoneNumber}
-                    formattedValue={formatPhoneNumber(clientData?.phoneNumber, clientData?.countryCode)}
-                    onUpdate={handleUpdateField("phoneNumber")}
-                    disableInternalEdit={!canModify}
-                  />
-                  <DetailRow
-                    label="Client Email(s)"
-                    value={clientData?.emails?.join(", ") || ""}
-                    onUpdate={handleUpdateEmails}
-                    alwaysShowEdit={true}
-                    disableInternalEdit={!canModify}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <Users className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Primary Contacts</h4>
-            </div>
-            <div className="p-5 space-y-3">
-              {clientData?.primaryContacts?.length > 0 ? (
-                clientData.primaryContacts.map((contact: any, index: number) => (
-                  <TeamMember
-                    key={contact._id || index}
-                    name={`${contact.firstName} ${contact.lastName}`}
-                    role={contact.designation || contact.position}
-                    email={contact.email}
-                    phone={contact.phone}
-                    countryCode={contact.countryCode}
-                  />
-                ))
-              ) : (
-                <div className="text-center py-8 border-2 border-dashed border-border rounded-2xl bg-muted/30">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">No Primary Contacts</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Add contacts in the Contacts tab</p>
-                </div>
-              )}
-            </div>
-          </div> */}
-        </div>
-
-        {/* Right Column: Location & Documents */}
-        <div className="space-y-6">
-          <div className="bg-card rounded-xl border border-border shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 p-5 border-b border-border bg-muted/50">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <Users className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Presence & Compliance</h4>
-            </div>
-            <div className="p-5 space-y-6">
-              <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Online & Location</h5>
-                <div className="grid grid-cols-1 gap-4 bg-muted/30 p-3 rounded-lg border border-border">
-                  <DetailRow
-                    label="Client Website"
-                    value={clientData?.website}
-                    onUpdate={handleUpdateField("website")}
-                    disableInternalEdit={!canModify}
-                  />
-                  <DetailRow
-                    label="LinkedIn Profile"
-                    value={clientData?.linkedInProfile}
-                    onUpdate={handleUpdateField("linkedInProfile")}
-                    optional
-                    disableInternalEdit={!canModify}
-                  />
-                  <DetailRow
-                    label="Google Maps"
-                    value={clientData?.googleMapsLink}
-                    onUpdate={handleUpdateField("googleMapsLink")}
-                    disableInternalEdit={!canModify}
-                  />
-                  <DetailRow
-                    label="Location"
-                    value={clientData?.location}
-                    onUpdate={handleUpdateField("location")}
-                    disableInternalEdit={!canModify}
-                  />
-                  <DetailRow
-                    label="Address"
-                    value={clientData?.address}
-                    onUpdate={handleUpdateField("address")}
-                    disableInternalEdit={!canModify}
-                    isLocation={false}
-                  />
-                  <DetailRow
-                    label="Country of Business"
-                    value={clientData?.countryOfBusiness}
-                    onUpdate={handleUpdateField("countryOfBusiness")}
-                    disableInternalEdit={!canModify}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Compliance Documents</h5>
-                <div className="grid grid-cols-1 gap-3">
-                  <FileUploadRow
-                    id="vat-copy-upload"
-                    label="VAT Copy"
-                    onFileSelect={canModify ? handleFileUpload("vatCopy") : () => { }}
-                    onUploadClick={canModify ? () => handleOpenFileUploadModal("vatCopy", "VAT Copy") : () => { }}
-                    docUrl={clientData?.vatCopy?.url}
-                    currentFileName={clientData?.vatCopy?.fileName}
-                    onPreview={() =>
-                      handlePreviewFile(
-                        clientData?.vatCopy?.url || "",
-                        clientData?.vatCopy?.fileName,
-                      )
-                    }
-                    onDownload={() => handleDownloadFile(clientData?.vatCopy?.url || "")}
-                  />
-                  <FileUploadRow
-                    id="cr-copy-upload"
-                    label="CR Copy"
-                    onFileSelect={canModify ? handleFileUpload("crCopy") : () => { }}
-                    onUploadClick={canModify ? () => handleOpenFileUploadModal("crCopy", "CR Copy") : () => { }}
-                    docUrl={clientData?.crCopy?.url}
-                    currentFileName={clientData?.crCopy?.fileName}
-                    onPreview={() =>
-                      handlePreviewFile(
-                        clientData?.crCopy?.url || "",
-                        clientData?.crCopy?.fileName,
-                      )
-                    }
-                    onDownload={() => handleDownloadFile(clientData?.crCopy?.url || "")}
-                  />
-                  <FileUploadRow
-                    id="gst-tin-document-upload"
-                    label="GST IN Doc"
-                    onFileSelect={canModify ? handleFileUpload("gstTinDocument") : () => { }}
-                    onUploadClick={canModify ? () =>
-                      handleOpenFileUploadModal("gstTinDocument", "GST TIN Document") : () => { }}
-                    docUrl={clientData?.gstTinDocument?.url}
-                    currentFileName={clientData?.gstTinDocument?.fileName}
-                    onPreview={() =>
-                      handlePreviewFile(
-                        clientData?.gstTinDocument?.url || "",
-                        clientData?.gstTinDocument?.fileName,
-                      )
-                    }
-                    onDownload={() => handleDownloadFile(clientData?.gstTinDocument?.url || "")}
-                  />
-                </div>
-              </div>
+                }
+              />
+              <DetailRow
+                label="Client Phone Number"
+                value={clientData?.phoneNumber}
+                formattedValue={formatPhoneNumber(clientData?.phoneNumber, clientData?.countryCode)}
+                onUpdate={handleUpdateField("phoneNumber")}
+                disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="Client Email(s)"
+                value={clientData?.emails?.join(", ") || ""}
+                onUpdate={handleUpdateEmails}
+                alwaysShowEdit={true}
+                disableInternalEdit={!canModify}
+              />
             </div>
           </div>
         </div>
+
       </div>
-
-
-
-      {/* PDF Viewer */}
-      <PDFViewer
-        isOpen={isPdfPreviewOpen}
-        onClose={() => setIsPdfPreviewOpen(false)}
-        pdfUrl={previewFileUrl}
-        candidateName={previewFileName}
-
-      />
-
-      {/* File Upload Modal */}
-      <FileUploadModal
-        open={isFileUploadModalOpen}
-        onOpenChange={setIsFileUploadModalOpen}
-        onUpload={handleFileUploadFromModal}
-        title={currentUploadTitle}
-        acceptedFileTypes=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.svg"
-        maxSizeInMB={10}
-      />
-
-      {/* Sales Lead User Select Dialog */}
-      {canModify && (
-        <UserSelectDialog
-          open={showSalesLeadDialog}
-          onClose={() => setShowSalesLeadDialog(false)}
-          title="Select Sales Lead"
-          onSelect={(user) => {
-            const name = user?.name || user?.email || "";
-            setPendingSalesLeadName(name || null);
-            setShowSalesLeadDialog(false);
-            setShowConfirmSalesLead(true);
-          }}
-        />
-      )}
-
-      {/* Confirm Sales Lead Update */}
-      <Dialog open={showConfirmSalesLead} onOpenChange={setShowConfirmSalesLead}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Sales Lead</DialogTitle>
-          </DialogHeader>
-          <div className="text-sm text-muted-foreground">
-            {pendingSalesLeadName
-              ? `Set "Sales Lead" to ${pendingSalesLeadName}?`
-              : "No user selected."}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowConfirmSalesLead(false);
-                setPendingSalesLeadName(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={async () => {
-                if (pendingSalesLeadName) {
-                  await updateClientDetails("salesLead", pendingSalesLeadName);
-                }
-                setShowConfirmSalesLead(false);
-                setPendingSalesLeadName(null);
-              }}
-            >
-              Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      {/* Referred By User Select Dialog */}
-      {canModify && (
-        <UserSelectDialog
-          open={showReferredByDialog}
-          onClose={() => setShowReferredByDialog(false)}
-          title="Select Referral Source"
-          onSelect={(user) => {
-            const name = user?.name || user?.email || "";
-            setPendingReferredByName(name || null);
-            setShowReferredByDialog(false);
-            setShowConfirmReferredBy(true);
-          }}
-        />
-      )}
-
-      {/* Confirm Referred By Update */}
-      <Dialog open={showConfirmReferredBy} onOpenChange={setShowConfirmReferredBy}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Referral Source</DialogTitle>
-          </DialogHeader>
-          <div className="text-sm text-muted-foreground">
-            {pendingReferredByName
-              ? `Set "Referred By (External)" to ${pendingReferredByName}?`
-              : "No user selected."}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowConfirmReferredBy(false);
-                setPendingReferredByName(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={async () => {
-                if (pendingReferredByName) {
-                  await updateClientDetails("referredBy", pendingReferredByName);
-                }
-                setShowConfirmReferredBy(false);
-                setPendingReferredByName(null);
-              }}
-            >
-              Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
+
+    {/* Right Column: Location & Documents */}
+    <div className="space-y-6">
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
+        
+        {/* Card Header */}
+        <div className="flex items-center gap-3 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
+          <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
+            <Users className="w-4 h-4" />
+          </div>
+          <h4 className="text-sm font-semibold text-foreground">Presence & Compliance</h4>
+        </div>
+
+        {/* Card Body */}
+        <div className="p-2 space-y-4">
+          {/* Section 1: Online & Location */}
+          <div>
+            <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">
+              Online & Location
+            </h5>
+            <div className="space-y-2 bg-muted/20 p-3 rounded-xl border border-border/40">
+              <DetailRow
+                label="Client Website"
+                value={clientData?.website}
+                onUpdate={handleUpdateField("website")}
+                disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="LinkedIn Profile"
+                value={clientData?.linkedInProfile}
+                onUpdate={handleUpdateField("linkedInProfile")}
+                optional
+                disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="Google Maps"
+                value={clientData?.googleMapsLink}
+                onUpdate={handleUpdateField("googleMapsLink")}
+                disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="Location"
+                value={clientData?.location}
+                onUpdate={handleUpdateField("location")}
+                disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="Address"
+                value={clientData?.address}
+                onUpdate={handleUpdateField("address")}
+                disableInternalEdit={!canModify}
+                isLocation={false}
+              />
+              <DetailRow
+                label="Country of Business"
+                value={clientData?.countryOfBusiness}
+                onUpdate={handleUpdateField("countryOfBusiness")}
+                disableInternalEdit={!canModify}
+              />
+            </div>
+          </div>
+
+          {/* Section 2: Compliance Documents */}
+          <div>
+            <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">
+              Compliance Documents
+            </h5>
+            <div className="space-y-2">
+              <FileUploadRow
+                id="vat-copy-upload"
+                label="VAT Copy"
+                onFileSelect={canModify ? handleFileUpload("vatCopy") : () => {}}
+                onUploadClick={canModify ? () => handleOpenFileUploadModal("vatCopy", "VAT Copy") : () => {}}
+                docUrl={clientData?.vatCopy?.url}
+                currentFileName={clientData?.vatCopy?.fileName}
+                onPreview={() => handlePreviewFile(clientData?.vatCopy?.url || "", clientData?.vatCopy?.fileName)}
+                onDownload={() => handleDownloadFile(clientData?.vatCopy?.url || "")}
+              />
+              <FileUploadRow
+                id="cr-copy-upload"
+                label="CR Copy"
+                onFileSelect={canModify ? handleFileUpload("crCopy") : () => {}}
+                onUploadClick={canModify ? () => handleOpenFileUploadModal("crCopy", "CR Copy") : () => {}}
+                docUrl={clientData?.crCopy?.url}
+                currentFileName={clientData?.crCopy?.fileName}
+                onPreview={() => handlePreviewFile(clientData?.crCopy?.url || "", clientData?.crCopy?.fileName)}
+                onDownload={() => handleDownloadFile(clientData?.crCopy?.url || "")}
+              />
+              <FileUploadRow
+                id="gst-tin-document-upload"
+                label="GST IN Doc"
+                onFileSelect={canModify ? handleFileUpload("gstTinDocument") : () => {}}
+                onUploadClick={canModify ? () => handleOpenFileUploadModal("gstTinDocument", "GST TIN Document") : () => {}}
+                docUrl={clientData?.gstTinDocument?.url}
+                currentFileName={clientData?.gstTinDocument?.fileName}
+                onPreview={() => handlePreviewFile(clientData?.gstTinDocument?.url || "", clientData?.gstTinDocument?.fileName)}
+                onDownload={() => handleDownloadFile(clientData?.gstTinDocument?.url || "")}
+              />
+              <FileUploadRow
+                id="national-address-cert-upload"
+                label="National Address Cert"
+                onFileSelect={canModify ? handleFileUpload("nationalAddressCertificate") : () => {}}
+                onUploadClick={canModify ? () => handleOpenFileUploadModal("nationalAddressCertificate", "National Address Certificate") : () => {}}
+                docUrl={clientData?.nationalAddressCertificate?.url}
+                currentFileName={clientData?.nationalAddressCertificate?.fileName}
+                onPreview={() => handlePreviewFile(clientData?.nationalAddressCertificate?.url || "", clientData?.nationalAddressCertificate?.fileName)}
+                onDownload={() => handleDownloadFile(clientData?.nationalAddressCertificate?.url || "")}
+              />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  {/* Modals & Dialogs Container */}
+  <PDFViewer
+    isOpen={isPdfPreviewOpen}
+    onClose={() => setIsPdfPreviewOpen(false)}
+    pdfUrl={previewFileUrl}
+    candidateName={previewFileName}
+  />
+
+  <FileUploadModal
+    open={isFileUploadModalOpen}
+    onOpenChange={setIsFileUploadModalOpen}
+    onUpload={handleFileUploadFromModal}
+    title={currentUploadTitle}
+    acceptedFileTypes=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.svg"
+    maxSizeInMB={10}
+  />
+
+  {/* Sales Lead Select & Confirmation */}
+  {canModify && (
+    <UserSelectDialog
+      open={showSalesLeadDialog}
+      onClose={() => setShowSalesLeadDialog(false)}
+      title="Select Sales Lead"
+      onSelect={(user) => {
+        const name = user?.name || user?.email || "";
+        setPendingSalesLeadName(name || null);
+        setShowSalesLeadDialog(false);
+        setShowConfirmSalesLead(true);
+      }}
+    />
+  )}
+
+  <Dialog open={showConfirmSalesLead} onOpenChange={setShowConfirmSalesLead}>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Confirm Sales Lead</DialogTitle>
+      </DialogHeader>
+      <div className="text-sm text-muted-foreground py-2">
+        {pendingSalesLeadName ? `Set "Sales Lead" to ${pendingSalesLeadName}?` : "No user selected."}
+      </div>
+      <DialogFooter className="gap-2">
+        <Button
+          variant="outline"
+          onClick={() => {
+            setShowConfirmSalesLead(false);
+            setPendingSalesLeadName(null);
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={async () => {
+            if (pendingSalesLeadName) {
+              await updateClientDetails("salesLead", pendingSalesLeadName);
+            }
+            setShowConfirmSalesLead(false);
+            setPendingSalesLeadName(null);
+          }}
+        >
+          Confirm
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+
+  {/* Referral Source Select & Confirmation */}
+  {canModify && (
+    <UserSelectDialog
+      open={showReferredByDialog}
+      onClose={() => setShowReferredByDialog(false)}
+      title="Select Referral Source"
+      onSelect={(user) => {
+        const name = user?.name || user?.email || "";
+        setPendingReferredByName(name || null);
+        setShowReferredByDialog(false);
+        setShowConfirmReferredBy(true);
+      }}
+    />
+  )}
+
+  <Dialog open={showConfirmReferredBy} onOpenChange={setShowConfirmReferredBy}>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Confirm Referral Source</DialogTitle>
+      </DialogHeader>
+      <div className="text-sm text-muted-foreground py-2">
+        {pendingReferredByName ? `Set "Referred By (External)" to ${pendingReferredByName}?` : "No user selected."}
+      </div>
+      <DialogFooter className="gap-2">
+        <Button
+          variant="outline"
+          onClick={() => {
+            setShowConfirmReferredBy(false);
+            setPendingReferredByName(null);
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={async () => {
+            if (pendingReferredByName) {
+              await updateClientDetails("referredBy", pendingReferredByName);
+            }
+            setShowConfirmReferredBy(false);
+            setPendingReferredByName(null);
+          }}
+        >
+          Confirm
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</div>
   );
 }

@@ -20,12 +20,15 @@ export interface PrimaryContact {
 }
 
 export const clientStageStatuses = [
-  "Replied to a message",
-  "Calls",
-  "Attended a meeting",
+  "Call",
   "Profile Sent",
   "Contract Sent",
+  "Attended a meeting",
+  "Replied to a message",
   "Contract Negotiation",
+  "LinkedIn message Sent",
+  "WA message sent",
+  "Email sent",
 ] as const;
 
 export type ClientStageStatus = (typeof clientStageStatuses)[number];
@@ -695,43 +698,19 @@ const updateClientStage = async (
 const updateClientStageStatus = async (
   id: string,
   status: ClientStageStatus,
+  channel?: string,
+  sentDate?: string
 ): Promise<ClientResponse> => {
   try {
-    // Fetch the full client data to avoid backend issues with partial updates.
-    const currentClient = await getClientById(id);
+    const payload: any = { subStage: status };
+    if (channel) payload.channel = channel;
+    if (sentDate) payload.sentDate = sentDate;
 
-    const dataToUpdate = {
-      ...currentClient,
-      clientSubStage: status,
-    };
-
-    // Remove fields that should not be sent in an update payload.
-    const { _id, createdAt, updatedAt, __v, ...updatePayload } = dataToUpdate;
-
-    // Manually remove file URL fields to prevent backend errors.
-    const fileFields = [
-      "profileImage",
-      "crCopy",
-      "vatCopy",
-      "gstTinDocument",
-      "fixedPercentage",
-      "fixedPercentageAdvance",
-      "variablePercentageCLevel",
-      "variablePercentageBelowCLevel",
-      "fixWithoutAdvance",
-      "seniorLevel",
-      "executives",
-      "nonExecutives",
-      "other",
-    ];
-    fileFields.forEach((field) => delete (updatePayload as any)[field]);
-
-    // Call the main updateClient function to reuse its logic, including validation.
-    return await updateClient(id, updatePayload);
+    const response = await api.patch(`/api/clients/${id}/sub-stage`, payload);
+    return response.data.data.client;
   } catch (error: any) {
     console.error("Error updating client stage status:", error);
-    // The error is already handled by `updateClient`, so we just re-throw it.
-    throw error;
+    throw handleError(error);
   }
 };
 
@@ -889,7 +868,7 @@ export interface ClientActivity {
   stageAtTime?: string;
   contactId?: string;
   repId?: string;
-  interactionScope?: string;
+  mode?: string;
   activityType: string;
   activityDate?: string;
   activityTime?: string;
@@ -924,6 +903,23 @@ export interface ClientStageHistory {
   activities?: ClientActivity[];
 }
 
+export interface ClientSubStageHistory {
+  _id: string;
+  client_id: string;
+  clientStage: string;
+  subStage: string;
+  channel: string | null;
+  sentDate: string | null;
+  changedBy: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // 1. PATCH /api/clients/:id/stage
 const changeClientStage = async (
   id: string,
@@ -935,6 +931,16 @@ const changeClientStage = async (
 ): Promise<{ client: ClientResponse, closedPeriod?: ClientStageHistory, newPeriod?: ClientStageHistory }> => {
   try {
     const response = await api.patch(`/api/clients/${id}/stage`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/:id/sub-stage-history
+const getClientSubStageHistory = async (id: string): Promise<ClientSubStageHistory[]> => {
+  try {
+    const response = await api.get<ApiResponse<ClientSubStageHistory[]>>(`/api/clients/${id}/sub-stage-history`);
     return response.data.data;
   } catch (error: any) {
     throw handleError(error);
@@ -981,11 +987,79 @@ const getClientTimeline = async (id: string): Promise<ClientStageHistory[]> => {
   }
 };
 
-// 6. PATCH /api/clients/:id/follow-up
-const updateClientFollowUp = async (id: string, data: { nextFollowUpDate?: string, nextFollowUpOwner?: string }): Promise<ClientResponse> => {
+// 6. POST /api/clients/:id/follow-up
+const scheduleClientFollowUp = async (id: string, data: { scheduledDate?: string, owner?: string, notes?: string }): Promise<any> => {
   try {
-    const response = await api.patch(`/api/clients/${id}/follow-up`, data, { timeout: 15000 });
+    const response = await api.post(`/api/clients/${id}/follow-up`, data, { timeout: 15000 });
     return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/follow-up/:followUpId
+const editClientFollowUp = async (id: string, followUpId: string, data: { scheduledDate?: string, owner?: string, notes?: string }): Promise<any> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/follow-up/${followUpId}`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/follow-up/:followUpId/complete
+const completeClientFollowUp = async (id: string, followUpId: string, data: { completionNotes: string, completionDate?: string, completionReason?: string }): Promise<any> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/follow-up/${followUpId}/complete`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/follow-up/:followUpId/cancel
+const cancelClientFollowUp = async (id: string, followUpId: string, data: { cancelReason?: string }): Promise<any> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/follow-up/${followUpId}/cancel`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/:id/follow-ups
+const getClientFollowUps = async (id: string, params?: { status?: string }): Promise<any> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/follow-ups`, { params, timeout: 15000 });
+    return response.data; 
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/bulk-upload/template
+const downloadClientBulkTemplate = async (): Promise<Blob> => {
+  try {
+    const response = await api.get(`/api/clients/bulk-upload/template`, {
+      responseType: 'blob',
+      timeout: 30000,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// POST /api/clients/bulk-upload
+const bulkUploadClients = async (file: File): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await api.post(`/api/clients/bulk-upload`, formData, {
+      timeout: 60000,
+    });
+    return response.data;
   } catch (error: any) {
     throw handleError(error);
   }
@@ -1007,8 +1081,15 @@ export {
   getPrimaryContacts,
   changeClientStage,
   getClientStageHistory,
+  getClientTimeline,
+  getClientSubStageHistory,
   logClientActivity,
   getClientActivities,
-  getClientTimeline,
-  updateClientFollowUp,
+  scheduleClientFollowUp,
+  editClientFollowUp,
+  completeClientFollowUp,
+  cancelClientFollowUp,
+  getClientFollowUps,
+  downloadClientBulkTemplate,
+  bulkUploadClients,
 };

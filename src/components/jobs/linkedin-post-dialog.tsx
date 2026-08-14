@@ -89,7 +89,7 @@ export function LinkedInPostDialog({ job, triggerClassName }: LinkedInPostDialog
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className={`flex items-center gap-2 bg-blue-400 hover:bg-blue-600 text-white ${triggerClassName || ""}`}
+          className={`flex items-center gap-2 bg-brand/20 hover:bg-brand/40 text-blue ${triggerClassName || ""}`}
         >
           <Linkedin className="size-4" />
           Post In LinkedIn

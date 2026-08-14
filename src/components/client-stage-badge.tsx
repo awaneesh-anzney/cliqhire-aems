@@ -39,7 +39,9 @@ export function ClientStageBadge({ id, stage, onStageChange, disabled = false }:
     return (event: React.MouseEvent) => {
       event.stopPropagation();
       if (id && onStageChange) {
-        onStageChange(id, option);
+        setTimeout(() => {
+          onStageChange(id, option);
+        }, 0);
       } else {
         console.error("Cannot change stage: id is undefined or onStageChange is not provided");
       }
@@ -48,7 +50,7 @@ export function ClientStageBadge({ id, stage, onStageChange, disabled = false }:
 
   const currentStageColor = (stageColors as any)[stage] || "bg-muted text-foreground";
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={true}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
           <Badge

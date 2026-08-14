@@ -44,22 +44,13 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
   // Date states for Shadcn Popover + Calendar
   const [activityDate, setActivityDate] = useState<Date>(new Date());
   const [expectedClosureDate, setExpectedClosureDate] = useState<Date | undefined>(undefined);
-  const [nextFollowUpDate, setNextFollowUpDate] = useState<Date | undefined>(undefined);
-  
   // Popover open states
   const [activityDateOpen, setActivityDateOpen] = useState(false);
   const [expectedClosureOpen, setExpectedClosureOpen] = useState(false);
-  const [nextFollowUpOpen, setNextFollowUpOpen] = useState(false);
-
-  // Team users for dropdown
-  const [teamUsers, setTeamUsers] = useState<{ id: string; name: string; role?: string }[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   const [formData, setFormData] = useState({
-    interactionScope: "Client-facing",
+    mode: "Virtual",
     activityTime: "09:00",
-    attempts: 1,
-    isMeeting: false,
     discussionSummary: "",
     outcome: "",
     
@@ -72,36 +63,11 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
     
     // Footer fields
     revenue: "",
-    nextFollowUpOwner: "",
   });
 
-  // Fetch team members for Follow-up Owner ID dropdown
   useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        setIsLoadingUsers(true);
-        const res = await getTeamMembers();
-        const members = (res.teamMembers || []).map((user: any) => ({
-          id: user._id || user.id || "",
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.name || user.email || "Unknown User",
-          role: user.teamRole || user.department || "",
-        }));
-        setTeamUsers(members);
-      } catch (error) {
-        console.error("Error fetching team users:", error);
-      } finally {
-        setIsLoadingUsers(false);
-      }
-    };
-    fetchTeamMembers();
-  }, []);
 
-  // Auto-check isMeeting if activityType is Meeting
-  useEffect(() => {
-    if (activityType === "Meeting") {
-      setFormData(prev => ({ ...prev, isMeeting: true }));
-    }
-  }, [activityType]);
+  }, [clientId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -112,11 +78,9 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
       
       const payload: any = {
         activityType,
-        interactionScope: formData.interactionScope,
+        mode: formData.mode,
         activityDate: (activityDate || new Date()).toISOString(),
         activityTime: formData.activityTime,
-        attempts: Number(formData.attempts),
-        isMeeting: formData.isMeeting,
         discussionSummary: formData.discussionSummary,
         outcome: formData.outcome,
       };
@@ -133,8 +97,6 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
       }
 
       if (formData.revenue) payload.revenue = Number(formData.revenue);
-      if (nextFollowUpDate) payload.nextFollowUpDate = nextFollowUpDate.toISOString();
-      if (formData.nextFollowUpOwner) payload.nextFollowUpOwner = formData.nextFollowUpOwner;
 
       await logClientActivity(clientId, payload);
       toast.success("Activity logged successfully");
@@ -165,43 +127,46 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
       <form onSubmit={handleSubmit}>
         <div className="space-y-6 py-4">
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Channel / Type</Label>
-              <Select value={activityType} onValueChange={setActivityType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACTIVITY_TYPES.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Interaction Scope</Label>
-              <Select 
-                value={formData.interactionScope} 
-                onValueChange={(val) => setFormData(prev => ({ ...prev, interactionScope: val }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Client-facing">Client-facing</SelectItem>
-                  <SelectItem value="Internal">Internal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label>Channel / Type</Label>
+            <Select value={activityType} onValueChange={setActivityType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {ACTIVITY_TYPES.map(type => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="grid grid-cols-[2fr,1.5fr,1fr,1fr] gap-4 items-center">
+          <div className={`grid gap-4 items-center ${activityType === "Meeting" ? "grid-cols-[1fr,2fr,1.5fr]" : "grid-cols-[2fr,1.5fr]"}`}>
+            
+            {activityType === "Meeting" && (
+              <div className="space-y-2">
+                <Label>Mode <span className="text-red-500">*</span></Label>
+                <Select 
+                  value={formData.mode} 
+                  onValueChange={(val) => setFormData(prev => ({ ...prev, mode: val }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="In Person">In Person</SelectItem>
+                    <SelectItem value="Virtual">Virtual</SelectItem>
+                    <SelectItem value="Phone Call">Phone Call</SelectItem>
+                    <SelectItem value="Internal">Internal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Shadcn UI Date Picker */}
             <div className="space-y-2">
               <Label>Date</Label>
-              <Popover open={activityDateOpen} onOpenChange={setActivityDateOpen} modal>
+              <Popover open={activityDateOpen} onOpenChange={setActivityDateOpen} modal={true}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -228,46 +193,21 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
               </Popover>
             </div>
 
-            {/* Shadcn UI Time Select */}
+            {/* Shadcn UI Time Input */}
             <div className="space-y-2">
               <Label>Time</Label>
-              <Select
-                value={formData.activityTime}
-                onValueChange={(val) => setFormData((prev) => ({ ...prev, activityTime: val }))}
-              >
-                <SelectTrigger className="w-full h-10 border-border">
-                  <Clock className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 overflow-y-auto z-50">
-                  {TIME_SLOTS.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="time"
+                  value={formData.activityTime}
+                  onChange={(e) => setFormData(prev => ({ ...prev, activityTime: e.target.value }))}
+                  className="pl-9 w-full h-10 border-border"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Attempts</Label>
-              <Input
-                type="number"
-                min="1"
-                value={formData.attempts}
-                onChange={handleInputChange("attempts")}
-                required
-              />
-            </div>
-            <div className="space-y-2 pt-6 flex justify-center">
-               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                 <Checkbox 
-                   checked={formData.isMeeting} 
-                   onCheckedChange={(checked) => setFormData(p => ({ ...p, isMeeting: checked as boolean }))}
-                 />
-                 Meeting?
-               </label>
-            </div>
+
           </div>
 
           <div className="space-y-2">
@@ -372,57 +312,7 @@ export function CreateActivityModal({ clientId, onActivityCreated, onClose }: Cr
              <div className="space-y-2">
                 <Label>Revenue (SAR)</Label>
                 <Input type="number" placeholder="Actual Revenue" value={formData.revenue} onChange={handleInputChange("revenue")} />
-             </div>
-
-             {/* Set Next Follow-up Date */}
-             <div className="space-y-2">
-                <Label>Set Next Follow-up</Label>
-                <Popover open={nextFollowUpOpen} onOpenChange={setNextFollowUpOpen} modal>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal h-10 border-border bg-background",
-                        !nextFollowUpDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {nextFollowUpDate ? format(nextFollowUpDate, "PPP") : <span>Follow-up date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={nextFollowUpDate}
-                      onSelect={(date) => {
-                        setNextFollowUpDate(date);
-                        setNextFollowUpOpen(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-             </div>
-
-             {/* Follow-up Owner Dropdown */}
-             <div className="space-y-2">
-                <Label>Follow-up Owner ID</Label>
-                <Select 
-                  value={formData.nextFollowUpOwner} 
-                  onValueChange={(val) => setFormData(prev => ({ ...prev, nextFollowUpOwner: val }))}
-                >
-                  <SelectTrigger className="w-full h-10 border-border">
-                    <SelectValue placeholder={isLoadingUsers ? "Loading users..." : "Select team user"} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60 overflow-y-auto z-50">
-                    {teamUsers.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name} {user.role ? `(${user.role})` : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-             </div>
+           </div>
           </div>
         </div>
 

@@ -35,7 +35,7 @@
  import { CandidateProgressCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateProgressCard";
  import { CandidateDisqualificationCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateDisqualificationCard";
  import { CandidateProbationCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateProbationCard";
-
+ import { CandidateOfferLetterCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateOfferLetterCard";
  import { CandidateDocumentsCard } from "@/components/Recruiter-Pipeline/candidate-details/CandidateDocumentsCard";
  
  // Dialog imports
@@ -257,8 +257,16 @@
               <TabsContent value="pipeline" className="mt-0 space-y-3 focus-visible:outline-none">
                 <CandidateDisqualificationCard candidate={candidate} />
   
-                {candidate.probation && candidate.currentStage === "Hired" && (
-                   <CandidateProbationCard probation={candidate.probation} />
+                 {candidate.probation && candidate.currentStage === "Hired" && (
+                    <CandidateProbationCard probation={candidate.probation} />
+                  )}
+
+                 {candidate.currentStage === "Hired" && (
+                   <CandidateOfferLetterCard 
+                     candidate={candidate}
+                     pipelineId={pipelineId}
+                     canModify={canModifyPipeline}
+                   />
                  )}
   
                 <div className="bg-card rounded-xl border border-border shadow-md overflow-visible p-4">

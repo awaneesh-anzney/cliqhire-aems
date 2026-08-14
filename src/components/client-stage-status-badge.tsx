@@ -9,25 +9,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from "lucide-react"
-
-const stageStatuses = [
-  "Calls",
-  "Profile Sent",
-  "Contract Sent",
-  "Attended a meeting",
-  "Replied to a message",
-  "Contract Negotiation",
-] as const
-
-type ClientStageStatus = (typeof stageStatuses)[number]
+import { ClientStageStatus, clientStageStatuses } from "@/services/clientService"
 
 const stageStatusColors: Record<ClientStageStatus, string> = {
-  "Calls": "bg-blue-100 text-blue-800",
+  "Call": "bg-blue-100 text-blue-800",
   "Profile Sent": "bg-purple-100 text-purple-800",
   "Contract Sent": "bg-yellow-100 text-foreground",
   "Attended a meeting": "bg-indigo-100 text-indigo-800",
   "Replied to a message": "bg-muted text-foreground",
   "Contract Negotiation": "bg-green-100 text-green-800",
+  "LinkedIn message Sent": "bg-blue-50 text-blue-700",
+  "WA message sent": "bg-green-50 text-green-700",
+  "Email sent": "bg-orange-50 text-orange-700",
 } as const
 
 interface ClientStageStatusBadgeProps {
@@ -60,7 +53,9 @@ export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disa
     return (event: React.MouseEvent) => {
       event.stopPropagation()
       if (id && onStatusChange) {
-        onStatusChange(id, option)
+        setTimeout(() => {
+          onStatusChange(id, option)
+        }, 0);
       } else {
         console.error('Cannot change status: id is undefined or onStatusChange is not provided')
       }
@@ -69,7 +64,7 @@ export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disa
 
   const currentStatusColor = (stageStatusColors as any)[status] || "bg-muted text-foreground";
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={true}>
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
@@ -85,17 +80,17 @@ export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disa
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        {stageStatuses.map((statusOption) => (
+        {clientStageStatuses.map((s) => (
           <DropdownMenuItem
-            key={statusOption}
-            onClick={handleClick(id, statusOption)}
+            key={s}
+            onClick={handleClick(id, s)}
             className="flex items-center gap-2"
           >
             <Badge 
               variant="secondary" 
-              className={`${stageStatusColors[statusOption]} border-none`}
+              className={`${stageStatusColors[s]} border-none`}
             >
-              {statusOption}
+              {s}
             </Badge>
           </DropdownMenuItem>
         ))}

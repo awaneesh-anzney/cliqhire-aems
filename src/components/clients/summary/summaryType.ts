@@ -31,6 +31,10 @@
     url: string;
     fileName: string;
   };
+  nationalAddressCertificate?: {
+    url: string;
+    fileName: string;
+  };
   phoneNumber?: string;
   googleMapsLink?: string;
   position?: string;

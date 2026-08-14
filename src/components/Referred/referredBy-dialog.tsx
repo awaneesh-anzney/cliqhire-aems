@@ -25,12 +25,10 @@ const formSchema = z.object({
   }).nonempty("Name is required"),
   email: z.string().email({
     message: "Please enter a valid email address.",
-  }).nonempty("Email is required"),
+  }).optional().or(z.literal("")),
   phone: z.string().min(1, "Phone is required"),
   countryCode: z.string().default("SA"),
-  position: z.string().min(2, {
-    message: "Position must be at least 2 characters.",
-  }).nonempty("Position is required"),
+  position: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -60,10 +58,7 @@ export function ReferredByDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
       phone: "",
-      countryCode: "SA",
-      position: "",
     },
   })
 
@@ -109,16 +104,16 @@ export function ReferredByDialog({
                 </p>
               )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-1">
-                Email <span className="text-red-500">*</span>
+                Email
               </Label>
               <Input
                 id="email"
                 type="email"
                 disabled={loading}
                 {...form.register("email")}
-                className={form.formState.errors.email ? "border-red-500" : ""}
                 placeholder="Enter email address"
               />
               {form.formState.errors.email && (
@@ -127,6 +122,7 @@ export function ReferredByDialog({
                 </p>
               )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="phone" className="flex items-center gap-1">
                 Phone <span className="text-red-500">*</span>
@@ -150,15 +146,15 @@ export function ReferredByDialog({
                 </p>
               )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="position" className="flex items-center gap-1">
-                Position <span className="text-red-500">*</span>
+                Position
               </Label>
               <Input
                 id="position"
                 disabled={loading}
                 {...form.register("position")}
-                className={form.formState.errors.position ? "border-red-500" : ""}
                 placeholder="eg, HR"
               />
               {form.formState.errors.position && (
@@ -167,6 +163,7 @@ export function ReferredByDialog({
                 </p>
               )}
             </div>
+
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading}>

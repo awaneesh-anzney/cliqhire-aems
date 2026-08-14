@@ -102,6 +102,9 @@ export function mapEntryToJob(entry: any): Job {
       currentStatus: c?.currentStatus || "",
       status: c?.currentStatus || c?.status,
       subStatus: c?.currentStatus || c?.status,
+      
+      // Offer Letter
+      offerLetter: c?.offerLetter || null,
 
       // Source info
       source: sourcingData?.connection || c?.sourcing?.source || "",
@@ -344,6 +347,7 @@ export function mapPipelineCandidateResponse(data: any): { job: Job; candidate: 
     location: candidateInfo.location || "",
     skills: candidateInfo.skills || [],
     gender: candidateInfo.gender || "",
+    offerLetter: data.offerLetter || null,
     dateOfBirth: candidateInfo.dateOfBirth || "",
     country: candidateInfo.country || "",
     nationality: candidateInfo.nationality || "",

@@ -61,6 +61,15 @@ export interface Candidate {
   currentCompanyName?: string;
   status?: StatusType;
   subStatus?: string;
+  offerLetter?: {
+    url: string;
+    fileName: string;
+    publicId: string;
+    fileSize: number;
+    mimeType: string;
+    uploadedAt: string;
+    uploadedBy: string;
+  } | null;
   // Additional fields from new API structure
   applicationId?: string;
   appliedDate?: string;

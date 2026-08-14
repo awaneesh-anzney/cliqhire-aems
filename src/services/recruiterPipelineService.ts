@@ -462,6 +462,58 @@ export class RecruiterPipelineService {
     }
   }
 
+  /**
+   * Upload an offer letter for a candidate in the Hired stage
+   */
+  static async uploadOfferLetter(
+    pipelineId: string,
+    candidateId: string,
+    file: File
+  ): Promise<StageUpdateResponse> {
+    try {
+      const formData = new FormData();
+      formData.append('offerLetter', file);
+
+      const response = await api.post(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/offer-letter`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return { success: true, message: 'Offer letter uploaded', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to upload offer letter',
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Delete an offer letter for a candidate
+   */
+  static async deleteOfferLetter(
+    pipelineId: string,
+    candidateId: string
+  ): Promise<StageUpdateResponse> {
+    try {
+      const response = await api.delete(
+        `/api/recruiter-pipeline/${pipelineId}/candidates/${candidateId}/offer-letter`
+      );
+      return { success: true, message: 'Offer letter removed', data: response.data };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete offer letter',
+        error: error.message,
+      };
+    }
+  }
+
   // ─── Legacy compat (for existing hooks that reference old method names) ─
 
   /** @deprecated Use updateStageData instead */
