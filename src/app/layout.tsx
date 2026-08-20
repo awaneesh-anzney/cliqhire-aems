@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   title: "CliqHire",
   description: "Recruitment Platform",
   icons: {
-    icon: "/cliqhire-icon.png",
+    icon: "/fluxxx.png"
   },
 };
 
