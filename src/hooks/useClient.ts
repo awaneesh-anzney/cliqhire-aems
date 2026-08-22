@@ -13,6 +13,7 @@ export interface ClientsQueryParams {
   clientStage?: "Lead" | "Engaged" | "Signed" | string;
   location?: string;
   clientTeam?: "Enterprise" | "SMB" | "Mid-Market";
+  topLevelOnly?: boolean;
 }
 
 export interface ClientsPage {
@@ -47,6 +48,42 @@ export function useBulkUploadClients() {
     mutationFn: (file: File) => bulkUploadClients(file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+    },
+  });
+}
+
+export function useLinkParentClient() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ clientId, parentClientId }: { clientId: string; parentClientId: string | null }) => 
+      import("@/services/clientService").then(m => m.linkParentClient(clientId, parentClientId)),
+    onSuccess: (data, { clientId }) => {
+      queryClient.invalidateQueries({ queryKey: ["clientsData", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+    },
+  });
+}
+
+export function useToggleContractSource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ clientId, contractSource }: { clientId: string; contractSource: 'own' | 'parent' }) => 
+      import("@/services/clientService").then(m => m.toggleContractSource(clientId, contractSource)),
+    onSuccess: (data, { clientId }) => {
+      queryClient.invalidateQueries({ queryKey: ["clientsData", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clientContracts", clientId] });
+    },
+  });
+}
+
+export function useToggleContactSource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ clientId, primaryContactSource }: { clientId: string; primaryContactSource: 'own' | 'parent' }) => 
+      import("@/services/clientService").then(m => m.toggleContactSource(clientId, primaryContactSource)),
+    onSuccess: (data, { clientId }) => {
+      queryClient.invalidateQueries({ queryKey: ["clientsData", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clientPrimaryContacts", clientId] });
     },
   });
 }

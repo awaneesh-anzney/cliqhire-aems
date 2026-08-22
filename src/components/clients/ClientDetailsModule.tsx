@@ -22,6 +22,7 @@ import {
   History,
   Activity,
   GitCommit,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios-config"; // Import directly as used in jobs-content
@@ -32,9 +33,11 @@ import { SummaryContent } from "@/components/clients/summary/summary-content";
 import { ActivitiesContent } from "@/components/clients/activities/activities-content";
 import { TimelineContent } from "@/components/clients/timeline/timeline-content";
 import { NotesContent } from "@/components/clients/notes/notes-content";
+import { Network, Building2 } from "lucide-react";
 import { AttachmentsContent } from "@/components/clients/attachments/attachments-content";
 import TeamContent from "@/components/clients/team/team-content";
 import { ContactsContent } from "@/components/clients/contacts/contacts-content";
+import { HierarchyContent } from "@/components/clients/hierarchy/hierarchy-content";
 import { HistoryContent } from "@/components/clients/history/history-content";
 import { JobsContent } from "@/components/clients/jobs/jobs-content";
 import { getClientById, updateClientStageStatus, ClientStageStatus, changeClientStage } from "@/services/clientService";
@@ -534,9 +537,17 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   </Avatar>
 
   {/* Vibrant & Colorful Client Name (No Black/Dark Shadow) */}
-  <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-800 via-teal-700 to-cyan-700 bg-clip-text text-transparent tracking-tight">
-    {client.name || `Unnamed ${entityName}`}
-  </h1>
+  <div className="flex items-center gap-2">
+    <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-800 via-teal-700 to-cyan-700 bg-clip-text text-transparent tracking-tight">
+      {client.name || `Unnamed ${entityName}`}
+    </h1>
+    {client.parentClientId && (
+      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 flex items-center gap-1 font-bold text-[10px] uppercase tracking-wider">
+        <Building2 className="w-3 h-3" />
+        Subsidiary of {client.parentCompany?.name || "Parent"}
+      </Badge>
+    )}
+  </div>
 
   <ClientStageBadge
     id={client._id}
@@ -740,6 +751,15 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
         <span>Jobs</span>
       </TabsTrigger>
 
+      {/* Hierarchy */}
+      <TabsTrigger
+        value="Hierarchy"
+        className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-emerald-900 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-t-lg flex items-center gap-2 h-9 px-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-900 hover:bg-white/50 transition-all shrink-0"
+      >
+        <Network className="h-3.5 w-3.5 text-orange-500" />
+        <span>Hierarchy</span>
+      </TabsTrigger>
+
       {/* Notes */}
       <TabsTrigger
         value="Notes"
@@ -825,6 +845,13 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
       className="p-2 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
     >
       <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
+    </TabsContent>
+
+    <TabsContent 
+      value="Hierarchy" 
+      className="p-2 max-w-full m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+    >
+      <HierarchyContent clientId={id} />
     </TabsContent>
 
     <TabsContent 

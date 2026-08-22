@@ -18,7 +18,7 @@ import {
   Info,
   Plus
 } from "lucide-react";
-import { createClient } from "./api";
+import { createClient, createSubsidiary } from "./api";
 import { objectToFormData } from "@/formdata/formData";
 import { ClientInformationTab } from "./ClientInformationTab";
 import { ContactDetailsTab } from "./ContactDetailsTab";
@@ -49,6 +49,9 @@ const INITIAL_STATE = {
   crCopy:            null as File | null,
   vatCopy:           null as File | null,
   gstTinDocument:    null as File | null,
+  parentClientId:    "",
+  contractSource:    "own",
+  primaryContactSource: "own",
 };
 
 export type ClientForm = typeof INITIAL_STATE;
@@ -132,7 +135,13 @@ export function CreateClientModal({
     setLoading(true);
     try {
       const body = objectToFormData(form, FILE_FIELDS);
-      const result = await createClient(body);
+      
+      let result;
+      if (form.parentClientId) {
+        result = await createSubsidiary(form.parentClientId, body);
+      } else {
+        result = await createClient(body);
+      }
 
       if (result.data?.data?._id) {
         toast.success("Client created successfully");

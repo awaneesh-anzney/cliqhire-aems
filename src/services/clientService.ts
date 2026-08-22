@@ -98,6 +98,12 @@ export interface ClientResponse {
   other?: string | null;
   salesLead?: string;
   jobCount?: number; // Added optional jobCount property
+  parentClientId?: string | null;
+  contractSource?: 'own' | 'parent';
+  primaryContactSource?: 'own' | 'parent';
+  subsidiaryCount?: number;
+  parentCompany?: any;
+  subsidiaries?: any[];
   createdBy?: {
     id: string;
     name: string;
@@ -1065,6 +1071,46 @@ const bulkUploadClients = async (file: File): Promise<any> => {
   }
 };
 
+// PATCH /api/clients/:id/link-parent
+const linkParentClient = async (id: string, parentClientId: string | null): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/link-parent`, { parentClientId }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/contract-source
+const toggleContractSource = async (id: string, contractSource: 'own' | 'parent'): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/contract-source`, { contractSource }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/contact-source
+const toggleContactSource = async (id: string, primaryContactSource: 'own' | 'parent'): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/contact-source`, { primaryContactSource }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/:id/group-summary
+const getGroupSummary = async (id: string): Promise<any> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/group-summary`, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -1092,4 +1138,9 @@ export {
   getClientFollowUps,
   downloadClientBulkTemplate,
   bulkUploadClients,
+  linkParentClient,
+  toggleContractSource,
+  toggleContactSource,
+  getGroupSummary,
 };
+

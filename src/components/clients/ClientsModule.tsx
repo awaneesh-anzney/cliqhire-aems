@@ -209,6 +209,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     industry: debouncedIndustry || undefined,
     location: debouncedLocation || undefined,
     clientStage: fetchStage,
+    topLevelOnly: true,
   });
 
   const allClients: Client[] = useMemo(() => {
@@ -231,6 +232,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       clientType: (c as any).clientType || "",
       nextFollowUpDate: (c as any).nextFollowUpDate || "",
       lastContactedAt: (c as any).lastContactedAt || "",
+      subsidiaryCount: (c as any).subsidiaryCount || 0,
     }));
   }, [clientsPage]);
 

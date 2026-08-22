@@ -77,11 +77,16 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
           <TooltipTrigger asChild>
             <div 
               onClick={() => router.push(`/${moduleType === "leads" ? "leads" : "clients"}/${client.id}`)}
-              className="cursor-pointer group/name truncate max-w-[150px]"
+              className="cursor-pointer group/name max-w-[150px] flex items-center gap-1.5"
             >
               <span className="text-[13px] font-semibold text-foreground group-hover/name:text-brand transition-all block truncate">
                 {client.name}
               </span>
+              {(client as any).subsidiaryCount > 0 && (
+                <span className="text-[9px] bg-primary/10 text-primary px-1.5 rounded-full font-black border border-primary/20 shrink-0">
+                  +{(client as any).subsidiaryCount} Sub
+                </span>
+              )}
             </div>
           </TooltipTrigger>
           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">

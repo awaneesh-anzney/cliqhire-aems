@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { usePrimaryContacts, useContactMutations } from "@/hooks/useContacts";
+import { useToggleContactSource } from "@/hooks/useClient";
 import { cn } from "@/lib/utils";
 
 interface ContactsContentProps {
@@ -27,6 +28,11 @@ interface ContactsContentProps {
 export function ContactsContent({ clientId, clientData, canModify }: ContactsContentProps) {
   const { data: primaryContacts = [], isLoading, isError, error: fetchError } = usePrimaryContacts(clientId);
   const { addContact, updateContact, deleteContact, isAdding, isUpdating, isDeleting } = useContactMutations(clientId);
+  const toggleContactSourceMutation = useToggleContactSource();
+
+  const isSubsidiary = !!clientData?.parentClientId;
+  const primaryContactSource = clientData?.primaryContactSource || "own";
+  const effectiveCanModify = canModify && primaryContactSource !== "parent";
 
   const [isContactEditOpen, setIsContactEditOpen] = useState(false);
   const [deleteContactId, setDeleteContactId] = useState<string | null>(null);
@@ -103,6 +109,39 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
 
   return (
     <div className="bg-muted/50 rounded-2xl p-6 space-y-8 animate-in fade-in duration-500">
+      {isSubsidiary && (
+        <div className="p-4 rounded-2xl bg-muted/50 border border-border flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Users className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-foreground">Subsidiary Client</h4>
+              <p className="text-xs text-muted-foreground">
+                This client is a subsidiary of <span className="font-semibold text-foreground">{clientData.parentCompany?.name || "its parent company"}</span>.
+                {primaryContactSource === 'parent' 
+                  ? " It currently shares the parent's contacts." 
+                  : " It manages its own contacts."}
+              </p>
+            </div>
+          </div>
+          {canModify && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={toggleContactSourceMutation.isPending}
+              onClick={() => {
+                const newSource = primaryContactSource === 'parent' ? 'own' : 'parent';
+                toggleContactSourceMutation.mutate({ clientId, primaryContactSource: newSource });
+              }}
+              className="text-xs font-semibold rounded-xl h-9"
+            >
+              {toggleContactSourceMutation.isPending ? "Updating..." : primaryContactSource === 'parent' ? "Manage Own Contacts" : "Share Parent Contacts"}
+            </Button>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Card: Client Identity */}
         <div className="w-full lg:w-[35%] shrink-0">
@@ -189,7 +228,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
               </h2>
               <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Strategic Decision Makers & Points of Contact</p>
             </div>
-            {canModify && (
+            {effectiveCanModify && (
               <Button 
                 onClick={() => { setEditContactIndex(null); setAddEditModalOpen(true); }}
                 className="bg-brand text-white font-black h-11 px-8 rounded-xl shadow-lg shadow-brand/10 hover:shadow-brand/20 active:scale-95 transition-all duration-300"
@@ -208,7 +247,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
               <p className="text-muted-foreground text-sm font-semibold max-w-sm mx-auto mt-1 mb-6">
                 Assign primary contacts to track relationship ownership and streamline communication.
               </p>
-              {canModify && (
+              {effectiveCanModify && (
                 <Button 
                   onClick={() => setAddEditModalOpen(true)}
                   variant="outline"
@@ -247,7 +286,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                       </div>
                     </div>
                     
-                    {canModify && (
+                    {effectiveCanModify && (
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                         <Button
                           variant="ghost"

@@ -1,6 +1,7 @@
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 import { useState } from "react";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
+import ClientSelectDialog from "@/components/shared/ClientSelectDialog";
 import { IndustrySelector } from "@/components/shared/industry-selector";
 import { 
   Select, 
@@ -20,6 +21,8 @@ interface ClientInformationTabProps {
 export function ClientInformationTab({ form, setField }: ClientInformationTabProps) {
   const [isSalesLeadDialogOpen, setIsSalesLeadDialogOpen] = useState(false);
   const [isReferredDialogOpen, setIsReferredDialogOpen] = useState(false);
+  const [isClientSelectOpen, setIsClientSelectOpen] = useState(false);
+  const [parentClientName, setParentClientName] = useState("");
 
   return (
     <div className="grid grid-cols-2 gap-4 p-1">
@@ -63,6 +66,74 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           </SelectContent>
         </Select>
       </div>
+
+      <div className="flex flex-col gap-1.5 col-span-2 sm:col-span-1">
+        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Parent Client (Optional)</label>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => setIsClientSelectOpen(true)}
+            className={`flex-1 h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start overflow-hidden ${
+              form.parentClientId ? "text-foreground" : "text-muted-foreground/60"
+            }`}
+          >
+            <Building2 className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
+            <span className="truncate">{parentClientName || "Select Parent Client..."}</span>
+          </Button>
+          {form.parentClientId && (
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                setField("parentClientId", "");
+                setParentClientName("");
+                setField("contractSource", "own");
+                setField("primaryContactSource", "own");
+              }}
+              className="h-11 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0 rounded-xl"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {form.parentClientId && (
+        <>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Contract Source</label>
+            <Select
+              value={form.contractSource}
+              onValueChange={val => setField("contractSource", val as any)}
+            >
+              <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground">
+                <SelectValue placeholder="Select contract source" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border shadow-xl">
+                <SelectItem value="own">Own Contract</SelectItem>
+                <SelectItem value="parent">Share Parent's Contract</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Contact Source</label>
+            <Select
+              value={form.primaryContactSource}
+              onValueChange={val => setField("primaryContactSource", val as any)}
+            >
+              <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground">
+                <SelectValue placeholder="Select contact source" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border shadow-xl">
+                <SelectItem value="own">Own Contacts</SelectItem>
+                <SelectItem value="parent">Share Parent's Contacts</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Sales lead</label>
@@ -172,6 +243,18 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
         onClose={() => setIsReferredDialogOpen(false)}
         onSelect={(u) => setField("referredBy", u.name || "")}
         title="Select Referral"
+      />
+
+      <ClientSelectDialog
+        open={isClientSelectOpen}
+        onClose={() => setIsClientSelectOpen(false)}
+        onSelect={(c) => {
+          setField("parentClientId", c._id);
+          setParentClientName(c.name);
+          setField("contractSource", "own");
+          setField("primaryContactSource", "own");
+        }}
+        title="Select Parent Client"
       />
     </div>
   );
