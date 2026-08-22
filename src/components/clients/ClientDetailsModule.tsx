@@ -33,7 +33,7 @@ import { SummaryContent } from "@/components/clients/summary/summary-content";
 import { ActivitiesContent } from "@/components/clients/activities/activities-content";
 import { TimelineContent } from "@/components/clients/timeline/timeline-content";
 import { NotesContent } from "@/components/clients/notes/notes-content";
-import { Network, Building2 } from "lucide-react";
+import { Network } from "lucide-react";
 import { AttachmentsContent } from "@/components/clients/attachments/attachments-content";
 import TeamContent from "@/components/clients/team/team-content";
 import { ContactsContent } from "@/components/clients/contacts/contacts-content";

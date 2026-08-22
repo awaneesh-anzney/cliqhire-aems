@@ -1111,6 +1111,16 @@ const getGroupSummary = async (id: string): Promise<any> => {
   }
 };
 
+// GET /api/clients/:id/hierarchy
+const getClientHierarchy = async (id: string): Promise<any> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/hierarchy`, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -1142,5 +1152,6 @@ export {
   toggleContractSource,
   toggleContactSource,
   getGroupSummary,
+  getClientHierarchy,
 };
 

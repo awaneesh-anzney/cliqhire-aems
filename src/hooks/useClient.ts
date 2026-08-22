@@ -87,3 +87,11 @@ export function useToggleContactSource() {
     },
   });
 }
+
+export function useClientHierarchy(clientId: string) {
+  return useQuery({
+    queryKey: ["clientHierarchy", clientId],
+    queryFn: () => import("@/services/clientService").then(m => m.getClientHierarchy(clientId)),
+    enabled: Boolean(clientId),
+  });
+}
