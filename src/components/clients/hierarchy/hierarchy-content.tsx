@@ -107,7 +107,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
               </div>
             ) : (
               <div className="grid gap-3">
-                {subsidiaries.map((sub) => (
+                {subsidiaries.map((sub: any) => (
                   <div key={sub._id} className={`flex items-center justify-between p-4 rounded-xl border ${sub._id === currentClient._id ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20' : 'border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors'}`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">

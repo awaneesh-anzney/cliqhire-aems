@@ -18,7 +18,7 @@ import {
   Info,
   Plus
 } from "lucide-react";
-import { createClient, createSubsidiary } from "./api";
+import { createClient } from "./api";
 import { objectToFormData } from "@/formdata/formData";
 import { ClientInformationTab } from "./ClientInformationTab";
 import { ContactDetailsTab } from "./ContactDetailsTab";
@@ -136,12 +136,8 @@ export function CreateClientModal({
     try {
       const body = objectToFormData(form, FILE_FIELDS);
       
-      let result;
-      if (form.parentClientId) {
-        result = await createSubsidiary(form.parentClientId, body);
-      } else {
-        result = await createClient(body);
-      }
+      // Backend will automatically handle subsidiary creation if parentClientId is present
+      const result = await createClient(body);
 
       if (result.data?.data?._id) {
         toast.success("Client created successfully");

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getClients, ClientResponse } from "@/services/clientService";
+import { getClients, getParentOptions, ClientResponse } from "@/services/clientService";
 import { Loader2, Search, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,9 +29,9 @@ export default function ClientSelectDialog({
   const loadClients = async () => {
     try {
       setLoading(true);
-      // Fetching only top-level clients to use as parents
-      const res = await getClients({ limit: 1000, topLevelOnly: true } as any);
-      setClients(res.clients || []);
+      // Fetching eligible parent options via the new endpoint
+      const res = await getParentOptions(search);
+      setClients(res.data || []);
     } catch (e) {
       console.error('Error loading clients:', e);
       toast.error('Failed to load clients');
@@ -42,9 +42,13 @@ export default function ClientSelectDialog({
 
   useEffect(() => {
     if (open) {
-      loadClients();
+      const delayDebounceFn = setTimeout(() => {
+        loadClients();
+      }, 300);
+
+      return () => clearTimeout(delayDebounceFn);
     }
-  }, [open]);
+  }, [open, search]);
 
   const filtered = useMemo(() => {
     if (!clients) return [];

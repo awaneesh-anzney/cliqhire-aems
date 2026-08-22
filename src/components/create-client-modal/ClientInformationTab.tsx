@@ -112,7 +112,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border shadow-xl">
                 <SelectItem value="own">Own Contract</SelectItem>
-                <SelectItem value="parent">Share Parent's Contract</SelectItem>
+                <SelectItem value="parent">Share Parent&apos;s Contract</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -128,7 +128,7 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border shadow-xl">
                 <SelectItem value="own">Own Contacts</SelectItem>
-                <SelectItem value="parent">Share Parent's Contacts</SelectItem>
+                <SelectItem value="parent">Share Parent&apos;s Contacts</SelectItem>
               </SelectContent>
             </Select>
           </div>
