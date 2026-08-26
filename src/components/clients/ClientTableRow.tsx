@@ -31,6 +31,7 @@ export interface ClientTableRowProps {
       months: number;
       days: number;
     };
+    role?: "parent" | "subsidiary" | "standalone";
   };
   onStageChange: (clientId: string, newStage: "Lead" | "Engaged" | "Signed") => void;
   onStatusChange: (clientId: string, newStatus: ClientStageStatus) => void;
@@ -85,6 +86,11 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
               {(client as any).subsidiaryCount > 0 && (
                 <span className="text-[9px] bg-primary/10 text-primary px-1.5 rounded-full font-black border border-primary/20 shrink-0">
                   +{(client as any).subsidiaryCount} Sub
+                </span>
+              )}
+              {client.role === 'subsidiary' && (
+                <span className="text-[9px] bg-indigo-500/10 text-indigo-500 px-1.5 rounded-full font-black border border-indigo-500/20 shrink-0">
+                  Subsidiary
                 </span>
               )}
             </div>

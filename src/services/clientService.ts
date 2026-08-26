@@ -102,6 +102,7 @@ export interface ClientResponse {
   contractSource?: 'own' | 'parent';
   primaryContactSource?: 'own' | 'parent';
   subsidiaryCount?: number;
+  role?: "parent" | "subsidiary" | "standalone";
   parentCompany?: any;
   subsidiaries?: any[];
   createdBy?: {

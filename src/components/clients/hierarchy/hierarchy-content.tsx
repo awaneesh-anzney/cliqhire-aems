@@ -32,7 +32,13 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
     );
   }
 
-  const { parent, subsidiaries, currentClient } = hierarchyData;
+  const { parent, members = [] } = hierarchyData;
+
+  // Find the current client in the members list, or fallback
+  const currentClient = members.find((m: any) => m._id === clientId) || { _id: clientId, name: "Current Client" };
+  
+  // Subsidiaries are those members with role 'subsidiary'
+  const subsidiaries = members.filter((m: any) => m.role === 'subsidiary');
 
   const isParent = !parent; // If no parent, it's a top-level client (can have subsidiaries)
 
