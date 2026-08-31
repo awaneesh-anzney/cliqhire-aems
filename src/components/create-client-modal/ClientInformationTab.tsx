@@ -11,6 +11,8 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Building2, User } from "lucide-react";
 
 interface ClientInformationTabProps {
@@ -203,7 +205,10 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
         <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Client Source</label>
         <Select
           value={form.clientSource}
-          onValueChange={val => setField("clientSource", val)}
+          onValueChange={val => {
+            setField("clientSource", val);
+            setField("clientSourceDetails", {});
+          }}
         >
           <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
             <SelectValue placeholder="Select source" />
@@ -217,6 +222,62 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           </SelectContent>
         </Select>
       </div>
+
+      {form.clientSource === 'Cold Call' && (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Cold Call Date</label>
+          <Input 
+            type="date"
+            value={form.clientSourceDetails?.date ? new Date(form.clientSourceDetails.date).toISOString().split('T')[0] : ''}
+            onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, date: e.target.value })}
+            className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+          />
+        </div>
+      )}
+
+      {form.clientSource === 'Events' && (
+        <>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Event Name</label>
+            <Input 
+              value={form.clientSourceDetails?.eventName || ''}
+              onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, eventName: e.target.value })}
+              className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+              placeholder="GITEX Dubai 2026"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Event Date</label>
+            <Input 
+              type="date"
+              value={form.clientSourceDetails?.eventDate ? new Date(form.clientSourceDetails.eventDate).toISOString().split('T')[0] : ''}
+              onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, eventDate: e.target.value })}
+              className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Event Location</label>
+            <Input 
+              value={form.clientSourceDetails?.eventLocation || ''}
+              onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, eventLocation: e.target.value })}
+              className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+              placeholder="Dubai World Trade Centre"
+            />
+          </div>
+        </>
+      )}
+
+      {form.clientSource === 'Others' && (
+        <div className="flex flex-col gap-1.5 col-span-2 sm:col-span-1">
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Notes</label>
+          <Textarea
+            value={form.clientSourceDetails?.notes || ''}
+            onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, notes: e.target.value })}
+            className="rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground min-h-[44px]"
+            placeholder="Enter notes..."
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Industry</label>

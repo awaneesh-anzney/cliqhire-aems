@@ -22,6 +22,10 @@ import { PDFViewer } from "@/components/ui/pdf-viewer";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
 import { useIndustries } from "@/hooks/useIndustries";
 import { IndustrySelector } from "@/components/shared/industry-selector";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export function SummaryContent({
   clientId,
@@ -59,6 +63,11 @@ export function SummaryContent({
   const [showReferredByDialog, setShowReferredByDialog] = useState(false);
   const [showConfirmReferredBy, setShowConfirmReferredBy] = useState(false);
   const [pendingReferredByName, setPendingReferredByName] = useState<string | null>(null);
+
+  // Client Source edit dialog
+  const [showClientSourceDialog, setShowClientSourceDialog] = useState(false);
+  const [editClientSource, setEditClientSource] = useState<string>("");
+  const [editClientSourceDetails, setEditClientSourceDetails] = useState<any>({});
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -277,6 +286,19 @@ export function SummaryContent({
                 onUpdate={handleUpdateField("referredBy")}
                 disableInternalEdit={!canModify}
                 customEdit={() => canModify && setShowReferredByDialog(true)}
+              />
+              <DetailRow
+                label="Client Source"
+                value={clientData?.clientSource}
+                onUpdate={() => {}}
+                disableInternalEdit={!canModify}
+                customEdit={() => {
+                  if (canModify) {
+                    setEditClientSource(clientData?.clientSource || "");
+                    setEditClientSourceDetails(clientData?.clientSourceDetails || {});
+                    setShowClientSourceDialog(true);
+                  }
+                }}
               />
               <DetailRow
                 label="Client Priority"
@@ -576,6 +598,117 @@ export function SummaryContent({
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  {/* Client Source Edit Dialog */}
+  {canModify && (
+    <Dialog open={showClientSourceDialog} onOpenChange={setShowClientSourceDialog}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit Client Source</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Client Source</Label>
+            <Select
+              value={editClientSource}
+              onValueChange={(val) => {
+                setEditClientSource(val);
+                setEditClientSourceDetails({});
+              }}
+            >
+              <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
+                <SelectValue placeholder="Select source" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border shadow-xl">
+                <SelectItem value="Cold Call">Cold Call</SelectItem>
+                <SelectItem value="Reference">Reference</SelectItem>
+                <SelectItem value="Events">Events</SelectItem>
+                <SelectItem value="Existing Old Client">Existing Old Client</SelectItem>
+                <SelectItem value="Others">Others</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {editClientSource === 'Cold Call' && (
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Cold Call Date</Label>
+              <Input 
+                type="date"
+                value={editClientSourceDetails?.date ? new Date(editClientSourceDetails.date).toISOString().split('T')[0] : ''}
+                onChange={(e) => setEditClientSourceDetails({ ...editClientSourceDetails, date: e.target.value })}
+                className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+              />
+            </div>
+          )}
+
+          {editClientSource === 'Events' && (
+            <>
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Event Name</Label>
+                <Input 
+                  value={editClientSourceDetails?.eventName || ''}
+                  onChange={(e) => setEditClientSourceDetails({ ...editClientSourceDetails, eventName: e.target.value })}
+                  className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+                  placeholder="GITEX Dubai 2026"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Event Date</Label>
+                <Input 
+                  type="date"
+                  value={editClientSourceDetails?.eventDate ? new Date(editClientSourceDetails.eventDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => setEditClientSourceDetails({ ...editClientSourceDetails, eventDate: e.target.value })}
+                  className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Event Location</Label>
+                <Input 
+                  value={editClientSourceDetails?.eventLocation || ''}
+                  onChange={(e) => setEditClientSourceDetails({ ...editClientSourceDetails, eventLocation: e.target.value })}
+                  className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground"
+                  placeholder="Dubai World Trade Centre"
+                />
+              </div>
+            </>
+          )}
+
+          {editClientSource === 'Others' && (
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Notes</Label>
+              <Textarea
+                value={editClientSourceDetails?.notes || ''}
+                onChange={(e) => setEditClientSourceDetails({ ...editClientSourceDetails, notes: e.target.value })}
+                className="rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground min-h-[44px]"
+                placeholder="Enter notes..."
+              />
+            </div>
+          )}
+        </div>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => setShowClientSourceDialog(false)}>Cancel</Button>
+          <Button onClick={async () => {
+            if (!canModify) return;
+            try {
+              const payload = {
+                clientSource: editClientSource,
+                clientSourceDetails: editClientSourceDetails
+              };
+              await api.patch(`/api/clients/${clientId}`, payload);
+              queryClient.setQueryData(["clientsData", clientId], (old: any) => ({
+                ...(old || {}),
+                ...payload,
+              }));
+              toast.success("Client source updated successfully");
+              setShowClientSourceDialog(false);
+            } catch (error) {
+              toast.error("Failed to update client source");
+            }
+          }}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )}
 </div>
   );
 }

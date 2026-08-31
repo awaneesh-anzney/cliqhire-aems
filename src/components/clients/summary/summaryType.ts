@@ -2,6 +2,8 @@
   clientPriority: string;
   clientSegment: string;
   name: string;
+  clientSource?: string;
+  clientSourceDetails?: any;
   website?: string;
   industry?: string;
   location?: string;
