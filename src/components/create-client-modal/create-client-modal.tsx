@@ -16,13 +16,16 @@ import {
   ArrowRight, 
   CheckCircle2, 
   Info,
-  Plus
+  Loader2,
+  Sparkles,
+  ShieldCheck
 } from "lucide-react";
 import { createClient } from "./api";
 import { objectToFormData } from "@/formdata/formData";
 import { ClientInformationTab } from "./ClientInformationTab";
 import { ContactDetailsTab } from "./ContactDetailsTab";
 import { DocumentsTab } from "./DocumentsTab";
+import { cn } from "@/lib/utils";
 
 // ── Single source of truth ───────────────────────────────────
 const INITIAL_STATE = {
@@ -57,7 +60,23 @@ const INITIAL_STATE = {
 
 export type ClientForm = typeof INITIAL_STATE;
 
-const TABS = ["General info", "Contact details", "Documents"] as const;
+const TABS = [
+  {
+    title: "General info",
+    subtitle: "Pipeline & account details",
+    icon: Building2,
+  },
+  {
+    title: "Contact details",
+    subtitle: "Address, emails & socials",
+    icon: MapPin,
+  },
+  {
+    title: "Documents",
+    subtitle: "Verification & tax docs",
+    icon: FileText,
+  },
+] as const;
 
 const FILE_FIELDS: (keyof ClientForm)[] = [
   "profileImage", "crCopy", "vatCopy", "gstTinDocument",
@@ -137,28 +156,26 @@ export function CreateClientModal({
     try {
       const payload = { ...form };
       
-      // Clean up clientSourceDetails based on API docs
+      // Clean up clientSourceDetails based on API requirements
       if (payload.clientSource === 'Reference' || payload.clientSource === 'Existing Old Client') {
-        payload.clientSourceDetails = {} as any; // Backend ignores it, but let's send empty
+        payload.clientSourceDetails = {} as any;
       }
       
-      // Stringify clientSourceDetails for form-data (as per API docs)
+      // Stringify clientSourceDetails for form-data
       if (payload.clientSourceDetails && typeof payload.clientSourceDetails === 'object') {
         payload.clientSourceDetails = JSON.stringify(payload.clientSourceDetails) as any;
       }
 
       const body = objectToFormData(payload, FILE_FIELDS);
-      
-      // Backend will automatically handle subsidiary creation if parentClientId is present
       const result = await createClient(body);
 
       if (result.data?.data?._id) {
-        toast.success("Client created successfully");
+        toast.success("Client onboarded successfully");
         router.push(`/clients/${result.data.data._id}`);
         handleClose();
         return;
       }
-      toast.success("Client created successfully");
+      toast.success("Client onboarded successfully");
       handleClose();
     } catch (error: any) {
       toast.error(error?.message ?? "Error creating client");
@@ -169,101 +186,173 @@ export function CreateClientModal({
 
   const isLastTab = currentTab === TABS.length - 1;
 
-  const tabIcons = [
-    <Info key="info" className="w-4 h-4" />,
-    <MapPin key="contact" className="w-4 h-4" />,
-    <FileText key="docs" className="w-4 h-4" />
-  ];
-
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-2xl">
-        <div className="flex flex-col md:flex-row h-full md:h-[620px] min-h-[500px]">
-          {/* Left Sidebar - Step Indicator */}
-          <div className="hidden md:flex flex-col w-52 bg-muted border-r border-border p-8 shrink-0">
-            <div className="mb-10">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Building2 className="w-5 h-5 text-primary" />
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border border-border/80 bg-background shadow-2xl rounded-2xl sm:rounded-3xl sm:max-h-[90vh]">
+        <div className="flex flex-col md:flex-row h-full md:h-[680px] max-h-[85vh] min-h-[540px]">
+          {/* Left Sidebar - Step Navigation */}
+          <div className="hidden md:flex flex-col w-64 bg-muted/40 dark:bg-muted/20 border-r border-border/70 p-6 shrink-0 justify-between">
+            <div>
+              {/* Header Badge */}
+              <div className="flex items-center gap-2.5 pb-6 border-b border-border/50 mb-6">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shadow-sm">
+                  <Building2 className="w-5 h-5" />
                 </div>
-                <span className="font-bold text-foreground text-lg">CliqHire</span>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-foreground text-sm tracking-tight">CliqHire</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/15 text-primary">AEMS</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-medium">Client Onboarding</p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground font-medium tracking-wider uppercase">Client Management</p>
+
+              {/* Steps List */}
+              <div className="space-y-4 relative">
+                {/* Vertical Rail Line */}
+                <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-border/80 -z-0" />
+
+                {TABS.map((tab, index) => {
+                  const isCompleted = index < currentTab;
+                  const isActive = index === currentTab;
+                  const Icon = tab.icon;
+
+                  return (
+                    <button
+                      key={tab.title}
+                      type="button"
+                      onClick={() => {
+                        if (index < currentTab) {
+                          setCurrentTab(index);
+                        } else if (index > currentTab) {
+                          const err = validateTab(currentTab, form);
+                          if (!err) setCurrentTab(index);
+                        }
+                      }}
+                      className={cn(
+                        "w-full flex items-start gap-3 p-2 rounded-xl text-left transition-all duration-200 group relative z-10",
+                        isActive
+                          ? "bg-background/90 dark:bg-background/60 shadow-sm border border-border/80"
+                          : "hover:bg-background/50 border border-transparent"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 transition-all duration-200 mt-0.5",
+                          isCompleted
+                            ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/20"
+                            : isActive
+                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-105"
+                            : "bg-muted text-muted-foreground border border-border/70 group-hover:border-primary/40"
+                        )}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle2 className="w-4 h-4" />
+                        ) : (
+                          <span>{index + 1}</span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={cn(
+                              "text-xs font-bold truncate transition-colors",
+                              isActive
+                                ? "text-foreground"
+                                : isCompleted
+                                ? "text-foreground/80 font-semibold"
+                                : "text-muted-foreground group-hover:text-foreground/80"
+                            )}
+                          >
+                            {tab.title}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground font-medium leading-tight truncate">
+                          {tab.subtitle}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="space-y-6">
-              {TABS.map((tab, index) => (
-                <div 
-                  key={tab} 
-                  className={`flex items-start gap-4 transition-all duration-300 ${
-                    currentTab === index ? "translate-x-1" : ""
-                  }`}
-                >
-                  <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors
-                    ${currentTab === index 
-                      ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                      : (index < currentTab ? "bg-green-500 text-white" : "bg-muted text-muted-foreground")}
-                  `}>
-                    {index < currentTab ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className={`text-sm font-semibold ${currentTab === index ? "text-foreground" : "text-muted-foreground"}`}>
-                      {tab}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Step {index + 1}</span>
-                  </div>
+            {/* Bottom Tip Card */}
+            <div className="bg-background/80 dark:bg-background/40 p-3.5 rounded-xl border border-border/70 shadow-xs">
+              <div className="flex items-start gap-2.5">
+                <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 mt-0.5">
+                  <Sparkles className="w-3.5 h-3.5" />
                 </div>
-              ))}
-            </div>
-
-            <div className="mt-auto bg-card/50 p-4 rounded-xl border border-border">
-              <div className="flex items-start gap-2">
-                <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
-                  Filling out accurate client details helps in better coordination and sales pipeline tracking.
-                </p>
+                <div className="text-[11px] text-muted-foreground leading-relaxed">
+                  <p className="font-semibold text-foreground/90 mb-0.5">Quick Tip</p>
+                  Fill required fields to activate pipeline automations & contracts.
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Content */}
+          {/* Right Main Content */}
           <div className="flex-1 flex flex-col bg-card overflow-hidden">
-            <DialogHeader className="p-8 pb-4 border-b md:border-none">
-              <div className="flex justify-between items-center mb-1">
-                <DialogTitle className="text-3xl font-black text-foreground tracking-tight">
-                  New Client
-                </DialogTitle>
-                <div className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md border">
-                  Step {currentTab + 1} of 3
+            {/* Header */}
+            <DialogHeader className="p-6 pb-4 border-b border-border/60">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <DialogTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                      Add New Client
+                    </DialogTitle>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
+                      Step {currentTab + 1} of {TABS.length}
+                    </span>
+                  </div>
+                  <DialogDescription className="text-xs sm:text-sm text-muted-foreground font-medium mt-0.5">
+                    {currentTab === 0 && "Provide core business details, stage in the pipeline, and source attribution."}
+                    {currentTab === 1 && "Enter official communication coordinates, company location, and web presence."}
+                    {currentTab === 2 && "Upload identity, registration, and tax compliance certificates."}
+                  </DialogDescription>
                 </div>
               </div>
-              <DialogDescription className="text-muted-foreground font-medium">
-                Complete the details below to onboard a new client.
-              </DialogDescription>
             </DialogHeader>
 
-            {/* Mobile Tab Icons */}
-            <div className="flex md:hidden border-b px-4">
-               {TABS.map((tab, index) => (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    if (index < currentTab) setCurrentTab(index);
-                  }}
-                  className={`flex-1 py-4 flex flex-col items-center gap-1 border-b-2 transition-all ${
-                    currentTab === index ? "border-primary text-primary" : "border-transparent text-muted-foreground"
-                  }`}
-                >
-                  {tabIcons[index]}
-                  <span className="text-[10px] font-bold uppercase">{tab.split(' ')[0]}</span>
-                </button>
-              ))}
+            {/* Mobile Tab Stepper Bar */}
+            <div className="flex md:hidden border-b border-border bg-muted/30 px-3 py-2 gap-1.5 overflow-x-auto">
+              {TABS.map((tab, index) => {
+                const Icon = tab.icon;
+                const isCompleted = index < currentTab;
+                const isActive = index === currentTab;
+
+                return (
+                  <button
+                    key={tab.title}
+                    type="button"
+                    onClick={() => {
+                      if (index < currentTab) setCurrentTab(index);
+                    }}
+                    className={cn(
+                      "flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all whitespace-nowrap",
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                        : isCompleted
+                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        : "bg-background text-muted-foreground border-border/70"
+                    )}
+                  >
+                    {isCompleted ? (
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    ) : (
+                      <Icon className="w-3.5 h-3.5" />
+                    )}
+                    <span>{tab.title}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-6">
+            {/* Scrollable Form Content */}
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
               <div className="max-w-2xl mx-auto">
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                   {currentTab === 0 && (
                     <ClientInformationTab form={form} setField={setField} />
                   )}
@@ -281,56 +370,56 @@ export function CreateClientModal({
               </div>
             </div>
 
-            <DialogFooter className="p-6 bg-muted/80 border-t flex flex-row items-center gap-4 mt-auto">
-              <div className="flex justify-between w-full h-11 items-center">
-                <div className="flex gap-3">
-                  <Button 
-                    variant="ghost" 
-                    onClick={handleClose} 
-                    disabled={loading}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    Cancel
-                  </Button>
-                  {currentTab > 0 && (
-                    <Button 
-                      variant="outline" 
-                      onClick={handlePrevious} 
-                      disabled={loading}
-                      className="border-border hover:bg-card"
-                    >
-                      <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                    </Button>
-                  )}
-                </div>
+            {/* Footer Controls */}
+            <DialogFooter className="p-4 sm:p-5 bg-muted/40 dark:bg-muted/20 border-t border-border/70 flex flex-row items-center justify-between gap-3 mt-auto">
+              <Button 
+                variant="ghost" 
+                onClick={handleClose} 
+                disabled={loading}
+                className="text-muted-foreground hover:text-foreground font-semibold rounded-xl text-xs sm:text-sm h-10 px-4"
+              >
+                Cancel
+              </Button>
 
-                <div className="flex gap-3">
-                  {!isLastTab ? (
-                    <Button 
-                      onClick={handleNext} 
-                      disabled={loading}
-                      className="bg-primary hover:bg-primary/90 text-white px-6 font-bold shadow-lg shadow-primary/20"
-                    >
-                      Continue <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={handleSubmit} 
-                      disabled={loading}
-                      className="bg-primary hover:bg-primary/90 text-white px-8 font-bold shadow-lg shadow-primary/20"
-                    >
-                      {loading ? (
-                        <div className="flex items-center gap-2">
-                          <Plus className="w-4 h-4 animate-spin" /> Creating...
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4" /> Create client
-                        </div>
-                      )}
-                    </Button>
-                  )}
-                </div>
+              <div className="flex items-center gap-2">
+                {currentTab > 0 && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handlePrevious} 
+                    disabled={loading}
+                    className="border-border/80 hover:bg-background font-semibold rounded-xl text-xs sm:text-sm h-10 px-4"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1.5" /> Back
+                  </Button>
+                )}
+
+                {!isLastTab ? (
+                  <Button 
+                    onClick={handleNext} 
+                    disabled={loading}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs sm:text-sm h-10 px-5 shadow-sm shadow-primary/20"
+                  >
+                    Continue <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={handleSubmit} 
+                    disabled={loading}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs sm:text-sm h-10 px-6 shadow-sm shadow-primary/20 min-w-[130px]"
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Creating...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Create Client</span>
+                      </div>
+                    )}
+                  </Button>
+                )}
               </div>
             </DialogFooter>
           </div>

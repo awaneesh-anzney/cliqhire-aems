@@ -2,6 +2,18 @@ import PhoneInput from "@/components/phone/Phoneinput";
 import { LocationSuggestion } from "@/components/location/LocationSuggestion";
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 import { CountrySelect } from "@/components/ui/country-select";
+import { Input } from "@/components/ui/input";
+import { 
+  Building2, 
+  Mail, 
+  Globe, 
+  MapPin, 
+  MapPinned, 
+  Linkedin, 
+  Navigation, 
+  Phone, 
+  Send
+} from "lucide-react";
 
 interface ContactDetailsTabProps {
   form: ClientForm;
@@ -10,111 +22,178 @@ interface ContactDetailsTabProps {
 
 export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
   return (
-    <div className="grid grid-cols-2 gap-4 p-1">
-      <div className="col-span-2 flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Company name *</label>
-        <input
-          type="text"
-          value={form.name}
-          onChange={e => setField("name", e.target.value)}
-          placeholder="e.g. Acme Corp"
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
+    <div className="space-y-5 pb-2">
+      {/* 1. Company Identity & Email */}
+      <div className="rounded-2xl border border-border/80 bg-muted/20 dark:bg-muted/10 p-4 sm:p-5 space-y-4">
+        <div className="flex items-center gap-2 pb-1 border-b border-border/40">
+          <Building2 className="w-4 h-4 text-primary" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Company & Email</h3>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Company Name */}
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-xs font-bold text-foreground/90 flex items-center gap-1">
+              Company Name <span className="text-destructive">*</span>
+            </label>
+            <div className="relative flex items-center">
+              <Building2 className="w-4 h-4 absolute left-3 text-muted-foreground/70 pointer-events-none" />
+              <Input
+                type="text"
+                value={form.name}
+                onChange={e => setField("name", e.target.value)}
+                placeholder="e.g. Acme International Ltd."
+                className="h-10 pl-9 rounded-xl bg-background border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Primary Email */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90 flex items-center gap-1">
+              Primary Email <span className="text-destructive">*</span>
+            </label>
+            <div className="relative flex items-center">
+              <Mail className="w-4 h-4 absolute left-3 text-muted-foreground/70 pointer-events-none" />
+              <Input
+                type="email"
+                value={form.email}
+                onChange={e => setField("email", e.target.value)}
+                placeholder="official@company.com"
+                className="h-10 pl-9 rounded-xl bg-background border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Secondary Email */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Secondary Email</label>
+            <div className="relative flex items-center">
+              <Send className="w-4 h-4 absolute left-3 text-muted-foreground/70 pointer-events-none" />
+              <Input
+                type="email"
+                value={form.otherEmail}
+                onChange={e => setField("otherEmail", e.target.value)}
+                placeholder="billing@company.com (optional)"
+                className="h-10 pl-9 rounded-xl bg-background border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Email *</label>
-        <input
-          type="email"
-          value={form.email}
-          onChange={e => setField("email", e.target.value)}
-          placeholder="primary@company.com"
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
+      {/* 2. Direct Phone & Web Presence */}
+      <div className="rounded-2xl border border-border/80 bg-muted/20 dark:bg-muted/10 p-4 sm:p-5 space-y-4">
+        <div className="flex items-center gap-2 pb-1 border-b border-border/40">
+          <Phone className="w-4 h-4 text-primary" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Phone & Online Presence</h3>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Phone */}
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-xs font-bold text-foreground/90 flex items-center gap-1">
+              Official Phone <span className="text-destructive">*</span>
+            </label>
+            <PhoneInput
+              countryCode={form.countryCode}
+              onCountryCodeChange={(code) => setField("countryCode", code)}
+              phoneNumber={form.phoneNumber}
+              onPhoneNumberChange={(phone) => setField("phoneNumber", phone)}
+            />
+          </div>
+
+          {/* Website */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Website</label>
+            <div className="relative flex items-center">
+              <Globe className="w-4 h-4 absolute left-3 text-muted-foreground/70 pointer-events-none" />
+              <Input
+                type="url"
+                value={form.website}
+                onChange={e => setField("website", e.target.value)}
+                placeholder="https://example.com"
+                className="h-10 pl-9 rounded-xl bg-background border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+
+          {/* LinkedIn Profile */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">LinkedIn Company Page</label>
+            <div className="relative flex items-center">
+              <Linkedin className="w-4 h-4 absolute left-3 text-muted-foreground/70 pointer-events-none" />
+              <Input
+                type="url"
+                value={form.linkedInProfile}
+                onChange={e => setField("linkedInProfile", e.target.value)}
+                placeholder="https://linkedin.com/company/acme"
+                className="h-10 pl-9 rounded-xl bg-background border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Other email</label>
-        <input
-          type="email"
-          value={form.otherEmail}
-          onChange={e => setField("otherEmail", e.target.value)}
-          placeholder="other@company.com (optional)"
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
-      </div>
+      {/* 3. Location & Physical Address */}
+      <div className="rounded-2xl border border-border/80 bg-muted/20 dark:bg-muted/10 p-4 sm:p-5 space-y-4">
+        <div className="flex items-center gap-2 pb-1 border-b border-border/40">
+          <MapPin className="w-4 h-4 text-primary" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Location & Coordinates</h3>
+        </div>
 
-      <div className="flex flex-col gap-1.5 col-span-2 md:col-span-1">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Phone *</label>
-        <PhoneInput
-          countryCode={form.countryCode}
-          onCountryCodeChange={(code) => setField("countryCode", code)}
-          phoneNumber={form.phoneNumber}
-          onPhoneNumberChange={(phone) => setField("phoneNumber", phone)}
-        />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Country of Business */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Country of Business</label>
+            <CountrySelect
+              value={form.countryOfBusiness}
+              onChange={val => setField("countryOfBusiness", val)}
+              type="country"
+              placeholder="Select country of operations..."
+            />
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Website</label>
-        <input
-          type="url"
-          value={form.website}
-          onChange={e => setField("website", e.target.value)}
-          placeholder="https://company.com"
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
-      </div>
+          {/* City / Location */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">City / Location</label>
+            <LocationSuggestion
+              value={form.location}
+              onChange={val => setField("location", val)}
+              placeholder="Search city, e.g. Riyadh..."
+            />
+          </div>
 
-      <div className="flex flex-col gap-1.5 justify-end">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Country of business</label>
-        <CountrySelect
-          value={form.countryOfBusiness}
-          onChange={val => setField("countryOfBusiness", val)}
-          type="country"
-          placeholder="Select country..."
-        />
-      </div>
+          {/* Street Address */}
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-xs font-bold text-foreground/90">Street Address</label>
+            <div className="relative flex items-center">
+              <MapPinned className="w-4 h-4 absolute left-3 text-muted-foreground/70 pointer-events-none" />
+              <Input
+                type="text"
+                value={form.address}
+                onChange={e => setField("address", e.target.value)}
+                placeholder="Floor 4, Building 12, Olaya Street"
+                className="h-10 pl-9 rounded-xl bg-background border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Address</label>
-        <input
-          type="text"
-          value={form.address}
-          onChange={e => setField("address", e.target.value)}
-          placeholder="e.g. 123 Business Way"
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Location</label>
-        <LocationSuggestion
-          value={form.location}
-          onChange={val => setField("location", val)}
-          placeholder="Search for client city..."
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">LinkedIn</label>
-        <input
-          type="url"
-          value={form.linkedInProfile}
-          onChange={e => setField("linkedInProfile", e.target.value)}
-          placeholder="https://linkedin.com/company/..."
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Google Maps link</label>
-        <input
-          type="url"
-          value={form.googleMapsLink}
-          onChange={e => setField("googleMapsLink", e.target.value)}
-          placeholder="https://maps.google.com/..."
-          className="h-11 border border-border rounded-xl px-4 text-sm bg-muted focus:bg-card transition-all font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-        />
+          {/* Google Maps link */}
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-xs font-bold text-foreground/90">Google Maps Location Link</label>
+            <div className="relative flex items-center">
+              <Navigation className="w-4 h-4 absolute left-3 text-muted-foreground/70 pointer-events-none" />
+              <Input
+                type="url"
+                value={form.googleMapsLink}
+                onChange={e => setField("googleMapsLink", e.target.value)}
+                placeholder="https://maps.app.goo.gl/..."
+                className="h-10 pl-9 rounded-xl bg-background border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
