@@ -32,7 +32,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
     );
   }
 
-  const { parent, members = [] } = hierarchyData;
+  const { parent, members = [], totalCompanies = 0, totalJobCount = 0, stageBreakdown = {} } = hierarchyData;
 
   // Find the current client in the members list, or fallback
   const currentClient = members.find((m: any) => m._id === clientId) || { _id: clientId, name: "Current Client" };
@@ -54,6 +54,31 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
             <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
               {isParent ? "Parent Company & Subsidiaries" : "Subsidiary Company"}
             </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-card p-4 rounded-xl border border-border flex flex-col justify-center shadow-sm">
+          <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Total Companies</h4>
+          <p className="text-3xl font-black text-foreground">{totalCompanies}</p>
+        </div>
+        <div className="bg-card p-4 rounded-xl border border-border flex flex-col justify-center shadow-sm">
+          <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Total Jobs</h4>
+          <p className="text-3xl font-black text-foreground">{totalJobCount}</p>
+        </div>
+        <div className="bg-card p-4 rounded-xl border border-border flex flex-col justify-center shadow-sm">
+          <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Stage Breakdown</h4>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(stageBreakdown).length > 0 ? (
+              Object.entries(stageBreakdown).map(([stage, count]) => (
+                <Badge key={stage} variant="outline" className="text-[10px] bg-muted/30">
+                  {stage}: <span className="font-black ml-1">{count as React.ReactNode}</span>
+                </Badge>
+              ))
+            ) : (
+              <span className="text-xs text-muted-foreground font-medium">No stages available</span>
+            )}
           </div>
         </div>
       </div>

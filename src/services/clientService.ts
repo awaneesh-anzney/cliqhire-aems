@@ -532,6 +532,11 @@ export interface ClientsPage {
   page: number;
   limit: number;
   totalPages: number;
+  filters?: {
+    topLevelOnly?: boolean;
+    topLevelOnlyRequested?: boolean;
+    [key: string]: any;
+  };
 }
 
 // Get all clients (server-side paginated)
@@ -570,6 +575,7 @@ const getClients = async (
         page: resData.page ?? page,
         limit: resData.limit ?? limit,
         totalPages: Math.ceil(totalCount / limit) || 1,
+        filters: resData.filters,
       };
     }
 
@@ -582,6 +588,7 @@ const getClients = async (
         page: p ?? page,
         limit,
         totalPages: (pages ?? Math.ceil((total ?? clients.length) / limit)) || 1,
+        filters: resData.filters,
       };
     }
 
@@ -598,6 +605,7 @@ const getClients = async (
       page,
       limit,
       totalPages: Math.ceil(totalCount / limit) || 1,
+      filters: resData.filters,
     };
   } catch (error: any) {
     console.error("Error in getClients:", error);

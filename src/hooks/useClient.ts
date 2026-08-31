@@ -22,6 +22,11 @@ export interface ClientsPage {
   page: number;
   limit: number;
   totalPages: number;
+  filters?: {
+    topLevelOnly?: boolean;
+    topLevelOnlyRequested?: boolean;
+    [key: string]: any;
+  };
 }
 
 export function useClients(params: ClientsQueryParams = {}) {
