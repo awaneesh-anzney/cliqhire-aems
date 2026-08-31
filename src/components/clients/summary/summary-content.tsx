@@ -300,6 +300,85 @@ export function SummaryContent({
                   }
                 }}
               />
+              {clientData?.clientSource === 'Cold Call' && clientData?.clientSourceDetails?.date && (
+                <DetailRow
+                  label="Cold Call Date"
+                  value={new Date(clientData.clientSourceDetails.date).toLocaleDateString()}
+                  onUpdate={() => {}}
+                  disableInternalEdit={!canModify}
+                  customEdit={() => {
+                    if (canModify) {
+                      setEditClientSource(clientData?.clientSource || "");
+                      setEditClientSourceDetails(clientData?.clientSourceDetails || {});
+                      setShowClientSourceDialog(true);
+                    }
+                  }}
+                />
+              )}
+              {clientData?.clientSource === 'Events' && (
+                <>
+                  {clientData?.clientSourceDetails?.eventName && (
+                    <DetailRow
+                      label="Event Name"
+                      value={clientData.clientSourceDetails.eventName}
+                      onUpdate={() => {}}
+                      disableInternalEdit={!canModify}
+                      customEdit={() => {
+                        if (canModify) {
+                          setEditClientSource(clientData?.clientSource || "");
+                          setEditClientSourceDetails(clientData?.clientSourceDetails || {});
+                          setShowClientSourceDialog(true);
+                        }
+                      }}
+                    />
+                  )}
+                  {clientData?.clientSourceDetails?.eventDate && (
+                    <DetailRow
+                      label="Event Date"
+                      value={new Date(clientData.clientSourceDetails.eventDate).toLocaleDateString()}
+                      onUpdate={() => {}}
+                      disableInternalEdit={!canModify}
+                      customEdit={() => {
+                        if (canModify) {
+                          setEditClientSource(clientData?.clientSource || "");
+                          setEditClientSourceDetails(clientData?.clientSourceDetails || {});
+                          setShowClientSourceDialog(true);
+                        }
+                      }}
+                    />
+                  )}
+                  {clientData?.clientSourceDetails?.eventLocation && (
+                    <DetailRow
+                      label="Event Location"
+                      value={clientData.clientSourceDetails.eventLocation}
+                      onUpdate={() => {}}
+                      disableInternalEdit={!canModify}
+                      customEdit={() => {
+                        if (canModify) {
+                          setEditClientSource(clientData?.clientSource || "");
+                          setEditClientSourceDetails(clientData?.clientSourceDetails || {});
+                          setShowClientSourceDialog(true);
+                        }
+                      }}
+                    />
+                  )}
+                </>
+              )}
+              {clientData?.clientSource === 'Others' && clientData?.clientSourceDetails?.notes && (
+                <DetailRow
+                  label="Source Notes"
+                  value={clientData.clientSourceDetails.notes}
+                  onUpdate={() => {}}
+                  disableInternalEdit={!canModify}
+                  customEdit={() => {
+                    if (canModify) {
+                      setEditClientSource(clientData?.clientSource || "");
+                      setEditClientSourceDetails(clientData?.clientSourceDetails || {});
+                      setShowClientSourceDialog(true);
+                    }
+                  }}
+                />
+              )}
               <DetailRow
                 label="Client Priority"
                 value={clientData?.clientPriority}
