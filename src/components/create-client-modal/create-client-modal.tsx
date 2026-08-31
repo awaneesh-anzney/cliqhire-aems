@@ -52,6 +52,7 @@ const INITIAL_STATE = {
   parentClientId:    "",
   contractSource:    "own",
   primaryContactSource: "own",
+  clientSourceDetails: {} as Record<string, any>,
 };
 
 export type ClientForm = typeof INITIAL_STATE;
@@ -134,7 +135,19 @@ export function CreateClientModal({
 
     setLoading(true);
     try {
-      const body = objectToFormData(form, FILE_FIELDS);
+      const payload = { ...form };
+      
+      // Clean up clientSourceDetails based on API docs
+      if (payload.clientSource === 'Reference' || payload.clientSource === 'Existing Old Client') {
+        payload.clientSourceDetails = {} as any; // Backend ignores it, but let's send empty
+      }
+      
+      // Stringify clientSourceDetails for form-data (as per API docs)
+      if (payload.clientSourceDetails && typeof payload.clientSourceDetails === 'object') {
+        payload.clientSourceDetails = JSON.stringify(payload.clientSourceDetails) as any;
+      }
+
+      const body = objectToFormData(payload, FILE_FIELDS);
       
       // Backend will automatically handle subsidiary creation if parentClientId is present
       const result = await createClient(body);
