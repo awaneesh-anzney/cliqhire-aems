@@ -21,6 +21,8 @@ const stageStatusColors: Record<ClientStageStatus, string> = {
   "LinkedIn message Sent": "bg-blue-50 text-blue-700",
   "WA message sent": "bg-green-50 text-green-700",
   "Email sent": "bg-orange-50 text-orange-700",
+  "Active": "bg-emerald-100 text-emerald-800",
+  "Inactive": "bg-rose-100 text-rose-800",
 } as const
 
 interface ClientStageStatusBadgeProps {
@@ -32,7 +34,7 @@ interface ClientStageStatusBadgeProps {
 }
 
 export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disabled = false }: ClientStageStatusBadgeProps) {
-  if (stage !== "Engaged" || disabled) {
+  if (stage === "Lead" || disabled) {
     return (
       <Badge variant="secondary" className="bg-muted text-muted-foreground border-none">
         N/A
@@ -80,7 +82,9 @@ export function ClientStageStatusBadge({ id, status, stage, onStatusChange, disa
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        {clientStageStatuses.map((s) => (
+        {clientStageStatuses
+          .filter(s => stage === "Signed" ? ["Active", "Inactive"].includes(s) : !["Active", "Inactive"].includes(s))
+          .map((s) => (
           <DropdownMenuItem
             key={s}
             onClick={handleClick(id, s)}

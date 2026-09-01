@@ -29,6 +29,8 @@ export const clientStageStatuses = [
   "LinkedIn message Sent",
   "WA message sent",
   "Email sent",
+  "Active",
+  "Inactive",
 ] as const;
 
 export type ClientStageStatus = (typeof clientStageStatuses)[number];
