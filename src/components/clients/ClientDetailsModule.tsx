@@ -60,6 +60,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { AddClientToGroupModal } from "@/components/client-groups/AddClientToGroupModal";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { linkClientToGroup } from "@/services/clientService";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -150,6 +153,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   const [subStageSentDate, setSubStageSentDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [scheduleFollowUpOnSubstage, setScheduleFollowUpOnSubstage] = useState(false);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
 
   const {
     data: client,
@@ -547,10 +551,42 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
         Subsidiary of {client.parentCompany?.name || "Parent"}
       </Badge>
     )}
-    {client.groupId && (
-      <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 flex items-center gap-1 font-bold text-[10px] uppercase tracking-wider">
-        <Network className="w-3 h-3" />
-        {client.group?.name ? `Group: ${client.group.name}` : "Group Member"}
+    {client.groupId ? (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 flex items-center gap-1 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:bg-amber-500/20 transition-colors">
+            <Building2 className="w-3 h-3" />
+            {client.group?.name ? `Group: ${client.group.name}` : "Group Member"}
+          </Badge>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onClick={() => router.push(`/client-groups/${client.groupId}`)}>
+            View Group details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsGroupModalOpen(true)}>
+            Move to another group
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="text-red-500 focus:text-red-500" 
+            onClick={async () => {
+              if (window.confirm("Client will stay as-is, only its group tag is removed. Are you sure?")) {
+                await linkClientToGroup(client._id, null);
+                refetch();
+              }
+            }}
+          >
+            Remove from Group
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ) : (
+      <Badge 
+        variant="outline" 
+        className="bg-muted text-muted-foreground border-border flex items-center gap-1 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:bg-muted/80 transition-colors"
+        onClick={() => setIsGroupModalOpen(true)}
+      >
+        <Plus className="w-3 h-3" />
+        Add to Group
       </Badge>
     )}
   </div>

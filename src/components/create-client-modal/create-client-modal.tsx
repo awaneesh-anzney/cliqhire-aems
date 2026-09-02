@@ -21,6 +21,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { createClient } from "./api";
+import { AddClientToGroupModal } from "@/components/client-groups/AddClientToGroupModal";
 import { objectToFormData } from "@/formdata/formData";
 import { ClientInformationTab } from "./ClientInformationTab";
 import { ContactDetailsTab } from "./ContactDetailsTab";
@@ -135,6 +136,9 @@ export function CreateClientModal({
 
   const handlePrevious = () => setCurrentTab(prev => Math.max(prev - 1, 0));
 
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [createdClientId, setCreatedClientId] = useState<string | null>(null);
+
   const handleClose = () => {
     setForm(INITIAL_STATE);
     setCurrentTab(0);
@@ -170,9 +174,28 @@ export function CreateClientModal({
       const result = await createClient(body);
 
       if (result.data?.data?._id) {
-        toast.success("Client onboarded successfully");
-        router.push(`/clients/${result.data.data._id}`);
-        handleClose();
+        const newClientId = result.data.data._id;
+        toast.success("Client onboarded successfully", {
+          action: {
+            label: "Add to Group",
+            onClick: () => {
+              setCreatedClientId(newClientId);
+              setIsGroupModalOpen(true);
+            },
+          }
+        });
+        
+        // Wait 4 seconds for user to click the toast action.
+        // If they don't, we redirect. If they do, the modal handles the redirect on close.
+        setTimeout(() => {
+          setIsGroupModalOpen((currentIsOpen) => {
+            if (!currentIsOpen) {
+              router.push(`/clients/${newClientId}`);
+              handleClose();
+            }
+            return currentIsOpen;
+          });
+        }, 4000);
         return;
       }
       toast.success("Client onboarded successfully");
@@ -425,6 +448,20 @@ export function CreateClientModal({
           </div>
         </div>
       </DialogContent>
+      {createdClientId && (
+        <AddClientToGroupModal
+          open={isGroupModalOpen}
+          onOpenChange={(open) => {
+            setIsGroupModalOpen(open);
+            if (!open) {
+              router.push(`/clients/${createdClientId}`);
+              handleClose();
+            }
+          }}
+          mode="pick-group"
+          clientId={createdClientId}
+        />
+      )}
     </Dialog>
   );
 }

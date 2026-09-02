@@ -19,6 +19,7 @@ export const SIDEBAR_MODULES: SidebarModule[] = [
   { name: "Todo", href: "/todo", moduleKey: "todo", alwaysVisible: true },
   { name: "Leads", href: "/leads", moduleKey: "clients" },
   { name: "Clients", href: "/clients", moduleKey: "clients" },
+  { name: "Client Groups", href: "/client-groups", moduleKey: "clients" },
   { name: "Jobs", href: "/jobs", moduleKey: "jobs" },
   { name: "Candidates", href: "/candidates", moduleKey: "candidates" },
   { name: "Recruitment Pipeline", href: "/reactruterpipeline", moduleKey: "pipeline" },

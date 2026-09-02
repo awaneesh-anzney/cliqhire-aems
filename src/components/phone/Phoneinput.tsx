@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { COUNTRIES, validatePhone, getFullPhone, getCountryByCode } from "@/lib/countryCodes";
 import { Country, PhoneRawChange } from "@/types/countryCodes";
 import { cn } from "@/lib/utils";
-import Flags from "country-flag-icons/react/3x2";
+import * as Flags from "country-flag-icons/react/3x2";
 
 /**
  * PhoneInput — Reusable phone number field for Next.js
