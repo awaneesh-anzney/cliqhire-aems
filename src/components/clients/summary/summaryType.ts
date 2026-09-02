@@ -10,7 +10,7 @@
   address?: string;
   incorporationDate?: string;
   countryOfRegistration?: string;
-  lineOfBusiness?: string;
+  lineOfBusiness?: string | string[];
   registrationNumber?: string;
   countryOfBusiness?: string;
   description?: string;

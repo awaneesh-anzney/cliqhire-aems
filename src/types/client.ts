@@ -25,14 +25,12 @@ export type ClientIndustry = {
 };
 
 export type LineOfBusiness = 
-  | 'Executive Search'
-  | 'Blue Collar Hiring'
-  | 'Manpower Supply'
+  | 'Recruitment'
   | 'HR Managed Services'
+  | 'IT & Technology'
+  | 'Mgt Consulting'
   | 'HR Consulting'
-  | 'Business Consulting'
-  | 'Projects'
-  | 'Investment Advisory';
+  | 'Outsourcing';
 
 export interface ClientContact {
   name: string;

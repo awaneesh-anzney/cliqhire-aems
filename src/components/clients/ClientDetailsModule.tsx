@@ -662,6 +662,15 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
           </span>
         )}
 
+        {client.lineOfBusiness && (Array.isArray(client.lineOfBusiness) ? client.lineOfBusiness.length > 0 : Boolean(client.lineOfBusiness)) && (
+          <span className="flex items-center gap-1.5 border-l border-border pl-4">
+            <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70" />
+            <span className="max-w-[250px] truncate">
+              {Array.isArray(client.lineOfBusiness) ? client.lineOfBusiness.join(", ") : client.lineOfBusiness}
+            </span>
+          </span>
+        )}
+
         {(client.address || client.location) && (
           <span className="flex items-center gap-1.5 border-l border-border pl-4">
             <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />

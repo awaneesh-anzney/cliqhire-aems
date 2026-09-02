@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export function SummaryContent({
   clientId,
@@ -80,6 +81,18 @@ export function SummaryContent({
     },
     enabled: showClientGroupDialog,
   });
+
+  // Line of Business edit dialog
+  const [showLineOfBusinessDialog, setShowLineOfBusinessDialog] = useState(false);
+  const [editLineOfBusiness, setEditLineOfBusiness] = useState<string[]>([]);
+  const LINE_OF_BUSINESS_OPTIONS = [
+    "Recruitment",
+    "HR Managed Services",
+    "IT & Technology",
+    "Mgt Consulting",
+    "HR Consulting",
+    "Outsourcing",
+  ];
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -452,6 +465,32 @@ export function SummaryContent({
                     disabled={!canModify}
                   />
                 }
+              />
+              <DetailRow
+                label="Line of Business"
+                value={
+                  Array.isArray(clientData?.lineOfBusiness)
+                    ? clientData.lineOfBusiness.join(", ")
+                    : clientData?.lineOfBusiness || ""
+                }
+                formattedValue={
+                  Array.isArray(clientData?.lineOfBusiness)
+                    ? clientData.lineOfBusiness.join(", ")
+                    : clientData?.lineOfBusiness || ""
+                }
+                onUpdate={() => {}}
+                disableInternalEdit={!canModify}
+                customEdit={() => {
+                  if (canModify) {
+                    const current = Array.isArray(clientData?.lineOfBusiness)
+                      ? clientData.lineOfBusiness
+                      : typeof clientData?.lineOfBusiness === "string" && clientData.lineOfBusiness
+                      ? clientData.lineOfBusiness.split(",").map((s: string) => s.trim()).filter(Boolean)
+                      : [];
+                    setEditLineOfBusiness(current);
+                    setShowLineOfBusinessDialog(true);
+                  }
+                }}
               />
               <DetailRow
                 label="Client Phone Number"
@@ -884,6 +923,65 @@ export function SummaryContent({
       </DialogContent>
     </Dialog>
   )}
+
+  {/* Line of Business Edit Dialog */}
+  <Dialog open={showLineOfBusinessDialog} onOpenChange={setShowLineOfBusinessDialog}>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Edit Line of Business</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-2 py-3">
+        <p className="text-xs text-muted-foreground mb-2">Select the line(s) of business applicable:</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
+          {LINE_OF_BUSINESS_OPTIONS.map((option) => {
+            const isSelected = editLineOfBusiness.includes(option);
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => {
+                  setEditLineOfBusiness((prev) =>
+                    prev.includes(option) ? prev.filter((x) => x !== option) : [...prev, option]
+                  );
+                }}
+                className={cn(
+                  "flex items-center gap-2.5 p-2.5 rounded-xl border text-xs font-semibold text-left transition-all",
+                  isSelected
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border/70 hover:bg-muted/50 text-foreground"
+                )}
+              >
+                <div
+                  className={cn(
+                    "h-4 w-4 rounded-md flex items-center justify-center border text-[10px] font-bold shrink-0",
+                    isSelected
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-muted-foreground/40"
+                  )}
+                >
+                  {isSelected && "✓"}
+                </div>
+                <span className="truncate">{option}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={() => setShowLineOfBusinessDialog(false)}>
+          Cancel
+        </Button>
+        <Button
+          onClick={async () => {
+            await updateClientDetails("lineOfBusiness", editLineOfBusiness);
+            setShowLineOfBusinessDialog(false);
+          }}
+        >
+          Save Changes
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </div>
   );
 }
