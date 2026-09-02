@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
@@ -116,14 +118,23 @@ export function DocumentsTab({ form, setField, onPreview }: DocumentsTabProps) {
 
   return (
     <div className="space-y-4 pb-2">
-      <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/70">
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-primary" />
-          <span className="text-xs font-bold text-foreground">Compliance & Verification Documents</span>
+      {/* Top Banner */}
+      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-card border border-border/70 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <FileText className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-xs font-bold text-foreground block">Compliance & Verification Documents</span>
+            <span className="text-[11px] text-muted-foreground font-medium">Upload corporate licenses, tax identifiers, and company logo</span>
+          </div>
         </div>
-        <span className="text-[11px] text-muted-foreground font-medium">All uploads optional · Max 5MB</span>
+        <span className="hidden sm:inline-flex text-[10px] font-bold text-muted-foreground bg-muted/60 px-2 py-1 rounded-md border border-border/50">
+          Max 5MB / file
+        </span>
       </div>
 
+      {/* Document Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {DOC_FIELDS.map(({ key, label, sub, accept, hint, icon: IconComponent }) => {
           const file = form[key] as File | null;
@@ -133,8 +144,8 @@ export function DocumentsTab({ form, setField, onPreview }: DocumentsTabProps) {
             <div 
               key={key} 
               className={cn(
-                "rounded-2xl border transition-all duration-200 p-4 flex flex-col justify-between gap-3 bg-muted/20 dark:bg-muted/10",
-                file ? "border-primary/40 bg-primary/5 dark:bg-primary/10" : "border-border/80 hover:border-primary/30"
+                "rounded-2xl border transition-all duration-200 p-4 flex flex-col justify-between gap-3 bg-card shadow-xs",
+                file ? "border-primary/40 bg-primary/5 dark:bg-primary/10 ring-1 ring-primary/20" : "border-border/70 hover:border-primary/40"
               )}
             >
               {/* Header Title */}
@@ -146,10 +157,10 @@ export function DocumentsTab({ form, setField, onPreview }: DocumentsTabProps) {
                   <IconComponent className="w-4 h-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-1">
                     <p className="text-xs font-bold text-foreground truncate">{label}</p>
                     {file && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md shrink-0">
                         <CheckCircle2 className="w-3 h-3" /> Attached
                       </span>
                     )}
@@ -166,25 +177,25 @@ export function DocumentsTab({ form, setField, onPreview }: DocumentsTabProps) {
                   onDrop={e => onDrop(key, e)}
                   onClick={() => triggerBrowse(key)}
                   className={cn(
-                    "border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-1.5",
+                    "border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-1.5 min-h-[96px]",
                     isDragOver
                       ? "border-primary bg-primary/10 scale-[0.99]"
-                      : "border-border/80 hover:border-primary/50 bg-background hover:bg-background/80"
+                      : "border-border/70 hover:border-primary/50 bg-muted/20 hover:bg-muted/40"
                   )}
                 >
-                  <div className="p-2 rounded-full bg-muted/50 text-muted-foreground">
-                    <UploadCloud className="w-5 h-5" />
+                  <div className="p-1.5 rounded-full bg-background text-primary shadow-xs">
+                    <UploadCloud className="w-4 h-4" />
                   </div>
                   <p className="text-xs font-semibold text-foreground">
-                    Drop file here, or <span className="text-primary underline">browse</span>
+                    Drop file here, or <span className="text-primary font-bold underline">browse</span>
                   </p>
-                  <p className="text-[10px] text-muted-foreground">{hint}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">{hint}</p>
                 </div>
               ) : (
-                <div className="rounded-xl border border-border/80 bg-background p-3 flex items-center justify-between gap-2 shadow-xs">
+                <div className="rounded-xl border border-border/80 bg-background p-3 flex items-center justify-between gap-2 shadow-xs min-h-[96px]">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-foreground truncate">{file.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-medium mt-0.5">
+                    <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -195,7 +206,7 @@ export function DocumentsTab({ form, setField, onPreview }: DocumentsTabProps) {
                       size="sm"
                       type="button"
                       onClick={() => onPreview(file)}
-                      className="h-8 px-2 text-xs font-bold text-primary hover:text-primary hover:bg-primary/10 rounded-lg"
+                      className="h-8 px-2.5 text-xs font-bold text-primary hover:text-primary hover:bg-primary/10 rounded-lg"
                     >
                       <Eye className="w-3.5 h-3.5 mr-1" /> Preview
                     </Button>
@@ -204,7 +215,8 @@ export function DocumentsTab({ form, setField, onPreview }: DocumentsTabProps) {
                       size="sm"
                       type="button"
                       onClick={() => setField(key, null)}
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+                      title="Remove file"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
@@ -213,23 +225,23 @@ export function DocumentsTab({ form, setField, onPreview }: DocumentsTabProps) {
               )}
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 pt-0.5">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => triggerBrowse(key)}
-                  className="flex-1 h-8 rounded-lg text-xs font-semibold border-border/80 hover:bg-background"
+                  className="flex-1 h-8.5 rounded-xl text-xs font-semibold border-border/80 hover:bg-background shadow-none"
                 >
                   <FolderOpen className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
-                  {file ? "Change" : "Browse"}
+                  {file ? "Change File" : "Browse"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => triggerCamera(key)}
-                  className="h-8 px-3 rounded-lg text-xs font-semibold border-border/80 hover:bg-background"
+                  className="h-8.5 px-3 rounded-xl text-xs font-semibold border-border/80 hover:bg-background shadow-none"
                   title="Capture with camera"
                 >
                   <Camera className="w-3.5 h-3.5 text-muted-foreground" />

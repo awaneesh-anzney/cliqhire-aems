@@ -208,14 +208,14 @@ export function CreateClientModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border border-border/80 bg-background shadow-2xl rounded-2xl sm:rounded-3xl sm:max-h-[90vh]">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border border-border/70 bg-background shadow-2xl rounded-2xl sm:rounded-3xl sm:max-h-[90vh]">
         <div className="flex flex-col md:flex-row h-full md:h-[680px] max-h-[85vh] min-h-[540px]">
           {/* Left Sidebar - Step Navigation */}
-          <div className="hidden md:flex flex-col w-64 bg-muted/40 dark:bg-muted/20 border-r border-border/70 p-6 shrink-0 justify-between">
-            <div>
-              {/* Header Badge */}
-              <div className="flex items-center gap-2.5 pb-6 border-b border-border/50 mb-6">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shadow-sm">
+          <div className="hidden md:flex flex-col w-64 bg-muted/40 dark:bg-muted/15 border-r border-border/60 p-6 shrink-0 justify-between">
+            <div className="space-y-6">
+              {/* Header Brand */}
+              <div className="flex items-center gap-3 pb-5 border-b border-border/50">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 text-primary flex items-center justify-center shadow-xs ring-1 ring-primary/20">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div>
@@ -228,9 +228,9 @@ export function CreateClientModal({
               </div>
 
               {/* Steps List */}
-              <div className="space-y-4 relative">
+              <div className="space-y-2 relative">
                 {/* Vertical Rail Line */}
-                <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-border/80 -z-0" />
+                <div className="absolute left-[18px] top-4 bottom-4 w-0.5 bg-border/60 -z-0" />
 
                 {TABS.map((tab, index) => {
                   const isCompleted = index < currentTab;
@@ -250,20 +250,20 @@ export function CreateClientModal({
                         }
                       }}
                       className={cn(
-                        "w-full flex items-start gap-3 p-2 rounded-xl text-left transition-all duration-200 group relative z-10",
+                        "w-full flex items-start gap-3 p-2.5 rounded-xl text-left transition-all duration-200 group relative z-10",
                         isActive
-                          ? "bg-background/90 dark:bg-background/60 shadow-sm border border-border/80"
-                          : "hover:bg-background/50 border border-transparent"
+                          ? "bg-card shadow-sm border border-border/80 ring-1 ring-primary/10"
+                          : "hover:bg-muted/50 border border-transparent"
                       )}
                     >
                       <div
                         className={cn(
                           "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 transition-all duration-200 mt-0.5",
                           isCompleted
-                            ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/20"
+                            ? "bg-emerald-500 text-white shadow-xs shadow-emerald-500/25"
                             : isActive
-                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-105"
-                            : "bg-muted text-muted-foreground border border-border/70 group-hover:border-primary/40"
+                            ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 scale-105"
+                            : "bg-muted text-muted-foreground border border-border/70 group-hover:border-primary/40 group-hover:text-foreground"
                         )}
                       >
                         {isCompleted ? (
@@ -274,21 +274,19 @@ export function CreateClientModal({
                       </div>
 
                       <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={cn(
-                              "text-xs font-bold truncate transition-colors",
-                              isActive
-                                ? "text-foreground"
-                                : isCompleted
-                                ? "text-foreground/80 font-semibold"
-                                : "text-muted-foreground group-hover:text-foreground/80"
-                            )}
-                          >
-                            {tab.title}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground font-medium leading-tight truncate">
+                        <span
+                          className={cn(
+                            "text-xs font-bold truncate transition-colors",
+                            isActive
+                              ? "text-foreground"
+                              : isCompleted
+                              ? "text-foreground/90 font-semibold"
+                              : "text-muted-foreground group-hover:text-foreground"
+                          )}
+                        >
+                          {tab.title}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-medium leading-tight truncate mt-0.5">
                           {tab.subtitle}
                         </span>
                       </div>
@@ -299,13 +297,13 @@ export function CreateClientModal({
             </div>
 
             {/* Bottom Tip Card */}
-            <div className="bg-background/80 dark:bg-background/40 p-3.5 rounded-xl border border-border/70 shadow-xs">
+            <div className="bg-card p-3.5 rounded-xl border border-border/60 shadow-xs">
               <div className="flex items-start gap-2.5">
-                <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 mt-0.5">
+                <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0">
                   <Sparkles className="w-3.5 h-3.5" />
                 </div>
                 <div className="text-[11px] text-muted-foreground leading-relaxed">
-                  <p className="font-semibold text-foreground/90 mb-0.5">Quick Tip</p>
+                  <p className="font-semibold text-foreground mb-0.5">Quick Tip</p>
                   Fill required fields to activate pipeline automations & contracts.
                 </div>
               </div>
@@ -314,24 +312,27 @@ export function CreateClientModal({
 
           {/* Right Main Content */}
           <div className="flex-1 flex flex-col bg-card overflow-hidden">
-            <DialogHeader className="p-6 pb-4 border-b border-border/60 flex flex-col items-start gap-1">
-              <div className="flex items-center gap-2">
-                <DialogTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-                  Add New Client
-                </DialogTitle>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
-                  Step {currentTab + 1} of {TABS.length}
-                </span>
+            {/* Header */}
+            <DialogHeader className="p-5 sm:p-6 pb-4 border-b border-border/60 flex flex-col items-start gap-1 shrink-0 bg-background/50">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2.5">
+                  <DialogTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                    Add New Client
+                  </DialogTitle>
+                  <span className="inline-flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    Step {currentTab + 1} of {TABS.length}
+                  </span>
+                </div>
               </div>
-              <DialogDescription className="text-xs sm:text-sm text-muted-foreground font-medium">
-                {currentTab === 0 && "Provide core business details, stage in the pipeline, and source attribution."}
-                {currentTab === 1 && "Enter official communication coordinates, company location, and web presence."}
-                {currentTab === 2 && "Upload identity, registration, and tax compliance certificates."}
+              <DialogDescription className="text-xs sm:text-sm text-muted-foreground font-medium mt-0.5">
+                {currentTab === 0 && "Provide core business details, pipeline stage, priority, and source attribution."}
+                {currentTab === 1 && "Enter official communication coordinates, phone numbers, and location details."}
+                {currentTab === 2 && "Upload identity, registration, VAT certificates, and compliance documents."}
               </DialogDescription>
             </DialogHeader>
 
             {/* Mobile Tab Stepper Bar */}
-            <div className="flex md:hidden border-b border-border bg-muted/30 px-3 py-2 gap-1.5 overflow-x-auto">
+            <div className="flex md:hidden border-b border-border/60 bg-muted/30 px-3 py-2 gap-1.5 overflow-x-auto shrink-0">
               {TABS.map((tab, index) => {
                 const Icon = tab.icon;
                 const isCompleted = index < currentTab;
@@ -345,7 +346,7 @@ export function CreateClientModal({
                       if (index < currentTab) setCurrentTab(index);
                     }}
                     className={cn(
-                      "flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all whitespace-nowrap",
+                      "flex-1 py-1.5 px-2.5 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all whitespace-nowrap",
                       isActive
                         ? "bg-primary text-primary-foreground border-primary shadow-xs"
                         : isCompleted
@@ -365,26 +366,28 @@ export function CreateClientModal({
             </div>
 
             {/* Scrollable Form Content */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-              <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
-                {currentTab === 0 && (
-                  <ClientInformationTab form={form} setField={setField} />
-                )}
-                {currentTab === 1 && (
-                  <ContactDetailsTab form={form} setField={setField} />
-                )}
-                {currentTab === 2 && (
-                  <DocumentsTab
-                    form={form}
-                    setField={setField}
-                    onPreview={handlePreview}
-                  />
-                )}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-muted/10">
+              <div className="max-w-3xl mx-auto">
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  {currentTab === 0 && (
+                    <ClientInformationTab form={form} setField={setField} />
+                  )}
+                  {currentTab === 1 && (
+                    <ContactDetailsTab form={form} setField={setField} />
+                  )}
+                  {currentTab === 2 && (
+                    <DocumentsTab
+                      form={form}
+                      setField={setField}
+                      onPreview={handlePreview}
+                    />
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Footer Controls */}
-            <DialogFooter className="p-4 sm:p-5 bg-muted/40 dark:bg-muted/20 border-t border-border/70 flex flex-row items-center justify-between gap-3 mt-auto">
+            <DialogFooter className="p-4 sm:p-5 bg-background border-t border-border/60 flex flex-row items-center justify-between gap-3 shrink-0">
               <Button 
                 variant="ghost" 
                 onClick={handleClose} 
@@ -394,13 +397,13 @@ export function CreateClientModal({
                 Cancel
               </Button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {currentTab > 0 && (
                   <Button 
                     variant="outline" 
                     onClick={handlePrevious} 
                     disabled={loading}
-                    className="border-border/80 hover:bg-background font-semibold rounded-xl text-xs sm:text-sm h-10 px-4"
+                    className="border-border/80 hover:bg-muted/50 font-semibold rounded-xl text-xs sm:text-sm h-10 px-4"
                   >
                     <ArrowLeft className="w-4 h-4 mr-1.5" /> Back
                   </Button>
