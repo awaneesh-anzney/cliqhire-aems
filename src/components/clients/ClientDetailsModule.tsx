@@ -547,6 +547,12 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
         Subsidiary of {client.parentCompany?.name || "Parent"}
       </Badge>
     )}
+    {client.groupId && (
+      <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 flex items-center gap-1 font-bold text-[10px] uppercase tracking-wider">
+        <Network className="w-3 h-3" />
+        {client.group?.name ? `Group: ${client.group.name}` : "Group Member"}
+      </Badge>
+    )}
   </div>
 
   <ClientStageBadge

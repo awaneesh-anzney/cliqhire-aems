@@ -35,6 +35,17 @@ export const clientStageStatuses = [
 
 export type ClientStageStatus = (typeof clientStageStatuses)[number];
 
+export interface ClientGroup {
+  _id: string;
+  name: string;
+  groupCode?: string;
+  description?: string;
+  primaryClientId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  memberCount?: number;
+}
+
 export interface ClientResponse {
   clientId?: string;
   _id: string;
@@ -107,6 +118,12 @@ export interface ClientResponse {
   role?: "parent" | "subsidiary" | "standalone";
   parentCompany?: any;
   subsidiaries?: any[];
+  groupId?: string | null;
+  group?: {
+    _id: string;
+    name: string;
+    groupCode?: string;
+  };
   createdBy?: {
     id: string;
     name: string;
@@ -1145,6 +1162,29 @@ const getClientHierarchy = async (id: string): Promise<any> => {
   }
 };
 
+// GET /api/client-groups
+const getClientGroups = async (search: string = "", page: number = 1, limit: number = 20): Promise<{ data: ClientGroup[], totalCount: number }> => {
+  try {
+    const response = await api.get(`/api/client-groups`, {
+      params: { search, page, limit },
+      timeout: 15000
+    });
+    return response.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/link-group
+const linkClientGroup = async (id: string, groupId: string | null): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/link-group`, { groupId }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -1178,5 +1218,7 @@ export {
   getGroupSummary,
   getClientHierarchy,
   getParentOptions,
+  getClientGroups,
+  linkClientGroup,
 };
 

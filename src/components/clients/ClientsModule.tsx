@@ -55,6 +55,7 @@ interface Client {
   nextFollowUpDate?: string;
   lastContactedAt?: string;
   role?: "parent" | "subsidiary" | "standalone";
+  groupId?: string | null;
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -235,6 +236,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       lastContactedAt: (c as any).lastContactedAt || "",
       subsidiaryCount: (c as any).subsidiaryCount || 0,
       role: (c as any).role || "standalone",
+      groupId: c.groupId || null,
     }));
   }, [clientsPage]);
 

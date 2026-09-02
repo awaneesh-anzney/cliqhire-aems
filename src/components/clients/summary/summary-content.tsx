@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getFileType, ClientDetails, PrimaryContact, TeamMemberType, ContactType } from "./summaryType";
 import { api } from "@/lib/axios-config";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { PDFViewer } from "@/components/ui/pdf-viewer";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
 import { useIndustries } from "@/hooks/useIndustries";
@@ -68,6 +68,18 @@ export function SummaryContent({
   const [showClientSourceDialog, setShowClientSourceDialog] = useState(false);
   const [editClientSource, setEditClientSource] = useState<string>("");
   const [editClientSourceDetails, setEditClientSourceDetails] = useState<any>({});
+
+  // Client Group edit dialog
+  const [showClientGroupDialog, setShowClientGroupDialog] = useState(false);
+  const [groupSearchQuery, setGroupSearchQuery] = useState("");
+  const { data: groupSearchResults, isLoading: isGroupSearchLoading } = useQuery({
+    queryKey: ["clientGroups", groupSearchQuery],
+    queryFn: async () => {
+      const res = await api.get(`/api/client-groups`, { params: { search: groupSearchQuery, limit: 10 } });
+      return res.data?.data || [];
+    },
+    enabled: showClientGroupDialog,
+  });
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -415,6 +427,18 @@ export function SummaryContent({
                 value={clientData?.name}
                 onUpdate={handleUpdateField("name")}
                 disableInternalEdit={!canModify}
+              />
+              <DetailRow
+                label="Client Group"
+                value={clientData?.group?.name || ""}
+                onUpdate={() => {}}
+                disableInternalEdit={!canModify}
+                customEdit={() => {
+                  if (canModify) {
+                    setGroupSearchQuery("");
+                    setShowClientGroupDialog(true);
+                  }
+                }}
               />
               <DetailRow
                 label="Client Industry"
@@ -785,6 +809,78 @@ export function SummaryContent({
             }
           }}>Save</Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )}
+
+  {/* Client Group Select Dialog */}
+  {canModify && (
+    <Dialog open={showClientGroupDialog} onOpenChange={setShowClientGroupDialog}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Select Client Group</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <Input 
+            placeholder="Search groups..." 
+            value={groupSearchQuery} 
+            onChange={(e) => setGroupSearchQuery(e.target.value)} 
+          />
+          <div className="max-h-60 overflow-y-auto space-y-2">
+            {isGroupSearchLoading ? (
+              <div className="text-sm text-muted-foreground text-center py-4">Searching...</div>
+            ) : groupSearchResults?.length > 0 ? (
+              groupSearchResults.map((group: any) => (
+                <div 
+                  key={group._id} 
+                  className="flex flex-col p-2 hover:bg-muted rounded-md cursor-pointer border border-transparent hover:border-border transition-colors"
+                  onClick={async () => {
+                    try {
+                      const response = await api.patch(`/api/clients/${clientId}/link-group`, { groupId: group._id });
+                      queryClient.setQueryData(["clientsData", clientId], (old: any) => ({
+                        ...(old || {}),
+                        groupId: group._id,
+                        group: { _id: group._id, name: group.name }
+                      }));
+                      toast.success(`Client added to group ${group.name}`);
+                      setShowClientGroupDialog(false);
+                    } catch (error) {
+                      toast.error("Failed to link client group");
+                    }
+                  }}
+                >
+                  <span className="font-semibold text-sm text-foreground">{group.name}</span>
+                  {group.groupCode && <span className="text-xs text-muted-foreground">{group.groupCode}</span>}
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-4">No groups found.</div>
+            )}
+          </div>
+          {clientData?.groupId && (
+            <Button 
+              variant="destructive" 
+              className="w-full mt-4"
+              onClick={async () => {
+                try {
+                  await api.patch(`/api/clients/${clientId}/link-group`, { groupId: null });
+                  queryClient.setQueryData(["clientsData", clientId], (old: any) => {
+                    const newData = { ...old };
+                    delete newData.groupId;
+                    delete newData.group;
+                    return newData;
+                  });
+                  toast.success("Client removed from group");
+                  setShowClientGroupDialog(false);
+                } catch (error) {
+                  toast.error("Failed to unlink client group");
+                }
+              }}
+            >
+              Unlink Group
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )}
