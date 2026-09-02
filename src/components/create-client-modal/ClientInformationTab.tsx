@@ -256,15 +256,12 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
           {/* Industry */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground/90">Industry</label>
-            <div className="h-10 rounded-xl bg-background border border-border/80 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all flex items-center px-2.5">
-              <Building2 className="w-4 h-4 text-primary shrink-0 mr-2" />
-              <IndustrySelector 
-                value={form.industry} 
-                onValueChange={val => setField("industry", val)} 
-                modal
-                className="border-none bg-transparent hover:bg-transparent shadow-none px-0 h-full text-xs sm:text-sm focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
-              />
-            </div>
+            <IndustrySelector 
+              value={form.industry} 
+              onValueChange={val => setField("industry", val)} 
+              modal
+              className="h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 text-xs sm:text-sm font-semibold shadow-none justify-between px-3"
+            />
           </div>
 
           {/* Dynamic Details: Cold Call */}

@@ -41,13 +41,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
               Company Name <span className="text-rose-500">*</span>
             </label>
             <div className="relative flex items-center">
-              <Building2 className="w-4 h-4 absolute left-3 text-primary pointer-events-none" />
+              <Building2 className="w-4 h-4 absolute left-3.5 text-primary/70 pointer-events-none z-10" />
               <Input
                 type="text"
                 value={form.name}
                 onChange={e => setField("name", e.target.value)}
                 placeholder="e.g. Acme International Ltd."
-                className="h-10 pl-9.5 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
+                className="h-10 pl-10 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
               />
             </div>
           </div>
@@ -58,13 +58,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
               Primary Email <span className="text-rose-500">*</span>
             </label>
             <div className="relative flex items-center">
-              <Mail className="w-4 h-4 absolute left-3 text-primary pointer-events-none" />
+              <Mail className="w-4 h-4 absolute left-3.5 text-primary/70 pointer-events-none z-10" />
               <Input
                 type="email"
                 value={form.email}
                 onChange={e => setField("email", e.target.value)}
                 placeholder="official@company.com"
-                className="h-10 pl-9.5 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
+                className="h-10 pl-10 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
               />
             </div>
           </div>
@@ -73,13 +73,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground/90">Secondary Email</label>
             <div className="relative flex items-center">
-              <Send className="w-4 h-4 absolute left-3 text-muted-foreground pointer-events-none" />
+              <Send className="w-4 h-4 absolute left-3.5 text-muted-foreground/70 pointer-events-none z-10" />
               <Input
                 type="email"
                 value={form.otherEmail}
                 onChange={e => setField("otherEmail", e.target.value)}
                 placeholder="billing@company.com (optional)"
-                className="h-10 pl-9.5 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
+                className="h-10 pl-10 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
               />
             </div>
           </div>
@@ -115,13 +115,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground/90">Website</label>
             <div className="relative flex items-center">
-              <Globe className="w-4 h-4 absolute left-3 text-muted-foreground pointer-events-none" />
+              <Globe className="w-4 h-4 absolute left-3.5 text-muted-foreground/70 pointer-events-none z-10" />
               <Input
                 type="url"
                 value={form.website}
                 onChange={e => setField("website", e.target.value)}
                 placeholder="https://example.com"
-                className="h-10 pl-9.5 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
+                className="h-10 pl-10 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
               />
             </div>
           </div>
@@ -130,13 +130,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground/90">LinkedIn Page</label>
             <div className="relative flex items-center">
-              <Linkedin className="w-4 h-4 absolute left-3 text-[#0A66C2] pointer-events-none" />
+              <Linkedin className="w-4 h-4 absolute left-3.5 text-[#0A66C2] pointer-events-none z-10" />
               <Input
                 type="url"
                 value={form.linkedInProfile}
                 onChange={e => setField("linkedInProfile", e.target.value)}
                 placeholder="https://linkedin.com/company/acme"
-                className="h-10 pl-9.5 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
+                className="h-10 pl-10 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
               />
             </div>
           </div>
@@ -178,13 +178,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-xs font-bold text-foreground/90">Street Address</label>
             <div className="relative flex items-center">
-              <MapPinned className="w-4 h-4 absolute left-3 text-muted-foreground pointer-events-none" />
+              <MapPinned className="w-4 h-4 absolute left-3.5 text-muted-foreground/70 pointer-events-none z-10" />
               <Input
                 type="text"
                 value={form.address}
                 onChange={e => setField("address", e.target.value)}
                 placeholder="Floor 4, Building 12, Olaya Street"
-                className="h-10 pl-9.5 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
+                className="h-10 pl-10 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
               />
             </div>
           </div>
@@ -193,13 +193,13 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-xs font-bold text-foreground/90">Google Maps Location Link</label>
             <div className="relative flex items-center">
-              <Navigation className="w-4 h-4 absolute left-3 text-muted-foreground pointer-events-none" />
+              <Navigation className="w-4 h-4 absolute left-3.5 text-muted-foreground/70 pointer-events-none z-10" />
               <Input
                 type="url"
                 value={form.googleMapsLink}
                 onChange={e => setField("googleMapsLink", e.target.value)}
                 placeholder="https://maps.app.goo.gl/..."
-                className="h-10 pl-9.5 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
+                className="h-10 pl-10 rounded-xl bg-background border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 font-semibold text-xs sm:text-sm transition-all"
               />
             </div>
           </div>

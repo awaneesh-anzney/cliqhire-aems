@@ -194,8 +194,8 @@ export default function PhoneInput({
 
       <div
         className={cn(
-          "flex items-center border rounded-xl overflow-visible bg-card transition-all h-11",
-          displayError ? "border-red-400 focus-within:border-red-500 shadow-sm shadow-red-50" : "border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 shadow-sm",
+          "flex items-center border rounded-xl overflow-visible bg-background transition-all h-10",
+          displayError ? "border-rose-400 focus-within:border-rose-500 shadow-xs shadow-rose-50" : "border-border/80 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 shadow-xs",
           disabled && "opacity-50 pointer-events-none bg-muted"
         )}
       >

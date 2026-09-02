@@ -78,19 +78,14 @@ export function LocationSuggestion({
       <PopoverTrigger asChild>
         <div className={cn("relative w-full group", className)}>
           <div className={cn(
-            "flex items-center w-full rounded-xl border border-input bg-background/50 backdrop-blur-sm px-3.5 py-2.5 text-sm shadow-sm transition-all duration-200",
-            "hover:border-muted-foreground/30",
-            "focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/5",
+            "flex items-center w-full h-10 rounded-xl border border-border/80 bg-background px-3 text-xs sm:text-sm shadow-xs transition-all duration-200",
+            "hover:border-primary/50",
+            "focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20",
             disabled && "opacity-50 cursor-not-allowed bg-muted"
           )}>
-            <div className={cn(
-              "p-1.5 rounded-lg mr-2.5 transition-colors",
-              open ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground/60"
-            )}>
-              <MapPin className="h-4 w-4 shrink-0" />
-            </div>
+            <MapPin className="h-4 w-4 shrink-0 text-muted-foreground mr-2" />
             <input
-              className="flex h-full w-full bg-transparent outline-none placeholder:text-muted-foreground/50 text-[14px] font-medium disabled:cursor-not-allowed"
+              className="flex h-full w-full bg-transparent outline-none placeholder:text-muted-foreground text-xs sm:text-sm font-semibold disabled:cursor-not-allowed"
               placeholder={placeholder}
               value={inputValue}
               onChange={(e) => handleInputChange(e.target.value)}
