@@ -53,9 +53,6 @@ const INITIAL_STATE = {
   crCopy:            null as File | null,
   vatCopy:           null as File | null,
   gstTinDocument:    null as File | null,
-  parentClientId:    "",
-  contractSource:    "own",
-  primaryContactSource: "own",
   clientSourceDetails: {} as Record<string, any>,
 };
 
@@ -317,25 +314,20 @@ export function CreateClientModal({
 
           {/* Right Main Content */}
           <div className="flex-1 flex flex-col bg-card overflow-hidden">
-            {/* Header */}
-            <DialogHeader className="p-6 pb-4 border-b border-border/60">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <DialogTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-                      Add New Client
-                    </DialogTitle>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
-                      Step {currentTab + 1} of {TABS.length}
-                    </span>
-                  </div>
-                  <DialogDescription className="text-xs sm:text-sm text-muted-foreground font-medium mt-0.5">
-                    {currentTab === 0 && "Provide core business details, stage in the pipeline, and source attribution."}
-                    {currentTab === 1 && "Enter official communication coordinates, company location, and web presence."}
-                    {currentTab === 2 && "Upload identity, registration, and tax compliance certificates."}
-                  </DialogDescription>
-                </div>
+            <DialogHeader className="p-6 pb-4 border-b border-border/60 flex flex-col items-start gap-1">
+              <div className="flex items-center gap-2">
+                <DialogTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                  Add New Client
+                </DialogTitle>
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
+                  Step {currentTab + 1} of {TABS.length}
+                </span>
               </div>
+              <DialogDescription className="text-xs sm:text-sm text-muted-foreground font-medium">
+                {currentTab === 0 && "Provide core business details, stage in the pipeline, and source attribution."}
+                {currentTab === 1 && "Enter official communication coordinates, company location, and web presence."}
+                {currentTab === 2 && "Upload identity, registration, and tax compliance certificates."}
+              </DialogDescription>
             </DialogHeader>
 
             {/* Mobile Tab Stepper Bar */}
@@ -373,23 +365,21 @@ export function CreateClientModal({
             </div>
 
             {/* Scrollable Form Content */}
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-              <div className="max-w-2xl mx-auto">
-                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  {currentTab === 0 && (
-                    <ClientInformationTab form={form} setField={setField} />
-                  )}
-                  {currentTab === 1 && (
-                    <ContactDetailsTab form={form} setField={setField} />
-                  )}
-                  {currentTab === 2 && (
-                    <DocumentsTab
-                      form={form}
-                      setField={setField}
-                      onPreview={handlePreview}
-                    />
-                  )}
-                </div>
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+              <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {currentTab === 0 && (
+                  <ClientInformationTab form={form} setField={setField} />
+                )}
+                {currentTab === 1 && (
+                  <ContactDetailsTab form={form} setField={setField} />
+                )}
+                {currentTab === 2 && (
+                  <DocumentsTab
+                    form={form}
+                    setField={setField}
+                    onPreview={handlePreview}
+                  />
+                )}
               </div>
             </div>
 

@@ -1,7 +1,6 @@
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 import { useState } from "react";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
-import ClientSelectDialog from "@/components/shared/ClientSelectDialog";
 import { IndustrySelector } from "@/components/shared/industry-selector";
 import { 
   Select, 
@@ -27,8 +26,7 @@ import {
   UserCheck, 
   Users, 
   GitBranch, 
-  Compass,
-  FileCheck
+  Compass
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,8 +38,6 @@ interface ClientInformationTabProps {
 export function ClientInformationTab({ form, setField }: ClientInformationTabProps) {
   const [isSalesLeadDialogOpen, setIsSalesLeadDialogOpen] = useState(false);
   const [isReferredDialogOpen, setIsReferredDialogOpen] = useState(false);
-  const [isClientSelectOpen, setIsClientSelectOpen] = useState(false);
-  const [parentClientName, setParentClientName] = useState("");
 
   return (
     <div className="space-y-5 pb-2">
@@ -168,113 +164,6 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
               </SelectContent>
             </Select>
           </div>
-        </div>
-      </div>
-
-      {/* 2. Account Hierarchy (Parent Client) */}
-      <div className="rounded-2xl border border-border/80 bg-muted/20 dark:bg-muted/10 p-4 sm:p-5 space-y-4">
-        <div className="flex items-center justify-between pb-1 border-b border-border/40">
-          <div className="flex items-center gap-2">
-            <GitBranch className="w-4 h-4 text-primary" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Hierarchy & Subsidiary</h3>
-          </div>
-          <span className="text-[11px] text-muted-foreground font-medium">Optional</span>
-        </div>
-
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-foreground/90">Parent Client</label>
-            
-            {form.parentClientId ? (
-              <div className="flex items-center justify-between p-3 rounded-xl border border-primary/30 bg-primary/5 dark:bg-primary/10">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center font-bold">
-                    <Building2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-bold text-foreground">{parentClientName || "Selected Parent Client"}</p>
-                    <p className="text-[11px] text-muted-foreground">Parent account connected</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={() => setIsClientSelectOpen(true)}
-                    className="h-8 text-xs font-semibold text-primary hover:text-primary hover:bg-primary/10"
-                  >
-                    Change
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={() => {
-                      setField("parentClientId", "");
-                      setParentClientName("");
-                      setField("contractSource", "own");
-                      setField("primaryContactSource", "own");
-                    }}
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setIsClientSelectOpen(true)}
-                className="w-full h-10 rounded-xl bg-background border-dashed border-2 border-border hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-foreground font-semibold justify-start text-xs sm:text-sm transition-all"
-              >
-                <Building2 className="w-4 h-4 mr-2 text-muted-foreground/70" />
-                <span>Link a parent client or headquarter entity...</span>
-              </Button>
-            )}
-          </div>
-
-          {/* Conditional Parent Settings */}
-          {form.parentClientId && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground/90 flex items-center gap-1.5">
-                  <FileCheck className="w-3.5 h-3.5 text-primary" /> Contract Source
-                </label>
-                <Select
-                  value={form.contractSource}
-                  onValueChange={val => setField("contractSource", val as any)}
-                >
-                  <SelectTrigger className="h-10 rounded-xl bg-background border-border/80 font-semibold text-xs sm:text-sm">
-                    <SelectValue placeholder="Select contract source" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-border/80 shadow-lg">
-                    <SelectItem value="own">Own Contract</SelectItem>
-                    <SelectItem value="parent">Share Parent&apos;s Contract</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground/90 flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-primary" /> Contact Source
-                </label>
-                <Select
-                  value={form.primaryContactSource}
-                  onValueChange={val => setField("primaryContactSource", val as any)}
-                >
-                  <SelectTrigger className="h-10 rounded-xl bg-background border-border/80 font-semibold text-xs sm:text-sm">
-                    <SelectValue placeholder="Select contact source" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-border/80 shadow-lg">
-                    <SelectItem value="own">Own Contacts</SelectItem>
-                    <SelectItem value="parent">Share Parent&apos;s Contacts</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -447,18 +336,6 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
         onClose={() => setIsReferredDialogOpen(false)}
         onSelect={(u) => setField("referredBy", u.name || "")}
         title="Select Referral"
-      />
-
-      <ClientSelectDialog
-        open={isClientSelectOpen}
-        onClose={() => setIsClientSelectOpen(false)}
-        onSelect={(c) => {
-          setField("parentClientId", c._id);
-          setParentClientName(c.name);
-          setField("contractSource", "own");
-          setField("primaryContactSource", "own");
-        }}
-        title="Select Parent Client"
       />
     </div>
   );
