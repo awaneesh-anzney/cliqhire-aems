@@ -10,7 +10,8 @@ import {
   MessageSquare, 
   Paperclip, 
   Search, 
-  BarChart 
+  BarChart,
+  History
 } from "lucide-react"
 import { JobTabTrigger } from "./tab-trigger"
 
@@ -35,6 +36,12 @@ export function JobTabsList() {
           value="team" 
           icon={<Users2 className="h-3.5 w-3.5 text-indigo-500 shrink-0" />} 
           label="Team" 
+        />
+
+        <JobTabTrigger 
+          value="history" 
+          icon={<History className="h-3.5 w-3.5 text-orange-500 shrink-0" />} 
+          label="History" 
         />
 
         {/* Commented Tabs (Ready to enable anytime with unique colors) */}

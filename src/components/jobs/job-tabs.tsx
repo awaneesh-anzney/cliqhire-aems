@@ -12,6 +12,7 @@ import { AttachmentsContent } from "./attachments/attachments-content"
 import { TeamContent } from "./teams/team-content"
 import { SourcingContent } from "./sourcing/sourcing-content"
 import { ReportsContent } from "./reports/reports-content"
+import { HistoryContent } from "./history/history-content"
 import { JobData } from "./types"
 
 interface JobTabsProps {
@@ -76,6 +77,16 @@ export function JobTabs({
             jobId={jobId} 
             jobData={jobData} 
             canModify={canModify} 
+          />
+        </JobTabContent>
+
+        {/* History Content */}
+        <JobTabContent 
+          value="history"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+        >
+          <HistoryContent 
+            jobId={jobId} 
           />
         </JobTabContent>
 

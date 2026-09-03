@@ -464,10 +464,20 @@ export async function deleteJobNote(id: string) {
 
 const updateJobStage = async (id: string, stage: string): Promise<JobResponse> => {
   try {
-    const response = await api.patch<JobResponse>(`/api/jobs/${id}`, { stage });
+    const response = await api.patch<JobResponse>(`/api/jobs/${id}/stage`, { stage });
     return response.data;
   } catch (error) {
     handleApiError(error, "job stage update");
+    throw error;
+  }
+};
+
+export const getJobStageHistory = async (jobId: string) => {
+  try {
+    const response = await api.get(`/api/jobs/${jobId}/stage-history`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, "fetching job stage history");
     throw error;
   }
 };
