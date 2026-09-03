@@ -14,7 +14,7 @@ import {
 
 import { DetailRow } from "@/components/clients/summary/detail-row";
 import { Button } from "@/components/ui/button";
-import { updateJobById, uploadJobFile } from "@/services/jobService";
+import { updateJobById, uploadJobFile, updateJobStage } from "@/services/jobService";
 import { JDBenefitFilesSection } from "./jd-benefit-files-section";
 import { JobCvSubmissionSummary } from "./JobCvSubmissionSummary";
 import { JobData, CvTarget } from "../types";
@@ -74,7 +74,11 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
         ...jobDetails,
         [editingField]: processedValue,
       };
-      await updateJobById(jobId, { [editingField]: processedValue });
+      if (editingField === "stage") {
+        await updateJobStage(jobId, processedValue as string);
+      } else {
+        await updateJobById(jobId, { [editingField]: processedValue });
+      }
       setJobDetails(updatedDetails);
       toast.success(
         editingField === "jobDescription"
