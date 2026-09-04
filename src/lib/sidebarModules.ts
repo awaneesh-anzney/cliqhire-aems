@@ -28,6 +28,7 @@ export const SIDEBAR_MODULES: SidebarModule[] = [
   { name: "Temp Candidates", href: "/tem-candidates", moduleKey: "tem_candidates" },
   { name: "Team Members", href: "/teammembers", moduleKey: "teams" },
   { name: "Notifications", href: "/notifications", moduleKey: "notifications", alwaysVisible: true },
+  { name: "Email", href: "/email", moduleKey: "email", alwaysVisible: true },
   { name: "Settings", href: "/settings", moduleKey: "settings" },
   { name: "Profile", href: "/profile", moduleKey: "profile", alwaysVisible: true },
 ];

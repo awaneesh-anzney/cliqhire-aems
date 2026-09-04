@@ -24,6 +24,7 @@
    UserRoundCog,
    Workflow,
    User,
+   Mail,
  } from "lucide-react";
  import { cn } from "@/lib/utils";
  import { useAuth } from "@/contexts/AuthContext";
@@ -61,6 +62,7 @@
    profile:        CircleUser,
    admin:          ShieldCheck,
    notifications:  Bell,
+   email:          Mail,
  };
  
 export function Sidebar() {
