@@ -41,6 +41,29 @@ export function PipelineJobCard({
     { label: 'Disqualified',  count: stageCounts.disqualified || 0,   colorClass: 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-300 dark:border-rose-900/50' },
   ].filter(stage => stage.count > 0);
 
+  // Pipeline status styling helper
+  const getPipelineStatusBadge = (status?: string) => {
+    if (!status) return null;
+    const cleanStatus = status.toLowerCase();
+    
+    let styles = "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300";
+    if (cleanStatus === "active") {
+      styles = "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-900";
+    } else if (cleanStatus === "completed") {
+      styles = "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900";
+    } else if (cleanStatus === "on hold") {
+      styles = "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900";
+    } else if (cleanStatus === "cancelled") {
+      styles = "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900";
+    }
+
+    return (
+      <Badge variant="outline" className={cn("text-[8.5px] px-1.5 py-0 rounded font-bold uppercase tracking-wider", styles)}>
+        {status}
+      </Badge>
+    );
+  };
+
   // Priority styling helper
   const getPriorityBadge = (priorityVal?: string) => {
     if (!priorityVal) return null;
@@ -120,6 +143,8 @@ export function PipelineJobCard({
                 {job.jobId.stage}
               </Badge>
             )}
+
+            {getPipelineStatusBadge(job.pipelineStatus)}
 
             {getPriorityBadge(job.priority)}
           </div>

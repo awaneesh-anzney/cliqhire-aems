@@ -47,6 +47,7 @@ export const convertPipelineListDataToJob = (
     department: (pipelineData as any).jobId?.department,
     numberOfPositions: (pipelineData as any).jobId?.numberOfPositions,
     stageCounts: (pipelineData as any).stageCounts,
+    pipelineStatus: (pipelineData as any).status,
   } as Job;
 };
 
@@ -180,5 +181,6 @@ export const convertPipelineDataToJob = (pipelineData: any, isExpanded: boolean 
     clientWebsite: pipelineData.jobId?.client?.website,
     clientPhone: pipelineData.jobId?.client?.phoneNumber,
     clientEmails: pipelineData.jobId?.client?.emails,
+    pipelineStatus: pipelineData.status,
   } as Job;
 };

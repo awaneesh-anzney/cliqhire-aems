@@ -169,7 +169,20 @@ const Page = () => {
   }>({ isOpen: false, candidate: null, newStatus: "" });
 
   // Handler functions
-  const handleAddCandidate = () => setIsAddCandidateOpen(true);
+  const handleAddCandidate = () => {
+    const blockedStages = ['Hired', 'On Hold', 'Closed'];
+    const currentStage = job?.jobId?.stage;
+    
+    if (currentStage && blockedStages.includes(currentStage)) {
+      toast.error(
+        `Candidates cannot be added to this pipeline because the job "${job?.title}" is currently in the "${currentStage}" stage. This job's pipeline is "${job?.pipelineStatus || 'Completed'}" and no longer accepts new candidates.`,
+        { duration: 6000 }
+      );
+      return;
+    }
+    
+    setIsAddCandidateOpen(true);
+  };
   const handleAddExistingCandidate = () => {
     setIsAddCandidateOpen(false);
     setIsAddExistingOpen(true);
