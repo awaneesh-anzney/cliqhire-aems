@@ -84,8 +84,19 @@ export function PipelineStageDetails({
 
   const displayStage = selectedStage || candidate.currentStage || "Sourcing";
   const stageFields = getStageFields(displayStage, candidate);
+  const isCurrentStage = displayStage === candidate.currentStage;
+  const isStageEditable = canModify && isCurrentStage;
+
+  // Automatically discard edit mode if switching between stages
+  React.useEffect(() => {
+    setIsEditingStage(false);
+  }, [displayStage]);
 
   const handleEditAll = () => {
+    if (!isStageEditable) {
+      toast.info("Previous stage data is read-only.");
+      return;
+    }
     setIsEditingStage(true);
     const initialValues: Record<string, string> = {};
     stageFields.forEach((field) => {
@@ -100,8 +111,8 @@ export function PipelineStageDetails({
   };
 
   const handleSaveAll = () => {
-    if (!canModify) {
-      toast.error("Permission restricted for pipeline modification.");
+    if (!isStageEditable) {
+      toast.error("Previous stage details cannot be modified.");
       return;
     }
     setShowConfirmDialog(true);
@@ -173,8 +184,21 @@ export function PipelineStageDetails({
     }
   };
 
-  const handleAddRound = () => setRoundDialog({ isOpen: true, round: null });
-  const handleEditRound = (round: InterviewRound) => setRoundDialog({ isOpen: true, round });
+  const handleAddRound = () => {
+    if (!isStageEditable) {
+      toast.info("Previous stages are view-only.");
+      return;
+    }
+    setRoundDialog({ isOpen: true, round: null });
+  };
+
+  const handleEditRound = (round: InterviewRound) => {
+    if (!isStageEditable) {
+      toast.info("Previous stages are view-only.");
+      return;
+    }
+    setRoundDialog({ isOpen: true, round });
+  };
 
   const handleConfirmRound = async (roundData: any) => {
     const cid = candidateId || candidate.id || candidate._id || (candidate as any).candidateId?._id;
@@ -232,45 +256,51 @@ export function PipelineStageDetails({
   const movedAt = stageMoveInfo?.movedAt ? formatDateTimeForDisplay(stageMoveInfo.movedAt) : null;
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-3">
       {/* Header with Stage Info and Actions */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-brand/5 flex items-center justify-center text-brand border border-brand/10">
-            <Sparkles className="h-4 w-4" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-brand/5 flex items-center justify-center text-brand border border-brand/10">
+            <Sparkles className="h-3.5 w-3.5" />
           </div>
           <div className="flex flex-col">
-            <h4 className="text-sm font-bold text-foreground tracking-tight uppercase">
+            <h4 className="text-xs font-bold text-foreground tracking-tight uppercase">
                {displayStage} Intel
             </h4>
-            <div className="flex items-center gap-2">
-               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Current Intelligence Level</span>
-               <Badge className={cn("text-[9px] font-semibold uppercase tracking-wider py-0 px-2 h-4", getStageColor(displayStage))}>
+            <div className="flex items-center gap-1.5">
+               <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Level</span>
+               <Badge className={cn("text-[9px] font-semibold uppercase tracking-wider py-0 px-1.5 h-4", getStageColor(displayStage))}>
                  {displayStage}
                </Badge>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {canModify && !isEditingStage && displayStage !== "Interview" && stageFields.length > 0 && (
+        <div className="flex items-center gap-1.5">
+          {!isCurrentStage && (
+            <Badge variant="outline" className="text-[9px] font-semibold text-muted-foreground border-border/80 bg-muted/40 py-0.5 px-2">
+              View Only
+            </Badge>
+          )}
+
+          {isStageEditable && !isEditingStage && displayStage !== "Interview" && stageFields.length > 0 && (
             <Button 
                variant="outline" 
                size="sm" 
                onClick={handleEditAll}
-               className="h-9 px-4 rounded-lg border-border font-semibold text-[10px] uppercase tracking-wider hover:bg-muted transition-all shadow-sm"
+               className="h-7.5 px-2.5 rounded-lg border-border/80 font-semibold text-[10px] uppercase tracking-wider hover:bg-muted transition-all shadow-xs"
             >
-              <Edit3 className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+              <Edit3 className="h-3 w-3 mr-1 text-muted-foreground" />
               Modify Details
             </Button>
           )}
           {isEditingStage && (
-            <div className="flex gap-2 animate-in slide-in-from-right-2">
+            <div className="flex gap-1.5 animate-in slide-in-from-right-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsEditingStage(false)}
-                className="h-9 px-4 rounded-lg font-semibold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
+                className="h-7.5 px-2.5 rounded-lg font-semibold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
               >
                 Discard
               </Button>
@@ -278,9 +308,9 @@ export function PipelineStageDetails({
                 size="sm"
                 onClick={handleSaveAll}
                 disabled={isUpdating}
-                className="h-9 px-4 rounded-lg bg-brand hover:bg-brand/90 font-semibold text-[10px] uppercase tracking-wider shadow-md shadow-brand/20 transition-all"
+                className="h-7.5 px-3 rounded-lg bg-brand hover:bg-brand/90 font-semibold text-[10px] uppercase tracking-wider shadow-xs shadow-brand/20 transition-all"
               >
-                {isUpdating ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Check className="h-3.5 w-3.5 mr-1.5" />}
+                {isUpdating ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Check className="h-3 w-3 mr-1" />}
                 Synchronize
               </Button>
             </div>
@@ -290,23 +320,23 @@ export function PipelineStageDetails({
 
       {/* Movement History Sub-header */}
       {stageMoveInfo && (
-        <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 px-3 py-2 bg-muted/65 border border-border rounded-xl animate-in fade-in duration-1000">
-          <div className="flex items-center gap-2">
-            <User2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Assigned By:</span>
+        <div className="flex flex-wrap items-center gap-y-1 gap-x-3 px-2.5 py-1.5 bg-muted/65 border border-border/70 rounded-lg text-xs animate-in fade-in duration-500">
+          <div className="flex items-center gap-1.5">
+            <User2 className="h-3 w-3 text-muted-foreground" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Assigned:</span>
             <span className="text-[11px] font-semibold text-foreground">{movedBy}</span>
           </div>
           {movedAt && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Timestamp:</span>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Timestamp:</span>
               <span className="text-[11px] font-semibold text-foreground">{movedAt}</span>
             </div>
           )}
           {stageMoveInfo.notes && (
-            <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-              <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Observation:</span>
+            <div className="flex items-center gap-1.5 flex-1 min-w-[180px]">
+              <Edit3 className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Observation:</span>
               <span className="text-[11px] font-medium text-foreground italic truncate">&quot;{stageMoveInfo.notes}&quot;</span>
             </div>
           )}
@@ -322,7 +352,7 @@ export function PipelineStageDetails({
                 candidateId={candidateId}
                 jobId={jobId || (candidate as any)?.jobId?._id}
                 jobTeamMembers={jobTeamMembers || []}
-                canModify={canModify}
+                canModify={isStageEditable}
              />
           </div>
         )}
@@ -333,7 +363,7 @@ export function PipelineStageDetails({
               rounds={candidate.interviewRounds || []} 
               onAddRound={handleAddRound}
               onEditRound={handleEditRound}
-              canModify={canModify}
+              canModify={isStageEditable}
             />
           </div>
         ) : stageFields.length === 0 ? (
@@ -347,7 +377,7 @@ export function PipelineStageDetails({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 animate-in fade-in slide-in-from-bottom-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 animate-in fade-in slide-in-from-bottom-2">
             {stageFields.map((field) => {
               const originalVal = (field.value?.toString() || "") === "Not set" ? "" : (field.value?.toString() || "");
               const currentVal = editValues[field.key] ?? "";
@@ -358,15 +388,15 @@ export function PipelineStageDetails({
                 <div 
                    key={field.key} 
                    className={cn(
-                     "group relative flex items-start gap-3.5 p-3 rounded-xl border transition-all duration-300",
-                     isEditingStage ? "bg-card border-brand/20 shadow-md ring-2 ring-brand/5" : "bg-muted/50 border-border hover:bg-card hover:border-brand/10 hover:shadow-lg"
+                     "group relative flex items-start gap-2.5 p-2.5 rounded-lg border transition-all duration-200",
+                     isEditingStage ? "bg-card border-brand/20 shadow-xs ring-2 ring-brand/5" : "bg-muted/40 border-border/70 hover:bg-card hover:border-border hover:shadow-xs"
                    )}
                 >
-                  <div className={cn("p-1.5 rounded-lg shrink-0 transition-transform group-hover:scale-110", field.color)}>
+                  <div className={cn("p-1.5 rounded-md shrink-0 transition-transform group-hover:scale-105", field.color)}>
                      {field.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <div className="flex items-center justify-between gap-1.5 mb-0.5">
                       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider group-hover:text-brand transition-colors">
                          {field.label}
                       </p>
@@ -376,20 +406,20 @@ export function PipelineStageDetails({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleUpdateFieldValue(field.key, originalVal)}
-                          className="h-5 px-1.5 text-[9px] font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded border border-amber-200/50 bg-amber-50/30 flex items-center gap-1 transition-all"
+                          className="h-4.5 px-1.5 text-[8px] font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded border border-amber-200/50 bg-amber-50/30 flex items-center gap-0.5 transition-all"
                           title="Revert to original value"
                         >
-                          <Undo className="h-3 w-3" />
+                          <Undo className="h-2.5 w-2.5" />
                           Revert
                         </Button>
                       )}
                     </div>
                     {isEditable ? (
-                      <div className="mt-1">
+                      <div className="mt-0.5">
                         {renderFieldInput(field, currentVal, (val) => handleUpdateFieldValue(field.key, val))}
                       </div>
                     ) : (
-                      <p className="text-[13px] font-semibold text-foreground truncate">
+                      <p className="text-xs font-semibold text-foreground truncate">
                          {renderFieldValue(field)}
                       </p>
                     )}
