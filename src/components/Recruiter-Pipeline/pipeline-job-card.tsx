@@ -158,59 +158,59 @@ export function PipelineJobCard({
     <div
       onClick={handleCardClick}
       className={cn(
-        "group relative flex flex-col bg-card rounded-xl border border-border/80 p-4 transition-all duration-300 cursor-pointer",
-        "hover:shadow-md hover:border-brand/40 hover:-translate-y-0.5",
+        "group relative flex flex-col bg-card rounded-xl border border-border/80 p-3 transition-all duration-300 cursor-pointer",
+        "hover:shadow-sm hover:border-brand/40 hover:-translate-y-0.5",
         isHighlighted && "ring-2 ring-brand/30 border-brand/40 bg-brand/[0.02]",
         isSelected && "bg-brand/[0.03] border-brand/50 ring-1 ring-brand/20"
       )}
     >
       {/* Interactive left status line */}
-      <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-brand opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute left-0 top-2.5 bottom-2.5 w-1 rounded-r-full bg-brand opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       {/* Top Header Row: Job title + ID + Status + Priority */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0 flex-1">
+      <div className="flex items-start justify-between gap-2.5">
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
           {showCheckbox && (
-            <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+            <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
               <Checkbox 
                 checked={isSelected} 
                 onCheckedChange={(checked) => onSelect?.(!!checked)} 
-                className="h-4 w-4 rounded border-border data-[state=checked]:bg-brand data-[state=checked]:border-brand cursor-pointer transition-all" 
+                className="h-3.5 w-3.5 rounded border-border data-[state=checked]:bg-brand data-[state=checked]:border-brand cursor-pointer transition-all" 
               />
             </div>
           )}
 
-          <div className="h-9 w-9 shrink-0 rounded-lg bg-brand/5 border border-brand/15 flex items-center justify-center text-brand transition-colors group-hover:bg-brand group-hover:text-white">
-            <Briefcase className="h-4 w-4" />
+          <div className="h-8 w-8 shrink-0 rounded-lg bg-brand/5 border border-brand/15 flex items-center justify-center text-brand transition-colors group-hover:bg-brand group-hover:text-white">
+            <Briefcase className="h-3.5 w-3.5" />
           </div>
 
           <div className="flex flex-col min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
+            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
               {readableJobId && (
-                <span className="font-mono text-[9px] font-bold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded border border-border/60">
+                <span className="font-mono text-[8.5px] font-bold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.2 rounded border border-border/60">
                   {readableJobId}
                 </span>
               )}
-              <h3 className="text-sm font-bold text-foreground tracking-tight group-hover:text-brand transition-colors truncate max-w-[280px] sm:max-w-[400px]">
+              <h3 className="text-xs font-bold text-foreground tracking-tight group-hover:text-brand transition-colors truncate max-w-[280px] sm:max-w-[400px]">
                 {job.title}
               </h3>
             </div>
 
             {/* Client, Location & Job Type row */}
-            <div className="flex items-center gap-2.5 text-xs text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
               <div className="flex items-center gap-1 font-semibold text-foreground/90">
-                <Building2 className="h-3.5 w-3.5 text-brand shrink-0" />
-                <span className="truncate max-w-[160px]">{job.clientName}</span>
+                <Building2 className="h-3 w-3 text-brand shrink-0" />
+                <span className="truncate max-w-[150px]">{job.clientName}</span>
               </div>
               <span className="text-border">•</span>
               <div className="flex items-center gap-1">
-                <MapPin className="h-3 w-3 text-muted-foreground/70 shrink-0" />
-                <span className="truncate max-w-[140px]">{job.location}</span>
+                <MapPin className="h-2.5 w-2.5 text-muted-foreground/70 shrink-0" />
+                <span className="truncate max-w-[130px]">{job.location}</span>
               </div>
               {job.jobType && (
                 <>
                   <span className="text-border">•</span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-muted/60 px-1.5 py-0.2 rounded text-muted-foreground">
+                  <span className="text-[9px] font-semibold uppercase tracking-wider bg-muted/60 px-1.5 py-0.2 rounded text-muted-foreground">
                     {job.jobType.replace("-", " ")}
                   </span>
                 </>
@@ -220,32 +220,32 @@ export function PipelineJobCard({
         </div>
 
         {/* Status Badges & Quick Action */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <div className="hidden sm:flex items-center gap-1.5">
             {getPriorityBadge(job.priority)}
             {getPipelineStatusBadge(job.pipelineStatus || job.jobId?.stage)}
           </div>
-          <div className="h-8 w-8 rounded-lg bg-muted/30 border border-border/80 flex items-center justify-center text-muted-foreground transition-all duration-300 group-hover:bg-brand group-hover:text-white group-hover:border-brand shadow-xs">
-            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <div className="h-7 w-7 rounded-lg bg-muted/30 border border-border/80 flex items-center justify-center text-muted-foreground transition-all duration-300 group-hover:bg-brand group-hover:text-white group-hover:border-brand shadow-2xs">
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
         </div>
       </div>
 
       {/* Mobile-only status chips */}
-      <div className="flex sm:hidden items-center gap-1.5 mt-2.5 pl-12">
+      <div className="flex sm:hidden items-center gap-1.5 mt-2 pl-10">
         {getPriorityBadge(job.priority)}
         {getPipelineStatusBadge(job.pipelineStatus || job.jobId?.stage)}
       </div>
 
       {/* Candidate Pipeline Funnel Progress Bar */}
-      <div className="mt-3.5 pt-3 border-t border-border/50 flex flex-col gap-2">
+      <div className="mt-2.5 pt-2 border-t border-border/50 flex flex-col gap-1.5">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-1.5 font-bold text-foreground">
-            <Layers className="h-3.5 w-3.5 text-brand" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Talent Distribution</span>
+            <Layers className="h-3 w-3 text-brand" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Talent Distribution</span>
           </div>
           <div className="flex items-center gap-1 text-xs font-bold text-foreground">
-            <Users className="h-3.5 w-3.5 text-brand" />
+            <Users className="h-3 w-3 text-brand" />
             <span>{totalCandidates}</span>
             <span className="text-[10px] font-normal text-muted-foreground">candidates in pipeline</span>
           </div>
@@ -253,9 +253,8 @@ export function PipelineJobCard({
 
         {/* Visual Segmented Bar */}
         {totalCandidates > 0 && activeStages.length > 0 ? (
-          <div className="w-full h-2 rounded-full bg-muted/60 overflow-hidden flex shadow-inner">
+          <div className="w-full h-1.5 rounded-full bg-muted/60 overflow-hidden flex shadow-inner">
             {activeStages.map((stage) => {
-              const percentage = Math.max(5, Math.round((stage.count / totalCandidates) * 100));
               return (
                 <Tooltip key={stage.key}>
                   <TooltipTrigger asChild>
@@ -275,20 +274,20 @@ export function PipelineJobCard({
             })}
           </div>
         ) : (
-          <div className="w-full h-2 rounded-full bg-muted/40 border border-dashed border-border flex items-center justify-center">
+          <div className="w-full h-1.5 rounded-full bg-muted/40 border border-dashed border-border flex items-center justify-center">
             <span className="sr-only">No active candidates in pipeline</span>
           </div>
         )}
 
         {/* Stage Pill Chips */}
-        <div className="flex items-center justify-between gap-2 flex-wrap pt-0.5">
+        <div className="flex items-center justify-between gap-1.5 flex-wrap pt-0.5">
           {activeStages.length > 0 ? (
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center gap-1 flex-wrap">
               {activeStages.map(stage => (
                 <span 
                   key={stage.key}
                   className={cn(
-                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider transition-all",
+                    "inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full border text-[8.5px] font-bold uppercase tracking-wider transition-all",
                     stage.badgeColor
                   )}
                 >
@@ -298,13 +297,13 @@ export function PipelineJobCard({
               ))}
             </div>
           ) : (
-            <span className="text-[10px] font-semibold text-muted-foreground italic">
+            <span className="text-[9.5px] font-semibold text-muted-foreground italic">
               No active candidates assigned yet
             </span>
           )}
 
           {job.headcount && job.headcount > 1 && (
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-auto">
+            <span className="text-[9.5px] font-bold text-muted-foreground uppercase tracking-wider ml-auto">
               Target: <span className="text-foreground font-black">{job.headcount} Hires</span>
             </span>
           )}

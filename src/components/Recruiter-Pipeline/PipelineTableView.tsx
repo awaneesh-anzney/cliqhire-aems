@@ -45,7 +45,6 @@ export function PipelineTableView({
   const router = useRouter();
 
   const isAllSelected = jobs.length > 0 && jobs.every(j => selectedPipelines.includes(j.id));
-  const isSomeSelected = jobs.some(j => selectedPipelines.includes(j.id)) && !isAllSelected;
 
   const getStatusBadge = (status?: string) => {
     const cleanStatus = (status || "Open").toLowerCase();
@@ -73,7 +72,7 @@ export function PipelineTableView({
     }
 
     return (
-      <Badge variant="outline" className={cn("text-[8.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-2xs", style)}>
+      <Badge variant="outline" className={cn("text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs", style)}>
         <span className={cn("h-1.5 w-1.5 rounded-full", dotColor)} />
         {status || "Open"}
       </Badge>
@@ -92,20 +91,20 @@ export function PipelineTableView({
     }
 
     return (
-      <Badge variant="outline" className={cn("text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full", style)}>
+      <Badge variant="outline" className={cn("text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-full", style)}>
         {priorityVal}
       </Badge>
     );
   };
 
   return (
-    <div className="w-full bg-card rounded-xl border border-border overflow-hidden shadow-xs">
+    <div className="w-full bg-card rounded-xl border border-border overflow-hidden shadow-2xs">
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-border bg-muted/30 text-[10px] font-bold uppercase tracking-wider text-muted-foreground select-none">
+            <tr className="border-b border-border bg-muted/40 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground select-none">
               {showCheckbox && (
-                <th className="py-3 px-4 w-10 text-center">
+                <th className="py-2 px-3 w-8 text-center">
                   <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={(checked) => onSelectAll(!!checked)}
@@ -113,14 +112,14 @@ export function PipelineTableView({
                   />
                 </th>
               )}
-              <th className="py-3 px-4 font-bold text-foreground">Requisition / Job Title</th>
-              <th className="py-3 px-4 font-bold text-foreground">Client</th>
-              <th className="py-3 px-4 font-bold text-foreground">Location & Type</th>
-              <th className="py-3 px-4 font-bold text-foreground">Priority</th>
-              <th className="py-3 px-4 font-bold text-foreground">Status</th>
-              <th className="py-3 px-4 font-bold text-foreground min-w-[160px]">Funnel Distribution</th>
-              <th className="py-3 px-4 font-bold text-foreground text-center">Candidates</th>
-              <th className="py-3 px-4 font-bold text-foreground text-right">Action</th>
+              <th className="py-2 px-3 font-bold text-foreground">Requisition / Job Title</th>
+              <th className="py-2 px-3 font-bold text-foreground">Client</th>
+              <th className="py-2 px-3 font-bold text-foreground">Location & Type</th>
+              <th className="py-2 px-3 font-bold text-foreground">Priority</th>
+              <th className="py-2 px-3 font-bold text-foreground">Status</th>
+              <th className="py-2 px-3 font-bold text-foreground min-w-[140px]">Funnel Progress</th>
+              <th className="py-2 px-3 font-bold text-foreground text-center">Candidates</th>
+              <th className="py-2 px-3 font-bold text-foreground text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
@@ -147,7 +146,7 @@ export function PipelineTableView({
                   )}
                 >
                   {showCheckbox && (
-                    <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-2 px-3 text-center" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={isSelected}
                         onCheckedChange={(checked) => onSelectPipeline(job.id, !!checked)}
@@ -157,17 +156,17 @@ export function PipelineTableView({
                   )}
 
                   {/* Requisition & Title */}
-                  <td className="py-3 px-4 max-w-[260px]">
+                  <td className="py-2 px-3 max-w-[260px]">
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-md bg-brand/5 border border-brand/10 flex items-center justify-center text-brand shrink-0 group-hover:bg-brand group-hover:text-white transition-colors">
-                        <Briefcase className="h-3.5 w-3.5" />
+                      <div className="h-6 w-6 rounded bg-brand/5 border border-brand/10 flex items-center justify-center text-brand shrink-0 group-hover:bg-brand group-hover:text-white transition-colors">
+                        <Briefcase className="h-3 w-3" />
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="font-bold text-xs text-foreground group-hover:text-brand transition-colors truncate">
                           {job.title}
                         </span>
                         {readableJobId && (
-                          <span className="font-mono text-[9px] font-semibold text-muted-foreground uppercase">
+                          <span className="font-mono text-[8.5px] font-semibold text-muted-foreground uppercase">
                             {readableJobId}
                           </span>
                         )}
@@ -176,22 +175,22 @@ export function PipelineTableView({
                   </td>
 
                   {/* Client */}
-                  <td className="py-3 px-4">
+                  <td className="py-2 px-3">
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
-                      <Building2 className="h-3.5 w-3.5 text-brand shrink-0" />
-                      <span className="truncate max-w-[140px]">{job.clientName}</span>
+                      <Building2 className="h-3 w-3 text-brand shrink-0" />
+                      <span className="truncate max-w-[130px]">{job.clientName}</span>
                     </div>
                   </td>
 
                   {/* Location & Type */}
-                  <td className="py-3 px-4">
-                    <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                  <td className="py-2 px-3">
+                    <div className="flex flex-col gap-0.2 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-1 text-foreground/80">
-                        <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <MapPin className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
                         <span className="truncate max-w-[120px]">{job.location}</span>
                       </div>
                       {job.jobType && (
-                        <span className="text-[9.5px] uppercase font-bold text-muted-foreground/70">
+                        <span className="text-[9px] uppercase font-bold text-muted-foreground/70">
                           {job.jobType.replace("-", " ")}
                         </span>
                       )}
@@ -199,20 +198,20 @@ export function PipelineTableView({
                   </td>
 
                   {/* Priority */}
-                  <td className="py-3 px-4">
+                  <td className="py-2 px-3">
                     {getPriorityBadge(job.priority)}
                   </td>
 
                   {/* Status */}
-                  <td className="py-3 px-4">
+                  <td className="py-2 px-3">
                     {getStatusBadge(job.pipelineStatus || job.jobId?.stage)}
                   </td>
 
                   {/* Funnel distribution bar */}
-                  <td className="py-3 px-4 min-w-[160px]">
+                  <td className="py-2 px-3 min-w-[140px]">
                     {totalCandidates > 0 && activeStages.length > 0 ? (
-                      <div className="flex flex-col gap-1 w-full max-w-[180px]">
-                        <div className="h-2 rounded-full bg-muted/60 overflow-hidden flex shadow-2xs">
+                      <div className="flex flex-col gap-0.5 w-full max-w-[160px]">
+                        <div className="h-1.5 rounded-full bg-muted/60 overflow-hidden flex shadow-2xs">
                           {activeStages.map((stage) => (
                             <Tooltip key={stage.key}>
                               <TooltipTrigger asChild>
@@ -227,9 +226,9 @@ export function PipelineTableView({
                             </Tooltip>
                           ))}
                         </div>
-                        <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-semibold">
-                          <span>{activeStages.length} active stages</span>
-                        </div>
+                        <span className="text-[8.5px] text-muted-foreground font-semibold">
+                          {activeStages.length} active stages
+                        </span>
                       </div>
                     ) : (
                       <span className="text-[10px] text-muted-foreground italic">No candidates</span>
@@ -237,19 +236,19 @@ export function PipelineTableView({
                   </td>
 
                   {/* Total Candidates */}
-                  <td className="py-3 px-4 text-center">
-                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800 font-bold text-xs">
-                      <Users className="h-3 w-3" />
+                  <td className="py-2 px-3 text-center">
+                    <div className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800 font-bold text-[11px]">
+                      <Users className="h-2.5 w-2.5" />
                       <span>{totalCandidates}</span>
                     </div>
                   </td>
 
                   {/* Action */}
-                  <td className="py-3 px-4 text-right">
+                  <td className="py-2 px-3 text-right">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2 text-[10px] font-bold text-brand hover:bg-brand/10 hover:text-brand rounded-md gap-1"
+                      className="h-6 px-2 text-[9.5px] font-bold text-brand hover:bg-brand/10 hover:text-brand rounded-md gap-0.5"
                       onClick={(e) => {
                         e.stopPropagation();
                         router.push(`/reactruterpipeline/${job.id}`);

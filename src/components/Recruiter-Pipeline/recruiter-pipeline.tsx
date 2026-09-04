@@ -71,8 +71,8 @@ export function RecruiterPipeline() {
   const canModifyPipeline = isAdmin || hasPermission("pipeline", "create") || hasPermission("pipeline", "edit");
   const canDeletePipeline = isAdmin || hasPermission("pipeline", "delete") || (user as any)?.role?.permissions?.pipeline?.delete === true;
 
-  // View mode: cards | table | board
-  const [viewMode, setViewMode] = useState<"cards" | "table" | "board">("cards");
+  // View mode: cards | table | board (Default: table)
+  const [viewMode, setViewMode] = useState<"cards" | "table" | "board">("table");
 
   // Primary filters
   const [search, setSearch] = useState("");
@@ -301,20 +301,20 @@ export function RecruiterPipeline() {
     <div className="flex flex-col h-full w-full bg-card overflow-hidden">
       
       {/* 1. Header & Command Bar */}
-      <div className="flex-shrink-0 px-6 py-4 border-b border-border bg-gradient-to-b from-card to-muted/15 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex-shrink-0 px-4 py-2.5 border-b border-border bg-gradient-to-b from-card to-muted/15 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand">
-              <Briefcase className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand">
+              <Briefcase className="h-3.5 w-3.5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-black text-foreground tracking-tight">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-base font-black text-foreground tracking-tight">
                   Recruiter Pipelines
                 </h1>
-                <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" title="Live Synced" />
+                <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" title="Live Synced" />
               </div>
-              <p className="text-xs text-muted-foreground font-medium">
+              <p className="text-[11px] text-muted-foreground font-medium">
                 Talent pipeline command center & active requisition tracking
               </p>
             </div>
@@ -322,16 +322,16 @@ export function RecruiterPipeline() {
         </div>
 
         {/* Global Action Controls */}
-        <div className="flex items-center gap-2 flex-wrap self-end md:self-auto">
+        <div className="flex items-center gap-1.5 flex-wrap self-end md:self-auto">
           {/* Multi-Delete Action */}
           {canDeletePipeline && selectedPipelines.length > 0 && (
             <Button 
               variant="destructive" 
               size="sm" 
               onClick={() => setIsDeleteDialogOpen(true)} 
-              className="h-9 px-3.5 rounded-lg flex items-center shadow-xs font-bold text-xs transition-all active:scale-95 animate-in fade-in"
+              className="h-8 px-2.5 rounded-lg flex items-center shadow-xs font-bold text-xs transition-all active:scale-95 animate-in fade-in"
             >
-              <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+              <Trash2 className="h-3 w-3 mr-1" />
               Delete ({selectedPipelines.length})
             </Button>
           )}
@@ -339,22 +339,9 @@ export function RecruiterPipeline() {
           {/* View Mode Switcher */}
           <div className="flex items-center p-0.5 rounded-lg bg-muted/60 border border-border">
             <button
-              onClick={() => setViewMode("cards")}
-              className={cn(
-                "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all",
-                viewMode === "cards" 
-                  ? "bg-card text-brand shadow-xs" 
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              title="Cards View"
-            >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Cards</span>
-            </button>
-            <button
               onClick={() => setViewMode("table")}
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all",
+                "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all",
                 viewMode === "table" 
                   ? "bg-card text-brand shadow-xs" 
                   : "text-muted-foreground hover:text-foreground"
@@ -365,9 +352,22 @@ export function RecruiterPipeline() {
               <span className="hidden sm:inline">Table</span>
             </button>
             <button
+              onClick={() => setViewMode("cards")}
+              className={cn(
+                "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all",
+                viewMode === "cards" 
+                  ? "bg-card text-brand shadow-xs" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              title="Cards View"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Cards</span>
+            </button>
+            <button
               onClick={() => setViewMode("board")}
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all",
+                "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all",
                 viewMode === "board" 
                   ? "bg-card text-brand shadow-xs" 
                   : "text-muted-foreground hover:text-foreground"
@@ -384,10 +384,10 @@ export function RecruiterPipeline() {
             variant="outline"
             size="sm"
             onClick={() => refetch()}
-            className="h-9 px-3 rounded-lg border-border hover:bg-muted font-bold text-xs shadow-2xs flex items-center gap-1.5"
+            className="h-8 px-2.5 rounded-lg border-border hover:bg-muted font-bold text-xs shadow-2xs flex items-center gap-1"
             title="Refresh Data"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5 text-muted-foreground", isFetching && "animate-spin text-brand")} />
+            <RefreshCw className={cn("h-3 w-3 text-muted-foreground", isFetching && "animate-spin text-brand")} />
             <span className="hidden sm:inline">Sync</span>
           </Button>
 
@@ -397,9 +397,9 @@ export function RecruiterPipeline() {
               trigger={
                 <Button
                   size="sm"
-                  className="h-9 px-3.5 rounded-lg bg-brand hover:bg-brand/90 text-white font-bold text-xs shadow-sm shadow-brand/20 flex items-center gap-1.5 transition-all active:scale-98"
+                  className="h-8 px-3 rounded-lg bg-brand hover:bg-brand/90 text-white font-bold text-xs shadow-sm shadow-brand/20 flex items-center gap-1.5 transition-all active:scale-98"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3.5 w-3.5" />
                   <span>Launch Pipeline</span>
                 </Button>
               }
@@ -413,48 +413,48 @@ export function RecruiterPipeline() {
       </div>
 
       {/* 2. Pipeline Intelligence KPI Banner */}
-      <div className="flex-shrink-0 px-6 py-3.5 bg-muted/20 border-b border-border/80 grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="flex-shrink-0 px-4 py-2 bg-muted/20 border-b border-border/80 grid grid-cols-2 lg:grid-cols-4 gap-2">
         {/* Metric 1: Active Pipelines */}
         <div 
           onClick={() => setStatus("Active")}
-          className="group relative flex items-center p-3 rounded-xl bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all cursor-pointer"
+          className="group relative flex items-center p-2 rounded-lg bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all cursor-pointer"
         >
-          <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 mr-3 shrink-0">
-            <Sparkles className="h-4 w-4" />
+          <div className="p-2 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300 mr-2.5 shrink-0">
+            <Sparkles className="h-3.5 w-3.5" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Active Requisitions</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-base font-black text-foreground">{kpiStats.activePipelines}</span>
-              <span className="text-[10px] text-muted-foreground">of {totalItems} total</span>
+            <span className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">Active Requisitions</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-black text-foreground">{kpiStats.activePipelines}</span>
+              <span className="text-[9.5px] text-muted-foreground">of {totalItems} total</span>
             </div>
           </div>
         </div>
 
         {/* Metric 2: Total Candidates */}
-        <div className="group relative flex items-center p-3 rounded-xl bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all">
-          <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300 mr-3 shrink-0">
-            <Users className="h-4 w-4" />
+        <div className="group relative flex items-center p-2 rounded-lg bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all">
+          <div className="p-2 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300 mr-2.5 shrink-0">
+            <Users className="h-3.5 w-3.5" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Talent in Process</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-base font-black text-foreground">{kpiStats.totalTalent}</span>
-              <span className="text-[10px] text-muted-foreground">candidates tracked</span>
+            <span className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">Talent in Process</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-black text-foreground">{kpiStats.totalTalent}</span>
+              <span className="text-[9.5px] text-muted-foreground">candidates</span>
             </div>
           </div>
         </div>
 
         {/* Metric 3: In Review & Interviews */}
-        <div className="group relative flex items-center p-3 rounded-xl bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all">
-          <div className="p-2.5 rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300 mr-3 shrink-0">
-            <Layers className="h-4 w-4" />
+        <div className="group relative flex items-center p-2 rounded-lg bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all">
+          <div className="p-2 rounded-md bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300 mr-2.5 shrink-0">
+            <Layers className="h-3.5 w-3.5" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Review & Interviews</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-base font-black text-foreground">{kpiStats.interviewCount}</span>
-              <span className="text-[10px] text-muted-foreground">in active evaluation</span>
+            <span className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">Review & Interviews</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-black text-foreground">{kpiStats.interviewCount}</span>
+              <span className="text-[9.5px] text-muted-foreground">in evaluation</span>
             </div>
           </div>
         </div>
@@ -462,23 +462,23 @@ export function RecruiterPipeline() {
         {/* Metric 4: Placements & Hired */}
         <div 
           onClick={() => setStatus("Hired")}
-          className="group relative flex items-center p-3 rounded-xl bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all cursor-pointer"
+          className="group relative flex items-center p-2 rounded-lg bg-card border border-border hover:border-brand/30 hover:shadow-xs transition-all cursor-pointer"
         >
-          <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 mr-3 shrink-0">
-            <CheckCircle2 className="h-4 w-4" />
+          <div className="p-2 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300 mr-2.5 shrink-0">
+            <CheckCircle2 className="h-3.5 w-3.5" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Hired & Onboarding</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-base font-black text-foreground">{kpiStats.hiredCount}</span>
-              <span className="text-[10px] text-emerald-600 font-bold">successful hires</span>
+            <span className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">Hired & Onboarding</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-black text-foreground">{kpiStats.hiredCount}</span>
+              <span className="text-[9.5px] text-emerald-600 font-bold">placed</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* 3. Unified Search & Precision Filter Toolbar */}
-      <div className="flex-shrink-0 border-b border-border bg-card p-4 flex flex-col gap-3 transition-all">
+      <div className="flex-shrink-0 border-b border-border bg-card px-4 py-2 flex flex-col gap-2 transition-all">
         {/* Main Row: Search + Quick Selects + Sort + Filter Drawer Toggle */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
           {/* Omni Search Box */}
@@ -727,7 +727,7 @@ export function RecruiterPipeline() {
       </div>
 
       {/* Summary Strip */}
-      <div className="flex-shrink-0 bg-muted/25 px-6 py-2 border-b border-border flex items-center justify-between text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">
+      <div className="flex-shrink-0 bg-muted/25 px-4 py-1.5 border-b border-border flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
         <div className="flex items-center gap-2">
           <span>Found {totalItems} recruitment pipelines</span>
           {isFetching && <Loader2 className="h-3 w-3 text-brand animate-spin" />}
@@ -738,30 +738,30 @@ export function RecruiterPipeline() {
       </div>
 
       {/* 4. Main Pipeline Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 bg-muted/10">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 bg-muted/10">
         {listLoading && renderJobs.length === 0 ? (
           /* Skeleton Loading Cards */
-          <div className="grid grid-cols-1 gap-3 w-full">
+          <div className="grid grid-cols-1 gap-2.5 w-full">
             {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="p-4 rounded-xl border border-border bg-card animate-pulse flex flex-col gap-3">
+              <div key={n} className="p-3 rounded-xl border border-border bg-card animate-pulse flex flex-col gap-2.5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-muted" />
-                    <div className="space-y-1.5">
-                      <div className="h-4 w-48 bg-muted rounded" />
-                      <div className="h-3 w-32 bg-muted/70 rounded" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-lg bg-muted" />
+                    <div className="space-y-1">
+                      <div className="h-3.5 w-44 bg-muted rounded" />
+                      <div className="h-2.5 w-28 bg-muted/70 rounded" />
                     </div>
                   </div>
-                  <div className="h-5 w-20 bg-muted rounded-full" />
+                  <div className="h-4 w-16 bg-muted rounded-full" />
                 </div>
-                <div className="h-2 w-full bg-muted rounded-full mt-2" />
+                <div className="h-1.5 w-full bg-muted rounded-full mt-1" />
               </div>
             ))}
           </div>
         ) : renderJobs.length > 0 ? (
           /* Render Active View Mode */
           viewMode === "cards" ? (
-            <div className="flex flex-col gap-2.5 w-full">
+            <div className="flex flex-col gap-2 w-full">
               {renderJobs.map((job: Job) => (
                 <PipelineJobCard
                   key={job.id}
@@ -789,23 +789,23 @@ export function RecruiterPipeline() {
           )
         ) : (
           /* Thoughtful Empty State */
-          <div className="h-full flex flex-col items-center justify-center gap-4 text-center p-8 bg-card rounded-2xl border border-border shadow-xs max-w-lg mx-auto my-10">
-            <div className="p-5 rounded-full bg-muted/40 border border-border shadow-xs">
-              <FilterX className="h-8 w-8 text-muted-foreground" />
+          <div className="h-full flex flex-col items-center justify-center gap-3 text-center p-6 bg-card rounded-xl border border-border shadow-2xs max-w-md mx-auto my-6">
+            <div className="p-3.5 rounded-full bg-muted/40 border border-border shadow-2xs">
+              <FilterX className="h-6 w-6 text-muted-foreground" />
             </div>
-            <div className="space-y-1.5 max-w-sm">
-              <h3 className="text-sm font-black text-foreground tracking-tight">No Pipelines Found</h3>
-              <p className="text-xs font-medium text-muted-foreground">
+            <div className="space-y-1 max-w-xs">
+              <h3 className="text-xs font-black text-foreground tracking-tight">No Pipelines Found</h3>
+              <p className="text-[11px] font-medium text-muted-foreground">
                 No recruitment pipelines matched your search or filters. You can adjust the parameters or launch a new pipeline.
               </p>
             </div>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-1">
               {activeChips.length > 0 && (
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={handleClearAll} 
-                  className="h-9 px-4 rounded-lg font-bold text-xs border-border shadow-2xs"
+                  className="h-8 px-3 rounded-lg font-bold text-xs border-border shadow-2xs"
                 >
                   Reset Filters
                 </Button>
@@ -815,9 +815,9 @@ export function RecruiterPipeline() {
                   trigger={
                     <Button 
                       size="sm" 
-                      className="h-9 px-4 rounded-lg font-bold text-xs bg-brand hover:bg-brand/90 text-white shadow-xs"
+                      className="h-8 px-3 rounded-lg font-bold text-xs bg-brand hover:bg-brand/90 text-white shadow-2xs"
                     >
-                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                      <Plus className="h-3 w-3 mr-1" />
                       Launch Pipeline
                     </Button>
                   }
@@ -833,7 +833,7 @@ export function RecruiterPipeline() {
       </div>
 
       {/* 5. Pagination Footer Controls */}
-      <div className="flex-shrink-0 bg-card border-t border-border px-6 py-3">
+      <div className="flex-shrink-0 bg-card border-t border-border px-4 py-2">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
           {/* Left: Records and Page size */}
           <div className="flex items-center gap-3">

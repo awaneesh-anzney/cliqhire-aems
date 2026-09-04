@@ -108,8 +108,8 @@ export function PipelineBoardView({ jobs }: PipelineBoardViewProps) {
   };
 
   return (
-    <div className="w-full overflow-x-auto custom-scrollbar pb-3">
-      <div className="flex gap-4 min-w-[1100px] items-start">
+    <div className="w-full overflow-x-auto custom-scrollbar pb-2">
+      <div className="flex gap-2.5 min-w-[1000px] items-start">
         {COLUMNS.map((col) => {
           const colJobs = getJobsForColumn(col);
           const IconComp = col.icon;
@@ -118,25 +118,25 @@ export function PipelineBoardView({ jobs }: PipelineBoardViewProps) {
             <div
               key={col.id}
               className={cn(
-                "flex-1 min-w-[260px] max-w-[320px] rounded-xl border flex flex-col bg-card/60 backdrop-blur-xs shadow-xs",
+                "flex-1 min-w-[240px] max-w-[300px] rounded-xl border flex flex-col bg-card/60 backdrop-blur-xs shadow-2xs",
                 col.borderColor
               )}
             >
               {/* Column Header */}
-              <div className={cn("px-3.5 py-3 rounded-t-xl border-b flex items-center justify-between", col.bgColor, col.borderColor)}>
-                <div className="flex items-center gap-2">
-                  <IconComp className={cn("h-4 w-4", col.color)} />
+              <div className={cn("px-3 py-2 rounded-t-xl border-b flex items-center justify-between", col.bgColor, col.borderColor)}>
+                <div className="flex items-center gap-1.5">
+                  <IconComp className={cn("h-3.5 w-3.5", col.color)} />
                   <span className="font-bold text-xs text-foreground tracking-tight">{col.title}</span>
                 </div>
-                <span className={cn("text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-card shadow-2xs border", col.borderColor, col.color)}>
+                <span className={cn("text-[9.5px] font-extrabold px-1.5 py-0.2 rounded-full bg-card shadow-2xs border", col.borderColor, col.color)}>
                   {colJobs.length}
                 </span>
               </div>
 
               {/* Column Content */}
-              <div className="p-2.5 flex flex-col gap-2.5 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar">
+              <div className="p-2 flex flex-col gap-2 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar">
                 {colJobs.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground/60 text-xs font-semibold italic">
+                  <div className="py-6 text-center text-muted-foreground/60 text-xs font-semibold italic">
                     No requisitions
                   </div>
                 ) : (
@@ -148,12 +148,12 @@ export function PipelineBoardView({ jobs }: PipelineBoardViewProps) {
                       <div
                         key={job.id}
                         onClick={() => router.push(`/reactruterpipeline/${job.id}`)}
-                        className="group bg-card rounded-lg border border-border p-3 hover:border-brand/40 hover:shadow-sm transition-all cursor-pointer flex flex-col gap-2"
+                        className="group bg-card rounded-lg border border-border p-2.5 hover:border-brand/40 hover:shadow-xs transition-all cursor-pointer flex flex-col gap-1.5"
                       >
                         <div className="flex items-start justify-between gap-1.5">
                           <div className="flex flex-col min-w-0 flex-1">
                             {readableJobId && (
-                              <span className="font-mono text-[8.5px] font-bold text-muted-foreground uppercase">
+                              <span className="font-mono text-[8px] font-bold text-muted-foreground uppercase">
                                 {readableJobId}
                               </span>
                             )}
