@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { 
   Table,
@@ -10,8 +11,26 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Briefcase, EllipsisVertical, Eye, Trash2, User2, Mail, Phone, MapPin, Building2, MoreVertical, ShieldCheck } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { 
+  Briefcase, 
+  Eye, 
+  Trash2, 
+  Mail, 
+  Phone, 
+  MoreHorizontal, 
+  FileText, 
+  Calendar, 
+  ExternalLink,
+  Copy,
+  Clock
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PipelineStageBadge } from "./pipeline-stage-badge";
 import { StatusBadge } from "./status-badge";
@@ -19,6 +38,7 @@ import { type Candidate, type Job } from "./dummy-data";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
 
 type Props = {
   job: Job;
@@ -29,7 +49,7 @@ type Props = {
   onDeleteCandidate: (candidate: Candidate) => void;
   canModify?: boolean;
   showStageColumn?: boolean;
-  statusOptionsOverride?: string[];
+  statusOptionsOverride?: string[] | ((candidate: Candidate) => string[]);
   actionsVariant?: "full" | "viewOnly";
 };
 
@@ -47,204 +67,214 @@ export function PipelineCandidatesTable({
 }: Props) {
   const router = useRouter();
 
+  const handleCopyText = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard!`);
+  };
+
+  if (candidates.length === 0) {
+    return (
+      <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-muted-foreground">
+        <Briefcase className="h-9 w-9 mb-2 opacity-25 text-brand" />
+        <h4 className="text-xs font-bold text-foreground">No candidates in this view</h4>
+        <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs">
+          No candidate profiles matched the active stage or filters.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <Table className="w-full border-separate border-spacing-0 table-auto">
-      <TableHeader className="sticky top-0 z-40 bg-card border-b border-border">
-        <TableRow className="hover:bg-transparent">
-          <TableHead className="w-[60px] px-4 py-3.5 border-b border-border text-[11px] font-semibold text-muted-foreground tracking-wider uppercase">Candidate</TableHead>
-          <TableHead className="px-4 py-3.5 border-b border-border text-[11px] font-semibold text-muted-foreground tracking-wider uppercase">Name & Title</TableHead>
-          {showStageColumn && <TableHead className="px-4 py-3.5 border-b border-border text-[11px] font-semibold text-muted-foreground tracking-wider uppercase">Pipeline Stage</TableHead>}
-          <TableHead className="px-4 py-3.5 border-b border-border text-[11px] font-semibold text-muted-foreground tracking-wider uppercase">Internal Status</TableHead>
-          <TableHead className="px-4 py-3.5 border-b border-border text-[11px] font-semibold text-muted-foreground tracking-wider uppercase">Assignees</TableHead>
-          <TableHead className="w-[80px] px-4 py-3.5 border-b border-border text-[11px] font-semibold text-muted-foreground tracking-wider uppercase text-right pr-6">Action</TableHead>
+    <Table className="w-full border-collapse text-xs">
+      <TableHeader className="sticky top-0 z-20 bg-muted/40 backdrop-blur-xs border-b border-border">
+        <TableRow className="hover:bg-transparent text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">
+          <TableHead className="w-12 py-2 px-3 text-center">Avatar</TableHead>
+          <TableHead className="py-2 px-3 font-bold text-foreground">Candidate & Title</TableHead>
+          {showStageColumn && (
+            <TableHead className="py-2 px-3 font-bold text-foreground">Pipeline Stage</TableHead>
+          )}
+          <TableHead className="py-2 px-3 font-bold text-foreground">Stage Status</TableHead>
+          <TableHead className="py-2 px-3 font-bold text-foreground">Contact & Source</TableHead>
+          <TableHead className="py-2 px-3 font-bold text-foreground">Resume</TableHead>
+          <TableHead className="w-16 py-2 px-3 text-right font-bold text-foreground">Action</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
-        {candidates.map((candidate) => (
-          <TableRow 
-            key={candidate.id} 
-            className={cn(
-               "group border-b border-border/80 transition-colors duration-200",
-               "hover:bg-muted/40"
-            )}
-          >
-            {/* Avatar Column */}
-            <TableCell className="px-4 py-3 w-[60px]">
-              <Avatar 
-                className={cn(
-                  "h-8 w-8 rounded-lg border border-border/85 shadow-sm transition-transform duration-200",
-                  candidate.isTempCandidate ? "cursor-default" : "group-hover:scale-105 cursor-pointer"
-                )}
-                onClick={() => {
-                  if (!candidate.isTempCandidate) {
-                    router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`);
-                  }
-                }}
-              >
-                <AvatarImage src={candidate.avatar} />
-                <AvatarFallback className="text-xs font-semibold bg-brand/5 text-brand">
-                  {candidate.name ? candidate.name.split(" ").map((n) => n[0]).join("").slice(0, 2) : "NA"}
-                </AvatarFallback>
-              </Avatar>
-            </TableCell>
+      <TableBody className="divide-y divide-border/60">
+        {candidates.map((candidate) => {
+          const candidateDetailUrl = `/reactruterpipeline/${job.id}/candidate/${candidate.id}`;
 
-            {/* Name & Title Column */}
-            <TableCell className="px-4 py-3">
-              <div className="flex flex-col min-w-0 max-w-[300px]">
-                 <Tooltip>
-                   <TooltipTrigger asChild>
-                     <div 
-                        className={cn(
-                          "flex items-center gap-2 truncate",
-                          candidate.isTempCandidate ? "cursor-default" : "cursor-pointer group/name"
-                        )}
-                        onClick={() => {
-                          if (!candidate.isTempCandidate) {
-                            router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`);
-                          }
-                        }}
-                     >
-                        <span className={cn(
-                          "text-xs font-bold text-foreground truncate transition-colors",
-                          !candidate.isTempCandidate && "group-hover/name:text-brand"
-                        )}>
-                          {candidate.name || "Anonymous Candidate"}
-                        </span>
-                        {candidate.isTempCandidate && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-red-50 text-red-600 text-[8px] font-semibold uppercase tracking-wider border border-red-100">
-                            Temp
-                          </span>
-                        )}
-                     </div>
-                   </TooltipTrigger>
-                   <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-md p-2">
-                     {candidate.name}
-                   </TooltipContent>
-                 </Tooltip>
-                 
-                 <div className="flex items-center gap-1.5 overflow-hidden mt-0.5">
-                    <Building2 className="h-3 w-3 text-muted-foreground/80 shrink-0" />
-                    <span className="text-xs font-normal text-muted-foreground truncate">
-                       {candidate.currentJobTitle || "Independent Professional"}
-                    </span>
-                 </div>
-              </div>
-            </TableCell>
-
-            {/* Stage Column */}
-            {showStageColumn && (
-              <TableCell className="px-4 py-3">
-                <div className="scale-90 origin-left">
-                  <PipelineStageBadge
-                    stage={candidate.currentStage}
-                    onStageChange={(newStage) => { if (canModify) onStageChange(candidate, newStage); }}
-                  />
-                </div>
-              </TableCell>
-            )}
-
-            {/* Status Column */}
-            <TableCell className="px-4 py-3">
-              {(() => {
-                const stagesWithStatus = [
-                  "Sourcing",
-                  "Screening",
-                  "Client Review",
-                  "Interview",
-                  "Verification",
-                  "Onboarding",
-                ];
-                const alwaysShowStatus = !!statusOptionsOverride;
-                if (alwaysShowStatus || stagesWithStatus.includes(candidate.currentStage)) {
-                  const statusValue = (alwaysShowStatus ? (candidate.subStatus as any) : (candidate.status as any)) || null;
-                  return (
-                    <div className="scale-90 origin-left">
-                      <StatusBadge
-                        status={statusValue}
-                        stage={candidate.currentStage}
-                        onStatusChange={(newStatus) => { if (canModify) onStatusChange(candidate, newStatus as any); }}
-                        allowedStatuses={statusOptionsOverride}
-                      />
-                    </div>
-                  );
-                } else {
-                  return <span className="text-xs font-medium text-muted-foreground">N/A</span>;
+          return (
+            <tr 
+              key={candidate.id} 
+              className="group transition-colors hover:bg-muted/30 cursor-pointer"
+              onClick={() => {
+                if (!candidate.isTempCandidate) {
+                  router.push(candidateDetailUrl);
                 }
-              })()}
-            </TableCell>
+              }}
+            >
+              {/* Avatar */}
+              <td className="py-2 px-3 w-12 text-center" onClick={(e) => e.stopPropagation()}>
+                <Avatar 
+                  className={cn(
+                    "h-7 w-7 rounded-lg border border-border shadow-2xs mx-auto transition-transform",
+                    candidate.isTempCandidate ? "cursor-default" : "cursor-pointer hover:scale-105"
+                  )}
+                  onClick={() => {
+                    if (!candidate.isTempCandidate) {
+                      router.push(candidateDetailUrl);
+                    }
+                  }}
+                >
+                  <AvatarImage src={candidate.avatar} />
+                  <AvatarFallback className="text-[10px] font-extrabold bg-brand/10 text-brand">
+                    {candidate.name ? candidate.name.split(" ").map((n) => n[0]).join("").slice(0, 2) : "CD"}
+                  </AvatarFallback>
+                </Avatar>
+              </td>
 
-            {/* Assignees Column */}
-            <TableCell className="px-4 py-3">
-              <div className="flex flex-col gap-0.5">
-                 <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="h-3 w-3 text-muted-foreground/80" />
-                    <span className="text-xs font-normal text-muted-foreground truncate max-w-[140px]">
-                       HM: <span className="font-semibold text-foreground">{job.hiringManagerName || "Unassigned"}</span>
+              {/* Name & Title */}
+              <td className="py-2 px-3 max-w-[240px]">
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-bold text-xs text-foreground group-hover:text-brand transition-colors truncate">
+                      {candidate.name || "Anonymous Candidate"}
                     </span>
-                 </div>
-                 <div className="flex items-center gap-1.5">
-                    <User2 className="h-3 w-3 text-muted-foreground/80" />
-                    <span className="text-xs font-normal text-muted-foreground truncate max-w-[140px]">
-                       REC: <span className="font-semibold text-foreground">{job.recruiterName || "Unassigned"}</span>
-                    </span>
-                 </div>
-              </div>
-            </TableCell>
+                    {candidate.isTempCandidate && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-200 px-1 py-0.2 rounded">
+                        Temp
+                      </span>
+                    )}
+                    {candidate.priority && (
+                      <span className={cn(
+                        "text-[8px] font-bold uppercase tracking-wider px-1 py-0.2 rounded border",
+                        candidate.priority.toLowerCase() === "high" ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-muted text-muted-foreground border-border"
+                      )}>
+                        {candidate.priority}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground truncate">
+                    {candidate.currentJobTitle || candidate.experience || "Talent Prospect"}
+                  </span>
+                </div>
+              </td>
 
-            {/* Action Column */}
-            <TableCell className="px-4 py-3 text-right pr-6">
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    className="h-8 w-8 p-0 rounded-lg hover:bg-brand/5 group/btn"
-                    onClick={(e) => e.stopPropagation()}
+              {/* Pipeline Stage Badge */}
+              {showStageColumn && (
+                <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                  <PipelineStageBadge
+                    stage={candidate.currentStage as any}
+                    onStageChange={(newStage) => {
+                      if (canModify) onStageChange(candidate, newStage);
+                    }}
+                  />
+                </td>
+              )}
+
+              {/* Status Badge */}
+              <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                <StatusBadge
+                  status={candidate.status || null}
+                  stage={candidate.currentStage}
+                  onStatusChange={(newStatus) => {
+                    if (canModify) onStatusChange(candidate, newStatus);
+                  }}
+                  isReadOnly={!canModify}
+                />
+              </td>
+
+              {/* Contact Details */}
+              <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                <div className="flex flex-col gap-0.5 text-[11px] text-muted-foreground">
+                  {candidate.email && (
+                    <div 
+                      onClick={() => handleCopyText(candidate.email!, "Email")}
+                      className="flex items-center gap-1 text-foreground/80 hover:text-brand cursor-pointer truncate max-w-[170px]"
+                      title="Click to copy email"
+                    >
+                      <Mail className="h-3 w-3 shrink-0 text-muted-foreground/60" />
+                      <span className="truncate">{candidate.email}</span>
+                    </div>
+                  )}
+                  {candidate.phone && (
+                    <div 
+                      onClick={() => handleCopyText(candidate.phone!, "Phone")}
+                      className="flex items-center gap-1 text-muted-foreground hover:text-brand cursor-pointer"
+                      title="Click to copy phone"
+                    >
+                      <Phone className="h-2.5 w-2.5 shrink-0" />
+                      <span>{candidate.phone}</span>
+                    </div>
+                  )}
+                  {!candidate.email && !candidate.phone && (
+                    <span className="text-[10px] italic text-muted-foreground/60">No contact info</span>
+                  )}
+                </div>
+              </td>
+
+              {/* Resume */}
+              <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                {candidate.resume ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewResume(candidate)}
+                    className="h-6.5 px-2 text-[10px] font-bold text-brand hover:bg-brand/10 hover:text-brand border-brand/20 rounded-md gap-1 shadow-2xs"
                   >
-                    <MoreVertical className="h-4 w-4 text-muted-foreground group-hover/btn:text-brand transition-colors" />
+                    <FileText className="h-3 w-3" />
+                    <span>View CV</span>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl border border-border bg-card shadow-lg w-52 p-1.5">
-                  {!candidate.isTempCandidate && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/reactruterpipeline/${job.id}/candidate/${candidate.id}`);
-                      }}
-                      className="rounded-lg p-2 text-xs font-semibold flex items-center gap-2 cursor-pointer hover:bg-brand/5 hover:text-brand"
-                    >
-                      <Eye className="h-4 w-4" />
-                      View Profile
-                    </DropdownMenuItem>
-                  )}
-                  {candidate.resume && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onViewResume(candidate);
-                      }}
-                      className="rounded-lg p-2 text-xs font-semibold flex items-center gap-2 cursor-pointer hover:bg-brand/5 hover:text-brand"
-                    >
-                      <Briefcase className="h-4 w-4" />
-                      Inspect CV
-                    </DropdownMenuItem>
-                  )}
-                  {canModify && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteCandidate(candidate);
-                      }}
-                      className="rounded-lg p-2 text-xs font-semibold flex items-center gap-2 cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Remove Candidate
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        ))}
+                ) : (
+                  <span className="text-[10px] text-muted-foreground/50 italic">No CV</span>
+                )}
+              </td>
+
+              {/* Action */}
+              <td className="py-2 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground">
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                    {!candidate.isTempCandidate && (
+                      <DropdownMenuItem 
+                        onClick={() => router.push(candidateDetailUrl)}
+                        className="text-xs font-semibold gap-2 cursor-pointer"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>View Profile</span>
+                      </DropdownMenuItem>
+                    )}
+                    {candidate.resume && (
+                      <DropdownMenuItem 
+                        onClick={() => onViewResume(candidate)}
+                        className="text-xs font-semibold gap-2 cursor-pointer"
+                      >
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>Preview Resume</span>
+                      </DropdownMenuItem>
+                    )}
+                    {canModify && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => onDeleteCandidate(candidate)}
+                          className="text-xs font-semibold text-destructive focus:text-destructive focus:bg-destructive/10 gap-2 cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Remove</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </td>
+            </tr>
+          );
+        })}
       </TableBody>
     </Table>
   );
