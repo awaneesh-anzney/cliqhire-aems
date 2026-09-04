@@ -51,7 +51,7 @@ import { PipelineJobHeader } from "@/components/Recruiter-Pipeline/PipelineJobHe
 import { PipelineStageFilters } from "@/components/Recruiter-Pipeline/PipelineStageFilters";
 import { PipelineCandidatesTable } from "@/components/Recruiter-Pipeline/PipelineCandidatesTable";
 import { mapEntryToJob } from "@/components/Recruiter-Pipeline/pipeline-mapper";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
@@ -73,11 +73,11 @@ const Page = () => {
   const canViewPipeline = isAdmin || hasPermission("pipeline", "view");
   const canModifyPipeline = isAdmin || hasPermission("pipeline", "edit");
 
+  // Filters and Pagination State
   const [selectedStageFilter, setSelectedStageFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(30);
 
-  // Precision Filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
@@ -88,20 +88,27 @@ const Page = () => {
   const [sortBy, setSortBy] = useState<string>("lastUpdated");
   const [sortOrder, setSortOrder] = useState<string>("desc");
 
-  // Search Debouncing (300ms)
+  // Search Debouncing (350ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 300);
+    }, 350);
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Reset to page 1 whenever any filter condition changes
+  // Reset page to 1 whenever any filter condition changes
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedStageFilter, debouncedSearch, currentStatus, priority, isTemp, addedFrom, addedTo, sortBy, sortOrder]);
 
-  const { data: jobResponse, isLoading, error, refetch, isFetching } = useQuery({
+  // API Query: passes all current filter values to the backend on every change
+  const {
+    data: jobResponse,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: [
       "pipelineEntry",
       id,
@@ -112,8 +119,8 @@ const Page = () => {
       currentStatus,
       priority,
       isTemp,
-      addedFrom,
-      addedTo,
+      addedFrom ? format(addedFrom, "yyyy-MM-dd") : null,
+      addedTo ? format(addedTo, "yyyy-MM-dd") : null,
       sortBy,
       sortOrder,
     ],
@@ -131,6 +138,7 @@ const Page = () => {
         sortBy: sortBy || undefined,
         sortOrder: sortOrder || undefined,
       }),
+    placeholderData: keepPreviousData,
     enabled: !!id,
   });
 
@@ -138,6 +146,60 @@ const Page = () => {
     if (!jobResponse?.data) return null;
     return mapEntryToJob(jobResponse.data);
   }, [jobResponse]);
+
+  // Preserve pipeline-wide stage counts across filter queries so the funnel ribbon remains complete
+  const [persistentStageCounts, setPersistentStageCounts] = useState<Record<string, number>>({});
+  const [persistentTotal, setPersistentTotal] = useState<number>(0);
+
+  useEffect(() => {
+    if (job?.stageCounts && Object.keys(job.stageCounts).length > 0) {
+      if (!selectedStageFilter) {
+        setPersistentStageCounts(job.stageCounts);
+        if (job.totalCandidates) {
+          setPersistentTotal(job.totalCandidates);
+        }
+      } else {
+        setPersistentStageCounts((prev) => ({
+          ...prev,
+          ...job.stageCounts,
+        }));
+      }
+    }
+  }, [job?.stageCounts, job?.totalCandidates, selectedStageFilter]);
+
+  // Enriched job object for header and funnel ribbon
+  const activeJob = useMemo(() => {
+    if (!job) return null;
+    return {
+      ...job,
+      stageCounts: Object.keys(persistentStageCounts).length > 0 ? persistentStageCounts : (job.stageCounts || {}),
+      totalCandidates: persistentTotal || job.totalCandidates || 0,
+    } as Job;
+  }, [job, persistentStageCounts, persistentTotal]);
+
+  const pagination = useMemo(() => {
+    return jobResponse?.data?.candidates?.pagination || jobResponse?.data?.pagination;
+  }, [jobResponse]);
+
+  const paginatedCandidates = useMemo(() => {
+    return job?.candidates || [];
+  }, [job?.candidates]);
+
+  const totalCandidatesCount = useMemo(() => {
+    if (pagination) {
+      return pagination.total ?? pagination.totalCandidates ?? pagination.totalItems ?? 0;
+    }
+    return selectedStageFilter
+      ? (activeJob?.stageCounts?.[selectedStageFilter] || paginatedCandidates.length || 0)
+      : (activeJob?.totalCandidates || paginatedCandidates.length || 0);
+  }, [pagination, activeJob?.stageCounts, activeJob?.totalCandidates, selectedStageFilter, paginatedCandidates.length]);
+
+  const totalPages = useMemo(() => {
+    if (pagination) {
+      return pagination.totalPages ?? pagination.pages ?? (Math.ceil(totalCandidatesCount / pageSize) || 1);
+    }
+    return Math.max(1, Math.ceil(totalCandidatesCount / pageSize) || 1);
+  }, [pagination, totalCandidatesCount, pageSize]);
 
   // Modals & Dialog states
   const [isAddCandidateOpen, setIsAddCandidateOpen] = useState(false);
@@ -188,11 +250,11 @@ const Page = () => {
   // Action Handlers
   const handleAddCandidate = () => {
     const blockedStages = ["Hired", "On Hold", "Closed"];
-    const currentStage = job?.jobId?.stage;
+    const currentStage = activeJob?.jobId?.stage;
 
     if (currentStage && blockedStages.includes(currentStage)) {
       toast.error(
-        `Candidates cannot be added because the job "${job?.title}" is in "${currentStage}" stage.`,
+        `Candidates cannot be added because the job "${activeJob?.title}" is in "${currentStage}" stage.`,
         { duration: 5000 }
       );
       return;
@@ -401,31 +463,8 @@ const Page = () => {
     );
   }, [selectedStageFilter, search, currentStatus, priority, isTemp, addedFrom, addedTo]);
 
-  const pagination = useMemo(() => {
-    return jobResponse?.data?.candidates?.pagination || jobResponse?.data?.pagination;
-  }, [jobResponse]);
-
-  const paginatedCandidates = useMemo(() => {
-    return job?.candidates || [];
-  }, [job?.candidates]);
-
-  const totalCandidatesCount = useMemo(() => {
-    if (pagination) {
-      return pagination.total ?? pagination.totalCandidates ?? pagination.totalItems ?? 0;
-    }
-    return selectedStageFilter
-      ? (job?.stageCounts?.[selectedStageFilter] || 0)
-      : (job?.totalCandidates || 0);
-  }, [pagination, job?.stageCounts, job?.totalCandidates, selectedStageFilter]);
-
-  const totalPages = useMemo(() => {
-    if (pagination) {
-      return pagination.totalPages ?? pagination.pages ?? (Math.ceil(totalCandidatesCount / pageSize) || 1);
-    }
-    return Math.ceil(totalCandidatesCount / pageSize) || 1;
-  }, [pagination, totalCandidatesCount, pageSize]);
-
-  if (isLoading) {
+  // Initial loading guard: only rendered on initial mount when no job is cached yet
+  if (isLoading && !job) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-4.25rem)] w-full gap-3">
         <div className="p-4 rounded-xl bg-card shadow-md border border-border flex items-center gap-3 animate-in zoom-in-95 duration-300">
@@ -436,7 +475,8 @@ const Page = () => {
     );
   }
 
-  if (error || !job) {
+  // Error guard: only rendered if an error occurs and no job is available
+  if (error && !job) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-4.25rem)] w-full gap-4 p-4">
         <div className="p-6 rounded-xl bg-card shadow-md border border-border text-center max-w-md">
@@ -473,18 +513,22 @@ const Page = () => {
     );
   }
 
+  if (!job || !activeJob) {
+    return null;
+  }
+
   return (
     <TooltipProvider delayDuration={150}>
       <div className="flex flex-col h-[calc(100vh-4.25rem)] w-full overflow-hidden bg-[hsl(var(--protected-bg))] p-2 md:p-2.5 gap-2">
         {/* Section 1: Executive Job Header */}
         <div className="flex-shrink-0 bg-card rounded-xl border border-border shadow-xs overflow-hidden">
-          <PipelineJobHeader job={job} onAddCandidate={handleAddCandidate} />
+          <PipelineJobHeader job={activeJob} onAddCandidate={handleAddCandidate} />
         </div>
 
         {/* Section 2: Stage Funnel Ribbon & Precision Filter Toolbar */}
         <div className="flex-shrink-0 bg-card rounded-xl border border-border shadow-xs p-2.5 flex flex-col gap-2">
           <PipelineStageFilters
-            job={job}
+            job={activeJob}
             selectedStage={selectedStageFilter}
             onSelectStage={setSelectedStageFilter}
           />
@@ -647,7 +691,7 @@ const Page = () => {
             </div>
           </div>
 
-          {/* Active Chips Panel (if filters applied) */}
+          {/* Active Filter Chips */}
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-border/60">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase mr-1">Active:</span>
@@ -729,14 +773,19 @@ const Page = () => {
 
         {/* Section 3: Candidates Table Area */}
         <div className="flex-1 min-h-0 bg-card rounded-xl border border-border shadow-xs overflow-hidden flex flex-col">
-          {/* Subheader info bar */}
+          {/* Subheader Info Bar */}
           <div className="px-3 py-1.5 bg-muted/20 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-muted-foreground">Current View:</span>
               <Badge variant="outline" className="text-xs font-semibold border-brand/30 text-brand bg-brand/5 px-2 py-0.5">
                 {selectedStageFilter ? selectedStageFilter : "All Pipeline Stages"}
               </Badge>
-              {isFetching && <Loader2 className="h-3 w-3 animate-spin text-brand" />}
+              {isFetching && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-brand font-medium">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>Updating...</span>
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-muted-foreground">
@@ -749,15 +798,15 @@ const Page = () => {
                 className="h-6 w-6 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
                 title="Refresh candidates"
               >
-                <RotateCw className="h-3 w-3" />
+                <RotateCw className={cn("h-3 w-3", isFetching && "animate-spin")} />
               </Button>
             </div>
           </div>
 
-          {/* Table Container */}
-          <div className="flex-1 overflow-auto relative custom-scrollbar">
+          {/* Table Container with proper scrolling & non-disruptive fetch transition */}
+          <div className={cn("flex-1 overflow-auto relative custom-scrollbar transition-opacity duration-200", isFetching && "opacity-75")}>
             <PipelineCandidatesTable
-              job={job}
+              job={activeJob}
               candidates={paginatedCandidates}
               onStageChange={handleStageChange}
               onStatusChange={handleStatusChange}
@@ -890,18 +939,18 @@ const Page = () => {
           onOpenChange={setIsAddCandidateOpen}
           onAddExisting={handleAddExistingCandidate}
           onAddNew={handleAddNewCandidate}
-          jobTitle={job.title}
+          jobTitle={activeJob.title}
         />
       )}
 
       {isAddExistingOpen && (
         <AddExistingCandidateDialog
-          jobId={job.id}
-          jobTitle={job.title}
+          jobId={activeJob.id}
+          jobTitle={activeJob.title}
           open={isAddExistingOpen}
           onOpenChange={setIsAddExistingOpen}
           isPipeline={true}
-          pipelineId={job.id}
+          pipelineId={activeJob.id}
           onCandidatesAdded={async () => {
             await refetch();
           }}
@@ -912,7 +961,7 @@ const Page = () => {
         <CreateCandidateDialog
           open={isCreateCandidateOpen}
           onOpenChange={setIsCreateCandidateOpen}
-          pipelineId={job.id}
+          pipelineId={activeJob.id}
           onSubmit={handleCreateCandidateSubmit}
         />
       )}

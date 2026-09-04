@@ -85,18 +85,32 @@ export function PipelineCandidatesTable({
   }
 
   return (
-    <Table className="w-full border-collapse text-xs">
-      <TableHeader className="sticky top-0 z-20 bg-muted/40 backdrop-blur-xs border-b border-border">
-        <TableRow className="hover:bg-transparent text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">
-          <TableHead className="w-12 py-2 px-3 text-center">Avatar</TableHead>
-          <TableHead className="py-2 px-3 font-bold text-foreground">Candidate & Title</TableHead>
+    <Table className="w-full border-separate border-spacing-0 text-xs">
+      <TableHeader className="sticky top-0 z-20">
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="sticky top-0 z-20 bg-card border-b border-border w-12 py-2 px-3 text-center text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border))]">
+            Avatar
+          </TableHead>
+          <TableHead className="sticky top-0 z-20 bg-card border-b border-border py-2 px-3 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border))]">
+            Candidate & Title
+          </TableHead>
           {showStageColumn && (
-            <TableHead className="py-2 px-3 font-bold text-foreground">Pipeline Stage</TableHead>
+            <TableHead className="sticky top-0 z-20 bg-card border-b border-border py-2 px-3 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border))]">
+              Pipeline Stage
+            </TableHead>
           )}
-          <TableHead className="py-2 px-3 font-bold text-foreground">Stage Status</TableHead>
-          <TableHead className="py-2 px-3 font-bold text-foreground">Contact & Source</TableHead>
-          <TableHead className="py-2 px-3 font-bold text-foreground">Resume</TableHead>
-          <TableHead className="w-16 py-2 px-3 text-right font-bold text-foreground">Action</TableHead>
+          <TableHead className="sticky top-0 z-20 bg-card border-b border-border py-2 px-3 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border))]">
+            Stage Status
+          </TableHead>
+          <TableHead className="sticky top-0 z-20 bg-card border-b border-border py-2 px-3 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border))]">
+            Contact & Source
+          </TableHead>
+          <TableHead className="sticky top-0 z-20 bg-card border-b border-border py-2 px-3 text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border))]">
+            Resume
+          </TableHead>
+          <TableHead className="sticky top-0 z-20 bg-card border-b border-border w-16 py-2 px-3 text-right text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border))]">
+            Action
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody className="divide-y divide-border/60">
@@ -114,7 +128,7 @@ export function PipelineCandidatesTable({
               }}
             >
               {/* Avatar */}
-              <td className="py-2 px-3 w-12 text-center" onClick={(e) => e.stopPropagation()}>
+              <td className="py-2 px-3 w-12 text-center border-b border-border/60" onClick={(e) => e.stopPropagation()}>
                 <Avatar 
                   className={cn(
                     "h-7 w-7 rounded-lg border border-border shadow-2xs mx-auto transition-transform",
@@ -134,7 +148,7 @@ export function PipelineCandidatesTable({
               </td>
 
               {/* Name & Title */}
-              <td className="py-2 px-3 max-w-[240px]">
+              <td className="py-2 px-3 max-w-[240px] border-b border-border/60">
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-bold text-xs text-foreground group-hover:text-brand transition-colors truncate">
@@ -162,7 +176,7 @@ export function PipelineCandidatesTable({
 
               {/* Pipeline Stage Badge */}
               {showStageColumn && (
-                <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                <td className="py-2 px-3 border-b border-border/60" onClick={(e) => e.stopPropagation()}>
                   <PipelineStageBadge
                     stage={candidate.currentStage as any}
                     onStageChange={(newStage) => {
@@ -173,7 +187,7 @@ export function PipelineCandidatesTable({
               )}
 
               {/* Status Badge */}
-              <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+              <td className="py-2 px-3 border-b border-border/60" onClick={(e) => e.stopPropagation()}>
                 <StatusBadge
                   status={candidate.status || null}
                   stage={candidate.currentStage}
@@ -185,7 +199,7 @@ export function PipelineCandidatesTable({
               </td>
 
               {/* Contact Details */}
-              <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+              <td className="py-2 px-3 border-b border-border/60" onClick={(e) => e.stopPropagation()}>
                 <div className="flex flex-col gap-0.5 text-[11px] text-muted-foreground">
                   {candidate.email && (
                     <div 
@@ -214,7 +228,7 @@ export function PipelineCandidatesTable({
               </td>
 
               {/* Resume */}
-              <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+              <td className="py-2 px-3 border-b border-border/60" onClick={(e) => e.stopPropagation()}>
                 {candidate.resume ? (
                   <Button
                     variant="outline"
@@ -231,7 +245,7 @@ export function PipelineCandidatesTable({
               </td>
 
               {/* Action */}
-              <td className="py-2 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+              <td className="py-2 px-3 text-right border-b border-border/60" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground">
