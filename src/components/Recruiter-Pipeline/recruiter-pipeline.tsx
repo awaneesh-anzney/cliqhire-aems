@@ -306,10 +306,12 @@ export function RecruiterPipeline() {
                 </SelectTrigger>
                 <SelectContent className="rounded-lg">
                   <SelectItem value="all" className="text-muted-foreground italic font-medium">Clear Filter</SelectItem>
+                  <SelectItem value="Open">Open</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Onboarding">Onboarding</SelectItem>
+                  <SelectItem value="Hired">Hired</SelectItem>
                   <SelectItem value="On Hold">On Hold</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  <SelectItem value="Closed">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>

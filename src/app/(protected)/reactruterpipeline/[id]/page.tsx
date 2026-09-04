@@ -175,7 +175,7 @@ const Page = () => {
     
     if (currentStage && blockedStages.includes(currentStage)) {
       toast.error(
-        `Candidates cannot be added to this pipeline because the job "${job?.title}" is currently in the "${currentStage}" stage. This job's pipeline is "${job?.pipelineStatus || 'Completed'}" and no longer accepts new candidates.`,
+        `Candidates cannot be added to this pipeline because the job "${job?.title}" is currently in the "${currentStage}" stage. This job's pipeline status is also "${job?.pipelineStatus || currentStage}" and no longer accepts new candidates.`,
         { duration: 6000 }
       );
       return;
