@@ -30,17 +30,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useSendEmail } from "@/hooks/useEmail";
+import { useSendEmail, useSaveDraft, useSendDraft, useUpdateDraft } from "@/hooks/useEmail";
 
 interface EmailComposerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: {
     to?: string;
+    cc?: string;
+    bcc?: string;
     subject?: string;
     threadId?: string;
     inReplyTo?: string;
     text?: string;
+    draftId?: string;
   };
 }
 
@@ -53,6 +56,9 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   initialData,
 }) => {
   const sendEmailMutation = useSendEmail();
+  const saveDraftMutation = useSaveDraft();
+  const updateDraftMutation = useUpdateDraft();
+  const sendDraftMutation = useSendDraft();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [to, setTo] = useState("");
@@ -68,6 +74,8 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   useEffect(() => {
     if (open && initialData) {
       if (initialData.to) setTo(initialData.to);
+      if (initialData.cc) { setCc(initialData.cc); setShowCc(true); }
+      if (initialData.bcc) { setBcc(initialData.bcc); setShowBcc(true); }
       if (initialData.subject) setSubject(initialData.subject);
       if (initialData.text) setBodyText(initialData.text);
     } else if (!open) {
@@ -136,6 +144,13 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       "<br/>"
     )}</div>`;
 
+    if (initialData?.draftId) {
+      sendDraftMutation.mutate(initialData.draftId, {
+        onSuccess: () => onOpenChange(false),
+      });
+      return;
+    }
+
     sendEmailMutation.mutate(
       {
         to: toArray,
@@ -156,6 +171,42 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     );
   };
 
+  const handleSaveDraft = () => {
+    const toArray = to ? to.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+    const ccArray = cc ? cc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+    const bccArray = bcc ? bcc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+
+    const htmlBody = bodyText ? `<div style="font-family: sans-serif; line-height: 1.5; color: #333;">${bodyText.replace(/\n/g,"<br/>")}</div>` : undefined;
+
+    const payload = {
+      to: toArray,
+      subject,
+      cc: ccArray,
+      bcc: bccArray,
+      text: bodyText,
+      html: htmlBody,
+      threadId: initialData?.threadId,
+      inReplyTo: initialData?.inReplyTo,
+      attachments: files.length > 0 ? files : undefined,
+    };
+
+    if (initialData?.draftId) {
+      updateDraftMutation.mutate({ draftId: initialData.draftId, payload }, {
+        onSuccess: () => {
+          toast.success("Draft updated");
+          onOpenChange(false);
+        }
+      });
+    } else {
+      saveDraftMutation.mutate(payload, {
+        onSuccess: () => {
+          toast.success("Draft saved");
+          onOpenChange(false);
+        }
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[640px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
@@ -163,7 +214,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         <DialogHeader className="p-4 border-b bg-muted/20">
           <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2">
             <Send className="h-4 w-4 text-primary" />
-            {initialData?.threadId ? "Reply to Conversation" : "Compose New Email"}
+            {initialData?.draftId ? "Edit Draft" : initialData?.threadId ? "Reply to Conversation" : "Compose New Email"}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             Dispatches through your connected organization mailbox and SMTP gateway.
@@ -350,24 +401,37 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             Discard
           </Button>
 
-          <Button
-            type="button"
-            disabled={sendEmailMutation.isPending}
-            onClick={handleSend}
-            className="text-xs h-8 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-sm"
-          >
-            {sendEmailMutation.isPending ? (
-              <>
-                <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                Sending email...
-              </>
-            ) : (
-              <>
-                <Send className="h-3.5 w-3.5" />
-                Send Email
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={saveDraftMutation.isPending || updateDraftMutation.isPending || sendDraftMutation.isPending || sendEmailMutation.isPending}
+              onClick={handleSaveDraft}
+              className="text-xs h-8"
+            >
+              {saveDraftMutation.isPending || updateDraftMutation.isPending ? "Saving..." : "Save Draft"}
+            </Button>
+
+            <Button
+              type="button"
+              disabled={sendEmailMutation.isPending || sendDraftMutation.isPending}
+              onClick={handleSend}
+              className="text-xs h-8 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-sm"
+            >
+              {sendEmailMutation.isPending || sendDraftMutation.isPending ? (
+                <>
+                  <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Sending email...
+                </>
+              ) : (
+                <>
+                  <Send className="h-3.5 w-3.5" />
+                  Send Email
+                </>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

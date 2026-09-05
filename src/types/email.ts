@@ -78,6 +78,10 @@ export interface Email {
   mailboxId: string;
   threadId: string;
   direction: EmailDirection;
+  folder?: string;
+  restoreFolder?: string;
+  serverFolder?: string;
+  serverUid?: number;
   from: string;
   to: string[];
   cc?: string[];
@@ -93,6 +97,22 @@ export interface Email {
   errorMessage?: string;
   sentAt?: string;
   receivedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Draft {
+  _id: string;
+  mailboxId: string;
+  to?: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject?: string;
+  bodyText?: string;
+  bodyHtml?: string;
+  attachments?: EmailAttachment[];
+  threadId?: string;
+  inReplyTo?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -113,6 +133,23 @@ export interface SendEmailPayload {
   threadId?: string;
   inReplyTo?: string;
   attachments?: File[];
+}
+
+export interface SaveDraftPayload {
+  to?: string | string[];
+  cc?: string | string[];
+  bcc?: string | string[];
+  subject?: string;
+  text?: string;
+  html?: string;
+  threadId?: string;
+  inReplyTo?: string;
+  attachments?: File[];
+}
+
+export interface GetEmailsParams {
+  page?: number;
+  limit?: number;
 }
 
 export interface GetThreadsParams {
@@ -163,4 +200,22 @@ export interface AdminMailboxStatusResponse {
   success: boolean;
   count: number;
   data: AdminMailboxStatusItem[];
+}
+
+export interface EmailsResponse {
+  success: boolean;
+  count: number;
+  total: number;
+  page: number;
+  pages: number;
+  data: Email[];
+}
+
+export interface DraftsResponse {
+  success: boolean;
+  count: number;
+  total: number;
+  page: number;
+  pages: number;
+  data: Draft[];
 }

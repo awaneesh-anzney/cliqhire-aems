@@ -18,11 +18,22 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmailThread } from "@/types/email";
 
+export interface EmailListItem {
+  id: string; // The email ID or thread ID to select
+  threadId?: string; // The underlying thread ID
+  subject: string;
+  participants: string[];
+  date: string;
+  unreadCount: number;
+  isStarred: boolean;
+  isDraft?: boolean;
+}
+
 interface EmailThreadListProps {
-  threads: EmailThread[];
+  threads: EmailListItem[];
   isLoading: boolean;
   selectedThreadId: string | null;
-  onSelectThread: (threadId: string) => void;
+  onSelectThread: (item: EmailListItem) => void;
   page: number;
   totalPages: number;
   totalThreads: number;
@@ -126,14 +137,14 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           </div>
         ) : (
           filteredThreads.map((thread) => {
-            const isSelected = selectedThreadId === thread._id;
-            const hasUnread = thread.unreadCount > 0;
+            const isSelected = selectedThreadId === thread.id || selectedThreadId === thread.threadId;
+            const hasUnread = thread.unreadCount > 0 && !thread.isDraft;
             const primaryParticipant = thread.participants?.[0] || "Unknown";
 
             return (
               <div
-                key={thread._id}
-                onClick={() => onSelectThread(thread._id)}
+                key={thread.id}
+                onClick={() => onSelectThread(thread)}
                 className={`relative flex items-start gap-3 p-3 cursor-pointer transition-all hover:bg-muted/40 ${
                   isSelected ? "bg-primary/5 border-l-2 border-l-primary" : ""
                 } ${hasUnread ? "bg-muted/10 font-semibold" : ""}`}
@@ -153,11 +164,14 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                         hasUnread ? "font-bold text-foreground" : "font-medium text-foreground/90"
                       }`}
                     >
+                      {thread.isDraft && (
+                        <span className="text-amber-500 font-bold mr-1">[Draft]</span>
+                      )}
                       {thread.participants?.join(", ") || "Participants"}
                     </span>
 
                     <span className="text-[10px] text-muted-foreground shrink-0 font-medium">
-                      {formatTime(thread.lastMessageAt)}
+                      {formatTime(thread.date)}
                     </span>
                   </div>
 
@@ -186,10 +200,10 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                 </div>
 
                 {/* Star Button */}
-                {onToggleStar && (
+                {onToggleStar && !thread.isDraft && (
                   <button
                     type="button"
-                    onClick={(e) => onToggleStar(thread._id, e)}
+                    onClick={(e) => onToggleStar(thread.id, e)}
                     className="p-1 rounded text-muted-foreground hover:text-amber-400 hover:bg-muted/60 transition-colors"
                   >
                     <Star

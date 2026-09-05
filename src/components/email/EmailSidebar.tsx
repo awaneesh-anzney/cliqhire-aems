@@ -13,7 +13,8 @@ import {
   Shield,
   Trash2,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,7 @@ import {
 import { Mailbox } from "@/types/email";
 import { useDisconnectMailbox } from "@/hooks/useEmail";
 
-export type EmailFolder = "inbox" | "starred" | "sent" | "trash";
+export type EmailFolder = "inbox" | "starred" | "sent" | "drafts" | "trash";
 
 interface EmailSidebarProps {
   activeFolder: EmailFolder;
@@ -65,7 +66,8 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
     { id: "inbox", label: "Inbox", icon: Inbox, badge: unreadCount },
     { id: "starred", label: "Starred", icon: Star },
     { id: "sent", label: "Sent Mail", icon: Send },
-    { id: "trash", label: "Archived / Trash", icon: Trash2 },
+    { id: "drafts", label: "Drafts", icon: FileText },
+    { id: "trash", label: "Trash", icon: Trash2 },
   ];
 
   return (

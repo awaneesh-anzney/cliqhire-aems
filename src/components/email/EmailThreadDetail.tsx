@@ -14,11 +14,12 @@ import {
   Mail, 
   User, 
   Star, 
-  Eye, 
+  Eye,
   EyeOff, 
   MoreVertical,
   X,
-  FileIcon
+  FileIcon,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { EmailThread, Email, EmailAttachment, EmailStatus } from "@/types/email";
-import { useMarkThreadRead, useSendEmail } from "@/hooks/useEmail";
+import { 
+  useMarkThreadRead, 
+  useSendEmail,
+  useMoveToTrash,
+  useRestoreEmail,
+  usePermanentDelete
+} from "@/hooks/useEmail";
 
 interface EmailThreadDetailProps {
   thread: EmailThread | null;
@@ -45,6 +52,9 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 }) => {
   const markReadMutation = useMarkThreadRead();
   const sendEmailMutation = useSendEmail();
+  const moveToTrashMutation = useMoveToTrash();
+  const restoreEmailMutation = useRestoreEmail();
+  const permanentDeleteMutation = usePermanentDelete();
 
   const [quickReplyText, setQuickReplyText] = useState("");
   const [isReplying, setIsReplying] = useState(false);
@@ -225,7 +235,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
           return (
             <div
               key={msg._id || idx}
-              className={`rounded-xl border p-4 shadow-xs transition-colors ${
+              className={`group rounded-xl border p-4 shadow-xs transition-colors ${
                 isSent ? "bg-muted/20 border-border/80 ml-4 sm:ml-8" : "bg-card border-border/90 mr-4 sm:mr-8"
               }`}
             >
@@ -255,15 +265,56 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                   </div>
                 </div>
 
-                <div className="text-[11px] text-muted-foreground shrink-0 font-medium">
-                  {msg.sentAt || msg.receivedAt
-                    ? new Date(msg.sentAt || msg.receivedAt!).toLocaleString([], {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "Recent"}
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="text-[11px] text-muted-foreground font-medium">
+                    {msg.sentAt || msg.receivedAt
+                      ? new Date(msg.sentAt || msg.receivedAt!).toLocaleString([], {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "Recent"}
+                  </div>
+
+                  {/* Message Actions */}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {msg.folder === "trash" ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => restoreEmailMutation.mutate(msg._id)}
+                          disabled={restoreEmailMutation.isPending}
+                          className="h-6 w-6 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
+                          title="Restore Email"
+                        >
+                          <Reply className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => permanentDeleteMutation.mutate(msg._id)}
+                          disabled={permanentDeleteMutation.isPending}
+                          className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title="Permanently Delete"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => moveToTrashMutation.mutate(msg._id)}
+                        disabled={moveToTrashMutation.isPending}
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        title="Move to Trash"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 

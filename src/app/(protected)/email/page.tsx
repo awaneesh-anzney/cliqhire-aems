@@ -11,9 +11,10 @@ import {
   EmailComposerDialog,
   AdminMailboxesDialog
 } from "@/components/email";
+import { EmailListItem } from "@/components/email/EmailThreadList";
 import { 
   useMailboxStatus, 
-  useEmailThreads, 
+  useEmailList, 
   useEmailThread, 
   useMarkThreadRead 
 } from "@/hooks/useEmail";
@@ -40,25 +41,27 @@ export default function EmailPage() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerInitialData, setComposerInitialData] = useState<{
     to?: string;
+    cc?: string;
+    bcc?: string;
     subject?: string;
     threadId?: string;
     inReplyTo?: string;
     text?: string;
+    draftId?: string;
   } | undefined>(undefined);
   const [adminMailboxesOpen, setAdminMailboxesOpen] = useState(false);
 
-  // Fetch threads when mailbox is connected
+  // Fetch lists
   const { 
-    data: threadsData, 
-    isLoading: loadingThreads, 
-    refetch: refetchThreads, 
-    isRefetching: refetchingThreads 
-  } = useEmailThreads(
+    data: listData, 
+    isLoading: loadingList, 
+    refetch: refetchList, 
+    isRefetching: refetchingList 
+  } = useEmailList(
+    activeFolder,
     {
       page,
       limit: 20,
-      starredOnly: activeFolder === "starred",
-      folder: activeFolder,
     },
     isConnected
   );
@@ -71,37 +74,91 @@ export default function EmailPage() {
 
   const markReadMutation = useMarkThreadRead();
 
-  const threads = threadsData?.data || [];
-  const totalThreads = threadsData?.total || 0;
-  const totalPages = threadsData?.pages || 1;
+  const rawList = listData?.data || [];
+  const totalThreads = listData?.total || 0;
+  const totalPages = listData?.pages || 1;
+
+  const mappedItems: EmailListItem[] = rawList.map((item: any) => {
+    if (activeFolder === "starred") {
+      return {
+        id: item._id,
+        threadId: item._id,
+        subject: item.subject,
+        participants: item.participants || ["Participants"],
+        date: item.lastMessageAt || item.createdAt,
+        unreadCount: item.unreadCount || 0,
+        isStarred: item.isStarred || false,
+        isDraft: false,
+      };
+    } else if (activeFolder === "drafts") {
+      return {
+        id: item._id,
+        threadId: item.threadId,
+        subject: item.subject || "(No Subject)",
+        participants: item.to && item.to.length > 0 ? item.to : ["No Recipients"],
+        date: item.updatedAt || item.createdAt,
+        unreadCount: 0,
+        isStarred: false,
+        isDraft: true,
+      };
+    } else {
+      return {
+        id: item._id,
+        threadId: item.threadId,
+        subject: item.subject || "(No Subject)",
+        participants: item.direction === "received" ? [item.from] : (item.to || ["Unknown"]),
+        date: item.receivedAt || item.sentAt || item.createdAt,
+        unreadCount: item.isRead ? 0 : 1,
+        isStarred: false,
+        isDraft: false,
+      };
+    }
+  });
 
   // Auto-select first thread on desktop if none selected
   React.useEffect(() => {
-    if (!selectedThreadId && threads.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1024) {
-      setSelectedThreadId(threads[0]._id);
+    if (!selectedThreadId && mappedItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1024) {
+      if (!mappedItems[0].isDraft) {
+        setSelectedThreadId(mappedItems[0].threadId || mappedItems[0].id);
+      }
     }
-  }, [threads, selectedThreadId]);
+  }, [mappedItems, selectedThreadId]);
 
-  const handleSelectThread = (id: string) => {
-    setSelectedThreadId(id);
-    const target = threads.find((t) => t._id === id);
-    if (target && target.unreadCount > 0) {
-      markReadMutation.mutate({ threadId: id, isRead: true });
+  const handleSelectThread = (item: EmailListItem) => {
+    if (item.isDraft) {
+      const rawDraft = rawList.find((d: any) => d._id === item.id);
+      handleCompose({
+        to: rawDraft?.to?.join(", "),
+        cc: rawDraft?.cc?.join(", "),
+        bcc: rawDraft?.bcc?.join(", "),
+        subject: rawDraft?.subject,
+        text: rawDraft?.bodyText,
+        threadId: rawDraft?.threadId,
+        inReplyTo: rawDraft?.inReplyTo,
+        draftId: item.id,
+      });
+    } else {
+      setSelectedThreadId(item.threadId || item.id);
+      if (item.unreadCount > 0 && activeFolder === "starred") {
+        markReadMutation.mutate({ threadId: item.threadId || item.id, isRead: true });
+      }
     }
   };
 
-  const handleCompose = (prefill?: { to?: string; subject?: string; threadId?: string; inReplyTo?: string }) => {
+  const handleCompose = (prefill?: { to?: string; cc?: string; bcc?: string; subject?: string; threadId?: string; inReplyTo?: string; draftId?: string }) => {
     setComposerInitialData(prefill);
     setComposerOpen(true);
   };
 
   const handleRefresh = () => {
     refetchStatus();
-    refetchThreads();
+    refetchList();
   };
 
-  // Compute unread count from threads
-  const totalUnread = threads.reduce((acc, t) => acc + (t.unreadCount || 0), 0);
+  // Compute unread count (only meaningful for inbox and starred)
+  const totalUnread = activeFolder === "inbox" || activeFolder === "starred"
+    ? mappedItems.reduce((acc, t) => acc + (t.unreadCount || 0), 0)
+    : 0;
 
   if (loadingStatus) {
     return (
@@ -124,7 +181,7 @@ export default function EmailPage() {
         onSearchChange={setSearchQuery}
         onComposeClick={() => handleCompose()}
         onRefreshClick={handleRefresh}
-        isRefreshing={refetchingStatus || refetchingThreads}
+        isRefreshing={refetchingStatus || refetchingList}
         onOpenAdminMailboxes={() => setAdminMailboxesOpen(true)}
       />
 
@@ -163,8 +220,8 @@ export default function EmailPage() {
               </div>
             ) : (
               <EmailThreadList
-                threads={threads}
-                isLoading={loadingThreads}
+                threads={mappedItems}
+                isLoading={loadingList}
                 selectedThreadId={selectedThreadId}
                 onSelectThread={handleSelectThread}
                 page={page}

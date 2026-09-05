@@ -174,4 +174,110 @@ export const emailService = {
       return response.data;
     }
   },
+
+  /**
+   * Fetch emails from specific folders (inbox, sent, trash, drafts, starred)
+   */
+  async getEmailsList(folder: string, params: GetEmailsParams = {}): Promise<EmailsResponse | DraftsResponse | ThreadsResponse> {
+    const response = await api.get(`/api/email/${folder}`, {
+      params: {
+        page: params.page || 1,
+        limit: params.limit || 20,
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Toggle star on a thread
+   */
+  async toggleStarThread(threadId: string, isStarred: boolean = true): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.patch(`/api/email/threads/${threadId}/star`, { isStarred });
+    return response.data;
+  },
+
+  /**
+   * Move an email to Trash (soft delete)
+   */
+  async moveToTrash(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.delete(`/api/email/emails/${emailId}`);
+    return response.data;
+  },
+
+  /**
+   * Restore an email from Trash
+   */
+  async restoreFromTrash(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/emails/${emailId}/restore`);
+    return response.data;
+  },
+
+  /**
+   * Permanently delete an email from Trash
+   */
+  async permanentDelete(emailId: string): Promise<{ success: boolean; message: string }> {
+    const response = await api.delete(`/api/email/trash/${emailId}`);
+    return response.data;
+  },
+
+  /**
+   * Save a new draft
+   */
+  async saveDraft(payload: SaveDraftPayload): Promise<{ success: boolean; message: string; data: any }> {
+    const hasFiles = payload.attachments && payload.attachments.length > 0;
+
+    if (hasFiles) {
+      const formData = new FormData();
+      if (payload.to) {
+        formData.append("to", Array.isArray(payload.to) ? payload.to.join(", ") : payload.to);
+      }
+      if (payload.subject) formData.append("subject", payload.subject);
+      if (payload.cc) {
+        formData.append("cc", Array.isArray(payload.cc) ? payload.cc.join(", ") : payload.cc);
+      }
+      if (payload.bcc) {
+        formData.append("bcc", Array.isArray(payload.bcc) ? payload.bcc.join(", ") : payload.bcc);
+      }
+      if (payload.text) formData.append("text", payload.text);
+      if (payload.html) formData.append("html", payload.html);
+      if (payload.threadId) formData.append("threadId", payload.threadId);
+      if (payload.inReplyTo) formData.append("inReplyTo", payload.inReplyTo);
+
+      payload.attachments?.forEach((file) => {
+        formData.append("attachments", file);
+      });
+
+      const response = await api.post("/api/email/drafts", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } else {
+      const response = await api.post("/api/email/drafts", payload);
+      return response.data;
+    }
+  },
+
+  /**
+   * Update an existing draft
+   */
+  async updateDraft(draftId: string, payload: Partial<SaveDraftPayload>): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.patch(`/api/email/drafts/${draftId}`, payload);
+    return response.data;
+  },
+
+  /**
+   * Discard a draft
+   */
+  async deleteDraft(draftId: string): Promise<{ success: boolean; message: string }> {
+    const response = await api.delete(`/api/email/drafts/${draftId}`);
+    return response.data;
+  },
+
+  /**
+   * Send a saved draft
+   */
+  async sendDraft(draftId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/drafts/${draftId}/send`);
+    return response.data;
+  }
 };
