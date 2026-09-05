@@ -47,6 +47,45 @@ export function useProviderConfig() {
     queryKey: EMAIL_QUERY_KEYS.providerConfig,
     queryFn: () => emailService.getProviderConfig(),
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: false, // Don't retry on 404
+  });
+}
+
+/**
+ * Mutation to create organization email provider config
+ */
+export function useCreateProviderConfig() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Partial<MailProviderConfig>) => emailService.createProviderConfig(data),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: EMAIL_QUERY_KEYS.providerConfig });
+      toast.success(res.message || "Email configuration created successfully");
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.message || "Failed to create email configuration";
+      toast.error(msg);
+    },
+  });
+}
+
+/**
+ * Mutation to update organization email provider config
+ */
+export function useUpdateProviderConfig() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Partial<MailProviderConfig>) => emailService.updateProviderConfig(data),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: EMAIL_QUERY_KEYS.providerConfig });
+      toast.success(res.message || "Email configuration updated successfully");
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.message || "Failed to update email configuration";
+      toast.error(msg);
+    },
   });
 }
 

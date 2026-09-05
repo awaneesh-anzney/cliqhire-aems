@@ -28,7 +28,17 @@ export const emailService = {
   },
 
   /**
-   * Update or create organization email provider config (ADMIN only).
+   * Create organization email provider config (ADMIN only).
+   */
+  async createProviderConfig(
+    data: Partial<MailProviderConfig>
+  ): Promise<{ success: boolean; message: string; data: MailProviderConfig }> {
+    const response = await api.post("/api/email/provider-config", data);
+    return response.data;
+  },
+
+  /**
+   * Update organization email provider config (ADMIN only).
    */
   async updateProviderConfig(
     data: Partial<MailProviderConfig>
