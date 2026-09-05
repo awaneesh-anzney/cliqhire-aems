@@ -287,6 +287,21 @@ export function EmailSettingsTab({ searchQuery = "" }: EmailSettingsTabProps = {
               className="data-[state=checked]:bg-brand scale-80"
             />
           </div>
+
+          <div className="space-y-1 mt-2">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
+              Custom Sent Folder (Optional)
+            </Label>
+            <Input
+              value={formData.sentFolder || ""}
+              onChange={(e) => setFormData({ ...formData, sentFolder: e.target.value })}
+              placeholder="e.g. INBOX.Sent"
+              className="h-8.5 text-xs rounded-xl font-mono"
+            />
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Leave blank for auto-detection. Specify only if sent emails are not syncing correctly.
+            </p>
+          </div>
         </div>
 
         {/* Right: Custom IMAP / SMTP Settings (6 cols) */}

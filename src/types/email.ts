@@ -29,6 +29,7 @@ export interface MailProviderConfig {
   smtpHost?: string;
   smtpPort?: number;
   smtpEncryption?: MailEncryptionType;
+  sentFolder?: string;
   requiresAppPassword?: boolean;
   dailySendLimit?: number | null;
   status: "active" | "disabled";
@@ -47,6 +48,8 @@ export interface Mailbox {
   lastSyncedAt?: string | null;
   lastSyncError?: string | null;
   isActive: boolean;
+  initialSyncCompleted?: boolean;
+  sentFolderDetected?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -116,6 +119,7 @@ export interface GetThreadsParams {
   page?: number;
   limit?: number;
   starredOnly?: boolean;
+  folder?: string;
 }
 
 export interface ThreadsResponse {

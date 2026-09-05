@@ -12,7 +12,8 @@ import {
   Clock,
   Shield,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -134,6 +135,13 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
               <Clock className="h-3 w-3" />
               <span>Synced at {formatLastSync(mailbox.lastSyncedAt)}</span>
             </div>
+
+            {mailbox.sentFolderDetected === false && (
+              <div className="flex items-center gap-1 text-amber-500 text-[10px] pt-0.5 mt-1">
+                <AlertTriangle className="h-3 w-3" />
+                <span>Sent folder not detected</span>
+              </div>
+            )}
           </div>
         )}
 

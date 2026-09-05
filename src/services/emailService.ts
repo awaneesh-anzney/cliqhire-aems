@@ -90,6 +90,7 @@ export const emailService = {
         page: params.page || 1,
         limit: params.limit || 20,
         starredOnly: params.starredOnly ? "true" : undefined,
+        folder: params.folder,
       },
     });
     return response.data;

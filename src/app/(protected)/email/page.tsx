@@ -58,6 +58,7 @@ export default function EmailPage() {
       page,
       limit: 20,
       starredOnly: activeFolder === "starred",
+      folder: activeFolder,
     },
     isConnected
   );
@@ -152,17 +153,27 @@ export default function EmailPage() {
               selectedThreadId ? "hidden md:block" : "block"
             }`}
           >
-            <EmailThreadList
-              threads={threads}
-              isLoading={loadingThreads}
-              selectedThreadId={selectedThreadId}
-              onSelectThread={handleSelectThread}
-              page={page}
-              totalPages={totalPages}
-              totalThreads={totalThreads}
-              onPageChange={setPage}
-              searchQuery={searchQuery}
-            />
+            {mailbox && mailbox.initialSyncCompleted === false ? (
+              <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-card border rounded-xl shadow-xs min-h-[500px]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                <h3 className="text-sm font-semibold mb-2">Importing your mail history...</h3>
+                <p className="text-xs text-muted-foreground max-w-[250px]">
+                  This may take a few minutes for larger mailboxes. We are bringing in your past emails.
+                </p>
+              </div>
+            ) : (
+              <EmailThreadList
+                threads={threads}
+                isLoading={loadingThreads}
+                selectedThreadId={selectedThreadId}
+                onSelectThread={handleSelectThread}
+                page={page}
+                totalPages={totalPages}
+                totalThreads={totalThreads}
+                onPageChange={setPage}
+                searchQuery={searchQuery}
+              />
+            )}
           </div>
 
           {/* Right Thread Detail Conversation View */}
