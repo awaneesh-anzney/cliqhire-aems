@@ -26,52 +26,59 @@
 
 @layer base {
   :root {
-    /* Light: slightly off-white background and softer foreground to reduce eye strain */
-    --background: 240 15% 97%;
-    --foreground: 240 5% 20%;
+    /* Light Mode: Soft, balanced, and visually comfortable palette */
+    --background: 216 18% 97.2%;
+    --foreground: 220 20% 22%;
     --card: 0 0% 100%;
-    --card-foreground: 240 5% 20%;
+    --card-foreground: 220 20% 22%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 5% 20%;
-    /* Light mode single-accent primary — FluxBridge electric blue */
-    --primary: 221 83% 53%;
+    --popover-foreground: 220 20% 22%;
+    
+    /* Refined, non-glaring sapphire primary — balanced saturation and depth */
+    --primary: 221 68% 48%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 96.5%;
-    --secondary-foreground: 240 5.9% 18%;
-    --muted: 240 4.8% 97%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 97%;
-    --accent-foreground: 240 5.9% 18%;
-    /* Destructive reuses the FluxBridge red for consistency with the brand palette */
-    --destructive: 357 82% 52%;
+    
+    --secondary: 216 16% 94.5%;
+    --secondary-foreground: 220 20% 24%;
+    --muted: 216 16% 94.5%;
+    --muted-foreground: 218 14% 46%;
+    --accent: 216 16% 93.5%;
+    --accent-foreground: 220 20% 22%;
+    
+    /* Warm balanced crimson */
+    --destructive: 355 72% 52%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5% 92%;
-    --input: 240 5% 92%;
-    --ring: 221 83% 53%;
-    --chart-1: 357 82% 52%;
-    --chart-2: 221 83% 53%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    
+    /* Soft, comfortable borders without harsh wireframe contrast */
+    --border: 218 16% 89.5%;
+    --input: 218 16% 89.5%;
+    --ring: 221 68% 48%;
+    
+    --chart-1: 355 72% 52%;
+    --chart-2: 221 68% 48%;
+    --chart-3: 197 37% 32%;
+    --chart-4: 43 74% 60%;
+    --chart-5: 27 80% 60%;
     --radius: 0.5rem;
+    
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-foreground: 220 18% 30%;
+    --sidebar-primary: 221 68% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95%;
-    --sidebar-accent-foreground: 240 5.9% 18%;
-    --sidebar-border: 240 5% 91%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-accent: 216 16% 94.5%;
+    --sidebar-accent-foreground: 220 20% 22%;
+    --sidebar-border: 218 16% 90%;
+    --sidebar-ring: 221 68% 48%;
 
-    /* FluxBridge brand colors — electric blue (primary) + signal red (secondary) */
-    --brand-primary: 221 83% 53%;
+    /* Brand identity — balanced soft sapphire and crimson */
+    --brand-primary: 221 68% 48%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 357 82% 52%;
+    --brand-secondary: 355 72% 52%;
     --brand-secondary-foreground: 0 0% 100%;
 
-    --protected-bg: 240 15% 96.5%; /* refined neutral canvas */
-    --candidate-name: 240 5% 20%;
-    --candidate-id: 240 4% 46%;
+    --protected-bg: 216 18% 96.8%;
+    --candidate-name: 220 20% 22%;
+    --candidate-id: 218 14% 46%;
   }
 
   .dark {
@@ -131,15 +138,15 @@
   }
 }
 
-/* Modern Custom Scrollbar */
+/* Modern Subtle Custom Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--primary) / 0.6) transparent;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -147,12 +154,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.6);
-  border-radius: 8px;
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 
 /* Modern Auth Styles */
