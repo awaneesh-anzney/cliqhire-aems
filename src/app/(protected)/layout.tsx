@@ -13,20 +13,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <SocketProvider>
         <SidebarProvider
           style={{
-            ["--sidebar-width" as string]: "16rem",
-            ["--sidebar-width-icon" as string]: "4rem",
+            ["--sidebar-width" as string]: "16.5rem",
+            ["--sidebar-width-icon" as string]: "4.25rem",
           }}
-          className="bg-[hsl(var(--protected-bg))] min-h-screen w-full !m-0 !p-0 flex text-foreground antialiased transition-colors duration-300"
+          className="h-screen w-full flex bg-background text-foreground antialiased overflow-hidden !m-0 !p-0"
         >
           {/* Main Sidebar */}
           <Sidebar />
 
-          {/* Main Content Area */}
-          <SidebarInset className="!m-0 !p-0 !rounded-none !border-none !shadow-none flex-1 flex flex-col min-w-0 min-h-screen bg-[hsl(var(--protected-bg))] text-foreground">
+          {/* Main Workspace Area */}
+          <SidebarInset className="!m-0 !p-0 !rounded-none !border-none !shadow-none flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-background text-foreground">
+            {/* Unified Glassmorphism Header */}
             <Header />
-            
-            <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-[hsl(var(--protected-bg))] !m-0 !p-0">
-              <div className="flex-1 overflow-auto">
+
+            {/* Main Page Viewport Container */}
+            <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background !m-0 !p-0 relative">
+              <div className="flex-1 min-h-0 overflow-hidden">
                 {children}
               </div>
             </main>
