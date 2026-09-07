@@ -14,6 +14,10 @@ import {
   ThreadDetailResponse,
   SendEmailPayload,
   GetThreadsParams,
+  GetEmailsParams,
+  EmailsResponse,
+  DraftsResponse,
+  SaveDraftPayload,
   AdminMailboxStatusResponse,
   Email,
 } from "@/types/email";
@@ -243,7 +247,7 @@ export const emailService = {
       if (payload.threadId) formData.append("threadId", payload.threadId);
       if (payload.inReplyTo) formData.append("inReplyTo", payload.inReplyTo);
 
-      payload.attachments?.forEach((file) => {
+      payload.attachments?.forEach((file: File) => {
         formData.append("attachments", file);
       });
 

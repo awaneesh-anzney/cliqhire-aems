@@ -5,16 +5,17 @@ import {
   Inbox, 
   Star, 
   Send, 
-  Archive, 
   PenSquare, 
   LogOut, 
-  CheckCircle2, 
-  Clock,
-  Shield,
-  Trash2,
-  RefreshCw,
+  Clock, 
+  Trash2, 
+  FileText,
   AlertTriangle,
-  FileText
+  MailCheck,
+  ChevronRight,
+  ShieldCheck,
+  PanelLeftClose,
+  PanelLeftOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Mailbox } from "@/types/email";
 import { useDisconnectMailbox } from "@/hooks/useEmail";
 
@@ -40,6 +47,9 @@ interface EmailSidebarProps {
   onComposeClick: () => void;
   unreadCount?: number;
   mailbox: Mailbox | null;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+  onCloseMobile?: () => void;
 }
 
 export const EmailSidebar: React.FC<EmailSidebarProps> = ({
@@ -48,12 +58,15 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
   onComposeClick,
   unreadCount = 0,
   mailbox,
+  isCollapsed = false,
+  onToggleCollapse,
+  onCloseMobile,
 }) => {
   const disconnectMutation = useDisconnectMailbox();
   const [disconnectOpen, setDisconnectOpen] = useState(false);
 
   const formatLastSync = (dateStr?: string | null) => {
-    if (!dateStr) return "Not synced yet";
+    if (!dateStr) return "Just now";
     try {
       const date = new Date(dateStr);
       return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -62,125 +75,230 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
     }
   };
 
-  const navItems: { id: EmailFolder; label: string; icon: React.ElementType; badge?: number }[] = [
-    { id: "inbox", label: "Inbox", icon: Inbox, badge: unreadCount },
-    { id: "starred", label: "Starred", icon: Star },
-    { id: "sent", label: "Sent Mail", icon: Send },
-    { id: "drafts", label: "Drafts", icon: FileText },
-    { id: "trash", label: "Trash", icon: Trash2 },
+  const navItems: { 
+    id: EmailFolder; 
+    label: string; 
+    icon: React.ElementType; 
+    badge?: number;
+    color?: string;
+  }[] = [
+    { id: "inbox", label: "Inbox", icon: Inbox, badge: unreadCount, color: "text-blue-500 dark:text-blue-400" },
+    { id: "starred", label: "Starred", icon: Star, color: "text-amber-500 dark:text-amber-400" },
+    { id: "sent", label: "Sent Mail", icon: Send, color: "text-emerald-500 dark:text-emerald-400" },
+    { id: "drafts", label: "Drafts", icon: FileText, color: "text-purple-500 dark:text-purple-400" },
+    { id: "trash", label: "Trash", icon: Trash2, color: "text-rose-500 dark:text-rose-400" },
   ];
 
+  const handleSelectFolder = (id: EmailFolder) => {
+    onFolderChange(id);
+    if (onCloseMobile) {
+      onCloseMobile();
+    }
+  };
+
   return (
-    <div className="flex flex-col justify-between h-full bg-card border rounded-xl p-3 shadow-xs min-h-[500px]">
-      {/* Top Section */}
-      <div className="space-y-3">
-        {/* Compose Button */}
-        <Button
-          onClick={onComposeClick}
-          className="w-full h-9 gap-2 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs justify-start px-3.5"
-        >
-          <PenSquare className="h-4 w-4" />
-          <span>New Message</span>
-        </Button>
-
-        {/* Navigation Folders */}
-        <nav className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeFolder === item.id;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => onFolderChange(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary/10 text-primary font-semibold"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
-                  <span>{item.label}</span>
-                </div>
-
-                {item.badge !== undefined && item.badge > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="h-5 px-1.5 text-[10px] font-bold bg-primary text-primary-foreground rounded-full"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Bottom Section: Mailbox Health & Disconnect */}
-      <div className="pt-3 border-t space-y-3">
-        {mailbox && (
-          <div className="p-2.5 rounded-lg bg-muted/30 border space-y-1.5 text-[11px]">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-foreground truncate max-w-[140px]">
-                {mailbox.displayName || "Mailbox"}
+    <TooltipProvider delayDuration={200}>
+      <aside
+        className={`flex flex-col justify-between h-full bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl p-3 shadow-xs transition-all duration-300 ${
+          isCollapsed ? "w-16 items-center" : "w-full"
+        }`}
+      >
+        {/* Top Section: Compose & Folder Navigation */}
+        <div className="space-y-3 w-full">
+          {/* Collapse Toggle & New Message Header */}
+          <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} px-1`}>
+            {!isCollapsed && (
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                Folders
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            </div>
-
-            <p className="text-muted-foreground truncate font-mono text-[10px]">
-              {mailbox.emailAddress}
-            </p>
-
-            <div className="flex items-center gap-1 text-muted-foreground text-[10px] pt-0.5">
-              <Clock className="h-3 w-3" />
-              <span>Synced at {formatLastSync(mailbox.lastSyncedAt)}</span>
-            </div>
-
-            {mailbox.sentFolderDetected === false && (
-              <div className="flex items-center gap-1 text-amber-500 text-[10px] pt-0.5 mt-1">
-                <AlertTriangle className="h-3 w-3" />
-                <span>Sent folder not detected</span>
-              </div>
+            )}
+            {onToggleCollapse && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleCollapse}
+                className="h-7 w-7 text-muted-foreground hover:text-foreground hidden md:inline-flex"
+                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {isCollapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
+              </Button>
             )}
           </div>
-        )}
 
-        {/* Disconnect Mailbox Dialog */}
-        <AlertDialog open={disconnectOpen} onOpenChange={setDisconnectOpen}>
-          <AlertDialogTrigger asChild>
+          {/* New Message CTA */}
+          {isCollapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={onComposeClick}
+                  size="icon"
+                  className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-xs mx-auto"
+                >
+                  <PenSquare className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">New Message</TooltipContent>
+            </Tooltip>
+          ) : (
             <Button
-              variant="ghost"
-              size="sm"
-              className="w-full h-8 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 justify-start px-2.5 gap-2"
+              onClick={onComposeClick}
+              className="w-full h-9 gap-2 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs justify-start px-3.5 rounded-xl transition-transform active:scale-[0.98]"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              <span>Disconnect Mailbox</span>
+              <PenSquare className="h-4 w-4" />
+              <span>New Message</span>
             </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-base">Disconnect Mailbox?</AlertDialogTitle>
-              <AlertDialogDescription className="text-xs">
-                This will pause incoming IMAP sync for this account. Your past sent and received email history will remain safely preserved in CliqHire.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="text-xs h-8">Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  disconnectMutation.mutate();
-                  setDisconnectOpen(false);
-                }}
-                className="text-xs h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              >
-                Disconnect
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </div>
+          )}
+
+          {/* Folder List */}
+          <nav className="space-y-1 w-full pt-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeFolder === item.id;
+
+              if (isCollapsed) {
+                return (
+                  <Tooltip key={item.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => handleSelectFolder(item.id)}
+                        className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-colors relative ${
+                          isActive
+                            ? "bg-primary/15 text-primary font-bold shadow-xs"
+                            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                        }`}
+                      >
+                        <Icon className={`h-4 w-4 ${isActive ? "text-primary" : ""}`} />
+                        {item.badge !== undefined && item.badge > 0 && (
+                          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {item.label} {item.badge ? `(${item.badge})` : ""}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleSelectFolder(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
+                    isActive
+                      ? "bg-primary/10 text-primary font-semibold shadow-xs"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Icon
+                      className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
+                        isActive ? "text-primary" : "text-muted-foreground"
+                      }`}
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+
+                  {item.badge !== undefined && item.badge > 0 ? (
+                    <Badge
+                      variant="secondary"
+                      className={`h-4 px-1.5 text-[10px] font-bold rounded-full ${
+                        isActive ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                      }`}
+                    >
+                      {item.badge}
+                    </Badge>
+                  ) : isActive ? (
+                    <ChevronRight className="h-3 w-3 text-primary opacity-60" />
+                  ) : null}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom Section: Mailbox Health & Disconnect */}
+        <div className="pt-3 border-t border-border/70 w-full space-y-2">
+          {mailbox && !isCollapsed && (
+            <div className="p-2.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5 text-[11px]">
+              <div className="flex items-center justify-between gap-1.5">
+                <span className="font-semibold text-foreground truncate max-w-[130px]">
+                  {mailbox.displayName || "Work Mailbox"}
+                </span>
+                <span className="flex h-2 w-2 relative shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+              </div>
+
+              <p className="text-muted-foreground truncate font-mono text-[10px]" title={mailbox.emailAddress}>
+                {mailbox.emailAddress}
+              </p>
+
+              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] pt-0.5 border-t border-border/40">
+                <Clock className="h-3 w-3 shrink-0" />
+                <span className="truncate">Synced: {formatLastSync(mailbox.lastSyncedAt)}</span>
+              </div>
+
+              {mailbox.sentFolderDetected === false && (
+                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-[10px] pt-0.5">
+                  <AlertTriangle className="h-3 w-3 shrink-0" />
+                  <span className="truncate">Sent folder not detected</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Disconnect Mailbox Trigger */}
+          <AlertDialog open={disconnectOpen} onOpenChange={setDisconnectOpen}>
+            <AlertDialogTrigger asChild>
+              {isCollapsed ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 mx-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Disconnect Mailbox</TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full h-8 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 justify-start px-2.5 gap-2 rounded-xl transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Disconnect Mailbox</span>
+                </Button>
+              )}
+            </AlertDialogTrigger>
+            <AlertDialogContent className="rounded-2xl sm:max-w-md">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-base font-bold">Disconnect Mailbox?</AlertDialogTitle>
+                <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
+                  This will pause incoming IMAP sync for this account. Your past sent and received email history will remain safely preserved in CliqHire.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="text-xs h-8 rounded-xl">Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    disconnectMutation.mutate();
+                    setDisconnectOpen(false);
+                  }}
+                  className="text-xs h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
+                >
+                  Disconnect
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 };

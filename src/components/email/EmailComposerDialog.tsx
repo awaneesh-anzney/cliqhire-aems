@@ -5,16 +5,9 @@ import {
   Send, 
   Paperclip, 
   X, 
-  Trash2, 
   FileText, 
-  Sparkles, 
-  AlertCircle,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  CheckCircle2,
-  FileIcon
+  FileIcon,
+  Maximize2
 } from "lucide-react";
 import {
   Dialog,
@@ -28,23 +21,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useSendEmail, useSaveDraft, useSendDraft, useUpdateDraft } from "@/hooks/useEmail";
+
+export interface ComposerInitialData {
+  to?: string;
+  cc?: string;
+  bcc?: string;
+  subject?: string;
+  threadId?: string;
+  inReplyTo?: string;
+  text?: string;
+  draftId?: string;
+}
 
 interface EmailComposerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: {
-    to?: string;
-    cc?: string;
-    bcc?: string;
-    subject?: string;
-    threadId?: string;
-    inReplyTo?: string;
-    text?: string;
-    draftId?: string;
-  };
+  initialData?: ComposerInitialData;
 }
 
 const MAX_ATTACHMENTS = 5;
@@ -139,7 +133,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     const ccArray = cc ? cc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
     const bccArray = bcc ? bcc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
 
-    const htmlBody = `<div style="font-family: sans-serif; line-height: 1.5; color: #333;">${bodyText.replace(
+    const htmlBody = `<div style="font-family: sans-serif; line-height: 1.5; color: #222;">${bodyText.replace(
       /\n/g,
       "<br/>"
     )}</div>`;
@@ -176,7 +170,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     const ccArray = cc ? cc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
     const bccArray = bcc ? bcc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
 
-    const htmlBody = bodyText ? `<div style="font-family: sans-serif; line-height: 1.5; color: #333;">${bodyText.replace(/\n/g,"<br/>")}</div>` : undefined;
+    const htmlBody = bodyText ? `<div style="font-family: sans-serif; line-height: 1.5; color: #222;">${bodyText.replace(/\n/g,"<br/>")}</div>` : undefined;
 
     const payload = {
       to: toArray,
@@ -200,7 +194,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     } else {
       saveDraftMutation.mutate(payload, {
         onSuccess: () => {
-          toast.success("Draft saved");
+          toast.success("Draft saved to drafts folder");
           onOpenChange(false);
         }
       });
@@ -209,12 +203,12 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[640px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[680px] max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl border-border/80 shadow-lg">
         {/* Header */}
-        <DialogHeader className="p-4 border-b bg-muted/20">
-          <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2">
+        <DialogHeader className="p-4 sm:p-5 border-b border-border/70 bg-muted/20">
+          <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-foreground">
             <Send className="h-4 w-4 text-primary" />
-            {initialData?.draftId ? "Edit Draft" : initialData?.threadId ? "Reply to Conversation" : "Compose New Email"}
+            {initialData?.draftId ? "Edit Saved Draft" : initialData?.threadId ? "Reply to Conversation" : "Compose New Email"}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             Dispatches through your connected organization mailbox and SMTP gateway.
@@ -222,17 +216,17 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         </DialogHeader>
 
         {/* Composer Form Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 overscroll-contain">
           {/* To Field */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold">To</Label>
+              <Label className="text-xs font-bold text-foreground">To</Label>
               <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                 {!showCc && (
                   <button
                     type="button"
                     onClick={() => setShowCc(true)}
-                    className="hover:text-primary transition-colors"
+                    className="hover:text-primary transition-colors font-medium"
                   >
                     + Cc
                   </button>
@@ -241,7 +235,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowBcc(true)}
-                    className="hover:text-primary transition-colors"
+                    className="hover:text-primary transition-colors font-medium"
                   >
                     + Bcc
                   </button>
@@ -253,15 +247,15 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               placeholder="candidate@example.com, client@example.com"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="text-xs h-8.5"
+              className="text-xs h-9 rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
             />
           </div>
 
           {/* Optional Cc Field */}
           {showCc && (
-            <div className="space-y-1 animate-in fade-in duration-200">
+            <div className="space-y-1.5 animate-in fade-in duration-200">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">Cc</Label>
+                <Label className="text-xs font-semibold text-muted-foreground">Cc</Label>
                 <button
                   type="button"
                   onClick={() => setShowCc(false)}
@@ -275,16 +269,16 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 placeholder="colleague@yourcompany.com"
                 value={cc}
                 onChange={(e) => setCc(e.target.value)}
-                className="text-xs h-8.5"
+                className="text-xs h-9 rounded-xl bg-muted/20 border-border/70"
               />
             </div>
           )}
 
           {/* Optional Bcc Field */}
           {showBcc && (
-            <div className="space-y-1 animate-in fade-in duration-200">
+            <div className="space-y-1.5 animate-in fade-in duration-200">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">Bcc</Label>
+                <Label className="text-xs font-semibold text-muted-foreground">Bcc</Label>
                 <button
                   type="button"
                   onClick={() => setShowBcc(false)}
@@ -298,64 +292,64 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 placeholder="archive@yourcompany.com"
                 value={bcc}
                 onChange={(e) => setBcc(e.target.value)}
-                className="text-xs h-8.5"
+                className="text-xs h-9 rounded-xl bg-muted/20 border-border/70"
               />
             </div>
           )}
 
           {/* Subject Field */}
-          <div className="space-y-1">
-            <Label className="text-xs font-semibold">Subject</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-foreground">Subject</Label>
             <Input
               type="text"
-              placeholder="Interview slot confirmation / Offer letter..."
+              placeholder="Interview slot confirmation / Candidate offer letter..."
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="text-xs h-8.5"
+              className="text-xs h-9 rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
             />
           </div>
 
           {/* Message Body Field */}
-          <div className="space-y-1">
-            <Label className="text-xs font-semibold">Message</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-foreground">Message</Label>
             <Textarea
-              placeholder="Type your message here..."
+              placeholder="Write your email message here..."
               value={bodyText}
               onChange={(e) => setBodyText(e.target.value)}
               rows={8}
-              className="text-xs resize-none"
+              className="text-xs resize-none rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary leading-relaxed"
             />
           </div>
 
           {/* Attachments Section */}
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold flex items-center gap-1.5">
-                <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+              <Label className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
+                <Paperclip className="h-3.5 w-3.5" />
                 Attachments ({files.length}/{MAX_ATTACHMENTS})
               </Label>
               <span className="text-[10px] text-muted-foreground">Max 15MB each</span>
             </div>
 
-            {/* Attached files list */}
+            {/* Attached files chips */}
             {files.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {files.map((file, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2 rounded-lg border bg-muted/30 text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/30 text-xs"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <FileIcon className="h-4 w-4 text-primary shrink-0" />
                       <div className="truncate">
-                        <p className="font-medium text-foreground truncate">{file.name}</p>
+                        <p className="font-semibold text-foreground truncate">{file.name}</p>
                         <p className="text-[10px] text-muted-foreground">{formatFileSize(file.size)}</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeFile(idx)}
-                      className="p-1 text-muted-foreground hover:text-destructive rounded transition-colors ml-1"
+                      className="p-1 text-muted-foreground hover:text-destructive rounded-lg transition-colors ml-1"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -379,7 +373,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-8 text-xs gap-1.5 w-full sm:w-auto"
+                  className="h-8 text-xs gap-1.5 rounded-xl border-border/70"
                 >
                   <Paperclip className="h-3.5 w-3.5" />
                   Attach File
@@ -390,13 +384,13 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <DialogFooter className="p-3.5 border-t bg-muted/10 flex items-center justify-between sm:justify-between w-full">
+        <DialogFooter className="p-3.5 sm:p-4 border-t border-border/70 bg-muted/15 flex items-center justify-between sm:justify-between w-full">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="text-xs h-8 text-muted-foreground hover:text-foreground"
+            className="text-xs h-8 text-muted-foreground hover:text-foreground rounded-xl"
           >
             Discard
           </Button>
@@ -408,7 +402,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               size="sm"
               disabled={saveDraftMutation.isPending || updateDraftMutation.isPending || sendDraftMutation.isPending || sendEmailMutation.isPending}
               onClick={handleSaveDraft}
-              className="text-xs h-8"
+              className="text-xs h-8 rounded-xl border-border/70"
             >
               {saveDraftMutation.isPending || updateDraftMutation.isPending ? "Saving..." : "Save Draft"}
             </Button>
@@ -417,17 +411,17 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               type="button"
               disabled={sendEmailMutation.isPending || sendDraftMutation.isPending}
               onClick={handleSend}
-              className="text-xs h-8 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-sm"
+              className="text-xs h-8 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-xs rounded-xl"
             >
               {sendEmailMutation.isPending || sendDraftMutation.isPending ? (
                 <>
                   <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  Sending email...
+                  <span>Sending...</span>
                 </>
               ) : (
                 <>
                   <Send className="h-3.5 w-3.5" />
-                  Send Email
+                  <span>Send Email</span>
                 </>
               )}
             </Button>

@@ -5,18 +5,14 @@ import Link from "next/link";
 import { 
   Mail, 
   Lock, 
-  Key, 
   User, 
-  ShieldCheck, 
   ArrowRight, 
   AlertCircle, 
   CheckCircle2, 
-  Info, 
-  Sparkles,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  Server
+  Eye, 
+  EyeOff, 
+  Server,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +40,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
   onSuccess,
 }) => {
   const { user } = useAuth();
-  const { data: providerConfigData, isLoading: loadingProvider } = useProviderConfig();
+  const { data: providerConfigData } = useProviderConfig();
   const connectMutation = useConnectMailbox();
 
   const providerConfig = providerConfigData?.data;
@@ -73,20 +69,20 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
     : "Organization Mail Server";
 
   return (
-    <div className="max-w-2xl mx-auto py-6 sm:py-10 px-4">
-      <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
+    <div className="max-w-2xl mx-auto py-6 sm:py-10 px-3 sm:px-4">
+      <div className="bg-card/90 backdrop-blur-md border border-border/70 rounded-3xl shadow-sm overflow-hidden">
         {/* Top Header Glow */}
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 sm:p-8 border-b">
+        <div className="bg-gradient-to-r from-primary/15 via-primary/5 to-transparent p-6 sm:p-8 border-b border-border/60">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
                 <Mail className="h-3.5 w-3.5" />
                 <span>CliqHire Mailbox Setup</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                 Connect Your Work Mailbox
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-lg">
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
                 Send candidate offers, schedule interviews, and sync applicant email replies directly inside your recruitment pipelines.
               </p>
             </div>
@@ -101,23 +97,23 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
         <div className="p-6 sm:p-8 space-y-6">
           {/* Organization Provider Banner */}
           {providerConfig ? (
-            <div className="p-3.5 rounded-xl bg-muted/40 border flex items-start gap-3">
-              <div className="h-8 w-8 rounded-lg bg-background border flex items-center justify-center text-primary shrink-0">
+            <div className="p-4 rounded-2xl bg-muted/40 border border-border/70 flex items-start gap-3">
+              <div className="h-8 w-8 rounded-xl bg-background border border-border/70 flex items-center justify-center text-primary shrink-0 shadow-2xs">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-foreground">Configured Provider:</span>
-                  <Badge variant="secondary" className="font-medium text-[11px] bg-primary/10 text-primary">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-bold text-foreground">Configured Provider:</span>
+                  <Badge variant="secondary" className="font-semibold text-[11px] bg-primary/15 text-primary rounded-lg">
                     {providerName}
                   </Badge>
                   {providerConfig.domain && (
                     <span className="text-muted-foreground font-mono text-[11px]">@{providerConfig.domain}</span>
                   )}
                 </div>
-                <p className="text-muted-foreground text-[11px]">
+                <p className="text-muted-foreground text-[11px] leading-relaxed">
                   {providerConfig.requiresAppPassword ? (
-                    <span className="text-amber-600 dark:text-amber-400 font-medium">
+                    <span className="text-amber-600 dark:text-amber-400 font-semibold">
                       Note: Your organization email requires an App Password (not your regular login password).
                     </span>
                   ) : (
@@ -127,15 +123,15 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
               </div>
             </div>
           ) : (
-            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3">
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <div className="space-y-1 text-xs text-amber-900 dark:text-amber-200">
-                <p className="font-medium">Organization Provider Config Not Detected</p>
-                <p className="text-[11px]">
-                  If your administrator hasn't configured the company mail hosting yet, please configure it in Settings first.
+                <p className="font-bold">Organization Provider Config Not Detected</p>
+                <p className="text-[11px] leading-relaxed">
+                  If your administrator hasn&apos;t configured the company mail hosting yet, please configure it in Settings first.
                 </p>
                 {user?.role === "ADMIN" && (
-                  <Link href="/settings?tab=email" className="inline-flex items-center gap-1 font-semibold text-primary underline mt-1">
+                  <Link href="/settings?tab=email" className="inline-flex items-center gap-1 font-bold text-primary underline mt-1">
                     Go to Settings → Email Configuration <ArrowRight className="h-3 w-3" />
                   </Link>
                 )}
@@ -146,7 +142,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
           {/* Connect Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Work Email Address</Label>
+              <Label className="text-xs font-bold text-foreground">Work Email Address</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -155,7 +151,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. priya@yourcompany.com"
-                  className="pl-9 text-xs h-9"
+                  className="pl-9 text-xs h-9 rounded-xl bg-muted/20 border-border/70"
                   disabled={connectMutation.isPending}
                 />
               </div>
@@ -163,7 +159,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">
+                <Label className="text-xs font-bold text-foreground">
                   {providerConfig?.requiresAppPassword ? "App Password" : "Mailbox Password"}
                 </Label>
                 {providerConfig?.requiresAppPassword && (
@@ -180,7 +176,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="pl-9 pr-9 text-xs h-9 font-mono"
+                  className="pl-9 pr-9 text-xs h-9 font-mono rounded-xl bg-muted/20 border-border/70"
                   disabled={connectMutation.isPending}
                 />
                 <button
@@ -194,7 +190,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Sender Display Name (Optional)</Label>
+              <Label className="text-xs font-bold text-foreground">Sender Display Name (Optional)</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -202,36 +198,36 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="e.g. Priya Sharma (CliqHire Talent Team)"
-                  className="pl-9 text-xs h-9"
+                  className="pl-9 text-xs h-9 rounded-xl bg-muted/20 border-border/70"
                   disabled={connectMutation.isPending}
                 />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                This name will appear in the "From" field of candidate interview invites and offer letters.
+                This name will appear in the &quot;From&quot; field of candidate interview invites and offer letters.
               </p>
             </div>
 
             {/* Security note */}
-            <div className="p-3 rounded-lg bg-muted/20 border text-[11px] text-muted-foreground flex items-center gap-2">
+            <div className="p-3.5 rounded-2xl bg-muted/20 border border-border/70 text-[11px] text-muted-foreground flex items-center gap-2.5">
               <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
               <span>
-                Passwords are encrypted using AES-256-GCM. Backend tests IMAP and SMTP connectivity live before saving.
+                Credentials are encrypted using AES-256-GCM. Backend validates IMAP and SMTP connectivity live before saving.
               </span>
             </div>
 
             <Button
               type="submit"
               disabled={connectMutation.isPending || !email || !password}
-              className="w-full h-9 text-xs font-medium gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+              className="w-full h-9.5 text-xs font-semibold gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs rounded-xl transition-all"
             >
               {connectMutation.isPending ? (
                 <>
                   <span className="h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  Testing live IMAP & SMTP connection...
+                  <span>Testing live IMAP & SMTP connection...</span>
                 </>
               ) : (
                 <>
-                  Connect My Mailbox
+                  <span>Connect My Mailbox</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </>
               )}

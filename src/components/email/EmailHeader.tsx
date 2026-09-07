@@ -8,17 +8,18 @@ import {
   RefreshCw, 
   Search, 
   Settings, 
-  ShieldCheck, 
-  Users,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle
+  Users, 
+  AlertTriangle, 
+  XCircle,
+  Menu,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Mailbox, MailboxConnectionStatus } from "@/types/email";
 import { useAuth } from "@/contexts/AuthContext";
+import { EmailFolder } from "./EmailSidebar";
 
 interface EmailHeaderProps {
   mailbox: Mailbox | null;
@@ -29,7 +30,17 @@ interface EmailHeaderProps {
   onRefreshClick: () => void;
   isRefreshing?: boolean;
   onOpenAdminMailboxes?: () => void;
+  onOpenMobileNav?: () => void;
+  activeFolder?: EmailFolder;
 }
+
+const FOLDER_LABELS: Record<EmailFolder, string> = {
+  inbox: "Inbox",
+  starred: "Starred",
+  sent: "Sent",
+  drafts: "Drafts",
+  trash: "Trash",
+};
 
 export const EmailHeader: React.FC<EmailHeaderProps> = ({
   mailbox,
@@ -40,6 +51,8 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
   onRefreshClick,
   isRefreshing = false,
   onOpenAdminMailboxes,
+  onOpenMobileNav,
+  activeFolder = "inbox",
 }) => {
   const { user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
@@ -48,68 +61,116 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
     switch (status) {
       case "connected":
         return (
-          <Badge variant="outline" className="h-6 gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 text-[11px] font-medium">
+          <Badge
+            variant="outline"
+            className="h-5 px-2 gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[11px] font-medium shrink-0"
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Connected
+            <span className="hidden sm:inline">Connected</span>
           </Badge>
         );
       case "auth_failed":
         return (
-          <Badge variant="outline" className="h-6 gap-1 bg-destructive/10 text-destructive border-destructive/30 text-[11px] font-medium">
+          <Badge
+            variant="outline"
+            className="h-5 px-2 gap-1 bg-destructive/10 text-destructive border-destructive/20 text-[11px] font-medium shrink-0"
+          >
             <AlertTriangle className="h-3 w-3" />
-            Auth Failed
+            <span>Auth Failed</span>
           </Badge>
         );
       case "disconnected":
       default:
         return (
-          <Badge variant="outline" className="h-6 gap-1 bg-muted text-muted-foreground border-border text-[11px] font-medium">
+          <Badge
+            variant="outline"
+            className="h-5 px-2 gap-1 bg-muted/60 text-muted-foreground border-border text-[11px] font-medium shrink-0"
+          >
             <XCircle className="h-3 w-3" />
-            Offline
+            <span>Offline</span>
           </Badge>
         );
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-card border rounded-xl p-3 sm:p-4 shadow-xs">
-      {/* Left side: Brand, Title, and Mailbox status */}
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
-          <Mail className="h-5 w-5" />
+    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 bg-card/80 backdrop-blur-md border border-border/70 rounded-2xl p-2.5 sm:p-3.5 shadow-xs transition-all">
+      {/* Left side: Mobile menu toggle, Brand icon, Title, Connection badge */}
+      <div className="flex items-center justify-between sm:justify-start gap-2.5 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {/* Mobile drawer toggle */}
+          {onOpenMobileNav && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onOpenMobileNav}
+              className="h-8 w-8 sm:hidden shrink-0 border-border/80 text-muted-foreground hover:text-foreground"
+              aria-label="Open folders navigation"
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+          )}
+
+          {/* Mail Icon */}
+          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
+            <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
+          </div>
+
+          {/* Title & Current Account */}
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm sm:text-base font-bold tracking-tight text-foreground truncate">
+                {FOLDER_LABELS[activeFolder]}
+              </h1>
+              {getStatusBadge(mailbox?.connectionStatus)}
+            </div>
+
+            <div className="text-[11px] text-muted-foreground truncate hidden md:block">
+              {isConnected && mailbox?.emailAddress ? (
+                <span className="font-mono text-foreground/85 font-medium truncate">
+                  {mailbox.displayName ? `${mailbox.displayName} • ${mailbox.emailAddress}` : mailbox.emailAddress}
+                </span>
+              ) : (
+                <span>CliqHire Talent Communications</span>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-              Mailbox & Communications
-            </h1>
-            {getStatusBadge(mailbox?.connectionStatus)}
-          </div>
-
-          <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
-            {isConnected && mailbox?.emailAddress ? (
-              <span className="font-mono text-foreground/80 font-medium truncate">
-                {mailbox.displayName ? `${mailbox.displayName} <${mailbox.emailAddress}>` : mailbox.emailAddress}
-              </span>
-            ) : (
-              <span>Connect your organizational mailbox to send and receive candidate emails.</span>
-            )}
-          </div>
+        {/* Mobile-only Compose CTA */}
+        <div className="flex sm:hidden items-center gap-1.5">
+          <Button
+            size="sm"
+            onClick={onComposeClick}
+            disabled={!isConnected}
+            className="h-8 px-2.5 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold"
+          >
+            <PenSquare className="h-3.5 w-3.5" />
+            <span>Compose</span>
+          </Button>
         </div>
       </div>
 
-      {/* Right side: Search, Compose CTA, Admin Tools */}
-      <div className="flex flex-wrap items-center gap-2 shrink-0">
-        {/* Search input */}
-        <div className="relative w-full sm:w-56 md:w-64">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+      {/* Right side: Search, Refresh, Desktop Compose, Admin tools */}
+      <div className="flex items-center gap-2 w-full sm:w-auto">
+        {/* Search input with clear button */}
+        <div className="relative flex-1 sm:w-60 md:w-72">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <Input
-            placeholder="Search emails, subjects..."
+            placeholder="Search emails, contacts..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8 h-8 text-xs bg-muted/30 border-border/80 rounded-lg"
+            className="pl-8 pr-7 h-8 text-xs bg-muted/30 border-border/70 rounded-xl focus-visible:ring-1 focus-visible:ring-primary placeholder:text-muted-foreground/70"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </div>
 
         {/* Refresh button */}
@@ -118,36 +179,36 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
           size="sm"
           onClick={onRefreshClick}
           disabled={isRefreshing || !isConnected}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 shrink-0 rounded-xl border-border/80"
           title="Refresh Inbox"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
+          <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${isRefreshing ? "animate-spin text-primary" : ""}`} />
         </Button>
 
-        {/* Compose CTA */}
+        {/* Desktop Compose CTA */}
         <Button
           size="sm"
           onClick={onComposeClick}
           disabled={!isConnected}
-          className="h-8 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-medium"
+          className="hidden sm:inline-flex h-8 px-3.5 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl shrink-0"
         >
           <PenSquare className="h-3.5 w-3.5" />
-          Compose
+          <span>Compose</span>
         </Button>
 
         {/* Admin Tools */}
         {isAdmin && (
-          <div className="flex items-center gap-1.5 border-l pl-2 ml-1">
+          <div className="flex items-center gap-1 border-l border-border/70 pl-2 ml-0.5 shrink-0">
             {onOpenAdminMailboxes && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onOpenAdminMailboxes}
-                className="h-8 px-2.5 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-                title="View all employee mailboxes"
+                className="h-8 px-2.5 gap-1.5 text-xs text-muted-foreground hover:text-foreground rounded-xl"
+                title="View team employee mailboxes"
               >
-                <Users className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Team Mailboxes</span>
+                <Users className="h-3.5 w-3.5 text-primary/80" />
+                <span className="hidden xl:inline">Team Mailboxes</span>
               </Button>
             )}
 
@@ -155,8 +216,8 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-                title="Email Provider Settings"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"
+                title="Email Server Settings"
               >
                 <Settings className="h-3.5 w-3.5" />
               </Button>
@@ -164,6 +225,6 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </header>
   );
 };
