@@ -31,7 +31,7 @@ const stages: JobStage[] = [
 
 interface JobStageBadgeProps {
   stage: JobStage
-  onStageChange: (newStage: JobStage) => void
+  onStageChange?: (newStage: JobStage) => void
   disabled?: boolean
 }
 
