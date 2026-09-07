@@ -1,28 +1,27 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, DragEvent } from "react";
 import { 
   Send, 
   Paperclip, 
   X, 
-  FileText, 
+  Trash2, 
+  Minus, 
+  Maximize2, 
+  Minimize2, 
   FileIcon,
-  Maximize2
+  Check,
+  Type,
+  Link2,
+  Sparkles,
+  Save
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useSendEmail, useSaveDraft, useSendDraft, useUpdateDraft } from "@/hooks/useEmail";
+import { RecipientInput } from "./RecipientInput";
+import { EmailRichEditor } from "./EmailRichEditor";
 
 export interface ComposerInitialData {
   to?: string;
@@ -41,6 +40,8 @@ interface EmailComposerDialogProps {
   initialData?: ComposerInitialData;
 }
 
+type WindowMode = "docked" | "minimized" | "fullscreen";
+
 const MAX_ATTACHMENTS = 5;
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
 
@@ -55,40 +56,68 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   const sendDraftMutation = useSendDraft();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [to, setTo] = useState("");
+  // Window display state
+  const [windowMode, setWindowMode] = useState<WindowMode>("docked");
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  // Form states
+  const [toRecipients, setToRecipients] = useState<string[]>([]);
   const [showCc, setShowCc] = useState(false);
-  const [cc, setCc] = useState("");
+  const [ccRecipients, setCcRecipients] = useState<string[]>([]);
   const [showBcc, setShowBcc] = useState(false);
-  const [bcc, setBcc] = useState("");
+  const [bccRecipients, setBccRecipients] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
+  const [bodyHtml, setBodyHtml] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [showFormattingBar, setShowFormattingBar] = useState(false);
+  const [draftStatus, setDraftStatus] = useState<"saved" | "unsaved" | "saving">("saved");
 
   // Sync initial data when opened
   useEffect(() => {
-    if (open && initialData) {
-      if (initialData.to) setTo(initialData.to);
-      if (initialData.cc) { setCc(initialData.cc); setShowCc(true); }
-      if (initialData.bcc) { setBcc(initialData.bcc); setShowBcc(true); }
-      if (initialData.subject) setSubject(initialData.subject);
-      if (initialData.text) setBodyText(initialData.text);
-    } else if (!open) {
-      // reset
-      setTo("");
-      setCc("");
-      setBcc("");
+    if (open) {
+      if (initialData) {
+        if (initialData.to) {
+          const parsedTo = initialData.to.split(/[\s,;]+/).filter(Boolean);
+          setToRecipients(parsedTo);
+        }
+        if (initialData.cc) {
+          const parsedCc = initialData.cc.split(/[\s,;]+/).filter(Boolean);
+          setCcRecipients(parsedCc);
+          setShowCc(true);
+        }
+        if (initialData.bcc) {
+          const parsedBcc = initialData.bcc.split(/[\s,;]+/).filter(Boolean);
+          setBccRecipients(parsedBcc);
+          setShowBcc(true);
+        }
+        if (initialData.subject) setSubject(initialData.subject);
+        if (initialData.text) {
+          setBodyText(initialData.text);
+          setBodyHtml(`<p>${initialData.text.replace(/\n/g, "<br/>")}</p>`);
+        }
+      }
+      setWindowMode("docked");
+      setDraftStatus("saved");
+    } else {
+      // Reset state on close
+      setToRecipients([]);
+      setCcRecipients([]);
+      setBccRecipients([]);
       setShowCc(false);
       setShowBcc(false);
       setSubject("");
+      setBodyHtml("");
       setBodyText("");
       setFiles([]);
+      setShowFormattingBar(false);
     }
   }, [open, initialData]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const selectedFiles = Array.from(e.target.files);
+  if (!open) return null;
 
+  // File Handling
+  const handleFileSelect = (selectedFiles: File[]) => {
     if (files.length + selectedFiles.length > MAX_ATTACHMENTS) {
       toast.error(`You can attach up to ${MAX_ATTACHMENTS} files maximum.`);
       return;
@@ -103,14 +132,37 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       }
     }
 
-    setFiles((prev) => [...prev, ...validFiles]);
+    if (validFiles.length > 0) {
+      setFiles((prev) => [...prev, ...validFiles]);
+      setDraftStatus("unsaved");
+    }
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    if (e.dataTransfer.files) {
+      handleFileSelect(Array.from(e.dataTransfer.files));
+    }
+  };
+
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
+    setDraftStatus("unsaved");
   };
 
   const formatFileSize = (bytes: number) => {
@@ -119,9 +171,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  // Dispatch Email
   const handleSend = () => {
-    if (!to.trim()) {
-      toast.error("Please provide at least one recipient email.");
+    if (toRecipients.length === 0) {
+      toast.error("Please add at least one recipient email address.");
       return;
     }
     if (!subject.trim()) {
@@ -129,14 +182,17 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       return;
     }
 
-    const toArray = to.split(",").map((s) => s.trim()).filter(Boolean);
-    const ccArray = cc ? cc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-    const bccArray = bcc ? bcc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-
-    const htmlBody = `<div style="font-family: sans-serif; line-height: 1.5; color: #222;">${bodyText.replace(
-      /\n/g,
-      "<br/>"
-    )}</div>`;
+    const payload = {
+      to: toRecipients,
+      subject,
+      cc: ccRecipients.length > 0 ? ccRecipients : undefined,
+      bcc: bccRecipients.length > 0 ? bccRecipients : undefined,
+      text: bodyText,
+      html: bodyHtml || `<p>${bodyText.replace(/\n/g, "<br/>")}</p>`,
+      threadId: initialData?.threadId,
+      inReplyTo: initialData?.inReplyTo,
+      attachments: files.length > 0 ? files : undefined,
+    };
 
     if (initialData?.draftId) {
       sendDraftMutation.mutate(initialData.draftId, {
@@ -145,273 +201,359 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       return;
     }
 
-    sendEmailMutation.mutate(
-      {
-        to: toArray,
-        subject,
-        cc: ccArray,
-        bcc: bccArray,
-        text: bodyText,
-        html: htmlBody,
-        threadId: initialData?.threadId,
-        inReplyTo: initialData?.inReplyTo,
-        attachments: files.length > 0 ? files : undefined,
+    sendEmailMutation.mutate(payload, {
+      onSuccess: () => {
+        onOpenChange(false);
       },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-      }
-    );
+    });
   };
 
+  // Draft Preservation
   const handleSaveDraft = () => {
-    const toArray = to ? to.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-    const ccArray = cc ? cc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-    const bccArray = bcc ? bcc.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-
-    const htmlBody = bodyText ? `<div style="font-family: sans-serif; line-height: 1.5; color: #222;">${bodyText.replace(/\n/g,"<br/>")}</div>` : undefined;
-
     const payload = {
-      to: toArray,
+      to: toRecipients.length > 0 ? toRecipients : undefined,
       subject,
-      cc: ccArray,
-      bcc: bccArray,
+      cc: ccRecipients.length > 0 ? ccRecipients : undefined,
+      bcc: bccRecipients.length > 0 ? bccRecipients : undefined,
       text: bodyText,
-      html: htmlBody,
+      html: bodyHtml || (bodyText ? `<p>${bodyText.replace(/\n/g, "<br/>")}</p>` : undefined),
       threadId: initialData?.threadId,
       inReplyTo: initialData?.inReplyTo,
       attachments: files.length > 0 ? files : undefined,
     };
 
+    setDraftStatus("saving");
+
     if (initialData?.draftId) {
-      updateDraftMutation.mutate({ draftId: initialData.draftId, payload }, {
-        onSuccess: () => {
-          toast.success("Draft updated");
-          onOpenChange(false);
+      updateDraftMutation.mutate(
+        { draftId: initialData.draftId, payload },
+        {
+          onSuccess: () => {
+            setDraftStatus("saved");
+            toast.success("Draft updated");
+          },
+          onError: () => setDraftStatus("unsaved"),
         }
-      });
+      );
     } else {
       saveDraftMutation.mutate(payload, {
         onSuccess: () => {
-          toast.success("Draft saved to drafts folder");
-          onOpenChange(false);
-        }
+          setDraftStatus("saved");
+          toast.success("Draft saved");
+        },
+        onError: () => setDraftStatus("unsaved"),
       });
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[680px] max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl border-border/80 shadow-lg">
-        {/* Header */}
-        <DialogHeader className="p-4 sm:p-5 border-b border-border/70 bg-muted/20">
-          <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-foreground">
-            <Send className="h-4 w-4 text-primary" />
-            {initialData?.draftId ? "Edit Saved Draft" : initialData?.threadId ? "Reply to Conversation" : "Compose New Email"}
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Dispatches through your connected organization mailbox and SMTP gateway.
-          </DialogDescription>
-        </DialogHeader>
+  const handleDiscard = () => {
+    onOpenChange(false);
+  };
 
-        {/* Composer Form Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 overscroll-contain">
-          {/* To Field */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-bold text-foreground">To</Label>
-              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+  // Keydown shortcut (Ctrl+Enter to Send)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // Title display
+  const windowTitle = initialData?.draftId
+    ? "Edit Draft"
+    : subject.trim()
+    ? subject
+    : "New Message";
+
+  // Minimized Bar (Docked bottom-right slim pill like Gmail)
+  if (windowMode === "minimized") {
+    return (
+      <div className="fixed bottom-0 right-4 sm:right-8 z-50 w-72 sm:w-80 h-11 rounded-t-xl bg-card border border-border shadow-lg flex items-center justify-between px-3.5 transition-transform hover:bg-muted/40 cursor-pointer">
+        <div
+          onClick={() => setWindowMode("docked")}
+          className="flex items-center gap-2 flex-1 min-w-0"
+        >
+          <span className="w-2 h-2 rounded-full bg-primary" />
+          <span className="text-xs font-semibold text-foreground truncate">{windowTitle}</span>
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setWindowMode("docked")}
+            className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md"
+            title="Expand"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDiscard}
+            className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md"
+            title="Close"
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Fullscreen Backdrop Overlay
+  const isFullscreen = windowMode === "fullscreen";
+
+  return (
+    <>
+      {/* Dim backdrop only when in fullscreen modal mode */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity"
+          onClick={() => setWindowMode("docked")}
+        />
+      )}
+
+      <div
+        onKeyDown={handleKeyDown}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`fixed z-50 bg-card border border-border/80 shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+          isFullscreen
+            ? "inset-2 sm:inset-6 md:inset-10 lg:inset-14 rounded-2xl"
+            : "bottom-0 right-0 sm:right-6 md:right-8 w-full sm:w-[600px] lg:w-[640px] max-w-[calc(100vw-1rem)] h-[90vh] sm:h-[580px] max-h-[calc(100vh-1rem)] rounded-t-2xl sm:rounded-t-2xl border-b-0"
+        }`}
+      >
+        {/* Header Bar */}
+        <div className="px-3.5 py-2.5 bg-muted/40 border-b border-border/60 flex items-center justify-between gap-2 select-none shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-bold text-foreground truncate">
+              {windowTitle}
+            </span>
+            {draftStatus === "saving" && (
+              <span className="text-[10px] text-muted-foreground animate-pulse">Saving...</span>
+            )}
+            {draftStatus === "saved" && (
+              <span className="text-[10px] text-muted-foreground/80 flex items-center gap-0.5">
+                <Check className="h-2.5 w-2.5 text-emerald-500" />
+                <span>Saved</span>
+              </span>
+            )}
+          </div>
+
+          {/* Window action controls */}
+          <div className="flex items-center gap-0.5 shrink-0">
+            {/* Minimize button (desktop only) */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setWindowMode("minimized")}
+              className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md hidden sm:inline-flex"
+              title="Minimize"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </Button>
+
+            {/* Maximize / Restore button */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setWindowMode(isFullscreen ? "docked" : "fullscreen")}
+              className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md hidden sm:inline-flex"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </Button>
+
+            {/* Close button */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleDiscard}
+              className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md"
+              title="Close"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Recipients Form Header */}
+        <div className="bg-card shrink-0">
+          {/* TO Field */}
+          <RecipientInput
+            label="To"
+            recipients={toRecipients}
+            onChange={(newTo) => {
+              setToRecipients(newTo);
+              setDraftStatus("unsaved");
+            }}
+            placeholder="Recipients..."
+            autoFocus
+            rightAction={
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 {!showCc && (
                   <button
                     type="button"
                     onClick={() => setShowCc(true)}
-                    className="hover:text-primary transition-colors font-medium"
+                    className="hover:text-primary transition-colors font-medium px-1 py-0.5 rounded hover:bg-muted"
                   >
-                    + Cc
+                    Cc
                   </button>
                 )}
                 {!showBcc && (
                   <button
                     type="button"
                     onClick={() => setShowBcc(true)}
-                    className="hover:text-primary transition-colors font-medium"
+                    className="hover:text-primary transition-colors font-medium px-1 py-0.5 rounded hover:bg-muted"
                   >
-                    + Bcc
+                    Bcc
                   </button>
                 )}
               </div>
-            </div>
-            <Input
-              type="text"
-              placeholder="candidate@example.com, client@example.com"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="text-xs h-9 rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
-            />
-          </div>
+            }
+          />
 
-          {/* Optional Cc Field */}
+          {/* CC Field (Collapsible) */}
           {showCc && (
-            <div className="space-y-1.5 animate-in fade-in duration-200">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-muted-foreground">Cc</Label>
+            <RecipientInput
+              label="Cc"
+              recipients={ccRecipients}
+              onChange={(newCc) => {
+                setCcRecipients(newCc);
+                setDraftStatus("unsaved");
+              }}
+              placeholder="Cc recipients..."
+              rightAction={
                 <button
                   type="button"
-                  onClick={() => setShowCc(false)}
-                  className="text-muted-foreground hover:text-foreground text-[10px]"
+                  onClick={() => {
+                    setShowCc(false);
+                    setCcRecipients([]);
+                  }}
+                  className="text-[10px] text-muted-foreground hover:text-foreground"
                 >
                   Remove
                 </button>
-              </div>
-              <Input
-                type="text"
-                placeholder="colleague@yourcompany.com"
-                value={cc}
-                onChange={(e) => setCc(e.target.value)}
-                className="text-xs h-9 rounded-xl bg-muted/20 border-border/70"
-              />
-            </div>
+              }
+            />
           )}
 
-          {/* Optional Bcc Field */}
+          {/* BCC Field (Collapsible) */}
           {showBcc && (
-            <div className="space-y-1.5 animate-in fade-in duration-200">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-muted-foreground">Bcc</Label>
+            <RecipientInput
+              label="Bcc"
+              recipients={bccRecipients}
+              onChange={(newBcc) => {
+                setBccRecipients(newBcc);
+                setDraftStatus("unsaved");
+              }}
+              placeholder="Bcc recipients..."
+              rightAction={
                 <button
                   type="button"
-                  onClick={() => setShowBcc(false)}
-                  className="text-muted-foreground hover:text-foreground text-[10px]"
+                  onClick={() => {
+                    setShowBcc(false);
+                    setBccRecipients([]);
+                  }}
+                  className="text-[10px] text-muted-foreground hover:text-foreground"
                 >
                   Remove
                 </button>
-              </div>
-              <Input
-                type="text"
-                placeholder="archive@yourcompany.com"
-                value={bcc}
-                onChange={(e) => setBcc(e.target.value)}
-                className="text-xs h-9 rounded-xl bg-muted/20 border-border/70"
-              />
-            </div>
+              }
+            />
           )}
 
           {/* Subject Field */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-bold text-foreground">Subject</Label>
-            <Input
+          <div className="px-3 py-1.5 border-b border-border/60 flex items-center">
+            <input
               type="text"
-              placeholder="Interview slot confirmation / Candidate offer letter..."
+              placeholder="Subject"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="text-xs h-9 rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
+              onChange={(e) => {
+                setSubject(e.target.value);
+                setDraftStatus("unsaved");
+              }}
+              className="w-full bg-transparent outline-none text-xs sm:text-sm font-semibold text-foreground placeholder:text-muted-foreground/60 h-7"
             />
           </div>
+        </div>
 
-          {/* Message Body Field */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-bold text-foreground">Message</Label>
-            <Textarea
-              placeholder="Write your email message here..."
-              value={bodyText}
-              onChange={(e) => setBodyText(e.target.value)}
-              rows={8}
-              className="text-xs resize-none rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary leading-relaxed"
-            />
-          </div>
-
-          {/* Attachments Section */}
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
-                <Paperclip className="h-3.5 w-3.5" />
-                Attachments ({files.length}/{MAX_ATTACHMENTS})
-              </Label>
-              <span className="text-[10px] text-muted-foreground">Max 15MB each</span>
+        {/* Rich Text Editor Body Area */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+          {/* Drag & Drop Visual Overlay */}
+          {isDraggingOver && (
+            <div className="absolute inset-0 z-20 bg-primary/10 border-2 border-dashed border-primary rounded-xl flex items-center justify-center pointer-events-none backdrop-blur-2xs">
+              <div className="flex items-center gap-2 text-xs font-bold text-primary bg-card px-4 py-2 rounded-xl shadow-lg border">
+                <Paperclip className="h-4 w-4" />
+                <span>Drop files here to attach (up to 15MB each)</span>
+              </div>
             </div>
+          )}
 
-            {/* Attached files chips */}
-            {files.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {/* Rich Text Editor */}
+          <EmailRichEditor
+            initialContent={bodyHtml || bodyText}
+            onChange={(html, text) => {
+              setBodyHtml(html);
+              setBodyText(text);
+              setDraftStatus("unsaved");
+            }}
+            showToolbar={showFormattingBar}
+            placeholder="Write your email message here..."
+          />
+
+          {/* Attachments Chip List */}
+          {files.length > 0 && (
+            <div className="px-3 py-2 border-t border-border/60 bg-muted/20 space-y-1.5 shrink-0 max-h-32 overflow-y-auto">
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
+                <span className="flex items-center gap-1">
+                  <Paperclip className="h-3 w-3" />
+                  Attachments ({files.length}/{MAX_ATTACHMENTS})
+                </span>
+                <span className="text-[10px]">Max 15MB each</span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
                 {files.map((file, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/30 text-xs"
+                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-card border border-border/80 text-xs shadow-2xs group"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FileIcon className="h-4 w-4 text-primary shrink-0" />
-                      <div className="truncate">
-                        <p className="font-semibold text-foreground truncate">{file.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{formatFileSize(file.size)}</p>
-                      </div>
-                    </div>
+                    <FileIcon className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="truncate max-w-[140px] text-[11px] font-medium text-foreground">
+                      {file.name}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">({formatFileSize(file.size)})</span>
                     <button
                       type="button"
                       onClick={() => removeFile(idx)}
-                      className="p-1 text-muted-foreground hover:text-destructive rounded-lg transition-colors ml-1"
+                      className="p-0.5 text-muted-foreground hover:text-destructive rounded transition-colors"
+                      title="Remove attachment"
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X className="h-3 w-3" />
                     </button>
                   </div>
                 ))}
               </div>
-            )}
-
-            {/* Add attachment trigger */}
-            {files.length < MAX_ATTACHMENTS && (
-              <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileSelect}
-                  multiple
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-8 text-xs gap-1.5 rounded-xl border-border/70"
-                >
-                  <Paperclip className="h-3.5 w-3.5" />
-                  Attach File
-                </Button>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Footer Actions */}
-        <DialogFooter className="p-3.5 sm:p-4 border-t border-border/70 bg-muted/15 flex items-center justify-between sm:justify-between w-full">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenChange(false)}
-            className="text-xs h-8 text-muted-foreground hover:text-foreground rounded-xl"
-          >
-            Discard
-          </Button>
-
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={saveDraftMutation.isPending || updateDraftMutation.isPending || sendDraftMutation.isPending || sendEmailMutation.isPending}
-              onClick={handleSaveDraft}
-              className="text-xs h-8 rounded-xl border-border/70"
-            >
-              {saveDraftMutation.isPending || updateDraftMutation.isPending ? "Saving..." : "Save Draft"}
-            </Button>
-
+        {/* Bottom Action Toolbar (Gmail Style) */}
+        <div className="p-2 sm:p-2.5 border-t border-border/70 bg-muted/15 flex items-center justify-between gap-2 shrink-0 select-none">
+          {/* Left Actions: Send Button & Quick Tools */}
+          <div className="flex items-center gap-1.5">
+            {/* Primary Send Button */}
             <Button
               type="button"
               disabled={sendEmailMutation.isPending || sendDraftMutation.isPending}
               onClick={handleSend}
-              className="text-xs h-8 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-xs rounded-xl"
+              className="h-8 px-4 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-xs"
             >
               {sendEmailMutation.isPending || sendDraftMutation.isPending ? (
                 <>
@@ -421,13 +563,80 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               ) : (
                 <>
                   <Send className="h-3.5 w-3.5" />
-                  <span>Send Email</span>
+                  <span>Send</span>
                 </>
               )}
             </Button>
+
+            {/* Formatting Ribbon Toggle (Gmail 'A' icon) */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFormattingBar(!showFormattingBar)}
+              className={`h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground ${
+                showFormattingBar ? "bg-muted text-primary font-bold shadow-2xs" : ""
+              }`}
+              title="Formatting options"
+            >
+              <Type className="h-4 w-4" />
+            </Button>
+
+            {/* Attach File Paperclip Button */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={(e) => {
+                if (e.target.files) {
+                  handleFileSelect(Array.from(e.target.files));
+                }
+              }}
+              multiple
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={files.length >= MAX_ATTACHMENTS}
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+              title="Attach files"
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+
+          {/* Right Actions: Save Draft & Discard Trash Button */}
+          <div className="flex items-center gap-1">
+            {/* Save Draft Button */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={saveDraftMutation.isPending || updateDraftMutation.isPending}
+              onClick={handleSaveDraft}
+              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground rounded-lg gap-1"
+              title="Save draft"
+            >
+              <Save className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Save</span>
+            </Button>
+
+            {/* Discard Trash Button */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleDiscard}
+              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
+              title="Discard draft"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };

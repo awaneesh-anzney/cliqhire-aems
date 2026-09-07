@@ -4,4 +4,6 @@ export * from "./EmailSidebar";
 export * from "./EmailThreadList";
 export * from "./EmailThreadDetail";
 export * from "./EmailComposerDialog";
+export * from "./EmailRichEditor";
+export * from "./RecipientInput";
 export * from "./AdminMailboxesDialog";
