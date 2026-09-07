@@ -1,52 +1,59 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Plus, SlidersHorizontal, RefreshCcw, MoreVertical, Loader, X, Briefcase, MapPin, Users2, Calendar, Search, Lock, Hash, DollarSign } from "lucide-react";
-import { toast } from "sonner";
-import { useState, useMemo, useEffect } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+import React, { useState, useMemo, useEffect } from "react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
- import {
-   Table,
-   TableHead,
-   TableBody,
-   TableCell,
-   TableHeader,
-   TableRow,
- } from "@/components/ui/table";
- import { useRouter } from "next/navigation";
- import { JobStageBadge } from "@/components/jobs/job-stage-badge";
- import { JobStage } from "@/types/job";
- import {
-   AlertDialog,
-   AlertDialogAction,
-   AlertDialogCancel,
-   AlertDialogContent,
-   AlertDialogDescription,
-   AlertDialogFooter,
-   AlertDialogHeader,
-   AlertDialogTitle,
- } from "@/components/ui/alert-dialog";
- import Dashboardheader from "@/components/dashboard-header";
- import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
- import { JobPaginationControls } from "@/components/jobs/JobPaginationControls";
- import { useAuth } from "@/contexts/AuthContext";
- import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
- import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
- import { useExportJobs } from "@/hooks/useExportJobs";
- import { useJobs, useUpdateJobStage, useDeleteJob } from "@/hooks/useJobs";
- import { usePermissions } from "@/contexts/PermissionContext";
- import { cn } from "@/lib/utils";
- import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
- 
- function useDebounce<T>(value: T, delay: number): T {
+  Table,
+  TableHead,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
+import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
+import { JobPaginationControls } from "@/components/jobs/JobPaginationControls";
+import { JobTableRow } from "@/components/jobs/JobTableRow";
+import { JobCardView, JobCardItem } from "@/components/jobs/JobCardView";
+import { JobFilterDrawer } from "@/components/jobs/JobFilterDrawer";
+import { JobStatsBar } from "@/components/jobs/JobStatsBar";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/contexts/PermissionContext";
+import { useExportJobs } from "@/hooks/useExportJobs";
+import { useJobs, useUpdateJobStage, useDeleteJob } from "@/hooks/useJobs";
+import { JobStage } from "@/types/job";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import {
+  Briefcase,
+  Search,
+  SlidersHorizontal,
+  X,
+  Lock,
+  Plus,
+  RefreshCw,
+  Download,
+  Trash2,
+  LayoutGrid,
+  List,
+  FolderOpen,
+  FilterX,
+} from "lucide-react";
+
+function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -60,619 +67,701 @@ import {
 }
 
 function ConfirmStageChangeDialog({
-   open,
-   onOpenChange,
-   onConfirm,
- }: {
-   open: boolean;
-   onOpenChange: (open: boolean) => void;
-   onConfirm: () => void;
- }) {
-   return (
-     <AlertDialog open={open} onOpenChange={onOpenChange}>
-       <AlertDialogContent className="rounded-[2rem] border-border shadow-2xl">
-         <AlertDialogHeader>
-           <AlertDialogTitle className="font-black text-foreground">Confirm Stage Change</AlertDialogTitle>
-           <AlertDialogDescription className="font-bold text-muted-foreground">
-             Are you sure you want to update the job stage? This action will be saved immediately.
-           </AlertDialogDescription>
-         </AlertDialogHeader>
-         <AlertDialogFooter>
-           <AlertDialogCancel className="rounded-xl font-black text-[11px] uppercase tracking-widest border-border">Cancel</AlertDialogCancel>
-           <AlertDialogAction onClick={onConfirm} className="rounded-xl font-black text-[11px] uppercase tracking-widest bg-brand hover:bg-brand/90">Confirm</AlertDialogAction>
-         </AlertDialogFooter>
-       </AlertDialogContent>
-     </AlertDialog>
-   );
- }
- 
- export default function JobsPage() {
-   const { user } = useAuth();
-   const { hasPermission } = usePermissions();
-   const isAdmin = user?.role === 'ADMIN';
- 
-   const canViewJobs = isAdmin || hasPermission('jobs', 'view');
-   const canModifyJobs = isAdmin || hasPermission('jobs', 'create') || hasPermission('jobs', 'edit');
-   const canDeleteJobs = isAdmin || hasPermission('jobs', 'delete');
- 
-   const [open, setOpen] = useState(false);
-   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-   const [openExportDialog, setOpenExportDialog] = useState(false);
-   const { mutateAsync: exportJobsMutation } = useExportJobs();
+  open,
+  onOpenChange,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="rounded-2xl border-border bg-card shadow-2xl">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-base font-bold text-foreground">
+            Confirm Stage Change
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-xs text-muted-foreground">
+            Are you sure you want to update the job stage? This will update the job status across all pipelines.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 sm:space-x-0">
+          <AlertDialogCancel className="rounded-xl text-xs h-9 px-3.5 border-border">
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className="rounded-xl text-xs h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Confirm
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
-   const [searchInput, setSearchInput] = useState("");
-   const [jobTitleInput, setJobTitleInput] = useState("");
-   const [jobIdInput, setJobIdInput] = useState("");
-   const [locationInput, setLocationInput] = useState("");
-   const [clientInput, setClientInput] = useState("");
-   const [headcountInput, setHeadcountInput] = useState("");
-   const [jobTypeInput, setJobTypeInput] = useState("");
-   const [selectedStage, setSelectedStage] = useState<string>("All");
-   const [includeInactiveInput, setIncludeInactiveInput] = useState(false);
+export default function JobsPage() {
+  const { user } = useAuth();
+  const { hasPermission } = usePermissions();
+  const isAdmin = user?.role === "ADMIN";
 
-   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const canViewJobs = isAdmin || hasPermission("jobs", "view");
+  const canModifyJobs =
+    isAdmin || hasPermission("jobs", "create") || hasPermission("jobs", "edit");
+  const canDeleteJobs = isAdmin || hasPermission("jobs", "delete");
 
-   const debouncedSearch = useDebounce(searchInput, 300);
-   const debouncedJobTitle = useDebounce(jobTitleInput, 300);
-   const debouncedJobId = useDebounce(jobIdInput, 300);
-   const debouncedLocation = useDebounce(locationInput, 300);
-   const debouncedClient = useDebounce(clientInput, 300);
-   const debouncedHeadcount = useDebounce(headcountInput, 300);
-   const debouncedJobType = useDebounce(jobTypeInput, 300);
+  // View Mode
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
-   const [confirmOpen, setConfirmOpen] = useState(false);
-   const [pendingStageChange, setPendingStageChange] = useState<{
-     jobId: string;
-     newStage: JobStage;
-   } | null>(null);
-   const [currentPage, setCurrentPage] = useState(1);
-   const [pageSize, setPageSize] = useState(10);
-   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-   const [isDeleting, setIsDeleting] = useState(false);
+  // Modals state
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [openExportDialog, setOpenExportDialog] = useState(false);
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-   const router = useRouter();
-   const { mutateAsync: updateStageMutation } = useUpdateJobStage();
-   const { mutateAsync: deleteJobMutation } = useDeleteJob();
+  // Stage change confirm
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingStageChange, setPendingStageChange] = useState<{
+    jobId: string;
+    newStage: JobStage;
+  } | null>(null);
 
-   useEffect(() => {
-     setCurrentPage(1);
-   }, [
-     debouncedSearch,
-     debouncedJobTitle,
-     debouncedJobId,
-     debouncedLocation,
-     debouncedClient,
-     debouncedHeadcount,
-     debouncedJobType,
-     selectedStage,
-     includeInactiveInput,
-   ]);
+  // Filter inputs
+  const [searchInput, setSearchInput] = useState("");
+  const [jobTitleInput, setJobTitleInput] = useState("");
+  const [jobIdInput, setJobIdInput] = useState("");
+  const [locationInput, setLocationInput] = useState("");
+  const [clientInput, setClientInput] = useState("");
+  const [headcountInput, setHeadcountInput] = useState("");
+  const [jobTypeInput, setJobTypeInput] = useState("");
+  const [selectedStage, setSelectedStage] = useState<string>("All");
+  const [includeInactiveInput, setIncludeInactiveInput] = useState(false);
 
-   const clearAllFilters = () => {
-     setSearchInput("");
-     setJobTitleInput("");
-     setJobIdInput("");
-     setLocationInput("");
-     setClientInput("");
-     setHeadcountInput("");
-     setJobTypeInput("");
-     setSelectedStage("All");
-     setIncludeInactiveInput(false);
-     setCurrentPage(1);
-   };
+  // Debounced filters
+  const debouncedSearch = useDebounce(searchInput, 300);
+  const debouncedJobTitle = useDebounce(jobTitleInput, 300);
+  const debouncedJobId = useDebounce(jobIdInput, 300);
+  const debouncedLocation = useDebounce(locationInput, 300);
+  const debouncedClient = useDebounce(clientInput, 300);
+  const debouncedHeadcount = useDebounce(headcountInput, 300);
+  const debouncedJobType = useDebounce(jobTypeInput, 300);
 
-   const { data: jobsData, isLoading, isFetching, refetch } = useJobs({
-     page: currentPage,
-     limit: pageSize,
-     search: debouncedSearch || undefined,
-     jobTitle: debouncedJobTitle || undefined,
-     jobId: debouncedJobId || undefined,
-     location: debouncedLocation || undefined,
-     client: debouncedClient || undefined,
-     headcount: debouncedHeadcount ? parseInt(debouncedHeadcount) || undefined : undefined,
-     jobType: debouncedJobType || undefined,
-     stage: selectedStage === "All" ? undefined : selectedStage,
-     includeInactive: includeInactiveInput || undefined,
-   });
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
-   const allJobs = jobsData?.jobs ?? [];
- 
-   const totalJobs = jobsData?.totalCount ?? 0;
-   const totalPages = jobsData?.totalPages ?? 1;
- 
-   const handlePageChange = (newPage: number) => {
-     if (newPage >= 1 && newPage <= totalPages) {
-       setCurrentPage(newPage);
-     }
-   };
- 
-   const toJobStage = (stage?: string): JobStage => {
-     const validStages: JobStage[] = ["Open", "Hired", "On Hold", "Closed", "Active", "Onboarding"];
-     return validStages.includes(stage as JobStage) ? (stage as JobStage) : "Open";
-   };
- 
-   const handleStageChange = (jobId: string, newStage: JobStage) => {
-     if (!canModifyJobs) return;
-     setPendingStageChange({ jobId, newStage });
-     setConfirmOpen(true);
-   };
- 
-   const confirmStageChange = async () => {
-     if (!pendingStageChange) return;
-     const { jobId, newStage } = pendingStageChange;
-     try {
-       await updateStageMutation({ id: jobId, stage: newStage });
-       toast.success("Job stage updated successfully");
-       refetch();
-     } catch (error) {
-       toast.error("Failed to update job stage");
-     } finally {
-       setPendingStageChange(null);
-       setConfirmOpen(false);
-     }
-   };
- 
-   const toggleRowSelection = (jobId: string) => {
-     if (!canDeleteJobs) return;
-     setSelectedRows(prevSelected => {
-       const newSelected = new Set(prevSelected);
-       if (newSelected.has(jobId)) newSelected.delete(jobId);
-       else newSelected.add(jobId);
-       return newSelected;
-     });
-   };
- 
-   const toggleSelectAll = () => {
-     if (!canDeleteJobs) return;
-     if (selectedRows.size === allJobs.length && allJobs.length > 0) {
-       setSelectedRows(new Set());
-     } else {
-       const newSelectedRows = new Set<string>();
-       allJobs.forEach((job: any) => newSelectedRows.add(job._id));
-       setSelectedRows(newSelectedRows);
-     }
-   };
- 
-   const handleDeleteSelected = async () => {
-     if (selectedRows.size === 0 || !canDeleteJobs) return;
-     setShowDeleteDialog(true);
-   };
- 
-   const confirmDeleteSelected = async () => {
-     if (selectedRows.size === 0 || !canDeleteJobs) return;
-     setIsDeleting(true);
-     try {
-       await Promise.all(Array.from(selectedRows).map((jobId) => deleteJobMutation(jobId)));
-       await refetch();
-       setSelectedRows(new Set());
-       toast.success(`${selectedRows.size} job(s) deleted successfully`);
-     } catch (error) {
-       toast.error('Failed to delete selected jobs');
-     } finally {
-       setIsDeleting(false);
-       setShowDeleteDialog(false);
-     }
-   };
- 
-   if (!canViewJobs) {
-     return (
-       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-         <div className="p-4 rounded-full bg-red-50 text-red-500">
-           <Lock className="w-8 h-8" />
-         </div>
-         <div className="text-center font-black text-foreground tracking-tight">Access Denied</div>
-         <div className="text-center text-muted-foreground text-sm font-bold uppercase tracking-widest">Permission required to view jobs.</div>
-       </div>
-     );
-   }
- 
-   return (
-     <TooltipProvider delayDuration={200}>
-       <div className="flex flex-col h-screen w-full overflow-hidden bg-muted/50 p-3 gap-3 animate-in fade-in duration-700">
-         {/* Page Header */}
-         <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col">
-            <Dashboardheader
-              setOpen={setOpen}
-              setFilterOpen={() => setAdvancedFiltersOpen(prev => !prev)}
-              initialLoading={isFetching}
-              onRefresh={() => refetch()}
-              onDelete={handleDeleteSelected}
-              heading="Jobs"
-              buttonText="Add Job"
-              selectedCount={selectedRows.size}
-              showCreateButton={canModifyJobs}
-              showFilterButton={true}
-              isFilterActive={!!searchInput.trim() || !!jobTitleInput.trim() || !!jobIdInput.trim() || !!locationInput.trim() || !!clientInput.trim() || !!headcountInput.trim() || !!jobTypeInput.trim() || selectedStage !== "All" || includeInactiveInput}
-              filterCount={(searchInput.trim() ? 1 : 0) + (jobTitleInput.trim() ? 1 : 0) + (jobIdInput.trim() ? 1 : 0) + (locationInput.trim() ? 1 : 0) + (clientInput.trim() ? 1 : 0) + (headcountInput.trim() ? 1 : 0) + (jobTypeInput.trim() ? 1 : 0) + (selectedStage !== "All" ? 1 : 0) + (includeInactiveInput ? 1 : 0)}
-              onExport={() => setOpenExportDialog(true)}
-            />
-          </div>
+  const { mutateAsync: exportJobsMutation } = useExportJobs();
+  const { mutateAsync: updateStageMutation } = useUpdateJobStage();
+  const { mutateAsync: deleteJobMutation } = useDeleteJob();
 
-          {/* Real-time Filter Bar */}
-          <div className="flex-shrink-0 bg-card rounded-[1.2rem] border border-border shadow-sm px-4 py-3 flex flex-col gap-2.5 animate-in fade-in duration-300">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Global Search Input */}
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
-                <input
-                  type="text"
-                  placeholder="Global quick search (title or ID)..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full pl-9 pr-8 h-9 text-xs bg-muted/20 border border-border rounded-xl focus:outline-none focus-visible:ring-1 focus-visible:ring-brand focus:border-brand transition-all font-medium text-foreground"
-                />
-                {searchInput && (
-                  <button
-                    onClick={() => setSearchInput("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    debouncedSearch,
+    debouncedJobTitle,
+    debouncedJobId,
+    debouncedLocation,
+    debouncedClient,
+    debouncedHeadcount,
+    debouncedJobType,
+    selectedStage,
+    includeInactiveInput,
+  ]);
+
+  const clearAllFilters = () => {
+    setSearchInput("");
+    setJobTitleInput("");
+    setJobIdInput("");
+    setLocationInput("");
+    setClientInput("");
+    setHeadcountInput("");
+    setJobTypeInput("");
+    setSelectedStage("All");
+    setIncludeInactiveInput(false);
+    setCurrentPage(1);
+  };
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (jobTitleInput.trim()) count++;
+    if (jobIdInput.trim()) count++;
+    if (locationInput.trim()) count++;
+    if (clientInput.trim()) count++;
+    if (headcountInput.trim()) count++;
+    if (jobTypeInput.trim()) count++;
+    if (selectedStage !== "All") count++;
+    if (includeInactiveInput) count++;
+    return count;
+  }, [
+    jobTitleInput,
+    jobIdInput,
+    locationInput,
+    clientInput,
+    headcountInput,
+    jobTypeInput,
+    selectedStage,
+    includeInactiveInput,
+  ]);
+
+  const {
+    data: jobsData,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useJobs({
+    page: currentPage,
+    limit: pageSize,
+    search: debouncedSearch || undefined,
+    jobTitle: debouncedJobTitle || undefined,
+    jobId: debouncedJobId || undefined,
+    location: debouncedLocation || undefined,
+    client: debouncedClient || undefined,
+    headcount: debouncedHeadcount ? parseInt(debouncedHeadcount, 10) || undefined : undefined,
+    jobType: debouncedJobType || undefined,
+    stage: selectedStage === "All" ? undefined : selectedStage,
+    includeInactive: includeInactiveInput || undefined,
+  });
+
+  const allJobs: JobCardItem[] = useMemo(() => {
+    return (jobsData?.jobs ?? []).map((j: any) => ({
+      _id: j._id,
+      jobId: j.jobId,
+      jobTitle: j.jobTitle,
+      jobType: j.jobType,
+      location: j.location,
+      headcount: j.headcount,
+      stage: j.stage,
+      salaryCurrency: j.salaryCurrency,
+      maximumSalary: j.maximumSalary,
+      minimumSalary: j.minimumSalary,
+      client: j.client,
+      createdBy: j.createdBy,
+      createdAt: j.createdAt,
+    }));
+  }, [jobsData]);
+
+  const totalJobs = jobsData?.totalCount ?? 0;
+  const totalPages = jobsData?.totalPages ?? 1;
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const handleStageChange = (jobId: string, newStage: JobStage) => {
+    if (!canModifyJobs) return;
+    setPendingStageChange({ jobId, newStage });
+    setConfirmOpen(true);
+  };
+
+  const confirmStageChange = async () => {
+    if (!pendingStageChange) return;
+    const { jobId, newStage } = pendingStageChange;
+    try {
+      await updateStageMutation({ id: jobId, stage: newStage });
+      refetch();
+    } catch (error) {
+      // Handled by mutation onError
+    } finally {
+      setPendingStageChange(null);
+      setConfirmOpen(false);
+    }
+  };
+
+  // Row selection
+  const toggleRowSelection = (jobId: string) => {
+    if (!canDeleteJobs) return;
+    setSelectedRows((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+      if (newSelected.has(jobId)) newSelected.delete(jobId);
+      else newSelected.add(jobId);
+      return newSelected;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!canDeleteJobs) return;
+    if (selectedRows.size === allJobs.length && allJobs.length > 0) {
+      setSelectedRows(new Set());
+    } else {
+      const newSelectedRows = new Set<string>();
+      allJobs.forEach((job) => newSelectedRows.add(job._id));
+      setSelectedRows(newSelectedRows);
+    }
+  };
+
+  const confirmDeleteSelected = async () => {
+    if (selectedRows.size === 0 || !canDeleteJobs) return;
+    setIsDeleting(true);
+    try {
+      await Promise.all(
+        Array.from(selectedRows).map((jobId) => deleteJobMutation(jobId))
+      );
+      await refetch();
+      setSelectedRows(new Set());
+      toast.success(`${selectedRows.size} job(s) deleted successfully`);
+    } catch (error) {
+      toast.error("Failed to delete selected jobs");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
+  if (!canViewJobs) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="p-4 rounded-2xl bg-destructive/10 text-destructive border border-destructive/20 shadow-xs">
+          <Lock className="w-8 h-8" />
+        </div>
+        <div className="text-center font-bold text-foreground text-lg tracking-tight">
+          Access Restricted
+        </div>
+        <div className="text-center text-muted-foreground text-xs uppercase tracking-wider font-semibold">
+          You do not have permission to view job requirements.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <TooltipProvider delayDuration={150}>
+      <div className="h-[calc(100vh-4.25rem)] w-full flex flex-col min-h-0 overflow-hidden bg-background p-2 sm:p-3 md:p-3.5 gap-2.5 select-text">
+        {/* Top Workstation Command Panel */}
+        <div className="shrink-0 rounded-2xl border border-border/80 bg-card/95 backdrop-blur-md shadow-xs p-3 sm:p-3.5 flex flex-col gap-2.5">
+          {/* Main Action Strip */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            {/* Left: Title + Icon + Count Badge */}
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs">
+                <Briefcase className="w-4 h-4" />
               </div>
-
-              {/* Stage Filter Dropdown */}
-              <div className="w-[160px]">
-                <Select value={selectedStage} onValueChange={setSelectedStage}>
-                  <SelectTrigger className="w-full bg-muted/20 border-border rounded-xl text-xs font-semibold h-9">
-                    <SelectValue placeholder="Stage" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-border">
-                    <SelectItem value="All" className="text-xs font-medium">All Stages</SelectItem>
-                    <SelectItem value="Open" className="text-xs font-medium">Open</SelectItem>
-                    <SelectItem value="Hired" className="text-xs font-medium">Hired</SelectItem>
-                    <SelectItem value="On Hold" className="text-xs font-medium">On Hold</SelectItem>
-                    <SelectItem value="Closed" className="text-xs font-medium">Closed</SelectItem>
-                    <SelectItem value="Active" className="text-xs font-medium">Active</SelectItem>
-                    <SelectItem value="Onboarding" className="text-xs font-medium">Onboarding</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+                    Jobs
+                  </h1>
+                  <span className="px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground text-xs font-semibold border border-border/60">
+                    {totalJobs}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground hidden sm:block">
+                  Manage active job requirements, stages, and recruitment requisitions
+                </p>
               </div>
+            </div>
 
-              {/* Advanced Filter Toggle */}
-              <Button
-                variant={advancedFiltersOpen ? "default" : "outline"}
-                size="sm"
-                onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
-                className="rounded-xl h-9 px-3.5 flex items-center gap-2 text-xs font-semibold transition-all"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                <span>{advancedFiltersOpen ? "Hide Advanced" : "Advanced Filters"}</span>
-                {(jobTitleInput || jobIdInput || locationInput || clientInput || headcountInput || jobTypeInput || includeInactiveInput) && (
-                  <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                )}
-              </Button>
-
-              {/* Reset All Filters Button */}
-              {(searchInput || jobTitleInput || jobIdInput || locationInput || clientInput || headcountInput || jobTypeInput || selectedStage !== "All" || includeInactiveInput) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearAllFilters}
-                  className="rounded-xl h-9 px-3.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted"
+            {/* Middle: Fast Search */}
+            <div className="relative flex-1 max-w-md min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70" />
+              <input
+                type="text"
+                placeholder="Search jobs by title, ID, client, or location..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full pl-9 pr-8 h-9 text-xs bg-muted/30 hover:bg-muted/50 border border-border/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground/60 transition-all font-medium"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={() => setSearchInput("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  <X className="h-4 w-4 mr-2" />
-                  Clear All
-                </Button>
+                  <X className="h-3.5 w-3.5" />
+                </button>
               )}
             </div>
 
-            {/* Collapsible Advanced Filters Panel */}
-            {advancedFiltersOpen && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 pt-3 border-t border-border/60 animate-in slide-in-from-top-2 duration-300">
-                {/* Job Title Filter */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Job Title</label>
-                  <input
-                    type="text"
-                    placeholder="Filter by title..."
-                    value={jobTitleInput}
-                    onChange={(e) => setJobTitleInput(e.target.value)}
-                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
-                  />
-                </div>
+            {/* Right: Action Buttons */}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap shrink-0">
+              {/* Filter Drawer Toggle */}
+              <Button
+                type="button"
+                variant={activeFiltersCount > 0 ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilterDrawerOpen(true)}
+                className={cn(
+                  "h-9 px-3 rounded-xl text-xs font-semibold gap-1.5 transition-all",
+                  activeFiltersCount > 0
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "border-border/80 hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Filters</span>
+                {activeFiltersCount > 0 && (
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-white/20 text-[10px] font-bold">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
 
-                {/* Job ID Filter */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Job ID</label>
-                  <input
-                    type="text"
-                    placeholder="Filter by ID..."
-                    value={jobIdInput}
-                    onChange={(e) => setJobIdInput(e.target.value)}
-                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
-                  />
-                </div>
-
-                {/* Location Filter */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Location</label>
-                  <input
-                    type="text"
-                    placeholder="Filter by location..."
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
-                  />
-                </div>
-
-                {/* Client Name/ID Filter */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Client (Name or ID)</label>
-                  <input
-                    type="text"
-                    placeholder="Filter by client..."
-                    value={clientInput}
-                    onChange={(e) => setClientInput(e.target.value)}
-                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
-                  />
-                </div>
-
-                {/* Headcount Filter */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Headcount</label>
-                  <input
-                    type="number"
-                    placeholder="Exact headcount..."
-                    value={headcountInput}
-                    onChange={(e) => setHeadcountInput(e.target.value)}
-                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
-                  />
-                </div>
-
-                {/* Job Type Filter */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Job Type</label>
-                  <input
-                    type="text"
-                    placeholder="Full-time, Contract..."
-                    value={jobTypeInput}
-                    onChange={(e) => setJobTypeInput(e.target.value)}
-                    className="w-full px-3 h-8 text-xs bg-muted/20 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand transition-all font-medium text-foreground"
-                  />
-                </div>
-
-                {/* Include Inactive Checkbox */}
-                <div className="flex items-center gap-2 h-full min-h-[40px] pt-3.5">
-                  <Checkbox
-                    id="includeInactive"
-                    checked={includeInactiveInput}
-                    onCheckedChange={(checked) => setIncludeInactiveInput(checked === true)}
-                    className="h-4 w-4 rounded border-border"
-                  />
-                  <Label htmlFor="includeInactive" className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none">
-                    Show Inactive
-                  </Label>
-                </div>
+              {/* View Switcher */}
+              <div className="flex items-center p-0.5 rounded-xl bg-muted/50 border border-border/80">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("table")}
+                  title="Table View"
+                  className={cn(
+                    "p-1.5 rounded-lg text-xs transition-all",
+                    viewMode === "table"
+                      ? "bg-card text-foreground shadow-2xs font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  title="Grid View"
+                  className={cn(
+                    "p-1.5 rounded-lg text-xs transition-all",
+                    viewMode === "grid"
+                      ? "bg-card text-foreground shadow-2xs font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
               </div>
-            )}
+
+              {/* Refresh Button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                title="Refresh"
+                className="h-9 w-9 p-0 rounded-xl border-border/80 hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+              >
+                <RefreshCw
+                  className={cn("h-3.5 w-3.5", isFetching && "animate-spin text-primary")}
+                />
+              </Button>
+
+              {/* Export Button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setOpenExportDialog(true)}
+                title="Export CSV"
+                className="h-9 px-2.5 sm:px-3 rounded-xl border-border/80 hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Export</span>
+              </Button>
+
+              {/* Primary Create Button */}
+              {canModifyJobs && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setOpenCreateModal(true)}
+                  className="h-9 px-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold gap-1.5 shadow-xs transition-all active:scale-[0.98]"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>New Job</span>
+                </Button>
+              )}
+            </div>
           </div>
 
-          {/* Table Area */}
-          <div className="flex-1 min-h-0 bg-card rounded-[1.2rem] border border-border shadow-sm overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-700 delay-150">
+          {/* Sub-strip: Stage Tabs & Filter Reset */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-2 border-t border-border/60">
+            <JobStatsBar
+              totalCount={totalJobs}
+              jobs={allJobs}
+              selectedStage={selectedStage}
+              onSelectStage={setSelectedStage}
+            />
+
+            {(activeFiltersCount > 0 || searchInput) && (
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground hover:text-destructive px-2 py-1 rounded-lg hover:bg-destructive/10 transition-colors self-end sm:self-auto shrink-0"
+              >
+                <FilterX className="w-3.5 h-3.5" />
+                <span>Reset Filters</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Contextual Bulk Action Bar */}
+        {selectedRows.size > 0 && canDeleteJobs && (
+          <div className="shrink-0 rounded-xl bg-card border border-border shadow-md px-3.5 py-2 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary" />
+              <span className="text-xs font-semibold text-foreground">
+                <span className="text-primary font-bold">{selectedRows.size}</span> of{" "}
+                {allJobs.length} selected
+              </span>
+              <button
+                type="button"
+                onClick={toggleSelectAll}
+                className="text-[11px] text-primary hover:underline font-semibold ml-2"
+              >
+                {selectedRows.size === allJobs.length ? "Deselect All" : "Select All Page"}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedRows(new Set())}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Clear
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+                className="h-7 px-3 text-xs font-semibold gap-1.5 rounded-lg shadow-xs"
+              >
+                <Trash2 className="w-3 h-3" />
+                <span>Delete Selected ({selectedRows.size})</span>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content: Table / Grid */}
+        <div className="flex-1 min-h-0 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs flex flex-col relative">
+          {isFetching && !isLoading && (
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/20 overflow-hidden z-30">
+              <div className="h-full bg-primary animate-pulse w-full" />
+            </div>
+          )}
+
+          {isLoading && allJobs.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-pulse">
+                <RefreshCw className="w-5 h-5 animate-spin" />
+              </div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Syncing jobs...
+              </p>
+            </div>
+          ) : allJobs.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-muted/60 border border-border flex items-center justify-center text-muted-foreground mb-3 shadow-2xs">
+                <FolderOpen className="w-7 h-7 stroke-[1.5]" />
+              </div>
+              <h3 className="text-sm font-bold text-foreground mb-1">
+                No Jobs Found
+              </h3>
+              <p className="text-xs text-muted-foreground max-w-sm mb-4 leading-relaxed">
+                {activeFiltersCount > 0 || searchInput
+                  ? "No job requirements matched your search criteria. Try clearing your filters or altering search terms."
+                  : "No job requirements have been created yet."}
+              </p>
+              <div className="flex items-center gap-2">
+                {activeFiltersCount > 0 || searchInput ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="text-xs rounded-xl h-8 px-3"
+                  >
+                    <FilterX className="w-3.5 h-3.5 mr-1.5" />
+                    Reset All Filters
+                  </Button>
+                ) : null}
+                {canModifyJobs && (
+                  <Button
+                    size="sm"
+                    onClick={() => setOpenCreateModal(true)}
+                    className="text-xs rounded-xl h-8 px-3 bg-primary text-primary-foreground"
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-1.5" />
+                    New Job Requirement
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : viewMode === "grid" ? (
+            <JobCardView
+              jobs={allJobs}
+              selectedRows={selectedRows}
+              onToggleSelect={toggleRowSelection}
+              onStageChange={handleStageChange}
+              canModify={canModifyJobs}
+              canDelete={canDeleteJobs}
+            />
+          ) : (
             <div className="flex-1 overflow-auto custom-scrollbar relative">
-              {isFetching && !isLoading && (
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand/20 overflow-hidden z-50">
-                  <div className="h-full bg-brand animate-pulse w-full" />
-                </div>
-              )}
-             <Table className="w-full border-separate border-spacing-0 table-auto">
-               <TableHeader className="sticky top-0 z-40 bg-muted/95 backdrop-blur-md">
-                 <TableRow className="hover:bg-muted/95 transition-colors">
-                   <TableHead className="w-[48px] px-3 py-3 border-b border-border text-center">
-                     <Checkbox
-                       checked={selectedRows.size > 0 && selectedRows.size === allJobs.length}
-                       onCheckedChange={() => toggleSelectAll()}
-                       className="h-4 w-4 rounded border-border"
-                       disabled={!canDeleteJobs}
-                     />
-                   </TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Job ID</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Position</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Location</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Headcount</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stage</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Salary Range</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Client</TableHead>
-                   <TableHead className="px-3 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right pr-6">Created By</TableHead>
-                 </TableRow>
-               </TableHeader>
-               <TableBody>
-                 {isLoading && allJobs.length === 0 ? (
-                   <TableRow>
-                     <TableCell colSpan={10} className="h-64 text-center">
-                        <Loader className="size-6 animate-spin text-brand mx-auto mb-2" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Syncing Jobs...</span>
-                     </TableCell>
-                   </TableRow>
-                 ) : allJobs.length === 0 ? (
-                   <TableRow>
-                     <TableCell colSpan={10} className="h-64 text-center">
-                        <Search className="size-8 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest">No active jobs found</p>
-                     </TableCell>
-                   </TableRow>
-                 ) : (
-                   allJobs.map((job: any) => (
-                     <TableRow
-                       key={job._id}
-                       className={cn(
-                         "group border-b border-border transition-all duration-300",
-                         "hover:bg-brand/[0.04] hover:shadow-inner",
-                         selectedRows.has(job._id) ? "bg-brand/[0.02]" : ""
-                       )}
-                     >
-                       <TableCell className="px-3 py-2.5 w-[48px] text-center">
-                         <Checkbox
-                           checked={selectedRows.has(job._id)}
-                           onCheckedChange={() => toggleRowSelection(job._id)}
-                           className="h-4 w-4 rounded border-border"
-                           disabled={!canDeleteJobs}
-                           onClick={(e) => e.stopPropagation()}
-                         />
-                       </TableCell>
-                       
-                       {/* Job ID */}
-                       <TableCell className="px-3 py-2.5">
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <span 
-                               className="text-[10px] font-medium text-muted-foreground cursor-pointer hover:text-brand transition-colors block truncate max-w-[80px]"
-                               onClick={() => router.push(`/jobs/${job._id}`)}
-                             >
-                               {job.jobId || "—"}
-                             </span>
-                           </TooltipTrigger>
-                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
-                             {job.jobId}
-                           </TooltipContent>
-                         </Tooltip>
-                       </TableCell>
- 
-                       {/* Position Name */}
-                       <TableCell className="px-3 py-2.5">
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <div 
-                               className="cursor-pointer group/title max-w-[160px] truncate"
-                               onClick={() => router.push(`/jobs/${job._id}`)}
-                             >
-                               <span className="text-[13px] font-semibold text-foreground group-hover/title:text-brand transition-all block truncate">
-                                 {job.jobTitle}
-                               </span>
-                             </div>
-                           </TooltipTrigger>
-                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
-                             {job.jobTitle}
-                           </TooltipContent>
-                         </Tooltip>
-                       </TableCell>
- 
-                       {/* Job Type */}
-                       <TableCell className="px-3 py-2.5">
-                         <div className="flex items-center gap-1.5">
-                            <Briefcase className="w-3 h-3 text-muted-foreground shrink-0" />
-                            <span className="text-[11px] font-medium text-foreground capitalize truncate max-w-[80px]">
-                              {job.jobType}
-                            </span>
-                         </div>
-                       </TableCell>
- 
-                       {/* Location */}
-                       <TableCell className="px-3 py-2.5">
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <div className="flex items-center gap-1.5 max-w-[120px] truncate cursor-help">
-                                <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
-                                <span className="text-[11px] font-medium text-foreground truncate">
-                                  {Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "—"}
-                                </span>
-                             </div>
-                           </TooltipTrigger>
-                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
-                             {Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "Global"}
-                           </TooltipContent>
-                         </Tooltip>
-                       </TableCell>
- 
-                       {/* Headcount */}
-                       <TableCell className="px-3 py-2.5 text-center">
-                         <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted border border-border">
-                            <Users2 className="w-2.5 h-2.5 text-muted-foreground shrink-0" />
-                            <span className="text-[10px] font-semibold text-foreground">{job.headcount}</span>
-                         </div>
-                       </TableCell>
- 
-                       {/* Stage */}
-                       <TableCell className="px-3 py-2.5">
-                         <div className="scale-90 origin-left">
-                           <JobStageBadge
-                             stage={toJobStage(job.stage)}
-                             onStageChange={(newStage) => handleStageChange(job._id, newStage)}
-                             disabled={!canModifyJobs}
-                           />
-                         </div>
-                       </TableCell>
- 
-                       {/* Salary Range */}
-                       <TableCell className="px-3 py-2.5 text-center">
-                         <div className="flex flex-col items-center leading-none gap-0.5">
-                            <span className="text-[11px] font-semibold text-foreground">
-                               {job.salaryCurrency} {job.maximumSalary}
-                            </span>
-                            <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">Max Range</span>
-                         </div>
-                       </TableCell>
- 
-                       {/* Client */}
-                       <TableCell className="px-3 py-2.5">
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <span className="text-[11px] font-medium text-foreground block truncate max-w-[120px] cursor-help">
-                                {typeof job.client === "object" ? job.client?.name : job.client || "—"}
-                             </span>
-                           </TooltipTrigger>
-                           <TooltipContent className="rounded-lg bg-card border border-border text-foreground font-semibold text-xs shadow-lg p-2">
-                             {typeof job.client === "object" ? job.client?.name : job.client || "No Client Specified"}
-                           </TooltipContent>
-                         </Tooltip>
-                       </TableCell>
- 
-                       {/* Created By */}
-                       <TableCell className="px-3 py-2.5 text-right pr-6">
-                         <span className="text-[11px] font-medium text-foreground block truncate max-w-[120px] ml-auto">
-                            {job.createdBy?.name || (typeof job.createdBy === 'string' ? job.createdBy : "System")}
-                         </span>
-                       </TableCell>
-                     </TableRow>
-                   ))
-                 )}
-               </TableBody>
-             </Table>
-           </div>
-           
-           {/* Pagination */}
-           <div className="flex-shrink-0 bg-card border-t border-border py-2 px-3">
-             <JobPaginationControls
-               currentPage={currentPage}
-               totalPages={totalPages}
-               totalJobs={totalJobs}
-               pageSize={pageSize}
-               setPageSize={(s) => { setPageSize(s); setCurrentPage(1); }}
-               handlePageChange={handlePageChange}
-               jobsLength={allJobs.length}
-             />
-           </div>
-         </div>
-       </div>
- 
-       <ConfirmStageChangeDialog
-         open={confirmOpen}
-         onOpenChange={setConfirmOpen}
-         onConfirm={confirmStageChange}
-       />
- 
-       <DeleteConfirmationDialog
-         isOpen={showDeleteDialog}
-         onClose={() => setShowDeleteDialog(false)}
-         onConfirm={confirmDeleteSelected}
-         title={`Delete ${selectedRows.size} job(s)?`}
-         description={`Confirm deletion of ${selectedRows.size} job requirements.`}
-         confirmText={isDeleting ? 'Processing...' : 'Delete Permanently'}
-         isDeleting={isDeleting}
-       />
- 
-       {canModifyJobs && <CreateJobRequirementForm open={open} onOpenChange={setOpen} />}
- 
-       <ExportDialog
-         isOpen={openExportDialog}
-         onClose={() => setOpenExportDialog(false)}
-         title="Export Jobs"
-         description="Generate CSV report for job requirements."
-         onExport={(params: ExportFilterParams | undefined) => exportJobsMutation(params)}
-         filename="jobs_report"
-       />
-     </TooltipProvider>
-   );
- }
+              <Table className="w-full border-separate border-spacing-0 table-auto">
+                <TableHeader className="sticky top-0 z-20 bg-muted/95 backdrop-blur-md">
+                  <TableRow className="border-b border-border/80 hover:bg-transparent">
+                    {canDeleteJobs && (
+                      <TableHead className="w-[44px] px-3 py-2.5 border-b border-border/80">
+                        <div className="flex items-center justify-center">
+                          <Checkbox
+                            checked={
+                              selectedRows.size > 0 &&
+                              selectedRows.size === allJobs.length
+                            }
+                            onCheckedChange={toggleSelectAll}
+                            className="rounded-md border-border"
+                          />
+                        </div>
+                      </TableHead>
+                    )}
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Job ID
+                    </TableHead>
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Position
+                    </TableHead>
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Client
+                    </TableHead>
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Location
+                    </TableHead>
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
+                      Headcount
+                    </TableHead>
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Stage
+                    </TableHead>
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
+                      Salary Range
+                    </TableHead>
+                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right pr-4">
+                      Created By
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allJobs.map((job) => {
+                    const isSelected = selectedRows.has(job._id);
+
+                    return (
+                      <TableRow
+                        key={job._id}
+                        className={cn(
+                          "group border-b border-border/50 transition-colors",
+                          "hover:bg-muted/40",
+                          isSelected ? "bg-primary/[0.03]" : ""
+                        )}
+                      >
+                        {canDeleteJobs && (
+                          <TableCell className="px-3 py-2.5 w-[44px]">
+                            <div className="flex items-center justify-center">
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() => toggleRowSelection(job._id)}
+                                className="rounded-md border-border"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </TableCell>
+                        )}
+                        <JobTableRow
+                          job={job}
+                          onStageChange={handleStageChange}
+                          canModify={canModifyJobs}
+                        />
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Integrated Compact Footer */}
+          <div className="shrink-0 bg-card/90 border-t border-border/80">
+            <JobPaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalJobs={totalJobs}
+              pageSize={pageSize}
+              setPageSize={(s) => {
+                setPageSize(s);
+                setCurrentPage(1);
+              }}
+              handlePageChange={handlePageChange}
+              jobsLength={allJobs.length}
+            />
+          </div>
+        </div>
+
+        {/* Filter Drawer */}
+        <JobFilterDrawer
+          open={filterDrawerOpen}
+          onOpenChange={setFilterDrawerOpen}
+          jobTitleInput={jobTitleInput}
+          setJobTitleInput={setJobTitleInput}
+          jobIdInput={jobIdInput}
+          setJobIdInput={setJobIdInput}
+          locationInput={locationInput}
+          setLocationInput={setLocationInput}
+          clientInput={clientInput}
+          setClientInput={setClientInput}
+          headcountInput={headcountInput}
+          setHeadcountInput={setHeadcountInput}
+          jobTypeInput={jobTypeInput}
+          setJobTypeInput={setJobTypeInput}
+          selectedStage={selectedStage}
+          setSelectedStage={setSelectedStage}
+          includeInactive={includeInactiveInput}
+          setIncludeInactive={setIncludeInactiveInput}
+          onClearAll={clearAllFilters}
+          activeCount={activeFiltersCount}
+        />
+
+        {/* Confirm Stage Change Dialog */}
+        <ConfirmStageChangeDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          onConfirm={confirmStageChange}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          isOpen={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onConfirm={confirmDeleteSelected}
+          title={`Delete ${selectedRows.size} job(s)?`}
+          description={`Confirm deletion of ${selectedRows.size} job requirement(s). This action cannot be undone.`}
+          confirmText={isDeleting ? "Deleting..." : "Delete"}
+          cancelText="Cancel"
+          isDeleting={isDeleting}
+        />
+
+        {/* Create Job Form Modal */}
+        {canModifyJobs && (
+          <CreateJobRequirementForm
+            open={openCreateModal}
+            onOpenChange={setOpenCreateModal}
+          />
+        )}
+
+        {/* Export Dialog */}
+        <ExportDialog
+          isOpen={openExportDialog}
+          onClose={() => setOpenExportDialog(false)}
+          title="Export Jobs"
+          description="Download CSV report for job requirements."
+          onExport={(params: ExportFilterParams | undefined) =>
+            exportJobsMutation(params)
+          }
+          filename="jobs_report"
+        />
+      </div>
+    </TooltipProvider>
+  );
+}
