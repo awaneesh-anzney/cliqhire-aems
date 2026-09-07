@@ -1,6 +1,8 @@
+"use client";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -28,55 +30,71 @@ const CandidatePaginationControls: React.FC<CandidatePaginationControlsProps> = 
   handlePageChange,
   candidatesLength,
 }) => {
+  const startItem =
+    candidatesLength > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+  const endItem = Math.min(currentPage * pageSize, totalCandidates);
+
   return (
-    <div className="flex items-center justify-between p-4 border-t">
-      <div className="flex items-center space-x-4">
-        <div className="text-sm text-muted-foreground">
-          Showing {candidatesLength > 0 ? (currentPage - 1) * pageSize + 1 : 0} to {""}
-          {Math.min(currentPage * pageSize, totalCandidates)} of {totalCandidates} candidates
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm">Show</span>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 py-1.5 text-xs select-none">
+      {/* Left: Summary & Per Page */}
+      <div className="flex items-center gap-3 text-muted-foreground">
+        <span className="text-[11px] font-medium">
+          Showing <span className="font-semibold text-foreground">{startItem}</span>-
+          <span className="font-semibold text-foreground">{endItem}</span> of{" "}
+          <span className="font-semibold text-foreground">{totalCandidates}</span> candidates
+        </span>
+
+        <div className="flex items-center gap-1.5 pl-2 border-l border-border/70">
+          <span className="text-[11px] text-muted-foreground">Rows:</span>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => {
-              const newSize = parseInt(value);
+              const newSize = parseInt(value, 10);
               setPageSize(newSize);
-              handlePageChange(1); // Reset to page 1 when changing page size
+              handlePageChange(1);
             }}
           >
-            <SelectTrigger className="h-8 w-16">
+            <SelectTrigger className="h-7 w-[68px] text-[11px] rounded-lg bg-muted/40 border-border/70 font-semibold focus:ring-1">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              {["25", "50", "100", "200"].map((item) => (
-                <SelectItem key={item} value={item}>
+            <SelectContent className="rounded-xl border-border">
+              {["10", "25", "50", "100", "200"].map((item) => (
+                <SelectItem key={item} value={item} className="text-xs">
                   {item}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <span className="text-sm">per page</span>
         </div>
       </div>
-      <div className="flex items-center space-x-2">
+
+      {/* Right: Navigation Controls */}
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage <= 1}
+          className="h-7 px-2.5 text-xs rounded-lg border-border/70 hover:bg-muted/60 disabled:opacity-40"
         >
-          <ArrowLeft size={16} /> Previous
+          <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+          <span className="hidden sm:inline">Previous</span>
         </Button>
-        <div className="text-sm">
-          Page {currentPage} of {totalPages}
+
+        <div className="px-2.5 py-1 rounded-lg bg-muted/40 border border-border/60 text-[11px] font-medium text-foreground">
+          Page <span className="font-bold">{currentPage}</span> of{" "}
+          <span className="font-bold">{Math.max(totalPages, 1)}</span>
         </div>
+
         <Button
+          variant="outline"
           size="sm"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
+          className="h-7 px-2.5 text-xs rounded-lg border-border/70 hover:bg-muted/60 disabled:opacity-40"
         >
-          Next <ArrowRight size={16} />
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="h-3.5 w-3.5 ml-1" />
         </Button>
       </div>
     </div>
