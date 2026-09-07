@@ -8,11 +8,10 @@ import {
   User, 
   ArrowRight, 
   AlertCircle, 
-  CheckCircle2, 
   Eye, 
   EyeOff, 
-  Server,
-  ShieldCheck
+  ShieldCheck,
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,173 +65,183 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
 
   const providerName = providerConfig?.provider
     ? PROVIDER_NAMES[providerConfig.provider] || providerConfig.provider
-    : "Organization Mail Server";
+    : "Corporate Mail Server";
 
   return (
-    <div className="max-w-2xl mx-auto py-6 sm:py-10 px-3 sm:px-4">
-      <div className="bg-card/90 backdrop-blur-md border border-border/70 rounded-3xl shadow-sm overflow-hidden">
-        {/* Top Header Glow */}
-        <div className="bg-gradient-to-r from-primary/15 via-primary/5 to-transparent p-6 sm:p-8 border-b border-border/60">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
-                <Mail className="h-3.5 w-3.5" />
-                <span>CliqHire Mailbox Setup</span>
+    <div className="w-full flex items-center justify-center p-1 sm:p-2">
+      <div className="w-full max-w-4xl min-h-[490px] md:min-h-[510px] bg-card/95 backdrop-blur-md border border-border/70 rounded-2xl shadow-sm overflow-hidden transition-all flex flex-col justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-12 flex-1 min-h-0">
+          {/* Left Column: Context, Provider Status, Trust Points */}
+          <div className="md:col-span-5 bg-gradient-to-br from-primary/10 via-primary/5 to-muted/20 p-5 sm:p-6 md:p-7 border-b md:border-b-0 md:border-r border-border/70 flex flex-col justify-between gap-5">
+            <div className="space-y-3.5">
+              {/* Header Badge & Title */}
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/20 text-[11px] font-bold text-primary">
+                  <Mail className="h-3 w-3" />
+                  <span>Mailbox Integration</span>
+                </div>
+                <h2 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-foreground">
+                  Connect Work Mailbox
+                </h2>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Send offers, schedule interviews, and sync applicant email responses directly in CliqHire.
+                </p>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-                Connect Your Work Mailbox
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-lg leading-relaxed">
-                Send candidate offers, schedule interviews, and sync applicant email replies directly inside your recruitment pipelines.
-              </p>
-            </div>
 
-            <div className="hidden sm:flex h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 items-center justify-center text-primary shrink-0 shadow-inner">
-              <Server className="h-7 w-7" />
-            </div>
-          </div>
-        </div>
-
-        {/* Content Body */}
-        <div className="p-6 sm:p-8 space-y-6">
-          {/* Organization Provider Banner */}
-          {providerConfig ? (
-            <div className="p-4 rounded-2xl bg-muted/40 border border-border/70 flex items-start gap-3">
-              <div className="h-8 w-8 rounded-xl bg-background border border-border/70 flex items-center justify-center text-primary shrink-0 shadow-2xs">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-foreground">Configured Provider:</span>
-                  <Badge variant="secondary" className="font-semibold text-[11px] bg-primary/15 text-primary rounded-lg">
-                    {providerName}
-                  </Badge>
+              {/* Provider Info Pill */}
+              {providerConfig ? (
+                <div className="p-3 rounded-xl bg-background/80 border border-border/70 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Provider:</span>
+                    <Badge variant="secondary" className="h-5 px-2 text-[10px] font-semibold bg-primary/15 text-primary rounded-md">
+                      {providerName}
+                    </Badge>
+                  </div>
                   {providerConfig.domain && (
-                    <span className="text-muted-foreground font-mono text-[11px]">@{providerConfig.domain}</span>
+                    <p className="text-[11px] text-muted-foreground font-mono truncate">
+                      @{providerConfig.domain}
+                    </p>
+                  )}
+                  {providerConfig.requiresAppPassword && (
+                    <p className="text-[10px] font-medium text-amber-600 dark:text-amber-400 pt-0.5">
+                      Requires an App Password (not standard account password).
+                    </p>
                   )}
                 </div>
-                <p className="text-muted-foreground text-[11px] leading-relaxed">
-                  {providerConfig.requiresAppPassword ? (
-                    <span className="text-amber-600 dark:text-amber-400 font-semibold">
-                      Note: Your organization email requires an App Password (not your regular login password).
-                    </span>
-                  ) : (
-                    "Your organization mail server settings are configured and ready for employee login."
-                  )}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3">
-              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <div className="space-y-1 text-xs text-amber-900 dark:text-amber-200">
-                <p className="font-bold">Organization Provider Config Not Detected</p>
-                <p className="text-[11px] leading-relaxed">
-                  If your administrator hasn&apos;t configured the company mail hosting yet, please configure it in Settings first.
-                </p>
-                {user?.role === "ADMIN" && (
-                  <Link href="/settings?tab=email" className="inline-flex items-center gap-1 font-bold text-primary underline mt-1">
-                    Go to Settings → Email Configuration <ArrowRight className="h-3 w-3" />
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Connect Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-foreground">Work Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. priya@yourcompany.com"
-                  className="pl-9 text-xs h-9 rounded-xl bg-muted/20 border-border/70"
-                  disabled={connectMutation.isPending}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-bold text-foreground">
-                  {providerConfig?.requiresAppPassword ? "App Password" : "Mailbox Password"}
-                </Label>
-                {providerConfig?.requiresAppPassword && (
-                  <span className="text-[11px] text-muted-foreground">
-                    Generated from Google or Microsoft account security
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="pl-9 pr-9 text-xs h-9 font-mono rounded-xl bg-muted/20 border-border/70"
-                  disabled={connectMutation.isPending}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-foreground">Sender Display Name (Optional)</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="e.g. Priya Sharma (CliqHire Talent Team)"
-                  className="pl-9 text-xs h-9 rounded-xl bg-muted/20 border-border/70"
-                  disabled={connectMutation.isPending}
-                />
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                This name will appear in the &quot;From&quot; field of candidate interview invites and offer letters.
-              </p>
-            </div>
-
-            {/* Security note */}
-            <div className="p-3.5 rounded-2xl bg-muted/20 border border-border/70 text-[11px] text-muted-foreground flex items-center gap-2.5">
-              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-              <span>
-                Credentials are encrypted using AES-256-GCM. Backend validates IMAP and SMTP connectivity live before saving.
-              </span>
-            </div>
-
-            <Button
-              type="submit"
-              disabled={connectMutation.isPending || !email || !password}
-              className="w-full h-9.5 text-xs font-semibold gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs rounded-xl transition-all"
-            >
-              {connectMutation.isPending ? (
-                <>
-                  <span className="h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  <span>Testing live IMAP & SMTP connection...</span>
-                </>
               ) : (
-                <>
-                  <span>Connect My Mailbox</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </>
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-[11px]">
+                    <AlertCircle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span>Server Not Configured</span>
+                  </div>
+                  <p className="text-[10px] leading-snug">
+                    Company email settings have not been set up yet.
+                  </p>
+                  {user?.role === "ADMIN" && (
+                    <Link href="/settings?tab=email" className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary underline pt-0.5">
+                      Configure Settings <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  )}
+                </div>
               )}
-            </Button>
-          </form>
+            </div>
+
+            {/* Trust & Feature Highlights */}
+            <div className="space-y-2.5 pt-3 border-t border-border/60 text-[11px] text-muted-foreground hidden sm:block">
+              <div className="flex items-center gap-2">
+                <Zap className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span>Live 2-way IMAP & SMTP synchronization</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>AES-256 credential encryption</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Connection Form */}
+          <div className="md:col-span-7 p-5 sm:p-6 md:p-7 flex flex-col justify-between">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              <div>
+                <h3 className="text-xs sm:text-sm md:text-base font-bold text-foreground">Sign In to Your Mailbox</h3>
+                <p className="text-[11px] text-muted-foreground">Enter your corporate credentials to link your email account.</p>
+              </div>
+
+              {/* Email Field */}
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold text-foreground">Work Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="e.g. name@company.com"
+                    className="pl-9 text-xs h-9 rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
+                    disabled={connectMutation.isPending}
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold text-foreground">
+                    {providerConfig?.requiresAppPassword ? "App Password" : "Password"}
+                  </Label>
+                  {providerConfig?.requiresAppPassword && (
+                    <span className="text-[10px] text-muted-foreground">
+                      From Google / MS account security
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="pl-9 pr-9 text-xs h-9 font-mono rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
+                    disabled={connectMutation.isPending}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Display Name Field (Optional) */}
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold text-foreground">
+                  Sender Name <span className="text-[10px] text-muted-foreground font-normal">(Optional)</span>
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="e.g. Priya Sharma"
+                    className="pl-9 text-xs h-9 rounded-xl bg-muted/20 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
+                    disabled={connectMutation.isPending}
+                  />
+                </div>
+              </div>
+
+              {/* Submit CTA */}
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  disabled={connectMutation.isPending || !email || !password}
+                  className="w-full h-9 text-xs font-semibold gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs rounded-xl transition-all"
+                >
+                  {connectMutation.isPending ? (
+                    <>
+                      <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      <span>Testing IMAP & SMTP live...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Connect Mailbox</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            <p className="text-[10px] text-center text-muted-foreground/80 pt-3">
+              Encrypted credentials are test-connected in real time before saving.
+            </p>
+          </div>
         </div>
       </div>
     </div>
