@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { formatPhoneNumber } from "@/lib/countryCodes";
+// import { formatPhoneNumber } from "@/lib/countryCodes";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, ChevronsUpDown, User, Mail, Phone, Briefcase, GraduationCap, Globe, Shield, Wallet, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -98,13 +98,13 @@ const contactFields = [
   { 
     key: "phone", 
     label: "Phone Number",
-    render: (val: string | undefined, record: any) => formatPhoneNumber(val, record?.countryCode) || undefined
+    render: (val: string | undefined, record: any) => (record?.countryCode && val) ? `${record.countryCode}-${val}` : (val || undefined)
   },
   { key: "email", label: "Email" },
   { 
     key: "otherPhone", 
     label: "Other Phone Number",
-    render: (val: string | undefined, record: any) => formatPhoneNumber(val, record?.otherCountryCode) || undefined
+    render: (val: string | undefined, record: any) => (record?.otherCountryCode && val) ? `${record.otherCountryCode}-${val}` : (val || undefined)
   },
   {
     key: "linkedin",

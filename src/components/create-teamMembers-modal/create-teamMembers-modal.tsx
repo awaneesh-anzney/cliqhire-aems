@@ -59,7 +59,7 @@ export function CreateTeamMemberModal({
     lastName: "",
     email: "",
     phone: "",
-    countryCode: "SA",
+    countryCode: "+966",
     location: "",
     experience: "",
     skills: [],
@@ -164,7 +164,7 @@ export function CreateTeamMemberModal({
         lastName: "",
         email: "",
         phone: "",
-        countryCode: "SA",
+        countryCode: "+966",
         location: "",
         experience: "",
         skills: [],
@@ -291,7 +291,7 @@ export function CreateTeamMemberModal({
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-foreground">Phone Number</Label>
                         <PhoneInput
-                          countryCode={formData.countryCode || "SA"}
+                          countryCode={formData.countryCode || "+966"}
                           onCountryCodeChange={(v) => handleInputChange("countryCode", v)}
                           phoneNumber={formData.phone}
                           onPhoneNumberChange={(v) => handleInputChange("phone", v)}

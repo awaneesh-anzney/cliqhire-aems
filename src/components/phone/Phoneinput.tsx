@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { COUNTRIES, validatePhone, getFullPhone, getCountryByCode } from "@/lib/countryCodes";
+import { COUNTRIES, validatePhone, getFullPhone, getCountryByCode, getCountryByDialCode } from "@/lib/countryCodes";
 import { Country, PhoneRawChange } from "@/types/countryCodes";
 import { cn } from "@/lib/utils";
 import * as Flags from "country-flag-icons/react/3x2";
@@ -54,7 +54,7 @@ export default function PhoneInput({
   phoneNumber,
   onPhoneNumberChange,
   onRawChange,
-  defaultCountry = "SA",
+  defaultCountry = "+966",
   label,
   required = false,
   disabled = false,
@@ -65,7 +65,7 @@ export default function PhoneInput({
 }: PhoneInputProps) {
   // ── State ────────────────────────────────────────────────────────────────
   const [selectedCountry, setSelectedCountry] = useState<Country>(
-    () => getCountryByCode(countryCode || defaultCountry) || getCountryByCode("SA")!
+    () => getCountryByDialCode(countryCode || "") || getCountryByCode(countryCode || defaultCountry) || getCountryByCode("SA")!
   );
 
   // Internal state used if specific props aren't provided
@@ -103,7 +103,7 @@ export default function PhoneInput({
   // Sync from controlled `countryCode`
   useEffect(() => {
     if (countryCode) {
-      const match = getCountryByCode(countryCode);
+      const match = getCountryByDialCode(countryCode) || getCountryByCode(countryCode);
       if (match && match.code !== selectedCountry.code) {
         setSelectedCountry(match);
       }

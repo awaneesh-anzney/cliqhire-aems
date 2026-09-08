@@ -25,7 +25,7 @@ const EditContactDetailsModal: React.FC<EditContactDetailsModalProps> = ({
   onSave,
 }) => {
   const [phoneNumber, setPhoneNumber] = useState(initialValues.phoneNumber || "");
-  const [countryCode, setCountryCode] = useState("SA");
+  const [countryCode, setCountryCode] = useState("+966");
   const [website, setWebsite] = useState(initialValues.website || "");
   const [emails, setEmails] = useState(initialValues.emails.join(", ") || "");
   const [linkedInProfile, setLinkedInProfile] = useState(initialValues.linkedInProfile || "");

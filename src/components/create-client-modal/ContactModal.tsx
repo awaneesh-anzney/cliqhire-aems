@@ -55,7 +55,7 @@ export function ContactModal({
       gender: "",
       email: "",
       phone: "",
-      countryCode: "SA",
+      countryCode: "+966",
       designation: "",
       linkedin: "",
       isPrimary: true,

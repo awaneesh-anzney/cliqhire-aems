@@ -13,7 +13,7 @@ import { AddToJobDialog } from '@/components/candidates/add-to-job-dialog';
 import { candidateService, type Candidate, type CandidateEducation } from '@/services/candidateService';
 import { toast } from "sonner";
 import { initializeAuth } from '@/lib/axios-config';
-import { formatPhoneNumber } from "@/lib/countryCodes";
+// import { formatPhoneNumber } from "@/lib/countryCodes";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
@@ -327,7 +327,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
                       className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
                     >
                       <Phone className="h-3.5 w-3.5 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
-                      {formatPhoneNumber(candidate.phone, (candidate as any).countryCode)}
+                      {((candidate as any).countryCode && candidate.phone) ? `${(candidate as any).countryCode}-${candidate.phone}` : candidate.phone}
                     </a>
                   )}
                 </div>
@@ -457,7 +457,7 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
                 <Phone className="w-5 h-5 text-foreground" />
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-sm text-foreground">{formatPhoneNumber(candidate.phone, (candidate as any).countryCode) || 'Not provided'}</p>
+                  <p className="text-sm text-foreground">{((candidate as any).countryCode && candidate.phone) ? `${(candidate as any).countryCode}-${candidate.phone}` : (candidate.phone || 'Not provided')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 border rounded-lg">

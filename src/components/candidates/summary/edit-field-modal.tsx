@@ -53,7 +53,7 @@ export function EditFieldModal({
   isContinent,
   isPhone,
   isLocation,
-  countryCode: initialCountryCode = "SA",
+  countryCode: initialCountryCode = "+966",
   options,
   currencyOptions
 }: EditFieldModalProps) {

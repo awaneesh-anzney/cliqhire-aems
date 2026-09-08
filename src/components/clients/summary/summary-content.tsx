@@ -2,7 +2,6 @@
 
 import {
   getCountryByCode,
-  formatPhoneNumber,
 } from "@/lib/countryCodes";
 import { SectionHeader } from "./section-header";
 import { DetailRow } from "./detail-row";
@@ -495,7 +494,7 @@ export function SummaryContent({
               <DetailRow
                 label="Client Phone Number"
                 value={clientData?.phoneNumber}
-                formattedValue={formatPhoneNumber(clientData?.phoneNumber, clientData?.countryCode)}
+                formattedValue={clientData?.countryCode && clientData?.phoneNumber ? `${clientData.countryCode}-${clientData.phoneNumber}` : clientData?.phoneNumber}
                 onUpdate={handleUpdateField("phoneNumber")}
                 disableInternalEdit={!canModify}
               />

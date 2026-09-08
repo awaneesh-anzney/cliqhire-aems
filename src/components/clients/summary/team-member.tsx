@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { formatPhoneNumber } from "@/lib/countryCodes"
+} from "@/components/ui/dialog"
 
 interface TeamMemberProps {
   name: string
@@ -80,7 +80,7 @@ export function TeamMember({ name, avatar, role, isActive, email, phone, country
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Phone Number</p>
-                  <p className="font-bold text-foreground">{formatPhoneNumber(phone, countryCode) || "No phone provided"}</p>
+                  <p className="font-bold text-foreground">{(countryCode && phone) ? `${countryCode}-${phone}` : (phone || "No phone provided")}</p>
                 </div>
               </div>
             </div>

@@ -231,7 +231,7 @@ export function validatePhone(countryCode: string, phoneNumber: string): { valid
     }
 
     // 4. Lookup country rules
-    const country = getCountryByCode(countryCode);
+    const country = getCountryByCode(countryCode) || getCountryByDialCode(countryCode);
 
     if (!country) {
         // Unknown country — apply ITU fallback (7–15 digits)
@@ -279,8 +279,14 @@ export function validatePhone(countryCode: string, phoneNumber: string): { valid
  */
 export function getFullPhone(countryCode: string, phoneNumber: string): string {
     if (!countryCode || !phoneNumber) return "";
-    const country = getCountryByCode(countryCode);
-    if (!country) return "";
+    const country = getCountryByCode(countryCode) || getCountryByDialCode(countryCode);
+    if (!country) {
+        if (countryCode.startsWith('+')) {
+            const digits = phoneNumber.replace(/\D/g, "");
+            return `${countryCode}${digits}`;
+        }
+        return "";
+    }
     const digits = phoneNumber.replace(/\D/g, "");
     return `${country.dialCode}${digits}`;
 }
@@ -323,8 +329,14 @@ export function formatPhoneNumber(phoneNumber?: string, countryCode?: string): s
     if (!phoneNumber) return "";
     if (!countryCode) return phoneNumber;
     
-    const country = getCountryByCode(countryCode);
-    if (!country) return phoneNumber;
+    const country = getCountryByCode(countryCode) || getCountryByDialCode(countryCode);
+    if (!country) {
+        if (countryCode.startsWith('+')) {
+            const cleanNumber = phoneNumber.replace(countryCode, "").replace(/^\+/, "");
+            return `${countryCode}-${cleanNumber}`;
+        }
+        return phoneNumber;
+    }
     
     // Remove any leading plus/dial code if it was accidentally stored in phoneNumber
     const cleanNumber = phoneNumber.replace(country.dialCode, "").replace(/^\+/, "");

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2, Mail, Phone, Linkedin, MapPin, User, Briefcase, Globe, Info, Loader2, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AddContactModal } from "../modals/add-contact-modal";
-import { formatPhoneNumber } from "@/lib/countryCodes";
+// import { formatPhoneNumber } from "@/lib/countryCodes";
 import EditContactDetailsModal from "./EditContactDetailsModal";
 import {
   Dialog,
@@ -170,7 +170,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Phone</span>
                   <p className="text-sm font-bold text-foreground">
-                    {clientInfo.phoneNumber ? formatPhoneNumber(clientInfo.phoneNumber, clientData?.countryCode) : "Not Provided"}
+                    {clientInfo.phoneNumber ? ((clientData?.countryCode && clientInfo.phoneNumber) ? `${clientData.countryCode}-${clientInfo.phoneNumber}` : clientInfo.phoneNumber) : "Not Provided"}
                   </p>
                 </div>
                 
@@ -315,7 +315,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                     </div>
                     <div className="flex items-center gap-3 text-xs font-bold text-foreground">
                       <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span>{contact.phone ? formatPhoneNumber(contact.phone, contact.countryCode) : "No phone provided"}</span>
+                      <span>{contact.phone ? ((contact.countryCode && contact.phone) ? `${contact.countryCode}-${contact.phone}` : contact.phone) : "No phone provided"}</span>
                     </div>
                     {contact.location && (
                       <div className="flex items-center gap-3 text-xs font-bold text-foreground">

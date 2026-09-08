@@ -1,6 +1,6 @@
 // Types for candidate data
 import { api } from "@/lib/axios-config";
-import { formatPhoneNumber } from "@/lib/countryCodes";
+// import { formatPhoneNumber } from "@/lib/countryCodes";
 import axios, { AxiosError } from "axios";
 
 export interface CandidateDomain {

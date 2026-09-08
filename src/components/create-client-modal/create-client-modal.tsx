@@ -42,7 +42,7 @@ const INITIAL_STATE = {
   email:             "",
   otherEmail:        "",
   phoneNumber:       "",
-  countryCode:       "SA",
+  countryCode:       "+966",
   website:           "",
   address:           "",
   location:          "",
