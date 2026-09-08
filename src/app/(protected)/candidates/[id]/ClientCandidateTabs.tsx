@@ -1,26 +1,40 @@
 "use client";
+
 import React, { useRef, useState } from "react";
-import CandidateSummary from '@/components/candidates/summary/candidate-summary';
-import { CandidateNotesContent } from '@/components/candidates/notes/notes-content';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  RefreshCcw,
+  FileText,
+  Briefcase,
+  StickyNote,
+  Paperclip,
+  MapPin,
+  Clock,
+  Mail,
+  Phone,
+  ArrowLeft,
+  ChevronRight,
+  Loader2,
+  Copy,
+  Check,
+} from "lucide-react";
+
+import CandidateSummary from "@/components/candidates/summary/candidate-summary";
+import { CandidateNotesContent } from "@/components/candidates/notes/notes-content";
+import { AttachmentsContent } from "@/components/candidates/attachments/attachments-content";
+import { JobsContent, JobsContentRef } from "@/components/candidates/jobs/jobs-content";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CandidateStatusBadge } from "@/components/candidate-status-badge";
-import { SlidersHorizontal, RefreshCcw, Plus, FileText, Users, Briefcase, Star, Activity, StickyNote, Paperclip, Clock, User, FileIcon, FilePen, Mail, Phone, MapPin, Calendar, Check, Loader, ArrowLeft } from "lucide-react";
-import { AttachmentsContent } from '@/components/candidates/attachments/attachments-content';
-import { JobsContent, JobsContentRef } from '@/components/candidates/jobs/jobs-content';
-import { AddToJobDialog } from '@/components/candidates/add-to-job-dialog';
-import { candidateService, type Candidate, type CandidateEducation } from '@/services/candidateService';
-import { toast } from "sonner";
-import { initializeAuth } from '@/lib/axios-config';
-// import { formatPhoneNumber } from "@/lib/countryCodes";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { candidateService, type Candidate } from "@/services/candidateService";
+import { initializeAuth } from "@/lib/axios-config";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 
-// Generate initials for candidate avatar
 function getInitials(name: string = "") {
   const parts = name.trim().split(" ");
   if (parts.length === 0 || !parts[0]) return "?";
@@ -28,16 +42,15 @@ function getInitials(name: string = "") {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-// Generate premium gradient based on candidate name
 function getAvatarGradient(name: string = "") {
   const colors = [
-    "from-[#4776E6] to-[#8E54E9]", // Royal Purple
-    "from-[#8A2387] via-[#E94057] to-[#F27121]", // Sunset Magenta
-    "from-[#00c6ff] to-[#0072ff]", // Cool Blue
-    "from-[#ED5C6B] to-[#F57C59]", // Coral Orange (Matches "jjk" avatar in the design image)
-    "from-[#11998e] to-[#38ef7d]", // Emerald Mint
-    "from-[#FF416C] to-[#FF4B2B]", // Vibrant Rose
-    "from-[#f12711] to-[#f5af19]", // Sunny Orange
+    "from-blue-600 to-indigo-600",
+    "from-indigo-600 to-purple-600",
+    "from-teal-600 to-emerald-600",
+    "from-cyan-600 to-blue-600",
+    "from-rose-600 to-pink-600",
+    "from-amber-600 to-orange-600",
+    "from-purple-600 to-pink-600",
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -52,17 +65,28 @@ interface Tab {
   icon: React.ReactNode;
 }
 
-
-
-export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId: string, tabs: Tab[] }) {
-  // All hooks must be called at the top level
+export default function ClientCandidateTabs({
+  candidateId,
+  tabs,
+}: {
+  candidateId: string;
+  tabs: Tab[];
+}) {
   const [activeTab, setActiveTab] = useState("Summary");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const jobsContentRef = useRef<JobsContentRef>(null);
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const router = useRouter();
-  
-  const { data: candidate, isLoading, isError, error, refetch } = useQuery<Candidate | null, any>({
+
+  const {
+    data: candidate,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery<Candidate | null, any>({
     queryKey: ["candidate", candidateId],
     enabled: !!candidateId,
     queryFn: async () => {
@@ -71,20 +95,24 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
     },
   });
 
-  // Mutation for updating candidate with optimistic cache update
   const updateCandidateMutation = useMutation({
     mutationFn: async ({ id, updatedCandidate }: { id: string; updatedCandidate: any }) => {
       await initializeAuth();
       const apiPayload = { ...updatedCandidate };
       if (apiPayload.domains) {
-        apiPayload.domains = apiPayload.domains.map((d: any) => typeof d === 'string' ? d : d._id);
+        apiPayload.domains = apiPayload.domains.map((d: any) =>
+          typeof d === "string" ? d : d._id
+        );
       }
       return candidateService.updateCandidate(id, apiPayload);
     },
     onMutate: async ({ updatedCandidate }) => {
       await queryClient.cancelQueries({ queryKey: ["candidate", candidateId] });
       const previous = queryClient.getQueryData(["candidate", candidateId]);
-      queryClient.setQueryData(["candidate", candidateId], (old: any) => ({ ...(old || {}), ...(updatedCandidate || {}) }));
+      queryClient.setQueryData(["candidate", candidateId], (old: any) => ({
+        ...(old || {}),
+        ...(updatedCandidate || {}),
+      }));
       return { previous } as { previous: any };
     },
     onError: (err: any, _vars, context) => {
@@ -102,19 +130,40 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
     },
   });
 
-  // Permission checks after hooks
   const { hasPermission } = usePermissions();
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === "ADMIN";
 
-  const canViewCandidates = isAdmin || hasPermission('candidates', 'view');
-  const canModifyCandidates = isAdmin || hasPermission('candidates', 'create') || hasPermission('candidates', 'edit');
-  const canDeleteCandidates = isAdmin || hasPermission('candidates', 'delete');
+  const canViewCandidates = isAdmin || hasPermission("candidates", "view");
+  const canModifyCandidates =
+    isAdmin || hasPermission("candidates", "create") || hasPermission("candidates", "edit");
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-3">
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
+        <p className="text-xs text-muted-foreground font-medium">Loading candidate profile...</p>
+      </div>
+    );
+  }
+
+  if (isError || !candidate) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-3">
+        <p className="text-sm font-semibold text-destructive">
+          {(error as any)?.message || "Candidate not found."}
+        </p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   if (!canViewCandidates) {
     return (
-      <div className="min-h-[400px] font-sans w-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-muted-foreground text-lg mb-4">You do not have permission to view this candidate.</div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center text-sm text-muted-foreground">
+          You do not have permission to view this candidate.
         </div>
       </div>
     );
@@ -124,63 +173,28 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
     try {
       await initializeAuth();
       await refetch();
-      toast.success("Data refreshed successfully");
-    } catch (error) {
-      console.error('Error refreshing candidate data:', error);
+      await queryClient.invalidateQueries({ queryKey: ["candidate", candidateId] });
+      toast.success("Candidate data refreshed");
+    } catch {
       toast.error("Failed to refresh data");
     }
   };
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center justify-center gap-2 flex-col">
-          <RefreshCcw className="size-6 animate-spin" />
-          <div className="text-center">Loading candidate data...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (isError || !candidate) {
-    return (
-      <div className="min-h-[400px] font-sans w-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-muted-foreground text-lg mb-4">{(error as any)?.message || 'Candidate not found.'}</div>
-          <Button onClick={handleRefresh} variant="outline">
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return 'bg-green-100 text-green-800 hover:bg-green-100';
-      case 'interviewing':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
-      case 'offer':
-        return 'bg-purple-100 text-purple-800 hover:bg-purple-100';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 hover:bg-red-100';
-      default:
-        return 'bg-muted text-foreground hover:bg-muted';
-    }
+  const handleCopy = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    toast.success(`${fieldName} copied to clipboard`);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const handleCandidateUpdate = async (updatedCandidate: any, fieldKey?: string) => {
     if (!canModifyCandidates) {
-      toast.error('You do not have permission to modify candidate details.');
+      toast.error("You do not have permission to modify candidate details.");
       return;
     }
     try {
       const id = candidate?._id;
-      if (!id) throw new Error('Missing candidate id');
+      if (!id) throw new Error("Missing candidate id");
 
       let payload: any = {};
       if (fieldKey) {
@@ -201,300 +215,256 @@ export default function ClientCandidateTabs({ candidateId, tabs }: { candidateId
 
       await updateCandidateMutation.mutateAsync({ id, updatedCandidate: payload });
       if (fieldKey) {
-        const allFields = [
-          { key: "name", label: "Candidate Name" },
-          { key: "location", label: "Location" },
-          { key: "experience", label: "Experience" },
-          { key: "referredBy", label: "Referred By" },
-          { key: "totalRelevantExperience", label: "Total Relevant Years of Experience" },
-          { key: "noticePeriod", label: "Notice Period" },
-          { key: "skills", label: "Skills" },
-          { key: "resume", label: "Resume" },
-          { key: "status", label: "Status" },
-          { key: "gender", label: "Gender" },
-          { key: "dateOfBirth", label: "Date of Birth" },
-          { key: "maritalStatus", label: "Marital Status" },
-          { key: "country", label: "Country" },
-          { key: "nationality", label: "Nationality" },
-          { key: "universityName", label: "University Name" },
-          { key: "educationDegree", label: "Education Degree/Certificate" },
-          { key: "education.diploma", label: "Diploma Details" },
-          { key: "education.bachelor", label: "Bachelor's Details" },
-          { key: "education.master", label: "Master's Details" },
-          { key: "certification", label: "Professional Certifications" },
-          { key: "primaryLanguage", label: "Primary Language" },
-          { key: "willingToRelocate", label: "Are you willing to relocate?" },
-          { key: "iqama", label: "Iqama is transferable ?" },
-          { key: "phone", label: "Phone Number" },
-          { key: "email", label: "Email" },
-          { key: "otherPhone", label: "Other Phone Number" },
-          { key: "linkedin", label: "LinkedIn" },
-          { key: "previousCompanyName", label: "Previous Company Name" },
-          { key: "currentJobTitle", label: "Current Job Title" },
-          { key: "reportingTo", label: "Reporting To" },
-          { key: "totalStaffReporting", label: "Total Number of Staff Reporting to You" },
-          { key: "softSkill", label: "Soft Skill" },
-          { key: "technicalSkill", label: "Technical Skill" },
-          { key: "domains", label: "Candidate Domains" }
-        ];
-        const fieldLabel = allFields.find(field => field.key === fieldKey)?.label || fieldKey || 'Field';
-        toast.success(`${fieldLabel} updated successfully`);
+        toast.success("Candidate updated successfully");
       }
-    } catch (error) {
-      console.error('Error updating candidate:', error);
+    } catch (err) {
+      console.error("Error updating candidate:", err);
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-background font-sans">
-      {/* Redesigned Premium Header Card Wrapper */}
-      <div className="max-w-[1600px] mx-auto w-full pb-2">
-        <div className="bg-card border border-border/60 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] relative overflow-hidden p-4 sm:py-4 sm:px-5">
-          {/* Subtle decorative background gradient accent */}
-          <div className="absolute top-0 right-0 w-80 h-32 bg-brand/5 blur-[80px] pointer-events-none rounded-full" />
-          
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 relative z-10">
-            {/* Left Column: Avatar + Basic Info */}
-            <div className="flex items-start gap-4 min-w-0">
-              <div className={cn(
-                "w-14 h-14 sm:w-16 sm:h-16 rounded-[16px] sm:rounded-[20px] flex items-center justify-center text-lg sm:text-xl font-bold text-white shrink-0 bg-gradient-to-tr shadow-md select-none",
+    <div className="flex flex-col h-full min-w-0">
+      {/* Top Breadcrumb & Candidate Header Bar */}
+      <header className="border-b border-border/70 bg-card/75 backdrop-blur-md px-3 sm:px-4 py-2 sm:py-2.5 shrink-0 transition-colors">
+        {/* Navigation Breadcrumb Row */}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 overflow-hidden">
+          <Link
+            href="/candidates"
+            className="inline-flex items-center gap-1 hover:text-foreground transition-colors font-medium text-[11px]"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            <span>Candidates</span>
+          </Link>
+          <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+          {candidate.profileId && (
+            <>
+              <span className="font-mono text-[11px] text-muted-foreground font-semibold">
+                #{candidate.profileId}
+              </span>
+              <ChevronRight className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+            </>
+          )}
+          <span className="truncate text-foreground font-semibold text-[11px] max-w-[200px] sm:max-w-md">
+            {candidate.name || "Untitled Candidate"}
+          </span>
+        </div>
+
+        {/* Main Header Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+          {/* Left: Avatar + Title + Chips */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className={cn(
+                "w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center text-xs sm:text-sm font-bold text-white shrink-0 bg-gradient-to-tr shadow-xs select-none",
                 getAvatarGradient(candidate.name)
-              )}>
-                {getInitials(candidate.name)}
-              </div>
-              
-              <div className="space-y-2 min-w-0 flex-1">
-                <div className="space-y-1">
-                  {/* Name + Badges */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight leading-none truncate max-w-[280px] sm:max-w-[450px]">
-                      {candidate.name || "Untitled Candidate"}
-                    </h1>
-                    
-                    {candidate.profileId && (
-                      <span className="bg-[#EEEDFC] text-[#553C9A] border border-[#D6D3F8] rounded-full px-2.5 py-0.5 text-xs font-bold font-mono leading-none">
-                        # {candidate.profileId}
-                      </span>
-                    )}
-                    
-                    <CandidateStatusBadge
-                      id={candidate._id}
-                      status={(candidate.status as any) || "Active"}
-                      onStatusChange={async (id, newStatus) => {
-                        await handleCandidateUpdate({ status: newStatus }, "status");
-                      }}
-                      disabled={!canModifyCandidates}
-                    />
-                  </div>
-
-                  {/* Metadata Row */}
-                  <div className="flex flex-wrap items-center gap-y-1 text-xs sm:text-sm font-medium text-muted-foreground">
-                    <div className="flex items-center gap-1.5 hover:text-brand transition-colors cursor-pointer">
-                      <MapPin className="h-3.5 w-3.5 text-muted-foreground/60" />
-                      <span>{candidate.location || "Global"}</span>
-                    </div>
-
-                    <span className="text-muted-foreground/30 mx-2 select-none">|</span>
-
-                    <div className="flex items-center gap-1.5">
-                      <Briefcase className="h-3.5 w-3.5 text-muted-foreground/60" />
-                      <span>{candidate.experience || "No experience info"}</span>
-                    </div>
-
-                    <span className="text-muted-foreground/30 mx-2 select-none">|</span>
-
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5 text-muted-foreground/60" />
-                      <span>Updated just now</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Contact Links */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {candidate.email && (
-                    <a 
-                      href={`mailto:${candidate.email}`} 
-                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
-                    >
-                      <Mail className="h-3.5 w-3.5 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
-                      {candidate.email}
-                    </a>
-                  )}
-                  {candidate.phone && (
-                    <a 
-                      href={`tel:${candidate.phone}`} 
-                      className="group flex items-center gap-2 text-xs sm:text-sm font-medium bg-[#F6F5EE] dark:bg-muted/30 border border-[#E9E7DC] dark:border-border/60 hover:border-slate-400/50 text-[#333] dark:text-foreground/90 rounded-xl px-3 py-1.5 transition-colors cursor-pointer"
-                    >
-                      <Phone className="h-3.5 w-3.5 text-[#555] dark:text-muted-foreground group-hover:text-foreground transition-colors" />
-                      {((candidate as any).countryCode && candidate.phone) ? `${(candidate as any).countryCode}-${candidate.phone}` : candidate.phone}
-                    </a>
-                  )}
-                </div>
-              </div>
+              )}
+            >
+              {getInitials(candidate.name)}
             </div>
 
-            {/* Right Column: Actions */}
-            <div className="flex items-center shrink-0 self-start md:self-center mt-1 md:mt-0">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleRefresh} 
-                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl border border-[#E2E8F0] dark:border-border bg-white dark:bg-background text-[#555] dark:text-muted-foreground hover:bg-muted shadow-sm flex items-center justify-center transition-all"
-              >
-                <RefreshCcw className="w-3.5 h-3.5" />
-              </Button>
+            <div className="space-y-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-base sm:text-lg font-bold text-foreground tracking-tight truncate max-w-[280px] sm:max-w-md">
+                  {candidate.name || "Untitled Candidate"}
+                </h1>
+
+                {candidate.profileId && (
+                  <span className="px-1.5 py-0.5 rounded bg-muted text-[11px] font-mono font-semibold text-muted-foreground border border-border/60">
+                    #{candidate.profileId}
+                  </span>
+                )}
+
+                <CandidateStatusBadge
+                  id={candidate._id}
+                  status={(candidate.status as any) || "Active"}
+                  onStatusChange={async (id, newStatus) => {
+                    await handleCandidateUpdate({ status: newStatus }, "status");
+                  }}
+                  disabled={!canModifyCandidates}
+                />
+              </div>
+
+              {/* Meta row: Location, Experience, Contacts */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <div className="inline-flex items-center gap-1 text-[11px]">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+                  <span className="truncate max-w-[140px]">{candidate.location || "Global"}</span>
+                </div>
+
+                <span className="text-border">•</span>
+
+                <div className="inline-flex items-center gap-1 text-[11px]">
+                  <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+                  <span>{candidate.experience || "No experience specified"}</span>
+                </div>
+
+                {candidate.email && (
+                  <>
+                    <span className="text-border hidden md:inline">•</span>
+                    <div className="hidden md:inline-flex items-center gap-1 text-[11px]">
+                      <a
+                        href={`mailto:${candidate.email}`}
+                        className="hover:text-foreground transition-colors truncate max-w-[160px]"
+                      >
+                        {candidate.email}
+                      </a>
+                      <button
+                        onClick={() => candidate.email && handleCopy(candidate.email, "Email")}
+                        className="text-muted-foreground/60 hover:text-foreground p-0.5"
+                        title="Copy email"
+                      >
+                        {copiedField === "Email" ? (
+                          <Check className="h-2.5 w-2.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-2.5 w-2.5" />
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {candidate.phone && (
+                  <>
+                    <span className="text-border hidden lg:inline">•</span>
+                    <div className="hidden lg:inline-flex items-center gap-1 text-[11px]">
+                      <a
+                        href={`tel:${candidate.phone}`}
+                        className="hover:text-foreground transition-colors"
+                      >
+                        {(candidate as any).countryCode
+                          ? `${(candidate as any).countryCode} `
+                          : ""}
+                        {candidate.phone}
+                      </a>
+                      <button
+                        onClick={() =>
+                          handleCopy(
+                            `${(candidate as any).countryCode || ""}${candidate.phone}`,
+                            "Phone"
+                          )
+                        }
+                        className="text-muted-foreground/60 hover:text-foreground p-0.5"
+                        title="Copy phone"
+                      >
+                        {copiedField === "Phone" ? (
+                          <Check className="h-2.5 w-2.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-2.5 w-2.5" />
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Modern Segmented Control Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full bg-card border border-border/60 rounded-2xl p-2">
-        <div className="bg-card border-b border-border/60 sticky top-0 z-20 px-6 py-3">
-          <TabsList className="inline-flex items-center h-11 p-1 bg-muted/80 rounded-2xl border border-border/50 shadow-inner max-w-full overflow-x-auto custom-scrollbar gap-1">
-            {tabs.map((tab) => {
-              const value = tab.label.replace(/\s+/g, "");
-              return (
-                <TabsTrigger
-                  key={tab.label}
-                  value={value}
-                  className="data-[state=active]:bg-card data-[state=active]:text-brand data-[state=active]:shadow-md rounded-xl flex items-center gap-2 h-9 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300 shrink-0"
-                >
-                  {tab.icon}
-                  {tab.label}
-                </TabsTrigger>
-              );
-            })}
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+              title="Refresh candidate data"
+            >
+              <RefreshCcw
+                className={cn("h-3 w-3 mr-1", isFetching && "animate-spin text-primary")}
+              />
+              Sync
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Tabs Navigation & Content */}
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full flex-1 max-w-full min-w-0 flex flex-col overflow-hidden"
+      >
+        {/* Sleek Tab Bar */}
+        <div className="w-full border-b border-border/70 bg-muted/25 px-2 sm:px-4 py-1 shrink-0 overflow-hidden">
+          <TabsList className="flex h-auto w-full justify-start items-center gap-1 p-0.5 bg-transparent overflow-x-auto scrollbar-none max-w-full min-w-0">
+            <TabsTrigger
+              value="Summary"
+              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>Summary</span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="Jobs"
+              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+            >
+              <Briefcase className="h-3.5 w-3.5" />
+              <span>Applied Jobs</span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="Notes"
+              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+            >
+              <StickyNote className="h-3.5 w-3.5" />
+              <span>Notes</span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="Attachments"
+              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+            >
+              <Paperclip className="h-3.5 w-3.5" />
+              <span>Attachments</span>
+            </TabsTrigger>
           </TabsList>
         </div>
 
-        <TabsContent value="Summary" className="p-4">
-          <CandidateSummary 
-            candidate={candidate} 
-            onCandidateUpdate={handleCandidateUpdate}
-            canModify={canModifyCandidates}
-          />
-        </TabsContent>
+        {/* Tab Content Wrapper with minimal padding */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-2.5 sm:p-3.5">
+          <TabsContent
+            value="Summary"
+            className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
+          >
+            <CandidateSummary
+              candidate={candidate}
+              onCandidateUpdate={handleCandidateUpdate}
+              canModify={canModifyCandidates}
+            />
+          </TabsContent>
 
-        <TabsContent value="Jobs">
-          <JobsContent 
-            ref={jobsContentRef}
-            candidateId={candidateId} 
-            candidateName={candidate.name || "Unknown Candidate"} 
-          />
-        </TabsContent>
+          <TabsContent
+            value="Jobs"
+            className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
+          >
+            <JobsContent
+              ref={jobsContentRef}
+              candidateId={candidateId}
+              candidateName={candidate.name || "Unknown Candidate"}
+            />
+          </TabsContent>
 
-        <TabsContent value="Activities" className="p-4">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Recent Activities</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium">Phone call scheduled</p>
-                  <p className="text-sm text-foreground">Scheduled for tomorrow at 2:00 PM</p>
-                </div>
-                <span className="text-xs text-muted-foreground ml-auto">2 hours ago</span>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium">Resume uploaded</p>
-                  <p className="text-sm text-foreground">Updated resume received</p>
-                </div>
-                <span className="text-xs text-muted-foreground ml-auto">1 day ago</span>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium">Initial contact</p>
-                  <p className="text-sm text-foreground">First email sent</p>
-                </div>
-                <span className="text-xs text-muted-foreground ml-auto">3 days ago</span>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
+          <TabsContent
+            value="Notes"
+            className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
+          >
+            <CandidateNotesContent
+              candidateId={candidateId}
+              canModify={canModifyCandidates}
+            />
+          </TabsContent>
 
-        <TabsContent value="Notes" className="p-4">
-          <CandidateNotesContent candidateId={candidateId} canModify={canModifyCandidates}/>
-        </TabsContent>
-
-        <TabsContent value="Attachments" className="p-4">
-          <AttachmentsContent candidateId={candidateId} canModify={canModifyCandidates} />
-        </TabsContent>
-
-        <TabsContent value="ClientTeam" className="p-4">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Assigned Team Members</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium">Recruiter</p>
-                  <p className="text-sm text-foreground">Assigned to: {user?.name || 'Unassigned'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="Contacts" className="p-4">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contact Information</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <Mail className="w-5 h-5 text-foreground" />
-                <div>
-                  <p className="font-medium">Email</p>
-                  <p className="text-sm text-foreground">{candidate.email || 'Not provided'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <Phone className="w-5 h-5 text-foreground" />
-                <div>
-                  <p className="font-medium">Phone</p>
-                  <p className="text-sm text-foreground">{((candidate as any).countryCode && candidate.phone) ? `${(candidate as any).countryCode}-${candidate.phone}` : (candidate.phone || 'Not provided')}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <MapPin className="w-5 h-5 text-foreground" />
-                <div>
-                  <p className="font-medium">Location</p>
-                  <p className="text-sm text-foreground">{candidate.location || 'Not provided'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="History" className="p-4">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Candidate History</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <Calendar className="w-5 h-5 text-foreground" />
-                <div>
-                  <p className="font-medium">Added to system</p>
-                  <p className="text-sm text-foreground">Candidate profile created</p>
-                </div>
-                <span className="text-xs text-muted-foreground ml-auto">Jan 10, 2024</span>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <Calendar className="w-5 h-5 text-foreground" />
-                <div>
-                  <p className="font-medium">Status updated</p>
-                  <p className="text-sm text-foreground">Changed to {candidate.status || 'Unknown'}</p>
-                </div>
-                <span className="text-xs text-muted-foreground ml-auto">Jan 12, 2024</span>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
+          <TabsContent
+            value="Attachments"
+            className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
+          >
+            <AttachmentsContent
+              candidateId={candidateId}
+              canModify={canModifyCandidates}
+            />
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );
-} 
+}
