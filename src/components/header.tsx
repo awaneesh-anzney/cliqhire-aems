@@ -97,7 +97,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 bg-card/85 backdrop-blur-xl border-b border-border/80 px-3 sm:px-4 md:px-5 flex items-center justify-between gap-3 shrink-0 z-30 select-none">
+    <header className="h-14 app-header px-3 sm:px-4 md:px-5 flex items-center justify-between gap-3 shrink-0 select-none">
       {showMobileSearch ? (
         /* Mobile Search Bar Expand Mode */
         <div className="flex items-center w-full gap-2 animate-in fade-in duration-200">

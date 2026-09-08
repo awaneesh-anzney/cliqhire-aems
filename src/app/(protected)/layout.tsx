@@ -16,22 +16,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ["--sidebar-width" as string]: "16.5rem",
             ["--sidebar-width-icon" as string]: "4.25rem",
           }}
-          className="h-screen w-full flex bg-background text-foreground antialiased overflow-hidden !m-0 !p-0"
+          className="h-dvh max-h-dvh w-full flex bg-background text-foreground antialiased overflow-hidden"
         >
           {/* Main Sidebar */}
           <Sidebar />
 
           {/* Main Workspace Area */}
-          <SidebarInset className="!m-0 !p-0 !rounded-none !border-none !shadow-none flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-background text-foreground">
+          <SidebarInset className="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-hidden bg-transparent text-foreground">
             {/* Unified Glassmorphism Header */}
             <Header />
 
-            {/* Main Page Viewport Container */}
-            <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background !m-0 !p-0 relative">
-              <div className="flex-1 min-h-0 overflow-hidden">
-                {children}
-              </div>
-            </main>
+            {/* Main Content Area - Primary Scrollable Viewport */}
+            <div
+              id="main-content"
+              tabIndex={-1}
+              className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden relative focus:outline-none"
+            >
+              {children}
+            </div>
           </SidebarInset>
         </SidebarProvider>
       </SocketProvider>

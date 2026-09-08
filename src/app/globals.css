@@ -26,8 +26,8 @@
 
 @layer base {
   :root {
-    /* Light Mode: Soft, balanced, and visually comfortable palette */
-    --background: 216 20% 98%;
+    /* Light Mode: Fresh, modern light-blue brand-tinted palette */
+    --background: 214 65% 97.5%;
     --foreground: 216 50% 10%;
     --card: 0 0% 100%;
     --card-foreground: 216 50% 10%;
@@ -38,20 +38,20 @@
     --primary: 216 100% 22%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 216 20% 95%;
+    --secondary: 214 55% 94%;
     --secondary-foreground: 216 100% 22%;
-    --muted: 216 20% 95%;
-    --muted-foreground: 216 20% 46%;
-    --accent: 351 20% 95%;
-    --accent-foreground: 351 74% 37%;
+    --muted: 214 50% 94%;
+    --muted-foreground: 216 25% 46%;
+    --accent: 214 60% 94%;
+    --accent-foreground: 216 100% 22%;
     
     /* FluxBridge Logo Crimson Red */
     --destructive: 351 74% 37%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Soft, comfortable borders without harsh wireframe contrast */
-    --border: 216 20% 90%;
-    --input: 216 20% 90%;
+    /* Soft, comfortable borders with clean light-blue tint */
+    --border: 214 35% 89%;
+    --input: 214 35% 89%;
     --ring: 216 100% 22%;
     
     --chart-1: 351 74% 37%;
@@ -62,12 +62,12 @@
     --radius: 0.5rem;
     
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 216 50% 30%;
+    --sidebar-foreground: 216 50% 26%;
     --sidebar-primary: 216 100% 22%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 216 20% 95%;
-    --sidebar-accent-foreground: 216 50% 10%;
-    --sidebar-border: 216 20% 90%;
+    --sidebar-accent: 214 60% 94%;
+    --sidebar-accent-foreground: 216 100% 22%;
+    --sidebar-border: 214 35% 90%;
     --sidebar-ring: 216 100% 22%;
 
     /* Brand identity — FluxBridge Logo Palette */
@@ -76,18 +76,18 @@
     --brand-secondary: 351 74% 37%;
     --brand-secondary-foreground: 0 0% 100%;
 
-    --protected-bg: 216 20% 96.8%;
+    --protected-bg: 214 55% 95%;
     --candidate-name: 216 50% 10%;
-    --candidate-id: 216 20% 46%;
+    --candidate-id: 216 25% 46%;
   }
 
   .dark {
-    /* Dark: mid-dark backgrounds with a hint of navy */
-    --background: 216 30% 6%;
+    /* Dark: mid-dark backgrounds with a rich hint of navy */
+    --background: 216 35% 6.5%;
     --foreground: 0 0% 95%;
-    --card: 216 30% 9%;
+    --card: 216 28% 10%;
     --card-foreground: 0 0% 95%;
-    --popover: 216 30% 9%;
+    --popover: 216 28% 10%;
     --popover-foreground: 0 0% 95%;
     
     /* Lighter Navy/Blue for visibility in dark mode */
@@ -105,8 +105,8 @@
     --destructive: 351 74% 45%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 216 30% 20%;
-    --input: 216 30% 20%;
+    --border: 216 25% 18%;
+    --input: 216 25% 18%;
     --ring: 216 100% 45%;
     
     --chart-1: 351 82% 58%;
@@ -119,9 +119,9 @@
     --sidebar-foreground: 0 0% 85%;
     --sidebar-primary: 216 100% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 216 20% 15%;
+    --sidebar-accent: 216 25% 14%;
     --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 216 30% 18%;
+    --sidebar-border: 216 25% 16%;
     --sidebar-ring: 216 100% 45%;
 
     /* FluxBridge brand colors */
@@ -130,7 +130,7 @@
     --brand-secondary: 351 74% 45%;
     --brand-secondary-foreground: 0 0% 100%;
 
-    --protected-bg: 216 30% 7%;
+    --protected-bg: 216 32% 8.5%;
     --candidate-name: 0 0% 95%;
     --candidate-id: 216 15% 65%;
   }
@@ -142,7 +142,19 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(at 0% 0%, hsl(var(--brand-primary) / 0.07) 0px, transparent 50%),
+      radial-gradient(at 100% 10%, hsl(214 85% 92% / 0.7) 0px, transparent 45%),
+      radial-gradient(at 90% 90%, hsl(var(--brand-primary) / 0.04) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(at 0% 0%, hsl(var(--brand-primary) / 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsl(var(--brand-secondary) / 0.05) 0px, transparent 50%);
   }
 }
 
@@ -222,7 +234,7 @@
 /* Dashboard Redesign Custom Styles */
 @layer components {
   .dashboard-container {
-    @apply flex flex-col w-full min-h-full p-3 md:p-4 lg:p-4 space-y-3.5 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-muted/40;
+    @apply flex flex-col w-full min-h-full p-3 md:p-4 lg:p-4 space-y-3.5 animate-in fade-in slide-in-from-bottom-4 duration-500;
   }
 
   /* Banner now echoes the Fb360 logo: blue fading into signal red */
@@ -260,11 +272,11 @@
 
   /* Header & Sidebar Redesign Custom Styles */
   .app-header {
-    @apply sticky top-0 z-50 w-full border-b border-border/60 bg-protected/70 backdrop-blur-md transition-all duration-300;
+    @apply sticky top-0 z-30 w-full border-b border-border/70 bg-card/85 dark:bg-card/75 backdrop-blur-xl transition-all duration-300 shadow-sm;
   }
 
   .app-sidebar {
-    @apply border-r border-border/60 bg-card shadow-lg shadow-black/5 transition-all duration-300;
+    @apply border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground shadow-sm shadow-black/5 transition-all duration-300;
   }
 
   .sidebar-logo-area {

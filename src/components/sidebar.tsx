@@ -178,11 +178,11 @@ export function Sidebar() {
   return (
     <UISidebar
       collapsible="icon"
-      className="border-r border-border/80 bg-card/95 backdrop-blur-xl shadow-xs transition-all duration-300"
+      className="border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground shadow-sm transition-all duration-300"
       data-variant="sidebar"
     >
       {/* Brand Header */}
-      <SidebarHeader className="p-3.5 border-b border-border/70 shrink-0 bg-transparent">
+      <SidebarHeader className="p-3.5 border-b border-sidebar-border/70 shrink-0 bg-transparent">
         <Link
           href="/"
           className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center select-none"
@@ -224,7 +224,7 @@ export function Sidebar() {
           <div className="space-y-4">
             {groupedModules.map((section, sIndex) => (
               <SidebarGroup key={sIndex} className="p-0">
-                <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 px-2 pb-1 pt-1 select-none group-data-[collapsible=icon]:hidden">
+                <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/60 px-2 pb-1 pt-1 select-none group-data-[collapsible=icon]:hidden">
                   {section.title}
                 </SidebarGroupLabel>
 
@@ -255,8 +255,8 @@ export function Sidebar() {
                             className={cn(
                               "relative flex items-center h-9 px-2.5 rounded-xl transition-all duration-150 select-none",
                               isActive
-                                ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent font-medium"
+                                ? "bg-sidebar-primary/10 text-sidebar-primary font-semibold border border-sidebar-primary/20 shadow-2xs"
+                                : "text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent/80 border border-transparent font-medium"
                             )}
                           >
                             <Link
@@ -265,15 +265,15 @@ export function Sidebar() {
                             >
                               {/* Left active glowing indicator */}
                               {isActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary rounded-r-full group-data-[collapsible=icon]:hidden" />
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-sidebar-primary rounded-r-full group-data-[collapsible=icon]:hidden" />
                               )}
 
                               <div
                                 className={cn(
                                   "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                                   isActive
-                                    ? "text-primary"
-                                    : "text-muted-foreground group-hover:text-foreground"
+                                    ? "text-sidebar-primary"
+                                    : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground"
                                 )}
                               >
                                 <Icon className="h-4 w-4 shrink-0" />
@@ -284,7 +284,7 @@ export function Sidebar() {
                               </span>
 
                               {isActive && (
-                                <ChevronRight className="w-3.5 h-3.5 ml-auto text-primary/70 group-data-[collapsible=icon]:hidden" />
+                                <ChevronRight className="w-3.5 h-3.5 ml-auto text-sidebar-primary/70 group-data-[collapsible=icon]:hidden" />
                               )}
                             </Link>
                           </SidebarMenuButton>
@@ -300,27 +300,27 @@ export function Sidebar() {
       </SidebarContent>
 
       {/* Modern User Profile Footer */}
-      <SidebarFooter className="p-2.5 border-t border-border/70 shrink-0 bg-transparent">
-        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-muted/40 border border-border/70 group-data-[collapsible=icon]:justify-center">
+      <SidebarFooter className="p-2.5 border-t border-sidebar-border/70 shrink-0 bg-transparent">
+        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-sidebar-accent/50 border border-sidebar-border/70 group-data-[collapsible=icon]:justify-center">
           <Link
             href="/profile"
             className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity"
           >
             <div className="relative shrink-0">
-              <Avatar className="h-8 w-8 rounded-lg border border-border/80 shadow-2xs">
+              <Avatar className="h-8 w-8 rounded-lg border border-sidebar-border/80 shadow-2xs">
                 <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-primary/10 text-primary font-bold text-[10px] rounded-lg">
+                <AvatarFallback className="bg-sidebar-primary/10 text-sidebar-primary font-bold text-[10px] rounded-lg">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-card" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-sidebar" />
             </div>
 
             <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
-              <span className="text-xs font-semibold text-foreground truncate leading-none">
+              <span className="text-xs font-semibold text-sidebar-foreground truncate leading-none">
                 {user?.name || "User"}
               </span>
-              <span className="text-[10px] font-medium text-muted-foreground truncate mt-0.5">
+              <span className="text-[10px] font-medium text-sidebar-foreground/60 truncate mt-0.5">
                 {user?.role || "Member"}
               </span>
             </div>
@@ -330,7 +330,7 @@ export function Sidebar() {
             type="button"
             onClick={logout}
             title="Sign Out"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
+            className="p-1.5 rounded-lg text-sidebar-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
