@@ -5,6 +5,7 @@ import { Loader2, Calendar, Clock, User, AlertCircle, History } from "lucide-rea
 import { format } from "date-fns";
 import { JobStageBadge } from "@/components/jobs/job-stage-badge";
 import { JobStage } from "@/types/job";
+import { Badge } from "@/components/ui/badge";
 
 interface HistoryContentProps {
   jobId: string;
@@ -15,17 +16,17 @@ export function HistoryContent({ jobId }: HistoryContentProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-rose-500">
-        <AlertCircle className="h-8 w-8 mb-2" />
-        <p>Failed to load history.</p>
+      <div className="flex flex-col items-center justify-center p-8 text-destructive gap-2">
+        <AlertCircle className="h-6 w-6" />
+        <p className="text-xs font-medium">Failed to load stage history.</p>
       </div>
     );
   }
@@ -34,90 +35,105 @@ export function HistoryContent({ jobId }: HistoryContentProps) {
   const totalDaysByStage = data?.totalDaysByStage || {};
 
   return (
-    <div className="p-4 space-y-6 animate-in fade-in duration-500">
-      
-      {/* Summary Cards */}
+    <div className="space-y-2.5">
+      {/* Summary KPI chips of days per stage */}
       {Object.keys(totalDaysByStage).length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {Object.entries(totalDaysByStage).map(([stage, days]) => (
-            <div key={stage} className="bg-card border border-border rounded-xl p-3 shadow-sm flex flex-col items-center justify-center gap-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground text-center">{stage}</span>
-              <span className="text-lg font-black text-foreground">{days as number} <span className="text-xs font-medium text-muted-foreground">days</span></span>
+            <div 
+              key={stage} 
+              className="bg-card border border-border/60 rounded-lg p-2 shadow-xs flex flex-col items-center justify-center text-center"
+            >
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground truncate w-full">
+                {stage}
+              </span>
+              <span className="text-sm sm:text-base font-bold text-foreground mt-0.5">
+                {days as number} <span className="text-[10px] font-normal text-muted-foreground">days</span>
+              </span>
             </div>
           ))}
         </div>
       )}
 
-      {/* Timeline */}
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-6">
-          <History className="w-5 h-5 text-emerald-600" />
-          <h2 className="text-lg font-black text-foreground tracking-tight">Stage History</h2>
+      {/* Timeline Card */}
+      <div className="bg-card border border-border/70 rounded-xl shadow-xs overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+          <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+            <History className="w-3.5 h-3.5" />
+          </div>
+          <h3 className="text-xs sm:text-sm font-semibold text-foreground">Stage History & Audit Log</h3>
         </div>
         
-        {historyData.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">No history available.</div>
-        ) : (
-          <div className="relative border-l border-border ml-3 space-y-8 pb-4">
-            {historyData.map((item: any) => {
-              const isActive = item.endedAt === null;
-              
-              return (
-                <div key={item._id} className="relative pl-6">
-                  {/* Timeline Dot */}
-                  <div className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 ${isActive ? 'bg-emerald-500 border-emerald-200' : 'bg-muted-foreground border-card'}`} />
-                  
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <JobStageBadge stage={item.stage as JobStage} disabled />
-                        {isActive && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md">
-                            Current Stage
-                          </span>
-                        )}
+        {/* Content */}
+        <div className="p-3 sm:p-4">
+          {historyData.length === 0 ? (
+            <div className="text-center py-6 text-xs text-muted-foreground">
+              No stage history recorded yet.
+            </div>
+          ) : (
+            <div className="relative border-l border-border/70 ml-2 space-y-4 pb-2">
+              {historyData.map((item: any) => {
+                const isActive = item.endedAt === null;
+                
+                return (
+                  <div key={item._id} className="relative pl-5">
+                    {/* Timeline Dot */}
+                    <div 
+                      className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 ${
+                        isActive 
+                          ? 'bg-primary border-primary/30' 
+                          : 'bg-muted-foreground/50 border-card'
+                      }`} 
+                    />
+                    
+                    <div className="bg-muted/15 border border-border/40 rounded-lg p-2.5 space-y-1.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <JobStageBadge stage={item.stage as JobStage} disabled />
+                          {isActive && (
+                            <Badge 
+                              variant="outline" 
+                              className="text-[9px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border-primary/20 py-0 px-1.5"
+                            >
+                              Current Stage
+                            </Badge>
+                          )}
+                        </div>
+
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {format(new Date(item.startedAt), 'MMM d, yyyy · h:mm a')}
+                        </span>
                       </div>
                       
                       {item.reason && (
-                        <p className="text-sm text-muted-foreground italic border-l-2 border-border pl-3 mt-2">
-                          "{item.reason}"
+                        <p className="text-xs text-foreground/80 italic bg-muted/30 p-2 rounded border border-border/30">
+                          &quot;{item.reason}&quot;
                         </p>
                       )}
                       
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 flex-wrap">
-                        {item.changedBy ? (
-                          <div className="flex items-center gap-1">
-                            <User className="w-3.5 h-3.5" />
-                            <span>{item.changedBy.firstName} {item.changedBy.lastName}</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            <User className="w-3.5 h-3.5" />
-                            <span>System</span>
-                          </div>
-                        )}
-                        
+                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground flex-wrap pt-0.5">
                         <div className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{format(new Date(item.startedAt), 'MMM dd, yyyy')}</span>
+                          <User className="w-3 h-3 text-muted-foreground/70" />
+                          <span>
+                            {item.changedBy 
+                              ? `${item.changedBy.firstName || ""} ${item.changedBy.lastName || ""}`.trim() 
+                              : "System"}
+                          </span>
                         </div>
                         
                         <div className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>{item.durationDays} days</span>
+                          <Clock className="w-3 h-3 text-muted-foreground/70" />
+                          <span>{item.durationDays} day{item.durationDays !== 1 ? "s" : ""}</span>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="text-xs text-muted-foreground sm:text-right whitespace-nowrap bg-muted/30 px-2 py-1 rounded-md">
-                      {format(new Date(item.startedAt), 'h:mm a')}
-                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
