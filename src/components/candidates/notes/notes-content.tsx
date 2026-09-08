@@ -114,13 +114,13 @@ export function CandidateNotesContent({
   };
 
   return (
-    <div className="space-y-2.5 h-full">
+    <section className="space-y-2.5 h-full">
       {/* Header Action Bar */}
-      <div className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-border/70 bg-card shadow-xs">
+      <header className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-border/70 bg-card shadow-xs">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+          <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
             <StickyNote className="w-3.5 h-3.5" />
-          </div>
+          </span>
           <div>
             <h3 className="text-xs sm:text-sm font-semibold text-foreground">Candidate Notes</h3>
             <p className="text-[10px] text-muted-foreground font-medium">
@@ -138,7 +138,7 @@ export function CandidateNotesContent({
             <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
           </Button>
         )}
-      </div>
+      </header>
 
       {/* Notes List or Empty State */}
       {notes.length > 0 ? (
@@ -195,6 +195,6 @@ export function CandidateNotesContent({
           isEdit
         />
       )}
-    </div>
+    </section>
   );
 }

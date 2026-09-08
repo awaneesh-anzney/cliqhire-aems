@@ -227,7 +227,7 @@ export default function ClientCandidateTabs({
       {/* Top Breadcrumb & Candidate Header Bar */}
       <header className="border-b border-border/70 bg-card/75 backdrop-blur-md px-3 sm:px-4 py-2 sm:py-2.5 shrink-0 transition-colors">
         {/* Navigation Breadcrumb Row */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 overflow-hidden">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5 overflow-hidden">
           <Link
             href="/candidates"
             className="inline-flex items-center gap-1 hover:text-foreground transition-colors font-medium text-[11px]"
@@ -247,20 +247,20 @@ export default function ClientCandidateTabs({
           <span className="truncate text-foreground font-semibold text-[11px] max-w-[200px] sm:max-w-md">
             {candidate.name || "Untitled Candidate"}
           </span>
-        </div>
+        </nav>
 
         {/* Main Header Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
           {/* Left: Avatar + Title + Chips */}
           <div className="flex items-center gap-3 min-w-0">
-            <div
+            <span
               className={cn(
-                "w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center text-xs sm:text-sm font-bold text-white shrink-0 bg-gradient-to-tr shadow-xs select-none",
+                "w-10 h-10 sm:w-11 sm:h-11 rounded-lg inline-flex items-center justify-center text-xs sm:text-sm font-bold text-white shrink-0 bg-gradient-to-tr shadow-xs select-none",
                 getAvatarGradient(candidate.name)
               )}
             >
               {getInitials(candidate.name)}
-            </div>
+            </span>
 
             <div className="space-y-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -286,22 +286,22 @@ export default function ClientCandidateTabs({
 
               {/* Meta row: Location, Experience, Contacts */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <div className="inline-flex items-center gap-1 text-[11px]">
+                <span className="inline-flex items-center gap-1 text-[11px]">
                   <MapPin className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
                   <span className="truncate max-w-[140px]">{candidate.location || "Global"}</span>
-                </div>
+                </span>
 
                 <span className="text-border">•</span>
 
-                <div className="inline-flex items-center gap-1 text-[11px]">
+                <span className="inline-flex items-center gap-1 text-[11px]">
                   <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
                   <span>{candidate.experience || "No experience specified"}</span>
-                </div>
+                </span>
 
                 {candidate.email && (
                   <>
                     <span className="text-border hidden md:inline">•</span>
-                    <div className="hidden md:inline-flex items-center gap-1 text-[11px]">
+                    <span className="hidden md:inline-flex items-center gap-1 text-[11px]">
                       <a
                         href={`mailto:${candidate.email}`}
                         className="hover:text-foreground transition-colors truncate max-w-[160px]"
@@ -319,14 +319,14 @@ export default function ClientCandidateTabs({
                           <Copy className="h-2.5 w-2.5" />
                         )}
                       </button>
-                    </div>
+                    </span>
                   </>
                 )}
 
                 {candidate.phone && (
                   <>
                     <span className="text-border hidden lg:inline">•</span>
-                    <div className="hidden lg:inline-flex items-center gap-1 text-[11px]">
+                    <span className="hidden lg:inline-flex items-center gap-1 text-[11px]">
                       <a
                         href={`tel:${candidate.phone}`}
                         className="hover:text-foreground transition-colors"
@@ -352,7 +352,7 @@ export default function ClientCandidateTabs({
                           <Copy className="h-2.5 w-2.5" />
                         )}
                       </button>
-                    </div>
+                    </span>
                   </>
                 )}
               </div>
@@ -383,45 +383,43 @@ export default function ClientCandidateTabs({
         onValueChange={setActiveTab}
         className="w-full flex-1 max-w-full min-w-0 flex flex-col overflow-hidden"
       >
-        {/* Sleek Tab Bar */}
-        <div className="w-full border-b border-border/70 bg-muted/25 px-2 sm:px-4 py-1 shrink-0 overflow-hidden">
-          <TabsList className="flex h-auto w-full justify-start items-center gap-1 p-0.5 bg-transparent overflow-x-auto scrollbar-none max-w-full min-w-0">
-            <TabsTrigger
-              value="Summary"
-              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
-            >
-              <FileText className="h-3.5 w-3.5" />
-              <span>Summary</span>
-            </TabsTrigger>
+        {/* Sleek Tab Bar directly on TabsList without wrapping div */}
+        <TabsList className="flex h-auto w-full justify-start items-center gap-1 p-1 bg-muted/25 border-b border-border/70 overflow-x-auto scrollbar-none max-w-full min-w-0 px-2 sm:px-4 shrink-0 rounded-none">
+          <TabsTrigger
+            value="Summary"
+            className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            <span>Summary</span>
+          </TabsTrigger>
 
-            <TabsTrigger
-              value="Jobs"
-              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
-            >
-              <Briefcase className="h-3.5 w-3.5" />
-              <span>Applied Jobs</span>
-            </TabsTrigger>
+          <TabsTrigger
+            value="Jobs"
+            className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+          >
+            <Briefcase className="h-3.5 w-3.5" />
+            <span>Applied Jobs</span>
+          </TabsTrigger>
 
-            <TabsTrigger
-              value="Notes"
-              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
-            >
-              <StickyNote className="h-3.5 w-3.5" />
-              <span>Notes</span>
-            </TabsTrigger>
+          <TabsTrigger
+            value="Notes"
+            className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+          >
+            <StickyNote className="h-3.5 w-3.5" />
+            <span>Notes</span>
+          </TabsTrigger>
 
-            <TabsTrigger
-              value="Attachments"
-              className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
-            >
-              <Paperclip className="h-3.5 w-3.5" />
-              <span>Attachments</span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
+          <TabsTrigger
+            value="Attachments"
+            className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+          >
+            <Paperclip className="h-3.5 w-3.5" />
+            <span>Attachments</span>
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Tab Content Wrapper with minimal padding */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-2.5 sm:p-3.5">
+        {/* Tab Content Wrapper */}
+        <main className="flex-1 min-h-0 overflow-y-auto p-2.5 sm:p-3.5">
           <TabsContent
             value="Summary"
             className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
@@ -463,7 +461,7 @@ export default function ClientCandidateTabs({
               canModify={canModifyCandidates}
             />
           </TabsContent>
-        </div>
+        </main>
       </Tabs>
     </div>
   );

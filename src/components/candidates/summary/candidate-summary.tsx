@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, User, Mail, Phone, Briefcase, GraduationCap, Globe, Star } from "lucide-react";
+import { Pencil, User, Briefcase, GraduationCap, Globe, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EditFieldModal } from "./edit-field-modal";
 import {
@@ -298,7 +298,7 @@ const CandidateSummary = ({
     };
 
     return (
-      <div
+      <article
         onClick={canModify ? handleEditClick : undefined}
         className={cn(
           "group relative flex items-start gap-3 p-2.5 rounded-lg border transition-all duration-200",
@@ -308,12 +308,12 @@ const CandidateSummary = ({
           canModify ? "cursor-pointer" : ""
         )}
       >
-        <div className={cn(
-          "p-2 rounded-md shrink-0 border mt-0.5",
+        <span className={cn(
+          "p-2 rounded-md shrink-0 border mt-0.5 inline-flex items-center justify-center",
           hasData ? "bg-primary/5 border-primary/15 text-primary" : "bg-muted border-border text-muted-foreground"
         )}>
           <GraduationCap className="w-4 h-4" />
-        </div>
+        </span>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-1 mb-0.5">
@@ -347,25 +347,23 @@ const CandidateSummary = ({
               )}
             </div>
           ) : (
-            <div className="py-0.5">
-              <span className="text-xs text-muted-foreground/60 italic font-medium">Not Provided</span>
-            </div>
+            <span className="text-xs text-muted-foreground/60 italic font-medium block py-0.5">
+              Not Provided
+            </span>
           )}
         </div>
 
         {canModify && (
-          <div className="flex items-center ml-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
-              onClick={handleEditClick}
-            >
-              <Pencil className="h-3 w-3 text-muted-foreground" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-muted ml-2 shrink-0"
+            onClick={handleEditClick}
+          >
+            <Pencil className="h-3 w-3 text-muted-foreground" />
+          </Button>
         )}
-      </div>
+      </article>
     );
   };
 
@@ -412,43 +410,43 @@ const CandidateSummary = ({
           <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 leading-none">
             {field.label}
           </span>
-          <div className="flex flex-col">
-            {field.key === 'domains' && hasValue ? (
-              <div className="flex flex-wrap gap-1 mt-0.5 max-w-full">
-                {(Array.isArray(rawValue) ? rawValue : []).map((d: any) => (
-                  <span key={d._id || d.name || d} className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
-                    {d.name || d}
-                  </span>
-                ))}
-              </div>
-            ) : field.key === 'certification' && hasValue ? (
-              <div className="flex flex-wrap gap-1 mt-0.5 max-w-full">
-                {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map(s => s.trim()).filter(Boolean) : [])).map((cert: string, idx: number) => (
-                  <span key={idx} className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
-                    {cert}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className={cn(
-                "text-xs font-semibold tracking-tight truncate",
-                hasValue ? "text-foreground" : "text-muted-foreground/50 italic font-medium"
-              )}>
-                {hasValue 
-                  ? (field.key === 'referredBy' && typeof value === 'object' 
-                      ? value.name || value.email 
-                      : Array.isArray(value) 
-                        ? value.join(", ") 
-                        : value) 
-                  : "Not Provided"}
-              </span>
-            )}
-            {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
-              <span className="text-[10px] text-muted-foreground font-medium truncate">
-                {localCandidate.referredBy.email}
-              </span>
-            )}
-          </div>
+          
+          {field.key === 'domains' && hasValue ? (
+            <div className="flex flex-wrap gap-1 mt-0.5 max-w-full">
+              {(Array.isArray(rawValue) ? rawValue : []).map((d: any) => (
+                <span key={d._id || d.name || d} className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
+                  {d.name || d}
+                </span>
+              ))}
+            </div>
+          ) : field.key === 'certification' && hasValue ? (
+            <div className="flex flex-wrap gap-1 mt-0.5 max-w-full">
+              {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map((s: string) => s.trim()).filter(Boolean) : [])).map((cert: string, idx: number) => (
+                <span key={idx} className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                  {cert}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <span className={cn(
+              "text-xs font-semibold tracking-tight truncate",
+              hasValue ? "text-foreground" : "text-muted-foreground/50 italic font-medium"
+            )}>
+              {hasValue 
+                ? (field.key === 'referredBy' && typeof value === 'object' 
+                    ? value.name || value.email 
+                    : Array.isArray(value) 
+                      ? value.join(", ") 
+                      : value) 
+                : "Not Provided"}
+            </span>
+          )}
+
+          {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
+            <span className="text-[10px] text-muted-foreground font-medium truncate">
+              {localCandidate.referredBy.email}
+            </span>
+          )}
         </div>
 
         {canModify && (
@@ -524,26 +522,26 @@ const CandidateSummary = ({
       <div 
         key={field.key} 
         className={cn(
-          "group flex flex-col p-2.5 rounded-lg bg-card/70 border border-border/40 transition-colors",
+          "group flex flex-col p-2 rounded-lg bg-card/70 border border-border/40 transition-colors",
           canModify ? "cursor-pointer hover:border-border/80" : ""
         )}
         onClick={canModify ? () => setEditField(field.key) : undefined}
       >
-        <div className="flex items-center justify-between mb-1.5" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center gap-1.5">
-             <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center text-primary">
-                <Star className="h-3 w-3" />
-             </div>
-             <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{field.label}</span>
-          </div>
+        <div className="flex items-center justify-between mb-1" onClick={(e) => e.stopPropagation()}>
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <span className="h-4 w-4 rounded bg-primary/10 inline-flex items-center justify-center text-primary">
+              <Star className="h-2.5 w-2.5" />
+            </span>
+            {field.label}
+          </span>
           {canModify && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
+              className="h-5 w-5 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
               onClick={() => setEditField(field.key)}
             >
-              <Pencil className="h-3 w-3 text-muted-foreground" />
+              <Pencil className="h-2.5 w-2.5 text-muted-foreground" />
             </Button>
           )}
         </div>
@@ -559,7 +557,9 @@ const CandidateSummary = ({
                 </span>
               ))}
             </div>
-          ) : "Not Provided"}
+          ) : (
+            <span>Not Provided</span>
+          )}
         </div>
         {canModify && editField === field.key && (
           <div onClick={(e) => e.stopPropagation()}>
@@ -578,146 +578,138 @@ const CandidateSummary = ({
   };
 
   return (
-    <div className="space-y-2.5 sm:space-y-3">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 items-start">
-        {/* Left Column: Profile & Professional */}
-        <div className="space-y-2.5 sm:space-y-3">
-          {/* Profile Details Card */}
-          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
-              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
-                <User className="w-3.5 h-3.5" />
-              </div>
-              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Profile Details</h4>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 items-start">
+      {/* Left Column: Profile & Professional */}
+      <div className="space-y-2.5 sm:space-y-3">
+        {/* Profile Details Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <User className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Profile Details</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Identity & Sourcing
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {defaultDetailsFields.map(renderField)}
             </div>
-            <div className="p-3 space-y-2.5">
-              <div>
-                <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
-                  Identity & Sourcing
-                </h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
-                  {defaultDetailsFields.map((field) => renderField(field))}
-                </div>
+          </div>
+        </section>
+
+        {/* Professional Background Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <Briefcase className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Professional Background</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Role & Compensation
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {previousCompanyFields.map(renderField)}
+              <div className="pt-2 border-t border-border/40 sm:col-span-2">
+                <SalaryRange
+                  candidate={localCandidate}
+                  onCandidateUpdate={onCandidateUpdate}
+                  canModify={canModify}
+                />
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Professional Background Card */}
-          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
-              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
-                <Briefcase className="w-3.5 h-3.5" />
-              </div>
-              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Professional Background</h4>
-            </div>
-            <div className="p-3 space-y-2.5">
-              <div>
-                <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
-                  Role & Compensation
-                </h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
-                  {previousCompanyFields.map((field) => renderField(field))}
-                  <div className="pt-2 border-t border-border/40 sm:col-span-2">
-                    <SalaryRange
-                      candidate={localCandidate}
-                      onCandidateUpdate={onCandidateUpdate}
-                      canModify={canModify}
-                    />
-                  </div>
-                </div>
-              </div>
+        {/* Skills Matrix Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <Star className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Skill Matrix</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Technical & Soft Skills
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
+              {skillFields.map(renderSkillField)}
             </div>
           </div>
+        </section>
+      </div>
 
-          {/* Skills Matrix Card */}
-          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
-              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
-                <Star className="w-3.5 h-3.5" />
-              </div>
-              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Skill Matrix</h4>
+      {/* Right Column: Contact & Personal */}
+      <div className="space-y-2.5 sm:space-y-3">
+        {/* Contact Information Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <Globe className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Contact Information</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {contactFields.map(renderField)}
             </div>
-            <div className="p-3 space-y-2">
-              <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-0.5">
-                Technical & Soft Skills
+          </div>
+        </section>
+
+        {/* Personal Details Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <User className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Personal Details</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Background Details
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {collapsibleDetailsFields.map(renderField)}
+            </div>
+          </div>
+        </section>
+
+        {/* Education & Academic Credentials Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <GraduationCap className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Education & Credentials</h4>
+          </header>
+          <div className="p-2.5 sm:p-3 space-y-2.5">
+            {/* Structured Education Levels */}
+            <div className="space-y-1.5">
+              <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                Academic Degrees
               </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {skillFields.map((field) => renderSkillField(field))}
+              <div className="flex flex-col gap-1.5">
+                {renderEducationLevelCard("master", "Master's Degree")}
+                {renderEducationLevelCard("bachelor", "Bachelor's Degree")}
+                {renderEducationLevelCard("diploma", "Diploma")}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Right Column: Contact & Personal */}
-        <div className="space-y-2.5 sm:space-y-3">
-          {/* Contact Information Card */}
-          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
-              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
-                <Globe className="w-3.5 h-3.5" />
-              </div>
-              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Contact Information</h4>
-            </div>
-            <div className="p-3">
+            {/* General Academic Fields */}
+            <div className="space-y-1.5 pt-2 border-t border-border/40">
+              <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                Other Qualifications
+              </h5>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
-                {contactFields.map((field) => renderField(field))}
+                {academicFields.map(renderField)}
               </div>
             </div>
           </div>
-
-          {/* Personal Details Card */}
-          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
-              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
-                <User className="w-3.5 h-3.5" />
-              </div>
-              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Personal Details</h4>
-            </div>
-            <div className="p-3">
-              <div className="space-y-2">
-                <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-0.5">
-                  Background Details
-                </h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
-                  {collapsibleDetailsFields.map((field) => renderField(field))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Education & Academic Credentials Card */}
-          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
-            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
-              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
-                <GraduationCap className="w-3.5 h-3.5" />
-              </div>
-              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Education & Credentials</h4>
-            </div>
-            <div className="p-3 space-y-3">
-              {/* Structured Education Levels */}
-              <div className="space-y-1.5">
-                <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-0.5">
-                  Academic Degrees
-                </h5>
-                <div className="flex flex-col gap-1.5">
-                  {renderEducationLevelCard("master", "Master's Degree")}
-                  {renderEducationLevelCard("bachelor", "Bachelor's Degree")}
-                  {renderEducationLevelCard("diploma", "Diploma")}
-                </div>
-              </div>
-
-              {/* General Academic Fields */}
-              <div className="space-y-1.5 pt-2 border-t border-border/40">
-                <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-0.5">
-                  Other Qualifications
-                </h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
-                  {academicFields.map((field) => renderField(field))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
 
       {/* Confirmation Dialog */}
@@ -728,9 +720,9 @@ const CandidateSummary = ({
           </DialogHeader>
           <div className="p-4 pt-1">
             <div className="p-3 bg-muted/30 rounded-lg border border-border/50 text-xs font-medium text-foreground flex items-center gap-2.5">
-               <div className="h-8 w-8 rounded-md bg-card flex items-center justify-center shadow-xs border border-border text-primary shrink-0">
+               <span className="h-8 w-8 rounded-md bg-card inline-flex items-center justify-center shadow-xs border border-border text-primary shrink-0">
                   <User className="h-4 w-4" />
-               </div>
+               </span>
                <span>Assign <strong className="text-foreground">{pendingReferrerName}</strong> as the official referrer for this candidate?</span>
             </div>
           </div>

@@ -153,13 +153,13 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
     };
 
     return (
-      <div className="w-full flex flex-col gap-2.5">
+      <section className="w-full space-y-2.5">
         {/* Header Action Bar */}
-        <div className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-border/70 bg-card shadow-xs">
+        <header className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-border/70 bg-card shadow-xs">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
               <Briefcase className="w-3.5 h-3.5" />
-            </div>
+            </span>
             <div>
               <h3 className="text-xs sm:text-sm font-semibold text-foreground">Applied Jobs</h3>
               <p className="text-[10px] text-muted-foreground font-medium">
@@ -167,7 +167,7 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
               </p>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Table Container */}
         <div className="bg-card border border-border/70 rounded-xl overflow-hidden shadow-xs">
@@ -225,15 +225,15 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
                           {job.jobTitle}
                         </span>
                         <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
-                          <div className="inline-flex items-center gap-1">
+                          <span className="inline-flex items-center gap-1">
                             <MapPin className="w-3 h-3 text-muted-foreground/70" />
                             <span className="truncate max-w-[120px]">{job.location}</span>
-                          </div>
+                          </span>
                           <span className="text-border">•</span>
-                          <div className="inline-flex items-center gap-1">
+                          <span className="inline-flex items-center gap-1">
                             <Clock className="w-3 h-3 text-muted-foreground/70" />
                             <span>{job.experience}</span>
-                          </div>
+                          </span>
                           <Badge variant="outline" className={`text-[9px] font-medium py-0 px-1.5 border ${getJobTypeBadgeColor(job.jobType)}`}>
                             {job.jobType}
                           </Badge>
@@ -243,9 +243,9 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
                     
                     <TableCell className="py-2.5 align-middle">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                        <span className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 inline-flex items-center justify-center text-primary font-bold text-xs shrink-0">
                           {job.clientName.substring(0, 1).toUpperCase() || "C"}
-                        </div>
+                        </span>
                         <span className="font-medium text-xs text-foreground line-clamp-1">
                           {job.clientName}
                         </span>
@@ -301,7 +301,7 @@ export const JobsContent = forwardRef<JobsContentRef, JobsContentProps>(
             </TableBody>
           </Table>
         </div>
-      </div>
+      </section>
     );
   }
 );
