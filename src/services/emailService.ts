@@ -265,8 +265,37 @@ export const emailService = {
    * Update an existing draft
    */
   async updateDraft(draftId: string, payload: Partial<SaveDraftPayload>): Promise<{ success: boolean; message: string; data: any }> {
-    const response = await api.patch(`/api/email/drafts/${draftId}`, payload);
-    return response.data;
+    const hasFiles = payload.attachments && payload.attachments.length > 0;
+
+    if (hasFiles) {
+      const formData = new FormData();
+      if (payload.to) {
+        formData.append("to", Array.isArray(payload.to) ? payload.to.join(", ") : payload.to);
+      }
+      if (payload.subject) formData.append("subject", payload.subject);
+      if (payload.cc) {
+        formData.append("cc", Array.isArray(payload.cc) ? payload.cc.join(", ") : payload.cc);
+      }
+      if (payload.bcc) {
+        formData.append("bcc", Array.isArray(payload.bcc) ? payload.bcc.join(", ") : payload.bcc);
+      }
+      if (payload.text) formData.append("text", payload.text);
+      if (payload.html) formData.append("html", payload.html);
+      if (payload.threadId) formData.append("threadId", payload.threadId);
+      if (payload.inReplyTo) formData.append("inReplyTo", payload.inReplyTo);
+
+      payload.attachments?.forEach((file: File) => {
+        formData.append("attachments", file);
+      });
+
+      const response = await api.patch(`/api/email/drafts/${draftId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } else {
+      const response = await api.patch(`/api/email/drafts/${draftId}`, payload);
+      return response.data;
+    }
   },
 
   /**

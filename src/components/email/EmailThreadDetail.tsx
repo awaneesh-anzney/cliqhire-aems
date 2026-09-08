@@ -362,25 +362,35 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                     </span>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {msg.attachments.map((file, fileIdx) => (
+                      {msg.attachments.map((file, fileIdx) => {
+                        const hasUrl = !!file.storageUrl;
+                        return (
                         <a
                           key={fileIdx}
-                          href={file.storageUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted/70 transition-colors group/file"
+                          href={hasUrl ? file.storageUrl : undefined}
+                          target={hasUrl ? "_blank" : undefined}
+                          rel={hasUrl ? "noreferrer" : undefined}
+                          className={`flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/40 transition-colors group/file ${
+                            hasUrl ? "hover:bg-muted/70 cursor-pointer" : "opacity-80 cursor-default"
+                          }`}
+                          title={!hasUrl ? "Attachment is processing or unavailable" : undefined}
+                          onClick={(e) => {
+                            if (!hasUrl) {
+                              e.preventDefault();
+                            }
+                          }}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <FileIcon className="h-4 w-4 text-primary shrink-0" />
+                            <FileIcon className={`h-4 w-4 shrink-0 ${hasUrl ? "text-primary" : "text-muted-foreground"}`} />
                             <div className="truncate text-xs">
                               <p className="font-semibold text-foreground truncate">{file.fileName}</p>
                               <p className="text-[10px] text-muted-foreground">{formatFileSize(file.sizeBytes)}</p>
                             </div>
                           </div>
 
-                          <Download className="h-3.5 w-3.5 text-muted-foreground group-hover/file:text-primary transition-colors shrink-0 ml-2" />
+                          {hasUrl && <Download className="h-3.5 w-3.5 text-muted-foreground group-hover/file:text-primary transition-colors shrink-0 ml-2" />}
                         </a>
-                      ))}
+                      )})}
                     </div>
                   </div>
                 )}
