@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { usePrimaryContacts, useContactMutations } from "@/hooks/useContacts";
 import { useToggleContactSource } from "@/hooks/useClient";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/axios-config";
 
 interface ContactsContentProps {
   clientId: string;
@@ -43,6 +44,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
   // We'll use local state for these as they might be updated via a separate modal
   const [clientInfo, setClientInfo] = useState({
     phoneNumber: clientData?.phoneNumber || "",
+    countryCode: clientData?.countryCode || "+966",
     website: clientData?.website || "",
     emails: clientData?.emails || [],
     linkedInProfile: clientData?.linkedInProfile || "",
@@ -52,6 +54,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
     if (clientData) {
       setClientInfo({
         phoneNumber: clientData.phoneNumber || "",
+        countryCode: clientData.countryCode || "+966",
         website: clientData.website || "",
         emails: clientData.emails || [],
         linkedInProfile: clientData.linkedInProfile || "",
@@ -170,7 +173,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Phone</span>
                   <p className="text-sm font-bold text-foreground">
-                    {clientInfo.phoneNumber ? ((clientData?.countryCode && clientInfo.phoneNumber) ? `${clientData.countryCode}-${clientInfo.phoneNumber}` : clientInfo.phoneNumber) : "Not Provided"}
+                    {clientInfo.phoneNumber ? ((clientInfo.countryCode && clientInfo.phoneNumber) ? `${clientInfo.countryCode}-${clientInfo.phoneNumber}` : clientInfo.phoneNumber) : "Not Provided"}
                   </p>
                 </div>
                 
@@ -358,9 +361,17 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
             clientId={clientId}
             initialValues={clientInfo}
             onSave={async (values) => {
-              setClientInfo(values);
-              setIsContactEditOpen(false);
-              toast.success("Identity updated locally. Note: persist via client update API if needed.");
+              try {
+                // Call the API to actually persist these changes
+                await api.patch(`/api/clients/${clientId}`, values);
+
+                // Assuming queryClient is available via useQueryClient if needed, or rely on refetch
+                setClientInfo(values);
+                setIsContactEditOpen(false);
+                toast.success("Identity updated successfully.");
+              } catch (error: any) {
+                toast.error(error.response?.data?.message || "Failed to update identity");
+              }
             }}
           />
 

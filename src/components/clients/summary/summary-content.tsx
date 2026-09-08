@@ -101,11 +101,25 @@ export function SummaryContent({
   ) => {
     if (!canModify) return;
     try {
-      const response = await api.patch(`/api/clients/${clientId}`, { [fieldName]: value });
+      await api.patch(`/api/clients/${clientId}`, { [fieldName]: value });
       // Optimistically update React Query cache
       queryClient.setQueryData(["clientsData", clientId], (old: any) => ({
         ...(old || {}),
         [fieldName]: value,
+      }));
+      toast.success("Client details updated successfully");
+    } catch (error) {
+      toast.error("Failed to update client details");
+    }
+  };
+
+  const updateClientFields = async (updates: Record<string, any>) => {
+    if (!canModify) return;
+    try {
+      await api.patch(`/api/clients/${clientId}`, updates);
+      queryClient.setQueryData(["clientsData", clientId], (old: any) => ({
+        ...(old || {}),
+        ...updates,
       }));
       toast.success("Client details updated successfully");
     } catch (error) {
@@ -170,9 +184,13 @@ export function SummaryContent({
         })();
       };
 
-  const handleUpdateField = (field: keyof ClientDetails) => (value: string) => {
+  const handleUpdateField = (field: keyof ClientDetails) => (value: any) => {
     if (!canModify) return;
-    updateClientDetails(field, value);
+    if (typeof value === 'object' && value !== null && 'phone' in value) {
+      updateClientFields({ phoneNumber: value.phone, countryCode: value.countryCode });
+    } else {
+      updateClientDetails(field, value as string);
+    }
   };
 
   const handleAddTeamMember = (member: TeamMemberType) => {
@@ -497,6 +515,8 @@ export function SummaryContent({
                 formattedValue={clientData?.countryCode && clientData?.phoneNumber ? `${clientData.countryCode}-${clientData.phoneNumber}` : clientData?.phoneNumber}
                 onUpdate={handleUpdateField("phoneNumber")}
                 disableInternalEdit={!canModify}
+                isPhone={true}
+                countryCode={clientData?.countryCode || "+966"}
               />
               <DetailRow
                 label="Client Email(s)"

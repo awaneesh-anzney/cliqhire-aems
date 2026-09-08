@@ -23,11 +23,13 @@ interface EditFieldModalProps {
   onClose: () => void;
   fieldName: string;
   currentValue?: string;
-  onSave: (value: string) => void;
+  onSave: (value: any) => void;
   isDate?: boolean;
   isNumber?: boolean;
   isCountry?: boolean;
   isLocation?: boolean;
+  isPhone?: boolean;
+  countryCode?: string;
   options?: { value: string; label: string }[];
 }
 
@@ -42,8 +44,11 @@ export function EditFieldModal({
   options,
   isCountry,
   isLocation,
+  isPhone,
+  countryCode: initialCountryCode = "+966",
 }: EditFieldModalProps) {
   const [value, setValue] = useState(currentValue);
+  const [phoneCountryCode, setPhoneCountryCode] = useState(initialCountryCode);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     currentValue ? new Date(currentValue) : null,
   );
@@ -51,6 +56,8 @@ export function EditFieldModal({
   const handleSave = () => {
     if (isDate && selectedDate) {
       onSave(selectedDate.getFullYear().toString());
+    } else if (isPhone || fieldName === "Client Phone Number") {
+      onSave({ phone: value, countryCode: phoneCountryCode });
     } else {
       onSave(value);
     }
@@ -70,10 +77,12 @@ export function EditFieldModal({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="value">{fieldName}</Label>
-            {fieldName === "Client Phone Number" ? (
+            {isPhone || fieldName === "Client Phone Number" ? (
               <PhoneInput
-                value={value}
-                onChange={setValue}
+                phoneNumber={value}
+                onPhoneNumberChange={setValue}
+                countryCode={phoneCountryCode}
+                onCountryCodeChange={setPhoneCountryCode}
               />
             ) : isDate ? (
               <div className="relative">
