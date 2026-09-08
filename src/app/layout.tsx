@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${jakarta.className} ${jakarta.variable}`} suppressHydrationWarning>
+      <body className={`${jakarta.className} ${jakarta.variable} min-h-screen bg-background text-foreground antialiased selection:bg-brand-primary/20`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/*
            * QueryProvider ek baar — yahan root level pe

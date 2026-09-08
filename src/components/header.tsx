@@ -136,7 +136,7 @@ export function Header() {
               </Button>
             ) : (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium truncate">
-                <span className="text-muted-foreground/60 hidden sm:inline">Cliqhire</span>
+                <span className="text-muted-foreground/60 hidden sm:inline font-black tracking-tight">FluxBridge</span>
                 <ChevronRight className="w-3 h-3 text-muted-foreground/40 hidden sm:inline" />
                 <span className="font-semibold text-foreground truncate">
                   {getPageTitle()}
