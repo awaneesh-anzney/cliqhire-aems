@@ -15,6 +15,7 @@ import { EditFollowUpModal } from "@/components/clients/modals/edit-follow-up-mo
 import { CancelFollowUpModal } from "@/components/clients/modals/cancel-follow-up-modal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ActivitiesContentProps {
   clientId: string;
@@ -25,11 +26,10 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
   const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Follow-up completion modal state
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  
+
   const [selectedFollowUpId, setSelectedFollowUpId] = useState<string | null>(null);
   const [selectedFollowUpData, setSelectedFollowUpData] = useState<any>(null);
 
@@ -65,52 +65,36 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center justify-center min-h-[300px] space-y-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-3 text-sm text-muted-foreground font-medium">Loading activity stream...</p>
-      </div>
-    );
-  }
-
-  if (timelineEvents.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center border border-dashed rounded-xl bg-card/50 my-6">
-        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
-          <Calendar className="h-6 w-6" />
-        </div>
-        <h3 className="text-lg font-semibold mb-1">No activities logged</h3>
-        <p className="text-sm text-muted-foreground max-w-sm mb-6">
-          Keep track of client interactions by creating your first activity or follow-up.
-        </p>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Activity
-            </Button>
-          </DialogTrigger>
-          <CreateActivityModal
-            clientId={clientId}
-            onActivityCreated={fetchActivities}
-            onClose={() => setIsDialogOpen(false)}
-          />
-        </Dialog>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Loading Activity Stream...</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full mx-auto">
+    <div className="space-y-4">
       {/* Header Bar */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">Activity Timeline</h2>
-          <p className="text-xs text-muted-foreground">Recent interactions and scheduled follow-ups</p>
+      <div className="flex items-center justify-between p-4 rounded-xl border border-border/70 bg-card shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <Calendar className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground">Activities & Follow-ups</h3>
+              <Badge variant="outline" className="h-5 px-1.5 text-xs font-bold bg-primary/10 text-primary border-primary/20">
+                {timelineEvents.length}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">Historical interactions and scheduled pending tasks</p>
+          </div>
         </div>
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2 shadow-sm">
-              <Plus className="h-4 w-4" />
+            <Button size="sm" className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+              <Plus className="h-3.5 w-3.5 mr-1" />
               Add Activity
             </Button>
           </DialogTrigger>
@@ -122,283 +106,256 @@ export function ActivitiesContent({ clientId }: ActivitiesContentProps) {
         </Dialog>
       </div>
 
-      {/* Modern Vertical Timeline */}
-      <div className="relative space-y-2 ">
-        {timelineEvents.map((event) => {
-          if (event._type === "activity") {
-            const activity = event;
-            return (
-              <div key={`act-${activity._id}`} className="relative group">
-                {/* Timeline Dot */}
-                <div className="absolute -left-[31px] top-4 h-4 w-4 rounded-full border-2 border-background bg-blue-500 ring-4 ring-background" />
+      {/* Timeline Stream */}
+      {timelineEvents.length === 0 ? (
+        <div className="bg-card rounded-xl border border-dashed border-border p-12 text-center flex flex-col items-center">
+          <div className="h-10 w-10 bg-muted rounded-xl flex items-center justify-center mb-3 text-muted-foreground">
+            <Calendar className="h-5 w-5" />
+          </div>
+          <h4 className="text-sm font-bold text-foreground">No Activities Logged</h4>
+          <p className="text-xs text-muted-foreground max-w-xs mt-1 mb-4">
+            Keep track of client meetings, emails, and follow-ups by logging an activity.
+          </p>
+          <Button onClick={() => setIsDialogOpen(true)} variant="outline" size="sm" className="text-xs font-semibold">
+            <Plus className="h-3.5 w-3.5 mr-1" /> Log First Activity
+          </Button>
+        </div>
+      ) : (
+        <div className="relative pl-6 sm:pl-8 space-y-4 before:absolute before:left-3 sm:before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/80">
+          {timelineEvents.map((event) => {
+            if (event._type === "activity") {
+              const activity = event;
+              return (
+                <div key={`act-${activity._id}`} className="relative group">
+                  {/* Timeline Dot */}
+                  <div className="absolute -left-6 sm:-left-8 top-3 h-3.5 w-3.5 rounded-full border-2 border-background bg-primary ring-2 ring-primary/20" />
 
-                <div className="bg-card rounded-xl border p-5 shadow-xs transition-shadow hover:shadow-md">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border">
-                        <AvatarFallback className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-semibold text-xs">
-                          {activity.createdBy?.firstName?.[0] || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm">
-                            {activity.createdBy?.firstName} {activity.createdBy?.lastName}
+                  <div className="bg-card rounded-xl border border-border/70 p-4 shadow-2xs hover:border-primary/40 transition-colors space-y-2.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar className="h-8 w-8 rounded-lg">
+                          <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold text-xs">
+                            {activity.createdBy?.firstName?.[0] || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-foreground">
+                              {activity.createdBy?.firstName} {activity.createdBy?.lastName}
+                            </span>
+                            <Badge variant="outline" className="text-[10px] font-semibold bg-primary/5 text-primary border-primary/20">
+                              {activity.activityType || "Activity"}
+                            </Badge>
+                          </div>
+                          <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Clock className="h-3 w-3" />
+                            {activity.activityDate
+                              ? formatDistanceToNow(new Date(activity.activityDate), { addSuffix: true })
+                              : "Recently"}
                           </span>
-                          <Badge variant="outline" className="text-xs font-normal border-blue-200 text-blue-700 bg-blue-50/50 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900">
-                            Activity
-                          </Badge>
                         </div>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Clock className="h-3 w-3" />
-                          {activity.activityDate
-                            ? formatDistanceToNow(new Date(activity.activityDate), { addSuffix: true })
-                            : "Recently"}
-                        </span>
                       </div>
-                    </div>
-                  </div>
 
-                  <h3 className="text-base font-medium mb-3 text-foreground">
-                    {activity.discussionSummary || "No summary provided"}
-                  </h3>
-
-                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground pt-3 border-t bg-muted/20 -mx-5 -mb-5 p-3 rounded-b-xl">
-                    {activity.activityDate && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-medium text-foreground">Date:</span>
-                        <span>
+                      {activity.activityDate && (
+                        <span className="text-[11px] text-muted-foreground font-medium hidden sm:inline">
                           {format(new Date(activity.activityDate), "MMM dd, yyyy")} {activity.activityTime}
                         </span>
-                      </div>
-                    )}
-                    <div>
-                      <span className="font-medium text-foreground">Type:</span> {activity.activityType}
+                      )}
                     </div>
-                    {activity.mode && (
-                      <div>
-                        <span className="font-medium text-foreground">Mode:</span> {activity.mode}
-                      </div>
-                    )}
-                    {activity.outcome && (
-                      <div>
-                        <span className="font-medium text-foreground">Outcome:</span> {activity.outcome}
-                      </div>
-                    )}
+
+                    <p className="text-xs text-foreground font-medium">
+                      {activity.discussionSummary || "No summary provided"}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground pt-2 border-t border-border/40">
+                      {activity.mode && (
+                        <div>
+                          <span className="font-semibold text-foreground">Channel:</span> {activity.mode}
+                        </div>
+                      )}
+                      {activity.outcome && (
+                        <div>
+                          <span className="font-semibold text-foreground">Outcome:</span> {activity.outcome}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          }
+              );
+            }
 
-          if (event._type === "followup") {
-            const fol = event;
-            const isCompleted = fol.status === "Completed";
-            const isCancelled = fol.status === "Cancelled";
-            const isPending = fol.status === "Pending";
+            if (event._type === "followup") {
+              const fol = event;
+              const isCompleted = fol.status === "Completed";
+              const isCancelled = fol.status === "Cancelled";
+              const isPending = fol.status === "Pending";
 
-            return (
-              <div key={`fol-${fol._id}`} className="relative group">
-                {/* Timeline Dot */}
-                <div
-                  className={`absolute -left-[31px] top-4 h-4 w-4 rounded-full border-2 border-background ring-4 ring-background ${
-                    isCompleted ? "bg-emerald-500" : isPending ? "bg-amber-500" : "bg-destructive"
-                  }`}
-                />
+              return (
+                <div key={`fol-${fol._id}`} className="relative group">
+                  {/* Timeline Dot */}
+                  <div
+                    className={cn(
+                      "absolute -left-6 sm:-left-8 top-3 h-3.5 w-3.5 rounded-full border-2 border-background ring-2",
+                      isCompleted && "bg-emerald-500 ring-emerald-500/20",
+                      isPending && "bg-amber-500 ring-amber-500/20",
+                      isCancelled && "bg-destructive ring-destructive/20",
+                    )}
+                  />
 
-                <div
-                  className={`rounded-xl border p-5 shadow-xs transition-shadow hover:shadow-md ${
-                    isPending ? "bg-amber-50/30 border-amber-200/60 dark:bg-amber-950/10 dark:border-amber-900/40" : "bg-card"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border">
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                          {(isCompleted ? fol.completedBy?.firstName?.[0] : fol.owner?.firstName?.[0]) || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm">
-                            {isCompleted
-                              ? `${fol.completedBy?.firstName} ${fol.completedBy?.lastName}`
-                              : fol.owner
-                              ? `${fol.owner?.firstName} ${fol.owner?.lastName}`
-                              : "Unassigned"}
-                          </span>
-                          <Badge
-                            variant={isCompleted ? "default" : isPending ? "secondary" : "destructive"}
-                            className={`text-xs gap-1 ${
-                              isCompleted
-                                ? "bg-emerald-600 hover:bg-emerald-700"
-                                : isPending
-                                ? "bg-amber-500 text-white hover:bg-amber-600"
-                                : ""
-                            }`}
-                          >
-                            {isCompleted && <CheckCircle2 className="h-3 w-3" />}
-                            {isPending && <AlertCircle className="h-3 w-3" />}
-                            {isCancelled && <XCircle className="h-3 w-3" />}
-                            {fol.status} Follow-up
-                          </Badge>
-                          {fol.attempts && (
-                            <Badge variant="outline" className="text-[10px] font-normal px-1.5 bg-muted/50">
-                              Attempt #{fol.attempts}
-                            </Badge>
-                          )}
-                          {fol.stageAtTime && (
-                            <span className="text-[10px] text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded border">
-                              Stage: {fol.stageAtTime}
+                  <div
+                    className={cn(
+                      "rounded-xl border p-4 shadow-2xs transition-colors space-y-2.5",
+                      isPending ? "bg-amber-500/5 border-amber-500/30" : "bg-card border-border/70",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar className="h-8 w-8 rounded-lg">
+                          <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold text-xs">
+                            {(isCompleted ? fol.completedBy?.firstName?.[0] : fol.owner?.firstName?.[0]) || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-foreground">
+                              {isCompleted
+                                ? `${fol.completedBy?.firstName || ""} ${fol.completedBy?.lastName || ""}`
+                                : fol.owner
+                                  ? `${fol.owner?.firstName || ""} ${fol.owner?.lastName || ""}`
+                                  : "Unassigned"}
                             </span>
-                          )}
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-[10px] font-bold",
+                                isCompleted && "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+                                isPending && "bg-amber-500/10 text-amber-600 border-amber-500/20",
+                                isCancelled && "bg-destructive/10 text-destructive border-destructive/20",
+                              )}
+                            >
+                              {isCompleted && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                              {isPending && <AlertCircle className="h-3 w-3 mr-1" />}
+                              {isCancelled && <XCircle className="h-3 w-3 mr-1" />}
+                              {fol.status} Follow-up
+                            </Badge>
+                          </div>
+                          <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Clock className="h-3 w-3" />
+                            {fol.createdAt ? formatDistanceToNow(new Date(fol.createdAt), { addSuffix: true }) : ""}
+                          </span>
                         </div>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Clock className="h-3 w-3" />
-                          {fol.createdAt ? `Created ${formatDistanceToNow(new Date(fol.createdAt), { addSuffix: true })}` : ""}
-                        </span>
                       </div>
-                    </div>
 
-                    {isPending && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800"
-                          onClick={() => {
-                            setSelectedFollowUpId(fol._id);
-                            setCompleteModalOpen(true);
-                          }}
-                        >
-                          Complete
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setTimeout(() => {
+                      {isPending && (
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-xs font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20"
+                            onClick={() => {
+                              setSelectedFollowUpId(fol._id);
+                              setCompleteModalOpen(true);
+                            }}
+                          >
+                            Complete
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <MoreHorizontal className="h-3.5 w-3.5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
                                   setSelectedFollowUpId(fol._id);
                                   setSelectedFollowUpData(fol);
                                   setEditModalOpen(true);
-                                }, 0);
-                              }}
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => {
-                                setTimeout(() => {
+                                }}
+                              >
+                                <Edit className="h-3.5 w-3.5 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => {
                                   setSelectedFollowUpId(fol._id);
+                                  setSelectedFollowUpData(fol);
                                   setCancelModalOpen(true);
-                                }, 0);
-                              }}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Cancel
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-medium text-sm flex items-center gap-2 text-foreground">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        Scheduled for: {fol.scheduledDate ? format(new Date(fol.scheduledDate), "MMM dd, yyyy") : "TBD"}
-                      </h4>
-                      {fol.notes && <p className="text-sm text-muted-foreground mt-1.5 pl-6">{fol.notes}</p>}
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-2" /> Cancel
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
                     </div>
 
-                    {isCompleted && (
-                      <div className="mt-3 bg-muted/40 p-3 rounded-lg text-xs space-y-2 border">
-                        {fol.completionReason && (
-                          <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-primary/10 text-primary mb-2">
-                            {fol.completionReason}
-                          </div>
-                        )}
-                        <div className="flex items-start gap-2">
-                          <MessageSquare className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
-                          <div>
-                            <span className="font-medium text-foreground">Completion Notes: </span>
-                            <span className="text-muted-foreground">{fol.completionNotes || "None"}</span>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-4 text-muted-foreground pt-2 border-t">
-                          <div>
-                            <span className="font-medium text-foreground">Completed:</span>{" "}
-                            {fol.completionDate ? format(new Date(fol.completionDate), "MMM dd, yyyy") : "N/A"}
-                          </div>
-                          <div>
-                            <span className="font-medium text-foreground">Logged:</span>{" "}
-                            {fol.completedAt ? format(new Date(fol.completedAt), "MMM dd, yyyy p") : "N/A"}
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    {fol.note && <p className="text-xs text-foreground font-medium">{fol.note}</p>}
 
-                    {isCancelled && (
-                      <div className="mt-3 bg-destructive/10 p-3 rounded-lg text-xs border border-destructive/20 text-destructive">
-                        <span className="font-semibold">Cancel Reason: </span>
-                        {fol.cancelReason || "No reason provided"}
+                    {fol.scheduledDate && (
+                      <div className="text-[11px] text-muted-foreground pt-2 border-t border-border/40">
+                        <span className="font-semibold text-foreground">Scheduled For:</span>{" "}
+                        {format(new Date(fol.scheduledDate), "MMM dd, yyyy")}
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            );
-          }
-        })}
-      </div>
+              );
+            }
 
+            return null;
+          })}
+        </div>
+      )}
+
+      {/* Completion Modal */}
       {selectedFollowUpId && (
-        <>
-          <CompleteFollowUpModal
-            clientId={clientId}
-            followUpId={selectedFollowUpId}
-            open={completeModalOpen}
-            onOpenChange={(open) => {
-              setCompleteModalOpen(open);
-              if (!open) setSelectedFollowUpId(null);
-            }}
-            onSuccess={fetchActivities}
-          />
-          <EditFollowUpModal
-            clientId={clientId}
-            followUpId={selectedFollowUpId}
-            open={editModalOpen}
-            onOpenChange={(open) => {
-              setEditModalOpen(open);
-              if (!open) {
-                setSelectedFollowUpId(null);
-                setSelectedFollowUpData(null);
-              }
-            }}
-            currentDate={selectedFollowUpData?.scheduledDate}
-            currentOwnerId={selectedFollowUpData?.owner?._id || selectedFollowUpData?.owner}
-            currentNotes={selectedFollowUpData?.notes}
-            onSuccess={fetchActivities}
-          />
-          <CancelFollowUpModal
-            clientId={clientId}
-            followUpId={selectedFollowUpId}
-            open={cancelModalOpen}
-            onOpenChange={(open) => {
-              setCancelModalOpen(open);
-              if (!open) setSelectedFollowUpId(null);
-            }}
-            onSuccess={fetchActivities}
-          />
-        </>
+        <CompleteFollowUpModal
+          open={completeModalOpen}
+          onOpenChange={(open) => {
+            setCompleteModalOpen(open);
+            if (!open) setSelectedFollowUpId(null);
+          }}
+          clientId={clientId}
+          followUpId={selectedFollowUpId}
+          onSuccess={fetchActivities}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {selectedFollowUpId && (
+        <EditFollowUpModal
+          open={editModalOpen}
+          onOpenChange={(open) => {
+            setEditModalOpen(open);
+            if (!open) {
+              setSelectedFollowUpId(null);
+              setSelectedFollowUpData(null);
+            }
+          }}
+          clientId={clientId}
+          followUpId={selectedFollowUpId}
+          currentNotes={selectedFollowUpData?.note}
+          onSuccess={fetchActivities}
+        />
+      )}
+
+      {/* Cancel Modal */}
+      {selectedFollowUpId && (
+        <CancelFollowUpModal
+          open={cancelModalOpen}
+          onOpenChange={(open) => {
+            setCancelModalOpen(open);
+            if (!open) {
+              setSelectedFollowUpId(null);
+              setSelectedFollowUpData(null);
+            }
+          }}
+          clientId={clientId}
+          followUpId={selectedFollowUpId}
+          onSuccess={fetchActivities}
+        />
       )}
     </div>
   );
