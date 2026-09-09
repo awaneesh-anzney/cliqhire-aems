@@ -17,7 +17,13 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PenTool,
-  Sparkles
+  Sparkles,
+  Building2,
+  UserCheck,
+  Users,
+  Check,
+  X,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +47,8 @@ import {
 import { Mailbox } from "@/types/email";
 import { useDisconnectMailbox } from "@/hooks/useEmail";
 import { useEmailSignatures } from "@/hooks/useEmailSignatures";
+import { EmailContactType, EMAIL_TYPE_CONFIG } from "@/types/emailContactTypes";
+import { EmailAddressSelector } from "./EmailAddressSelector";
 
 export type EmailFolder = "inbox" | "starred" | "sent" | "drafts" | "trash";
 
@@ -54,6 +62,10 @@ interface EmailSidebarProps {
   onToggleCollapse?: () => void;
   onCloseMobile?: () => void;
   onOpenSignatures?: () => void;
+  selectedEmailType?: EmailContactType | null;
+  onSelectEmailType?: (type: EmailContactType | null) => void;
+  selectedEmailAddress?: string | null;
+  onSelectEmailAddress?: (email: string | null) => void;
 }
 
 export const EmailSidebar: React.FC<EmailSidebarProps> = ({
@@ -66,6 +78,10 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
   onToggleCollapse,
   onCloseMobile,
   onOpenSignatures,
+  selectedEmailType = null,
+  onSelectEmailType,
+  selectedEmailAddress = null,
+  onSelectEmailAddress,
 }) => {
   const disconnectMutation = useDisconnectMailbox();
   const [disconnectOpen, setDisconnectOpen] = useState(false);
@@ -252,6 +268,176 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 </button>
               );
             })}
+
+            {/* Email Types Section (Client, Candidate, Team) */}
+            <div className="pt-2.5 border-t border-border/40 mt-2.5 space-y-1">
+              {!isCollapsed && (
+                <div className="flex items-center justify-between px-2 mb-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                    Email Types
+                  </span>
+                  {(selectedEmailType || selectedEmailAddress) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectEmailType?.(null);
+                        onSelectEmailAddress?.(null);
+                      }}
+                      className="text-[10px] font-semibold text-muted-foreground hover:text-destructive transition-colors"
+                      title="Clear type filter"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {([
+                {
+                  id: "client" as EmailContactType,
+                  label: "Client Emails",
+                  icon: Building2,
+                  color: "text-blue-600 dark:text-blue-400",
+                  activeBg: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+                },
+                {
+                  id: "candidate" as EmailContactType,
+                  label: "Candidate Emails",
+                  icon: UserCheck,
+                  color: "text-emerald-600 dark:text-emerald-400",
+                  activeBg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+                },
+                {
+                  id: "team" as EmailContactType,
+                  label: "Team Emails",
+                  icon: Users,
+                  color: "text-purple-600 dark:text-purple-400",
+                  activeBg: "bg-purple-500/10 text-purple-700 dark:text-purple-300",
+                },
+              ]).map((typeItem) => {
+                const Icon = typeItem.icon;
+                const isTypeActive = selectedEmailType === typeItem.id;
+                const hasAddressForThisType = isTypeActive && !!selectedEmailAddress;
+
+                if (isCollapsed) {
+                  return (
+                    <EmailAddressSelector
+                      key={typeItem.id}
+                      initialType={typeItem.id}
+                      selectedEmail={isTypeActive ? selectedEmailAddress : null}
+                      onSelect={(email) => {
+                        onSelectEmailType?.(typeItem.id);
+                        onSelectEmailAddress?.(email);
+                      }}
+                      onClear={() => onSelectEmailAddress?.(null)}
+                      trigger={
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-colors relative ${
+                                isTypeActive
+                                  ? `${typeItem.activeBg} font-bold shadow-2xs`
+                                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                              }`}
+                            >
+                              <Icon className={`h-4 w-4 ${isTypeActive ? typeItem.color : ""}`} />
+                              {hasAddressForThisType && (
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
+                              )}
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            {typeItem.label}
+                            {hasAddressForThisType ? ` (${selectedEmailAddress})` : " - Select Address"}
+                          </TooltipContent>
+                        </Tooltip>
+                      }
+                    />
+                  );
+                }
+
+                return (
+                  <div key={typeItem.id} className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isTypeActive) {
+                          // Toggle off
+                          onSelectEmailType?.(null);
+                          onSelectEmailAddress?.(null);
+                        } else {
+                          onSelectEmailType?.(typeItem.id);
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium transition-all group ${
+                        isTypeActive
+                          ? `${typeItem.activeBg} font-semibold shadow-2xs`
+                          : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Icon
+                          className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${
+                            isTypeActive ? typeItem.color : "text-muted-foreground/80"
+                          }`}
+                        />
+                        <span className="truncate">{typeItem.label}</span>
+                      </div>
+
+                      {isTypeActive ? (
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                      ) : null}
+                    </button>
+
+                    {/* Expandable Email Address Selector when type is selected */}
+                    {isTypeActive && (
+                      <div className="pl-6 pr-1 pb-1 pt-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                        <EmailAddressSelector
+                          initialType={typeItem.id}
+                          selectedEmail={selectedEmailAddress}
+                          onSelect={(email) => onSelectEmailAddress?.(email)}
+                          onClear={() => onSelectEmailAddress?.(null)}
+                          title={`Select ${typeItem.label.replace(" Emails", "")} Email`}
+                          trigger={
+                            <button
+                              type="button"
+                              className={`w-full text-left px-2 py-1 rounded-lg text-[11px] flex items-center justify-between gap-1 border transition-all ${
+                                selectedEmailAddress
+                                  ? "bg-primary/10 text-primary border-primary/25 font-mono font-medium shadow-2xs"
+                                  : "bg-muted/30 text-muted-foreground hover:text-foreground border-border/60 hover:bg-muted/60"
+                              }`}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <Mail className="h-3 w-3 shrink-0 text-primary/70" />
+                                <span className="truncate">
+                                  {selectedEmailAddress || "Select email address..."}
+                                </span>
+                              </div>
+
+                              {selectedEmailAddress ? (
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectEmailAddress?.(null);
+                                  }}
+                                  className="p-0.5 rounded hover:bg-primary/20 hover:text-primary shrink-0 text-muted-foreground"
+                                  title="Clear address"
+                                >
+                                  <X className="h-2.5 w-2.5" />
+                                </span>
+                              ) : (
+                                <ChevronRight className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                              )}
+                            </button>
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Email Signatures Quick Trigger in Sidebar */}
             {onOpenSignatures && (

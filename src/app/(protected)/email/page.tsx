@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   EmailHeader,
   MailboxConnectCard,
@@ -12,7 +12,9 @@ import {
   EmailComposerDialog,
   ComposerInitialData,
   AdminMailboxesDialog,
-  EmailSignatureDialog
+  EmailSignatureDialog,
+  EmailContactType,
+  EMAIL_TYPE_CONFIG
 } from "@/components/email";
 import { 
   useMailboxStatus, 
@@ -22,7 +24,8 @@ import {
   useToggleStar 
 } from "@/hooks/useEmail";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function EmailPage() {
   const { 
@@ -40,6 +43,10 @@ export default function EmailPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+
+  // Email type & address selection state (Client, Candidate, Team)
+  const [selectedEmailType, setSelectedEmailType] = useState<EmailContactType | null>(null);
+  const [selectedEmailAddress, setSelectedEmailAddress] = useState<string | null>(null);
 
   // Responsive sidebar states
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -119,14 +126,24 @@ export default function EmailPage() {
     }
   });
 
+  // Filter items by selected email address or stakeholder type
+  const displayItems = useMemo(() => {
+    if (!selectedEmailAddress) return mappedItems;
+    const target = selectedEmailAddress.toLowerCase();
+    return mappedItems.filter((item) =>
+      item.participants.some((p) => p.toLowerCase().includes(target)) ||
+      item.subject.toLowerCase().includes(target)
+    );
+  }, [mappedItems, selectedEmailAddress]);
+
   // Auto-select first thread on wide desktop displays only (>= 1280px)
   useEffect(() => {
-    if (!selectedThreadId && mappedItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1280) {
-      if (!mappedItems[0].isDraft) {
-        setSelectedThreadId(mappedItems[0].threadId || mappedItems[0].id);
+    if (!selectedThreadId && displayItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1280) {
+      if (!displayItems[0].isDraft) {
+        setSelectedThreadId(displayItems[0].threadId || displayItems[0].id);
       }
     }
-  }, [mappedItems, selectedThreadId]);
+  }, [displayItems, selectedThreadId]);
 
   const handleSelectThread = (item: EmailListItem) => {
     if (item.isDraft) {
@@ -199,6 +216,13 @@ export default function EmailPage() {
         onOpenMobileNav={() => setMobileNavOpen(true)}
         onOpenSignatures={() => setSignatureDialogOpen(true)}
         activeFolder={activeFolder}
+        selectedEmailType={selectedEmailType}
+        onSelectEmailType={(type) => {
+          setSelectedEmailType(type);
+          setSelectedEmailAddress(null);
+        }}
+        selectedEmailAddress={selectedEmailAddress}
+        onSelectEmailAddress={(email) => setSelectedEmailAddress(email)}
       />
 
       {/* Main Mailbox Workspace */}
@@ -227,6 +251,13 @@ export default function EmailPage() {
               isCollapsed={isSidebarCollapsed}
               onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               onOpenSignatures={() => setSignatureDialogOpen(true)}
+              selectedEmailType={selectedEmailType}
+              onSelectEmailType={(type) => {
+                setSelectedEmailType(type);
+                setSelectedEmailAddress(null);
+              }}
+              selectedEmailAddress={selectedEmailAddress}
+              onSelectEmailAddress={(email) => setSelectedEmailAddress(email)}
             />
           </div>
 
@@ -247,18 +278,59 @@ export default function EmailPage() {
                 </p>
               </div>
             ) : (
-              <EmailThreadList
-                threads={mappedItems}
-                isLoading={loadingList}
-                selectedThreadId={selectedThreadId}
-                onSelectThread={handleSelectThread}
-                page={page}
-                totalPages={totalPages}
-                totalThreads={totalThreads}
-                onPageChange={setPage}
-                searchQuery={searchQuery}
-                onToggleStar={handleToggleStar}
-              />
+              <div className="flex flex-col h-full min-h-0">
+                {/* Active Stakeholder Email Type / Address Filter Banner */}
+                {(selectedEmailType || selectedEmailAddress) && (
+                  <div className="mb-2 p-2 px-3 rounded-xl bg-card border border-border/70 shadow-2xs flex items-center justify-between gap-2 text-xs shrink-0 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div
+                        className={`h-2 w-2 rounded-full shrink-0 ${
+                          selectedEmailType === "client"
+                            ? "bg-blue-500"
+                            : selectedEmailType === "candidate"
+                            ? "bg-emerald-500"
+                            : "bg-purple-500"
+                        }`}
+                      />
+                      <span className="font-semibold text-foreground truncate">
+                        {selectedEmailType ? EMAIL_TYPE_CONFIG[selectedEmailType].label : "Filtered"}
+                      </span>
+                      {selectedEmailAddress && (
+                        <span className="font-mono text-[11px] text-muted-foreground truncate">
+                          • {selectedEmailAddress}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedEmailType(null);
+                        setSelectedEmailAddress(null);
+                      }}
+                      className="h-6 px-2 text-[10px] text-muted-foreground hover:text-destructive rounded-lg transition-colors shrink-0"
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      <span>Reset</span>
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex-1 min-h-0">
+                  <EmailThreadList
+                    threads={displayItems}
+                    isLoading={loadingList}
+                    selectedThreadId={selectedThreadId}
+                    onSelectThread={handleSelectThread}
+                    page={page}
+                    totalPages={totalPages}
+                    totalThreads={selectedEmailAddress ? displayItems.length : totalThreads}
+                    onPageChange={setPage}
+                    searchQuery={searchQuery}
+                    onToggleStar={handleToggleStar}
+                  />
+                </div>
+              </div>
             )}
           </div>
 
@@ -301,6 +373,17 @@ export default function EmailPage() {
               onOpenSignatures={() => {
                 setMobileNavOpen(false);
                 setSignatureDialogOpen(true);
+              }}
+              selectedEmailType={selectedEmailType}
+              onSelectEmailType={(type) => {
+                setSelectedEmailType(type);
+                setSelectedEmailAddress(null);
+                setMobileNavOpen(false);
+              }}
+              selectedEmailAddress={selectedEmailAddress}
+              onSelectEmailAddress={(email) => {
+                setSelectedEmailAddress(email);
+                setMobileNavOpen(false);
               }}
             />
           </div>

@@ -7,13 +7,16 @@ import {
   PenSquare, 
   RefreshCw, 
   Search, 
-  Settings, 
-  Users, 
+  Settings,  
   AlertTriangle, 
   XCircle,
   Menu,
   X,
-  PenTool
+  PenTool,
+  Building2,
+  UserCheck,
+  Users,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Mailbox, MailboxConnectionStatus } from "@/types/email";
 import { useAuth } from "@/contexts/AuthContext";
 import { EmailFolder } from "./EmailSidebar";
+import { EmailContactType, EMAIL_TYPE_CONFIG } from "@/types/emailContactTypes";
+import { EmailAddressSelector } from "./EmailAddressSelector";
 
 interface EmailHeaderProps {
   mailbox: Mailbox | null;
@@ -34,6 +39,10 @@ interface EmailHeaderProps {
   onOpenMobileNav?: () => void;
   onOpenSignatures?: () => void;
   activeFolder?: EmailFolder;
+  selectedEmailType?: EmailContactType | null;
+  onSelectEmailType?: (type: EmailContactType | null) => void;
+  selectedEmailAddress?: string | null;
+  onSelectEmailAddress?: (email: string | null) => void;
 }
 
 const FOLDER_LABELS: Record<EmailFolder, string> = {
@@ -56,6 +65,10 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
   onOpenMobileNav,
   onOpenSignatures,
   activeFolder = "inbox",
+  selectedEmailType = null,
+  onSelectEmailType,
+  selectedEmailAddress = null,
+  onSelectEmailAddress,
 }) => {
   const { user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
@@ -121,10 +134,31 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
 
           {/* Title & Current Account */}
           <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-sm sm:text-base font-bold tracking-tight text-foreground truncate">
-                {FOLDER_LABELS[activeFolder]}
+                {selectedEmailType ? EMAIL_TYPE_CONFIG[selectedEmailType].label : FOLDER_LABELS[activeFolder]}
               </h1>
+
+              {/* Selected Email Address Badge */}
+              {selectedEmailAddress && (
+                <Badge
+                  variant="outline"
+                  className="h-5 pl-2 pr-1 gap-1 text-[11px] font-mono bg-primary/10 text-primary border-primary/25 shrink-0"
+                >
+                  <span className="truncate max-w-[150px] sm:max-w-[200px]">
+                    {selectedEmailAddress}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onSelectEmailAddress?.(null)}
+                    className="p-0.5 rounded hover:bg-primary/20 text-muted-foreground hover:text-primary transition-colors"
+                    title="Clear selected email address"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </Badge>
+              )}
+
               {getStatusBadge(mailbox?.connectionStatus)}
             </div>
 
@@ -201,6 +235,46 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
             <span className="hidden md:inline font-medium">Signatures</span>
           </Button>
         )}
+
+        {/* Stakeholder Email Address Selector in Header */}
+        <EmailAddressSelector
+          initialType={selectedEmailType || "client"}
+          selectedEmail={selectedEmailAddress}
+          onSelect={(email, contact) => {
+            onSelectEmailType?.(contact.type);
+            onSelectEmailAddress?.(email);
+          }}
+          onClear={() => onSelectEmailAddress?.(null)}
+          title="Select Email Address"
+          trigger={
+            <Button
+              variant="outline"
+              size="sm"
+              className={`h-8 px-2.5 gap-1.5 text-xs rounded-xl border-border/70 shadow-2xs hover:bg-muted/50 shrink-0 transition-colors ${
+                selectedEmailAddress
+                  ? "bg-primary/10 border-primary/30 text-primary font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Select email address for Client, Candidate, or Team"
+            >
+              <Users className="h-3.5 w-3.5 text-primary" />
+              <span className="hidden lg:inline">
+                {selectedEmailAddress ? selectedEmailAddress : "Select Email"}
+              </span>
+              {selectedEmailAddress && (
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectEmailAddress?.(null);
+                  }}
+                  className="p-0.5 rounded hover:bg-foreground/10 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </span>
+              )}
+            </Button>
+          }
+        />
 
         {/* Desktop Compose CTA */}
         <Button

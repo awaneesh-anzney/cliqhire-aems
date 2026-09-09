@@ -15,7 +15,10 @@ import {
   Link2, 
   Sparkles, 
   Save,
-  PenTool
+  PenTool,
+  Building2,
+  UserCheck,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +36,7 @@ import { useEmailSignatures } from "@/hooks/useEmailSignatures";
 import { RecipientInput } from "./RecipientInput";
 import { EmailRichEditor, EmailRichEditorRef } from "./EmailRichEditor";
 import { EmailSignatureDialog } from "./EmailSignatureDialog";
+import { EmailAddressSelector } from "./EmailAddressSelector";
 
 export interface ComposerInitialData {
   to?: string;
@@ -461,6 +465,82 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
         {/* Recipients Form Header */}
         <div className="bg-card shrink-0">
+          {/* Stakeholder Quick Email Address Selector */}
+          <div className="px-3 py-1 bg-muted/20 border-b border-border/50 flex items-center justify-between gap-2 text-[11px] overflow-x-auto">
+            <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 shrink-0">
+              <Users className="h-3 w-3 text-primary" />
+              <span>Select Email:</span>
+            </span>
+
+            <div className="flex items-center gap-1 shrink-0">
+              <EmailAddressSelector
+                initialType="client"
+                align="start"
+                title="Select Client Email Address"
+                onSelect={(email) => {
+                  if (!toRecipients.includes(email)) {
+                    setToRecipients((prev) => [...prev, email]);
+                    setDraftStatus("unsaved");
+                  }
+                }}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300 hover:bg-blue-500/20 border border-blue-200/60 dark:border-blue-800/40 transition-colors"
+                    title="Select from client emails"
+                  >
+                    <Building2 className="h-2.5 w-2.5" />
+                    <span>Client</span>
+                  </button>
+                }
+              />
+
+              <EmailAddressSelector
+                initialType="candidate"
+                align="start"
+                title="Select Candidate Email Address"
+                onSelect={(email) => {
+                  if (!toRecipients.includes(email)) {
+                    setToRecipients((prev) => [...prev, email]);
+                    setDraftStatus("unsaved");
+                  }
+                }}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 border border-emerald-200/60 dark:border-emerald-800/40 transition-colors"
+                    title="Select from candidate emails"
+                  >
+                    <UserCheck className="h-2.5 w-2.5" />
+                    <span>Candidate</span>
+                  </button>
+                }
+              />
+
+              <EmailAddressSelector
+                initialType="team"
+                align="start"
+                title="Select Team Member Email Address"
+                onSelect={(email) => {
+                  if (!toRecipients.includes(email)) {
+                    setToRecipients((prev) => [...prev, email]);
+                    setDraftStatus("unsaved");
+                  }
+                }}
+                trigger={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 border border-purple-200/60 dark:border-purple-800/40 transition-colors"
+                    title="Select from team member emails"
+                  >
+                    <Users className="h-2.5 w-2.5" />
+                    <span>Team</span>
+                  </button>
+                }
+              />
+            </div>
+          </div>
+
           {/* TO Field */}
           <RecipientInput
             label="To"

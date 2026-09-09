@@ -8,3 +8,5 @@ export * from "./EmailRichEditor";
 export * from "./RecipientInput";
 export * from "./AdminMailboxesDialog";
 export * from "./EmailSignatureDialog";
+export * from "./EmailAddressSelector";
+export * from "@/types/emailContactTypes";

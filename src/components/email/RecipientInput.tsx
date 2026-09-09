@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useRef, KeyboardEvent, ClipboardEvent } from "react";
-import { X, AlertCircle } from "lucide-react";
+import { X, AlertCircle, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { EmailAddressSelector } from "./EmailAddressSelector";
+import { EmailContactItem } from "@/types/emailContactTypes";
 
 interface RecipientInputProps {
   label: string;
@@ -11,6 +13,7 @@ interface RecipientInputProps {
   placeholder?: string;
   autoFocus?: boolean;
   rightAction?: React.ReactNode;
+  showContactPicker?: boolean;
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,6 +25,7 @@ export const RecipientInput: React.FC<RecipientInputProps> = ({
   placeholder = "Add recipients...",
   autoFocus = false,
   rightAction,
+  showContactPicker = true,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -126,8 +130,27 @@ export const RecipientInput: React.FC<RecipientInputProps> = ({
         className="flex-1 min-w-[120px] bg-transparent outline-none text-xs text-foreground placeholder:text-muted-foreground/60 h-6"
       />
 
-      {/* Optional right actions (e.g. + Cc, + Bcc toggles) */}
-      {rightAction && <div className="ml-auto shrink-0">{rightAction}</div>}
+      {/* Right actions: Contact selector & optional toggles (e.g. + Cc, + Bcc) */}
+      <div className="ml-auto flex items-center gap-1 shrink-0">
+        {showContactPicker && (
+          <EmailAddressSelector
+            align="end"
+            title={`Select ${label} Email Address`}
+            onSelect={(email) => addEmails([email])}
+            trigger={
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded-md hover:bg-muted transition-colors shrink-0"
+                title="Select email address (Client, Candidate, Team)"
+              >
+                <Users className="h-3 w-3" />
+                <span className="hidden sm:inline">Select</span>
+              </button>
+            }
+          />
+        )}
+        {rightAction}
+      </div>
     </div>
   );
 };
