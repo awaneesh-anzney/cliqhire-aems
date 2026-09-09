@@ -112,6 +112,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [linkInputOpen, setLinkInputOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [pendingUpdates, setPendingUpdates] = useState<Record<string, { name?: string; contentHtml?: string; contentText?: string }>>({});
 
   // Sync initial or fallback selected signature
   useEffect(() => {
@@ -158,10 +159,14 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
       if (selectedId) {
         const html = editor.getHTML();
         const text = editor.getText();
-        updateMutation.mutate({
-          id: selectedId,
-          payload: { contentHtml: html, contentText: text },
-        });
+        setPendingUpdates((prev) => ({
+          ...prev,
+          [selectedId]: {
+            ...prev[selectedId],
+            contentHtml: html,
+            contentText: text,
+          },
+        }));
       }
     },
   });
@@ -169,9 +174,10 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
   // Sync editor content whenever selectedId changes
   useEffect(() => {
     if (editor && activeSignature) {
-      const currentHtml = editor.getHTML();
-      if (activeSignature.contentHtml !== currentHtml) {
-        editor.commands.setContent(activeSignature.contentHtml);
+      const sigId = activeSignature._id || activeSignature.id || "";
+      const expectedHtml = pendingUpdates[sigId]?.contentHtml ?? activeSignature.contentHtml;
+      if (editor.getHTML() !== expectedHtml) {
+        editor.commands.setContent(expectedHtml);
       }
     }
   }, [selectedId, editor]); // intentionally trigger on selectedId change
@@ -222,8 +228,27 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
     });
 
     editor.commands.setContent(html);
-    updateMutation.mutate({ id: selectedId, payload: { contentHtml: html } });
+    setPendingUpdates((prev) => ({
+      ...prev,
+      [selectedId]: {
+        ...prev[selectedId],
+        contentHtml: html,
+      },
+    }));
     toast.success(`Applied "${preset.name}" preset`);
+  };
+
+  // Save all pending updates
+  const handleSaveAndClose = () => {
+    const ids = Object.keys(pendingUpdates);
+    if (ids.length > 0) {
+      ids.forEach((id) => {
+        updateMutation.mutate({ id, payload: pendingUpdates[id] });
+      });
+      setPendingUpdates({});
+    }
+    onOpenChange(false);
+    toast.success("Signature preferences saved successfully");
   };
 
   // Link helper
@@ -333,7 +358,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                   >
                     <div className="flex-1 min-w-0 pr-2">
                       <div className="flex items-center gap-1.5 truncate">
-                        <span className="truncate font-semibold">{sig.name}</span>
+                        <span className="truncate font-semibold">{pendingUpdates[sigId]?.name ?? sig.name}</span>
                         {isSelected && (
                           <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
                         )}
@@ -385,8 +410,18 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                   <div className="flex items-center gap-2 flex-1 min-w-[200px]">
                     <span className="text-xs font-semibold text-muted-foreground shrink-0">Name:</span>
                     <Input
-                      value={activeSignature.name}
-                      onChange={(e) => updateMutation.mutate({ id: activeSignature._id || activeSignature.id || "", payload: { name: e.target.value } })}
+                      value={pendingUpdates[activeSignature._id || activeSignature.id || ""]?.name ?? activeSignature.name}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const id = activeSignature._id || activeSignature.id || "";
+                        setPendingUpdates((prev) => ({
+                          ...prev,
+                          [id]: {
+                            ...prev[id],
+                            name: val,
+                          },
+                        }));
+                      }}
                       className="h-8 text-xs font-semibold rounded-lg max-w-[240px] bg-background"
                       placeholder="Signature Name"
                     />
@@ -642,7 +677,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                       </div>
                       <div
                         className="p-4 rounded-xl border border-border/70 bg-muted/10 shadow-2xs"
-                        dangerouslySetInnerHTML={{ __html: activeSignature.contentHtml }}
+                        dangerouslySetInnerHTML={{ __html: pendingUpdates[activeSignature._id || activeSignature.id || ""]?.contentHtml ?? activeSignature.contentHtml }}
                       />
                     </div>
                   )}
@@ -702,13 +737,10 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
         {/* Modal Footer */}
         <div className="px-5 py-3 bg-muted/20 border-t border-border/60 flex items-center justify-between">
           <span className="text-[11px] text-muted-foreground">
-            Changes are saved automatically to your workspace.
+            Click Save &amp; Close to apply your changes.
           </span>
           <Button
-            onClick={() => {
-              onOpenChange(false);
-              toast.success("Signature preferences saved successfully");
-            }}
+            onClick={handleSaveAndClose}
             className="h-8 px-4 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
           >
             Save &amp; Close
