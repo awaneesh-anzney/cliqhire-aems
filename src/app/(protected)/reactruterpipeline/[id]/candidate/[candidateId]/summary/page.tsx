@@ -217,12 +217,33 @@ export default function CandidateJourneySummaryPage() {
     stageJourney = [],
     interviewSummary,
     rejectionInfo,
-    timeline = []
+    timeline = [],
+    globalHireInfo
   } = summary;
 
   return (
     <div className="flex flex-col h-screen w-full bg-slate-50/30 dark:bg-background/20 p-4 overflow-y-auto custom-scrollbar gap-4 animate-in fade-in duration-300">
       
+      {/* Global Hire Info Banner */}
+      {globalHireInfo?.isHired && (
+        <div className={`flex items-start gap-3 p-3.5 rounded-lg border shadow-sm shrink-0 ${globalHireInfo.hiredInThisPipeline ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900/30' : 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/30'}`}>
+          {globalHireInfo.hiredInThisPipeline ? (
+            <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          ) : (
+            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          )}
+          <div className="flex-1">
+            <h4 className={`text-sm font-bold ${globalHireInfo.hiredInThisPipeline ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'}`}>
+              {globalHireInfo.hiredInThisPipeline ? 'Hired in this Pipeline' : 'Hired Elsewhere'}
+            </h4>
+            <p className={`text-xs mt-0.5 ${globalHireInfo.hiredInThisPipeline ? 'text-emerald-700/80 dark:text-emerald-400/80' : 'text-amber-700/80 dark:text-amber-400/80'}`}>
+              This candidate was hired on {globalHireInfo.hiredAt ? new Date(globalHireInfo.hiredAt).toLocaleDateString() : 'an unknown date'}
+              {globalHireInfo.hiredInThisPipeline ? '.' : ' in a different pipeline. They are locked from being added to new pipelines.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 3-Column Hero Header Card */}
       <div className="relative overflow-hidden bg-card rounded-lg border border-border/60 shadow-sm py-3 px-4 flex flex-col md:flex-row md:items-stretch justify-between gap-4 md:gap-6 shrink-0 transition-shadow hover:shadow-md">
         

@@ -20,12 +20,14 @@ import {
   Loader2,
   Copy,
   Check,
+  Activity,
 } from "lucide-react";
 
 import CandidateSummary from "@/components/candidates/summary/candidate-summary";
 import { CandidateNotesContent } from "@/components/candidates/notes/notes-content";
 import { AttachmentsContent } from "@/components/candidates/attachments/attachments-content";
 import { JobsContent, JobsContentRef } from "@/components/candidates/jobs/jobs-content";
+import { CandidateTrackingContent } from "@/components/candidates/tracking/tracking-content";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CandidateStatusBadge } from "@/components/candidate-status-badge";
@@ -402,6 +404,14 @@ export default function ClientCandidateTabs({
           </TabsTrigger>
 
           <TabsTrigger
+            value="Tracking"
+            className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
+          >
+            <Activity className="h-3.5 w-3.5" />
+            <span>Tracking</span>
+          </TabsTrigger>
+
+          <TabsTrigger
             value="Notes"
             className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 text-xs font-medium rounded-md text-muted-foreground transition-all duration-150 shrink-0 cursor-pointer select-none hover:text-foreground hover:bg-muted/60 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:border data-[state=active]:border-border/70"
           >
@@ -440,6 +450,13 @@ export default function ClientCandidateTabs({
               candidateId={candidateId}
               candidateName={candidate.name || "Unknown Candidate"}
             />
+          </TabsContent>
+
+          <TabsContent
+            value="Tracking"
+            className="m-0 h-full outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
+          >
+            <CandidateTrackingContent candidateId={candidateId} />
           </TabsContent>
 
           <TabsContent
