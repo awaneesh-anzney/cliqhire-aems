@@ -67,14 +67,22 @@ const HIGHLIGHT_COLORS = [
   "#fca5a5", "#fdba74", "#fde047", "#86efac", "#7dd3fc", "#d8b4fe",
 ];
 
-export const EmailRichEditor: React.FC<EmailRichEditorProps> = ({
+export interface EmailRichEditorRef {
+  setContent: (html: string) => void;
+  insertContent: (html: string) => void;
+  getHTML: () => string;
+  getText: () => string;
+  focus: () => void;
+}
+
+export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEditorProps>(({
   initialContent = "",
   onChange,
   showToolbar = false,
   placeholder = "Write your message here...",
   onKeyDown,
   className = "",
-}) => {
+}, ref) => {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
   const [colorPopoverOpen, setColorPopoverOpen] = useState(false);
@@ -119,6 +127,28 @@ export const EmailRichEditor: React.FC<EmailRichEditorProps> = ({
       }
     },
   });
+
+  React.useImperativeHandle(ref, () => ({
+    setContent: (html: string) => {
+      if (editor) {
+        editor.commands.setContent(html);
+        if (onChange) {
+          onChange(html, editor.getText());
+        }
+      }
+    },
+    insertContent: (html: string) => {
+      if (editor) {
+        editor.commands.insertContent(html);
+        if (onChange) {
+          onChange(editor.getHTML(), editor.getText());
+        }
+      }
+    },
+    getHTML: () => editor?.getHTML() || "",
+    getText: () => editor?.getText() || "",
+    focus: () => editor?.commands.focus(),
+  }), [editor, onChange]);
 
   // Keep editor content in sync when initialContent changes externally
   useEffect(() => {
@@ -640,4 +670,6 @@ export const EmailRichEditor: React.FC<EmailRichEditorProps> = ({
       )}
     </div>
   );
-};
+});
+
+EmailRichEditor.displayName = "EmailRichEditor";

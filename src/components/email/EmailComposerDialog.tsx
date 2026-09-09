@@ -9,19 +9,30 @@ import {
   Minus, 
   Maximize2, 
   Minimize2, 
-  FileIcon,
-  Check,
-  Type,
-  Link2,
-  Sparkles,
-  Save
+  FileIcon, 
+  Check, 
+  Type, 
+  Link2, 
+  Sparkles, 
+  Save,
+  PenTool
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useSendEmail, useSaveDraft, useSendDraft, useUpdateDraft } from "@/hooks/useEmail";
+import { useEmailSignatures } from "@/hooks/useEmailSignatures";
 import { RecipientInput } from "./RecipientInput";
-import { EmailRichEditor } from "./EmailRichEditor";
+import { EmailRichEditor, EmailRichEditorRef } from "./EmailRichEditor";
+import { EmailSignatureDialog } from "./EmailSignatureDialog";
 
 export interface ComposerInitialData {
   to?: string;
@@ -55,6 +66,18 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   const updateDraftMutation = useUpdateDraft();
   const sendDraftMutation = useSendDraft();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<EmailRichEditorRef>(null);
+
+  const {
+    signatures,
+    defaultNewSignature,
+    defaultReplySignature,
+    getSignatureById,
+  } = useEmailSignatures();
+
+  // Signature state
+  const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
+  const [activeSignatureId, setActiveSignatureId] = useState<string | null>(null);
 
   // Window display state
   const [windowMode, setWindowMode] = useState<WindowMode>("docked");
@@ -76,6 +99,13 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   // Sync initial data when opened
   useEffect(() => {
     if (open) {
+      let initialHtml = "";
+      let initialTxt = "";
+      const isReply = !!initialData?.threadId;
+
+      // Determine default signature to inject
+      const targetDefaultSig = isReply ? defaultReplySignature : defaultNewSignature;
+
       if (initialData) {
         if (initialData.to) {
           const parsedTo = initialData.to.split(/[\s,;]+/).filter(Boolean);
@@ -93,10 +123,26 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         }
         if (initialData.subject) setSubject(initialData.subject);
         if (initialData.text) {
-          setBodyText(initialData.text);
-          setBodyHtml(`<p>${initialData.text.replace(/\n/g, "<br/>")}</p>`);
+          initialTxt = initialData.text;
+          initialHtml = `<p>${initialData.text.replace(/\n/g, "<br/>")}</p>`;
         }
       }
+
+      // If no draft ID and a default signature is configured, append it!
+      if (!initialData?.draftId && targetDefaultSig) {
+        const sigBlock = `<div class="gmail_signature" data-signature-block="true">${targetDefaultSig.contentHtml}</div>`;
+        if (initialHtml) {
+          initialHtml = `${initialHtml}<p><br/></p>${sigBlock}`;
+        } else {
+          initialHtml = `<p><br/></p>${sigBlock}`;
+        }
+        setActiveSignatureId(targetDefaultSig.id);
+      } else {
+        setActiveSignatureId(null);
+      }
+
+      setBodyText(initialTxt);
+      setBodyHtml(initialHtml);
       setWindowMode("docked");
       setDraftStatus("saved");
     } else {
@@ -111,10 +157,41 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       setBodyText("");
       setFiles([]);
       setShowFormattingBar(false);
+      setActiveSignatureId(null);
     }
-  }, [open, initialData]);
+  }, [open, initialData, defaultNewSignature, defaultReplySignature]);
 
   if (!open) return null;
+
+  // Signature switching & insertion (Gmail style)
+  const handleSelectSignature = (sigId: string | null) => {
+    setActiveSignatureId(sigId);
+    let currentHtml = editorRef.current?.getHTML() || bodyHtml || "";
+
+    // Regex to match existing signature block
+    const sigRegex = /<div class="gmail_signature"[\s\S]*?<\/div>(\s*<\/div>)?/i;
+
+    if (sigId) {
+      const sig = getSignatureById(sigId);
+      if (!sig) return;
+      const sigBlock = `<div class="gmail_signature" data-signature-block="true">${sig.contentHtml}</div>`;
+
+      if (sigRegex.test(currentHtml)) {
+        currentHtml = currentHtml.replace(sigRegex, sigBlock);
+      } else {
+        currentHtml = currentHtml ? `${currentHtml}<p><br/></p>${sigBlock}` : `<p><br/></p>${sigBlock}`;
+      }
+      toast.success(`Inserted "${sig.name}" signature`);
+    } else {
+      // Remove signature
+      currentHtml = currentHtml.replace(sigRegex, "");
+      toast.info("Signature removed from message");
+    }
+
+    setBodyHtml(currentHtml);
+    editorRef.current?.setContent(currentHtml);
+    setDraftStatus("unsaved");
+  };
 
   // File Handling
   const handleFileSelect = (selectedFiles: File[]) => {
@@ -268,7 +345,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   // Minimized Bar (Docked bottom-right slim pill like Gmail)
   if (windowMode === "minimized") {
     return (
-      <div className="fixed bottom-0 right-4 sm:right-8 z-50 w-72 sm:w-80 h-11 rounded-t-xl bg-card border border-border shadow-lg flex items-center justify-between px-3.5 transition-transform hover:bg-muted/40 cursor-pointer">
+      <div className="fixed bottom-0 right-4 sm:right-8 z-50 w-72 sm:w-80 h-11 rounded-t-xl bg-card border border-border/80 shadow-lg flex items-center justify-between px-3.5 transition-transform hover:bg-muted/40 cursor-pointer">
         <div
           onClick={() => setWindowMode("docked")}
           className="flex items-center gap-2 flex-1 min-w-0"
@@ -309,7 +386,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       {/* Dim backdrop only when in fullscreen modal mode */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity"
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs transition-opacity"
           onClick={() => setWindowMode("docked")}
         />
       )}
@@ -319,14 +396,14 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`fixed z-50 bg-card border border-border/80 shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+        className={`fixed z-50 bg-card/95 backdrop-blur-md border border-border/70 shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
           isFullscreen
             ? "inset-2 sm:inset-6 md:inset-10 lg:inset-14 rounded-2xl"
-            : "bottom-0 right-0 sm:right-6 md:right-8 w-full sm:w-[600px] lg:w-[640px] max-w-[calc(100vw-1rem)] h-[90vh] sm:h-[580px] max-h-[calc(100vh-1rem)] rounded-t-2xl sm:rounded-t-2xl border-b-0"
+            : "bottom-0 right-0 sm:right-6 md:right-8 w-full sm:w-[600px] lg:w-[640px] max-w-[calc(100vw-1rem)] h-[90vh] sm:h-[590px] max-h-[calc(100vh-1rem)] rounded-t-2xl sm:rounded-t-2xl border-b-0"
         }`}
       >
         {/* Header Bar */}
-        <div className="px-3.5 py-2.5 bg-muted/40 border-b border-border/60 flex items-center justify-between gap-2 select-none shrink-0">
+        <div className="px-3.5 py-2.5 bg-muted/35 border-b border-border/60 flex items-center justify-between gap-2 select-none shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-xs font-bold text-foreground truncate">
               {windowTitle}
@@ -495,8 +572,9 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             </div>
           )}
 
-          {/* Rich Text Editor */}
+          {/* Rich Text Editor with imperative ref for signature updates */}
           <EmailRichEditor
+            ref={editorRef}
             initialContent={bodyHtml || bodyText}
             onChange={(html, text) => {
               setBodyHtml(html);
@@ -522,7 +600,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 {files.map((file, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-card border border-border/80 text-xs shadow-2xs group"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border/80 text-xs shadow-2xs group"
                   >
                     <FileIcon className="h-3.5 w-3.5 text-primary shrink-0" />
                     <span className="truncate max-w-[140px] text-[11px] font-medium text-foreground">
@@ -605,6 +683,65 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             >
               <Paperclip className="h-4 w-4" />
             </Button>
+
+            {/* Signature Management Menu Button (Gmail Style) */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 rounded-lg transition-colors ${
+                    activeSignatureId
+                      ? "text-primary bg-primary/10 hover:bg-primary/20"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Insert signature"
+                >
+                  <PenTool className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 rounded-xl p-1.5 shadow-xl border-border/70">
+                <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase px-2 py-1 flex items-center justify-between">
+                  <span>Insert Signature</span>
+                  {activeSignatureId && (
+                    <span className="text-[9px] text-primary font-semibold lowercase">active</span>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                {signatures.map((sig) => {
+                  const isSelected = activeSignatureId === sig.id;
+                  return (
+                    <DropdownMenuItem
+                      key={sig.id}
+                      onClick={() => handleSelectSignature(sig.id)}
+                      className="flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg cursor-pointer"
+                    >
+                      <span className="truncate font-medium">{sig.name}</span>
+                      {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                    </DropdownMenuItem>
+                  );
+                })}
+
+                <DropdownMenuItem
+                  onClick={() => handleSelectSignature(null)}
+                  className="flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg cursor-pointer text-muted-foreground hover:text-foreground"
+                >
+                  <span>No signature</span>
+                  {!activeSignatureId && <Check className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setSignatureDialogOpen(true)}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-primary hover:text-primary hover:bg-primary/10 rounded-lg cursor-pointer flex items-center gap-1.5"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Manage signatures...</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Right Actions: Save Draft & Discard Trash Button */}
@@ -637,6 +774,13 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Email Signature Management Dialog */}
+      <EmailSignatureDialog
+        open={signatureDialogOpen}
+        onOpenChange={setSignatureDialogOpen}
+        initialSelectedId={activeSignatureId || undefined}
+      />
     </>
   );
 };

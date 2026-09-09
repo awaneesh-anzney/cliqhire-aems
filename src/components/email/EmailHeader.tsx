@@ -12,7 +12,8 @@ import {
   AlertTriangle, 
   XCircle,
   Menu,
-  X
+  X,
+  PenTool
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ interface EmailHeaderProps {
   isRefreshing?: boolean;
   onOpenAdminMailboxes?: () => void;
   onOpenMobileNav?: () => void;
+  onOpenSignatures?: () => void;
   activeFolder?: EmailFolder;
 }
 
@@ -52,6 +54,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
   isRefreshing = false,
   onOpenAdminMailboxes,
   onOpenMobileNav,
+  onOpenSignatures,
   activeFolder = "inbox",
 }) => {
   const { user } = useAuth();
@@ -73,7 +76,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
         return (
           <Badge
             variant="outline"
-            className="h-5 px-2 gap-1 bg-destructive/10 text-destructive border-destructive/20 text-[11px] font-medium shrink-0"
+            className="h-5 px-2 gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[11px] font-medium shrink-0"
           >
             <AlertTriangle className="h-3 w-3" />
             <span>Auth Failed</span>
@@ -84,7 +87,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
         return (
           <Badge
             variant="outline"
-            className="h-5 px-2 gap-1 bg-muted/60 text-muted-foreground border-border text-[11px] font-medium shrink-0"
+            className="h-5 px-2 gap-1 bg-muted/40 text-muted-foreground border-border/70 text-[11px] font-medium shrink-0"
           >
             <XCircle className="h-3 w-3" />
             <span>Offline</span>
@@ -94,7 +97,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
   };
 
   return (
-    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 bg-card/80 backdrop-blur-md border border-border/70 rounded-2xl p-2.5 sm:p-3.5 shadow-xs transition-all">
+    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl p-2.5 sm:p-3.5 shadow-xs transition-all">
       {/* Left side: Mobile menu toggle, Brand icon, Title, Connection badge */}
       <div className="flex items-center justify-between sm:justify-start gap-2.5 min-w-0">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -104,7 +107,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
               variant="outline"
               size="icon"
               onClick={onOpenMobileNav}
-              className="h-8 w-8 sm:hidden shrink-0 border-border/80 text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 sm:hidden shrink-0 border-border/70 text-muted-foreground hover:text-foreground rounded-xl"
               aria-label="Open folders navigation"
             >
               <Menu className="h-4 w-4" />
@@ -112,7 +115,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
           )}
 
           {/* Mail Icon */}
-          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
+          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-2xs">
             <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
 
@@ -127,7 +130,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
 
             <div className="text-[11px] text-muted-foreground truncate hidden md:block">
               {isConnected && mailbox?.emailAddress ? (
-                <span className="font-mono text-foreground/85 font-medium truncate">
+                <span className="font-mono text-foreground/80 font-medium truncate">
                   {mailbox.displayName ? `${mailbox.displayName} • ${mailbox.emailAddress}` : mailbox.emailAddress}
                 </span>
               ) : (
@@ -143,7 +146,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
             size="sm"
             onClick={onComposeClick}
             disabled={!isConnected}
-            className="h-8 px-2.5 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold"
+            className="h-8 px-2.5 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl"
           >
             <PenSquare className="h-3.5 w-3.5" />
             <span>Compose</span>
@@ -151,16 +154,16 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right side: Search, Refresh, Desktop Compose, Admin tools */}
+      {/* Right side: Search, Signatures, Refresh, Desktop Compose, Admin tools */}
       <div className="flex items-center gap-2 w-full sm:w-auto">
         {/* Search input with clear button */}
         <div className="relative flex-1 sm:w-60 md:w-72">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70 pointer-events-none" />
           <Input
             placeholder="Search emails, contacts..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8 pr-7 h-8 text-xs bg-muted/30 border-border/70 rounded-xl focus-visible:ring-1 focus-visible:ring-primary placeholder:text-muted-foreground/70"
+            className="pl-8 pr-7 h-8 text-xs bg-muted/30 border-border/60 rounded-xl focus-visible:ring-1 focus-visible:ring-primary/40 placeholder:text-muted-foreground/60 transition-colors"
           />
           {searchQuery && (
             <button
@@ -179,18 +182,32 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
           size="sm"
           onClick={onRefreshClick}
           disabled={isRefreshing || !isConnected}
-          className="h-8 w-8 p-0 shrink-0 rounded-xl border-border/80"
+          className="h-8 w-8 p-0 shrink-0 rounded-xl border-border/70 hover:bg-muted/50"
           title="Refresh Inbox"
         >
           <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${isRefreshing ? "animate-spin text-primary" : ""}`} />
         </Button>
+
+        {/* Signatures Shortcut Button */}
+        {onOpenSignatures && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenSignatures}
+            className="h-8 px-2.5 gap-1.5 text-xs text-muted-foreground hover:text-foreground rounded-xl border-border/70 shadow-2xs hover:bg-muted/50 shrink-0 transition-colors"
+            title="Manage Email Signatures"
+          >
+            <PenTool className="h-3.5 w-3.5 text-primary" />
+            <span className="hidden md:inline font-medium">Signatures</span>
+          </Button>
+        )}
 
         {/* Desktop Compose CTA */}
         <Button
           size="sm"
           onClick={onComposeClick}
           disabled={!isConnected}
-          className="hidden sm:inline-flex h-8 px-3.5 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl shrink-0"
+          className="hidden sm:inline-flex h-8 px-3.5 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl shrink-0 transition-transform active:scale-[0.98]"
         >
           <PenSquare className="h-3.5 w-3.5" />
           <span>Compose</span>
@@ -198,13 +215,13 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
 
         {/* Admin Tools */}
         {isAdmin && (
-          <div className="flex items-center gap-1 border-l border-border/70 pl-2 ml-0.5 shrink-0">
+          <div className="flex items-center gap-1 border-l border-border/60 pl-2 ml-0.5 shrink-0">
             {onOpenAdminMailboxes && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onOpenAdminMailboxes}
-                className="h-8 px-2.5 gap-1.5 text-xs text-muted-foreground hover:text-foreground rounded-xl"
+                className="h-8 px-2.5 gap-1.5 text-xs text-muted-foreground hover:text-foreground rounded-xl border-border/70 shadow-2xs"
                 title="View team employee mailboxes"
               >
                 <Users className="h-3.5 w-3.5 text-primary/80" />

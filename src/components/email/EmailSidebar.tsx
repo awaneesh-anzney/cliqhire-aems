@@ -15,7 +15,9 @@ import {
   ChevronRight,
   ShieldCheck,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  PenTool,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +40,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Mailbox } from "@/types/email";
 import { useDisconnectMailbox } from "@/hooks/useEmail";
+import { useEmailSignatures } from "@/hooks/useEmailSignatures";
 
 export type EmailFolder = "inbox" | "starred" | "sent" | "drafts" | "trash";
 
@@ -50,6 +53,7 @@ interface EmailSidebarProps {
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
   onCloseMobile?: () => void;
+  onOpenSignatures?: () => void;
 }
 
 export const EmailSidebar: React.FC<EmailSidebarProps> = ({
@@ -61,9 +65,11 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
   isCollapsed = false,
   onToggleCollapse,
   onCloseMobile,
+  onOpenSignatures,
 }) => {
   const disconnectMutation = useDisconnectMailbox();
   const [disconnectOpen, setDisconnectOpen] = useState(false);
+  const { signatures } = useEmailSignatures();
 
   const formatLastSync = (dateStr?: string | null) => {
     if (!dateStr) return "Just now";
@@ -80,13 +86,45 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
     label: string; 
     icon: React.ElementType; 
     badge?: number;
-    color?: string;
+    color: string;
+    bgHover: string;
   }[] = [
-    { id: "inbox", label: "Inbox", icon: Inbox, badge: unreadCount, color: "text-blue-500 dark:text-blue-400" },
-    { id: "starred", label: "Starred", icon: Star, color: "text-amber-500 dark:text-amber-400" },
-    { id: "sent", label: "Sent Mail", icon: Send, color: "text-emerald-500 dark:text-emerald-400" },
-    { id: "drafts", label: "Drafts", icon: FileText, color: "text-purple-500 dark:text-purple-400" },
-    { id: "trash", label: "Trash", icon: Trash2, color: "text-rose-500 dark:text-rose-400" },
+    { 
+      id: "inbox", 
+      label: "Inbox", 
+      icon: Inbox, 
+      badge: unreadCount, 
+      color: "text-sky-600 dark:text-sky-400", 
+      bgHover: "hover:bg-sky-500/10" 
+    },
+    { 
+      id: "starred", 
+      label: "Starred", 
+      icon: Star, 
+      color: "text-amber-600 dark:text-amber-400", 
+      bgHover: "hover:bg-amber-500/10" 
+    },
+    { 
+      id: "sent", 
+      label: "Sent Mail", 
+      icon: Send, 
+      color: "text-emerald-600 dark:text-emerald-400", 
+      bgHover: "hover:bg-emerald-500/10" 
+    },
+    { 
+      id: "drafts", 
+      label: "Drafts", 
+      icon: FileText, 
+      color: "text-purple-600 dark:text-purple-400", 
+      bgHover: "hover:bg-purple-500/10" 
+    },
+    { 
+      id: "trash", 
+      label: "Trash", 
+      icon: Trash2, 
+      color: "text-rose-600 dark:text-rose-400", 
+      bgHover: "hover:bg-rose-500/10" 
+    },
   ];
 
   const handleSelectFolder = (id: EmailFolder) => {
@@ -99,16 +137,16 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
   return (
     <TooltipProvider delayDuration={200}>
       <aside
-        className={`flex flex-col justify-between h-full bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl p-3 shadow-xs transition-all duration-300 ${
+        className={`flex flex-col justify-between h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl p-3 shadow-xs transition-all duration-300 ${
           isCollapsed ? "w-16 items-center" : "w-full"
         }`}
       >
         {/* Top Section: Compose & Folder Navigation */}
-        <div className="space-y-3 w-full">
+        <div className="space-y-2.5 w-full">
           {/* Collapse Toggle & New Message Header */}
           <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} px-1`}>
             {!isCollapsed && (
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
                 Folders
               </span>
             )}
@@ -117,7 +155,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={onToggleCollapse}
-                className="h-7 w-7 text-muted-foreground hover:text-foreground hidden md:inline-flex"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground hidden md:inline-flex rounded-lg"
                 title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
                 {isCollapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
@@ -132,7 +170,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 <Button
                   onClick={onComposeClick}
                   size="icon"
-                  className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-xs mx-auto"
+                  className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-xs mx-auto transition-transform active:scale-95"
                 >
                   <PenSquare className="h-4 w-4" />
                 </Button>
@@ -163,11 +201,11 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                         onClick={() => handleSelectFolder(item.id)}
                         className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-colors relative ${
                           isActive
-                            ? "bg-primary/15 text-primary font-bold shadow-xs"
-                            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                            ? "bg-primary/15 text-primary font-bold shadow-2xs"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                         }`}
                       >
-                        <Icon className={`h-4 w-4 ${isActive ? "text-primary" : ""}`} />
+                        <Icon className={`h-4 w-4 ${isActive ? item.color : ""}`} />
                         {item.badge !== undefined && item.badge > 0 && (
                           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
                         )}
@@ -186,14 +224,14 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                   onClick={() => handleSelectFolder(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
                     isActive
-                      ? "bg-primary/10 text-primary font-semibold shadow-xs"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      ? "bg-primary/10 text-primary font-semibold shadow-2xs"
+                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Icon
-                      className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
-                        isActive ? "text-primary" : "text-muted-foreground"
+                      className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${
+                        isActive ? item.color : "text-muted-foreground/80"
                       }`}
                     />
                     <span className="truncate">{item.label}</span>
@@ -203,30 +241,65 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                     <Badge
                       variant="secondary"
                       className={`h-4 px-1.5 text-[10px] font-bold rounded-full ${
-                        isActive ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                        isActive ? "bg-primary text-primary-foreground" : "bg-muted/70 text-foreground"
                       }`}
                     >
                       {item.badge}
                     </Badge>
                   ) : isActive ? (
-                    <ChevronRight className="h-3 w-3 text-primary opacity-60" />
+                    <ChevronRight className="h-3 w-3 text-primary opacity-50" />
                   ) : null}
                 </button>
               );
             })}
+
+            {/* Email Signatures Quick Trigger in Sidebar */}
+            {onOpenSignatures && (
+              <div className="pt-2 border-t border-border/40 mt-2">
+                {isCollapsed ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={onOpenSignatures}
+                        className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <PenTool className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">Signatures ({signatures.length})</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <button
+                    onClick={onOpenSignatures}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <PenTool className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span className="truncate">Signatures</span>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="h-4 px-1.5 text-[9px] font-bold rounded-md border-border/70 text-muted-foreground group-hover:border-primary/40 group-hover:text-primary"
+                    >
+                      {signatures.length}
+                    </Badge>
+                  </button>
+                )}
+              </div>
+            )}
           </nav>
         </div>
 
         {/* Bottom Section: Mailbox Health & Disconnect */}
-        <div className="pt-3 border-t border-border/70 w-full space-y-2">
+        <div className="pt-2.5 border-t border-border/60 w-full space-y-2">
           {mailbox && !isCollapsed && (
-            <div className="p-2.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5 text-[11px]">
+            <div className="p-2.5 rounded-xl bg-muted/20 border border-border/50 space-y-1.5 text-[11px]">
               <div className="flex items-center justify-between gap-1.5">
                 <span className="font-semibold text-foreground truncate max-w-[130px]">
                   {mailbox.displayName || "Work Mailbox"}
                 </span>
                 <span className="flex h-2 w-2 relative shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
               </div>
@@ -236,7 +309,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
               </p>
 
               <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] pt-0.5 border-t border-border/40">
-                <Clock className="h-3 w-3 shrink-0" />
+                <Clock className="h-3 w-3 shrink-0 text-muted-foreground/70" />
                 <span className="truncate">Synced: {formatLastSync(mailbox.lastSyncedAt)}</span>
               </div>
 

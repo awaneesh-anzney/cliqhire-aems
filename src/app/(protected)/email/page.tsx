@@ -11,14 +11,15 @@ import {
   EmailThreadDetail,
   EmailComposerDialog,
   ComposerInitialData,
-  AdminMailboxesDialog
+  AdminMailboxesDialog,
+  EmailSignatureDialog
 } from "@/components/email";
 import { 
   useMailboxStatus, 
   useEmailList, 
   useEmailThread, 
-  useMarkThreadRead,
-  useToggleStar
+  useMarkThreadRead, 
+  useToggleStar 
 } from "@/hooks/useEmail";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Loader2, Sparkles } from "lucide-react";
@@ -48,6 +49,7 @@ export default function EmailPage() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerInitialData, setComposerInitialData] = useState<ComposerInitialData | undefined>(undefined);
   const [adminMailboxesOpen, setAdminMailboxesOpen] = useState(false);
+  const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
 
   // Fetch lists
   const { 
@@ -173,8 +175,8 @@ export default function EmailPage() {
 
   if (loadingStatus) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] w-full items-center justify-center">
-        <div className="flex items-center gap-2.5 text-xs text-muted-foreground font-medium p-4 rounded-2xl bg-card border shadow-xs">
+      <div className="flex h-[calc(100vh-4rem)] w-full items-center justify-center bg-gradient-to-br from-slate-50/40 via-background to-blue-50/20 dark:from-slate-950/40 dark:via-background dark:to-slate-900/20">
+        <div className="flex items-center gap-2.5 text-xs text-muted-foreground font-medium p-4 rounded-2xl bg-card/90 border border-border/70 shadow-xs">
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
           <span>Connecting to mailbox service...</span>
         </div>
@@ -183,7 +185,7 @@ export default function EmailPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4.25rem)] p-2 sm:p-3 md:p-4 flex flex-col gap-2.5 sm:gap-3 max-w-[1800px] mx-auto overflow-hidden">
+    <div className="h-[calc(100vh-4.25rem)] p-2 sm:p-3 md:p-4 flex flex-col gap-2.5 sm:gap-3 max-w-[1800px] mx-auto overflow-hidden bg-gradient-to-br from-slate-50/30 via-background to-blue-50/15 dark:from-slate-950/30 dark:via-background dark:to-slate-900/15">
       {/* Top Application Bar */}
       <EmailHeader
         mailbox={mailbox}
@@ -195,6 +197,7 @@ export default function EmailPage() {
         isRefreshing={refetchingStatus || refetchingList}
         onOpenAdminMailboxes={() => setAdminMailboxesOpen(true)}
         onOpenMobileNav={() => setMobileNavOpen(true)}
+        onOpenSignatures={() => setSignatureDialogOpen(true)}
         activeFolder={activeFolder}
       />
 
@@ -223,6 +226,7 @@ export default function EmailPage() {
               mailbox={mailbox}
               isCollapsed={isSidebarCollapsed}
               onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              onOpenSignatures={() => setSignatureDialogOpen(true)}
             />
           </div>
 
@@ -233,7 +237,7 @@ export default function EmailPage() {
             }`}
           >
             {mailbox && mailbox.initialSyncCompleted === false ? (
-              <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl shadow-xs min-h-[400px]">
+              <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl shadow-xs min-h-[400px]">
                 <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
@@ -294,6 +298,10 @@ export default function EmailPage() {
               unreadCount={totalUnread}
               mailbox={mailbox}
               onCloseMobile={() => setMobileNavOpen(false)}
+              onOpenSignatures={() => {
+                setMobileNavOpen(false);
+                setSignatureDialogOpen(true);
+              }}
             />
           </div>
         </SheetContent>
@@ -310,6 +318,12 @@ export default function EmailPage() {
       <AdminMailboxesDialog
         open={adminMailboxesOpen}
         onOpenChange={setAdminMailboxesOpen}
+      />
+
+      {/* Email Signature Management Dialog (Gmail Style) */}
+      <EmailSignatureDialog
+        open={signatureDialogOpen}
+        onOpenChange={setSignatureDialogOpen}
       />
     </div>
   );

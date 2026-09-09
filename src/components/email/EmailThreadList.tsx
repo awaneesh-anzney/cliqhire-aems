@@ -123,9 +123,9 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
   });
 
   return (
-    <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl overflow-hidden shadow-xs">
+    <div className="flex flex-col h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
       {/* List Header & Quick Filter Pills */}
-      <div className="p-3 border-b border-border/70 bg-muted/15 space-y-2 shrink-0">
+      <div className="p-3 border-b border-border/60 bg-muted/20 space-y-2.5 shrink-0">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-1.5 font-bold text-foreground">
             <Inbox className="h-3.5 w-3.5 text-primary" />
@@ -138,15 +138,15 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           )}
         </div>
 
-        {/* Filter Pills */}
+        {/* Filter Pills with subtle accent styling */}
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setFilterType("all")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
               filterType === "all"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
             }`}
           >
             All
@@ -154,10 +154,10 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           <button
             type="button"
             onClick={() => setFilterType("unread")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
               filterType === "unread"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30 shadow-2xs font-bold"
+                : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
             }`}
           >
             Unread
@@ -165,10 +165,10 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           <button
             type="button"
             onClick={() => setFilterType("starred")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
               filterType === "starred"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 shadow-2xs font-bold"
+                : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
             }`}
           >
             Starred
@@ -177,7 +177,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
       </div>
 
       {/* Threads List Container */}
-      <div className="flex-1 overflow-y-auto divide-y divide-border/50 overscroll-contain">
+      <div className="flex-1 overflow-y-auto divide-y divide-border/40 overscroll-contain">
         {isLoading ? (
           <div className="p-3 space-y-2.5">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -196,8 +196,8 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           </div>
         ) : filteredThreads.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[300px] p-6 text-center text-muted-foreground">
-            <div className="h-12 w-12 rounded-2xl bg-muted/60 border border-border/80 flex items-center justify-center mb-3 text-muted-foreground">
-              <Mail className="h-6 w-6" />
+            <div className="h-12 w-12 rounded-2xl bg-muted/40 border border-border/70 flex items-center justify-center mb-3 text-muted-foreground">
+              <Mail className="h-6 w-6 text-muted-foreground/60" />
             </div>
             <p className="text-xs font-bold text-foreground">No conversations found</p>
             <p className="text-[11px] text-muted-foreground mt-1 max-w-[240px] leading-relaxed">
@@ -218,16 +218,16 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
               <div
                 key={thread.id}
                 onClick={() => onSelectThread(thread)}
-                className={`relative flex items-start gap-3 p-3 sm:p-3.5 cursor-pointer transition-all hover:bg-muted/40 group ${
+                className={`relative flex items-start gap-3 p-3 sm:p-3.5 cursor-pointer transition-all hover:bg-muted/30 group ${
                   isSelected
-                    ? "bg-primary/10 border-l-3 border-l-primary"
+                    ? "bg-primary/8 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-primary before:rounded-r-full shadow-2xs"
                     : hasUnread
                     ? "bg-muted/15 font-medium"
                     : ""
                 }`}
               >
                 {/* Avatar with initials */}
-                <Avatar className="h-9 w-9 border shrink-0 text-xs mt-0.5 shadow-2xs">
+                <Avatar className="h-9 w-9 border border-border/50 shrink-0 text-xs mt-0.5 shadow-2xs">
                   <AvatarFallback className={`font-bold text-[11px] ${getAvatarColor(primaryParticipant)}`}>
                     {thread.isDraft ? <FileEdit className="h-4 w-4" /> : getInitials(primaryParticipant)}
                   </AvatarFallback>
@@ -237,18 +237,23 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                 <div className="flex-1 min-w-0 space-y-1">
                   {/* Row 1: Participant and Date */}
                   <div className="flex items-center justify-between gap-1.5">
-                    <span
-                      className={`text-xs truncate ${
-                        hasUnread ? "font-bold text-foreground" : "font-semibold text-foreground/85"
-                      }`}
-                    >
-                      {thread.isDraft && (
-                        <span className="text-amber-500 dark:text-amber-400 font-bold mr-1.5">[Draft]</span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {hasUnread && (
+                        <span className="h-2 w-2 rounded-full bg-primary shrink-0 animate-pulse" />
                       )}
-                      {thread.participants?.join(", ") || "Participants"}
-                    </span>
+                      <span
+                        className={`text-xs truncate ${
+                          hasUnread ? "font-bold text-foreground" : "font-semibold text-foreground/85"
+                        }`}
+                      >
+                        {thread.isDraft && (
+                          <span className="text-amber-600 dark:text-amber-400 font-bold mr-1.5">[Draft]</span>
+                        )}
+                        {thread.participants?.join(", ") || "Participants"}
+                      </span>
+                    </div>
 
-                    <span className="text-[10px] text-muted-foreground shrink-0 font-medium">
+                    <span className="text-[10px] text-muted-foreground/80 shrink-0 font-medium">
                       {formatTime(thread.date)}
                     </span>
                   </div>
@@ -266,14 +271,14 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                   <div className="flex items-center justify-between pt-0.5">
                     <div className="flex items-center gap-1.5">
                       {hasUnread && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary text-primary-foreground">
-                          New
+                        <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-primary/15 text-primary border border-primary/25">
+                          Unread
                         </span>
                       )}
 
                       {thread.hasAttachments && (
-                        <span className="inline-flex items-center text-muted-foreground">
-                          <Paperclip className="h-3 w-3" />
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground bg-muted/40 px-1.5 py-0.2 rounded-md border border-border/50">
+                          <Paperclip className="h-2.5 w-2.5" />
                         </span>
                       )}
                     </div>
@@ -283,7 +288,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                       <button
                         type="button"
                         onClick={(e) => onToggleStar(thread.id, e)}
-                        className="p-1 rounded-md text-muted-foreground/60 hover:text-amber-400 hover:bg-muted/70 transition-colors"
+                        className="p-1 rounded-md text-muted-foreground/50 hover:text-amber-400 hover:bg-muted/60 transition-colors"
                         title={thread.isStarred ? "Unstar" : "Star"}
                       >
                         <Star
@@ -303,13 +308,13 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
 
       {/* Pagination Footer */}
       {totalPages > 1 && (
-        <div className="p-2.5 border-t border-border/70 bg-muted/15 flex items-center justify-between text-xs shrink-0">
+        <div className="p-2.5 border-t border-border/60 bg-muted/15 flex items-center justify-between text-xs shrink-0">
           <Button
             variant="outline"
             size="sm"
             disabled={page <= 1 || isLoading}
             onClick={() => onPageChange(page - 1)}
-            className="h-7 px-2.5 text-xs gap-1 rounded-xl"
+            className="h-7 px-2.5 text-xs gap-1 rounded-xl border-border/70"
           >
             <ChevronLeft className="h-3 w-3" />
             <span>Prev</span>
@@ -324,7 +329,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
             size="sm"
             disabled={page >= totalPages || isLoading}
             onClick={() => onPageChange(page + 1)}
-            className="h-7 px-2.5 text-xs gap-1 rounded-xl"
+            className="h-7 px-2.5 text-xs gap-1 rounded-xl border-border/70"
           >
             <span>Next</span>
             <ChevronRight className="h-3 w-3" />

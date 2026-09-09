@@ -10,15 +10,16 @@ import {
   Clock, 
   AlertCircle, 
   Mail, 
-  Eye,
+  Eye, 
   EyeOff, 
-  ArrowLeft,
-  FileIcon,
-  Trash2,
-  Maximize2,
-  ExternalLink,
-  MoreVertical,
-  RotateCcw
+  ArrowLeft, 
+  FileIcon, 
+  Trash2, 
+  Maximize2, 
+  ExternalLink, 
+  MoreVertical, 
+  RotateCcw,
+  PenTool
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,11 +35,12 @@ import {
 import { EmailThread, Email, EmailAttachment, EmailStatus } from "@/types/email";
 import { 
   useMarkThreadRead, 
-  useSendEmail,
-  useMoveToTrash,
-  useRestoreEmail,
-  usePermanentDelete
+  useSendEmail, 
+  useMoveToTrash, 
+  useRestoreEmail, 
+  usePermanentDelete 
 } from "@/hooks/useEmail";
+import { useEmailSignatures } from "@/hooks/useEmailSignatures";
 
 interface EmailThreadDetailProps {
   thread: EmailThread | null;
@@ -60,12 +62,14 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
   const moveToTrashMutation = useMoveToTrash();
   const restoreEmailMutation = useRestoreEmail();
   const permanentDeleteMutation = usePermanentDelete();
+  const { defaultReplySignature } = useEmailSignatures();
 
   const [quickReplyText, setQuickReplyText] = useState("");
+  const [includeSignature, setIncludeSignature] = useState(true);
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
+      <div className="flex flex-col h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
         <div className="flex items-center justify-between pb-3 border-b border-border/60">
           <div className="space-y-1.5">
             <Skeleton className="h-5 w-64" />
@@ -93,9 +97,9 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 
   if (!thread) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl p-8 text-center text-muted-foreground shadow-xs">
-        <div className="h-16 w-16 rounded-2xl bg-muted/60 border border-border/70 flex items-center justify-center mb-4 text-muted-foreground/60 shadow-2xs">
-          <Mail className="h-8 w-8" />
+      <div className="flex flex-col items-center justify-center h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl p-8 text-center text-muted-foreground shadow-xs">
+        <div className="h-16 w-16 rounded-2xl bg-muted/40 border border-border/60 flex items-center justify-center mb-4 text-muted-foreground/60 shadow-2xs">
+          <Mail className="h-8 w-8 text-muted-foreground/60" />
         </div>
         <h3 className="text-sm font-bold text-foreground">Select a conversation</h3>
         <p className="text-xs text-muted-foreground mt-1 max-w-sm leading-relaxed">
@@ -150,12 +154,18 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 
     const replySubject = thread.subject.startsWith("Re:") ? thread.subject : `Re: ${thread.subject}`;
 
+    let replyHtml = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.5; color: #334155;"><p>${quickReplyText.replace(/\n/g, "<br/>")}</p></div>`;
+
+    if (includeSignature && defaultReplySignature) {
+      replyHtml += `<div class="gmail_signature" data-signature-block="true">${defaultReplySignature.contentHtml}</div>`;
+    }
+
     sendEmailMutation.mutate(
       {
         to: replyTargetEmail,
         subject: replySubject,
         text: quickReplyText,
-        html: `<div style="font-family: sans-serif; line-height: 1.5; color: #222;"><p>${quickReplyText.replace(/\n/g, "<br/>")}</p></div>`,
+        html: replyHtml,
         threadId: thread._id,
         inReplyTo: lastReceivedMessage?.messageIdHeader,
       },
@@ -168,9 +178,9 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl overflow-hidden shadow-xs">
+    <div className="flex flex-col h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
       {/* Thread Header Toolbar */}
-      <div className="p-3 sm:p-4 border-b border-border/70 bg-muted/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+      <div className="p-3 sm:p-4 border-b border-border/60 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           {/* Mobile Back button */}
           {onClose && (
@@ -208,7 +218,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
             variant="outline"
             size="sm"
             onClick={() => markReadMutation.mutate({ threadId: thread._id, isRead: thread.unreadCount <= 0 })}
-            className="h-8 px-2.5 text-xs gap-1.5 rounded-xl border-border/70"
+            className="h-8 px-2.5 text-xs gap-1.5 rounded-xl border-border/70 hover:bg-muted/50"
             title={thread.unreadCount > 0 ? "Mark as Read" : "Mark as Unread"}
           >
             {thread.unreadCount > 0 ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
@@ -227,7 +237,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 });
               }
             }}
-            className="h-8 px-3 text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl"
+            className="h-8 px-3 text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl transition-transform active:scale-95"
           >
             <Reply className="h-3.5 w-3.5" />
             <span>Reply</span>
@@ -236,7 +246,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 overscroll-contain">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3.5 overscroll-contain">
         {messages.length === 0 ? (
           <div className="text-center py-10 text-xs text-muted-foreground">
             No message content recorded in this thread.
@@ -248,16 +258,16 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
             return (
               <div
                 key={msg._id || idx}
-                className={`group rounded-2xl border p-4 sm:p-5 shadow-xs transition-all ${
+                className={`group rounded-2xl border p-4 sm:p-5 shadow-2xs transition-all ${
                   isSent
                     ? "bg-primary/5 border-primary/15 ml-2 sm:ml-8"
-                    : "bg-card border-border/80 mr-2 sm:mr-8"
+                    : "bg-card border-border/70 mr-2 sm:mr-8"
                 }`}
               >
                 {/* Message Header */}
-                <div className="flex items-start justify-between gap-3 pb-3 border-b border-border/60">
+                <div className="flex items-start justify-between gap-3 pb-3 border-b border-border/50">
                   <div className="flex items-center gap-3 min-w-0">
-                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border shrink-0 text-xs">
+                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border border-border/60 shrink-0 text-xs shadow-2xs">
                       <AvatarFallback
                         className={
                           isSent
@@ -287,7 +297,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <div className="text-[10px] sm:text-[11px] text-muted-foreground font-medium">
+                    <div className="text-[10px] sm:text-[11px] text-muted-foreground/80 font-medium">
                       {msg.sentAt || msg.receivedAt
                         ? new Date(msg.sentAt || msg.receivedAt!).toLocaleString([], {
                             month: "short",
@@ -298,42 +308,37 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                         : "Recent"}
                     </div>
 
-                    {/* Message menu */}
+                    {/* Quick message options dropdown */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-foreground opacity-60 group-hover:opacity-100 rounded-lg"
-                        >
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground">
                           <MoreVertical className="h-3.5 w-3.5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="text-xs rounded-xl">
-                        {msg.folder === "trash" ? (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() => restoreEmailMutation.mutate(msg._id)}
-                              className="gap-2 text-emerald-600 dark:text-emerald-400"
-                            >
-                              <RotateCcw className="h-3.5 w-3.5" />
-                              <span>Restore Email</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => permanentDeleteMutation.mutate(msg._id)}
-                              className="gap-2 text-destructive"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                              <span>Delete Permanently</span>
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
+                      <DropdownMenuContent align="end" className="w-40 text-xs rounded-xl">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            if (onOpenFullComposer) {
+                              onOpenFullComposer({
+                                to: msg.direction === "sent" ? (Array.isArray(msg.to) ? msg.to[0] : msg.to) : msg.from,
+                                subject: msg.subject?.startsWith("Re:") ? msg.subject : `Re: ${msg.subject}`,
+                                threadId: thread._id,
+                                inReplyTo: msg.messageIdHeader,
+                              });
+                            }
+                          }}
+                          className="gap-2 cursor-pointer"
+                        >
+                          <Reply className="h-3.5 w-3.5" />
+                          <span>Reply to this</span>
+                        </DropdownMenuItem>
+                        {msg._id && (
                           <DropdownMenuItem
                             onClick={() => moveToTrashMutation.mutate(msg._id)}
-                            className="gap-2 text-destructive"
+                            className="gap-2 text-destructive focus:text-destructive cursor-pointer"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
-                            <span>Move to Trash</span>
+                            <span>Move to trash</span>
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -341,11 +346,11 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                   </div>
                 </div>
 
-                {/* Message Body Content */}
-                <div className="py-3 text-xs text-foreground leading-relaxed break-words overflow-hidden">
+                {/* Message Body */}
+                <div className="pt-3 text-xs sm:text-sm text-foreground/90 leading-relaxed overflow-x-auto select-text">
                   {msg.bodyHtml ? (
                     <div
-                      className="prose dark:prose-invert max-w-none text-xs leading-relaxed"
+                      className="email-body-content max-w-none prose dark:prose-invert text-xs sm:text-sm"
                       dangerouslySetInnerHTML={{ __html: msg.bodyHtml }}
                     />
                   ) : (
@@ -355,9 +360,9 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 
                 {/* Attachments Section */}
                 {msg.attachments && msg.attachments.length > 0 && (
-                  <div className="pt-3 border-t border-border/60 space-y-2">
+                  <div className="pt-3 border-t border-border/50 space-y-2 mt-3">
                     <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
-                      <Paperclip className="h-3.5 w-3.5" />
+                      <Paperclip className="h-3.5 w-3.5 text-primary" />
                       Attachments ({msg.attachments.length})
                     </span>
 
@@ -365,32 +370,35 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                       {msg.attachments.map((file, fileIdx) => {
                         const hasUrl = !!file.storageUrl;
                         return (
-                        <a
-                          key={fileIdx}
-                          href={hasUrl ? file.storageUrl : undefined}
-                          target={hasUrl ? "_blank" : undefined}
-                          rel={hasUrl ? "noreferrer" : undefined}
-                          className={`flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/40 transition-colors group/file ${
-                            hasUrl ? "hover:bg-muted/70 cursor-pointer" : "opacity-80 cursor-default"
-                          }`}
-                          title={!hasUrl ? "Attachment is processing or unavailable" : undefined}
-                          onClick={(e) => {
-                            if (!hasUrl) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <FileIcon className={`h-4 w-4 shrink-0 ${hasUrl ? "text-primary" : "text-muted-foreground"}`} />
-                            <div className="truncate text-xs">
-                              <p className="font-semibold text-foreground truncate">{file.fileName}</p>
-                              <p className="text-[10px] text-muted-foreground">{formatFileSize(file.sizeBytes)}</p>
+                          <a
+                            key={fileIdx}
+                            href={hasUrl ? file.storageUrl : undefined}
+                            target={hasUrl ? "_blank" : undefined}
+                            rel={hasUrl ? "noreferrer" : undefined}
+                            className={`flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/30 transition-colors group/file ${
+                              hasUrl ? "hover:bg-muted/60 cursor-pointer" : "opacity-80 cursor-default"
+                            }`}
+                            title={!hasUrl ? "Attachment is processing or unavailable" : undefined}
+                            onClick={(e) => {
+                              if (!hasUrl) {
+                                e.preventDefault();
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <FileIcon className={`h-4 w-4 shrink-0 ${hasUrl ? "text-primary" : "text-muted-foreground"}`} />
+                              <div className="truncate text-xs">
+                                <p className="font-semibold text-foreground truncate">{file.fileName}</p>
+                                <p className="text-[10px] text-muted-foreground">{formatFileSize(file.sizeBytes)}</p>
+                              </div>
                             </div>
-                          </div>
 
-                          {hasUrl && <Download className="h-3.5 w-3.5 text-muted-foreground group-hover/file:text-primary transition-colors shrink-0 ml-2" />}
-                        </a>
-                      )})}
+                            {hasUrl && (
+                              <Download className="h-3.5 w-3.5 text-muted-foreground group-hover/file:text-primary transition-colors shrink-0 ml-2" />
+                            )}
+                          </a>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -401,19 +409,38 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
       </div>
 
       {/* Inline Quick Reply Drawer */}
-      <div className="p-3 sm:p-4 border-t border-border/70 bg-muted/15 space-y-2 shrink-0">
+      <div className="p-3 sm:p-3.5 border-t border-border/60 bg-muted/20 space-y-2 shrink-0">
         <Textarea
           value={quickReplyText}
           onChange={(e) => setQuickReplyText(e.target.value)}
-          placeholder={`Write a quick reply to ${replyTargetEmail || "candidate"}...`}
+          placeholder={`Write a quick reply to ${replyTargetEmail || "recipient"}...`}
           rows={2}
-          className="text-xs resize-none bg-background/80 border-border/70 rounded-xl focus-visible:ring-1 focus-visible:ring-primary"
+          className="text-xs resize-none bg-background/90 border-border/60 rounded-xl focus-visible:ring-1 focus-visible:ring-primary/40 shadow-2xs"
         />
 
         <div className="flex items-center justify-between gap-2 pt-0.5">
-          <div className="text-[11px] text-muted-foreground truncate hidden sm:block">
-            <span>To: </span>
-            <span className="font-mono text-foreground/85 font-medium">{replyTargetEmail}</span>
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Signature toggle in quick reply */}
+            {defaultReplySignature && (
+              <button
+                type="button"
+                onClick={() => setIncludeSignature(!includeSignature)}
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                  includeSignature
+                    ? "bg-primary/10 border-primary/25 text-primary"
+                    : "bg-muted/40 border-border/60 text-muted-foreground hover:text-foreground"
+                }`}
+                title={includeSignature ? "Signature will be included" : "Signature excluded"}
+              >
+                <PenTool className="h-3 w-3" />
+                <span className="hidden sm:inline">Signature:</span>
+                <span className="font-bold truncate max-w-[100px]">{defaultReplySignature.name}</span>
+              </button>
+            )}
+            <div className="text-[11px] text-muted-foreground truncate hidden md:block">
+              <span>To: </span>
+              <span className="font-mono text-foreground/80 font-medium">{replyTargetEmail}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
@@ -440,7 +467,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
               size="sm"
               disabled={!quickReplyText.trim() || sendEmailMutation.isPending}
               onClick={handleSendQuickReply}
-              className="h-8 px-3.5 text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-xs rounded-xl"
+              className="h-8 px-3.5 text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-xs rounded-xl transition-transform active:scale-95"
             >
               {sendEmailMutation.isPending ? (
                 <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />

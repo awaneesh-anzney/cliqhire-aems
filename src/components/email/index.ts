@@ -7,3 +7,4 @@ export * from "./EmailComposerDialog";
 export * from "./EmailRichEditor";
 export * from "./RecipientInput";
 export * from "./AdminMailboxesDialog";
+export * from "./EmailSignatureDialog";
