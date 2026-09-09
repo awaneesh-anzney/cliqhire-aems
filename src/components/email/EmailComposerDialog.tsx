@@ -136,7 +136,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         } else {
           initialHtml = `<p><br/></p>${sigBlock}`;
         }
-        setActiveSignatureId(targetDefaultSig.id);
+        setActiveSignatureId(targetDefaultSig._id || targetDefaultSig.id || "");
       } else {
         setActiveSignatureId(null);
       }
@@ -711,11 +711,12 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 <DropdownMenuSeparator />
 
                 {signatures.map((sig) => {
-                  const isSelected = activeSignatureId === sig.id;
+                  const sigId = sig._id || sig.id || "";
+                  const isSelected = activeSignatureId === sigId;
                   return (
                     <DropdownMenuItem
-                      key={sig.id}
-                      onClick={() => handleSelectSignature(sig.id)}
+                      key={sigId}
+                      onClick={() => handleSelectSignature(sigId)}
                       className="flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg cursor-pointer"
                     >
                       <span className="truncate font-medium">{sig.name}</span>

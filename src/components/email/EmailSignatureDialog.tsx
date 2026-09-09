@@ -97,13 +97,11 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
 }) => {
   const {
     signatures,
-    settings,
-    createSignature,
-    updateSignature,
-    deleteSignature,
-    setDefaultNewEmail,
-    setDefaultReply,
-    setInsertBeforeQuoted,
+    createMutation,
+    updateMutation,
+    deleteMutation,
+    setDefaultMutation,
+    defaultSignature,
     defaultUserName,
     defaultUserEmail,
   } = useEmailSignatures();
@@ -118,15 +116,15 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
   // Sync initial or fallback selected signature
   useEffect(() => {
     if (open) {
-      if (initialSelectedId && signatures.some((s) => s.id === initialSelectedId)) {
+      if (initialSelectedId && signatures.some((s) => (s._id || s.id) === initialSelectedId)) {
         setSelectedId(initialSelectedId);
-      } else if (signatures.length > 0 && (!selectedId || !signatures.some((s) => s.id === selectedId))) {
-        setSelectedId(signatures[0].id);
+      } else if (signatures.length > 0 && (!selectedId || !signatures.some((s) => (s._id || s.id) === selectedId))) {
+        setSelectedId(signatures[0]._id || signatures[0].id || null);
       }
     }
   }, [open, signatures, initialSelectedId, selectedId]);
 
-  const activeSignature = signatures.find((s) => s.id === selectedId) || null;
+  const activeSignature = signatures.find((s) => (s._id || s.id) === selectedId) || null;
 
   // TipTap editor instance for rich signature formatting
   const editor = useEditor({
@@ -160,9 +158,9 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
       if (selectedId) {
         const html = editor.getHTML();
         const text = editor.getText();
-        updateSignature(selectedId, {
-          contentHtml: html,
-          contentText: text,
+        updateMutation.mutate({
+          id: selectedId,
+          payload: { contentHtml: html, contentText: text },
         });
       }
     },
@@ -181,11 +179,17 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
   // Create signature handler
   const handleConfirmCreate = () => {
     const trimmed = newSigNameInput.trim();
-    const created = createSignature(trimmed || `Signature ${signatures.length + 1}`);
-    setSelectedId(created.id);
-    setNewSigNameInput("");
-    setIsCreatingNew(false);
-    toast.success(`Signature "${created.name}" created`);
+    createMutation.mutate(
+      { name: trimmed || `Signature ${signatures.length + 1}` },
+      {
+        onSuccess: (res) => {
+          setSelectedId(res.data._id || res.data.id || null);
+          setNewSigNameInput("");
+          setIsCreatingNew(false);
+          toast.success(`Signature "${res.data.name}" created`);
+        },
+      }
+    );
   };
 
   // Delete signature handler
@@ -194,12 +198,15 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
       toast.error("You must keep at least one signature template.");
       return;
     }
-    deleteSignature(id);
-    toast.info(`Deleted signature "${name}"`);
-    const remaining = signatures.filter((s) => s.id !== id);
-    if (remaining.length > 0) {
-      setSelectedId(remaining[0].id);
-    }
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.info(`Deleted signature "${name}"`);
+        const remaining = signatures.filter((s) => (s._id || s.id) !== id);
+        if (remaining.length > 0) {
+          setSelectedId(remaining[0]._id || remaining[0].id || null);
+        }
+      },
+    });
   };
 
   // Apply template preset
@@ -215,7 +222,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
     });
 
     editor.commands.setContent(html);
-    updateSignature(selectedId, { contentHtml: html });
+    updateMutation.mutate({ id: selectedId, payload: { contentHtml: html } });
     toast.success(`Applied "${preset.name}" preset`);
   };
 
@@ -310,14 +317,14 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
             {/* List of signatures */}
             <div className="flex-1 overflow-y-auto space-y-1.5 pr-0.5">
               {signatures.map((sig) => {
-                const isSelected = sig.id === selectedId;
-                const isDefaultNew = settings.defaultNewEmailSignatureId === sig.id;
-                const isDefaultReply = settings.defaultReplySignatureId === sig.id;
+                const sigId = sig._id || sig.id || "";
+                const isSelected = sigId === selectedId;
+                const isDefault = sig.isDefault;
 
                 return (
                   <div
-                    key={sig.id}
-                    onClick={() => setSelectedId(sig.id)}
+                    key={sigId}
+                    onClick={() => setSelectedId(sigId)}
                     className={`group relative flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
                       isSelected
                         ? "bg-card shadow-xs border border-primary/30 text-foreground font-medium"
@@ -334,14 +341,9 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
 
                       {/* Default indicator pills */}
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {isDefaultNew && (
+                        {isDefault && (
                           <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                            New Email
-                          </span>
-                        )}
-                        {isDefaultReply && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                            Reply
+                            Default
                           </span>
                         )}
                       </div>
@@ -354,7 +356,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                         variant="ghost"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDelete(sig.id, sig.name);
+                          handleDelete(sigId, sig.name);
                         }}
                         className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md shrink-0 transition-opacity"
                         title="Delete signature"
@@ -384,7 +386,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                     <span className="text-xs font-semibold text-muted-foreground shrink-0">Name:</span>
                     <Input
                       value={activeSignature.name}
-                      onChange={(e) => updateSignature(activeSignature.id, { name: e.target.value })}
+                      onChange={(e) => updateMutation.mutate({ id: activeSignature._id || activeSignature.id || "", payload: { name: e.target.value } })}
                       className="h-8 text-xs font-semibold rounded-lg max-w-[240px] bg-background"
                       placeholder="Signature Name"
                     />
@@ -651,19 +653,23 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-foreground">Signature Defaults</span>
                     <span className="text-[11px] text-muted-foreground">
-                      Configure when CliqHire should automatically insert your signatures.
+                      Configure your default signature for all outgoing emails.
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Default for new emails */}
-                    <div className="space-y-1">
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Default for emails */}
+                    <div className="space-y-1 max-w-sm">
                       <Label className="text-[11px] font-medium text-muted-foreground">
-                        For new emails use
+                        Default Signature
                       </Label>
                       <Select
-                        value={settings.defaultNewEmailSignatureId || "none"}
-                        onValueChange={(val) => setDefaultNewEmail(val === "none" ? null : val)}
+                        value={defaultSignature?._id || defaultSignature?.id || "none"}
+                        onValueChange={(val) => {
+                          if (val !== "none") {
+                            setDefaultMutation.mutate(val);
+                          }
+                        }}
                       >
                         <SelectTrigger className="h-8 text-xs rounded-xl bg-card border-border/70">
                           <SelectValue placeholder="Select signature..." />
@@ -671,30 +677,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                         <SelectContent className="rounded-xl">
                           <SelectItem value="none">No signature</SelectItem>
                           {signatures.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>
-                              {s.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Default on reply/forward */}
-                    <div className="space-y-1">
-                      <Label className="text-[11px] font-medium text-muted-foreground">
-                        On reply / forward use
-                      </Label>
-                      <Select
-                        value={settings.defaultReplySignatureId || "none"}
-                        onValueChange={(val) => setDefaultReply(val === "none" ? null : val)}
-                      >
-                        <SelectTrigger className="h-8 text-xs rounded-xl bg-card border-border/70">
-                          <SelectValue placeholder="Select signature..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="none">No signature</SelectItem>
-                          {signatures.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>
+                            <SelectItem key={s._id || s.id} value={s._id || s.id || ""}>
                               {s.name}
                             </SelectItem>
                           ))}

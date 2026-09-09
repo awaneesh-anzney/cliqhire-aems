@@ -5,18 +5,17 @@
  */
 
 export interface EmailSignature {
-  id: string;
+  id?: string;
+  _id?: string;
   name: string;
   contentHtml: string;
   contentText?: string;
-  createdAt: string;
-  updatedAt: string;
+  isDefault?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EmailSignatureSettings {
-  signatures: EmailSignature[];
-  defaultNewEmailSignatureId: string | null; // null = "No signature"
-  defaultReplySignatureId: string | null; // null = "No signature"
   insertSignatureBeforeQuotedText?: boolean;
 }
 

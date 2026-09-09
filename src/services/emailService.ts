@@ -21,6 +21,7 @@ import {
   AdminMailboxStatusResponse,
   Email,
 } from "@/types/email";
+import { EmailSignature } from "@/types/emailSignature";
 
 export const emailService = {
   /**
@@ -311,6 +312,54 @@ export const emailService = {
    */
   async sendDraft(draftId: string): Promise<{ success: boolean; message: string; data: any }> {
     const response = await api.post(`/api/email/drafts/${draftId}/send`);
+    return response.data;
+  },
+
+  /**
+   * Fetch all signatures for the user
+   */
+  async getSignatures(): Promise<{ success: boolean; count: number; data: EmailSignature[] }> {
+    const response = await api.get('/api/email/signatures');
+    return response.data;
+  },
+
+  /**
+   * Fetch the default signature for the user
+   */
+  async getDefaultSignature(): Promise<{ success: boolean; data: EmailSignature | null }> {
+    const response = await api.get('/api/email/signatures/default');
+    return response.data;
+  },
+
+  /**
+   * Create a new signature
+   */
+  async createSignature(payload: { name: string; contentHtml: string; contentText?: string; isDefault?: boolean }): Promise<{ success: boolean; message: string; data: EmailSignature }> {
+    const response = await api.post('/api/email/signatures', payload);
+    return response.data;
+  },
+
+  /**
+   * Update an existing signature
+   */
+  async updateSignature(id: string, payload: Partial<{ name: string; contentHtml: string; contentText: string; isDefault: boolean }>): Promise<{ success: boolean; message: string; data: EmailSignature }> {
+    const response = await api.patch(`/api/email/signatures/${id}`, payload);
+    return response.data;
+  },
+
+  /**
+   * Set a signature as default
+   */
+  async setDefaultSignature(id: string): Promise<{ success: boolean; message: string; data: EmailSignature }> {
+    const response = await api.patch(`/api/email/signatures/${id}/default`);
+    return response.data;
+  },
+
+  /**
+   * Delete a signature
+   */
+  async deleteSignature(id: string): Promise<{ success: boolean; message: string; newDefault: EmailSignature | null }> {
+    const response = await api.delete(`/api/email/signatures/${id}`);
     return response.data;
   }
 };
