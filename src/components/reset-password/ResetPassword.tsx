@@ -44,7 +44,7 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { resetPassword, isResetPasswordPending, isResetPasswordSuccess } = usePasswordReset();
-  const { isValid, isLoading: isVerifying, isError } = useVerifyResetToken(token);
+  const { isValid, isLoading: isVerifying, isSuccess, isError } = useVerifyResetToken(token);
 
   const form = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -55,14 +55,17 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
   });
 
   useEffect(() => {
-    if (!token) {
+    if (token === null) {
       toast.error("Invalid reset link. Please request a new one.");
       router.push("/forgot-password");
-    } else if (!isVerifying && (isError || !isValid)) {
+    } else if (isSuccess && !isValid) {
       toast.error("Reset link is invalid or expired. Please request a new one.");
       router.push("/forgot-password");
+    } else if (isError) {
+      toast.error("Failed to verify reset link. Please try again.");
+      router.push("/forgot-password");
     }
-  }, [token, router, isVerifying, isError, isValid]);
+  }, [token, router, isSuccess, isValid, isError]);
 
   const onSubmit = async (values: ResetPasswordValues) => {
     if (!token) {

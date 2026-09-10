@@ -46,7 +46,7 @@ export function usePasswordReset() {
 }
 
 export function useVerifyResetToken(token: string | null) {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isPending, isFetching, isSuccess, isError, error } = useQuery({
     queryKey: ["verifyResetToken", token],
     queryFn: () => {
       if (!token) throw new Error("No token provided");
@@ -59,7 +59,8 @@ export function useVerifyResetToken(token: string | null) {
   return {
     isValid: data?.valid ?? false,
     message: data?.message,
-    isLoading,
+    isLoading: isPending || isFetching,
+    isSuccess,
     isError,
     error,
   };
