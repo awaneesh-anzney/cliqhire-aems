@@ -2,19 +2,19 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { 
-  EmailHeader,
-  MailboxConnectCard,
-  EmailSidebar,
-  EmailFolder,
-  EmailThreadList,
-  EmailListItem,
-  EmailThreadDetail,
-  EmailComposerDialog,
-  ComposerInitialData,
-  AdminMailboxesDialog,
-  EmailSignatureDialog,
-  EmailContactType,
-  EMAIL_TYPE_CONFIG
+  EmailHeader, 
+  MailboxConnectCard, 
+  EmailSidebar, 
+  EmailFolder, 
+  EmailThreadList, 
+  EmailListItem, 
+  EmailThreadDetail, 
+  EmailComposerDialog, 
+  ComposerInitialData, 
+  AdminMailboxesDialog, 
+  EmailSignatureDialog, 
+  EmailContactType, 
+  EMAIL_TYPE_CONFIG 
 } from "@/components/email";
 import { 
   useMailboxStatus, 
@@ -24,7 +24,7 @@ import {
   useToggleStar 
 } from "@/hooks/useEmail";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Loader2, Sparkles, X } from "lucide-react";
+import { Loader2, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function EmailPage() {
@@ -48,7 +48,7 @@ export default function EmailPage() {
   const [selectedEmailType, setSelectedEmailType] = useState<EmailContactType | null>(null);
   const [selectedEmailAddress, setSelectedEmailAddress] = useState<string | null>(null);
 
-  // Responsive sidebar states
+  // Responsive sidebar states (default collapsed on tablet, expanded on desktop)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -57,6 +57,15 @@ export default function EmailPage() {
   const [composerInitialData, setComposerInitialData] = useState<ComposerInitialData | undefined>(undefined);
   const [adminMailboxesOpen, setAdminMailboxesOpen] = useState(false);
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
+
+  // Set initial collapse based on screen width on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (window.innerWidth >= 768 && window.innerWidth < 1024) {
+        setIsSidebarCollapsed(true);
+      }
+    }
+  }, []);
 
   // Fetch lists
   const { 
@@ -193,7 +202,7 @@ export default function EmailPage() {
   if (loadingStatus) {
     return (
       <div className="flex h-[calc(100vh-4rem)] w-full items-center justify-center bg-gradient-to-br from-slate-50/40 via-background to-blue-50/20 dark:from-slate-950/40 dark:via-background dark:to-slate-900/20">
-        <div className="flex items-center gap-2.5 text-xs text-muted-foreground font-medium p-4 rounded-2xl bg-card/90 border border-border/70 shadow-xs">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground font-semibold p-4 sm:p-5 rounded-2xl bg-card/95 border border-border/70 shadow-sm">
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
           <span>Connecting to mailbox service...</span>
         </div>
@@ -227,7 +236,7 @@ export default function EmailPage() {
 
       {/* Main Mailbox Workspace */}
       {!isConnected ? (
-        <div className="flex-1 min-h-0 flex items-start justify-center pt-1 sm:pt-2 md:pt-3 overflow-y-auto">
+        <div className="flex-1 min-h-0 flex items-start justify-center pt-1 sm:pt-2 md:pt-4 overflow-y-auto">
           <MailboxConnectCard onSuccess={() => refetchStatus()} />
         </div>
       ) : (
@@ -235,7 +244,7 @@ export default function EmailPage() {
           {/* Desktop & Tablet Collapsible Left Sidebar */}
           <div
             className={`hidden md:block shrink-0 transition-all duration-300 ${
-              isSidebarCollapsed ? "w-16" : "w-52 lg:w-60"
+              isSidebarCollapsed ? "w-16" : "w-56 lg:w-60 xl:w-64"
             }`}
           >
             <EmailSidebar
@@ -264,12 +273,14 @@ export default function EmailPage() {
           {/* Middle Thread List Panel */}
           <div
             className={`flex flex-col min-w-0 transition-all ${
-              selectedThreadId ? "hidden md:flex md:w-72 lg:w-84 xl:w-96 shrink-0" : "flex-1 md:w-80 lg:w-96 md:flex-initial shrink-0"
+              selectedThreadId 
+                ? "hidden md:flex md:w-72 lg:w-80 xl:w-96 shrink-0" 
+                : "w-full md:w-80 lg:w-96 md:flex-initial shrink-0"
             }`}
           >
             {mailbox && mailbox.initialSyncCompleted === false ? (
-              <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl shadow-xs min-h-[400px]">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
+              <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl shadow-xs min-h-[400px]">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3 shadow-2xs">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
                 <h3 className="text-sm font-bold mb-1.5 text-foreground">Importing mailbox history...</h3>
@@ -286,10 +297,10 @@ export default function EmailPage() {
                       <div
                         className={`h-2 w-2 rounded-full shrink-0 ${
                           selectedEmailType === "client"
-                            ? "bg-blue-500"
+                            ? "bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"
                             : selectedEmailType === "candidate"
-                            ? "bg-emerald-500"
-                            : "bg-purple-500"
+                            ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]"
+                            : "bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.8)]"
                         }`}
                       />
                       <span className="font-semibold text-foreground truncate">
@@ -403,7 +414,7 @@ export default function EmailPage() {
         onOpenChange={setAdminMailboxesOpen}
       />
 
-      {/* Email Signature Management Dialog (Gmail Style) */}
+      {/* Email Signature Management Dialog */}
       <EmailSignatureDialog
         open={signatureDialogOpen}
         onOpenChange={setSignatureDialogOpen}

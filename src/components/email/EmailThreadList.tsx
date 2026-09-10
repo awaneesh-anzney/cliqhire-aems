@@ -8,10 +8,9 @@ import {
   ChevronRight, 
   Inbox, 
   Search,
-  Filter,
-  CheckCircle2,
   Paperclip,
-  FileEdit
+  FileEdit,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,12 +44,13 @@ interface EmailThreadListProps {
 }
 
 const AVATAR_COLORS = [
-  "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/40",
-  "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200/50 dark:border-purple-900/40",
-  "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-900/40",
-  "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-900/40",
-  "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/50 dark:border-rose-900/40",
-  "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-900/40",
+  "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-800/40",
+  "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-200/60 dark:border-purple-800/40",
+  "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/40",
+  "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/40",
+  "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/40",
+  "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-200/60 dark:border-indigo-800/40",
+  "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-200/60 dark:border-teal-800/40",
 ];
 
 export const EmailThreadList: React.FC<EmailThreadListProps> = ({
@@ -122,13 +122,18 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
     return matchSubject || matchParticipants;
   });
 
+  const unreadTotal = threads.filter((t) => t.unreadCount > 0 && !t.isDraft).length;
+  const starredTotal = threads.filter((t) => t.isStarred).length;
+
   return (
-    <div className="flex flex-col h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
+    <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
       {/* List Header & Quick Filter Pills */}
       <div className="p-3 border-b border-border/60 bg-muted/20 space-y-2.5 shrink-0">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-1.5 font-bold text-foreground">
-            <Inbox className="h-3.5 w-3.5 text-primary" />
+            <div className="h-5 w-5 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <Inbox className="h-3 w-3" />
+            </div>
             <span>{totalThreads} {totalThreads === 1 ? "Conversation" : "Conversations"}</span>
           </div>
           {totalPages > 1 && (
@@ -138,46 +143,57 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           )}
         </div>
 
-        {/* Filter Pills with subtle accent styling */}
+        {/* Filter Pills with vibrant email client accents */}
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setFilterType("all")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
               filterType === "all"
-                ? "bg-primary text-primary-foreground shadow-2xs"
-                : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                ? "bg-primary text-primary-foreground border-primary shadow-2xs"
+                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground"
             }`}
           >
-            All
+            All ({threads.length})
           </button>
           <button
             type="button"
             onClick={() => setFilterType("unread")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border flex items-center gap-1 ${
               filterType === "unread"
-                ? "bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30 shadow-2xs font-bold"
-                : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                ? "bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-500/40 shadow-2xs font-bold"
+                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground"
             }`}
           >
-            Unread
+            <span>Unread</span>
+            {unreadTotal > 0 && (
+              <span className="h-4 px-1 rounded-full text-[9px] font-bold bg-sky-500 text-white leading-none flex items-center">
+                {unreadTotal}
+              </span>
+            )}
           </button>
           <button
             type="button"
             onClick={() => setFilterType("starred")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border flex items-center gap-1 ${
               filterType === "starred"
-                ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 shadow-2xs font-bold"
-                : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 shadow-2xs font-bold"
+                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground"
             }`}
           >
-            Starred
+            <Star className={`h-3 w-3 ${filterType === "starred" ? "fill-amber-400 text-amber-400" : ""}`} />
+            <span>Starred</span>
+            {starredTotal > 0 && (
+              <span className="h-4 px-1 rounded-full text-[9px] font-bold bg-amber-500 text-white leading-none flex items-center">
+                {starredTotal}
+              </span>
+            )}
           </button>
         </div>
       </div>
 
       {/* Threads List Container */}
-      <div className="flex-1 overflow-y-auto divide-y divide-border/40 overscroll-contain">
+      <div className="flex-1 overflow-y-auto divide-y divide-border/40 overscroll-contain scrollbar-thin">
         {isLoading ? (
           <div className="p-3 space-y-2.5">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -196,7 +212,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           </div>
         ) : filteredThreads.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[300px] p-6 text-center text-muted-foreground">
-            <div className="h-12 w-12 rounded-2xl bg-muted/40 border border-border/70 flex items-center justify-center mb-3 text-muted-foreground">
+            <div className="h-12 w-12 rounded-2xl bg-muted/40 border border-border/70 flex items-center justify-center mb-3 text-muted-foreground shadow-2xs">
               <Mail className="h-6 w-6 text-muted-foreground/60" />
             </div>
             <p className="text-xs font-bold text-foreground">No conversations found</p>
@@ -218,11 +234,11 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
               <div
                 key={thread.id}
                 onClick={() => onSelectThread(thread)}
-                className={`relative flex items-start gap-3 p-3 sm:p-3.5 cursor-pointer transition-all hover:bg-muted/30 group ${
+                className={`relative flex items-start gap-3 p-3 sm:p-3.5 cursor-pointer transition-all hover:bg-muted/40 group ${
                   isSelected
-                    ? "bg-primary/8 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-primary before:rounded-r-full shadow-2xs"
+                    ? "bg-primary/10 dark:bg-primary/15 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1.5 before:bg-primary before:rounded-r-full before:shadow-[0_0_8px_rgba(59,130,246,0.6)] shadow-2xs"
                     : hasUnread
-                    ? "bg-muted/15 font-medium"
+                    ? "bg-sky-500/[0.04] dark:bg-sky-500/[0.08]"
                     : ""
                 }`}
               >
@@ -239,7 +255,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                   <div className="flex items-center justify-between gap-1.5">
                     <div className="flex items-center gap-1.5 min-w-0">
                       {hasUnread && (
-                        <span className="h-2 w-2 rounded-full bg-primary shrink-0 animate-pulse" />
+                        <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0 shadow-[0_0_6px_rgba(59,130,246,0.8)] animate-pulse" />
                       )}
                       <span
                         className={`text-xs truncate ${
@@ -247,7 +263,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                         }`}
                       >
                         {thread.isDraft && (
-                          <span className="text-amber-600 dark:text-amber-400 font-bold mr-1.5">[Draft]</span>
+                          <span className="text-purple-600 dark:text-purple-400 font-bold mr-1.5">[Draft]</span>
                         )}
                         {thread.participants?.join(", ") || "Participants"}
                       </span>
@@ -271,13 +287,13 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                   <div className="flex items-center justify-between pt-0.5">
                     <div className="flex items-center gap-1.5">
                       {hasUnread && (
-                        <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-primary/15 text-primary border border-primary/25">
+                        <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25">
                           Unread
                         </span>
                       )}
 
                       {thread.hasAttachments && (
-                        <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground bg-muted/40 px-1.5 py-0.2 rounded-md border border-border/50">
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-primary/80 bg-primary/10 px-1.5 py-0.2 rounded-md border border-primary/20" title="Has attachments">
                           <Paperclip className="h-2.5 w-2.5" />
                         </span>
                       )}

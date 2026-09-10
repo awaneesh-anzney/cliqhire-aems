@@ -16,10 +16,13 @@ import {
   FileIcon, 
   Trash2, 
   Maximize2, 
-  ExternalLink, 
   MoreVertical, 
-  RotateCcw,
-  PenTool
+  PenTool,
+  Star,
+  PenSquare,
+  FileText,
+  Image as ImageIcon,
+  Sheet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,8 +40,7 @@ import {
   useMarkThreadRead, 
   useSendEmail, 
   useMoveToTrash, 
-  useRestoreEmail, 
-  usePermanentDelete 
+  useToggleStar 
 } from "@/hooks/useEmail";
 import { useEmailSignatures } from "@/hooks/useEmailSignatures";
 
@@ -60,8 +62,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
   const markReadMutation = useMarkThreadRead();
   const sendEmailMutation = useSendEmail();
   const moveToTrashMutation = useMoveToTrash();
-  const restoreEmailMutation = useRestoreEmail();
-  const permanentDeleteMutation = usePermanentDelete();
+  const toggleStarMutation = useToggleStar();
   const { defaultReplySignature } = useEmailSignatures();
 
   const [quickReplyText, setQuickReplyText] = useState("");
@@ -69,7 +70,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
+      <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
         <div className="flex items-center justify-between pb-3 border-b border-border/60">
           <div className="space-y-1.5">
             <Skeleton className="h-5 w-64" />
@@ -79,7 +80,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
         </div>
         <div className="space-y-4 flex-1 overflow-hidden">
           {[1, 2].map((i) => (
-            <div key={i} className="p-4 border rounded-2xl space-y-3">
+            <div key={i} className="p-4 border border-border/60 rounded-2xl space-y-3">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-9 w-9 rounded-full" />
                 <div className="space-y-1">
@@ -97,14 +98,25 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 
   if (!thread) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl p-8 text-center text-muted-foreground shadow-xs">
-        <div className="h-16 w-16 rounded-2xl bg-muted/40 border border-border/60 flex items-center justify-center mb-4 text-muted-foreground/60 shadow-2xs">
-          <Mail className="h-8 w-8 text-muted-foreground/60" />
+      <div className="flex flex-col items-center justify-center h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl p-8 text-center text-muted-foreground shadow-xs">
+        <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary shadow-2xs">
+          <Mail className="h-8 w-8 text-primary" />
         </div>
-        <h3 className="text-sm font-bold text-foreground">Select a conversation</h3>
-        <p className="text-xs text-muted-foreground mt-1 max-w-sm leading-relaxed">
-          Choose an email thread from the inbox list to view the full message history and communicate with candidates.
+        <h3 className="text-base font-bold text-foreground">Select a conversation</h3>
+        <p className="text-xs text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
+          Choose an email thread from the conversation list to review message history, download attachments, and send replies.
         </p>
+        {onOpenFullComposer && (
+          <Button
+            onClick={() => onOpenFullComposer({ to: "", subject: "", threadId: "" })}
+            variant="outline"
+            size="sm"
+            className="mt-5 h-9 px-4 gap-2 text-xs font-semibold rounded-xl border-border/70 hover:bg-muted/50"
+          >
+            <PenSquare className="h-3.5 w-3.5 text-primary" />
+            <span>Compose New Message</span>
+          </Button>
+        )}
       </div>
     );
   }
@@ -116,26 +128,40 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const getAttachmentIcon = (filename: string, mime?: string) => {
+    const lower = filename.toLowerCase();
+    if (lower.endsWith(".pdf") || mime?.includes("pdf")) {
+      return <FileText className="h-4 w-4 text-rose-500 shrink-0" />;
+    }
+    if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") || mime?.includes("image")) {
+      return <ImageIcon className="h-4 w-4 text-purple-500 shrink-0" />;
+    }
+    if (lower.endsWith(".xls") || lower.endsWith(".xlsx") || lower.endsWith(".csv")) {
+      return <Sheet className="h-4 w-4 text-emerald-500 shrink-0" />;
+    }
+    return <FileIcon className="h-4 w-4 text-blue-500 shrink-0" />;
+  };
+
   const getStatusBadge = (status: EmailStatus, errorMsg?: string) => {
     switch (status) {
       case "delivered":
       case "sent":
         return (
-          <Badge variant="outline" className="h-5 text-[10px] gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-medium">
+          <Badge variant="outline" className="h-5 text-[10px] gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 font-semibold">
             <CheckCheck className="h-3 w-3" />
             <span>Sent</span>
           </Badge>
         );
       case "failed":
         return (
-          <Badge variant="outline" className="h-5 text-[10px] gap-1 bg-destructive/10 text-destructive border-destructive/20 font-medium" title={errorMsg}>
+          <Badge variant="outline" className="h-5 text-[10px] gap-1 bg-destructive/10 text-destructive border-destructive/25 font-semibold" title={errorMsg}>
             <AlertCircle className="h-3 w-3" />
             <span>Failed</span>
           </Badge>
         );
       case "queued":
         return (
-          <Badge variant="outline" className="h-5 text-[10px] gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-medium">
+          <Badge variant="outline" className="h-5 text-[10px] gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25 font-semibold">
             <Clock className="h-3 w-3" />
             <span>Queued</span>
           </Badge>
@@ -178,7 +204,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
+    <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
       {/* Thread Header Toolbar */}
       <div className="p-3 sm:p-4 border-b border-border/60 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -188,7 +214,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
               variant="outline"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 rounded-xl border-border/70 shrink-0 md:hidden text-foreground"
+              className="h-8 w-8 rounded-xl border-border/70 shrink-0 md:hidden text-foreground hover:bg-muted/50"
               aria-label="Back to conversations list"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -201,7 +227,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 {thread.subject || "(No Subject)"}
               </h2>
               {thread.unreadCount > 0 && (
-                <Badge variant="secondary" className="text-[10px] bg-primary/15 text-primary rounded-full shrink-0">
+                <Badge variant="secondary" className="text-[10px] bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 rounded-full shrink-0 font-bold">
                   Unread
                 </Badge>
               )}
@@ -214,6 +240,20 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 
         {/* Action Toolbar */}
         <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+          {/* Star thread toggle */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toggleStarMutation.mutate({ threadId: thread._id, isStarred: !thread.isStarred })}
+            className={`h-8 w-8 p-0 rounded-xl border-border/70 transition-colors ${
+              thread.isStarred ? "text-amber-400 bg-amber-500/10 border-amber-500/30" : "text-muted-foreground hover:text-amber-400"
+            }`}
+            title={thread.isStarred ? "Unstar conversation" : "Star conversation"}
+          >
+            <Star className={`h-3.5 w-3.5 ${thread.isStarred ? "fill-amber-400 text-amber-400" : ""}`} />
+          </Button>
+
+          {/* Mark read / unread */}
           <Button
             variant="outline"
             size="sm"
@@ -221,10 +261,11 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
             className="h-8 px-2.5 text-xs gap-1.5 rounded-xl border-border/70 hover:bg-muted/50"
             title={thread.unreadCount > 0 ? "Mark as Read" : "Mark as Unread"}
           >
-            {thread.unreadCount > 0 ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            {thread.unreadCount > 0 ? <Eye className="h-3.5 w-3.5 text-primary" /> : <EyeOff className="h-3.5 w-3.5" />}
             <span className="hidden lg:inline">{thread.unreadCount > 0 ? "Mark Read" : "Mark Unread"}</span>
           </Button>
 
+          {/* Open full reply */}
           <Button
             size="sm"
             onClick={() => {
@@ -246,7 +287,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3.5 overscroll-contain">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3.5 overscroll-contain scrollbar-thin">
         {messages.length === 0 ? (
           <div className="text-center py-10 text-xs text-muted-foreground">
             No message content recorded in this thread.
@@ -260,7 +301,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 key={msg._id || idx}
                 className={`group rounded-2xl border p-4 sm:p-5 shadow-2xs transition-all ${
                   isSent
-                    ? "bg-primary/5 border-primary/15 ml-2 sm:ml-8"
+                    ? "bg-blue-500/[0.03] dark:bg-blue-500/[0.08] border-blue-500/20 ml-2 sm:ml-8"
                     : "bg-card border-border/70 mr-2 sm:mr-8"
                 }`}
               >
@@ -271,7 +312,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                       <AvatarFallback
                         className={
                           isSent
-                            ? "bg-primary text-primary-foreground font-bold"
+                            ? "bg-blue-600 text-white font-bold"
                             : "bg-muted text-foreground font-bold"
                         }
                       >
@@ -386,7 +427,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                             }}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <FileIcon className={`h-4 w-4 shrink-0 ${hasUrl ? "text-primary" : "text-muted-foreground"}`} />
+                              {getAttachmentIcon(file.fileName, file.mimeType)}
                               <div className="truncate text-xs">
                                 <p className="font-semibold text-foreground truncate">{file.fileName}</p>
                                 <p className="text-[10px] text-muted-foreground">{formatFileSize(file.sizeBytes)}</p>
@@ -418,7 +459,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
           className="text-xs resize-none bg-background/90 border-border/60 rounded-xl focus-visible:ring-1 focus-visible:ring-primary/40 shadow-2xs"
         />
 
-        <div className="flex items-center justify-between gap-2 pt-0.5">
+        <div className="flex items-center justify-between gap-2 pt-0.5 flex-wrap">
           <div className="flex items-center gap-2 min-w-0">
             {/* Signature toggle in quick reply */}
             {defaultReplySignature && (
@@ -427,13 +468,13 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 onClick={() => setIncludeSignature(!includeSignature)}
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
                   includeSignature
-                    ? "bg-primary/10 border-primary/25 text-primary"
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300"
                     : "bg-muted/40 border-border/60 text-muted-foreground hover:text-foreground"
                 }`}
                 title={includeSignature ? "Signature will be included" : "Signature excluded"}
               >
-                <PenTool className="h-3 w-3" />
-                <span className="hidden sm:inline">Signature:</span>
+                <PenTool className="h-3 w-3 text-amber-500" />
+                <span className="hidden sm:inline">Sig:</span>
                 <span className="font-bold truncate max-w-[100px]">{defaultReplySignature.name}</span>
               </button>
             )}

@@ -3,30 +3,32 @@
 import React, { useState } from "react";
 import { 
   Inbox, 
-  Star, 
   Send, 
-  PenSquare, 
-  LogOut, 
-  Clock, 
   Trash2, 
-  FileText,
-  AlertTriangle,
-  MailCheck,
-  ChevronRight,
-  ShieldCheck,
-  PanelLeftClose,
-  PanelLeftOpen,
+  FileText, 
+  Star, 
+  PenSquare, 
+  Clock, 
+  AlertTriangle, 
+  LogOut, 
+  PanelLeftClose, 
+  PanelLeftOpen, 
+  ChevronRight, 
   PenTool,
-  Sparkles,
   Building2,
   UserCheck,
   Users,
-  Check,
-  X,
-  Mail
+  Mail,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,16 +40,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Mailbox } from "@/types/email";
 import { useDisconnectMailbox } from "@/hooks/useEmail";
 import { useEmailSignatures } from "@/hooks/useEmailSignatures";
-import { EmailContactType, EMAIL_TYPE_CONFIG } from "@/types/emailContactTypes";
+import { EmailContactType } from "@/types/emailContactTypes";
 import { EmailAddressSelector } from "./EmailAddressSelector";
 
 export type EmailFolder = "inbox" | "starred" | "sent" | "drafts" | "trash";
@@ -103,43 +99,49 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
     icon: React.ElementType; 
     badge?: number;
     color: string;
-    bgHover: string;
+    activeBg: string;
+    hoverBg: string;
   }[] = [
     { 
       id: "inbox", 
       label: "Inbox", 
       icon: Inbox, 
       badge: unreadCount, 
-      color: "text-sky-600 dark:text-sky-400", 
-      bgHover: "hover:bg-sky-500/10" 
+      color: "text-blue-600 dark:text-blue-400", 
+      activeBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border-blue-500/20",
+      hoverBg: "hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400" 
     },
     { 
       id: "starred", 
       label: "Starred", 
       icon: Star, 
-      color: "text-amber-600 dark:text-amber-400", 
-      bgHover: "hover:bg-amber-500/10" 
+      color: "text-amber-500 dark:text-amber-400", 
+      activeBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border-amber-500/20",
+      hoverBg: "hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400" 
     },
     { 
       id: "sent", 
       label: "Sent Mail", 
       icon: Send, 
       color: "text-emerald-600 dark:text-emerald-400", 
-      bgHover: "hover:bg-emerald-500/10" 
+      activeBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border-emerald-500/20",
+      hoverBg: "hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400" 
     },
     { 
       id: "drafts", 
       label: "Drafts", 
       icon: FileText, 
       color: "text-purple-600 dark:text-purple-400", 
-      bgHover: "hover:bg-purple-500/10" 
+      activeBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold border-purple-500/20",
+      hoverBg: "hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400" 
     },
     { 
       id: "trash", 
       label: "Trash", 
       icon: Trash2, 
       color: "text-rose-600 dark:text-rose-400", 
-      bgHover: "hover:bg-rose-500/10" 
+      activeBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold border-rose-500/20",
+      hoverBg: "hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400" 
     },
   ];
 
@@ -153,17 +155,17 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
   return (
     <TooltipProvider delayDuration={200}>
       <aside
-        className={`flex flex-col justify-between h-full bg-card/85 backdrop-blur-md border border-border/60 rounded-2xl p-3 shadow-xs transition-all duration-300 ${
+        className={`flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl p-3 shadow-xs transition-all duration-300 overflow-hidden ${
           isCollapsed ? "w-16 items-center" : "w-full"
         }`}
       >
-        {/* Top Section: Compose & Folder Navigation */}
-        <div className="space-y-2.5 w-full">
-          {/* Collapse Toggle & New Message Header */}
+        {/* Top Fixed Section: Collapse Toggle & Compose */}
+        <div className="shrink-0 space-y-2.5 w-full pb-2">
+          {/* Header row */}
           <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"} px-1`}>
             {!isCollapsed && (
               <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
-                Folders
+                Mailbox
               </span>
             )}
             {onToggleCollapse && (
@@ -202,7 +204,10 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
               <span>New Message</span>
             </Button>
           )}
+        </div>
 
+        {/* Middle Scrollable Section: Folders, Email Types & Signatures */}
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-2.5 w-full pr-0.5 -mr-0.5 scrollbar-thin">
           {/* Folder List */}
           <nav className="space-y-1 w-full pt-1">
             {navItems.map((item) => {
@@ -215,15 +220,15 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => handleSelectFolder(item.id)}
-                        className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-colors relative ${
+                        className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-colors relative border ${
                           isActive
-                            ? "bg-primary/15 text-primary font-bold shadow-2xs"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                            ? `${item.activeBg} shadow-2xs`
+                            : `border-transparent text-muted-foreground ${item.hoverBg}`
                         }`}
                       >
                         <Icon className={`h-4 w-4 ${isActive ? item.color : ""}`} />
                         {item.badge !== undefined && item.badge > 0 && (
-                          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
+                          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]" />
                         )}
                       </button>
                     </TooltipTrigger>
@@ -238,16 +243,16 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelectFolder(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all border group ${
                     isActive
-                      ? "bg-primary/10 text-primary font-semibold shadow-2xs"
-                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                      ? `${item.activeBg} shadow-2xs`
+                      : `border-transparent text-muted-foreground hover:text-foreground ${item.hoverBg}`
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Icon
-                      className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${
-                        isActive ? item.color : "text-muted-foreground/80"
+                      className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
+                        isActive ? item.color : "text-muted-foreground/80 group-hover:" + item.color
                       }`}
                     />
                     <span className="truncate">{item.label}</span>
@@ -257,24 +262,24 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                     <Badge
                       variant="secondary"
                       className={`h-4 px-1.5 text-[10px] font-bold rounded-full ${
-                        isActive ? "bg-primary text-primary-foreground" : "bg-muted/70 text-foreground"
+                        isActive ? "bg-primary text-primary-foreground" : "bg-muted/80 text-foreground"
                       }`}
                     >
                       {item.badge}
                     </Badge>
                   ) : isActive ? (
-                    <ChevronRight className="h-3 w-3 text-primary opacity-50" />
+                    <ChevronRight className="h-3 w-3 opacity-60" />
                   ) : null}
                 </button>
               );
             })}
 
             {/* Email Types Section (Client, Candidate, Team) */}
-            <div className="pt-2.5 border-t border-border/40 mt-2.5 space-y-1">
+            <div className="pt-2.5 border-t border-border/50 mt-2.5 space-y-1">
               {!isCollapsed && (
                 <div className="flex items-center justify-between px-2 mb-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
-                    Email Types
+                    Stakeholders
                   </span>
                   {(selectedEmailType || selectedEmailAddress) && (
                     <button
@@ -284,7 +289,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                         onSelectEmailAddress?.(null);
                       }}
                       className="text-[10px] font-semibold text-muted-foreground hover:text-destructive transition-colors"
-                      title="Clear type filter"
+                      title="Clear stakeholder filter"
                     >
                       Reset
                     </button>
@@ -298,21 +303,24 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                   label: "Client Emails",
                   icon: Building2,
                   color: "text-blue-600 dark:text-blue-400",
-                  activeBg: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+                  activeBg: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/25",
+                  hoverBg: "hover:bg-blue-500/10 hover:text-blue-600",
                 },
                 {
                   id: "candidate" as EmailContactType,
                   label: "Candidate Emails",
                   icon: UserCheck,
                   color: "text-emerald-600 dark:text-emerald-400",
-                  activeBg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+                  activeBg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
+                  hoverBg: "hover:bg-emerald-500/10 hover:text-emerald-600",
                 },
                 {
                   id: "team" as EmailContactType,
                   label: "Team Emails",
                   icon: Users,
                   color: "text-purple-600 dark:text-purple-400",
-                  activeBg: "bg-purple-500/10 text-purple-700 dark:text-purple-300",
+                  activeBg: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/25",
+                  hoverBg: "hover:bg-purple-500/10 hover:text-purple-600",
                 },
               ]).map((typeItem) => {
                 const Icon = typeItem.icon;
@@ -335,10 +343,10 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                           <TooltipTrigger asChild>
                             <button
                               type="button"
-                              className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-colors relative ${
+                              className={`w-10 h-10 mx-auto flex items-center justify-center rounded-xl transition-colors relative border ${
                                 isTypeActive
                                   ? `${typeItem.activeBg} font-bold shadow-2xs`
-                                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                                  : `border-transparent text-muted-foreground ${typeItem.hoverBg}`
                               }`}
                             >
                               <Icon className={`h-4 w-4 ${isTypeActive ? typeItem.color : ""}`} />
@@ -363,22 +371,21 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                       type="button"
                       onClick={() => {
                         if (isTypeActive) {
-                          // Toggle off
                           onSelectEmailType?.(null);
                           onSelectEmailAddress?.(null);
                         } else {
                           onSelectEmailType?.(typeItem.id);
                         }
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium transition-all group ${
+                      className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium transition-all border group ${
                         isTypeActive
                           ? `${typeItem.activeBg} font-semibold shadow-2xs`
-                          : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                          : `border-transparent text-muted-foreground hover:text-foreground ${typeItem.hoverBg}`
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Icon
-                          className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-105 ${
+                          className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${
                             isTypeActive ? typeItem.color : "text-muted-foreground/80"
                           }`}
                         />
@@ -441,13 +448,13 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
 
             {/* Email Signatures Quick Trigger in Sidebar */}
             {onOpenSignatures && (
-              <div className="pt-2 border-t border-border/40 mt-2">
+              <div className="pt-2 border-t border-border/50 mt-2">
                 {isCollapsed ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={onOpenSignatures}
-                        className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 transition-colors"
                       >
                         <PenTool className="h-4 w-4" />
                       </button>
@@ -457,15 +464,15 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 ) : (
                   <button
                     onClick={onOpenSignatures}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all group"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-amber-500/10 transition-all group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <PenTool className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <PenTool className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-amber-500 transition-colors" />
                       <span className="truncate">Signatures</span>
                     </div>
                     <Badge
                       variant="outline"
-                      className="h-4 px-1.5 text-[9px] font-bold rounded-md border-border/70 text-muted-foreground group-hover:border-primary/40 group-hover:text-primary"
+                      className="h-4 px-1.5 text-[9px] font-bold rounded-md border-border/70 text-muted-foreground group-hover:border-amber-500/40 group-hover:text-amber-600 dark:group-hover:text-amber-400"
                     >
                       {signatures.length}
                     </Badge>
@@ -476,16 +483,16 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
           </nav>
         </div>
 
-        {/* Bottom Section: Mailbox Health & Disconnect */}
-        <div className="pt-2.5 border-t border-border/60 w-full space-y-2">
+        {/* Bottom Section: Mailbox Health & Disconnect (Pinned at bottom, ALWAYS visible!) */}
+        <div className="shrink-0 pt-2.5 border-t border-border/60 w-full space-y-2 mt-auto">
           {mailbox && !isCollapsed && (
-            <div className="p-2.5 rounded-xl bg-muted/20 border border-border/50 space-y-1.5 text-[11px]">
+            <div className="p-2.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5 text-[11px]">
               <div className="flex items-center justify-between gap-1.5">
-                <span className="font-semibold text-foreground truncate max-w-[130px]">
+                <span className="font-semibold text-foreground truncate max-w-[130px]" title={mailbox.displayName || "Work Mailbox"}>
                   {mailbox.displayName || "Work Mailbox"}
                 </span>
-                <span className="flex h-2 w-2 relative shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70" />
+                <span className="flex h-2 w-2 relative shrink-0" title="Mailbox connected & syncing">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
               </div>
@@ -494,9 +501,14 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 {mailbox.emailAddress}
               </p>
 
-              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] pt-0.5 border-t border-border/40">
-                <Clock className="h-3 w-3 shrink-0 text-muted-foreground/70" />
-                <span className="truncate">Synced: {formatLastSync(mailbox.lastSyncedAt)}</span>
+              <div className="flex items-center justify-between text-muted-foreground text-[10px] pt-1 border-t border-border/40">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 shrink-0 text-muted-foreground/70" />
+                  <span className="truncate">{formatLastSync(mailbox.lastSyncedAt)}</span>
+                </div>
+                <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-md">
+                  Active
+                </span>
               </div>
 
               {mailbox.sentFolderDetected === false && (
@@ -517,7 +529,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 mx-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
+                      className="h-9 w-9 mx-auto text-destructive hover:text-destructive hover:bg-destructive/15 rounded-xl transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
                     </Button>
@@ -526,20 +538,23 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 </Tooltip>
               ) : (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="w-full h-8 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 justify-start px-2.5 gap-2 rounded-xl transition-colors"
+                  className="w-full h-8 text-xs font-semibold text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/25 hover:border-destructive/40 justify-start px-2.5 gap-2 rounded-xl transition-all"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span>Disconnect Mailbox</span>
+                  <LogOut className="h-3.5 w-3.5 text-destructive shrink-0" />
+                  <span className="truncate">Disconnect Mailbox</span>
                 </Button>
               )}
             </AlertDialogTrigger>
             <AlertDialogContent className="rounded-2xl sm:max-w-md">
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-base font-bold">Disconnect Mailbox?</AlertDialogTitle>
+                <AlertDialogTitle className="text-base font-bold flex items-center gap-2 text-foreground">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  Disconnect Mailbox?
+                </AlertDialogTitle>
                 <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
-                  This will pause incoming IMAP sync for this account. Your past sent and received email history will remain safely preserved in CliqHire.
+                  This will safely disconnect your personal mailbox integration. Incoming sync will be paused, but all previously imported conversations and message history will remain preserved in CliqHire.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -549,9 +564,9 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                     disconnectMutation.mutate();
                     setDisconnectOpen(false);
                   }}
-                  className="text-xs h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
+                  className="text-xs h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold rounded-xl"
                 >
-                  Disconnect
+                  Disconnect Now
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
