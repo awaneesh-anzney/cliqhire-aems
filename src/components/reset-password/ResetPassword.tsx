@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { usePasswordReset } from "@/hooks/usePasswordReset";
+import { usePasswordReset, useVerifyResetToken } from "@/hooks/usePasswordReset";
 
 const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, {
@@ -44,6 +44,7 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { resetPassword, isResetPasswordPending, isResetPasswordSuccess } = usePasswordReset();
+  const { isValid, isLoading: isVerifying, isError } = useVerifyResetToken(token);
 
   const form = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -57,8 +58,11 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
     if (!token) {
       toast.error("Invalid reset link. Please request a new one.");
       router.push("/forgot-password");
+    } else if (!isVerifying && (isError || !isValid)) {
+      toast.error("Reset link is invalid or expired. Please request a new one.");
+      router.push("/forgot-password");
     }
-  }, [token, router]);
+  }, [token, router, isVerifying, isError, isValid]);
 
   const onSubmit = async (values: ResetPasswordValues) => {
     if (!token) {
@@ -88,6 +92,19 @@ export function ResetPassword({ className, ...props }: React.ComponentPropsWitho
         </div>
       </div>
     );
+  }
+
+  if (isVerifying) {
+    return (
+      <div className={cn("flex w-full flex-col gap-6 items-center justify-center min-h-[300px]", className)} {...props}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
+        <p className="text-muted-foreground mt-4">Verifying reset link...</p>
+      </div>
+    );
+  }
+
+  if (!isValid) {
+    return null; // Will redirect via useEffect
   }
 
   return (
