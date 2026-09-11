@@ -26,6 +26,9 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Loader2, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { emailService } from "@/services/emailService";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function EmailPage() {
   const { 
@@ -57,6 +60,38 @@ export default function EmailPage() {
   const [composerInitialData, setComposerInitialData] = useState<ComposerInitialData | undefined>(undefined);
   const [adminMailboxesOpen, setAdminMailboxesOpen] = useState(false);
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [activeFolder, searchQuery, page, selectedEmailType, selectedEmailAddress]);
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    try {
+      if (activeFolder === "trash") {
+        await Promise.all(selectedIds.map(id => emailService.permanentDelete(id)));
+        toast.success("Conversations permanently deleted");
+      } else if (activeFolder === "drafts") {
+        await Promise.all(selectedIds.map(id => emailService.deleteDraft(id)));
+        toast.success("Drafts discarded");
+      } else {
+        await Promise.all(selectedIds.map(id => emailService.moveToTrash(id)));
+        toast.success("Conversations moved to Trash");
+      }
+      setSelectedIds([]);
+      queryClient.invalidateQueries({ queryKey: ["email-list"] });
+      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
+      refetchList();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Some actions failed");
+      queryClient.invalidateQueries({ queryKey: ["email-list"] });
+      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
+      refetchList();
+    }
+  };
 
   // Set initial collapse based on screen width on mount
   useEffect(() => {
@@ -339,6 +374,10 @@ export default function EmailPage() {
                     onPageChange={setPage}
                     searchQuery={searchQuery}
                     onToggleStar={handleToggleStar}
+                    selectedIds={selectedIds}
+                    onSelectIdsChange={setSelectedIds}
+                    onBulkDelete={handleBulkDelete}
+                    activeFolder={activeFolder}
                   />
                 </div>
               </div>

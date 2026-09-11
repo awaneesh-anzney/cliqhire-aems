@@ -22,7 +22,8 @@ import {
   PenSquare,
   FileText,
   Image as ImageIcon,
-  Sheet
+  Sheet,
+  RotateCcw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +41,9 @@ import {
   useMarkThreadRead, 
   useSendEmail, 
   useMoveToTrash, 
-  useToggleStar 
+  useToggleStar,
+  useRestoreEmail,
+  usePermanentDelete
 } from "@/hooks/useEmail";
 import { useEmailSignatures } from "@/hooks/useEmailSignatures";
 
@@ -63,6 +66,8 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
   const sendEmailMutation = useSendEmail();
   const moveToTrashMutation = useMoveToTrash();
   const toggleStarMutation = useToggleStar();
+  const restoreEmailMutation = useRestoreEmail();
+  const permanentDeleteMutation = usePermanentDelete();
   const { defaultReplySignature } = useEmailSignatures();
 
   const [quickReplyText, setQuickReplyText] = useState("");
@@ -373,7 +378,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                           <Reply className="h-3.5 w-3.5" />
                           <span>Reply to this</span>
                         </DropdownMenuItem>
-                        {msg._id && (
+                        {msg._id && msg.folder !== "trash" && (
                           <DropdownMenuItem
                             onClick={() => moveToTrashMutation.mutate(msg._id)}
                             className="gap-2 text-destructive focus:text-destructive cursor-pointer"
@@ -381,6 +386,24 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                             <Trash2 className="h-3.5 w-3.5" />
                             <span>Move to trash</span>
                           </DropdownMenuItem>
+                        )}
+                        {msg._id && msg.folder === "trash" && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => restoreEmailMutation.mutate(msg._id)}
+                              className="gap-2 cursor-pointer"
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                              <span>Restore</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => permanentDeleteMutation.mutate(msg._id)}
+                              className="gap-2 text-destructive focus:text-destructive cursor-pointer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              <span>Permanent Delete</span>
+                            </DropdownMenuItem>
+                          </>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -10,7 +10,9 @@ import {
   Search,
   Paperclip,
   FileEdit,
-  Sparkles
+  Sparkles,
+  Trash2,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +43,10 @@ interface EmailThreadListProps {
   onPageChange: (newPage: number) => void;
   searchQuery?: string;
   onToggleStar?: (threadId: string, e: React.MouseEvent) => void;
+  selectedIds?: string[];
+  onSelectIdsChange?: (ids: string[]) => void;
+  onBulkDelete?: () => void;
+  activeFolder?: string;
 }
 
 const AVATAR_COLORS = [
@@ -64,6 +70,10 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
   onPageChange,
   searchQuery = "",
   onToggleStar,
+  selectedIds,
+  onSelectIdsChange,
+  onBulkDelete,
+  activeFolder,
 }) => {
   const [filterType, setFilterType] = useState<"all" | "unread" | "starred">("all");
 
@@ -125,23 +135,89 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
   const unreadTotal = threads.filter((t) => t.unreadCount > 0 && !t.isDraft).length;
   const starredTotal = threads.filter((t) => t.isStarred).length;
 
+  const allIds = filteredThreads.map(t => t.id);
+  const areAllSelected = allIds.length > 0 && !!selectedIds && allIds.every(id => selectedIds.includes(id));
+  
+  const handleToggleSelectAll = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onSelectIdsChange || !selectedIds) return;
+    if (areAllSelected) {
+      onSelectIdsChange(selectedIds.filter(id => !allIds.includes(id)));
+    } else {
+      const newSelected = [...selectedIds];
+      allIds.forEach(id => {
+        if (!newSelected.includes(id)) newSelected.push(id);
+      });
+      onSelectIdsChange(newSelected);
+    }
+  };
+
+  const handleToggleSelect = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onSelectIdsChange || !selectedIds) return;
+    if (selectedIds.includes(id)) {
+      onSelectIdsChange(selectedIds.filter(sid => sid !== id));
+    } else {
+      onSelectIdsChange([...selectedIds, id]);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
       {/* List Header & Quick Filter Pills */}
       <div className="p-3 border-b border-border/60 bg-muted/20 space-y-2.5 shrink-0">
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5 font-bold text-foreground">
-            <div className="h-5 w-5 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Inbox className="h-3 w-3" />
+        {(selectedIds && selectedIds.length > 0) ? (
+          <div className="flex items-center justify-between py-0.5">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleToggleSelectAll}
+                className="flex items-center justify-center w-4 h-4 rounded border border-border/70 hover:border-primary text-primary transition-colors bg-card"
+              >
+                {areAllSelected ? <Check className="w-3 h-3" /> : <span className="w-2 h-2 rounded-sm bg-primary/40" />}
+              </button>
+              <span className="text-xs font-semibold text-foreground">
+                {selectedIds.length} selected
+              </span>
             </div>
-            <span>{totalThreads} {totalThreads === 1 ? "Conversation" : "Conversations"}</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onBulkDelete}
+                className="h-7 px-2 text-[11px] font-semibold text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 rounded-lg shadow-2xs"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                {activeFolder === "trash" ? "Delete Forever" : "Trash"}
+              </Button>
+            </div>
           </div>
-          {totalPages > 1 && (
-            <span className="text-[11px] text-muted-foreground font-medium">
-              Page {page} of {totalPages}
-            </span>
-          )}
-        </div>
+        ) : (
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-3">
+              {onSelectIdsChange && (
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="flex items-center justify-center w-4 h-4 rounded border border-border/70 hover:border-primary transition-colors bg-card mt-0.5"
+                >
+                  {areAllSelected && <Check className="w-3 h-3 text-primary" />}
+                </button>
+              )}
+              <div className="flex items-center gap-1.5 font-bold text-foreground">
+                <div className="h-5 w-5 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <Inbox className="h-3 w-3" />
+                </div>
+                <span>{totalThreads} {totalThreads === 1 ? "Conversation" : "Conversations"}</span>
+              </div>
+            </div>
+            {totalPages > 1 && (
+              <span className="text-[11px] text-muted-foreground font-medium">
+                Page {page} of {totalPages}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Filter Pills with vibrant email client accents */}
         <div className="flex items-center gap-1.5">
@@ -242,6 +318,22 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                     : ""
                 }`}
               >
+                {/* Checkbox */}
+                {onSelectIdsChange && selectedIds && (
+                  <div 
+                    className="shrink-0 flex items-center mt-2.5 sm:opacity-0 group-hover:opacity-100 transition-opacity mr-0.5" 
+                    style={{ opacity: selectedIds.includes(thread.id) ? 1 : undefined }}
+                    onClick={(e) => handleToggleSelect(thread.id, e)}
+                  >
+                    <button
+                      type="button"
+                      className="flex items-center justify-center w-4 h-4 rounded border border-border/70 hover:border-primary text-primary transition-colors bg-card"
+                    >
+                      {selectedIds.includes(thread.id) && <Check className="w-3 h-3" />}
+                    </button>
+                  </div>
+                )}
+
                 {/* Avatar with initials */}
                 <Avatar className="h-9 w-9 border border-border/50 shrink-0 text-xs mt-0.5 shadow-2xs">
                   <AvatarFallback className={`font-bold text-[11px] ${getAvatarColor(primaryParticipant)}`}>
