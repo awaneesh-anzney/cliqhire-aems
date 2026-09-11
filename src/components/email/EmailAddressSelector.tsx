@@ -26,9 +26,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   EmailContactItem,
   EmailContactType,
-  MOCK_EMAIL_CONTACTS,
   EMAIL_TYPE_CONFIG,
 } from "@/types/emailContactTypes";
+import { useEmailRecipients } from "@/hooks/useEmailRecipients";
 
 interface EmailAddressSelectorProps {
   initialType?: EmailContactType;
@@ -56,6 +56,7 @@ export const EmailAddressSelector: React.FC<EmailAddressSelectorProps> = ({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<EmailContactType>(initialType);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
   // Sync initial type whenever it changes externally
   React.useEffect(() => {
@@ -64,30 +65,26 @@ export const EmailAddressSelector: React.FC<EmailAddressSelectorProps> = ({
     }
   }, [initialType]);
 
-  const filteredContacts = useMemo(() => {
-    return MOCK_EMAIL_CONTACTS.filter((contact) => {
-      const matchesType = contact.type === activeTab;
-      if (!matchesType) return false;
+  // Debounce search query
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-      if (!searchQuery.trim()) return true;
-
-      const q = searchQuery.toLowerCase();
-      return (
-        contact.name.toLowerCase().includes(q) ||
-        contact.email.toLowerCase().includes(q) ||
-        contact.roleOrCompany.toLowerCase().includes(q) ||
-        (contact.status && contact.status.toLowerCase().includes(q))
-      );
-    });
-  }, [activeTab, searchQuery]);
+  const { data: contacts, isLoading } = useEmailRecipients(activeTab, debouncedSearchQuery);
+  const filteredContacts = contacts || [];
 
   const handleSelectContact = (contact: EmailContactItem) => {
     onSelect(contact.email, contact);
     setOpen(false);
     setSearchQuery("");
+    setDebouncedSearchQuery("");
   };
 
   const getInitials = (name: string) => {
+    if (!name) return "??";
     return name
       .split(" ")
       .map((n) => n[0])
@@ -98,10 +95,19 @@ export const EmailAddressSelector: React.FC<EmailAddressSelectorProps> = ({
 
   const activeContact = useMemo(() => {
     if (!selectedEmail) return null;
-    return MOCK_EMAIL_CONTACTS.find(
+    const found = filteredContacts.find(
       (c) => c.email.toLowerCase() === selectedEmail.toLowerCase()
     );
-  }, [selectedEmail]);
+    if (found) return found;
+    return {
+      id: "selected",
+      name: selectedEmail.split("@")[0],
+      email: selectedEmail,
+      type: activeTab,
+      roleOrCompany: "Selected Contact",
+      status: "Active",
+    } as EmailContactItem;
+  }, [selectedEmail, filteredContacts, activeTab]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -219,7 +225,12 @@ export const EmailAddressSelector: React.FC<EmailAddressSelectorProps> = ({
 
         {/* Contacts Email List */}
         <div className="max-h-64 overflow-y-auto p-1.5 space-y-1">
-          {filteredContacts.length === 0 ? (
+          {isLoading ? (
+            <div className="p-6 text-center text-muted-foreground">
+              <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-xs font-semibold text-foreground">Loading contacts...</p>
+            </div>
+          ) : filteredContacts.length === 0 ? (
             <div className="p-6 text-center text-muted-foreground">
               <Mail className="h-6 w-6 text-muted-foreground/40 mx-auto mb-1.5" />
               <p className="text-xs font-semibold text-foreground">

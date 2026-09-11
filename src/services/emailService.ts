@@ -23,6 +23,14 @@ import {
 } from "@/types/email";
 import { EmailSignature } from "@/types/emailSignature";
 
+export interface GetEmailRecipientsParams {
+  type: "client" | "candidate" | "user";
+  search?: string;
+  clientId?: string;
+  page?: number;
+  limit?: number;
+}
+
 export const emailService = {
   /**
    * Fetch current organization email provider configuration.
@@ -57,6 +65,14 @@ export const emailService = {
    */
   async getMailboxStatus(): Promise<MailboxStatusResponse> {
     const response = await api.get<MailboxStatusResponse>("/api/email/mailbox/status");
+    return response.data;
+  },
+
+  /**
+   * Fetch email recipients for compose dropdowns and filtering.
+   */
+  async getEmailRecipients(params: GetEmailRecipientsParams) {
+    const response = await api.get("/api/email-recipients", { params });
     return response.data;
   },
 
