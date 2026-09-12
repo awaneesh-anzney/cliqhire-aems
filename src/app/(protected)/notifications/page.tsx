@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function NotificationsPage() {
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-muted/20">
+    <div className="h-full w-full flex flex-col min-h-0 overflow-hidden bg-background">
       <NotificationsClient />
     </div>
   );
