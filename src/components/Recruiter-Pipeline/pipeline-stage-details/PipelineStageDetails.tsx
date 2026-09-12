@@ -80,17 +80,18 @@ export function PipelineStageDetails({
     return () => setShowConfirmDialog(false);
   }, []);
 
-  if (!candidate) return null;
-
-  const displayStage = selectedStage || candidate.currentStage || "Sourcing";
-  const stageFields = getStageFields(displayStage, candidate);
-  const isCurrentStage = displayStage === candidate.currentStage;
-  const isStageEditable = canModify && isCurrentStage;
+  const displayStage = selectedStage || candidate?.currentStage || "Sourcing";
 
   // Automatically discard edit mode if switching between stages
   React.useEffect(() => {
     setIsEditingStage(false);
   }, [displayStage]);
+
+  if (!candidate) return null;
+
+  const stageFields = getStageFields(displayStage, candidate);
+  const isCurrentStage = displayStage === candidate.currentStage;
+  const isStageEditable = canModify && isCurrentStage;
 
   const handleEditAll = () => {
     if (!isStageEditable) {
