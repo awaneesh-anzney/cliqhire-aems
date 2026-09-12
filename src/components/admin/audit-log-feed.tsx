@@ -78,35 +78,72 @@ export function AuditLogFeed() {
   };
 
   const renderChanges = (log: any) => {
-    if (log.action === "LOGIN" || log.action === "LOGOUT") {
-      if (!log.metadata) return null;
-      const { ip, device } = log.metadata;
-      return (
-        <div className="text-[10px] text-muted-foreground flex flex-col gap-0.5 leading-tight font-medium">
-          {ip && <span>IP: <code className="font-mono text-foreground/80 bg-muted/65 px-1 py-0.5 rounded">{ip}</code></span>}
-          {device && <span>Device: {device.browser} ({device.os})</span>}
-        </div>
-      );
-    }
+    let changeNode = null;
+    let isEmptyMain = false;
 
     if (log.changes) {
       if (log.action === "STAGE_CHANGED") {
-        return (
+        changeNode = (
           <div className="text-[10px] text-muted-foreground flex items-center gap-1.5 leading-tight font-medium">
             <span className="line-through text-muted-foreground/60">{log.changes.before?.stage || "Unknown"}</span>
             <span className="text-muted-foreground/40 font-bold">→</span>
             <span className="font-black text-foreground px-1.5 py-0.5 rounded bg-muted border border-border/40">{log.changes.after?.stage || "Unknown"}</span>
           </div>
         );
+      } else {
+        changeNode = (
+          <div className="text-[10px] text-muted-foreground font-medium flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand/60 animate-pulse" />
+            <span>Updated fields</span>
+          </div>
+        );
       }
-      return (
-        <div className="text-[10px] text-muted-foreground font-medium flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand/60 animate-pulse" />
-          <span>Updated fields</span>
-        </div>
-      );
+    } else if (log.action !== "LOGIN" && log.action !== "LOGOUT") {
+      isEmptyMain = true;
     }
-    return <span className="text-muted-foreground/30">—</span>;
+
+    const { ip, device } = log.metadata || {};
+    const { location, session } = log;
+    const hasNetworkInfo = ip || location || device || session;
+
+    if (!changeNode && !hasNetworkInfo) {
+      return <span className="text-muted-foreground/30">—</span>;
+    }
+
+    return (
+      <div className="flex flex-col gap-1.5">
+        {changeNode}
+        {isEmptyMain && !hasNetworkInfo && <span className="text-muted-foreground/30">—</span>}
+        {hasNetworkInfo && (
+          <div className={`text-[10px] text-muted-foreground flex flex-col gap-0.5 leading-tight font-medium ${changeNode ? "mt-0.5 pt-1.5 border-t border-border/40" : ""}`}>
+            {device && (log.action === "LOGIN" || log.action === "LOGOUT") && (
+              <span>Device: {device.browser} ({device.os})</span>
+            )}
+            {(ip || location) && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                {ip && (
+                  <span>
+                    IP: <code className="font-mono text-foreground/80 bg-muted/65 px-1 py-0.5 rounded">{ip}</code>
+                  </span>
+                )}
+                {location && (
+                  <span className="flex items-center gap-1">
+                    {ip && <span className="text-muted-foreground/40 text-[8px]">●</span>}
+                    Location: {location.city ? `${location.city}, ` : ""}{location.country}
+                    <span className="text-muted-foreground/60">({location.timezone})</span>
+                  </span>
+                )}
+              </div>
+            )}
+            {session && (
+              <span className={`mt-0.5 font-bold ${session.active ? "text-emerald-500/90 dark:text-emerald-400" : "text-muted-foreground/60"}`}>
+                {session.active ? `Active Session • ${session.label || `${session.days} days`}` : "Session Ended"}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const filterFields = [
