@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { cn } from "@/lib/utils"
+
 export interface FilterField {
   id: string
   type: "search" | "select"
@@ -27,6 +29,7 @@ interface AdminFiltersProps {
   rightFields?: FilterField[]
   onReset?: () => void
   showReset?: boolean
+  className?: string
 }
 
 export function AdminFilters({
@@ -34,6 +37,7 @@ export function AdminFilters({
   rightFields = [],
   onReset,
   showReset = false,
+  className,
 }: AdminFiltersProps) {
   const renderField = (field: FilterField) => {
     if (field.type === "search") {
@@ -45,7 +49,7 @@ export function AdminFilters({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/80" />
           <Input
             placeholder={field.placeholder || "Search..."}
-            className="pl-9 h-9 text-xs rounded-xl bg-muted/20 border-border/80 focus-visible:ring-1 focus-visible:ring-brand w-full"
+            className="pl-9 h-8 sm:h-8.5 text-xs rounded-lg sm:rounded-xl bg-muted/20 border-border/80 focus-visible:ring-1 focus-visible:ring-brand w-full"
             value={field.value}
             onChange={(e) => field.onChange(e.target.value)}
           />
@@ -61,7 +65,7 @@ export function AdminFilters({
           onValueChange={field.onChange}
         >
           <SelectTrigger
-            className={`w-full md:w-[150px] h-9 text-xs rounded-xl bg-card border-border/80 shrink-0 font-medium ${
+            className={`w-full md:w-[150px] h-8 sm:h-8.5 text-xs rounded-lg sm:rounded-xl bg-card border-border/80 shrink-0 font-medium ${
               field.className || ""
             }`}
           >
@@ -86,7 +90,7 @@ export function AdminFilters({
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-3 items-center justify-between bg-card p-3 rounded-xl border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.02)] w-full">
+    <div className={cn("flex flex-col md:flex-row gap-2.5 items-center justify-between bg-card p-2 sm:p-2.5 rounded-xl border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.02)] w-full", className)}>
       {/* Left-aligned filters */}
       <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
         {leftFields.map(renderField)}

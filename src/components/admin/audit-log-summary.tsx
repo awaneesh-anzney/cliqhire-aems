@@ -1,7 +1,10 @@
+"use client";
+
+import React from "react";
 import { useAuditLogSummary } from "@/hooks/useAuditLog";
-import { Activity, Users, Briefcase, FileText, Paperclip, LogIn, Building2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Activity, Users, Briefcase, FileText, Paperclip, LogIn, Building2, Layers } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, React.ElementType> = {
   Candidate: Users,
@@ -13,83 +16,167 @@ const ICONS: Record<string, React.ElementType> = {
   Auth: LogIn,
 };
 
-const ENTITY_COLORS: Record<string, { bg: string; text: string }> = {
-  Candidate: { bg: "bg-emerald-500/10 dark:bg-emerald-500/20", text: "text-emerald-600 dark:text-emerald-400" },
-  Job: { bg: "bg-blue-500/10 dark:bg-blue-500/20", text: "text-blue-600 dark:text-blue-400" },
-  Client: { bg: "bg-indigo-500/10 dark:bg-indigo-500/20", text: "text-indigo-600 dark:text-indigo-400" },
-  Pipeline: { bg: "bg-purple-500/10 dark:bg-purple-500/20", text: "text-purple-600 dark:text-purple-400" },
-  Note: { bg: "bg-amber-500/10 dark:bg-amber-500/20", text: "text-amber-600 dark:text-amber-400" },
-  Attachment: { bg: "bg-pink-500/10 dark:bg-pink-500/20", text: "text-pink-600 dark:text-pink-400" },
-  Auth: { bg: "bg-teal-500/10 dark:bg-teal-500/20", text: "text-teal-600 dark:text-teal-400" },
+const ENTITY_COLORS: Record<string, { bg: string; text: string; activeBg: string; border: string }> = {
+  Candidate: {
+    bg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    activeBg: "bg-emerald-600 text-white border-emerald-600 shadow-xs",
+    text: "text-emerald-600 dark:text-emerald-400",
+    border: "border-emerald-500/30",
+  },
+  Job: {
+    bg: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+    activeBg: "bg-blue-600 text-white border-blue-600 shadow-xs",
+    text: "text-blue-600 dark:text-blue-400",
+    border: "border-blue-500/30",
+  },
+  Client: {
+    bg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
+    activeBg: "bg-indigo-600 text-white border-indigo-600 shadow-xs",
+    text: "text-indigo-600 dark:text-indigo-400",
+    border: "border-indigo-500/30",
+  },
+  Pipeline: {
+    bg: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+    activeBg: "bg-purple-600 text-white border-purple-600 shadow-xs",
+    text: "text-purple-600 dark:text-purple-400",
+    border: "border-purple-500/30",
+  },
+  Note: {
+    bg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    activeBg: "bg-amber-600 text-white border-amber-600 shadow-xs",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-500/30",
+  },
+  Attachment: {
+    bg: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
+    activeBg: "bg-pink-600 text-white border-pink-600 shadow-xs",
+    text: "text-pink-600 dark:text-pink-400",
+    border: "border-pink-500/30",
+  },
+  Auth: {
+    bg: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
+    activeBg: "bg-teal-600 text-white border-teal-600 shadow-xs",
+    text: "text-teal-600 dark:text-teal-400",
+    border: "border-teal-500/30",
+  },
 };
 
-export function AuditLogSummaryCards() {
+interface AuditLogSummaryCardsProps {
+  selectedEntity?: string;
+  onSelectEntity?: (entity: string) => void;
+  className?: string;
+}
+
+export function AuditLogSummaryCards({
+  selectedEntity = "ALL",
+  onSelectEntity,
+  className,
+}: AuditLogSummaryCardsProps) {
   const { data, isLoading, isError } = useAuditLogSummary();
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-auto-fit gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
-        {Array.from({ length: 7 }).map((_, i) => (
-          <Card key={i} className="p-3.5 rounded-xl border border-border/60 animate-pulse min-h-[105px] flex flex-col justify-between">
-            <div className="flex justify-between items-center mb-2">
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-7 w-7 rounded-lg" />
-            </div>
-            <div>
-              <Skeleton className="h-7 w-10 mb-1.5" />
-              <Skeleton className="h-2.5 w-16" />
-            </div>
-          </Card>
+      <div className={cn("flex items-center gap-1.5 overflow-x-auto py-1 shrink-0 no-scrollbar", className)}>
+        <Skeleton className="h-8 w-24 rounded-lg bg-muted/60 shrink-0" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-28 rounded-lg bg-muted/50 shrink-0" />
         ))}
       </div>
     );
   }
 
   if (isError || !data?.success) {
-    return (
-      <div className="p-4 bg-destructive/10 text-destructive text-xs font-bold uppercase tracking-widest rounded-xl border border-destructive/20 shadow-sm animate-in fade-in duration-300">
-        Failed to load audit log summary.
-      </div>
-    );
+    return null; // Gracefully degrade without taking vertical space if error
   }
 
   const summaryData = data.data || [];
+  const totalActions = summaryData.reduce((acc, curr) => acc + (curr.count || 0), 0);
+
+  const handleEntityClick = (entity: string) => {
+    if (!onSelectEntity) return;
+    if (selectedEntity === entity) {
+      onSelectEntity("ALL");
+    } else {
+      onSelectEntity(entity);
+    }
+  };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-auto-fit gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+    <div className={cn("flex items-center gap-1.5 overflow-x-auto py-0.5 shrink-0 no-scrollbar select-none", className)}>
+      {/* 24h Label & All trigger */}
+      <button
+        type="button"
+        onClick={() => handleEntityClick("ALL")}
+        className={cn(
+          "inline-flex items-center gap-1.5 h-7.5 sm:h-8 px-2.5 rounded-lg text-[11px] font-bold transition-all shrink-0 border",
+          selectedEntity === "ALL"
+            ? "bg-primary text-primary-foreground border-primary shadow-xs font-black"
+            : "bg-card text-muted-foreground border-border/70 hover:border-border hover:text-foreground hover:bg-muted/40"
+        )}
+      >
+        <Layers className="h-3.5 w-3.5" />
+        <span>All 24h</span>
+        <span
+          className={cn(
+            "px-1.5 py-0.2 rounded-md text-[10px] font-black leading-none",
+            selectedEntity === "ALL"
+              ? "bg-white/20 text-white"
+              : "bg-muted text-foreground"
+          )}
+        >
+          {totalActions}
+        </span>
+      </button>
+
+      {/* Individual entity summary pills */}
       {summaryData.map((item) => {
         const Icon = ICONS[item.entityType] || Activity;
-        const colors = ENTITY_COLORS[item.entityType] || { bg: "bg-zinc-500/10", text: "text-zinc-600 dark:text-zinc-400" };
-        
+        const color = ENTITY_COLORS[item.entityType] || {
+          bg: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/20",
+          activeBg: "bg-zinc-700 text-white border-zinc-700 shadow-xs",
+          text: "text-zinc-600 dark:text-zinc-400",
+          border: "border-zinc-500/30",
+        };
+        const isSelected = selectedEntity === item.entityType;
+
         return (
-          <Card 
-            key={item.entityType} 
-            className="group relative bg-card border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.03)] rounded-xl p-3.5 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-brand/40 dark:hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-default"
+          <button
+            key={item.entityType}
+            type="button"
+            onClick={() => handleEntityClick(item.entityType)}
+            className={cn(
+              "group inline-flex items-center gap-1.5 h-7.5 sm:h-8 px-2.5 rounded-lg text-[11px] font-bold transition-all shrink-0 border cursor-pointer",
+              isSelected
+                ? color.activeBg
+                : "bg-card hover:bg-muted/40 text-foreground/80 hover:text-foreground border-border/70 hover:border-border"
+            )}
           >
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                {item.entityType}
-              </span>
-              <div className={`p-1.5 rounded-lg transition-all duration-300 group-hover:scale-110 ${colors.bg} ${colors.text}`}>
-                <Icon className="h-4 w-4" />
-              </div>
+            <div
+              className={cn(
+                "p-0.5 rounded-md transition-all",
+                isSelected
+                  ? "bg-white/20 text-white"
+                  : color.bg
+              )}
+            >
+              <Icon className="h-3 w-3" />
             </div>
-            
-            <div>
-              <div className="text-2xl font-black text-foreground tracking-tight">{item.count}</div>
-              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Actions (24h)</p>
-            </div>
-            
-            {/* Subtle glow border at bottom on hover */}
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand/40 to-transparent translate-y-[2px] group-hover:translate-y-0 transition-transform duration-300" />
-          </Card>
+
+            <span className="tracking-tight">{item.entityType}</span>
+
+            <span
+              className={cn(
+                "px-1.5 py-0.5 rounded-md text-[10px] font-black leading-none",
+                isSelected
+                  ? "bg-white/25 text-white"
+                  : "bg-muted text-foreground"
+              )}
+            >
+              {item.count}
+            </span>
+          </button>
         );
       })}
-      {summaryData.length === 0 && (
-        <div className="col-span-full p-6 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground bg-card border rounded-xl shadow-sm">
-          No activity in the last 24 hours.
-        </div>
-      )}
     </div>
   );
 }
