@@ -197,6 +197,14 @@ export const emailService = {
   },
 
   /**
+   * Search email threads across all folders
+   */
+  async searchEmailThreads(params: { q: string; folder?: string; starredOnly?: boolean; page?: number; limit?: number }): Promise<ThreadsResponse> {
+    const response = await api.get('/api/email/search', { params });
+    return response.data;
+  },
+
+  /**
    * Fetch emails from specific folders (inbox, sent, trash, drafts, starred)
    */
   async getEmailsList(folder: string, params: GetEmailsParams = {}): Promise<EmailsResponse | DraftsResponse | ThreadsResponse> {

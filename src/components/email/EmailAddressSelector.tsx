@@ -96,7 +96,7 @@ export const EmailAddressSelector: React.FC<EmailAddressSelectorProps> = ({
   const activeContact = useMemo(() => {
     if (!selectedEmail) return null;
     const found = filteredContacts.find(
-      (c) => c.email.toLowerCase() === selectedEmail.toLowerCase()
+      (c) => c.email?.toLowerCase() === selectedEmail.toLowerCase()
     );
     if (found) return found;
     return {
@@ -243,7 +243,7 @@ export const EmailAddressSelector: React.FC<EmailAddressSelectorProps> = ({
           ) : (
             filteredContacts.map((contact) => {
               const isSelected =
-                selectedEmail?.toLowerCase() === contact.email.toLowerCase();
+                selectedEmail?.toLowerCase() === contact.email?.toLowerCase();
 
               return (
                 <button

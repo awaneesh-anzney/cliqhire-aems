@@ -164,7 +164,18 @@ export function useEmailList(folder: string, params: any = {}, enabled: boolean 
 
   return useQuery({
     queryKey: EMAIL_QUERY_KEYS.emailList(folder, params),
-    queryFn: () => emailService.getEmailsList(folder, params),
+    queryFn: () => {
+      if (params.q) {
+        return emailService.searchEmailThreads({
+          q: params.q,
+          folder: ["inbox", "sent", "trash"].includes(folder) ? folder : undefined,
+          starredOnly: folder === "starred" ? true : undefined,
+          page: params.page,
+          limit: params.limit,
+        });
+      }
+      return emailService.getEmailsList(folder, params);
+    },
     enabled: enabled && !!folder,
     staleTime: 1000 * 20, // 20s
   });

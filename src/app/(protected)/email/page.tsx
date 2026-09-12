@@ -102,6 +102,9 @@ export default function EmailPage() {
     }
   }, []);
 
+  const effectiveSearchQuery = searchQuery || selectedEmailAddress || "";
+  const isSearchActive = !!effectiveSearchQuery;
+
   // Fetch lists
   const { 
     data: listData, 
@@ -113,6 +116,7 @@ export default function EmailPage() {
     {
       page,
       limit: 25,
+      q: effectiveSearchQuery ? effectiveSearchQuery : undefined,
     },
     isConnected
   );
@@ -131,7 +135,7 @@ export default function EmailPage() {
   const totalPages = listData?.pages || 1;
 
   const mappedItems: EmailListItem[] = rawList.map((item: any) => {
-    if (activeFolder === "starred") {
+    if (isSearchActive || activeFolder === "starred") {
       return {
         id: item._id,
         threadId: item._id,
@@ -170,15 +174,8 @@ export default function EmailPage() {
     }
   });
 
-  // Filter items by selected email address or stakeholder type
-  const displayItems = useMemo(() => {
-    if (!selectedEmailAddress) return mappedItems;
-    const target = selectedEmailAddress.toLowerCase();
-    return mappedItems.filter((item) =>
-      item.participants.some((p) => p.toLowerCase().includes(target)) ||
-      item.subject.toLowerCase().includes(target)
-    );
-  }, [mappedItems, selectedEmailAddress]);
+  // Items are already filtered by the server when search is active
+  const displayItems = mappedItems;
 
   // Auto-select first thread on wide desktop displays only (>= 1280px)
   useEffect(() => {
@@ -370,7 +367,7 @@ export default function EmailPage() {
                     onSelectThread={handleSelectThread}
                     page={page}
                     totalPages={totalPages}
-                    totalThreads={selectedEmailAddress ? displayItems.length : totalThreads}
+                    totalThreads={totalThreads}
                     onPageChange={setPage}
                     searchQuery={searchQuery}
                     onToggleStar={handleToggleStar}

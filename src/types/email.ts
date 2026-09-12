@@ -150,6 +150,7 @@ export interface SaveDraftPayload {
 export interface GetEmailsParams {
   page?: number;
   limit?: number;
+  q?: string;
 }
 
 export interface GetThreadsParams {
