@@ -189,19 +189,16 @@ export function Sidebar() {
         >
           {/* Logo Mark */}
           <div className="relative flex shrink-0 items-center justify-center">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/20 transition-transform duration-200 hover:scale-105 active:scale-95 font-black text-xl tracking-tighter">
-              Fb
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/20 transition-transform duration-200 hover:scale-105 active:scale-95 font-black text-base tracking-tighter">
+              CH
             </div>
           </div>
 
           {/* Brand Text */}
           <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-left-2 duration-300">
             <div className="flex items-center gap-1.5">
-              <span className="text-[15px] font-black tracking-tight text-foreground leading-none uppercase">
-                FluxBridge
-              </span>
-              <span className="px-1.5 py-0.2 rounded-md bg-destructive text-destructive-foreground text-[9px] font-bold border border-destructive/20">
-                360
+              <span className="text-[15px] font-black tracking-tight text-foreground leading-none">
+                Cliq<span className="text-destructive">Hire</span>
               </span>
             </div>
             <p className="text-[10px] font-medium text-muted-foreground mt-0.5 truncate">
