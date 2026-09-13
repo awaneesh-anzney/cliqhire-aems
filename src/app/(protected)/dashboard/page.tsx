@@ -34,7 +34,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="h-full min-h-0 w-full flex flex-col overflow-hidden p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-background animate-in fade-in duration-300">
+    <div className="h-full min-h-0 w-full flex flex-col overflow-hidden p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-transparent animate-in fade-in duration-300">
       {/* ─── MODERN EXECUTIVE COMMAND & ACTION HEADER ─── */}
       <header className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/95 to-slate-900 text-primary-foreground py-2 px-3 sm:px-4 border border-white/10 shadow-sm shrink-0">
         {/* Subtle Ambient Glow */}

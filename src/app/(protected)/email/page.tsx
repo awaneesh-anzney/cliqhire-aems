@@ -243,7 +243,7 @@ export default function EmailPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4.25rem)] p-2 sm:p-3 md:p-4 flex flex-col gap-2.5 sm:gap-3 max-w-[1800px] mx-auto overflow-hidden bg-gradient-to-br from-slate-50/30 via-background to-blue-50/15 dark:from-slate-950/30 dark:via-background dark:to-slate-900/15">
+    <div className="h-full min-h-0 w-full p-2 sm:p-2.5 md:p-3 flex flex-col gap-2.5 sm:gap-3 overflow-hidden bg-transparent">
       {/* Top Application Bar */}
       <EmailHeader
         mailbox={mailbox}

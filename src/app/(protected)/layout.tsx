@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ["--sidebar-width" as string]: "16.5rem",
             ["--sidebar-width-icon" as string]: "4.25rem",
           }}
-          className="h-dvh max-h-dvh w-full flex bg-background text-foreground antialiased overflow-hidden"
+          className="h-dvh max-h-dvh w-full flex bg-transparent text-foreground antialiased overflow-hidden"
         >
           {/* Main Sidebar */}
           <Sidebar />

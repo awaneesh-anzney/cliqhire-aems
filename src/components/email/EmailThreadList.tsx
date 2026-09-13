@@ -163,7 +163,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
+    <div className="flex flex-col h-full bg-card border border-border/80 rounded-2xl overflow-hidden shadow-xs">
       {/* List Header & Quick Filter Pills */}
       <div className="p-3 border-b border-border/60 bg-muted/20 space-y-2.5 shrink-0">
         {(selectedIds && selectedIds.length > 0) ? (

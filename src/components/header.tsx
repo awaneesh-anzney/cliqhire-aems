@@ -119,9 +119,9 @@ export function Header() {
         <>
           {/* Left: Sidebar Trigger & Breadcrumbs / Back */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <SidebarTrigger className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors" />
+            <SidebarTrigger className="h-8 w-8 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors" />
 
-            <div className="h-4 w-[1px] bg-border/80 hidden sm:block" />
+            <div className="h-4 w-[1px] bg-white/20 hidden sm:block" />
 
             {isOnIdPage ? (
               <Button
@@ -129,16 +129,16 @@ export function Header() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="h-8 px-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 gap-1.5 transition-colors"
+                className="h-8 px-2.5 rounded-xl text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 gap-1.5 transition-colors"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>{getBackNavigation().label}</span>
               </Button>
             ) : (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium truncate">
-                <span className="text-muted-foreground/60 hidden sm:inline font-black tracking-tight">CliqHire</span>
-                <ChevronRight className="w-3 h-3 text-muted-foreground/40 hidden sm:inline" />
-                <span className="font-semibold text-foreground truncate">
+              <div className="flex items-center gap-1.5 text-xs text-white/70 font-medium truncate">
+                <span className="text-white/60 hidden sm:inline font-black tracking-tight">CliqHire</span>
+                <ChevronRight className="w-3 h-3 text-white/40 hidden sm:inline" />
+                <span className="font-semibold text-white truncate">
                   {getPageTitle()}
                 </span>
               </div>
@@ -160,19 +160,19 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setShowMobileSearch(true)}
-              className="flex md:hidden h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              className="flex md:hidden h-8 w-8 rounded-xl text-white/80 hover:text-white hover:bg-white/10"
             >
               <Search className="h-4 w-4" />
             </Button>
 
             {/* Status / Quick Action Pill */}
-            <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/40 border border-border/60 text-[11px] font-medium text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/10 border border-white/15 text-[11px] font-medium text-white/90">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>Workspace Live</span>
             </div>
 
             {/* Utility Controls Group */}
-            <div className="flex items-center gap-1 p-0.5 rounded-xl bg-muted/40 border border-border/70">
+            <div className="flex items-center gap-1 p-0.5 rounded-xl bg-white/10 border border-white/15 text-white">
               <ModeToggle />
               <NotificationDropdown />
 
@@ -182,7 +182,7 @@ export function Header() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    className="h-7 w-7 rounded-lg text-white/80 hover:text-white hover:bg-white/10"
                   >
                     <HelpCircle className="h-3.5 w-3.5" />
                   </Button>
@@ -191,26 +191,26 @@ export function Header() {
               </Tooltip>
             </div>
 
-            <div className="h-4 w-[1px] bg-border/80 hidden sm:block mx-0.5" />
+            <div className="h-4 w-[1px] bg-white/20 hidden sm:block mx-0.5" />
 
             {/* User Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border/60 outline-none"
+                  className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-white/10 transition-colors border border-transparent hover:border-white/15 outline-none"
                 >
-                  <Avatar className="h-7 w-7 rounded-lg border border-border/80 shadow-2xs shrink-0">
+                  <Avatar className="h-7 w-7 rounded-lg border border-white/20 shadow-2xs shrink-0">
                     <AvatarImage src={user?.avatar} alt={user?.name} className="object-cover" />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold text-[10px] rounded-lg">
+                    <AvatarFallback className="bg-white/20 text-white font-bold text-[10px] rounded-lg">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start leading-none">
-                    <span className="text-xs font-semibold text-foreground truncate max-w-[100px]">
+                    <span className="text-xs font-semibold text-white truncate max-w-[100px]">
                       {user?.name || "User"}
                     </span>
-                    <span className="text-[10px] text-muted-foreground font-medium capitalize mt-0.5">
+                    <span className="text-[10px] text-white/70 font-medium capitalize mt-0.5">
                       {user?.role?.toLowerCase() || "member"}
                     </span>
                   </div>

@@ -103,7 +103,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
 
   if (!thread) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl p-8 text-center text-muted-foreground shadow-xs">
+      <div className="flex flex-col items-center justify-center h-full bg-card border border-border/80 rounded-2xl p-8 text-center text-muted-foreground shadow-xs">
         <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary shadow-2xs">
           <Mail className="h-8 w-8 text-primary" />
         </div>
@@ -209,7 +209,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl overflow-hidden shadow-xs">
+    <div className="flex flex-col h-full bg-card border border-border/80 rounded-2xl overflow-hidden shadow-xs">
       {/* Thread Header Toolbar */}
       <div className="p-3 sm:p-4 border-b border-border/60 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">

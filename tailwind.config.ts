@@ -76,6 +76,8 @@ const config: Config = {
 				brand: {
 					DEFAULT: 'hsl(var(--brand-primary))',
 					foreground: 'hsl(var(--brand-primary-foreground))',
+					secondary: 'hsl(var(--brand-secondary))',
+					'secondary-foreground': 'hsl(var(--brand-secondary-foreground))',
 				},
 				protected: {
 					DEFAULT: 'hsl(var(--protected-bg))',

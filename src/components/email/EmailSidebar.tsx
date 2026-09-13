@@ -155,7 +155,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
   return (
     <TooltipProvider delayDuration={200}>
       <aside
-        className={`flex flex-col h-full bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl p-3 shadow-xs transition-all duration-300 overflow-hidden ${
+        className={`flex flex-col h-full bg-card border border-border/80 rounded-2xl p-3 shadow-xs transition-all duration-300 overflow-hidden ${
           isCollapsed ? "w-16 items-center" : "w-full"
         }`}
       >

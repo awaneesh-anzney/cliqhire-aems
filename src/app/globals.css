@@ -66,15 +66,15 @@
     --chart-5: 220 50% 55%;
     --radius: 0.65rem;
     
-    /* Sidebar Base Tokens: Pure black text for high contrast */
-    --sidebar-background: 214 50% 98%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 216 100% 24%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 214 45% 93%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 28% 89%;
-    --sidebar-ring: 216 95% 30%;
+    /* Sidebar Base Tokens: Brand color themed */
+    --sidebar-background: 216 100% 24%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 216 100% 24%;
+    --sidebar-accent: 216 80% 32%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 216 60% 35%;
+    --sidebar-ring: 216 95% 45%;
 
     /* Brand identity — Balanced Navy & Crimson */
     --brand-primary: 216 100% 24%;
@@ -118,14 +118,14 @@
     --chart-4: 280 55% 56%;
     --chart-5: 340 65% 52%;
     
-    --sidebar-background: 216 30% 8%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 216 100% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 216 25% 14%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 216 25% 16%;
-    --sidebar-ring: 216 100% 45%;
+    --sidebar-background: 216 100% 18%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 216 100% 24%;
+    --sidebar-accent: 216 70% 26%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 216 50% 28%;
+    --sidebar-ring: 216 95% 45%;
 
     --brand-primary: 216 100% 45%;
     --brand-primary-foreground: 0 0% 100%;
@@ -244,7 +244,11 @@
 /* Dashboard Redesign Custom Styles */
 @layer components {
   .dashboard-container {
-    @apply flex flex-col w-full h-full min-h-0 p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-background overflow-hidden animate-in fade-in duration-300;
+    @apply flex flex-col w-full h-full min-h-0 p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-transparent overflow-hidden animate-in fade-in duration-300;
+  }
+
+  #main-content > div.bg-background {
+    background-color: transparent;
   }
 
   .dashboard-welcome-banner {
@@ -279,39 +283,39 @@
     @apply w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shrink-0;
   }
 
-  /* Header Styles */
+  /* Header Styles: Brand color with lower opacity */
   .app-header {
-    @apply sticky top-0 z-30 w-full border-b border-border/70 bg-card/85 dark:bg-card/75 backdrop-blur-xl transition-all duration-300 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)];
+    @apply sticky top-0 z-30 w-full border-b border-white/10 bg-brand/80 dark:bg-brand/65 backdrop-blur-xl transition-all duration-300 shadow-[0_1px_4px_0_rgba(0,0,0,0.12)] text-white;
   }
 
-  /* Sidebar Styles */
+  /* Sidebar Styles: Brand color with lower opacity */
   .app-sidebar {
-    @apply border-r border-sidebar-border/70 bg-sidebar/95 backdrop-blur-lg text-slate-950 dark:text-zinc-100 shadow-[2px_0_12px_rgba(0,0,0,0.02)] transition-all duration-300;
+    @apply border-r border-white/10 bg-brand/85 dark:bg-brand/75 backdrop-blur-xl text-white shadow-[2px_0_12px_rgba(0,0,0,0.15)] transition-all duration-300;
   }
 
   .sidebar-logo-area {
-    @apply py-4 px-5 border-b border-sidebar-border/50 font-bold text-slate-950 dark:text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-300;
+    @apply py-4 px-5 border-b border-white/10 font-bold text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-300;
   }
 
-  /* Sidebar Menu Items: Pure Dark Black Text + Bold Typography */
+  /* Sidebar Menu Items: Crisp Light Typography for Brand Sidebar */
   .sidebar-nav-item {
-    @apply relative h-10 font-bold text-sm tracking-tight transition-all duration-200 ease-out rounded-xl px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-3 text-slate-950 dark:text-zinc-200 hover:bg-muted/70 hover:text-black dark:hover:text-white;
+    @apply relative h-10 font-bold text-sm tracking-tight transition-all duration-200 ease-out rounded-xl px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-3 text-white/80 hover:bg-white/10 hover:text-white;
   }
 
-  /* Active Menu Item: Solid Bold Dark Accent */
+  /* Active Menu Item: Elevated Solid White Accent */
   .sidebar-nav-item-active {
-    @apply bg-brand/10 text-brand font-extrabold shadow-sm border border-brand/15 hover:bg-brand/15 hover:text-brand relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-brand before:rounded-r-full;
+    @apply bg-white/20 text-white font-extrabold shadow-sm border border-white/25 hover:bg-white/25 hover:text-white relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-white before:rounded-r-full;
   }
 
   .sidebar-icon-wrap {
-    @apply flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-all duration-200 text-slate-950 dark:text-zinc-200;
+    @apply flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-all duration-200 text-white/80 group-hover:text-white;
   }
 
   .sidebar-pro-card {
-    @apply bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white font-medium rounded-2xl p-4 relative overflow-hidden shadow-xl border border-zinc-800/80 transition-all duration-300;
+    @apply bg-gradient-to-br from-white/15 via-white/10 to-white/5 text-white font-medium rounded-2xl p-4 relative overflow-hidden shadow-xl border border-white/15 transition-all duration-300;
   }
 
   .sidebar-footer-card {
-    @apply bg-muted/40 backdrop-blur-md font-bold text-slate-950 dark:text-zinc-100 rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-300 border border-border/50;
+    @apply bg-white/10 backdrop-blur-md font-bold text-white rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-300 border border-white/15;
   }
 }

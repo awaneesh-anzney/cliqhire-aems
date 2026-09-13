@@ -143,7 +143,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
 
   return (
     <>
-      <header className="flex flex-col gap-2.5 bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl p-2.5 sm:p-3 shadow-xs transition-all">
+      <header className="flex flex-col gap-2.5 bg-card border border-border/80 rounded-2xl p-2.5 sm:p-3 shadow-xs transition-all">
         {/* Main Row */}
         <div className="flex items-center justify-between gap-2.5 flex-wrap">
           {/* Left: Mobile Toggle, Brand Icon, Title & Status */}

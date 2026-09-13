@@ -245,11 +245,11 @@ export function NotificationDropdown() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative rounded-lg hover:bg-card hover:text-brand transition-all shadow-none h-8 w-8 text-muted-foreground"
+          className="relative rounded-lg hover:bg-white/15 hover:text-white transition-all shadow-none h-8 w-8 text-white/80"
         >
           <Bell className="h-3.5 w-3.5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-brand text-[8px] font-black text-white border border-background shadow-sm select-none leading-none">
+            <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-destructive text-[8px] font-black text-white border border-white/40 shadow-sm select-none leading-none">
               {unreadCount > 10 ? "10+" : unreadCount}
             </span>
           )}

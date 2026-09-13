@@ -142,22 +142,22 @@ export default function ClientGroupDetailModule({ groupId }: ClientGroupDetailMo
   const initials = data.group?.name ? data.group.name.slice(0, 2).toUpperCase() : "CG";
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+    <div className="flex flex-col min-h-screen w-full bg-transparent text-foreground">
+      <div className="flex-1 p-3 sm:p-4 md:p-5 max-w-7xl w-full mx-auto space-y-4">
         {/* Navigation Breadcrumb Bar */}
-        <div className="flex items-center justify-between border-b border-border/50 pb-3">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
           <div className="flex items-center gap-2 text-xs">
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="h-7 px-2 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
               onClick={() => router.push("/client-groups")}
             >
               <ChevronLeft className="h-3.5 w-3.5 mr-1" />
               <span>Groups</span>
             </Button>
-            <span className="text-muted-foreground/40">/</span>
-            <span className="font-semibold text-foreground truncate max-w-[200px] sm:max-w-[320px]">
+            <span className="text-white/40">/</span>
+            <span className="font-bold text-white truncate max-w-[200px] sm:max-w-[320px]">
               {data.group.name}
             </span>
           </div>
@@ -167,14 +167,14 @@ export default function ClientGroupDetailModule({ groupId }: ClientGroupDetailMo
             <Button
               size="sm"
               onClick={() => setIsAddClientModalOpen(true)}
-              className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-8 px-3 text-xs font-bold rounded-xl bg-white text-primary hover:bg-white/90 shadow-sm active:scale-95 transition-all"
             >
-              <Plus className="w-3.5 h-3.5 mr-1" /> Add Client
+              <Plus className="w-3.5 h-3.5 mr-1 stroke-[2.5]" /> Add Client
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-lg">
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0 rounded-xl bg-white/10 border-white/20 text-white hover:bg-white/20">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
