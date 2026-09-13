@@ -10,11 +10,12 @@ interface EditContactDetailsModalProps {
   clientId: string;
   initialValues: {
     phoneNumber: string;
+    countryCode?: string;
     website: string;
     emails: string[];
     linkedInProfile: string;
   };
-  onSave: (values: { phoneNumber: string; website: string; emails: string[]; linkedInProfile: string }) => Promise<void>;
+  onSave: (values: { phoneNumber: string; countryCode: string; website: string; emails: string[]; linkedInProfile: string }) => Promise<void>;
 }
 
 const EditContactDetailsModal: React.FC<EditContactDetailsModalProps> = ({
@@ -25,7 +26,7 @@ const EditContactDetailsModal: React.FC<EditContactDetailsModalProps> = ({
   onSave,
 }) => {
   const [phoneNumber, setPhoneNumber] = useState(initialValues.phoneNumber || "");
-  const [countryCode, setCountryCode] = useState("SA");
+  const [countryCode, setCountryCode] = useState(initialValues.countryCode || "+966");
   const [website, setWebsite] = useState(initialValues.website || "");
   const [emails, setEmails] = useState(initialValues.emails.join(", ") || "");
   const [linkedInProfile, setLinkedInProfile] = useState(initialValues.linkedInProfile || "");
@@ -61,6 +62,7 @@ const EditContactDetailsModal: React.FC<EditContactDetailsModalProps> = ({
     try {
       await onSave({
         phoneNumber,
+        countryCode,
         website,
         emails: emailArr,
         linkedInProfile,
@@ -76,6 +78,7 @@ const EditContactDetailsModal: React.FC<EditContactDetailsModalProps> = ({
   React.useEffect(() => {
     if (open) {
       setPhoneNumber(initialValues.phoneNumber || "");
+      setCountryCode(initialValues.countryCode || "+966");
       setWebsite(initialValues.website || "");
       setEmails(initialValues.emails.join(", ") || "");
       setLinkedInProfile(initialValues.linkedInProfile || "");

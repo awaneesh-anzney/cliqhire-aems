@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { cn } from "@/lib/utils"
+
 interface AdminPaginationProps {
   page: number
   totalPages: number
@@ -21,6 +23,7 @@ interface AdminPaginationProps {
   itemName?: string
   isLoading?: boolean
   limitOptions?: number[]
+  className?: string
 }
 
 export function AdminPagination({
@@ -33,12 +36,13 @@ export function AdminPagination({
   itemName = "records",
   isLoading = false,
   limitOptions = [5, 10, 20, 50],
+  className,
 }: AdminPaginationProps) {
   const from = totalItems === 0 ? 0 : (page - 1) * limit + 1
   const to = Math.min(page * limit, totalItems)
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-border/40 bg-muted/10">
+    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 px-3.5 py-2 border-t border-border/40 bg-muted/10 shrink-0", className)}>
       {/* Left section: record stats & limit select */}
       <div className="flex flex-wrap items-center gap-4 text-xs">
         <span className="font-medium text-muted-foreground">

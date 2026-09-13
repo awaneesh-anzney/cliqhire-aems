@@ -9,12 +9,13 @@ import {
   Wallet, 
   ClipboardList, 
   Clock, 
-  Pencil 
+  Pencil,
+  FileText
 } from "lucide-react";
 
 import { DetailRow } from "@/components/clients/summary/detail-row";
 import { Button } from "@/components/ui/button";
-import { updateJobById, uploadJobFile } from "@/services/jobService";
+import { updateJobById, uploadJobFile, updateJobStage } from "@/services/jobService";
 import { JDBenefitFilesSection } from "./jd-benefit-files-section";
 import { JobCvSubmissionSummary } from "./JobCvSubmissionSummary";
 import { JobData, CvTarget } from "../types";
@@ -74,7 +75,11 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
         ...jobDetails,
         [editingField]: processedValue,
       };
-      await updateJobById(jobId, { [editingField]: processedValue });
+      if (editingField === "stage") {
+        await updateJobStage(jobId, processedValue as string);
+      } else {
+        await updateJobById(jobId, { [editingField]: processedValue });
+      }
       setJobDetails(updatedDetails);
       toast.success(
         editingField === "jobDescription"
@@ -111,6 +116,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
       });
       setJobDetails(updatedDetails);
       toast.success("Salary updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ["job", jobId] });
     } catch (err) {
       toast.error("Failed to update salary");
     }
@@ -134,6 +140,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
 
       setJobDetails(updatedDetails);
       toast.success("Date range and CV count updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ["job", jobId] });
     } catch (err) {
       toast.error("Failed to update date range and CV count");
     }
@@ -166,6 +173,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
       await updateJobById(jobId, { nationalities: nationalitiesArray });
       setJobDetails({ ...jobDetails, nationalities: nationalitiesArray });
       toast.success("Nationalities updated successfully");
+      await queryClient.invalidateQueries({ queryKey: ["job", jobId] });
     } catch (err) {
       toast.error("Failed to update nationalities");
     }
@@ -182,6 +190,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
       await updateJobById(jobId, { [field]: uploadResult.filePath });
       setJobDetails(updatedDetails);
       toast.success(`${field === "jobDescriptionPdf" ? "Job Description" : "Benefit"} PDF uploaded successfully`);
+      await queryClient.invalidateQueries({ queryKey: ["job", jobId] });
     } catch (err) {
       toast.error(`Failed to upload ${field === "jobDescriptionPdf" ? "Job Description" : "Benefit"} PDF`);
       throw err;
@@ -189,34 +198,32 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
   };
 
   return (
-    <div className="space-y-2">
-      {/* Top CV Submission Bar Component */}
+    <div className="space-y-2.5">
+      {/* CV Submission SLA Bar */}
       <JobCvSubmissionSummary jobId={jobId} />
 
-      {/* Main Grid Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+      {/* Main Grid: Position Details & Requirements (Left) + Timelines, CV Targets & Descriptions (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 items-start">
         
-        {/* Left Column: Position Details & Requirements */}
-        <div className="space-y-2">
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            
+        {/* Left Column: Role & Position Details */}
+        <div className="space-y-2.5">
+          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
-              <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-                <Briefcase className="w-4 h-4" />
+            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+                <Briefcase className="w-3.5 h-3.5" />
               </div>
-              <h4 className="text-sm font-semibold text-foreground">Position Details</h4>
+              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Position Details</h4>
             </div>
 
             {/* Content */}
-            <div className="p-2 space-y-2">
-              
-              {/* Basic Info */}
+            <div className="p-3 space-y-3">
+              {/* Basic Information */}
               <div>
-                <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">
+                <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
                   Basic Information
                 </h5>
-                <div className="space-y-2 bg-muted/20 p-3 rounded-xl border border-border/40">
+                <div className="space-y-1 bg-muted/15 p-2 rounded-lg border border-border/40">
                   <DetailRow
                     label="Job Title"
                     value={jobDetails.jobTitle}
@@ -252,10 +259,10 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
 
               {/* Requirements & Experience */}
               <div>
-                <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                  Requirements & Experience
+                <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+                  Requirements & Candidate Specs
                 </h5>
-                <div className="space-y-2 bg-muted/20 p-3 rounded-xl border border-border/40">
+                <div className="space-y-1 bg-muted/15 p-2 rounded-lg border border-border/40">
                   <DetailRow
                     label="Experience"
                     value={capitalize(jobDetails.experience)}
@@ -285,45 +292,46 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                   />
                 </div>
               </div>
-
             </div>
           </div>
         </div>
 
         {/* Right Column: Compensation, Timelines, CV Targets & Descriptions */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           
           {/* Compensation & Benefits */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
-              <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-                <Wallet className="w-4 h-4" />
+          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+            <div className="flex items-center justify-between px-3.5 py-2 border-b border-border/60 bg-muted/25">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+                  <Wallet className="w-3.5 h-3.5" />
+                </div>
+                <h4 className="text-xs sm:text-sm font-semibold text-foreground">Compensation & Benefits</h4>
               </div>
-              <h4 className="text-sm font-semibold text-foreground">Compensation & Benefits</h4>
+              {canEdit && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsSalaryDialogOpen(true)} 
+                  className="h-7 px-2 text-xs font-medium text-primary hover:bg-primary/10"
+                >
+                  <Pencil className="h-3 w-3 mr-1" /> Edit
+                </Button>
+              )}
             </div>
             
-            <div className="p-4">
-              <div className="bg-muted/20 p-3.5 rounded-xl border border-border/40 space-y-4">
+            <div className="p-3">
+              <div className="bg-muted/15 p-2.5 rounded-lg border border-border/40 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Salary Range</p>
-                    <p className="text-base font-extrabold text-foreground mt-0.5">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Salary Range</p>
+                    <p className="text-sm sm:text-base font-bold text-foreground mt-0.5">
                       {jobDetails.salaryCurrency || "SAR"} {jobDetails.minimumSalary || 0} - {jobDetails.maximumSalary || 0}
                     </p>
                   </div>
-                  {canEdit && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setIsSalaryDialogOpen(true)} 
-                      className="border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs font-semibold"
-                    >
-                      <Pencil className="h-3.5 w-3.5 mr-1.5" /> Update Salary
-                    </Button>
-                  )}
                 </div>
 
-                <div className="pt-3 border-t border-border/40">
+                <div className="pt-2 border-t border-border/40">
                   <JDBenefitFilesSection
                     jobDescriptionPdf={jobDetails.jobDescriptionPdf}
                     benefitPdf={jobDetails.benefitPdf}
@@ -336,16 +344,16 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
           </div>
 
           {/* Timelines & Status */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
-              <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-                <Clock className="w-4 h-4" />
+          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+            <div className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+              <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+                <Clock className="w-3.5 h-3.5" />
               </div>
-              <h4 className="text-sm font-semibold text-foreground">Timelines & Status</h4>
+              <h4 className="text-xs sm:text-sm font-semibold text-foreground">Timelines & Status</h4>
             </div>
 
-            <div className="p-4">
-              <div className="space-y-2 bg-muted/20 p-3 rounded-xl border border-border/40">
+            <div className="p-3">
+              <div className="space-y-1 bg-muted/15 p-2 rounded-lg border border-border/40">
                 <DetailRow
                   label="Job Stage"
                   value={jobDetails.stage}
@@ -365,36 +373,36 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
           </div>
 
           {/* CV Targets Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center justify-between p-2 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-                  <ClipboardList className="w-4 h-4" />
+          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+            <div className="flex items-center justify-between px-3.5 py-2 border-b border-border/60 bg-muted/25">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+                  <ClipboardList className="w-3.5 h-3.5" />
                 </div>
-                <h4 className="text-sm font-semibold text-foreground">CV Targets</h4>
+                <h4 className="text-xs sm:text-sm font-semibold text-foreground">CV Submission Targets</h4>
               </div>
               {canEdit && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 font-bold text-xs"
+                  className="h-7 px-2 text-xs font-medium text-primary hover:bg-primary/10"
                   onClick={() => setIsCvTargetsDialogOpen(true)}
                 >
-                  <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                  <Pencil className="h-3 w-3 mr-1" /> Edit Targets
                 </Button>
               )}
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-3 space-y-2.5">
               {!jobDetails.cvTargets || jobDetails.cvTargets.length === 0 ? (
-                <div className="text-center py-6 text-muted-foreground bg-muted/20 border border-dashed border-border/80 rounded-xl">
-                  <p className="text-xs font-semibold">No CV target slots configured.</p>
+                <div className="text-center py-4 text-muted-foreground bg-muted/15 border border-dashed border-border/70 rounded-lg">
+                  <p className="text-xs font-medium">No CV target slots configured.</p>
                   {canEdit && (
                     <Button
                       variant="link"
                       size="sm"
                       onClick={() => setIsCvTargetsDialogOpen(true)}
-                      className="text-emerald-600 dark:text-emerald-400 font-bold text-xs mt-1"
+                      className="text-primary font-semibold text-xs mt-0.5 h-auto p-0"
                     >
                       Add targets
                     </Button>
@@ -404,16 +412,16 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                 <>
                   {/* Overall progress */}
                   {jobDetails.cvTargetsSummary && (
-                    <div className="bg-muted/20 p-3.5 rounded-xl border border-border/40 space-y-2">
-                      <div className="flex justify-between text-xs font-bold text-foreground">
-                        <span>Overall Submission Progress</span>
+                    <div className="bg-muted/15 p-2.5 rounded-lg border border-border/40 space-y-1.5">
+                      <div className="flex justify-between text-xs font-semibold text-foreground">
+                        <span>Overall Progress</span>
                         <span>
                           {jobDetails.cvTargetsSummary.totalAchievedCVs} / {jobDetails.cvTargetsSummary.totalTargetCVs} CVs
                         </span>
                       </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-emerald-600 transition-all duration-500"
+                          className="h-full bg-primary transition-all duration-500"
                           style={{
                             width: `${Math.min(
                               100,
@@ -424,7 +432,7 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                           }}
                         />
                       </div>
-                      <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      <div className="flex justify-between text-[10px] font-medium text-muted-foreground">
                         <span>
                           {Math.round(
                             (jobDetails.cvTargetsSummary.totalAchievedCVs /
@@ -438,8 +446,10 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                   )}
 
                   {/* Individual Slots */}
-                  <div className="space-y-3 pt-1">
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-1">Client CV Submission</p>
+                  <div className="space-y-1.5 pt-0.5">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                      Client CV Submission Slots
+                    </p>
                     {jobDetails.cvTargets.map((slot) => {
                       const achieved = slot.achievedCount || 0;
                       const target = slot.targetCount || 1;
@@ -448,13 +458,13 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                       const isExpired = slot.isExpired;
 
                       let badgeLabel = "Active";
-                      let badgeCls = "bg-blue-500/10 text-blue-700 dark:text-blue-300";
+                      let badgeCls = "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20";
                       if (isCompleted) {
                         badgeLabel = "Completed";
-                        badgeCls = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+                        badgeCls = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20";
                       } else if (isExpired) {
                         badgeLabel = "Expired";
-                        badgeCls = "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+                        badgeCls = "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20";
                       }
 
                       const formatDateRange = (startStr: string, endStr: string) => {
@@ -468,31 +478,31 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
                       };
 
                       return (
-                        <div key={slot._id} className="p-3 bg-muted/20 border border-border/40 rounded-xl space-y-2">
+                        <div key={slot._id} className="p-2.5 bg-muted/15 border border-border/40 rounded-lg space-y-1.5">
                           <div className="flex justify-between items-start">
                             <div>
-                              <p className="text-xs font-bold text-foreground">
+                              <p className="text-xs font-semibold text-foreground">
                                 {slot.label || `Submission Slot`}
                               </p>
-                              <p className="text-[11px] text-muted-foreground font-semibold">
+                              <p className="text-[10px] text-muted-foreground font-medium">
                                 {formatDateRange(slot.startDate, slot.endDate)}
                               </p>
                             </div>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badgeCls}`}>
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider border ${badgeCls}`}>
                               {badgeLabel}
                             </span>
                           </div>
 
                           <div className="space-y-1">
-                            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div className="h-1 bg-muted rounded-full overflow-hidden">
                               <div
                                 className={`h-full transition-all duration-500 ${
-                                  isCompleted ? "bg-emerald-500" : isExpired ? "bg-rose-500" : "bg-blue-500"
+                                  isCompleted ? "bg-emerald-500" : isExpired ? "bg-rose-500" : "bg-primary"
                                 }`}
                                 style={{ width: `${Math.min(100, (achieved / target) * 100)}%` }}
                               />
                             </div>
-                            <div className="flex justify-between text-[10px] font-semibold text-muted-foreground">
+                            <div className="flex justify-between text-[10px] font-medium text-muted-foreground">
                               <span>{achieved} / {target} CVs</span>
                               <span>{isCompleted ? "Goal Met" : `${remaining} remaining`}</span>
                             </div>
@@ -507,48 +517,56 @@ export function SummaryContent({ jobId, jobData, canModify }: SummaryContentProp
           </div>
 
           {/* Job Description Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/40 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-                  <ClipboardList className="w-4 h-4" />
+          <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+            <div className="flex items-center justify-between px-3.5 py-2 border-b border-border/60 bg-muted/25">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+                  <FileText className="w-3.5 h-3.5" />
                 </div>
-                <h4 className="text-sm font-semibold text-foreground">Job Description</h4>
+                <h4 className="text-xs sm:text-sm font-semibold text-foreground">Job Descriptions & Notes</h4>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs font-medium" 
+                  className="h-7 px-2 text-xs font-medium text-primary hover:bg-primary/10" 
                   onClick={() => setIsDescriptionModalOpen(true)}
                 >
-                  <Pencil className="h-3.5 w-3.5 mr-1" /> Client
+                  <Pencil className="h-3 w-3 mr-1" /> Client
                 </Button>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs font-medium" 
+                  className="h-7 px-2 text-xs font-medium text-primary hover:bg-primary/10" 
                   onClick={() => setIsInternalDescriptionModalOpen(true)}
                 >
-                  <Pencil className="h-3.5 w-3.5 mr-1" /> Internal
+                  <Pencil className="h-3 w-3 mr-1" /> Internal
                 </Button>
               </div>
             </div>
 
-            <div className="p-4 space-y-3">
-              <div className="bg-muted/20 rounded-xl p-3.5 border border-border/40">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Description by Client</p>
+            <div className="p-3 space-y-2.5">
+              <div className="bg-muted/15 rounded-lg p-2.5 border border-border/40">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                  Description by Client
+                </p>
                 {jobDetails.jobDescription ? (
-                  <p className="text-xs text-foreground/90 line-clamp-6 leading-relaxed">{jobDetails.jobDescription}</p>
+                  <p className="text-xs text-foreground/90 line-clamp-5 leading-relaxed">
+                    {jobDetails.jobDescription}
+                  </p>
                 ) : (
                   <p className="text-xs text-muted-foreground italic">No description provided by client</p>
                 )}
               </div>
 
-              <div className="bg-muted/20 rounded-xl p-3.5 border border-border/40">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Internal Team Notes</p>
+              <div className="bg-muted/15 rounded-lg p-2.5 border border-border/40">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                  Internal Team Notes
+                </p>
                 {jobDetails.jobDescriptionByInternalTeam ? (
-                  <p className="text-xs text-foreground/90 line-clamp-6 leading-relaxed">{jobDetails.jobDescriptionByInternalTeam}</p>
+                  <p className="text-xs text-foreground/90 line-clamp-5 leading-relaxed">
+                    {jobDetails.jobDescriptionByInternalTeam}
+                  </p>
                 ) : (
                   <p className="text-xs text-muted-foreground italic">No internal notes added</p>
                 )}

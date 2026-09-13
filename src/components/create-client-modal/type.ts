@@ -76,6 +76,7 @@ export interface ClientForm {
   nonExecutivesNotes?: string;
   otherNotes?: string;
   clientSource?: string;
+  clientSourceDetails?: any;
   fixWithoutAdvanceNotes?: string;
   fixWithoutAdvanceValue?: number;
   clientPriority?: string;
@@ -116,6 +117,7 @@ export type ClientGeneralInfo = {
   clientPriority: string | undefined;
   clientSegment: string | undefined;
   clientSource: string | undefined;
+  clientSourceDetails?: any;
   industry: string | undefined;
 }
 

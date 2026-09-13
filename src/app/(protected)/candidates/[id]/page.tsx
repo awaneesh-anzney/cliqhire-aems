@@ -5,6 +5,7 @@ import dynamicImport from 'next/dynamic';
 const TABS = [
   { label: "Summary", icon: <FileText className="w-4 h-4" /> },
   { label: "Jobs", icon: <Briefcase className="w-4 h-4" /> },
+  { label: "Tracking", icon: <Activity className="w-4 h-4" /> },
   // { label: "Activities", icon: <Activity className="w-4 h-4" /> },
   { label: "Notes", icon: <StickyNote className="w-4 h-4" /> },
   { label: "Attachments", icon: <Paperclip className="w-4 h-4" /> },

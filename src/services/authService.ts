@@ -286,6 +286,23 @@ class AuthService {
     }
   }
 
+  // ── verifyResetToken ────────────────────────────────────────────────────────
+  async verifyResetToken(token: string): Promise<{ success: boolean; valid: boolean; message: string }> {
+    try {
+      const response = await api.get(`/api/auth/verify-reset-token/${token}`);
+      return {
+        success: response.data.success ?? true,
+        valid: response.data.valid ?? true,
+        message: response.data.message ?? "Token is valid.",
+      };
+    } catch (error) {
+      const msg = axios.isAxiosError(error)
+        ? ((error.response?.data as { message?: string })?.message ?? error.message)
+        : "Failed to verify token";
+      return { success: false, valid: false, message: msg };
+    }
+  }
+
   // ── resetPassword ───────────────────────────────────────────────────────────
   async resetPassword(
     token: string,

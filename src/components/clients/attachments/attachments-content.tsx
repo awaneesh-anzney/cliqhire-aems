@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-
+import { Plus, Paperclip, Loader2 } from "lucide-react";
 import { UploadAttachment } from "./uploadAttachment";
 import { AttachmentList } from "./attachmentList";
+import { Badge } from "@/components/ui/badge";
 
 export interface BackendAttachment {
   _id: string;
@@ -27,10 +27,8 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
   const [attachments, setAttachments] = useState<BackendAttachment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch attachments from backend
   const fetchAttachments = async () => {
     if (!clientId) return;
-
     setLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/api/attachments?client_id=${clientId}`);
@@ -43,11 +41,10 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
     }
   };
 
-  // Bulk delete selected attachments
   const handleBulkDelete = async (ids: string[]) => {
     try {
       await Promise.all(
-        ids.map(id => axios.delete(`${API_BASE_URL}/api/attachments/${id}`))
+        ids.map((id) => axios.delete(`${API_BASE_URL}/api/attachments/${id}`)),
       );
       fetchAttachments();
     } catch (error) {
@@ -55,29 +52,23 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
     }
   };
 
-  // Upload a file
   const handleUpload = async (file: File) => {
     if (!clientId) return;
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("client_id", clientId);
-
       await axios.post(`${API_BASE_URL}/api/attachments`, formData);
-      // Always refresh list after upload to ensure new file appears
       await fetchAttachments();
     } catch (error) {
       console.error("Upload failed:", error);
     }
   };
 
-  // Delete a file
   const handleDelete = async (attachmentId: string) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/${attachmentId}`);
-      setAttachments((prev) =>
-        prev.filter((item) => item._id !== attachmentId)
-      );
+      setAttachments((prev) => prev.filter((item) => item._id !== attachmentId));
     } catch (error) {
       console.error("Delete failed:", error);
     }
@@ -89,25 +80,38 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
   }, [clientId]);
 
   return (
-    <div className="bg-muted/50 rounded-2xl p-6 flex flex-col h-full">
-      <div className="mb-6 flex items-center justify-between bg-card p-4 rounded-xl border border-border shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand/10 rounded-lg">
-            <Plus className="w-4 h-4 text-brand" />
+    <div className="space-y-4">
+      {/* Header action bar */}
+      <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-border/70 shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <Paperclip className="w-4 h-4" />
           </div>
-          <h3 className="text-base font-semibold text-foreground">Client Attachments</h3>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground">Client Attachments</h3>
+              <Badge variant="outline" className="h-5 px-1.5 text-xs font-bold bg-primary/10 text-primary border-primary/20">
+                {attachments.length}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">Files, agreements, and reference documents</p>
+          </div>
         </div>
-        <Button
-          onClick={() => setShowUploadBox(true)}
-          disabled={showUploadBox || !canModify}
-          className="hover:bg-brand/90 transition-colors bg-brand text-white flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Upload File
-        </Button>
+
+        {canModify && (
+          <Button
+            onClick={() => setShowUploadBox(true)}
+            disabled={showUploadBox}
+            size="sm"
+            className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Upload File
+          </Button>
+        )}
       </div>
 
-      <div className="bg-card rounded-xl border border-border shadow-sm p-6 flex-1">
+      <div className="bg-card rounded-xl border border-border/70 shadow-2xs p-5">
         <UploadAttachment
           show={showUploadBox}
           setShow={setShowUploadBox}
@@ -116,18 +120,31 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
         />
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground animate-pulse">Loading attachments...</div>
+          <div className="flex flex-col items-center justify-center py-16 space-y-3">
+            <Loader2 className="h-7 w-7 text-primary animate-spin" />
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Loading attachments...
+            </p>
+          </div>
         ) : attachments.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-12">
-            <div className="w-24 h-24 mb-6 bg-muted rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-              </svg>
+            <div className="w-12 h-12 mb-3 bg-muted rounded-2xl flex items-center justify-center text-muted-foreground">
+              <Paperclip className="w-6 h-6" />
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">No attachments yet</h2>
-            <p className="text-muted-foreground max-w-sm">
-              Add your first attachment to share files with your team.
+            <h4 className="text-sm font-bold text-foreground mb-1">No attachments uploaded</h4>
+            <p className="text-xs text-muted-foreground max-w-sm mb-4">
+              Add your first document or agreement to share across the team.
             </p>
+            {canModify && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-semibold"
+                onClick={() => setShowUploadBox(true)}
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" /> Add Document
+              </Button>
+            )}
           </div>
         ) : (
           <AttachmentList

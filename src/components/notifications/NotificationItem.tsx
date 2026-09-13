@@ -1,15 +1,18 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
-import { Notification } from '@/services/notificationService';
-import { Button } from '@/components/ui/button';
-import { 
-  Bell, 
-  Trash2, 
-  Clock, 
+"use client";
+
+import React from "react";
+import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { Notification } from "@/services/notificationService";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Bell,
+  Trash2,
+  Clock,
   ExternalLink,
   Check,
-  // Category Icons
   UserCheck,
   CheckCircle2,
   XCircle,
@@ -44,8 +47,10 @@ import {
   FileMinus,
   FileWarning,
   UploadCloud,
-  LucideIcon
-} from 'lucide-react';
+  LucideIcon,
+  AlertCircle,
+  UserCircle2,
+} from "lucide-react";
 
 interface NotificationItemProps {
   notification: Notification;
@@ -54,6 +59,9 @@ interface NotificationItemProps {
   onDelete: (id: string, e: React.MouseEvent) => void;
   isMarkingRead?: boolean;
   isDeleting?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string, e: React.MouseEvent) => void;
+  isSelectionMode?: boolean;
 }
 
 export function NotificationItem({
@@ -62,193 +70,456 @@ export function NotificationItem({
   onMarkAsRead,
   onDelete,
   isMarkingRead,
-  isDeleting
+  isDeleting,
+  isSelected = false,
+  onToggleSelect,
+  isSelectionMode = false,
 }: NotificationItemProps) {
-  const getNotificationIcon = (type: string): { icon: LucideIcon; bg: string; color: string } => {
+  const getNotificationVisuals = (
+    type: string
+  ): { icon: LucideIcon; badgeBg: string; iconColor: string; category: string } => {
     switch (type) {
-      // Phase 1
-      case 'CANDIDATE_ASSIGNED': return { icon: UserCheck, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'ASSIGNMENT_ACCEPTED': return { icon: CheckCircle2, bg: 'bg-green-100 dark:bg-green-900/30', color: 'text-green-600 dark:text-green-400' };
-      case 'ASSIGNMENT_REJECTED': return { icon: XCircle, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
-      case 'ASSIGNMENT_EXPIRED': return { icon: Clock, bg: 'bg-orange-100 dark:bg-orange-900/30', color: 'text-orange-600 dark:text-orange-400' };
-      case 'ASSIGNMENT_REASSIGNED': return { icon: RefreshCw, bg: 'bg-purple-100 dark:bg-purple-900/30', color: 'text-purple-600 dark:text-purple-400' };
-      case 'DEADLINE_REMINDER_12H':
-      case 'DEADLINE_REMINDER_4H':
-      case 'DEADLINE_REMINDER_1H': return { icon: Clock, bg: 'bg-yellow-100 dark:bg-yellow-900/30', color: 'text-yellow-600 dark:text-yellow-400' };
-      case 'DUPLICATE_CANDIDATE_FOUND': return { icon: AlertTriangle, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
-      case 'SCREENING_DEADLINE_SET': return { icon: ClipboardList, bg: 'bg-teal-100 dark:bg-teal-900/30', color: 'text-teal-600 dark:text-teal-400' };
+      // Candidates & Screening
+      case "CANDIDATE_ASSIGNED":
+      case "CV_SUBMISSION_ASSIGNED":
+        return {
+          icon: UserCheck,
+          badgeBg: "bg-blue-500/10 dark:bg-blue-500/15",
+          iconColor: "text-blue-600 dark:text-blue-400",
+          category: "Candidate",
+        };
+      case "ASSIGNMENT_ACCEPTED":
+      case "CV_SUBMISSION_COMPLETED":
+        return {
+          icon: CheckCircle2,
+          badgeBg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+          iconColor: "text-emerald-600 dark:text-emerald-400",
+          category: "Candidate",
+        };
+      case "ASSIGNMENT_REJECTED":
+        return {
+          icon: XCircle,
+          badgeBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          category: "Candidate",
+        };
+      case "ASSIGNMENT_EXPIRED":
+      case "DEADLINE_REMINDER_12H":
+      case "DEADLINE_REMINDER_4H":
+      case "DEADLINE_REMINDER_1H":
+      case "CV_SUBMISSION_REMINDER_12H":
+      case "CV_SUBMISSION_REMINDER_4H":
+      case "CV_SUBMISSION_REMINDER_1H":
+        return {
+          icon: Clock,
+          badgeBg: "bg-amber-500/10 dark:bg-amber-500/15",
+          iconColor: "text-amber-600 dark:text-amber-400",
+          category: "Reminder",
+        };
+      case "ASSIGNMENT_REASSIGNED":
+      case "CV_SUBMISSION_REASSIGNED":
+      case "CV_SUBMISSION_REOPENED":
+        return {
+          icon: RefreshCw,
+          badgeBg: "bg-purple-500/10 dark:bg-purple-500/15",
+          iconColor: "text-purple-600 dark:text-purple-400",
+          category: "Candidate",
+        };
+      case "DUPLICATE_CANDIDATE_FOUND":
+      case "CV_SUBMISSION_OVERDUE":
+        return {
+          icon: AlertTriangle,
+          badgeBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          category: "Alert",
+        };
+      case "SCREENING_DEADLINE_SET":
+        return {
+          icon: ClipboardList,
+          badgeBg: "bg-teal-500/10 dark:bg-teal-500/15",
+          iconColor: "text-teal-600 dark:text-teal-400",
+          category: "Candidate",
+        };
 
-      // Phase 2
-      case 'PIPELINE_STAGE_CHANGED': return { icon: GitCompare, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
-      case 'PIPELINE_CANDIDATE_ADDED': return { icon: UserPlus, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'PIPELINE_CANDIDATE_REMOVED': return { icon: UserMinus, bg: 'bg-gray-100 dark:bg-gray-900/30', color: 'text-gray-600 dark:text-gray-400' };
-      case 'PIPELINE_INTERVIEW_SCHEDULED': return { icon: Calendar, bg: 'bg-cyan-100 dark:bg-cyan-900/30', color: 'text-cyan-600 dark:text-cyan-400' };
-      case 'PIPELINE_OFFER_EXTENDED': return { icon: FileSignature, bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400' };
-      case 'PIPELINE_CANDIDATE_HIRED': return { icon: Award, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
-      case 'PIPELINE_CANDIDATE_REJECTED': return { icon: Ban, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
-      case 'PIPELINE_STAGE_DATA_UPDATED': return { icon: Edit3, bg: 'bg-cyan-100 dark:bg-cyan-900/30', color: 'text-cyan-600 dark:text-cyan-400' };
-      case 'PIPELINE_PROBATION_SET': return { icon: Shield, bg: 'bg-teal-100 dark:bg-teal-900/30', color: 'text-teal-600 dark:text-teal-400' };
+      // Pipeline
+      case "PIPELINE_STAGE_CHANGED":
+      case "PIPELINE_STAGE_DATA_UPDATED":
+        return {
+          icon: GitCompare,
+          badgeBg: "bg-indigo-500/10 dark:bg-indigo-500/15",
+          iconColor: "text-indigo-600 dark:text-indigo-400",
+          category: "Pipeline",
+        };
+      case "PIPELINE_CANDIDATE_ADDED":
+        return {
+          icon: UserPlus,
+          badgeBg: "bg-primary/10",
+          iconColor: "text-primary",
+          category: "Pipeline",
+        };
+      case "PIPELINE_CANDIDATE_REMOVED":
+        return {
+          icon: UserMinus,
+          badgeBg: "bg-muted",
+          iconColor: "text-muted-foreground",
+          category: "Pipeline",
+        };
+      case "PIPELINE_INTERVIEW_SCHEDULED":
+        return {
+          icon: Calendar,
+          badgeBg: "bg-cyan-500/10 dark:bg-cyan-500/15",
+          iconColor: "text-cyan-600 dark:text-cyan-400",
+          category: "Interview",
+        };
+      case "PIPELINE_OFFER_EXTENDED":
+        return {
+          icon: FileSignature,
+          badgeBg: "bg-violet-500/10 dark:bg-violet-500/15",
+          iconColor: "text-violet-600 dark:text-violet-400",
+          category: "Offer",
+        };
+      case "PIPELINE_CANDIDATE_HIRED":
+        return {
+          icon: Award,
+          badgeBg: "bg-emerald-500/15 dark:bg-emerald-500/20",
+          iconColor: "text-emerald-600 dark:text-emerald-400",
+          category: "Placement",
+        };
+      case "PIPELINE_CANDIDATE_REJECTED":
+        return {
+          icon: Ban,
+          badgeBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          category: "Pipeline",
+        };
+      case "PIPELINE_PROBATION_SET":
+        return {
+          icon: Shield,
+          badgeBg: "bg-teal-500/10 dark:bg-teal-500/15",
+          iconColor: "text-teal-600 dark:text-teal-400",
+          category: "Pipeline",
+        };
 
-      // Phase 3
-      case 'JOB_CREATED': return { icon: Briefcase, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
-      case 'JOB_STATUS_CHANGED': return { icon: Sliders, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
-      case 'JOB_DELETED': return { icon: Trash2, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
-      case 'JOB_TEAM_MEMBER_CHANGED':
-      case 'JOB_TEAM_MEMBER_ASSIGNED': return { icon: Users, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'TEAM_CREATED': return { icon: Building, bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400' };
-      case 'TEAM_UPDATED': return { icon: Edit3, bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400' };
-      case 'TEAM_DELETED': return { icon: XCircle, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
+      // Jobs & Teams
+      case "JOB_CREATED":
+        return {
+          icon: Briefcase,
+          badgeBg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+          iconColor: "text-emerald-600 dark:text-emerald-400",
+          category: "Job",
+        };
+      case "JOB_STATUS_CHANGED":
+        return {
+          icon: Sliders,
+          badgeBg: "bg-indigo-500/10 dark:bg-indigo-500/15",
+          iconColor: "text-indigo-600 dark:text-indigo-400",
+          category: "Job",
+        };
+      case "JOB_DELETED":
+        return {
+          icon: Trash2,
+          badgeBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          category: "Job",
+        };
+      case "JOB_TEAM_MEMBER_CHANGED":
+      case "JOB_TEAM_MEMBER_ASSIGNED":
+        return {
+          icon: Users,
+          badgeBg: "bg-primary/10",
+          iconColor: "text-primary",
+          category: "Team",
+        };
+      case "TEAM_CREATED":
+      case "TEAM_UPDATED":
+        return {
+          icon: Building,
+          badgeBg: "bg-violet-500/10 dark:bg-violet-500/15",
+          iconColor: "text-violet-600 dark:text-violet-400",
+          category: "Team",
+        };
+      case "TEAM_DELETED":
+        return {
+          icon: XCircle,
+          badgeBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          category: "Team",
+        };
 
-      // Phase 4
-      case 'PASSWORD_CHANGED':
-      case 'PASSWORD_RESET': return { icon: Key, bg: 'bg-slate-100 dark:bg-slate-900/30', color: 'text-slate-600 dark:text-slate-400' };
-      case 'SUSPICIOUS_LOGIN': return { icon: ShieldAlert, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
-      case 'NEW_LOGIN': return { icon: Smartphone, bg: 'bg-teal-100 dark:bg-teal-900/30', color: 'text-teal-600 dark:text-teal-400' };
+      // Security
+      case "PASSWORD_CHANGED":
+      case "PASSWORD_RESET":
+        return {
+          icon: Key,
+          badgeBg: "bg-slate-500/10 dark:bg-slate-500/15",
+          iconColor: "text-slate-600 dark:text-slate-400",
+          category: "Security",
+        };
+      case "SUSPICIOUS_LOGIN":
+        return {
+          icon: ShieldAlert,
+          badgeBg: "bg-destructive/15",
+          iconColor: "text-destructive",
+          category: "Security",
+        };
+      case "NEW_LOGIN":
+        return {
+          icon: Smartphone,
+          badgeBg: "bg-teal-500/10 dark:bg-teal-500/15",
+          iconColor: "text-teal-600 dark:text-teal-400",
+          category: "Security",
+        };
 
-      // Phase 5
-      case 'CLIENT_CREATED': return { icon: Users, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'CLIENT_STAGE_CHANGED':
-      case 'CLIENT_SUB_STAGE_CHANGED': return { icon: TrendingUp, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
-      case 'CLIENT_ACTIVITY_LOGGED': return { icon: ClipboardList, bg: 'bg-teal-100 dark:bg-teal-900/30', color: 'text-teal-600 dark:text-teal-400' };
-      case 'CLIENT_NEGOTIATION_UPDATED': return { icon: Briefcase, bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400' };
-      case 'CLIENT_FOLLOWUP_SCHEDULED': return { icon: Calendar, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'CLIENT_FOLLOWUP_COMPLETED': return { icon: CheckCircle2, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
-      case 'CLIENT_FOLLOWUP_CANCELLED': return { icon: XCircle, bg: 'bg-gray-100 dark:bg-gray-900/30', color: 'text-gray-600 dark:text-gray-400' };
-      case 'CLIENT_FOLLOWUP_DUE': return { icon: Clock, bg: 'bg-yellow-100 dark:bg-yellow-900/30', color: 'text-yellow-600 dark:text-yellow-400' };
-      case 'CLIENT_FOLLOWUP_OVERDUE': return { icon: AlertTriangle, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
-      case 'CLIENT_DELETED': return { icon: Building2, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
-      case 'CLIENT_BULK_IMPORTED': return { icon: UploadCloud, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
-      case 'CONTRACT_CREATED': return { icon: FileText, bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400' };
-      case 'CONTRACT_UPDATED':
-      case 'CONTRACT_RENEWED': return { icon: RefreshCw, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
-      case 'CONTRACT_EXPIRY_SOON':
-      case 'CONTRACT_RENEWAL_DUE': return { icon: FileClock, bg: 'bg-yellow-100 dark:bg-yellow-900/30', color: 'text-yellow-600 dark:text-yellow-400' };
-      case 'CONTRACT_EXPIRED': return { icon: FileX, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
-      case 'MEMBER_ADDED': return { icon: UserPlus, bg: 'bg-teal-100 dark:bg-teal-900/30', color: 'text-teal-600 dark:text-teal-400' };
-      case 'USER_ROLE_CHANGED': return { icon: Shield, bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400' };
-      case 'USER_DEACTIVATED':
-      case 'USER_DELETED': return { icon: UserMinus, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
-      case 'TASK_DUE_SOON':
-      case 'TASK_OVERDUE': return { icon: Calendar, bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400' };
-      case 'TASK_JOB_ASSIGNMENT_ADDED': return { icon: Pin, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'CANDIDATE_CREATED': return { icon: User, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
-      case 'CANDIDATE_STATUS_CHANGED': return { icon: RefreshCw, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
+      // Clients & Contracts
+      case "CLIENT_CREATED":
+      case "CLIENT_BULK_IMPORTED":
+        return {
+          icon: Building2,
+          badgeBg: "bg-primary/10",
+          iconColor: "text-primary",
+          category: "Client",
+        };
+      case "CLIENT_STAGE_CHANGED":
+      case "CLIENT_SUB_STAGE_CHANGED":
+        return {
+          icon: TrendingUp,
+          badgeBg: "bg-indigo-500/10 dark:bg-indigo-500/15",
+          iconColor: "text-indigo-600 dark:text-indigo-400",
+          category: "Client",
+        };
+      case "CONTRACT_CREATED":
+      case "CONTRACT_UPDATED":
+      case "CONTRACT_RENEWED":
+        return {
+          icon: FileText,
+          badgeBg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+          iconColor: "text-emerald-600 dark:text-emerald-400",
+          category: "Contract",
+        };
+      case "CONTRACT_EXPIRY_SOON":
+      case "CONTRACT_RENEWAL_DUE":
+        return {
+          icon: FileClock,
+          badgeBg: "bg-amber-500/10 dark:bg-amber-500/15",
+          iconColor: "text-amber-600 dark:text-amber-400",
+          category: "Contract",
+        };
+      case "CONTRACT_EXPIRED":
+        return {
+          icon: FileX,
+          badgeBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          category: "Contract",
+        };
 
       // CV Targets
-      case 'CV_TARGET_CV_ADDED': return { icon: FilePlus, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'CV_TARGET_CV_REMOVED': return { icon: FileMinus, bg: 'bg-gray-100 dark:bg-gray-900/30', color: 'text-gray-600 dark:text-gray-400' };
-      case 'CV_TARGET_SLOT_COMPLETED': return { icon: Target, bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400' };
-      case 'CV_TARGET_SLOT_EXPIRED': return { icon: FileWarning, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600 dark:text-red-400' };
+      case "CV_TARGET_CV_ADDED":
+        return {
+          icon: FilePlus,
+          badgeBg: "bg-primary/10",
+          iconColor: "text-primary",
+          category: "Target",
+        };
+      case "CV_TARGET_CV_REMOVED":
+        return {
+          icon: FileMinus,
+          badgeBg: "bg-muted",
+          iconColor: "text-muted-foreground",
+          category: "Target",
+        };
+      case "CV_TARGET_SLOT_COMPLETED":
+        return {
+          icon: Target,
+          badgeBg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+          iconColor: "text-emerald-600 dark:text-emerald-400",
+          category: "Target",
+        };
+      case "CV_TARGET_SLOT_EXPIRED":
+        return {
+          icon: FileWarning,
+          badgeBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          category: "Target",
+        };
 
-      // CV Submission Responsibility
-      case 'CV_SUBMISSION_ASSIGNED': return { icon: UserCheck, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' };
-      case 'CV_SUBMISSION_REMINDER_12H':
-      case 'CV_SUBMISSION_REMINDER_4H':
-      case 'CV_SUBMISSION_REMINDER_1H': return { icon: Clock, bg: 'bg-yellow-100 dark:bg-yellow-900/30', color: 'text-yellow-600 dark:text-yellow-400' };
-      case 'CV_SUBMISSION_OVERDUE': return { icon: AlertTriangle, bg: 'bg-rose-100 dark:bg-rose-900/30', color: 'text-rose-600 dark:text-rose-400' };
-      case 'CV_SUBMISSION_REOPENED': return { icon: RefreshCw, bg: 'bg-indigo-100 dark:bg-indigo-900/30', color: 'text-indigo-600 dark:text-indigo-400' };
-      case 'CV_SUBMISSION_REASSIGNED': return { icon: RefreshCw, bg: 'bg-purple-100 dark:bg-purple-900/30', color: 'text-purple-600 dark:text-purple-400' };
-      case 'CV_SUBMISSION_COMPLETED': return { icon: CheckCircle2, bg: 'bg-green-100 dark:bg-green-900/30', color: 'text-green-600 dark:text-green-400' };
-
-      default: return { icon: Bell, bg: 'bg-muted/70', color: 'text-muted-foreground' };
+      default:
+        return {
+          icon: Bell,
+          badgeBg: "bg-muted/80",
+          iconColor: "text-muted-foreground",
+          category: "General",
+        };
     }
   };
 
-  const getPriorityClasses = (priority: string) => {
-    switch (priority) {
-      case 'URGENT': return 'border-l-[4px] border-l-red-500';
-      case 'HIGH': return 'border-l-[4px] border-l-orange-500';
-      default: return 'border-l-[4px] border-l-transparent';
-    }
-  };
+  const visuals = getNotificationVisuals(notification.type);
+  const IconComponent = visuals.icon;
 
-  const iconDetails = getNotificationIcon(notification.type);
-  const IconComponent = iconDetails.icon;
+  const isUrgent = notification.priority === "URGENT";
+  const isHigh = notification.priority === "HIGH";
 
   return (
     <div
-      className={cn(
-        "group relative flex flex-col sm:flex-row sm:items-start gap-4 p-5 cursor-pointer bg-card transition-all duration-300 hover:shadow-sm hover:bg-muted/30",
-        !notification.isRead && "bg-brand/[0.02]",
-        getPriorityClasses(notification.priority)
-      )}
       onClick={() => onClick(notification)}
+      className={cn(
+        "group relative flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl border transition-all duration-150 select-none cursor-pointer",
+        notification.isRead
+          ? "bg-card/75 hover:bg-card border-border/60 hover:border-border/90 opacity-85 hover:opacity-100"
+          : "bg-card hover:bg-card border-primary/30 hover:border-primary/50 shadow-2xs",
+        isSelected && "ring-2 ring-primary/40 bg-primary/[0.03] border-primary/50"
+      )}
     >
-      <div className={cn(
-        "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 shadow-sm", 
-        iconDetails.bg
-      )}>
-        <IconComponent className={cn("h-5 w-5", iconDetails.color)} />
-      </div>
-
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <h4 className={cn(
-            "text-[15px] tracking-tight leading-tight transition-colors duration-200 group-hover:text-brand",
-            notification.isRead ? "text-foreground/80 font-semibold" : "text-foreground font-bold"
-          )}>
-            {notification.title}
-          </h4>
-          {notification.priority === 'URGENT' && (
-            <span className="px-2 py-0.5 text-[10px] font-black bg-red-100 text-red-600 rounded-md uppercase tracking-wider shadow-sm">
-              Urgent
-            </span>
-          )}
-          {notification.priority === 'HIGH' && (
-            <span className="px-2 py-0.5 text-[10px] font-black bg-orange-100 text-orange-600 rounded-md uppercase tracking-wider shadow-sm">
-              High
-            </span>
-          )}
-          {!notification.isRead && (
-            <span className="h-2 w-2 rounded-full bg-brand shadow-[0_0_8px_rgba(var(--brand),0.5)] ml-1 animate-pulse" />
-          )}
-        </div>
-        <p className="text-[14px] text-muted-foreground leading-snug md:max-w-[95%]">
-          {notification.message}
-        </p>
-        
-        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground font-medium">
-          <span className="flex items-center gap-1.5 opacity-80 transition-opacity group-hover:opacity-100">
-            <Clock className="h-3.5 w-3.5" />
-            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-          </span>
-          {notification.actionUrl && (
-            <span className="flex items-center gap-1 text-brand opacity-0 transform -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:underline font-semibold">
-              View details <ExternalLink className="h-3 w-3" />
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Hover Actions */}
-      <div className="absolute right-4 top-4 sm:top-1/2 sm:-translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 flex items-center gap-2 bg-card/95 backdrop-blur-md p-1.5 rounded-xl shadow-sm border border-border/50 z-10">
-        {!notification.isRead && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-lg hover:bg-brand hover:text-white transition-colors duration-200"
-            title="Mark as read"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMarkAsRead(notification._id, e);
-            }}
-            disabled={isMarkingRead}
-          >
-            <Check className="h-4 w-4" />
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-lg hover:bg-red-500 hover:text-white transition-colors duration-200"
-          title="Delete notification"
+      {/* Selection Checkbox */}
+      {(isSelectionMode || isSelected) && (
+        <div
+          className="pt-0.5 shrink-0"
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(notification._id, e);
+            onToggleSelect?.(notification._id, e);
           }}
-          disabled={isDeleting}
         >
-          <Trash2 className="h-4 w-4" />
+          <Checkbox
+            checked={isSelected}
+            className="h-3.5 w-3.5 rounded data-[state=checked]:bg-primary"
+          />
+        </div>
+      )}
+
+      {/* Category Icon */}
+      <div
+        className={cn(
+          "relative h-8 w-8 sm:h-9 sm:w-9 rounded-lg flex items-center justify-center shrink-0 border border-border/40 transition-transform duration-150 group-hover:scale-105",
+          visuals.badgeBg
+        )}
+      >
+        <IconComponent className={cn("h-4 w-4", visuals.iconColor)} />
+
+        {/* Unread indicator dot */}
+        {!notification.isRead && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary ring-2 ring-card" />
+          </span>
+        )}
+      </div>
+
+      {/* Content Body */}
+      <div className="flex-1 min-w-0 pr-1">
+        {/* Badges & Title */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+          <Badge
+            variant="outline"
+            className="text-[9px] font-bold px-1.5 py-0 rounded border-border/70 text-muted-foreground bg-muted/40 uppercase tracking-wider h-4.5"
+          >
+            {visuals.category}
+          </Badge>
+
+          {isUrgent && (
+            <Badge
+              variant="destructive"
+              className="text-[9px] font-extrabold px-1.5 py-0 rounded uppercase tracking-wider gap-0.5 h-4.5 shadow-2xs"
+            >
+              <AlertTriangle className="h-2.5 w-2.5" />
+              Urgent
+            </Badge>
+          )}
+
+          {isHigh && (
+            <Badge
+              variant="outline"
+              className="text-[9px] font-extrabold px-1.5 py-0 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 uppercase tracking-wider gap-0.5 h-4.5"
+            >
+              <AlertCircle className="h-2.5 w-2.5" />
+              High
+            </Badge>
+          )}
+
+          <h3
+            className={cn(
+              "text-xs sm:text-[13px] tracking-tight leading-snug w-full sm:w-auto",
+              notification.isRead
+                ? "font-semibold text-foreground/80"
+                : "font-extrabold text-foreground"
+            )}
+          >
+            {notification.title}
+          </h3>
+        </div>
+
+        {/* Message */}
+        <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-1">
+          {notification.message}
+        </p>
+
+        {/* Metadata Pills & Timestamps */}
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 mt-1 text-[10px] text-muted-foreground">
+          {/* Relative Time */}
+          <span className="inline-flex items-center gap-1 font-medium text-muted-foreground/80">
+            <Clock className="h-2.5 w-2.5" />
+            {formatDistanceToNow(new Date(notification.createdAt), {
+              addSuffix: true,
+            })}
+          </span>
+
+          {/* Related Candidate */}
+          {notification.relatedCandidate && (
+            <span className="inline-flex items-center gap-1 font-semibold text-foreground/90 bg-muted/50 px-1.5 py-0.2 rounded border border-border/50 max-w-[140px] truncate">
+              <User className="h-2.5 w-2.5 text-primary" />
+              {notification.relatedCandidate.name}
+            </span>
+          )}
+
+          {/* Related Job */}
+          {notification.relatedJob && (
+            <span className="inline-flex items-center gap-1 font-semibold text-foreground/90 bg-muted/50 px-1.5 py-0.2 rounded border border-border/50 max-w-[160px] truncate">
+              <Briefcase className="h-2.5 w-2.5 text-indigo-500" />
+              {notification.relatedJob.title}
+            </span>
+          )}
+
+          {/* Triggered By User */}
+          {notification.triggeredBy && (
+            <span className="inline-flex items-center gap-1 font-medium text-muted-foreground bg-muted/40 px-1.5 py-0.2 rounded border border-border/40 max-w-[120px] truncate">
+              <UserCircle2 className="h-2.5 w-2.5" />
+              {notification.triggeredBy.name}
+            </span>
+          )}
+
+          {/* Destination Link */}
+          {notification.actionUrl && (
+            <span className="inline-flex items-center gap-0.5 text-primary font-bold hover:underline ml-auto">
+              Open <ExternalLink className="h-2.5 w-2.5" />
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-0.5 shrink-0">
+        {!notification.isRead && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={(e) => onMarkAsRead(notification._id, e)}
+            disabled={isMarkingRead}
+            title="Mark as read"
+            className="h-7 w-7 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Check className="h-3.5 w-3.5" />
+          </Button>
+        )}
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={(e) => onDelete(notification._id, e)}
+          disabled={isDeleting}
+          title="Delete notification"
+          className="h-7 w-7 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>

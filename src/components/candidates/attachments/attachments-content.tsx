@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Paperclip, Loader2 } from "lucide-react";
 
 import { UploadAttachment } from "./uploadAttachment";
 import { AttachmentList } from "./attachmentList";
@@ -30,11 +31,10 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
       _id: item?._id || item?.id || "",
       fileName: item?.fileName || item?.originalName || item?.name || "Untitled",
       uploadedAt: item?.uploadedAt || item?.createdAt || item?.updatedAt || "",
-      file: item?.file|| item?.fileUrl || item?.path || "",
+      file: item?.file || item?.fileUrl || item?.path || "",
     } as BackendAttachment;
   };
 
-  // Fetch attachments from backend
   const fetchAttachments = async () => {
     if (!candidateId) return;
 
@@ -54,7 +54,6 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
     }
   };
 
-  // Bulk delete selected attachments
   const handleBulkDelete = async (ids: string[]) => {
     if (!canModify) return;
     try {
@@ -64,12 +63,13 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
         )
       );
       await fetchAttachments();
+      toast.success("Files deleted successfully");
     } catch (error) {
       console.error("Error deleting attachments:", error);
+      toast.error("Failed to delete files");
     }
   };
 
-  // Upload a file
   const handleUpload = async (file: File) => {
     if (!candidateId) return;
     if (!canModify) return;
@@ -80,20 +80,23 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/candidate-attachments`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      await fetchAttachments(); // refresh list after upload
+      await fetchAttachments();
+      toast.success("File uploaded successfully");
     } catch (error) {
       console.error("Upload failed:", error);
+      toast.error("Failed to upload file");
     }
   };
 
-  // Delete a file
   const handleDelete = async (attachmentId: string) => {
     if (!canModify) return;
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/candidate-attachments/${encodeURIComponent(attachmentId)}`);
       setAttachments((prev) => prev.filter((item) => item._id !== attachmentId));
+      toast.success("File deleted successfully");
     } catch (error) {
       console.error("Delete failed:", error);
+      toast.error("Failed to delete file");
     }
   };
 
@@ -103,18 +106,32 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
   }, [candidateId]);
 
   return (
-    <div className="">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">Upload File</h3>
-        <Button
-          onClick={() => setShowUploadBox(true)}
-          disabled={showUploadBox || !canModify}
-          className="flex items-center gap-2 bg-black text-white hover:bg-foreground"
-        >
-          <Plus className="w-4 h-4" />
-          Upload File
-        </Button>
-      </div>
+    <section className="space-y-2.5 h-full">
+      {/* Header Action Bar */}
+      <header className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-border/70 bg-card shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+            <Paperclip className="w-3.5 h-3.5" />
+          </span>
+          <div>
+            <h3 className="text-xs sm:text-sm font-semibold text-foreground">Candidate Attachments</h3>
+            <p className="text-[10px] text-muted-foreground font-medium">
+              Resumes, portfolios, credentials, or interview assessments ({attachments.length})
+            </p>
+          </div>
+        </div>
+
+        {canModify && (
+          <Button
+            onClick={() => setShowUploadBox(true)}
+            size="sm"
+            className="h-7 px-2.5 text-xs font-medium"
+            disabled={showUploadBox}
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" /> Upload File
+          </Button>
+        )}
+      </header>
 
       <UploadAttachment
         show={showUploadBox}
@@ -124,30 +141,42 @@ export function AttachmentsContent({ candidateId, canModify = true }: Attachment
       />
 
       {loading ? (
-        <div className="text-center py-8 text-muted-foreground">Loading attachments...</div>
-      ) : attachments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center">
-          <div className="w-48 h-48 mb-6">
-            <svg viewBox="0 0 200 200" className="w-full h-full text-blue-500">
-              <rect x="50" y="80" width="100" height="60" rx="10" fill="currentColor" opacity="0.1" />
-              <rect x="70" y="100" width="60" height="20" rx="4" fill="currentColor" opacity="0.2" />
-              <circle cx="100" cy="120" r="8" fill="currentColor" opacity="0.2" />
-              <rect x="120" y="90" width="20" height="8" rx="2" fill="currentColor" opacity="0.3" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold mb-2">No attachments yet</h2>
-          <p className="text-muted-foreground mb-4">
-            Add your first attachment to share files with your team.
+        <div className="flex flex-col items-center justify-center p-8 bg-card rounded-xl border border-border/70 min-h-[180px]">
+          <Loader2 className="h-5 w-5 text-primary animate-spin mb-1.5" />
+          <p className="text-xs font-medium text-muted-foreground">
+            Loading attachments...
           </p>
         </div>
+      ) : attachments.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-center bg-muted/15 rounded-xl border border-dashed border-border/70 p-6 min-h-[180px]">
+          <div className="w-10 h-10 mb-2 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <Paperclip className="w-5 h-5" />
+          </div>
+          <h4 className="text-xs font-semibold text-foreground">No attachments uploaded</h4>
+          <p className="text-[11px] text-muted-foreground max-w-xs mt-0.5 mb-3">
+            Add resumes, portfolios, certificates, or references to share with your hiring team.
+          </p>
+          {canModify && (
+            <Button
+              onClick={() => setShowUploadBox(true)}
+              variant="outline"
+              size="sm"
+              className="h-7 px-2.5 text-xs border-border text-foreground font-medium"
+            >
+              <Plus className="h-3.5 w-3.5 mr-1" /> Upload First File
+            </Button>
+          )}
+        </div>
       ) : (
-        <AttachmentList
-          attachments={attachments}
-          onDelete={handleDelete}
-          onDeleteSelected={handleBulkDelete}
-          canModify={canModify}
-        />
+        <div className="rounded-xl border border-border/70 bg-card p-3 shadow-xs">
+          <AttachmentList
+            attachments={attachments}
+            onDelete={handleDelete}
+            onDeleteSelected={handleBulkDelete}
+            canModify={canModify}
+          />
+        </div>
       )}
-    </div>
+    </section>
   );
 }

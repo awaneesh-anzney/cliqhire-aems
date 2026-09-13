@@ -1,3 +1,5 @@
+"use client";
+
 import type { ClientForm } from "@/components/create-client-modal/create-client-modal";
 import { useState } from "react";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
@@ -10,7 +12,22 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Building2, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Building2, 
+  User, 
+  Layers, 
+  Tag, 
+  Sparkles, 
+  Calendar, 
+  ChevronRight, 
+  UserCheck, 
+  Users, 
+  Compass,
+  AlertCircle
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ClientInformationTabProps {
   form:     ClientForm;
@@ -22,144 +39,295 @@ export function ClientInformationTab({ form, setField }: ClientInformationTabPro
   const [isReferredDialogOpen, setIsReferredDialogOpen] = useState(false);
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-1">
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Client stage *</label>
-        <Select
-          value={form.clientStage}
-          onValueChange={val => {
-            setField("clientStage", val);
-            if (val !== "Engaged") setField("clientSubStage", "");
-          }}
-        >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
-            <SelectValue placeholder="Select stage" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border shadow-xl">
-            <SelectItem value="Lead">Lead</SelectItem>
-            <SelectItem value="Engaged">Engaged</SelectItem>
-            <SelectItem value="Signed">Signed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="space-y-4 pb-2">
+      {/* 1. Pipeline & Status Section */}
+      <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 space-y-4 shadow-xs">
+        <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+          <div className="h-6 w-6 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Layers className="w-3.5 h-3.5" />
+          </div>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Pipeline & Classification</h3>
+        </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Sub-stage</label>
-        <Select
-          value={form.clientSubStage}
-          onValueChange={val => setField("clientSubStage", val)}
-          disabled={form.clientStage !== "Engaged"}
-        >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold disabled:opacity-50 text-foreground data-[placeholder]:text-muted-foreground/60">
-            <SelectValue placeholder={form.clientStage === "Engaged" ? "Select sub-stage" : "N/A"} />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border shadow-xl">
-            <SelectItem value="Calls">Calls</SelectItem>
-            <SelectItem value="Profile Sent">Profile Sent</SelectItem>
-            <SelectItem value="Contract Sent">Contract Sent</SelectItem>
-            <SelectItem value="Attended a Meeting">Attended a Meeting</SelectItem>
-            <SelectItem value="Replied to a Message">Replied to a Message</SelectItem>
-            <SelectItem value="Contract Negotiation">Contract Negotiation</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Client Stage */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90 flex items-center gap-1">
+              Client Stage <span className="text-rose-500">*</span>
+            </label>
+            <Select
+              value={form.clientStage}
+              onValueChange={val => {
+                setField("clientStage", val);
+                if (val !== "Engaged") setField("clientSubStage", "");
+              }}
+            >
+              <SelectTrigger className="h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-semibold text-xs sm:text-sm">
+                <SelectValue placeholder="Select stage" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border/80 shadow-lg">
+                <SelectItem value="Lead" className="font-semibold text-xs sm:text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/20" />
+                    <span>Lead</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="Engaged" className="font-semibold text-xs sm:text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 ring-2 ring-amber-500/20" />
+                    <span>Engaged</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="Signed" className="font-semibold text-xs sm:text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
+                    <span>Signed</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Sales lead</label>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => setIsSalesLeadDialogOpen(true)}
-          className={`h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start ${
-            form.salesLead ? "text-foreground" : "text-muted-foreground/60"
-          }`}
-        >
-          <User className="w-4 h-4 mr-2 text-muted-foreground" />
-          {form.salesLead || "Select Sales Lead..."}
-        </Button>
-      </div>
+          {/* Sub Stage */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90 flex items-center justify-between">
+              <span>Sub-stage</span>
+              {form.clientStage !== "Engaged" && (
+                <span className="text-[10px] text-muted-foreground font-normal">Active only when Engaged</span>
+              )}
+            </label>
+            <Select
+              value={form.clientSubStage}
+              onValueChange={val => setField("clientSubStage", val)}
+              disabled={form.clientStage !== "Engaged"}
+            >
+              <SelectTrigger className="h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-semibold disabled:opacity-50 text-xs sm:text-sm">
+                <SelectValue placeholder={form.clientStage === "Engaged" ? "Select sub-stage" : "N/A"} />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border/80 shadow-lg">
+                <SelectItem value="Calls">Calls</SelectItem>
+                <SelectItem value="Profile Sent">Profile Sent</SelectItem>
+                <SelectItem value="Contract Sent">Contract Sent</SelectItem>
+                <SelectItem value="Attended a Meeting">Attended a Meeting</SelectItem>
+                <SelectItem value="Replied to a Message">Replied to a Message</SelectItem>
+                <SelectItem value="Contract Negotiation">Contract Negotiation</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Referred by</label>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => setIsReferredDialogOpen(true)}
-          className={`h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold justify-start ${
-            form.referredBy ? "text-foreground" : "text-muted-foreground/60"
-          }`}
-        >
-          <User className="w-4 h-4 mr-2 text-muted-foreground" />
-          {form.referredBy || "Select Referral..."}
-        </Button>
-      </div>
+          {/* Priority */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Priority</label>
+            <Select
+              value={form.clientPriority}
+              onValueChange={val => setField("clientPriority", val)}
+            >
+              <SelectTrigger className="h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-semibold text-xs sm:text-sm">
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border/80 shadow-lg">
+                <SelectItem value="High">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 ring-2 ring-rose-500/20" />
+                    <span className="font-semibold text-xs sm:text-sm text-rose-600 dark:text-rose-400">High</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="Medium">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 ring-2 ring-amber-500/20" />
+                    <span className="font-semibold text-xs sm:text-sm text-amber-600 dark:text-amber-400">Medium</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="Low">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
+                    <span className="font-semibold text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">Low</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Priority</label>
-        <Select
-          value={form.clientPriority}
-          onValueChange={val => setField("clientPriority", val)}
-        >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
-            <SelectValue placeholder="Select priority" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border shadow-xl">
-            <SelectItem value="High">High</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="Low">Low</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Segment</label>
-        <Select
-          value={form.clientSegment}
-          onValueChange={val => setField("clientSegment", val)}
-        >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
-            <SelectValue placeholder="Select segment" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border shadow-xl">
-            <SelectItem value="Silver">Silver</SelectItem>
-            <SelectItem value="Gold">Gold</SelectItem>
-            <SelectItem value="Premium">Premium</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Client Source</label>
-        <Select
-          value={form.clientSource}
-          onValueChange={val => setField("clientSource", val)}
-        >
-          <SelectTrigger className="h-11 rounded-xl bg-muted border-border focus:bg-card transition-all font-semibold text-foreground data-[placeholder]:text-muted-foreground/60">
-            <SelectValue placeholder="Select source" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border shadow-xl">
-            <SelectItem value="Cold Call">Cold Call</SelectItem>
-            <SelectItem value="Reference">Reference</SelectItem>
-            <SelectItem value="Events">Events</SelectItem>
-            <SelectItem value="Existing Old Client">Existing Old Client</SelectItem>
-            <SelectItem value="Others">Others</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Industry</label>
-        <div className="h-11 rounded-xl bg-muted border border-border focus-within:bg-card transition-all flex items-center px-1">
-          <Building2 className="w-4 h-4 mx-3 text-muted-foreground shrink-0" />
-          <IndustrySelector 
-            value={form.industry} 
-            onValueChange={val => setField("industry", val)} 
-            modal
-            className="border-none bg-transparent hover:bg-transparent shadow-none px-0 h-full focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
-          />
+          {/* Segment */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Client Segment</label>
+            <Select
+              value={form.clientSegment}
+              onValueChange={val => setField("clientSegment", val)}
+            >
+              <SelectTrigger className="h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-semibold text-xs sm:text-sm">
+                <SelectValue placeholder="Select segment" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border/80 shadow-lg">
+                <SelectItem value="Silver">Silver</SelectItem>
+                <SelectItem value="Gold">Gold</SelectItem>
+                <SelectItem value="Premium">Premium</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
+      {/* 2. Team Assignment & Referral */}
+      <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 space-y-4 shadow-xs">
+        <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+          <div className="h-6 w-6 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <UserCheck className="w-3.5 h-3.5" />
+          </div>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Ownership & Referral</h3>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Sales Lead */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Sales Lead</label>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setIsSalesLeadDialogOpen(true)}
+              className={cn(
+                "w-full h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 text-left font-semibold justify-between text-xs sm:text-sm px-3 shadow-none transition-all",
+                form.salesLead ? "text-foreground" : "text-muted-foreground"
+              )}
+            >
+              <div className="flex items-center gap-2 truncate">
+                <User className="w-4 h-4 text-primary shrink-0" />
+                <span className="truncate">{form.salesLead || "Assign sales lead..."}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground/60 shrink-0" />
+            </Button>
+          </div>
+
+          {/* Referred By */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Referred By</label>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setIsReferredDialogOpen(true)}
+              className={cn(
+                "w-full h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 text-left font-semibold justify-between text-xs sm:text-sm px-3 shadow-none transition-all",
+                form.referredBy ? "text-foreground" : "text-muted-foreground"
+              )}
+            >
+              <div className="flex items-center gap-2 truncate">
+                <Users className="w-4 h-4 text-primary shrink-0" />
+                <span className="truncate">{form.referredBy || "Select referral contact..."}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground/60 shrink-0" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Lead Source & Industry */}
+      <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 space-y-4 shadow-xs">
+        <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+          <div className="h-6 w-6 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Compass className="w-3.5 h-3.5" />
+          </div>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Source & Industry</h3>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Client Source */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Client Source</label>
+            <Select
+              value={form.clientSource}
+              onValueChange={val => {
+                setField("clientSource", val);
+                setField("clientSourceDetails", {});
+              }}
+            >
+              <SelectTrigger className="h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all font-semibold text-xs sm:text-sm">
+                <SelectValue placeholder="Select client source" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border/80 shadow-lg">
+                <SelectItem value="Cold Call">Cold Call</SelectItem>
+                <SelectItem value="Reference">Reference</SelectItem>
+                <SelectItem value="Events">Events</SelectItem>
+                <SelectItem value="Existing Old Client">Existing Old Client</SelectItem>
+                <SelectItem value="Others">Others</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Industry */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground/90">Industry</label>
+            <IndustrySelector 
+              value={form.industry} 
+              onValueChange={val => setField("industry", val)} 
+              modal
+              className="h-10 rounded-xl bg-background border-border/80 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 text-xs sm:text-sm font-semibold shadow-none justify-between px-3"
+            />
+          </div>
+
+          {/* Dynamic Details: Cold Call */}
+          {form.clientSource === 'Cold Call' && (
+            <div className="space-y-1.5 sm:col-span-2 p-3.5 rounded-xl bg-muted/30 border border-border/70 animate-in fade-in duration-200">
+              <label className="text-xs font-bold text-foreground/90 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-primary" /> Cold Call Date
+              </label>
+              <Input 
+                type="date"
+                value={form.clientSourceDetails?.date ? new Date(form.clientSourceDetails.date).toISOString().split('T')[0] : ''}
+                onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, date: e.target.value })}
+                className="h-10 rounded-xl bg-background border-border/80 font-semibold text-xs sm:text-sm"
+              />
+            </div>
+          )}
+
+          {/* Dynamic Details: Events */}
+          {form.clientSource === 'Events' && (
+            <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-muted/30 border border-border/70 animate-in fade-in duration-200">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-foreground/90">Event Name</label>
+                <Input 
+                  value={form.clientSourceDetails?.eventName || ''}
+                  onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, eventName: e.target.value })}
+                  className="h-10 rounded-xl bg-background border-border/80 text-xs sm:text-sm font-semibold"
+                  placeholder="e.g. GITEX Dubai"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-foreground/90">Event Date</label>
+                <Input 
+                  type="date"
+                  value={form.clientSourceDetails?.eventDate ? new Date(form.clientSourceDetails.eventDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, eventDate: e.target.value })}
+                  className="h-10 rounded-xl bg-background border-border/80 text-xs sm:text-sm font-semibold"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-foreground/90">Location</label>
+                <Input 
+                  value={form.clientSourceDetails?.eventLocation || ''}
+                  onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, eventLocation: e.target.value })}
+                  className="h-10 rounded-xl bg-background border-border/80 text-xs sm:text-sm font-semibold"
+                  placeholder="e.g. World Trade Centre"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Dynamic Details: Others */}
+          {form.clientSource === 'Others' && (
+            <div className="space-y-1.5 sm:col-span-2 p-3.5 rounded-xl bg-muted/30 border border-border/70 animate-in fade-in duration-200">
+              <label className="text-xs font-bold text-foreground/90">Source Notes</label>
+              <Textarea
+                value={form.clientSourceDetails?.notes || ''}
+                onChange={(e) => setField('clientSourceDetails', { ...form.clientSourceDetails, notes: e.target.value })}
+                className="rounded-xl bg-background border-border/80 text-xs sm:text-sm min-h-[60px]"
+                placeholder="Provide details on how the client was acquired..."
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* User Selection Dialogs */}
       <UserSelectDialog
         open={isSalesLeadDialogOpen}
         onClose={() => setIsSalesLeadDialogOpen(false)}

@@ -1,0 +1,389 @@
+/**
+ * emailService.ts
+ *
+ * Dedicated API service for the integrated employee mailbox system.
+ * Based on the contract defined in EMAIL_API.md.
+ */
+
+import { api } from "@/lib/axios-config";
+import {
+  MailProviderConfig,
+  MailboxStatusResponse,
+  ConnectMailboxPayload,
+  ThreadsResponse,
+  ThreadDetailResponse,
+  SendEmailPayload,
+  GetThreadsParams,
+  GetEmailsParams,
+  EmailsResponse,
+  DraftsResponse,
+  SaveDraftPayload,
+  AdminMailboxStatusResponse,
+  Email,
+} from "@/types/email";
+import { EmailSignature } from "@/types/emailSignature";
+
+export interface GetEmailRecipientsParams {
+  type: "client" | "candidate" | "user";
+  search?: string;
+  clientId?: string;
+  page?: number;
+  limit?: number;
+}
+
+export const emailService = {
+  /**
+   * Fetch current organization email provider configuration.
+   */
+  async getProviderConfig(): Promise<{ success: boolean; data: MailProviderConfig }> {
+    const response = await api.get("/api/email/provider-config");
+    return response.data;
+  },
+
+  /**
+   * Create organization email provider config (ADMIN only).
+   */
+  async createProviderConfig(
+    data: Partial<MailProviderConfig>
+  ): Promise<{ success: boolean; message: string; data: MailProviderConfig }> {
+    const response = await api.post("/api/email/provider-config", data);
+    return response.data;
+  },
+
+  /**
+   * Update organization email provider config (ADMIN only).
+   */
+  async updateProviderConfig(
+    data: Partial<MailProviderConfig>
+  ): Promise<{ success: boolean; message: string; data: MailProviderConfig }> {
+    const response = await api.patch("/api/email/provider-config", data);
+    return response.data;
+  },
+
+  /**
+   * Check current user's mailbox connection status.
+   */
+  async getMailboxStatus(): Promise<MailboxStatusResponse> {
+    const response = await api.get<MailboxStatusResponse>("/api/email/mailbox/status");
+    return response.data;
+  },
+
+  /**
+   * Fetch email recipients for compose dropdowns and filtering.
+   */
+  async getEmailRecipients(params: GetEmailRecipientsParams) {
+    const response = await api.get("/api/email-recipients", { params });
+    return response.data;
+  },
+
+  /**
+   * Connect user's own mailbox (live IMAP + SMTP validation).
+   */
+  async connectMailbox(
+    payload: ConnectMailboxPayload
+  ): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post("/api/email/mailbox/connect", payload);
+    return response.data;
+  },
+
+  /**
+   * Disconnect user's mailbox (soft disconnect, preserving history).
+   */
+  async disconnectMailbox(): Promise<{ success: boolean; message: string }> {
+    const response = await api.post("/api/email/mailbox/disconnect");
+    return response.data;
+  },
+
+  /**
+   * Fetch mailbox statuses for all employees in organization (ADMIN only).
+   */
+  async getAdminAllMailboxes(): Promise<AdminMailboxStatusResponse> {
+    const response = await api.get<AdminMailboxStatusResponse>("/api/email/mailbox/admin/all");
+    return response.data;
+  },
+
+  /**
+   * List paginated inbox threads for the authenticated user's mailbox.
+   */
+  async getThreads(params: GetThreadsParams = {}): Promise<ThreadsResponse> {
+    const response = await api.get<ThreadsResponse>("/api/email/threads", {
+      params: {
+        page: params.page || 1,
+        limit: params.limit || 20,
+        starredOnly: params.starredOnly ? "true" : undefined,
+        folder: params.folder,
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Fetch thread details and all chronological messages in the conversation.
+   */
+  async getThreadById(threadId: string): Promise<ThreadDetailResponse> {
+    const response = await api.get<ThreadDetailResponse>(`/api/email/threads/${threadId}`);
+    return response.data;
+  },
+
+  /**
+   * Mark a thread as read or unread.
+   */
+  async markThreadRead(
+    threadId: string,
+    isRead: boolean = true
+  ): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.patch(`/api/email/threads/${threadId}/read`, { isRead });
+    return response.data;
+  },
+
+  /**
+   * Compose & dispatch an email (new conversation or reply).
+   * Automatically handles multipart/form-data if attachments are present.
+   */
+  async sendEmail(
+    payload: SendEmailPayload
+  ): Promise<{ success: boolean; message: string; data: Email }> {
+    const hasFiles = payload.attachments && payload.attachments.length > 0;
+
+    if (hasFiles) {
+      const formData = new FormData();
+
+      const toStr = Array.isArray(payload.to) ? payload.to.join(", ") : payload.to;
+      formData.append("to", toStr);
+      formData.append("subject", payload.subject);
+
+      if (payload.cc) {
+        formData.append("cc", Array.isArray(payload.cc) ? payload.cc.join(", ") : payload.cc);
+      }
+      if (payload.bcc) {
+        formData.append("bcc", Array.isArray(payload.bcc) ? payload.bcc.join(", ") : payload.bcc);
+      }
+      if (payload.text) {
+        formData.append("text", payload.text);
+      }
+      if (payload.html) {
+        formData.append("html", payload.html);
+      }
+      if (payload.threadId) {
+        formData.append("threadId", payload.threadId);
+      }
+      if (payload.inReplyTo) {
+        formData.append("inReplyTo", payload.inReplyTo);
+      }
+
+      payload.attachments?.forEach((file) => {
+        formData.append("attachments", file);
+      });
+
+      const response = await api.post("/api/email/send", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } else {
+      const jsonBody: Record<string, any> = {
+        to: payload.to,
+        subject: payload.subject,
+      };
+      if (payload.cc) jsonBody.cc = payload.cc;
+      if (payload.bcc) jsonBody.bcc = payload.bcc;
+      if (payload.text) jsonBody.text = payload.text;
+      if (payload.html) jsonBody.html = payload.html;
+      if (payload.threadId) jsonBody.threadId = payload.threadId;
+      if (payload.inReplyTo) jsonBody.inReplyTo = payload.inReplyTo;
+
+      const response = await api.post("/api/email/send", jsonBody);
+      return response.data;
+    }
+  },
+
+  /**
+   * Search email threads across all folders
+   */
+  async searchEmailThreads(params: { q: string; folder?: string; starredOnly?: boolean; page?: number; limit?: number }): Promise<ThreadsResponse> {
+    const response = await api.get('/api/email/search', { params });
+    return response.data;
+  },
+
+  /**
+   * Fetch emails from specific folders (inbox, sent, trash, drafts, starred)
+   */
+  async getEmailsList(folder: string, params: GetEmailsParams = {}): Promise<EmailsResponse | DraftsResponse | ThreadsResponse> {
+    const response = await api.get(`/api/email/${folder}`, {
+      params: {
+        page: params.page || 1,
+        limit: params.limit || 20,
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Toggle star on a thread
+   */
+  async toggleStarThread(threadId: string, isStarred: boolean = true): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.patch(`/api/email/threads/${threadId}/star`, { isStarred });
+    return response.data;
+  },
+
+  /**
+   * Move an email to Trash (soft delete)
+   */
+  async moveToTrash(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.delete(`/api/email/emails/${emailId}`);
+    return response.data;
+  },
+
+  /**
+   * Restore an email from Trash
+   */
+  async restoreFromTrash(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/emails/${emailId}/restore`);
+    return response.data;
+  },
+
+  /**
+   * Permanently delete an email from Trash
+   */
+  async permanentDelete(emailId: string): Promise<{ success: boolean; message: string }> {
+    const response = await api.delete(`/api/email/trash/${emailId}`);
+    return response.data;
+  },
+
+  /**
+   * Save a new draft
+   */
+  async saveDraft(payload: SaveDraftPayload): Promise<{ success: boolean; message: string; data: any }> {
+    const hasFiles = payload.attachments && payload.attachments.length > 0;
+
+    if (hasFiles) {
+      const formData = new FormData();
+      if (payload.to) {
+        formData.append("to", Array.isArray(payload.to) ? payload.to.join(", ") : payload.to);
+      }
+      if (payload.subject) formData.append("subject", payload.subject);
+      if (payload.cc) {
+        formData.append("cc", Array.isArray(payload.cc) ? payload.cc.join(", ") : payload.cc);
+      }
+      if (payload.bcc) {
+        formData.append("bcc", Array.isArray(payload.bcc) ? payload.bcc.join(", ") : payload.bcc);
+      }
+      if (payload.text) formData.append("text", payload.text);
+      if (payload.html) formData.append("html", payload.html);
+      if (payload.threadId) formData.append("threadId", payload.threadId);
+      if (payload.inReplyTo) formData.append("inReplyTo", payload.inReplyTo);
+
+      payload.attachments?.forEach((file: File) => {
+        formData.append("attachments", file);
+      });
+
+      const response = await api.post("/api/email/drafts", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } else {
+      const response = await api.post("/api/email/drafts", payload);
+      return response.data;
+    }
+  },
+
+  /**
+   * Update an existing draft
+   */
+  async updateDraft(draftId: string, payload: Partial<SaveDraftPayload>): Promise<{ success: boolean; message: string; data: any }> {
+    const hasFiles = payload.attachments && payload.attachments.length > 0;
+
+    if (hasFiles) {
+      const formData = new FormData();
+      if (payload.to) {
+        formData.append("to", Array.isArray(payload.to) ? payload.to.join(", ") : payload.to);
+      }
+      if (payload.subject) formData.append("subject", payload.subject);
+      if (payload.cc) {
+        formData.append("cc", Array.isArray(payload.cc) ? payload.cc.join(", ") : payload.cc);
+      }
+      if (payload.bcc) {
+        formData.append("bcc", Array.isArray(payload.bcc) ? payload.bcc.join(", ") : payload.bcc);
+      }
+      if (payload.text) formData.append("text", payload.text);
+      if (payload.html) formData.append("html", payload.html);
+      if (payload.threadId) formData.append("threadId", payload.threadId);
+      if (payload.inReplyTo) formData.append("inReplyTo", payload.inReplyTo);
+
+      payload.attachments?.forEach((file: File) => {
+        formData.append("attachments", file);
+      });
+
+      const response = await api.patch(`/api/email/drafts/${draftId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } else {
+      const response = await api.patch(`/api/email/drafts/${draftId}`, payload);
+      return response.data;
+    }
+  },
+
+  /**
+   * Discard a draft
+   */
+  async deleteDraft(draftId: string): Promise<{ success: boolean; message: string }> {
+    const response = await api.delete(`/api/email/drafts/${draftId}`);
+    return response.data;
+  },
+
+  /**
+   * Send a saved draft
+   */
+  async sendDraft(draftId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/drafts/${draftId}/send`);
+    return response.data;
+  },
+
+  /**
+   * Fetch all signatures for the user
+   */
+  async getSignatures(): Promise<{ success: boolean; count: number; data: EmailSignature[] }> {
+    const response = await api.get('/api/email/signatures');
+    return response.data;
+  },
+
+  /**
+   * Fetch the default signature for the user
+   */
+  async getDefaultSignature(): Promise<{ success: boolean; data: EmailSignature | null }> {
+    const response = await api.get('/api/email/signatures/default');
+    return response.data;
+  },
+
+  /**
+   * Create a new signature
+   */
+  async createSignature(payload: { name: string; contentHtml: string; contentText?: string; isDefault?: boolean }): Promise<{ success: boolean; message: string; data: EmailSignature }> {
+    const response = await api.post('/api/email/signatures', payload);
+    return response.data;
+  },
+
+  /**
+   * Update an existing signature
+   */
+  async updateSignature(id: string, payload: Partial<{ name: string; contentHtml: string; contentText: string; isDefault: boolean }>): Promise<{ success: boolean; message: string; data: EmailSignature }> {
+    const response = await api.patch(`/api/email/signatures/${id}`, payload);
+    return response.data;
+  },
+
+  /**
+   * Set a signature as default
+   */
+  async setDefaultSignature(id: string): Promise<{ success: boolean; message: string; data: EmailSignature }> {
+    const response = await api.patch(`/api/email/signatures/${id}/default`);
+    return response.data;
+  },
+
+  /**
+   * Delete a signature
+   */
+  async deleteSignature(id: string): Promise<{ success: boolean; message: string; newDefault: EmailSignature | null }> {
+    const response = await api.delete(`/api/email/signatures/${id}`);
+    return response.data;
+  }
+};

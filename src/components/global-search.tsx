@@ -131,15 +131,15 @@ export function GlobalSearch() {
     return (
         <div className="relative max-w-[500px] w-full mx-auto" ref={containerRef}>
             <div className={cn(
-                "group flex items-center px-4 py-2.5 rounded-2xl border transition-all duration-300 bg-background/60 backdrop-blur-md shadow-sm",
-                isOpen ? "border-primary ring-4 ring-primary/5 bg-background" : "border-muted-foreground/15 hover:border-muted-foreground/30"
+                "group flex items-center px-4 py-2.5 rounded-2xl border transition-all duration-300 bg-white/10 backdrop-blur-md shadow-sm text-white",
+                isOpen ? "border-white/40 ring-4 ring-white/10 bg-white/20" : "border-white/15 hover:border-white/30"
             )}>
                 <Search className={cn(
                     "h-5 w-5 mr-3 transition-colors",
-                    isOpen ? "text-primary" : "text-muted-foreground/60"
+                    isOpen ? "text-white" : "text-white/70"
                 )} />
                 <input
-                    className="flex-1 bg-transparent border-none outline-none text-[15px] placeholder:text-muted-foreground/50"
+                    className="flex-1 bg-transparent border-none outline-none text-[15px] text-white placeholder:text-white/60"
                     placeholder="Search anything... (Ctrl+K)"
                     value={query}
                     onChange={(e) => {
@@ -149,10 +149,10 @@ export function GlobalSearch() {
                     onFocus={() => setIsOpen(true)}
                 />
                 {isLoading && (
-                    <Loader2 className="h-4 w-4 animate-spin text-primary ml-2" />
+                    <Loader2 className="h-4 w-4 animate-spin text-white ml-2" />
                 )}
                 {!isLoading && (
-                    <kbd className="hidden sm:inline-flex h-6 select-none items-center gap-1 rounded-md border bg-muted/50 px-2 font-mono text-[11px] font-semibold text-muted-foreground/70 opacity-100 ml-2">
+                    <kbd className="hidden sm:inline-flex h-6 select-none items-center gap-1 rounded-md border border-white/20 bg-white/15 px-2 font-mono text-[11px] font-semibold text-white/80 opacity-100 ml-2">
                         <span className="text-xs">⌘</span>K
                     </kbd>
                 )}

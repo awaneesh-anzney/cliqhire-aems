@@ -6,13 +6,11 @@ import { cvSubmissionService } from "@/services/cvSubmissionService";
 import { format } from "date-fns";
 import { 
   Send, 
-  CheckCircle2, 
   Clock, 
   AlertTriangle, 
   History,
   Loader2 
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -29,99 +27,101 @@ export function JobCvSubmissionSummary({ jobId }: JobCvSubmissionSummaryProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8 bg-card border border-border rounded-xl mb-6">
-        <Loader2 className="h-6 w-6 animate-spin text-brand" />
+      <div className="flex items-center justify-center p-4 bg-card border border-border/70 rounded-xl mb-3">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
       </div>
     );
   }
 
   if (error || !data?.data) {
-    return null; // Don't show if there's an error or no data
+    return null;
   }
 
   const summary = data.data;
 
-  // Don't render the widget if no CVs have been assigned yet
+  // Don't render if no CVs assigned
   if (summary.totalAssigned === 0) {
     return null;
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden mb-6">
-      <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand/10 rounded-lg">
-            <Send className="w-4 h-4 text-brand" />
+    <div className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden mb-3">
+      {/* Header */}
+      <div className="flex items-center justify-between px-3.5 py-2 border-b border-border/60 bg-muted/30">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-primary/10 rounded-md text-primary">
+            <Send className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h4 className="text-base font-semibold text-foreground">CV Submission SLA Summary</h4>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Internal to Client SLA tracking</p>
+            <h4 className="text-xs font-semibold text-foreground">CV Submission SLA Summary</h4>
+            <p className="text-[10px] text-muted-foreground font-medium">Internal to Client SLA tracking</p>
           </div>
         </div>
       </div>
 
-      <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards */}
+      <div className="p-3 grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         {/* KPI: Total Assigned */}
-        <div className="bg-muted/30 p-4 rounded-xl border border-border">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Assigned</p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-foreground">{summary.totalAssigned}</span>
-            <span className="text-xs text-muted-foreground font-medium">CVs</span>
+        <div className="bg-muted/20 p-2.5 rounded-lg border border-border/50">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total Assigned</p>
+          <div className="mt-1 flex items-baseline gap-1.5">
+            <span className="text-lg sm:text-xl font-bold text-foreground">{summary.totalAssigned}</span>
+            <span className="text-[11px] text-muted-foreground">CVs</span>
           </div>
         </div>
 
         {/* KPI: On-Time Rate */}
-        <div className="bg-muted/30 p-4 rounded-xl border border-border">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">On-Time Rate</p>
-          <div className="mt-2 flex items-baseline gap-2">
+        <div className="bg-muted/20 p-2.5 rounded-lg border border-border/50">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">On-Time Rate</p>
+          <div className="mt-1 flex items-baseline gap-1.5">
             <span className={cn(
-              "text-2xl font-bold",
-              summary.onTimePercentage >= 80 ? "text-emerald-600" : summary.onTimePercentage >= 50 ? "text-amber-600" : "text-red-600"
+              "text-lg sm:text-xl font-bold",
+              summary.onTimePercentage >= 80 ? "text-emerald-600 dark:text-emerald-400" : summary.onTimePercentage >= 50 ? "text-amber-600 dark:text-amber-400" : "text-destructive"
             )}>
               {summary.onTimePercentage}%
             </span>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
+          <p className="text-[10px] text-muted-foreground mt-0.5">
             {summary.onTimeCount} on time, {summary.lateCount} late
           </p>
         </div>
 
         {/* KPI: Currently Pending */}
-        <div className="bg-muted/30 p-4 rounded-xl border border-border">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Currently Pending</p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-amber-600">{summary.currentlyPending}</span>
-            <Clock className="h-4 w-4 text-amber-600/50" />
+        <div className="bg-muted/20 p-2.5 rounded-lg border border-border/50">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Currently Pending</p>
+          <div className="mt-1 flex items-baseline gap-1.5">
+            <span className="text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-400">{summary.currentlyPending}</span>
+            <Clock className="h-3.5 w-3.5 text-amber-600/60 dark:text-amber-400/60" />
           </div>
         </div>
 
         {/* KPI: Currently Overdue */}
-        <div className="bg-muted/30 p-4 rounded-xl border border-border">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Currently Overdue</p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-red-600">{summary.currentlyOverdue}</span>
-            <AlertTriangle className="h-4 w-4 text-red-600/50" />
+        <div className="bg-muted/20 p-2.5 rounded-lg border border-border/50">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Currently Overdue</p>
+          <div className="mt-1 flex items-baseline gap-1.5">
+            <span className="text-lg sm:text-xl font-bold text-destructive">{summary.currentlyOverdue}</span>
+            <AlertTriangle className="h-3.5 w-3.5 text-destructive/60" />
           </div>
         </div>
       </div>
 
       {summary.delayReasons && summary.delayReasons.length > 0 && (
-        <div className="px-5 pb-5">
-          <div className="bg-muted/20 border border-border rounded-xl p-4">
-            <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <History className="h-3.5 w-3.5" /> Recent Delay Reasons
+        <div className="px-3 pb-3">
+          <div className="bg-muted/20 border border-border/50 rounded-lg p-2.5">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
+              <History className="h-3 w-3" /> Recent Delay Reasons
             </h5>
-            <ScrollArea className="h-[120px] pr-4">
-              <div className="space-y-3">
+            <ScrollArea className="h-[90px] pr-2">
+              <div className="space-y-2">
                 {summary.delayReasons.map((reasonItem: any, idx: number) => (
-                  <div key={idx} className="flex flex-col gap-1 text-xs border-b border-border/50 pb-3 last:border-0 last:pb-0">
+                  <div key={idx} className="flex flex-col gap-0.5 text-xs border-b border-border/40 pb-2 last:border-0 last:pb-0">
                     <div className="flex justify-between items-start">
-                      <span className="font-semibold text-foreground">{reasonItem.candidateName}</span>
-                      <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                      <span className="font-medium text-foreground text-[11px]">{reasonItem.candidateName}</span>
+                      <span className="text-[9px] text-muted-foreground">
                         {format(new Date(reasonItem.at), "MMM dd, hh:mm a")}
                       </span>
                     </div>
-                    <p className="text-muted-foreground bg-muted/50 p-2 rounded-lg italic">
+                    <p className="text-muted-foreground bg-muted/40 p-1.5 rounded text-[11px] italic">
                       &quot;{reasonItem.reason}&quot;
                     </p>
                   </div>

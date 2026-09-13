@@ -30,7 +30,6 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
   const [attachments, setAttachments] = useState<BackendAttachment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch attachments from backend for this job
   const fetchAttachments = async () => {
     if (!jobId) return;
     setLoading(true);
@@ -45,7 +44,6 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
     }
   };
 
-  // Bulk delete selected attachments
   const handleBulkDelete = async (ids: string[]) => {
     try {
       await Promise.all(ids.map((id) => deleteJobAttachment(id)));
@@ -57,7 +55,6 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
     }
   };
 
-  // Upload a file for this job
   const handleUpload = async (file: File) => {
     if (!jobId) return;
     try {
@@ -70,7 +67,6 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
     }
   };
 
-  // Delete a file
   const handleDelete = async (attachmentId: string) => {
     try {
       await deleteJobAttachment(attachmentId);
@@ -90,18 +86,17 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
   }, [jobId]);
 
   return (
-    <div className="space-y-4 h-full">
-      
+    <div className="space-y-2.5 h-full">
       {/* Header Action Bar */}
-      <div className="flex items-center justify-between p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-            <Paperclip className="w-4 h-4" />
+      <div className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-border/70 bg-card shadow-xs">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+            <Paperclip className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Job Attachments</h2>
-            <p className="text-[11px] text-muted-foreground">
-              Manage relevant documents, resumes, or client specs
+            <h3 className="text-xs sm:text-sm font-semibold text-foreground">Job Attachments</h3>
+            <p className="text-[10px] text-muted-foreground font-medium">
+              Manage position documents, specifications, or briefs ({attachments.length})
             </p>
           </div>
         </div>
@@ -110,15 +105,15 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
           <Button
             onClick={() => setShowUploadBox(true)}
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-medium transition-all text-xs"
+            className="h-7 px-2.5 text-xs font-medium"
             disabled={showUploadBox}
           >
-            <Plus className="w-4 h-4 mr-1.5" /> Upload File
+            <Plus className="w-3.5 h-3.5 mr-1" /> Upload File
           </Button>
         )}
       </div>
 
-      {/* Upload Modal / Component */}
+      {/* Upload Modal */}
       <UploadAttachment
         show={showUploadBox}
         setShow={setShowUploadBox}
@@ -126,39 +121,36 @@ export function AttachmentsContent({ jobId, canModify }: AttachmentsContentProps
         attachments={attachments}
       />
 
-      {/* Dynamic Content Views */}
+      {/* Content Area */}
       {loading ? (
-        /* Modern Clean Centered Loader */
-        <div className="flex flex-col items-center justify-center p-12 bg-card/40 rounded-2xl border border-border/60 min-h-[260px]">
-          <Loader2 className="h-6 w-6 text-emerald-600 animate-spin mb-2" />
+        <div className="flex flex-col items-center justify-center p-8 bg-card rounded-xl border border-border/70 min-h-[180px]">
+          <Loader2 className="h-5 w-5 text-primary animate-spin mb-1.5" />
           <p className="text-xs font-medium text-muted-foreground">
             Loading attachments...
           </p>
         </div>
       ) : attachments.length === 0 ? (
-        /* Modern Empty State Card */
-        <div className="flex flex-col items-center justify-center text-center bg-card/40 rounded-2xl border border-dashed border-border/80 p-10 min-h-[260px]">
-          <div className="w-12 h-12 mb-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center">
-            <Paperclip className="w-6 h-6" />
+        <div className="flex flex-col items-center justify-center text-center bg-muted/15 rounded-xl border border-dashed border-border/70 p-6 min-h-[180px]">
+          <div className="w-10 h-10 mb-2 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <Paperclip className="w-5 h-5" />
           </div>
-          <h3 className="text-sm font-bold text-foreground">No attachments uploaded</h3>
-          <p className="text-xs text-muted-foreground max-w-xs mt-1 mb-4">
-            Upload candidate files, job specs, or compliance documents to share with your team.
+          <h4 className="text-xs font-semibold text-foreground">No attachments uploaded</h4>
+          <p className="text-[11px] text-muted-foreground max-w-xs mt-0.5 mb-3">
+            Upload candidate dossiers, job briefs, or requirements to share with your team.
           </p>
           {canModify && (
             <Button
               onClick={() => setShowUploadBox(true)}
               variant="outline"
               size="sm"
-              className="border-emerald-600/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs"
+              className="h-7 px-2.5 text-xs border-border text-foreground font-medium"
             >
-              <Plus className="h-3.5 w-3.5 mr-1" /> Add Attachment
+              <Plus className="h-3.5 w-3.5 mr-1" /> Upload First File
             </Button>
           )}
         </div>
       ) : (
-        /* Attachments List Container */
-        <div className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-sm p-4 shadow-sm">
+        <div className="rounded-xl border border-border/70 bg-card p-3 shadow-xs">
           <AttachmentList
             attachments={attachments}
             onDelete={handleDelete}

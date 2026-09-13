@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getJobs, Job, JobsPage, updateJobStage, deleteJobById, createJob, updateJobById } from "@/services/jobService";
+import { getJobs, Job, JobsPage, updateJobStage, deleteJobById, createJob, updateJobById, getJobStageHistory } from "@/services/jobService";
 import { toast } from "sonner";
 import { JobStage } from "@/types/job";
 
@@ -95,5 +95,13 @@ export function useUpdateJob() {
     onError: () => {
       toast.error("Failed to update job");
     },
+  });
+}
+
+export function useJobStageHistory(jobId: string) {
+  return useQuery({
+    queryKey: ["jobStageHistory", jobId],
+    queryFn: () => getJobStageHistory(jobId),
+    enabled: !!jobId,
   });
 }

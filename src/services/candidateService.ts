@@ -1,6 +1,6 @@
 // Types for candidate data
 import { api } from "@/lib/axios-config";
-import { formatPhoneNumber } from "@/lib/countryCodes";
+// import { formatPhoneNumber } from "@/lib/countryCodes";
 import axios, { AxiosError } from "axios";
 
 export interface CandidateDomain {
@@ -113,6 +113,57 @@ export interface DuplicateCheckResponse {
     name: string;
     profileId: string;
   };
+}
+
+export interface PipelineCandidateRecord {
+  pipelineId: string;
+  pipelineStatus: string;
+  job: {
+    _id: string;
+    jobId: string;
+    jobTitle: string;
+    department: string;
+    location: string;
+    jobType: string;
+    stage: string;
+  };
+  client: {
+    _id: string;
+    name: string;
+    industry: string;
+  };
+  currentStage: string;
+  currentStatus: string;
+  priority: string;
+  isHiredHere: boolean;
+  addedAt: string;
+  lastUpdated: string;
+}
+
+export interface CandidateHireStatus {
+  status: string;
+  isHired: boolean;
+  hiredIn: {
+    pipelineId: string;
+    jobId: string;
+    hiredAt: string;
+  } | null;
+}
+
+export interface GetCandidatePipelinesResponse {
+  status: string;
+  message: string;
+  data: PipelineCandidateRecord[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    limit: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  appliedFilters: any;
+  candidateHireStatus: CandidateHireStatus;
 }
 
 class CandidateService {
@@ -412,6 +463,30 @@ class CandidateService {
       return response.data;
     } catch (error) {
       console.error(`Error checking duplicate for ${field}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch all pipelines a candidate is part of
+   */
+  async getCandidatePipelines(
+    candidateId: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      pipelineStatus?: string;
+      stage?: string;
+      clientId?: string;
+      sortBy?: string;
+      sortOrder?: string;
+    }
+  ): Promise<GetCandidatePipelinesResponse> {
+    try {
+      const response = await api.get(`/api/candidates/${candidateId}/pipelines`, { params });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching pipelines for candidate ${candidateId}:`, error);
       throw error;
     }
   }

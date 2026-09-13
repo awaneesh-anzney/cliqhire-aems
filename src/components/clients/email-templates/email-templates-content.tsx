@@ -227,25 +227,26 @@ export function EmailTemplatesContent({
   }
 
   return (
-    <div className="bg-muted/50 rounded-2xl p-6 flex flex-col h-full">
-      <div className="mb-6 flex justify-between items-center bg-card p-4 rounded-xl border border-border shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand/10 rounded-lg">
-            <Mail className="w-4 h-4 text-brand" />
+    <div className="space-y-4">
+      {/* Header action bar */}
+      <div className="flex items-center justify-between p-4 rounded-xl border border-border/70 bg-card shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <Mail className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-foreground">Email Templates</h2>
+            <h3 className="text-sm font-bold text-foreground">Email Templates</h3>
             <p className="text-xs text-muted-foreground">
-              Manage email templates for {clientData?.name || "this client"}
+              Pre-configured templates for automated and direct communication
             </p>
           </div>
         </div>
-        <Button onClick={() => canModify && setIsAddDialogOpen(true)} disabled={!canModify} className="hover:bg-brand/90 transition-colors bg-brand text-white">
-          <Plus className="h-4 w-4 mr-2" /> Create Template
+        <Button onClick={() => canModify && setIsAddDialogOpen(true)} disabled={!canModify} className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+          <Plus className="h-3.5 w-3.5 mr-1" /> Create Template
         </Button>
       </div>
 
-      <div className="bg-card rounded-xl border border-border shadow-sm transition-all p-5 flex-1">
+      <div className="bg-card rounded-xl border border-border/70 shadow-2xs p-5 flex-1">
 
         {templates.length > 0 ? (
           <TemplatesList

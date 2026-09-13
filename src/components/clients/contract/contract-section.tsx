@@ -47,6 +47,7 @@ import BusinessForm from "@/components/contract-forms/business-form";
 import ConsultingForm from "@/components/contract-forms/consulting-form";
 import OutsourcingForm from "@/components/contract-forms/outsourcing-form";
 import { useClientContracts } from "@/hooks/useClientContracts";
+import { useToggleContractSource } from "@/hooks/useClient";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface ContractSectionProps {
@@ -257,11 +258,16 @@ export function ContractSection({
     deleteContractMutation,
     renewContractMutation,
   } = useClientContracts(clientId);
+  const toggleContractSourceMutation = useToggleContractSource();
   const queryClient = useQueryClient();
   const router = useRouter();
 
   const isSubmitting = updateContractMutation.isPending;
   const isDeleting = deleteContractMutation.isPending;
+  const isSubsidiary = !!clientData?.parentClientId;
+  const contractSource = clientData?.contractSource || "own";
+  const sharedFromParent = contractsQuery.data?.sharedFromParent || false;
+  const effectiveCanModify = canModify && contractSource !== "parent";
 
   // Use contracts from the new API if available, fallback to clientData
   const contractsObj =
@@ -390,7 +396,7 @@ export function ContractSection({
   };
 
   const handleEditContract = (businessType: string) => {
-    if (!canModify) return;
+    if (!effectiveCanModify) return;
     const contractKey =
       CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
     const contractData = contractsObj[contractKey];
@@ -400,7 +406,7 @@ export function ContractSection({
   };
 
   const handleFormSubmit = async (updatedFormData: any) => {
-    if (!canModify) return;
+    if (!effectiveCanModify) return;
     if (!editDialogOpen || !clientId) return;
 
     try {
@@ -417,7 +423,7 @@ export function ContractSection({
   };
 
   const handleDeleteContract = async () => {
-    if (!canModify) return;
+    if (!effectiveCanModify) return;
     if (!deleteDialogOpen || !clientId) return;
 
     try {
@@ -431,7 +437,7 @@ export function ContractSection({
   };
 
   const handleRenewContract = async () => {
-    if (!canModify || !renewDialogOpen || !clientId) return;
+    if (!effectiveCanModify || !renewDialogOpen || !clientId) return;
 
     try {
       const contractKey =
@@ -448,7 +454,7 @@ export function ContractSection({
   };
 
   const handleAddContract = () => {
-    if (!canModify) return;
+    if (!effectiveCanModify) return;
     router.push(`/clients/${clientId}/contract/new`);
   };
 
@@ -553,7 +559,7 @@ export function ContractSection({
         </p>
         <Button
           onClick={handleAddContract}
-          disabled={!canModify}
+          disabled={!effectiveCanModify}
           className="mt-6 shadow-sm gap-2 rounded-xl px-5 h-10 bg-primary hover:bg-primary/90 text-white font-medium"
         >
           <Plus className="size-4" />
@@ -1251,6 +1257,39 @@ export function ContractSection({
 
   return (
     <div className="space-y-2">
+      {isSubsidiary && (
+        <div className="p-4 rounded-2xl bg-muted/50 border border-border flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Building2 className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-foreground">Subsidiary Client</h4>
+              <p className="text-xs text-muted-foreground">
+                This client is a subsidiary of <span className="font-semibold text-foreground">{clientData.parentCompany?.name || "its parent company"}</span>.
+                {contractSource === 'parent' 
+                  ? " It currently shares the parent's contract." 
+                  : " It uses its own standalone contract."}
+              </p>
+            </div>
+          </div>
+          {canModify && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={toggleContractSourceMutation.isPending}
+              onClick={() => {
+                const newSource = contractSource === 'parent' ? 'own' : 'parent';
+                toggleContractSourceMutation.mutate({ clientId, contractSource: newSource });
+              }}
+              className="text-xs font-semibold rounded-xl h-9"
+            >
+              {toggleContractSourceMutation.isPending ? "Updating..." : contractSource === 'parent' ? "Switch to Own Contract" : "Share Parent Contract"}
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Portfolio Overview & Actions Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {/* KPI Card 1: Active Contracts */}
@@ -1323,7 +1362,7 @@ export function ContractSection({
           </div>
           <Button
             onClick={handleAddContract}
-            disabled={!canModify}
+            disabled={!effectiveCanModify}
             className="shadow-xs gap-2 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium text-xs px-4 h-9"
           >
             <Plus className="size-4" />
@@ -1420,7 +1459,7 @@ export function ContractSection({
                       </Button>
                       <Button
                         onClick={() => handleFormSubmit(formData)}
-                        disabled={isSubmitting || !canModify}
+                        disabled={isSubmitting || !effectiveCanModify}
                         className="rounded-xl h-9 text-xs bg-primary hover:bg-primary/90 text-white font-medium"
                       >
                         {isSubmitting ? "Saving Changes..." : "Save Contract"}
@@ -1537,7 +1576,7 @@ export function ContractSection({
                           variant="outline"
                           size="sm"
                           onClick={() => handleEditContract(businessType)}
-                          disabled={!canModify}
+                          disabled={!effectiveCanModify}
                           className="text-xs h-8 rounded-xl gap-1 border-border/80"
                         >
                           <Edit className="size-3.5" />
@@ -1548,7 +1587,7 @@ export function ContractSection({
                           variant="outline"
                           size="sm"
                           onClick={() => setDeleteDialogOpen(businessType)}
-                          disabled={!canModify}
+                          disabled={!effectiveCanModify}
                           className="text-xs h-8 rounded-xl gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
                         >
                           <Trash2 className="size-3.5" />
@@ -1576,7 +1615,7 @@ export function ContractSection({
         cancelText="Cancel"
         onConfirm={handleDeleteContract}
         loading={isDeleting}
-        disabled={!canModify}
+        disabled={!effectiveCanModify}
         confirmVariant="destructive"
       />
 

@@ -123,7 +123,7 @@ export default function CreateCandidateForm({
   const [form, setForm] = useState({
     name: tempCandidateData?.name || "",
     phone: tempCandidateData?.phone || "",
-    countryCode: tempCandidateData?.countryCode || "SA",
+    countryCode: tempCandidateData?.countryCode || "+966",
     email: tempCandidateData?.email || "",
     location: tempCandidateData?.location || "",
     description: tempCandidateData?.description || "",

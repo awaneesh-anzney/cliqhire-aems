@@ -45,7 +45,7 @@ const CreateCandidateSchema = z.object({
   profileLink: z.string().min(1, "Profile Link is required"),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
-  countryCode: z.string().default("SA"),
+  countryCode: z.string().default("+966"),
 });
 
 export type CreateCandidateValues = z.infer<typeof CreateCandidateSchema>;
@@ -80,7 +80,7 @@ export function CreateCandidateDialog({
       profileLink: tempCandidateData?.profileLink || "",
       email: tempCandidateData?.email || "",
       phone: tempCandidateData?.phone || "",
-      countryCode: tempCandidateData?.countryCode || "SA",
+      countryCode: tempCandidateData?.countryCode || "+966",
     },
   });
 
@@ -91,7 +91,7 @@ export function CreateCandidateDialog({
         profileLink: tempCandidateData.profileLink || "",
         email: tempCandidateData.email || "",
         phone: tempCandidateData.phone || "",
-        countryCode: tempCandidateData.countryCode || "SA",
+        countryCode: tempCandidateData.countryCode || "+966",
       });
     }
   }, [tempCandidateData, form]);

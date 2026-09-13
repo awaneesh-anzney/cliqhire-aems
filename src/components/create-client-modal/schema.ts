@@ -26,6 +26,7 @@ export const clientGeneralInfoSchema = z.object({
   clientPriority: z.string().optional(),
   clientSegment: z.string().optional(),
   clientSource: z.string().optional(),
+  clientSourceDetails: z.any().optional(),
   industry: z.string().optional(),
 });
 

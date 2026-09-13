@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { COUNTRIES, validatePhone, getFullPhone, getCountryByCode } from "@/lib/countryCodes";
+import { COUNTRIES, validatePhone, getFullPhone, getCountryByCode, getCountryByDialCode } from "@/lib/countryCodes";
 import { Country, PhoneRawChange } from "@/types/countryCodes";
 import { cn } from "@/lib/utils";
+import * as Flags from "country-flag-icons/react/3x2";
 
 /**
  * PhoneInput — Reusable phone number field for Next.js
@@ -35,6 +36,16 @@ interface PhoneInputProps {
   onBlur?: () => void;
 }
 
+/**
+ * Renders a country flag as an SVG using country-flag-icons.
+ * Falls back to nothing (no broken emoji/text) if the code isn't found.
+ */
+function FlagIcon({ code, className }: { code: string; className?: string }) {
+  const Flag = Flags[code as keyof typeof Flags];
+  if (!Flag) return <span className={cn("inline-block bg-muted rounded-sm", className)} />;
+  return <Flag title={code} className={cn("rounded-sm object-cover", className)} />;
+}
+
 export default function PhoneInput({
   value,
   onChange,
@@ -43,7 +54,7 @@ export default function PhoneInput({
   phoneNumber,
   onPhoneNumberChange,
   onRawChange,
-  defaultCountry = "SA",
+  defaultCountry = "+966",
   label,
   required = false,
   disabled = false,
@@ -54,9 +65,9 @@ export default function PhoneInput({
 }: PhoneInputProps) {
   // ── State ────────────────────────────────────────────────────────────────
   const [selectedCountry, setSelectedCountry] = useState<Country>(
-    () => getCountryByCode(countryCode || defaultCountry) || getCountryByCode("SA")!
+    () => getCountryByDialCode(countryCode || "") || getCountryByCode(countryCode || defaultCountry) || getCountryByCode("SA")!
   );
-  
+
   // Internal state used if specific props aren't provided
   const [internalLocalNumber, setInternalLocalNumber] = useState("");
   const [touched, setTouched] = useState(false);
@@ -85,8 +96,6 @@ export default function PhoneInput({
         setSelectedCountry(match);
         const local = value.slice(match.dialCode.length);
         setInternalLocalNumber(local);
-        // If external handlers for separate fields exist, sync them too? 
-        // Usually, if value is provided, we use the value mode.
       }
     }
   }, [value]);
@@ -94,7 +103,7 @@ export default function PhoneInput({
   // Sync from controlled `countryCode`
   useEffect(() => {
     if (countryCode) {
-      const match = getCountryByCode(countryCode);
+      const match = getCountryByDialCode(countryCode) || getCountryByCode(countryCode);
       if (match && match.code !== selectedCountry.code) {
         setSelectedCountry(match);
       }
@@ -130,9 +139,9 @@ export default function PhoneInput({
 
     // Call external handlers
     onChange?.(full);
-    onCountryCodeChange?.(country.code);
+    onCountryCodeChange?.(country.dialCode);
     onPhoneNumberChange?.(local);
-    
+
     onRawChange?.({
       countryCode: country.code,
       localNumber: local,
@@ -147,9 +156,7 @@ export default function PhoneInput({
     setSelectedCountry(country);
     setDropdownOpen(false);
     setSearch("");
-    
-    // Reset local number when country changes? 
-    // Usually better to keep it and re-validate.
+
     updateData(country, effectiveLocalNumber, touched);
   };
 
@@ -187,8 +194,8 @@ export default function PhoneInput({
 
       <div
         className={cn(
-          "flex items-center border rounded-xl overflow-visible bg-card transition-all h-11",
-          displayError ? "border-red-400 focus-within:border-red-500 shadow-sm shadow-red-50" : "border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 shadow-sm",
+          "flex items-center border rounded-xl overflow-visible bg-background transition-all h-10",
+          displayError ? "border-rose-400 focus-within:border-rose-500 shadow-xs shadow-rose-50" : "border-border/80 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 shadow-xs",
           disabled && "opacity-50 pointer-events-none bg-muted"
         )}
       >
@@ -200,7 +207,7 @@ export default function PhoneInput({
             disabled={disabled}
             className="flex items-center gap-2 px-3 h-full border-r border-border hover:bg-muted transition-colors min-w-[95px]"
           >
-            <span className="text-lg leading-none">{selectedCountry.flag}</span>
+            <FlagIcon code={selectedCountry.code} className="w-5 h-3.5 shrink-0" />
             <span className="text-sm text-foreground font-bold">{selectedCountry.dialCode}</span>
             <svg
               className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform", dropdownOpen && "rotate-180")}
@@ -240,7 +247,7 @@ export default function PhoneInput({
                         country.code === selectedCountry.code ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted text-foreground"
                       )}
                     >
-                      <span className="text-lg">{country.flag}</span>
+                      <FlagIcon code={country.code} className="w-5 h-3.5 shrink-0" />
                       <span className="flex-1 text-sm font-bold truncate">{country.name}</span>
                       <span className="text-muted-foreground text-[10px] font-black uppercase">{country.dialCode}</span>
                     </li>

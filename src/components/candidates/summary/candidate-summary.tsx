@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { formatPhoneNumber } from "@/lib/countryCodes";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, ChevronsUpDown, User, Mail, Phone, Briefcase, GraduationCap, Globe, Shield, Wallet, Star } from "lucide-react";
+import { Pencil, User, Briefcase, GraduationCap, Globe, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EditFieldModal } from "./edit-field-modal";
 import {
@@ -13,20 +12,18 @@ import {
   EducationDialog,
 } from "./personal-info-edit-dialog";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
 import SalaryRange from "./salary-range";
 import EditResumeDialog from "@/components/candidates/EditResumeDialog";
 import UserSelectDialog from "@/components/shared/UserSelectDialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CandidateDomainDialog } from "./CandidateDomainDialog";
-// ReferredByList import removed as we're using UserSelectDialog instead
 
 const detailsFields = [
   { key: "name", label: "Candidate Name" },
   { key: "location", label: "Location" },
   { key: "experience", label: "Experience" },
   { key: "referredBy", label: "CV Referred By" },
-  { key: "totalRelevantExperience", label: "Total Relevant Years of Experience" },
+  { key: "totalRelevantExperience", label: "Total Relevant Experience" },
   { key: "noticePeriod", label: "Notice Period" },
   {
     key: "domains",
@@ -36,7 +33,6 @@ const detailsFields = [
       return val.map((d: any) => d.name).join(", ");
     }
   },
-
   {
     key: "resume",
     label: "Resume",
@@ -47,7 +43,7 @@ const detailsFields = [
             ? val
             : `${process.env.NEXT_PUBLIC_API_URL || ''}${val.startsWith('/') ? '' : '/'}${val}`;
           return (
-            <a href={href} target="_blank" rel="noopener noreferrer" className="underline" onClick={(e) => e.stopPropagation()}>
+            <a href={href} target="_blank" rel="noopener noreferrer" className="underline text-primary" onClick={(e) => e.stopPropagation()}>
               View Resume
             </a>
           );
@@ -64,14 +60,14 @@ const detailsFields = [
       if (!val) return undefined;
       try {
         const date = new Date(val);
-        if (isNaN(date.getTime())) return val; // Return original value if invalid date
+        if (isNaN(date.getTime())) return val;
         return date.toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "short",
           year: "numeric",
         });
-      } catch (error) {
-        return val; // Return original value if parsing fails
+      } catch {
+        return val;
       }
     },
   },
@@ -80,31 +76,30 @@ const detailsFields = [
   { key: "nationality", label: "Nationality" },
   { key: "continent", label: "Continent" },
   { key: "primaryLanguage", label: "Primary Language" },
-  { key: "willingToRelocate", label: "Are you willing to relocate ?" },
-  { key: "iqama", label: "Iqama is transferable ?" },
+  { key: "willingToRelocate", label: "Willing to relocate?" },
+  { key: "iqama", label: "Iqama transferable?" },
 ];
 
 const academicFields = [
   { key: "universityName", label: "University Name" },
-  { key: "educationDegree", label: "Education Degree/Certificate", isTextarea: true },
-  { key: "certification", label: "Professional Certifications", isArray: true },
+  { key: "educationDegree", label: "Degree / Certificate", isTextarea: true },
+  { key: "certification", label: "Certifications", isArray: true },
 ];
 
-// Split details fields into default visible and collapsible sections
-const defaultDetailsFields = detailsFields.slice(0, 8); // Up to "Resume"
-const collapsibleDetailsFields = detailsFields.slice(8); // From "status" onwards
+const defaultDetailsFields = detailsFields.slice(0, 8);
+const collapsibleDetailsFields = detailsFields.slice(8);
 
 const contactFields = [
   { 
     key: "phone", 
     label: "Phone Number",
-    render: (val: string | undefined, record: any) => formatPhoneNumber(val, record?.countryCode) || undefined
+    render: (val: string | undefined, record: any) => (record?.countryCode && val) ? `${record.countryCode}-${val}` : (val || undefined)
   },
   { key: "email", label: "Email" },
   { 
     key: "otherPhone", 
-    label: "Other Phone Number",
-    render: (val: string | undefined, record: any) => formatPhoneNumber(val, record?.otherCountryCode) || undefined
+    label: "Other Phone",
+    render: (val: string | undefined, record: any) => (record?.otherCountryCode && val) ? `${record.otherCountryCode}-${val}` : (val || undefined)
   },
   {
     key: "linkedin",
@@ -118,8 +113,7 @@ const contactFields = [
             href={val}
             target="_blank"
             rel="noopener noreferrer"
-            className="cursor-pointer hover:underline"
-            style={{ textDecoration: "none" }}
+            className="cursor-pointer hover:underline text-primary"
             onClick={(e) => e.stopPropagation()}
           >
             {val}
@@ -135,12 +129,12 @@ const previousCompanyFields = [
   { key: "previousCompanyName", label: "Current Company Name" },
   { key: "currentJobTitle", label: "Current Job Title" },
   { key: "reportingTo", label: "Reporting To" },
-  { key: "totalStaffReporting", label: "Total Number of Staff Reporting to You" },
+  { key: "totalStaffReporting", label: "Staff Reporting" },
 ];
 
 const skillFields = [
-  { key: "softSkill", label: "Soft Skill", isArray: true, isTextarea: true },
-  { key: "technicalSkill", label: "Technical Skill", isArray: true, isTextarea: true },
+  { key: "softSkill", label: "Soft Skills", isArray: true, isTextarea: true },
+  { key: "technicalSkill", label: "Technical Skills", isArray: true, isTextarea: true },
 ];
 
 interface CandidateSummaryProps {
@@ -164,6 +158,7 @@ const CandidateSummary = ({
   useEffect(() => {
     setLocalCandidate(candidate);
   }, [candidate]);
+
   const [showDateOfBirthDialog, setShowDateOfBirthDialog] = useState(false);
   const [showMaritalStatusDialog, setShowMaritalStatusDialog] = useState(false);
   const [showGenderDialog, setShowGenderDialog] = useState(false);
@@ -176,8 +171,6 @@ const CandidateSummary = ({
 
   const handleReferredBySelect = useCallback((user: any) => {
     if (!user) return;
-
-    // Set the pending user and show confirmation dialog
     setPendingUser(user);
     setPendingReferrerName(user.name || user.email || '');
     setShowConfirmReferrer(true);
@@ -223,7 +216,6 @@ const CandidateSummary = ({
       }
       updatedCandidate = { ...updatedCandidate, [fieldKey]: val };
     } else {
-      // LinkedIn validation
       if (fieldKey === "linkedin" && newValue && typeof newValue === "string" && newValue.trim()) {
         const trimmedValue = newValue.trim();
         if (!trimmedValue.startsWith("http://") && !trimmedValue.startsWith("https://")) {
@@ -236,7 +228,6 @@ const CandidateSummary = ({
     setLocalCandidate(updatedCandidate);
     setEditField(null);
 
-    // Notify parent component of the update
     if (onCandidateUpdate) {
       onCandidateUpdate(updatedCandidate, fieldKey);
     }
@@ -307,34 +298,34 @@ const CandidateSummary = ({
     };
 
     return (
-      <div
+      <article
         onClick={canModify ? handleEditClick : undefined}
         className={cn(
-          "group relative flex items-start gap-4 p-4 rounded-xl border transition-all duration-300",
+          "group relative flex items-start gap-3 p-2.5 rounded-lg border transition-all duration-200",
           hasData
-            ? "bg-card border-border/70 hover:border-primary/45 hover:shadow-sm"
-            : "bg-muted/10 border-dashed border-border/50 opacity-60 hover:opacity-100",
+            ? "bg-card/70 border-border/60 hover:border-border/90"
+            : "bg-muted/10 border-dashed border-border/50 opacity-70 hover:opacity-100",
           canModify ? "cursor-pointer" : ""
         )}
       >
-        <div className={cn(
-          "p-2.5 rounded-lg shrink-0 border",
-          hasData ? "bg-primary/5 border-primary/10 text-primary" : "bg-muted border-border text-muted-foreground"
+        <span className={cn(
+          "p-2 rounded-md shrink-0 border mt-0.5 inline-flex items-center justify-center",
+          hasData ? "bg-primary/5 border-primary/15 text-primary" : "bg-muted border-border text-muted-foreground"
         )}>
-          <GraduationCap className="w-5 h-5" />
-        </div>
+          <GraduationCap className="w-4 h-4" />
+        </span>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1 mb-0.5">
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
               {label}
             </span>
             {hasData && data.status && (
               <span className={cn(
-                "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border leading-none",
+                "inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold border leading-none",
                 data.status === "Completed"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
-                  : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                  : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
               )}>
                 {data.status}
               </span>
@@ -342,44 +333,41 @@ const CandidateSummary = ({
           </div>
 
           {hasData ? (
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold text-foreground truncate">
+            <div className="space-y-0.5">
+              <h4 className="text-xs font-semibold text-foreground truncate">
                 {data.degreeName || "Unspecified Degree"}
               </h4>
-              <p className="text-xs text-muted-foreground/90 font-semibold truncate">
+              <p className="text-[11px] text-muted-foreground truncate">
                 {data.universityName || "Unspecified University"}
               </p>
               {data.passingYear && (
-                <p className="text-[10px] font-bold text-primary bg-primary/5 border border-primary/10 rounded px-1.5 py-0.5 inline-block mt-1">
-                  Passing Year: {data.passingYear}
-                </p>
+                <span className="text-[9px] font-medium text-primary bg-primary/5 border border-primary/15 rounded px-1 py-0.2 inline-block">
+                  Year: {data.passingYear}
+                </span>
               )}
             </div>
           ) : (
-            <div className="py-1">
-              <span className="text-xs font-bold text-muted-foreground/50 italic">Not Provided</span>
-              <p className="text-[10px] font-medium text-muted-foreground/40 mt-0.5">Click to add {label.toLowerCase()} details</p>
-            </div>
+            <span className="text-xs text-muted-foreground/60 italic font-medium block py-0.5">
+              Not Provided
+            </span>
           )}
         </div>
 
         {canModify && (
-          <div className="flex items-center ml-4 shrink-0" onClick={(e) => e.stopPropagation()}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
-              onClick={handleEditClick}
-            >
-              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-muted ml-2 shrink-0"
+            onClick={handleEditClick}
+          >
+            <Pencil className="h-3 w-3 text-muted-foreground" />
+          </Button>
         )}
-      </div>
+      </article>
     );
   };
 
-  const renderField = (field: any, fieldArray: any[]) => {
+  const renderField = (field: any) => {
     const rawValue = field.key.includes('.') ? getNestedValue(localCandidate, field.key) : localCandidate?.[field.key];
     const value = field.render ? field.render(rawValue, localCandidate) : rawValue;
     const hasValue =
@@ -389,7 +377,6 @@ const CandidateSummary = ({
       (!Array.isArray(rawValue) || rawValue.length > 0) &&
       (typeof rawValue !== "object" || Object.values(rawValue).some(v => v !== undefined && v !== null && v !== ""));
 
-    // Common click handler for specific fields
     const handleEditClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       if (!canModify) return;
@@ -413,67 +400,66 @@ const CandidateSummary = ({
       <div 
         key={field.key} 
         className={cn(
-          "group relative flex items-center justify-between p-3.5 rounded-xl bg-muted/20 border border-border/50 transition-all duration-300",
+          "group relative flex items-center justify-between p-2 rounded-md bg-card/70 border border-border/40 transition-colors",
           field.isTextarea ? "sm:col-span-2" : "",
-          canModify ? "cursor-pointer hover:bg-card hover:border-brand/35 hover:shadow-sm" : ""
+          canModify ? "cursor-pointer hover:border-border/80" : ""
         )}
         onClick={canModify ? handleEditClick : undefined}
       >
         <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-[10px] font-black text-muted-foreground/85 uppercase tracking-wider mb-1.5 leading-none">
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 leading-none">
             {field.label}
           </span>
-          <div className="flex flex-col">
-            {field.key === 'domains' && hasValue ? (
-              <div className="flex flex-wrap gap-1 mt-1 max-w-full">
-                {(Array.isArray(rawValue) ? rawValue : []).map((d: any) => (
-                  <span key={d._id || d.name || d} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">
-                    {d.name || d}
-                  </span>
-                ))}
-              </div>
-            ) : field.key === 'certification' && hasValue ? (
-              <div className="flex flex-wrap gap-1 mt-1 max-w-full">
-                {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map(s => s.trim()).filter(Boolean) : [])).map((cert: string, idx: number) => (
-                  <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
-                    {cert}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className={cn(
-                "text-xs sm:text-sm font-bold tracking-tight truncate",
-                hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
-              )}>
-                {hasValue 
-                  ? (field.key === 'referredBy' && typeof value === 'object' 
-                      ? value.name || value.email 
-                      : Array.isArray(value) 
-                        ? value.join(", ") 
-                        : value) 
-                  : "Not Provided"}
-              </span>
-            )}
-            {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
-              <span className="text-[10px] text-muted-foreground font-semibold truncate mt-0.5">
-                {localCandidate.referredBy.email}
-              </span>
-            )}
-          </div>
+          
+          {field.key === 'domains' && hasValue ? (
+            <div className="flex flex-wrap gap-1 mt-0.5 max-w-full">
+              {(Array.isArray(rawValue) ? rawValue : []).map((d: any) => (
+                <span key={d._id || d.name || d} className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
+                  {d.name || d}
+                </span>
+              ))}
+            </div>
+          ) : field.key === 'certification' && hasValue ? (
+            <div className="flex flex-wrap gap-1 mt-0.5 max-w-full">
+              {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map((s: string) => s.trim()).filter(Boolean) : [])).map((cert: string, idx: number) => (
+                <span key={idx} className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                  {cert}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <span className={cn(
+              "text-xs font-semibold tracking-tight truncate",
+              hasValue ? "text-foreground" : "text-muted-foreground/50 italic font-medium"
+            )}>
+              {hasValue 
+                ? (field.key === 'referredBy' && typeof value === 'object' 
+                    ? value.name || value.email 
+                    : Array.isArray(value) 
+                      ? value.join(", ") 
+                      : value) 
+                : "Not Provided"}
+            </span>
+          )}
+
+          {field.key === 'referredBy' && hasValue && localCandidate.referredBy?.email && (
+            <span className="text-[10px] text-muted-foreground font-medium truncate">
+              {localCandidate.referredBy.email}
+            </span>
+          )}
         </div>
 
         {canModify && (
-          <div className="flex items-center ml-4 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center ml-2 shrink-0" onClick={(e) => e.stopPropagation()}>
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
+              className="h-6 w-6 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
               onClick={handleEditClick}
             >
-              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+              <Pencil className="h-3 w-3 text-muted-foreground" />
             </Button>
             
-            {/* Modal injections for fields that don't use dedicated dialogs */}
             {field.key !== "referredBy" && field.key !== "domains" && !field.isUpload && !field.key.startsWith("education.") && !["dateOfBirth", "maritalStatus", "gender", "status", "willingToRelocate"].includes(field.key) && (
               <EditFieldModal
                 open={editField === field.key}
@@ -497,6 +483,7 @@ const CandidateSummary = ({
                 isArray={field.isArray}
                 countryCode={field.key === "phone" ? localCandidate?.countryCode : localCandidate?.otherCountryCode}
                 options={field.key === "noticePeriod" ? [
+                  { value: "Immediate", label: "Immediate" },
                   { value: "15 Days", label: "15 Days" },
                   { value: "1 Month", label: "1 Month" },
                   { value: "2 Months", label: "2 Months" },
@@ -531,48 +518,48 @@ const CandidateSummary = ({
       rawValue !== null &&
       (Array.isArray(rawValue) ? rawValue.length > 0 : rawValue !== "");
 
-    // Display value: if array, join with commas; if string, use as is
-    const displayValue = Array.isArray(rawValue) ? rawValue.join(", ") : rawValue;
     return (
       <div 
         key={field.key} 
         className={cn(
-          "group flex flex-col p-4.5 rounded-xl bg-muted/20 border border-border/50 transition-all duration-300",
-          canModify ? "cursor-pointer hover:bg-card hover:border-brand/35 hover:shadow-sm" : ""
+          "group flex flex-col p-2 rounded-lg bg-card/70 border border-border/40 transition-colors",
+          canModify ? "cursor-pointer hover:border-border/80" : ""
         )}
         onClick={canModify ? () => setEditField(field.key) : undefined}
       >
-        <div className="flex items-center justify-between mb-3.5" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center gap-2">
-             <div className="h-7 w-7 rounded-lg bg-card flex items-center justify-center text-brand border border-border/60 shadow-sm">
-                <Star className="h-3.5 w-3.5" />
-             </div>
-             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{field.label}</span>
-          </div>
+        <div className="flex items-center justify-between mb-1" onClick={(e) => e.stopPropagation()}>
+          <span className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <span className="h-4 w-4 rounded bg-primary/10 inline-flex items-center justify-center text-primary">
+              <Star className="h-2.5 w-2.5" />
+            </span>
+            {field.label}
+          </span>
           {canModify && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
+              className="h-5 w-5 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-muted"
               onClick={() => setEditField(field.key)}
             >
-              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+              <Pencil className="h-2.5 w-2.5 text-muted-foreground" />
             </Button>
           )}
         </div>
         <div className={cn(
-          "text-xs sm:text-sm font-bold leading-relaxed",
-          hasValue ? "text-foreground" : "text-muted-foreground/40 italic font-medium"
+          "text-xs font-semibold leading-relaxed",
+          hasValue ? "text-foreground" : "text-muted-foreground/50 italic font-medium"
         )}>
           {hasValue ? (
-            <div className="flex flex-wrap gap-1.5">
-              {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map(s => s.trim()).filter(Boolean) : [])).map((skill: string, idx: number) => (
-                <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-muted text-muted-foreground border border-border/50">
+            <div className="flex flex-wrap gap-1">
+              {(Array.isArray(rawValue) ? rawValue : (typeof rawValue === 'string' ? rawValue.split(',').map((s: string) => s.trim()).filter(Boolean) : [])).map((skill: string, idx: number) => (
+                <span key={idx} className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-muted text-foreground border border-border/40">
                   {skill}
                 </span>
               ))}
             </div>
-          ) : "Not Provided"}
+          ) : (
+            <span>Not Provided</span>
+          )}
         </div>
         {canModify && editField === field.key && (
           <div onClick={(e) => e.stopPropagation()}>
@@ -590,162 +577,180 @@ const CandidateSummary = ({
     );
   };
 
-  // Main component return
   return (
-    <div className="p-2 space-y-6 bg-muted/50 rounded-2xl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Left Column: Profile & Professional */}
-        <div className="space-y-6">
-          {/* Profile Details Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <User className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Profile Details</h4>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 items-start">
+      {/* Left Column: Profile & Professional */}
+      <div className="space-y-2.5 sm:space-y-3">
+        {/* Profile Details Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <User className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Profile Details</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Identity & Sourcing
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {defaultDetailsFields.map(renderField)}
             </div>
-            <div className="p-5 space-y-6">
-              <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Identity & Sourcing</h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
-                  {defaultDetailsFields.map((field) => renderField(field, defaultDetailsFields))}
-                </div>
+          </div>
+        </section>
+
+        {/* Professional Background Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <Briefcase className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Professional Background</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Role & Compensation
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {previousCompanyFields.map(renderField)}
+              <div className="pt-2 border-t border-border/40 sm:col-span-2">
+                <SalaryRange
+                  candidate={localCandidate}
+                  onCandidateUpdate={onCandidateUpdate}
+                  canModify={canModify}
+                />
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Professional Background Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <Briefcase className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Professional Background</h4>
-            </div>
-            <div className="p-5 space-y-6">
-              <div className="space-y-4">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Role & Compensation</h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
-                  {previousCompanyFields.map((field) => renderField(field, previousCompanyFields))}
-                  <div className="pt-3 border-t border-border/60 sm:col-span-2">
-                    <SalaryRange
-                      candidate={localCandidate}
-                      onCandidateUpdate={onCandidateUpdate}
-                      canModify={canModify}
-                    />
-                  </div>
-                </div>
-              </div>
+        {/* Skills Matrix Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <Star className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Skill Matrix</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Technical & Soft Skills
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
+              {skillFields.map(renderSkillField)}
             </div>
           </div>
-
-          {/* Skills Matrix Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <Star className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Skill Matrix</h4>
-            </div>
-            <div className="p-5 space-y-4">
-              <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Technical Assessment</h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {skillFields.map((field) => renderSkillField(field))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Contact & Personal */}
-        <div className="space-y-6">
-          {/* Contact Information Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <Globe className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Contact Information</h4>
-            </div>
-            <div className="p-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
-                {contactFields.map((field) => renderField(field, contactFields))}
-              </div>
-            </div>
-          </div>
-
-          {/* Personal Details Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <User className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Personal Details</h4>
-            </div>
-            <div className="p-5">
-              <div className="space-y-4">
-                 <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Background Details</h5>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
-                    {collapsibleDetailsFields.map((field) => renderField(field, collapsibleDetailsFields))}
-                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Education & Academic Credentials Card */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm transition-all hover:shadow-md overflow-hidden group">
-            <div className="flex items-center gap-3 p-5 border-b border-border/60 bg-muted/40">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <GraduationCap className="w-4 h-4 text-brand" />
-              </div>
-              <h4 className="text-base font-semibold text-foreground">Education & Academic Credentials</h4>
-            </div>
-            <div className="p-5 space-y-6">
-              {/* Structured Education Levels */}
-              <div className="space-y-3">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Academic Degrees</h5>
-                <div className="flex flex-col gap-3">
-                  {renderEducationLevelCard("master", "Master's Degree")}
-                  {renderEducationLevelCard("bachelor", "Bachelor's Degree")}
-                  {renderEducationLevelCard("diploma", "Diploma")}
-                </div>
-              </div>
-
-              {/* General Academic Fields */}
-              <div className="space-y-3 pt-4 border-t border-border/60">
-                <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-2 px-1">Other Qualifications</h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-muted/20 p-3.5 rounded-xl border border-border/60">
-                  {academicFields.map((field) => renderField(field, academicFields))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
 
-      {/* Confirmation Dialog (from referredBy logic) */}
-      <Dialog open={showConfirmReferrer} onOpenChange={setShowConfirmReferrer}>
-        <DialogContent className="rounded-2xl overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="text-xl font-black text-foreground tracking-tight">Confirm Referrer Change</DialogTitle>
-          </DialogHeader>
-          <div className="p-6 py-8">
-            <div className="p-4 bg-muted rounded-xl border border-border text-sm font-semibold text-foreground flex items-center gap-3">
-               <div className="h-10 w-10 rounded-lg bg-card flex items-center justify-center shadow-sm border border-border text-brand">
-                  <User className="h-5 w-5" />
-               </div>
-               <span>Assign <span className="text-foreground font-black tracking-tight">{pendingReferrerName}</span> as the official referrer for this candidate?</span>
+      {/* Right Column: Contact & Personal */}
+      <div className="space-y-2.5 sm:space-y-3">
+        {/* Contact Information Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <Globe className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Contact Information</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {contactFields.map(renderField)}
             </div>
           </div>
-          <DialogFooter className="p-6 bg-muted border-t flex flex-row items-center gap-3">
-            <Button variant="ghost" onClick={cancelReferrer} className="text-muted-foreground font-bold">
+        </section>
+
+        {/* Personal Details Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <User className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Personal Details</h4>
+          </header>
+          <div className="p-2.5 sm:p-3">
+            <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+              Background Details
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+              {collapsibleDetailsFields.map(renderField)}
+            </div>
+          </div>
+        </section>
+
+        {/* Education & Academic Credentials Card */}
+        <section className="bg-card rounded-xl border border-border/70 shadow-xs overflow-hidden">
+          <header className="flex items-center gap-2 px-3.5 py-2 border-b border-border/60 bg-muted/25">
+            <span className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0 inline-flex items-center justify-center">
+              <GraduationCap className="w-3.5 h-3.5" />
+            </span>
+            <h4 className="text-xs sm:text-sm font-semibold text-foreground">Education & Credentials</h4>
+          </header>
+          <div className="p-2.5 sm:p-3 space-y-2.5">
+            {/* Structured Education Levels */}
+            <div className="space-y-1.5">
+              <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                Academic Degrees
+              </h5>
+              <div className="flex flex-col gap-1.5">
+                {renderEducationLevelCard("master", "Master's Degree")}
+                {renderEducationLevelCard("bachelor", "Bachelor's Degree")}
+                {renderEducationLevelCard("diploma", "Diploma")}
+              </div>
+            </div>
+
+            {/* General Academic Fields */}
+            <div className="space-y-1.5 pt-2 border-t border-border/40">
+              <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                Other Qualifications
+              </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 bg-muted/15 p-2 rounded-lg border border-border/40">
+                {academicFields.map(renderField)}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmReferrer} onOpenChange={setShowConfirmReferrer}>
+        <DialogContent className="rounded-xl overflow-hidden border border-border/70 shadow-lg p-0">
+          <DialogHeader className="p-4 pb-2">
+            <DialogTitle className="text-sm font-bold text-foreground">Confirm Referrer Change</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-1">
+            <div className="p-3 bg-muted/30 rounded-lg border border-border/50 text-xs font-medium text-foreground flex items-center gap-2.5">
+               <span className="h-8 w-8 rounded-md bg-card inline-flex items-center justify-center shadow-xs border border-border text-primary shrink-0">
+                  <User className="h-4 w-4" />
+               </span>
+               <span>Assign <strong className="text-foreground">{pendingReferrerName}</strong> as the official referrer for this candidate?</span>
+            </div>
+          </div>
+          <DialogFooter className="p-3 bg-muted/25 border-t border-border/40 flex flex-row items-center justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={cancelReferrer} className="text-xs">
               Cancel
             </Button>
-            <Button onClick={confirmReferrer} className="bg-foreground hover:bg-black text-white px-8 font-black shadow-xl shadow-black/10">
+            <Button size="sm" onClick={confirmReferrer} className="text-xs">
               Confirm & Save
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Domain Dialog */}
+      {canModify && (
+        <CandidateDomainDialog
+          open={showDomainsDialog}
+          onClose={() => setShowDomainsDialog(false)}
+          currentValues={localCandidate?.domains || []}
+          onSave={(val: { ids: string[]; domains: any[] }) => {
+            const updated = { ...localCandidate, domains: val.domains };
+            setLocalCandidate(updated);
+            if (onCandidateUpdate) onCandidateUpdate(updated, "domains");
+            setShowDomainsDialog(false);
+          }}
+        />
+      )}
 
       {/* Edit Resume Dialog */}
       {canModify && (
@@ -807,29 +812,8 @@ const CandidateSummary = ({
         />
       )}
 
-      {/* Referred By List Dialog */}
-      {/* {canModify && (
-        <ReferredByList
-          open={showReferredByDialog}
-          onOpenChange={setShowReferredByDialog}
-          onSelect={handleReferredBySelect}
-        />
-      )} */}
-
-      {/* Domains Dialog */}
-      {canModify && (
-        <CandidateDomainDialog
-          open={showDomainsDialog}
-          onClose={() => setShowDomainsDialog(false)}
-          currentValues={localCandidate?.domains || []}
-          onSave={(newValue: { ids: string[]; domains: any[] }) => {
-            handleSave("domains", newValue.domains);
-          }}
-        />
-      )}
-
       {/* Education Dialog */}
-      {canModify && showEducationDialog && editEducationLevel && (
+      {canModify && editEducationLevel && (
         <EducationDialog
           open={showEducationDialog}
           onClose={() => {
@@ -838,10 +822,9 @@ const CandidateSummary = ({
           }}
           level={editEducationLevel}
           currentValue={localCandidate?.education?.[editEducationLevel]}
-          onSave={handleEducationSave}
+          onSave={(lvl, val) => handleEducationSave(lvl, val)}
         />
       )}
-
     </div>
   );
 };

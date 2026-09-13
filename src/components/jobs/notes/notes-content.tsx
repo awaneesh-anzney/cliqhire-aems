@@ -26,7 +26,6 @@ export interface Note {
   isPrivate: boolean;
 }
 
-// Utility to map backend note to frontend note
 function mapNote(noteFromApi: any): Note {
   return {
     id: noteFromApi._id || noteFromApi.id,
@@ -107,18 +106,17 @@ export function NotesContent({
   };
 
   return (
-    <div className="space-y-4 h-full">
-      
+    <div className="space-y-2.5 h-full">
       {/* Header Action Bar */}
-      <div className="flex items-center justify-between p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm shadow-sm">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-            <StickyNote className="w-4 h-4" />
+      <div className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-border/70 bg-card shadow-xs">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-primary/10 rounded-md text-primary shrink-0">
+            <StickyNote className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Job Notes</h2>
-            <p className="text-[11px] text-muted-foreground">
-              Internal notes and updates for this position
+            <h3 className="text-xs sm:text-sm font-semibold text-foreground">Job Notes</h3>
+            <p className="text-[10px] text-muted-foreground font-medium">
+              Internal notes and position logs ({notes.length})
             </p>
           </div>
         </div>
@@ -127,16 +125,16 @@ export function NotesContent({
           <Button
             onClick={() => setIsAddDialogOpen(true)}
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-medium transition-all text-xs"
+            className="h-7 px-2.5 text-xs font-medium"
           >
-            <Plus className="h-4 w-4 mr-1.5" /> Add Note
+            <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
           </Button>
         )}
       </div>
 
-      {/* Notes List or Empty State Container */}
+      {/* Notes List or Empty State */}
       {notes.length > 0 ? (
-        <div className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-sm p-4 shadow-sm hover:border-emerald-500/30 transition-all">
+        <div className="rounded-xl border border-border/70 bg-card p-3 shadow-xs">
           <NotesList
             notes={notes}
             onEdit={(note) => {
@@ -148,23 +146,22 @@ export function NotesContent({
           />
         </div>
       ) : (
-        /* Modern Clean Empty State */
-        <div className="flex flex-col items-center justify-center text-center bg-card/40 rounded-2xl border border-dashed border-border/80 p-10 min-h-[260px]">
-          <div className="w-12 h-12 mb-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center">
-            <StickyNote className="w-6 h-6" />
+        <div className="flex flex-col items-center justify-center text-center bg-muted/15 rounded-xl border border-dashed border-border/70 p-6 min-h-[180px]">
+          <div className="w-10 h-10 mb-2 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <StickyNote className="w-5 h-5" />
           </div>
-          <h3 className="text-sm font-bold text-foreground">No notes recorded yet</h3>
-          <p className="text-xs text-muted-foreground max-w-xs mt-1 mb-4">
-            Add your first note to keep track of key details, feedback, or interview history.
+          <h4 className="text-xs font-semibold text-foreground">No notes recorded yet</h4>
+          <p className="text-[11px] text-muted-foreground max-w-xs mt-0.5 mb-3">
+            Add internal notes to keep track of discussions, hiring decisions, or feedback.
           </p>
           {canModify && (
             <Button
               onClick={() => setIsAddDialogOpen(true)}
               variant="outline"
               size="sm"
-              className="border-emerald-600/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs"
+              className="h-7 px-2.5 text-xs border-border text-foreground font-medium"
             >
-              <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
+              <Plus className="h-3.5 w-3.5 mr-1" /> Add First Note
             </Button>
           )}
         </div>

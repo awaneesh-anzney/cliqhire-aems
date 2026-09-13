@@ -1,13 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 238, 244, 250;
+  --background-end-rgb: 255, 250, 251;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,98 +26,115 @@
 
 @layer base {
   :root {
-    /* Light: slightly off-white background and softer foreground to reduce eye strain */
-    --background: 240 15% 97%;
-    --foreground: 240 5% 20%;
+    /* Light Mode: Soft Ice-Blue canvas with subtle Crimson warmth */
+    --background: 214 55% 96.5%;
+    --foreground: 218 45% 12%;
+    
+    /* Clean, elevated white cards */
     --card: 0 0% 100%;
-    --card-foreground: 240 5% 20%;
+    --card-foreground: 218 45% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 5% 20%;
-    /* Light mode single-accent primary — FluxBridge electric blue */
-    --primary: 221 83% 53%;
+    --popover-foreground: 218 45% 12%;
+    
+    /* FluxBridge Logo Navy Blue */
+    --primary: 216 100% 24%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 96.5%;
-    --secondary-foreground: 240 5.9% 18%;
-    --muted: 240 4.8% 97%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 97%;
-    --accent-foreground: 240 5.9% 18%;
-    /* Destructive reuses the FluxBridge red for consistency with the brand palette */
-    --destructive: 357 82% 52%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5% 92%;
-    --input: 240 5% 92%;
-    --ring: 221 83% 53%;
-    --chart-1: 357 82% 52%;
-    --chart-2: 221 83% 53%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: var(--protected-bg);
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 18%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 221 83% 53%;
+    
+    /* Soft tinted surfaces */
+    --secondary: 214 45% 93%;
+    --secondary-foreground: 216 85% 22%;
+    --muted: 214 35% 93%;
+    --muted-foreground: 217 20% 44%;
+    
+    /* Soft blended accent */
+    --accent: 350 45% 94%;
+    --accent-foreground: 351 75% 36%;
+    
+    /* FluxBridge Logo Crimson Red */
+    --destructive: 351 74% 42%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders */
+    --border: 214 28% 88%;
+    --input: 214 28% 88%;
+    --ring: 216 95% 30%;
+    
+    --chart-1: 351 74% 44%;
+    --chart-2: 216 90% 28%;
+    --chart-3: 200 65% 38%;
+    --chart-4: 340 60% 55%;
+    --chart-5: 220 50% 55%;
+    --radius: 0.65rem;
+    
+    /* Sidebar Base Tokens: Brand color themed */
+    --sidebar-background: 216 100% 24%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 216 100% 24%;
+    --sidebar-accent: 216 80% 32%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 216 60% 35%;
+    --sidebar-ring: 216 95% 45%;
 
-    /* FluxBridge brand colors — electric blue (primary) + signal red (secondary) */
-    --brand-primary: 221 83% 53%;
+    /* Brand identity — Balanced Navy & Crimson */
+    --brand-primary: 216 100% 24%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 357 82% 52%;
+    --brand-secondary: 351 74% 42%;
     --brand-secondary-foreground: 0 0% 100%;
 
-    --protected-bg: 221 83% 80%; /* lighter tint of brand-primary blue */
-    --candidate-name: 221 70% 28%;
-    --candidate-id: 221 15% 45%;
+    --protected-bg: 214 45% 94%;
+    --candidate-name: 218 45% 12%;
+    --candidate-id: 217 20% 44%;
   }
 
   .dark {
-    /* Dark: mid-dark backgrounds, softened text — comfortable low-contrast palette */
-    --background: 240 5% 20%;
-    --foreground: 0 0% 72%;
-    --card: 240 5% 23%;
-    --card-foreground: 0 0% 74%;
-    --popover: 240 5% 23%;
-    --popover-foreground: 0 0% 74%;
-    --primary: 221 83% 60%;
-    --primary-foreground: 0 0% 96%;
-    --secondary: 240 4% 28%;
-    --secondary-foreground: 0 0% 78%;
-    --muted: 240 4% 24%;
-    --muted-foreground: 240 5% 55%;
-    --accent: 240 4% 28%;
-    --accent-foreground: 0 0% 82%;
-    --destructive: 357 75% 48%;
-    --destructive-foreground: 0 0% 90%;
-    --border: 240 4% 30%;
-    --input: 240 4% 30%;
-    --ring: 221 83% 60%;
-    --chart-1: 357 82% 58%;
-    --chart-2: 221 83% 60%;
+    --background: 216 35% 6.5%;
+    --foreground: 0 0% 95%;
+    --card: 216 28% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 216 28% 10%;
+    --popover-foreground: 0 0% 95%;
+    
+    --primary: 216 100% 45%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 216 20% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 216 20% 15%;
+    --muted-foreground: 216 15% 65%;
+    --accent: 351 20% 15%;
+    --accent-foreground: 351 100% 70%;
+    
+    --destructive: 351 74% 45%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 216 25% 18%;
+    --input: 216 25% 18%;
+    --ring: 216 100% 45%;
+    
+    --chart-1: 351 82% 58%;
+    --chart-2: 216 100% 45%;
     --chart-3: 30 70% 52%;
     --chart-4: 280 55% 56%;
     --chart-5: 340 65% 52%;
-    --sidebar-background: var(--protected-bg);
-    --sidebar-foreground: 240 5% 72%;
-    --sidebar-primary: 221 83% 60%;
-    --sidebar-primary-foreground: 0 0% 96%;
-    --sidebar-accent: 240 4% 24%;
-    --sidebar-accent-foreground: 240 5% 72%;
-    --sidebar-border: 240 4% 26%;
-    --sidebar-ring: 221 83% 60%;
+    
+    --sidebar-background: 216 100% 18%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 216 100% 24%;
+    --sidebar-accent: 216 70% 26%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 216 50% 28%;
+    --sidebar-ring: 216 95% 45%;
 
-    /* FluxBridge brand colors — electric blue (primary) + signal red (secondary) */
-    --brand-primary: 221 83% 60%;
-    --brand-primary-foreground: 0 0% 96%;
-    --brand-secondary: 357 82% 58%;
-    --brand-secondary-foreground: 0 0% 96%;
+    --brand-primary: 216 100% 45%;
+    --brand-primary-foreground: 0 0% 100%;
+    --brand-secondary: 351 74% 45%;
+    --brand-secondary-foreground: 0 0% 100%;
 
-    --protected-bg: 221 70% 24%; /* darker tint of brand-primary blue */
-    --candidate-name: 221 70% 78%;
-    --candidate-id: 221 15% 60%;
+    --protected-bg: 216 32% 8.5%;
+    --candidate-name: 0 0% 95%;
+    --candidate-id: 216 15% 65%;
   }
 }
 
@@ -127,19 +144,39 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    letter-spacing: -0.011em;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(at 0% 0%, hsl(var(--brand-primary) / 0.08) 0px, transparent 45%),
+      radial-gradient(at 100% 10%, hsl(214 75% 91% / 0.8) 0px, transparent 50%),
+      radial-gradient(at 85% 95%, hsl(var(--brand-secondary) / 0.05) 0px, transparent 45%),
+      radial-gradient(at 10% 80%, hsl(var(--brand-primary) / 0.04) 0px, transparent 45%);
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(at 0% 0%, hsl(var(--brand-primary) / 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsl(var(--brand-secondary) / 0.05) 0px, transparent 50%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
+    font-weight: 700;
   }
 }
 
-/* Modern Custom Scrollbar */
+/* Modern Subtle Custom Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--primary) / 0.6) transparent;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -147,21 +184,21 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.6);
-  border-radius: 8px;
+  background: hsl(var(--muted-foreground) / 0.25);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
+  background: hsl(var(--muted-foreground) / 0.45);
 }
 
 /* Modern Auth Styles */
 .auth-bg {
   background: linear-gradient(-45deg,
-    hsl(var(--brand-primary) / 0.15),
-    hsl(var(--brand-secondary) / 0.15),
-    hsl(var(--brand-primary) / 0.15),
-    hsl(var(--chart-4) / 0.15)
+    hsl(var(--brand-primary) / 0.12),
+    hsl(var(--brand-secondary) / 0.12),
+    hsl(var(--brand-primary) / 0.08),
+    hsl(var(--chart-4) / 0.1)
   );
   background-size: 400% 400%;
   animation: authGradient 15s ease infinite;
@@ -174,11 +211,11 @@
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 4px 30px rgba(15, 23, 42, 0.05);
 }
 
 .dark .glass-card {
@@ -207,72 +244,78 @@
 /* Dashboard Redesign Custom Styles */
 @layer components {
   .dashboard-container {
-    @apply flex flex-col w-full min-h-full p-3 md:p-4 lg:p-4 space-y-3.5 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-muted/40;
+    @apply flex flex-col w-full h-full min-h-0 p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-transparent overflow-hidden animate-in fade-in duration-300;
   }
 
-  /* Banner now echoes the Fb360 logo: blue fading into signal red */
+  #main-content > div.bg-background {
+    background-color: transparent;
+  }
+
   .dashboard-welcome-banner {
-    @apply relative overflow-hidden rounded-xl bg-gradient-to-r from-brand via-brand/90 to-red-600/90 text-white py-3 px-4 sm:px-5 shadow-md border border-brand/10 transition-all duration-500 hover:shadow-lg hover:shadow-brand/20;
+    @apply relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/95 to-slate-900 text-white py-2 px-3 sm:px-4 shadow-sm border border-white/10 shrink-0 transition-all duration-300;
   }
 
   .dashboard-date-badge {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 border border-white/10 text-[10px] font-bold tracking-wider backdrop-blur-md shadow-sm text-white transition-all duration-300 hover:bg-white/20 hover:scale-105 cursor-default;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-[10px] font-bold tracking-wide backdrop-blur-md text-white/90 transition-all duration-300;
   }
 
   .dashboard-kpi-card {
-    @apply relative bg-card border border-border/60 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.03)] rounded-xl p-3.5 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:border-brand/40 dark:hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between overflow-hidden;
+    @apply relative bg-card/95 backdrop-blur-sm border border-border/70 shadow-2xs rounded-xl p-3 hover:shadow-xs hover:border-primary/30 transition-all duration-200 flex flex-col justify-between overflow-hidden;
   }
 
   .dashboard-kpi-skeleton {
-    @apply p-3.5 rounded-xl bg-card border border-border/60 shadow-sm flex flex-col justify-between animate-pulse min-h-[145px];
+    @apply p-3 rounded-xl bg-card border border-border/70 shadow-2xs flex flex-col justify-between animate-pulse min-h-[110px];
   }
 
   .dashboard-action-card {
-    @apply relative flex flex-col items-start p-3.5 sm:p-4 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.06)] hover:border-brand/30 transition-all duration-300 text-left h-full overflow-hidden;
+    @apply relative flex items-center gap-3 p-3 rounded-xl bg-card/95 backdrop-blur-sm border border-border/70 shadow-2xs hover:shadow-xs hover:border-primary/40 hover:bg-muted/15 transition-all duration-200 text-left w-full overflow-hidden cursor-pointer active:scale-[0.99];
   }
 
   .dashboard-action-icon {
-    @apply relative z-10 p-2 rounded-lg mb-2.5 transition-all duration-300;
+    @apply relative z-10 p-2 rounded-lg shrink-0 transition-all duration-200;
   }
 
   .dashboard-action-badge {
-    @apply flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full;
+    @apply flex items-center gap-1 text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md;
   }
 
   .dashboard-action-circle {
-    @apply w-7 h-7 rounded-full bg-muted flex items-center justify-center group-hover:bg-brand group-hover:text-white transition-all duration-300;
+    @apply w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shrink-0;
   }
 
-  /* Header & Sidebar Redesign Custom Styles */
+  /* Header Styles: Brand color with lower opacity */
   .app-header {
-    @apply sticky top-0 z-50 w-full border-b border-border/60 bg-protected/70 backdrop-blur-md transition-all duration-300;
+    @apply sticky top-0 z-30 w-full border-b border-white/10 bg-brand/80 dark:bg-brand/65 backdrop-blur-xl transition-all duration-300 shadow-[0_1px_4px_0_rgba(0,0,0,0.12)] text-white;
   }
 
+  /* Sidebar Styles: Brand color with lower opacity */
   .app-sidebar {
-    @apply border-r border-border/60 bg-card shadow-lg shadow-black/5 transition-all duration-300;
+    @apply border-r border-white/10 bg-brand/85 dark:bg-brand/75 backdrop-blur-xl text-white shadow-[2px_0_12px_rgba(0,0,0,0.15)] transition-all duration-300;
   }
 
   .sidebar-logo-area {
-    @apply py-4 px-5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-300;
+    @apply py-4 px-5 border-b border-white/10 font-bold text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-300;
   }
 
+  /* Sidebar Menu Items: Crisp Light Typography for Brand Sidebar */
   .sidebar-nav-item {
-    @apply relative h-10 transition-all duration-300 ease-out rounded-xl px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-3 text-muted-foreground hover:bg-muted/65 hover:text-foreground;
+    @apply relative h-10 font-bold text-sm tracking-tight transition-all duration-200 ease-out rounded-xl px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-3 text-white/80 hover:bg-white/10 hover:text-white;
   }
 
+  /* Active Menu Item: Elevated Solid White Accent */
   .sidebar-nav-item-active {
-    @apply bg-brand/5 text-brand shadow-sm shadow-brand/5 border border-brand/10 hover:bg-brand/10 hover:text-brand;
+    @apply bg-white/20 text-white font-extrabold shadow-sm border border-white/25 hover:bg-white/25 hover:text-white relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-white before:rounded-r-full;
   }
 
   .sidebar-icon-wrap {
-    @apply flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-all duration-300;
+    @apply flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-all duration-200 text-white/80 group-hover:text-white;
   }
 
   .sidebar-pro-card {
-    @apply bg-zinc-950 text-white rounded-2xl p-4 relative overflow-hidden shadow-xl border border-zinc-800 transition-all duration-300;
+    @apply bg-gradient-to-br from-white/15 via-white/10 to-white/5 text-white font-medium rounded-2xl p-4 relative overflow-hidden shadow-xl border border-white/15 transition-all duration-300;
   }
 
   .sidebar-footer-card {
-    @apply bg-muted/40 rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-300 border border-border/40;
+    @apply bg-white/10 backdrop-blur-md font-bold text-white rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-300 border border-white/15;
   }
 }

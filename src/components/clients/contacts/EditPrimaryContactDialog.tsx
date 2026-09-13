@@ -37,7 +37,7 @@ export function EditPrimaryContactDialog({ open, onOpenChange, contact, onSave }
       setLastName(contact.lastName || (contact.name ? contact.name.split(' ').slice(1).join(' ') : ''));
       setEmail(contact.email || '');
       setPhone(contact.phone || '');
-      setCountryCode(contact.countryCode || 'SA');
+      setCountryCode(contact.countryCode || '+966');
       setLinkedin(contact.linkedin || '');
     }
   }, [contact, open]);
@@ -90,7 +90,7 @@ export function EditPrimaryContactDialog({ open, onOpenChange, contact, onSave }
           <div>
             <Label htmlFor="phone">Phone</Label>
             <PhoneInput
-              countryCode={countryCode || "SA"}
+              countryCode={countryCode || "+966"}
               onCountryCodeChange={setCountryCode}
               phoneNumber={phone}
               onPhoneNumberChange={setPhone}

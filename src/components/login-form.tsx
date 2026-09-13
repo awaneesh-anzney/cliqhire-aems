@@ -23,6 +23,7 @@ import { useState, useEffect } from "react";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -174,16 +175,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                 </FormItem>
               )}
             />
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                toast.info("Forgot password flow goes here.");
-              }}
+            <Link
+              href="/forgot-password"
               className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           {/* Submit */}

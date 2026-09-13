@@ -2,13 +2,15 @@
   clientPriority: string;
   clientSegment: string;
   name: string;
+  clientSource?: string;
+  clientSourceDetails?: any;
   website?: string;
   industry?: string;
   location?: string;
   address?: string;
   incorporationDate?: string;
   countryOfRegistration?: string;
-  lineOfBusiness?: string;
+  lineOfBusiness?: string | string[];
   registrationNumber?: string;
   countryOfBusiness?: string;
   description?: string;

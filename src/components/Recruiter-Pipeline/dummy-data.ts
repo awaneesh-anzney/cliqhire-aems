@@ -73,7 +73,9 @@ export interface Candidate {
   // Additional fields from new API structure
   applicationId?: string;
   appliedDate?: string;
+  addedAt?: string;
   lastUpdated?: string;
+  currentStatus?: string;
   applicationDuration?: number;
   // Candidate details
   email?: string;

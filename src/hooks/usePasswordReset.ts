@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { authService } from "@/services/authService";
 import { toast } from "sonner";
 
@@ -42,5 +42,26 @@ export function usePasswordReset() {
     isResetPasswordPending: resetPasswordMutation.isPending,
     isResetPasswordSuccess: resetPasswordMutation.isSuccess,
     resetPasswordError: resetPasswordMutation.error,
+  };
+}
+
+export function useVerifyResetToken(token: string | null) {
+  const { data, isPending, isFetching, isSuccess, isError, error } = useQuery({
+    queryKey: ["verifyResetToken", token],
+    queryFn: () => {
+      if (!token) throw new Error("No token provided");
+      return authService.verifyResetToken(token);
+    },
+    enabled: !!token,
+    retry: false,
+  });
+
+  return {
+    isValid: data?.valid ?? false,
+    message: data?.message,
+    isLoading: isPending || isFetching,
+    isSuccess,
+    isError,
+    error,
   };
 }

@@ -29,9 +29,42 @@ export const clientStageStatuses = [
   "LinkedIn message Sent",
   "WA message sent",
   "Email sent",
+  "Active",
+  "Inactive",
 ] as const;
 
 export type ClientStageStatus = (typeof clientStageStatuses)[number];
+
+export interface ClientGroup {
+  _id: string;
+  name: string;
+  groupCode?: string;
+  description?: string;
+  primaryClientId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  memberCount?: number;
+}
+
+export interface ClientGroupMember {
+  _id: string;
+  name: string;
+  clientId: string;
+  clientStage: string;
+  industry?: string;
+  groupId: string;
+  role: 'primary' | 'member';
+  jobCount: number;
+}
+
+export interface ClientGroupDetail {
+  group: Pick<ClientGroup, '_id' | 'name' | 'groupCode' | 'description'>;
+  primaryClient: { _id: string; name: string; clientId: string } | null;
+  totalCompanies: number;
+  totalJobCount: number;
+  stageBreakdown: Record<string, number>;
+  members: ClientGroupMember[];
+}
 
 export interface ClientResponse {
   clientId?: string;
@@ -98,6 +131,19 @@ export interface ClientResponse {
   other?: string | null;
   salesLead?: string;
   jobCount?: number; // Added optional jobCount property
+  parentClientId?: string | null;
+  contractSource?: 'own' | 'parent';
+  primaryContactSource?: 'own' | 'parent';
+  subsidiaryCount?: number;
+  role?: "parent" | "subsidiary" | "standalone";
+  parentCompany?: any;
+  subsidiaries?: any[];
+  groupId?: string | null;
+  group?: {
+    _id: string;
+    name: string;
+    groupCode?: string;
+  };
   createdBy?: {
     id: string;
     name: string;
@@ -525,6 +571,11 @@ export interface ClientsPage {
   page: number;
   limit: number;
   totalPages: number;
+  filters?: {
+    topLevelOnly?: boolean;
+    topLevelOnlyRequested?: boolean;
+    [key: string]: any;
+  };
 }
 
 // Get all clients (server-side paginated)
@@ -563,6 +614,7 @@ const getClients = async (
         page: resData.page ?? page,
         limit: resData.limit ?? limit,
         totalPages: Math.ceil(totalCount / limit) || 1,
+        filters: resData.filters,
       };
     }
 
@@ -575,6 +627,7 @@ const getClients = async (
         page: p ?? page,
         limit,
         totalPages: (pages ?? Math.ceil((total ?? clients.length) / limit)) || 1,
+        filters: resData.filters,
       };
     }
 
@@ -591,6 +644,7 @@ const getClients = async (
       page,
       limit,
       totalPages: Math.ceil(totalCount / limit) || 1,
+      filters: resData.filters,
     };
   } catch (error: any) {
     console.error("Error in getClients:", error);
@@ -1065,6 +1119,144 @@ const bulkUploadClients = async (file: File): Promise<any> => {
   }
 };
 
+// PATCH /api/clients/:id/link-parent
+const linkParentClient = async (id: string, parentClientId: string | null): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/link-parent`, { parentClientId }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/contract-source
+const toggleContractSource = async (id: string, contractSource: 'own' | 'parent'): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/contract-source`, { contractSource }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/contact-source
+const toggleContactSource = async (id: string, primaryContactSource: 'own' | 'parent'): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/contact-source`, { primaryContactSource }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/:id/group-summary
+const getGroupSummary = async (id: string): Promise<any> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/group-summary`, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/parent-options
+const getParentOptions = async (search: string = ""): Promise<any> => {
+  try {
+    const response = await api.get(`/api/clients/parent-options`, { 
+      params: { search },
+      timeout: 15000 
+    });
+    return response.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/clients/:id/hierarchy
+const getClientHierarchy = async (id: string): Promise<any> => {
+  try {
+    const response = await api.get(`/api/clients/${id}/hierarchy`, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// POST /api/client-groups
+const createClientGroup = async (data: Partial<ClientGroup>): Promise<ClientGroup> => {
+  try {
+    const response = await api.post(`/api/client-groups`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/client-groups
+const listClientGroups = async (search: string = "", page: number = 1, limit: number = 20): Promise<{ data: ClientGroup[], totalCount: number }> => {
+  try {
+    const response = await api.get(`/api/client-groups`, {
+      params: { search, page, limit },
+      timeout: 15000
+    });
+    return response.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// GET /api/client-groups/:id
+const getClientGroupById = async (id: string): Promise<ClientGroupDetail> => {
+  try {
+    const response = await api.get(`/api/client-groups/${id}`, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/client-groups/:id
+const updateClientGroup = async (id: string, data: Partial<ClientGroup>): Promise<ClientGroup> => {
+  try {
+    const response = await api.patch(`/api/client-groups/${id}`, data, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// DELETE /api/client-groups/:id
+const deleteClientGroup = async (id: string, force: boolean = false): Promise<void> => {
+  try {
+    await api.delete(`/api/client-groups/${id}`, { 
+      params: { force },
+      timeout: 15000 
+    });
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// POST /api/client-groups/merge
+const mergeClientGroups = async (sourceGroupId: string, targetGroupId: string): Promise<any> => {
+  try {
+    const response = await api.post(`/api/client-groups/merge`, { sourceGroupId, targetGroupId }, { timeout: 15000 });
+    return response.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
+// PATCH /api/clients/:id/link-group
+const linkClientToGroup = async (id: string, groupId: string | null): Promise<ClientResponse> => {
+  try {
+    const response = await api.patch(`/api/clients/${id}/link-group`, { groupId }, { timeout: 15000 });
+    return response.data.data;
+  } catch (error: any) {
+    throw handleError(error);
+  }
+};
+
 export {
   createClient,
   getClients,
@@ -1092,4 +1284,18 @@ export {
   getClientFollowUps,
   downloadClientBulkTemplate,
   bulkUploadClients,
+  linkParentClient,
+  toggleContractSource,
+  toggleContactSource,
+  getGroupSummary,
+  getClientHierarchy,
+  getParentOptions,
+  createClientGroup,
+  listClientGroups,
+  getClientGroupById,
+  updateClientGroup,
+  deleteClientGroup,
+  mergeClientGroups,
+  linkClientToGroup,
 };
+

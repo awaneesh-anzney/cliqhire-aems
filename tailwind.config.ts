@@ -18,6 +18,10 @@ const config: Config = {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			boxShadow: {
+				'2xs': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+				'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+			},
 			colors: {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
@@ -72,6 +76,8 @@ const config: Config = {
 				brand: {
 					DEFAULT: 'hsl(var(--brand-primary))',
 					foreground: 'hsl(var(--brand-primary-foreground))',
+					secondary: 'hsl(var(--brand-secondary))',
+					'secondary-foreground': 'hsl(var(--brand-secondary-foreground))',
 				},
 				protected: {
 					DEFAULT: 'hsl(var(--protected-bg))',

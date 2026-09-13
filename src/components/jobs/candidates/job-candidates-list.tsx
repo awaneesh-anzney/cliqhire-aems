@@ -265,64 +265,64 @@ export const JobCandidatesList = forwardRef<JobCandidatesListRef, JobCandidatesL
     }
 
     return (
-      <div className="w-full flex flex-col space-y-4 p-4">
+      <div className="w-full flex flex-col space-y-2.5">
         {/* KPI Banner section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="rounded-xl border border-border/80 shadow-sm bg-card overflow-hidden relative">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="space-y-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
+          <Card className="rounded-xl border border-border/70 shadow-xs bg-card overflow-hidden">
+            <CardContent className="p-2.5 sm:p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Total Candidates</p>
-                <h3 className="text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.total}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.total}</h3>
               </div>
-              <div className="w-9 h-9 bg-brand/10 rounded-xl flex items-center justify-center">
-                <Users className="h-4 w-4 text-brand" />
+              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                <Users className="h-4 w-4" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-xl border border-border/80 shadow-sm bg-card overflow-hidden relative">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="space-y-1">
+          <Card className="rounded-xl border border-border/70 shadow-xs bg-card overflow-hidden">
+            <CardContent className="p-2.5 sm:p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">In Progress</p>
-                <h3 className="text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.inProgress}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.inProgress}</h3>
               </div>
-              <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center dark:bg-blue-950/20">
-                <Building className="h-4 w-4 text-blue-600" />
+              <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <Building className="h-4 w-4" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-xl border border-border/80 shadow-sm bg-card overflow-hidden relative">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="space-y-1">
+          <Card className="rounded-xl border border-border/70 shadow-xs bg-card overflow-hidden">
+            <CardContent className="p-2.5 sm:p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Hired Profiles</p>
-                <h3 className="text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.hired}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.hired}</h3>
               </div>
-              <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center dark:bg-emerald-950/20">
+              <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <Badge className="bg-emerald-500 hover:bg-emerald-600 px-1 py-0 shadow-none h-4 w-4 flex items-center justify-center rounded-full text-white text-[8px] font-black">✓</Badge>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-xl border border-border/80 shadow-sm bg-card overflow-hidden relative">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="space-y-1">
+          <Card className="rounded-xl border border-border/70 shadow-xs bg-card overflow-hidden">
+            <CardContent className="p-2.5 sm:p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Disqualified</p>
-                <h3 className="text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.disqualified}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">{isLoading ? '...' : kpis.disqualified}</h3>
               </div>
-              <div className="w-9 h-9 bg-rose-50 rounded-xl flex items-center justify-center dark:bg-rose-950/20">
-                <span className="text-rose-600 text-xs font-black">✕</span>
+              <div className="w-8 h-8 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-600 dark:text-rose-400">
+                <span className="text-xs font-black">✕</span>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Toolbar Controls */}
-        <div className="bg-card rounded-xl border border-border/80 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3 flex-1">
+        <div className="bg-card rounded-xl border border-border/70 shadow-xs p-2.5 flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 flex-1">
             {/* Search input */}
-            <div className="relative w-full sm:w-[240px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
+            <div className="relative w-full sm:w-[220px]">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
               <Input
                 type="text"
                 placeholder="Search candidates..."

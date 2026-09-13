@@ -111,23 +111,22 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
     const salaryValue = localCandidate?.currentSalary;
     const hasSalary = salaryValue !== undefined && salaryValue !== null && salaryValue !== '';
     return (
-      <div className="flex items-center gap-4 p-3 border rounded-md bg-muted">
-        <div className="flex items-center gap-2 flex-1">
-          <Label className="text-sm font-medium text-foreground min-w-[100px]">Current Salary:</Label>
-          <div className="bg-card px-3 py-2 rounded border flex-1">
-            <span className={`text-sm ${hasSalary ? 'font-medium' : 'text-muted-foreground'}`}>
-              {hasSalary ? `${currencyValue} ${salaryValue}` : 'No Details'}
-            </span>
-          </div>
+      <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-card border border-border/60 hover:border-border transition-colors">
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-[10px] font-medium text-muted-foreground">Current Salary</span>
+          <span className={cn("text-xs truncate", hasSalary ? "font-semibold text-foreground" : "text-muted-foreground italic")}>
+            {hasSalary ? `${currencyValue} ${salaryValue}` : "Not specified"}
+          </span>
         </div>
         {canModify && (
           <Button
-            variant="outline"
-            size="sm"
-            className="h-8 flex items-center"
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
             onClick={() => setEditField("currentSalaryRow")}
+            title="Edit Current Salary"
           >
-            <Pencil className="h-4 w-4 mr-2" />Edit
+            <Pencil className="h-3 w-3" />
           </Button>
         )}
       </div>
@@ -139,23 +138,22 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
     const salaryValue = localCandidate?.expectedSalary;
     const hasSalary = salaryValue !== undefined && salaryValue !== null && salaryValue !== '';
     return (
-      <div className="flex items-center gap-4 p-3 border rounded-md bg-muted">
-        <div className="flex items-center gap-2 flex-1">
-          <Label className="text-sm font-medium text-foreground min-w-[100px]">Expected Salary:</Label>
-          <div className="bg-card px-3 py-2 rounded border flex-1">
-            <span className={`text-sm ${hasSalary ? 'font-medium' : 'text-muted-foreground'}`}>
-              {hasSalary ? `${currencyValue} ${salaryValue}` : 'No Details'}
-            </span>
-          </div>
+      <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-card border border-border/60 hover:border-border transition-colors">
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-[10px] font-medium text-muted-foreground">Expected Salary</span>
+          <span className={cn("text-xs truncate", hasSalary ? "font-semibold text-foreground" : "text-muted-foreground italic")}>
+            {hasSalary ? `${currencyValue} ${salaryValue}` : "Not specified"}
+          </span>
         </div>
         {canModify && (
           <Button
-            variant="outline"
-            size="sm"
-            className="h-8 flex items-center"
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
             onClick={() => setEditField("expectedSalaryRow")}
+            title="Edit Expected Salary"
           >
-            <Pencil className="h-4 w-4 mr-2" />Edit
+            <Pencil className="h-3 w-3" />
           </Button>
         )}
       </div>
@@ -163,16 +161,10 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
   };
 
   return (
-    <div className="rounded-lg border shadow-sm">
-      <div className="p-4">
-        <h4 className="text-sm font-semibold mb-4">Salary Range</h4>
-        <div className="space-y-4">
-          {/* Current Salary Row */}
-          {renderCurrentSalaryRow()}
-          
-          {/* Expected Salary Row */}
-          {renderExpectedSalaryRow()}
-        </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
+        {renderCurrentSalaryRow()}
+        {renderExpectedSalaryRow()}
       </div>
 
       {/* Current Salary Row Edit Modal */}
@@ -358,7 +350,7 @@ const SalaryRange = ({ candidate, onCandidateUpdate, canModify = true }: SalaryR
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 

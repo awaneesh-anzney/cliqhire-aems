@@ -1,18 +1,15 @@
-"use client"
+"use client";
 
-import { Tabs } from "@/components/ui/tabs"
-import { JobTabsList } from "@/components/jobs/tabs/tab-list"
-import { JobTabContent } from "@/components/jobs/tabs/tab-content"
-import { SummaryContent } from "./summary/summary-content"
-import { CandidatesContent } from "./candidates/candidates-content"
-import { RecommendationsContent } from "./recommendations/recommendations-content"
-import { ActivitiesContent } from "./activities/activities-content"
-import { NotesContent } from "./notes/notes-content"
-import { AttachmentsContent } from "./attachments/attachments-content"
-import { TeamContent } from "./teams/team-content"
-import { SourcingContent } from "./sourcing/sourcing-content"
-import { ReportsContent } from "./reports/reports-content"
-import { JobData } from "./types"
+import { Tabs } from "@/components/ui/tabs";
+import { JobTabsList } from "@/components/jobs/tabs/tab-list";
+import { JobTabContent } from "@/components/jobs/tabs/tab-content";
+import { SummaryContent } from "./summary/summary-content";
+import { CandidatesContent } from "./candidates/candidates-content";
+import { NotesContent } from "./notes/notes-content";
+import { AttachmentsContent } from "./attachments/attachments-content";
+import { TeamContent } from "./teams/team-content";
+import { HistoryContent } from "./history/history-content";
+import { JobData } from "./types";
 
 interface JobTabsProps {
   jobId: string;
@@ -37,16 +34,27 @@ export function JobTabs({
       onValueChange={onTabChange} 
       className="w-full flex-1 max-w-full min-w-0 flex flex-col overflow-hidden"
     >
-      {/* Modern Tabs Navigation Bar */}
+      {/* Sleek Tabs Navigation Bar */}
       <JobTabsList />
       
-      {/* Dynamic Tab Content Wrapper with Fade-In Animation */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-2">
-        
+      {/* Dynamic Tab Content Wrapper with minimal padding */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-2.5 sm:p-3.5">
+        {/* Summary Content */}
+        <JobTabContent 
+          value="summary"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
+        >
+          <SummaryContent 
+            jobId={jobId} 
+            jobData={jobData} 
+            canModify={canModify} 
+          />
+        </JobTabContent>
+
         {/* Candidates Content */}
         <JobTabContent 
           value="candidates"
-          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
         >
           <CandidatesContent 
             jobId={jobId} 
@@ -55,22 +63,10 @@ export function JobTabs({
           />
         </JobTabContent>
         
-        {/* Summary Content */}
-        <JobTabContent 
-          value="summary"
-          className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
-        >
-          <SummaryContent 
-            jobId={jobId} 
-            jobData={jobData} 
-            canModify={canModify} 
-          />
-        </JobTabContent>
-        
         {/* Team Content */}
         <JobTabContent 
           value="team"
-          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
         >
           <TeamContent 
             jobId={jobId} 
@@ -79,23 +75,20 @@ export function JobTabs({
           />
         </JobTabContent>
 
-        {/* Commented Out Content Tabs (Uncomment when needed) */}
-        {/* 
-        <JobTabContent value="recommendations" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
-          <RecommendationsContent jobId={jobId} />
-        </JobTabContent> 
-        */}
-        
-        {/* 
-        <JobTabContent value="activities" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
-          <ActivitiesContent jobId={jobId} />
-        </JobTabContent> 
-        */}
+        {/* History Content */}
+        <JobTabContent 
+          value="history"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
+        >
+          <HistoryContent 
+            jobId={jobId} 
+          />
+        </JobTabContent>
         
         {/* Notes Content */}
         <JobTabContent 
           value="notes"
-          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
         >
           <NotesContent 
             jobId={jobId} 
@@ -107,27 +100,14 @@ export function JobTabs({
         {/* Attachments Content */}
         <JobTabContent 
           value="attachments"
-          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200"
+          className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-150"
         >
           <AttachmentsContent 
             jobId={jobId} 
             canModify={canModify} 
           />
         </JobTabContent>
-
-        {/* 
-        <JobTabContent value="sourcing" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
-          <SourcingContent jobId={jobId} />
-        </JobTabContent> 
-        */}
-
-        {/* 
-        <JobTabContent value="reports" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
-          <ReportsContent jobId={jobId} />
-        </JobTabContent> 
-        */}
-
       </div>
     </Tabs>
-  )
+  );
 }
