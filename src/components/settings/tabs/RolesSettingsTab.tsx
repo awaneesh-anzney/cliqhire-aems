@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Shield,
@@ -505,7 +505,7 @@ function RoleCard({
           className={`h-1 w-full ${role.isSystem ? "bg-muted-foreground/30" : "bg-brand"}`}
         />
 
-        <div className="p-4 flex-1 flex flex-col">
+        <div className="p-3 sm:p-3.5 flex-1 flex flex-col">
           {/* Header row */}
           <div className="flex items-start justify-between gap-2 mb-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -664,6 +664,14 @@ export function RolesSettingsTab({ searchQuery = "" }: RolesSettingsTabProps) {
   const systemRoles = filtered.filter((r) => r.isSystem);
   const customRoles = filtered.filter((r) => !r.isSystem);
 
+  const [roleTypeFilter, setRoleTypeFilter] = useState<"all" | "custom" | "system">("all");
+
+  const displayedRoles = useMemo(() => {
+    if (roleTypeFilter === "custom") return customRoles;
+    if (roleTypeFilter === "system") return systemRoles;
+    return filtered;
+  }, [roleTypeFilter, customRoles, systemRoles, filtered]);
+
   const handleUpdateName = async (name: string, description: string) => {
     if (!editRole) return;
     await updateRole(editRole._id || editRole.id!, { name, description });
@@ -695,11 +703,11 @@ export function RolesSettingsTab({ searchQuery = "" }: RolesSettingsTabProps) {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3 sm:gap-3.5">
       {/* Top Banner & Create Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl bg-card border border-border/80 shadow-xs">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-brand/10 text-brand flex items-center justify-center shrink-0">
+          <div className="h-7.5 w-7.5 rounded-lg bg-brand/10 text-brand flex items-center justify-center shrink-0">
             <Shield className="h-4 w-4" />
           </div>
           <div>
@@ -712,87 +720,91 @@ export function RolesSettingsTab({ searchQuery = "" }: RolesSettingsTabProps) {
           </div>
         </div>
 
-        <Button
-          asChild
-          size="sm"
-          className="h-8 bg-brand hover:bg-brand/90 text-white gap-1.5 text-xs font-semibold rounded-xl shrink-0"
-        >
-          <Link href="/settings/roles/create">
-            <Plus className="h-3.5 w-3.5" /> Create New Role
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Filter Pills */}
+          <div className="inline-flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border/70 text-xs">
+            <button
+              type="button"
+              onClick={() => setRoleTypeFilter("all")}
+              className={cn(
+                "px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-all",
+                roleTypeFilter === "all"
+                  ? "bg-card text-foreground shadow-2xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              All ({filtered.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setRoleTypeFilter("custom")}
+              className={cn(
+                "px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-all",
+                roleTypeFilter === "custom"
+                  ? "bg-card text-foreground shadow-2xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Custom ({customRoles.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setRoleTypeFilter("system")}
+              className={cn(
+                "px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-all",
+                roleTypeFilter === "system"
+                  ? "bg-card text-foreground shadow-2xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              System ({systemRoles.length})
+            </button>
+          </div>
+
+          <Button
+            asChild
+            size="sm"
+            className="h-7.5 bg-brand hover:bg-brand/90 text-white gap-1.5 text-xs font-semibold rounded-lg shrink-0 shadow-2xs"
+          >
+            <Link href="/settings/roles/create">
+              <Plus className="h-3.5 w-3.5" /> Create New Role
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {loading ? (
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="bg-card rounded-xl border border-border/70 h-48 animate-pulse"
+              className="bg-card rounded-xl border border-border/70 h-44 animate-pulse"
             />
           ))}
         </div>
       ) : (
         <>
-          {/* Custom Roles Section */}
-          {customRoles.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Custom Roles
-                </h3>
-                <div className="h-px flex-1 bg-border/60" />
-                <Badge variant="secondary" className="text-[10px] px-2 py-0">
-                  {customRoles.length}
-                </Badge>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {customRoles.map((role) => (
-                  <RoleCard
-                    key={role._id || role.id}
-                    role={role}
-                    onEdit={() => setEditRole(role)}
-                    onPermissions={() => setPermRole(role)}
-                    onDelete={() => setDeleteTarget(role)}
-                  />
-                ))}
-              </div>
-            </section>
+          {displayedRoles.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {displayedRoles.map((role) => (
+                <RoleCard
+                  key={role._id || role.id}
+                  role={role}
+                  onEdit={() => setEditRole(role)}
+                  onPermissions={() => setPermRole(role)}
+                  onDelete={() => setDeleteTarget(role)}
+                />
+              ))}
+            </div>
           )}
 
-          {/* System Roles Section */}
-          {systemRoles.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  System Roles
-                </h3>
-                <div className="h-px flex-1 bg-border/60" />
-                <Badge variant="secondary" className="text-[10px] px-2 py-0">
-                  {systemRoles.length}
-                </Badge>
+          {!displayedRoles.length && (
+            <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border p-6">
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-2 text-muted-foreground">
+                <Shield className="h-5 w-5" />
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {systemRoles.map((role) => (
-                  <RoleCard
-                    key={role._id || role.id}
-                    role={role}
-                    onEdit={() => setEditRole(role)}
-                    onPermissions={() => setPermRole(role)}
-                    onDelete={() => setDeleteTarget(role)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {!filtered.length && (
-            <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border p-6">
-              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 text-muted-foreground">
-                <Shield className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-semibold text-foreground">No matching roles found</p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm font-semibold text-foreground">No matching roles found</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
                 {searchQuery
                   ? `No roles match your search term "${searchQuery}"`
                   : "Create your first custom role to get started."}
