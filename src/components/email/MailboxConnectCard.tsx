@@ -230,7 +230,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
           </div>
 
           {/* Form */}
-          {providerConfig?.requiresOAuth ? (
+          {providerConfig?.provider === "outlook365" ? (
             <div className="flex flex-col items-center justify-center space-y-6 pt-6">
               <Button
                 type="button"
