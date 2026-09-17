@@ -80,7 +80,13 @@ export const emailService = {
    * Get Microsoft OAuth authorization URL
    */
   async getMicrosoftAuthUrl(): Promise<{ success: boolean; url: string }> {
-    const response = await api.get("/api/email/mailbox/oauth/microsoft/authorize-url");
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const response = await api.get("/api/email/mailbox/oauth/microsoft/authorize-url", {
+      params: {
+        frontendUrl: origin,
+        redirectUri: `${origin}/settings/email`
+      }
+    });
     return response.data;
   },
 
