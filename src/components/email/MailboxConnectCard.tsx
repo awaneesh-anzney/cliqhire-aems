@@ -25,6 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { useConnectMailbox, useProviderConfig } from "@/hooks/useEmail";
 import { useAuth } from "@/contexts/AuthContext";
 import { MailProviderPreset } from "@/types/email";
+import { emailService } from "@/services/emailService";
+import { toast } from "sonner";
 
 const PROVIDER_NAMES: Record<MailProviderPreset, string> = {
   godaddy: "GoDaddy Mail",
@@ -53,6 +55,18 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState(user?.name || "");
   const [showPassword, setShowPassword] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+
+  const handleMicrosoftSignIn = async () => {
+    try {
+      setOauthLoading(true);
+      const { url } = await emailService.getMicrosoftAuthUrl();
+      window.location.href = url;
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to initiate Microsoft sign-in");
+      setOauthLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,6 +230,33 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
           </div>
 
           {/* Form */}
+          {providerConfig?.requiresOAuth ? (
+            <div className="flex flex-col items-center justify-center space-y-6 pt-6">
+              <Button
+                type="button"
+                onClick={handleMicrosoftSignIn}
+                disabled={oauthLoading}
+                className="w-full h-11 text-xs font-bold gap-2 bg-[#00a4ef] hover:bg-[#0078d4] text-white shadow-md rounded-xl transition-all active:scale-[0.99]"
+              >
+                {oauthLoading ? (
+                  <>
+                    <span className="h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <span>Connecting to Microsoft...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4 fill-current" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M0 0h10v10H0zM11 0h10v10H11zM0 11h10v10H0zM11 11h10v10H11z"/>
+                    </svg>
+                    <span>Sign in with Microsoft</span>
+                  </>
+                )}
+              </Button>
+              <p className="text-[11px] font-medium text-muted-foreground text-center px-4">
+                Your organization requires signing in with Microsoft to connect your mailbox securely.
+              </p>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Work Email Address */}
             <div className="space-y-1.5">
@@ -311,6 +352,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
               </Button>
             </div>
           </form>
+          )}
 
           {/* Security & Verification Guarantee */}
           <div className="pt-3 border-t border-border/60 text-center space-y-1">
