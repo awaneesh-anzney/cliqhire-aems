@@ -77,6 +77,14 @@ export const emailService = {
   },
 
   /**
+   * Get Microsoft OAuth authorization URL
+   */
+  async getMicrosoftAuthUrl(): Promise<{ success: boolean; url: string }> {
+    const response = await api.get("/api/email/mailbox/oauth/microsoft/authorize-url");
+    return response.data;
+  },
+
+  /**
    * Connect user's own mailbox (live IMAP + SMTP validation).
    */
   async connectMailbox(

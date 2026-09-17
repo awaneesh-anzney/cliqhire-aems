@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { emailService } from "@/services/emailService";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function EmailPage() {
   const { 
@@ -63,6 +64,29 @@ export default function EmailPage() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!searchParams) return;
+    const connected = searchParams.get("connected");
+    const message = searchParams.get("message");
+    
+    if (connected === "success") {
+      toast.success("Mailbox connected successfully!");
+      refetchStatus();
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("connected");
+      params.delete("message");
+      router.replace(`/email?${params.toString()}`, { scroll: false });
+    } else if (connected === "error") {
+      toast.error(message || "Could not connect mailbox");
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("connected");
+      params.delete("message");
+      router.replace(`/email?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParams, router, refetchStatus]);
 
   useEffect(() => {
     setSelectedIds([]);

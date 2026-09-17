@@ -19,6 +19,7 @@ import { GeneralSettingsTab } from "@/components/settings/tabs/GeneralSettingsTa
 import { PipelineDefaultsTab } from "@/components/settings/tabs/PipelineDefaultsTab";
 import { SecuritySettingsTab } from "@/components/settings/tabs/SecuritySettingsTab";
 import { IntegrationsTab } from "@/components/settings/tabs/IntegrationsTab";
+import { toast } from "sonner";
 
 type TabKey = "roles" | "email" | "general" | "pipeline" | "security" | "integrations";
 
@@ -50,6 +51,27 @@ function SettingsPageContent() {
       setActiveTab(tabParam);
     }
   }, [searchParams, activeTab]);
+
+  // Handle OAuth callback redirects
+  useEffect(() => {
+    if (!searchParams) return;
+    const connected = searchParams.get("connected");
+    const message = searchParams.get("message");
+    
+    if (connected === "success") {
+      toast.success("Mailbox connected successfully!");
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("connected");
+      params.delete("message");
+      router.replace(`/settings?${params.toString()}`, { scroll: false });
+    } else if (connected === "error") {
+      toast.error(message || "Could not connect mailbox");
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("connected");
+      params.delete("message");
+      router.replace(`/settings?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const handleTabChange = (val: string) => {
     const newTab = val as TabKey;

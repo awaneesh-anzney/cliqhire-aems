@@ -31,6 +31,7 @@ export interface MailProviderConfig {
   smtpEncryption?: MailEncryptionType;
   sentFolder?: string;
   requiresAppPassword?: boolean;
+  requiresOAuth?: boolean;
   dailySendLimit?: number | null;
   status: "active" | "disabled";
   createdBy?: string;
