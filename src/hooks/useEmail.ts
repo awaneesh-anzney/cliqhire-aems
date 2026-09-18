@@ -174,6 +174,13 @@ export function useEmailList(folder: string, params: any = {}, enabled: boolean 
           limit: params.limit,
         });
       }
+      if (folder === "starred") {
+        return emailService.getThreads({
+          starredOnly: true,
+          page: params.page,
+          limit: params.limit,
+        });
+      }
       return emailService.getEmailsList(folder, params);
     },
     enabled: enabled && !!folder,
