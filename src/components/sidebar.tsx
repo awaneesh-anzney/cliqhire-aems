@@ -178,7 +178,7 @@ export function Sidebar() {
   return (
     <UISidebar
       collapsible="icon"
-      className="border-r border-white/10 bg-brand/85 backdrop-blur-xl text-white shadow-sm transition-all duration-300"
+      className="border-r border-white/10 bg-brand/85 backdrop-blur-xl text-white shadow-sm transition-all duration-300 [&>div[data-sidebar=sidebar]]:bg-transparent"
       data-variant="sidebar"
     >
       {/* Brand Header */}
@@ -258,7 +258,7 @@ export function Sidebar() {
                           >
                             <Link
                               href={item.href}
-                              className="flex items-center gap-2.5 w-full h-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                              className="flex items-center gap-2.5 w-full h-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 !no-underline hover:!no-underline"
                             >
                               {/* Left active glowing indicator */}
                               {isActive && (
