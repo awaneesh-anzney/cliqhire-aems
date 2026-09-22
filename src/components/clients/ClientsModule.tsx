@@ -126,6 +126,9 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
   const [phoneNumberInput, setPhoneNumberInput] = useState("");
   const [industryInput, setIndustryInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
+  const [salesLeadInput, setSalesLeadInput] = useState("");
+  const [referredByInput, setReferredByInput] = useState("");
+  const [createdByInput, setCreatedByInput] = useState("");
   const [selectedClientStage, setSelectedClientStage] = useState<string>("All");
 
   // Debounced filters
@@ -136,6 +139,9 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
   const debouncedPhoneNumber = useDebounce(phoneNumberInput, 300);
   const debouncedIndustry = useDebounce(industryInput, 300);
   const debouncedLocation = useDebounce(locationInput, 300);
+  const debouncedSalesLead = useDebounce(salesLeadInput, 300);
+  const debouncedReferredBy = useDebounce(referredByInput, 300);
+  const debouncedCreatedBy = useDebounce(createdByInput, 300);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -173,6 +179,9 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     debouncedPhoneNumber,
     debouncedIndustry,
     debouncedLocation,
+    debouncedSalesLead,
+    debouncedReferredBy,
+    debouncedCreatedBy,
     selectedClientStage,
   ]);
 
@@ -184,6 +193,9 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     setPhoneNumberInput("");
     setIndustryInput("");
     setLocationInput("");
+    setSalesLeadInput("");
+    setReferredByInput("");
+    setCreatedByInput("");
     setSelectedClientStage("All");
     setCurrentPage(1);
   };
@@ -196,6 +208,9 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     if (phoneNumberInput.trim()) count++;
     if (industryInput.trim()) count++;
     if (locationInput.trim()) count++;
+    if (salesLeadInput.trim()) count++;
+    if (referredByInput.trim()) count++;
+    if (createdByInput.trim()) count++;
     if (isLeads && selectedClientStage !== "All") count++;
     return count;
   }, [
@@ -205,6 +220,9 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     phoneNumberInput,
     industryInput,
     locationInput,
+    salesLeadInput,
+    referredByInput,
+    createdByInput,
     isLeads,
     selectedClientStage,
   ]);
@@ -230,6 +248,9 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     phoneNumber: debouncedPhoneNumber || undefined,
     industry: debouncedIndustry || undefined,
     location: debouncedLocation || undefined,
+    salesLead: debouncedSalesLead || undefined,
+    referredBy: debouncedReferredBy || undefined,
+    createdBy: debouncedCreatedBy || undefined,
     clientStage: fetchStage,
     topLevelOnly: true,
   });
@@ -249,8 +270,11 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       createdAt: c.createdAt,
       jobCount: c.jobCount ?? 0,
       incorporationDate: (c as any).incorporationDate ?? "",
-      createdBy:
-        c.createdBy?.name || (typeof c.createdBy === "string" ? c.createdBy : ""),
+      createdBy: (typeof c.createdBy === "object" && c.createdBy !== null)
+        ? (c.createdBy.firstName && c.createdBy.lastName)
+          ? `${c.createdBy.firstName} ${c.createdBy.lastName}`
+          : c.createdBy.name || ""
+        : (typeof c.createdBy === "string" ? c.createdBy : ""),
       clientAge: (c as any).clientAge,
       clientType: (c as any).clientType || "",
       nextFollowUpDate: (c as any).nextFollowUpDate || "",
@@ -821,6 +845,12 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
           setIndustryInput={setIndustryInput}
           locationInput={locationInput}
           setLocationInput={setLocationInput}
+          salesLeadInput={salesLeadInput}
+          setSalesLeadInput={setSalesLeadInput}
+          referredByInput={referredByInput}
+          setReferredByInput={setReferredByInput}
+          createdByInput={createdByInput}
+          setCreatedByInput={setCreatedByInput}
           selectedClientStage={selectedClientStage}
           setSelectedClientStage={isLeads ? setSelectedClientStage : undefined}
           isLeads={isLeads}

@@ -145,9 +145,12 @@ export interface ClientResponse {
     groupCode?: string;
   };
   createdBy?: {
-    id: string;
-    name: string;
-  };
+    _id?: string;
+    id?: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+  } | string;
   nextFollowUpDate?: string;
   nextFollowUpOwner?: {
     _id: string;
