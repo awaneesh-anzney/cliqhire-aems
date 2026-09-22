@@ -270,11 +270,11 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       createdAt: c.createdAt,
       jobCount: c.jobCount ?? 0,
       incorporationDate: (c as any).incorporationDate ?? "",
-      createdBy: c.createdBy 
+      createdBy: (typeof c.createdBy === "object" && c.createdBy !== null)
         ? (c.createdBy.firstName && c.createdBy.lastName)
           ? `${c.createdBy.firstName} ${c.createdBy.lastName}`
-          : c.createdBy.name || (typeof c.createdBy === "string" ? c.createdBy : "")
-        : "",
+          : c.createdBy.name || ""
+        : (typeof c.createdBy === "string" ? c.createdBy : ""),
       clientAge: (c as any).clientAge,
       clientType: (c as any).clientType || "",
       nextFollowUpDate: (c as any).nextFollowUpDate || "",
