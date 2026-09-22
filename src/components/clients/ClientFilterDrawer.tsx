@@ -47,6 +47,12 @@ interface ClientFilterDrawerProps {
   setIndustryInput: (val: string) => void;
   locationInput: string;
   setLocationInput: (val: string) => void;
+  salesLeadInput: string;
+  setSalesLeadInput: (val: string) => void;
+  referredByInput: string;
+  setReferredByInput: (val: string) => void;
+  createdByInput: string;
+  setCreatedByInput: (val: string) => void;
   selectedClientStage?: string;
   setSelectedClientStage?: (val: string) => void;
   isLeads?: boolean;
@@ -70,6 +76,12 @@ export const ClientFilterDrawer: React.FC<ClientFilterDrawerProps> = ({
   setIndustryInput,
   locationInput,
   setLocationInput,
+  salesLeadInput,
+  setSalesLeadInput,
+  referredByInput,
+  setReferredByInput,
+  createdByInput,
+  setCreatedByInput,
   selectedClientStage,
   setSelectedClientStage,
   isLeads = false,
@@ -276,6 +288,84 @@ export const ClientFilterDrawer: React.FC<ClientFilterDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setPhoneNumberInput("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Sales Lead Filter */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-muted-foreground" />
+              <span>Sales Lead</span>
+            </Label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="e.g. Ahmed..."
+                value={salesLeadInput}
+                onChange={(e) => setSalesLeadInput(e.target.value)}
+                className="w-full h-9 pl-3 pr-8 text-xs bg-muted/30 border border-border/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground/60 transition-all"
+              />
+              {salesLeadInput && (
+                <button
+                  type="button"
+                  onClick={() => setSalesLeadInput("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Referred By Filter */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-muted-foreground" />
+              <span>Referred By</span>
+            </Label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="e.g. Sara..."
+                value={referredByInput}
+                onChange={(e) => setReferredByInput(e.target.value)}
+                className="w-full h-9 pl-3 pr-8 text-xs bg-muted/30 border border-border/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground/60 transition-all"
+              />
+              {referredByInput && (
+                <button
+                  type="button"
+                  onClick={() => setReferredByInput("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Created By Filter */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-muted-foreground" />
+              <span>Created By</span>
+            </Label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="e.g. John Doe..."
+                value={createdByInput}
+                onChange={(e) => setCreatedByInput(e.target.value)}
+                className="w-full h-9 pl-3 pr-8 text-xs bg-muted/30 border border-border/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground/60 transition-all"
+              />
+              {createdByInput && (
+                <button
+                  type="button"
+                  onClick={() => setCreatedByInput("")}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-3.5 h-3.5" />

@@ -14,6 +14,9 @@ export interface ClientsQueryParams {
   location?: string;
   clientTeam?: "Enterprise" | "SMB" | "Mid-Market";
   topLevelOnly?: boolean;
+  salesLead?: string;
+  referredBy?: string;
+  createdBy?: string;
 }
 
 export interface ClientsPage {
