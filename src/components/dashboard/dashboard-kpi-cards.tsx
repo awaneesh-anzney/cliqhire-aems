@@ -8,18 +8,14 @@ import {
   Users,
   UserCheck,
   FileText,
-  Layers,
   ArrowUpRight,
   TrendingUp,
-  Target,
-  Sparkles,
   Rocket,
-  CheckCircle2,
-  Plus,
   ArrowRight,
-  Zap,
-  Clock,
   ShieldCheck,
+  Workflow,
+  CheckCheck,
+  ListTodo,
 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboard";
 import { Badge } from "@/components/ui/badge";
@@ -41,44 +37,47 @@ export function DashboardKpiCards({
 
   if (isLoading) {
     return (
-      <div className="flex-1 min-h-0 flex flex-col gap-2.5 overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden animate-in fade-in duration-300">
         {/* Skeleton: 4 Primary Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 shrink-0">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="p-3 rounded-xl border border-border/70 bg-card/95 shadow-2xs space-y-2.5"
+              className="p-4 rounded-2xl border border-border/70 bg-card/95 shadow-2xs space-y-3"
             >
               <div className="flex justify-between items-center">
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-6 w-6 rounded-lg" />
+                <Skeleton className="h-3.5 w-24 rounded-md" />
+                <Skeleton className="h-8 w-8 rounded-xl" />
               </div>
-              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-8 w-24 rounded-md" />
               <Skeleton className="h-1.5 w-full rounded-full" />
               <div className="flex justify-between">
-                <Skeleton className="h-2.5 w-12" />
-                <Skeleton className="h-2.5 w-12" />
+                <Skeleton className="h-3 w-16 rounded-md" />
+                <Skeleton className="h-3 w-16 rounded-md" />
               </div>
             </div>
           ))}
         </div>
 
         {/* Skeleton: Two-Column Main Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-1 min-h-0">
-          <div className="lg:col-span-8 p-4 rounded-xl border border-border/70 bg-card/95 shadow-2xs space-y-4">
-            <Skeleton className="h-4 w-40" />
-            <div className="grid grid-cols-3 gap-2">
-              <Skeleton className="h-12 w-full rounded-lg" />
-              <Skeleton className="h-12 w-full rounded-lg" />
-              <Skeleton className="h-12 w-full rounded-lg" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 min-h-0">
+          <div className="lg:col-span-8 p-4 rounded-2xl border border-border/70 bg-card/95 shadow-2xs space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-border/40">
+              <Skeleton className="h-4 w-44 rounded-md" />
+              <Skeleton className="h-5 w-24 rounded-full" />
             </div>
-            <Skeleton className="h-28 w-full rounded-lg" />
+            <div className="grid grid-cols-3 gap-3">
+              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-16 w-full rounded-xl" />
+            </div>
+            <Skeleton className="h-32 w-full rounded-xl" />
           </div>
-          <div className="lg:col-span-4 p-4 rounded-xl border border-border/70 bg-card/95 shadow-2xs space-y-3">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-14 w-full rounded-xl" />
-            <Skeleton className="h-14 w-full rounded-xl" />
-            <Skeleton className="h-14 w-full rounded-xl" />
+          <div className="lg:col-span-4 p-4 rounded-2xl border border-border/70 bg-card/95 shadow-2xs space-y-3">
+            <Skeleton className="h-4 w-32 rounded-md" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl" />
           </div>
         </div>
       </div>
@@ -122,46 +121,47 @@ export function DashboardKpiCards({
   const candidatesCompleted = dashboardStats?.pipeline?.candidatesCompleted || 0;
   const stageBreakdown = dashboardStats?.pipeline?.stageBreakdown || [];
 
-  // 5. Calculations for Users & Contracts
+  // 5. Calculations for Users, Contracts, Tasks
   const usersTotal = dashboardStats?.users?.total || 0;
   const usersActive = dashboardStats?.users?.active || 0;
   const usersActivePercent = usersTotal > 0 ? (usersActive / usersTotal) * 100 : 0;
   const contractsTotal = dashboardStats?.contracts?.total || 0;
+  const tasksPending = dashboardStats?.tasks?.pending || 0;
+  const tasksTotal = dashboardStats?.tasks?.total || 0;
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col gap-2.5 overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
       {/* ─── SECTION 1: PRIMARY EXECUTIVE METRICS PULSE STRIP ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 shrink-0">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
+        
         {/* Metric 1: Candidates Pool */}
         <Link
           href="/candidates"
-          className="group relative p-2.5 sm:p-3 rounded-xl border border-border/70 bg-card/95 backdrop-blur-sm shadow-2xs hover:shadow-xs hover:border-primary/40 transition-all duration-200 flex flex-col justify-between"
+          className="group relative p-3.5 sm:p-4 rounded-2xl border border-border/80 bg-card hover:bg-card/95 shadow-2xs hover:shadow-xs hover:border-blue-400/50 transition-all duration-200 flex flex-col justify-between"
         >
           <div className="flex justify-between items-start">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                Candidates Pool
-              </span>
-            </div>
-            <div className="p-1 rounded-md bg-primary-soft text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200">
-              <Users className="w-3.5 h-3.5" />
+            <span className="text-[10.5px] font-black uppercase tracking-wider text-muted-foreground">
+              Candidate Pool
+            </span>
+            <div className="h-8 w-8 rounded-xl bg-blue-50 border border-blue-200/60 text-blue-600 dark:bg-blue-950/40 dark:border-blue-900/40 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
+              <Users className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="my-1 flex items-baseline justify-between">
+          <div className="my-2 flex items-baseline justify-between">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
                 {candidatesTotal.toLocaleString()}
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground">profiles</span>
+              <span className="text-[11px] font-semibold text-muted-foreground">talent profiles</span>
             </div>
-            <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            <ArrowUpRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-blue-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </div>
 
-          <div className="space-y-1 mt-0.5">
-            <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
+          <div className="space-y-1.5 mt-0.5">
+            <div className="w-full h-1.5 bg-muted/80 rounded-full overflow-hidden flex">
               <div
-                className="h-full bg-emerald-500 transition-all duration-500"
+                className="h-full bg-emerald-500 transition-all duration-500 rounded-l-full"
                 style={{ width: `${candidatesActivePercent}%` }}
               />
               <div
@@ -169,8 +169,8 @@ export function DashboardKpiCards({
                 style={{ width: `${candidatesInactivePercent}%` }}
               />
             </div>
-            <div className="flex items-center justify-between text-[9.5px] font-bold">
-              <span className="flex items-center gap-1 text-emerald-600">
+            <div className="flex items-center justify-between text-[10px] font-bold">
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {candidatesActive.toLocaleString()} Active
               </span>
@@ -184,31 +184,31 @@ export function DashboardKpiCards({
         {/* Metric 2: Job Requisitions */}
         <Link
           href="/jobs"
-          className="group relative p-2.5 sm:p-3 rounded-xl border border-border/70 bg-card/95 backdrop-blur-sm shadow-2xs hover:shadow-xs hover:border-amber-500/40 transition-all duration-200 flex flex-col justify-between"
+          className="group relative p-3.5 sm:p-4 rounded-2xl border border-border/80 bg-card hover:bg-card/95 shadow-2xs hover:shadow-xs hover:border-blue-500/50 transition-all duration-200 flex flex-col justify-between"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            <span className="text-[10.5px] font-black uppercase tracking-wider text-muted-foreground">
               Job Requisitions
             </span>
-            <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-all duration-200">
-              <Briefcase className="w-3.5 h-3.5" />
+            <div className="h-8 w-8 rounded-xl bg-blue-50 border border-blue-200/60 text-blue-600 dark:bg-blue-950/40 dark:border-blue-900/40 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
+              <Briefcase className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="my-1 flex items-baseline justify-between">
+          <div className="my-2 flex items-baseline justify-between">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
                 {jobsTotal.toLocaleString()}
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground">total roles</span>
+              <span className="text-[11px] font-semibold text-muted-foreground">open targets</span>
             </div>
-            <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-amber-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            <ArrowUpRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-blue-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </div>
 
-          <div className="space-y-1 mt-0.5">
-            <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
+          <div className="space-y-1.5 mt-0.5">
+            <div className="w-full h-1.5 bg-muted/80 rounded-full overflow-hidden flex">
               <div
-                className="h-full bg-blue-500 transition-all duration-500"
+                className="h-full bg-blue-500 transition-all duration-500 rounded-l-full"
                 style={{ width: `${jobsOpenPercent}%` }}
               />
               <div
@@ -216,12 +216,12 @@ export function DashboardKpiCards({
                 style={{ width: `${jobsActivePercent}%` }}
               />
             </div>
-            <div className="flex items-center justify-between text-[9.5px] font-bold">
-              <span className="flex items-center gap-1 text-blue-600">
+            <div className="flex items-center justify-between text-[10px] font-bold">
+              <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                 {jobsOpen} Open
               </span>
-              <span className="flex items-center gap-1 text-emerald-600">
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {jobsActiveStage} Active
               </span>
@@ -232,31 +232,31 @@ export function DashboardKpiCards({
         {/* Metric 3: Client Partners */}
         <Link
           href="/clients"
-          className="group relative p-2.5 sm:p-3 rounded-xl border border-border/70 bg-card/95 backdrop-blur-sm shadow-2xs hover:shadow-xs hover:border-emerald-500/40 transition-all duration-200 flex flex-col justify-between"
+          className="group relative p-3.5 sm:p-4 rounded-2xl border border-border/80 bg-card hover:bg-card/95 shadow-2xs hover:shadow-xs hover:border-emerald-500/50 transition-all duration-200 flex flex-col justify-between"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              Client Partners
+            <span className="text-[10.5px] font-black uppercase tracking-wider text-muted-foreground">
+              Client Accounts
             </span>
-            <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-200">
-              <Building2 className="w-3.5 h-3.5" />
+            <div className="h-8 w-8 rounded-xl bg-emerald-50 border border-emerald-200/60 text-emerald-600 dark:bg-emerald-950/40 dark:border-emerald-900/40 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
+              <Building2 className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="my-1 flex items-baseline justify-between">
+          <div className="my-2 flex items-baseline justify-between">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
                 {clientsTotal.toLocaleString()}
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground">accounts</span>
+              <span className="text-[11px] font-semibold text-muted-foreground">partners</span>
             </div>
-            <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-emerald-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            <ArrowUpRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-emerald-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </div>
 
-          <div className="space-y-1 mt-0.5">
-            <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
+          <div className="space-y-1.5 mt-0.5">
+            <div className="w-full h-1.5 bg-muted/80 rounded-full overflow-hidden flex">
               <div
-                className="h-full bg-purple-500 transition-all duration-500"
+                className="h-full bg-purple-500 transition-all duration-500 rounded-l-full"
                 style={{ width: `${clientsLeadPercent}%` }}
               />
               <div
@@ -268,135 +268,150 @@ export function DashboardKpiCards({
                 style={{ width: `${clientsSignedPercent}%` }}
               />
             </div>
-            <div className="flex items-center justify-between text-[9px] font-bold">
-              <span className="text-purple-600">{clientsLead} Lead</span>
-              <span className="text-sky-600">{clientsEngaged} Engaged</span>
-              <span className="text-emerald-600">{clientsSigned} Signed</span>
+            <div className="flex items-center justify-between text-[9.5px] font-bold">
+              <span className="text-purple-600 dark:text-purple-400">{clientsLead} Lead</span>
+              <span className="text-sky-600 dark:text-sky-400">{clientsEngaged} Engaged</span>
+              <span className="text-emerald-600 dark:text-emerald-400">{clientsSigned} Signed</span>
             </div>
           </div>
         </Link>
 
-        {/* Metric 4: Pipeline Throughput */}
+        {/* Metric 4: Placement & Throughput (Signature Crimson Rose #FFF1F2 Card) */}
         <Link
           href="/reactruterpipeline/pipeline"
-          className="group relative p-2.5 sm:p-3 rounded-xl border border-border/70 bg-card/95 backdrop-blur-sm shadow-2xs hover:shadow-xs hover:border-primary/40 transition-all duration-200 flex flex-col justify-between"
+          className="group relative p-3.5 sm:p-4 rounded-2xl border border-rose-200/90 dark:border-rose-900/50 bg-gradient-to-br from-[#FFF1F2] via-card to-card hover:bg-card/95 shadow-2xs hover:shadow-xs hover:border-rose-400 transition-all duration-200 flex flex-col justify-between"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              Funnel Throughput
+            <span className="text-[10.5px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-300">
+              Placed / Throughput
             </span>
-            <div className="p-1 rounded-md bg-purple-500/10 text-purple-600 group-hover:bg-purple-500 group-hover:text-white transition-all duration-200">
-              <Layers className="w-3.5 h-3.5" />
+            <div className="h-8 w-8 rounded-xl bg-[#FFF1F2] border border-rose-300/80 text-rose-600 dark:bg-rose-950/40 dark:border-rose-800/40 dark:text-rose-400 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
+              <CheckCheck className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="my-1 flex items-baseline justify-between">
+          <div className="my-2 flex items-baseline justify-between">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-                {pipelineTotal.toLocaleString()}
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+                {candidatesCompleted.toLocaleString()}
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground">in funnel</span>
+              <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400">hired</span>
             </div>
-            <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            <ArrowUpRight className="w-4 h-4 text-rose-400 group-hover:text-rose-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </div>
 
-          <div className="space-y-1 mt-0.5">
-            <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
+          <div className="space-y-1.5 mt-0.5">
+            <div className="w-full h-1.5 bg-muted/80 rounded-full overflow-hidden flex">
               <div
-                className="h-full bg-primary transition-all duration-500"
+                className="h-full bg-rose-500 transition-all duration-500 rounded-l-full"
                 style={{ width: `${Math.min((candidatesCompleted / (pipelineTotal || 1)) * 100, 100)}%` }}
               />
-              <div className="h-full bg-blue-500 flex-1 opacity-60" />
+              <div className="h-full bg-blue-500/70 flex-1" />
             </div>
-            <div className="flex items-center justify-between text-[9.5px] font-bold">
-              <span className="text-primary">{activePipelines} Active Pipelines</span>
-              <span className="text-emerald-600">{candidatesCompleted} Placed</span>
+            <div className="flex items-center justify-between text-[10px] font-bold">
+              <span className="text-blue-600 dark:text-blue-400 font-semibold">{activePipelines} Pipelines</span>
+              <span className="text-rose-600 dark:text-rose-400 font-black">{pipelineTotal} in Funnel</span>
             </div>
           </div>
         </Link>
       </div>
 
       {/* ─── SECTION 2: MAIN OPERATIONS & ANALYTICS GRID ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-1 min-h-0 overflow-hidden">
-        {/* LEFT COLUMN: Funnel Progression & Requisition Stages (8 Cols) */}
-        <div className="lg:col-span-8 flex flex-col rounded-xl border border-border/70 bg-card/95 shadow-2xs overflow-hidden">
-          {/* Funnel Header */}
-          <div className="px-3.5 py-2 border-b border-border/40 bg-muted/15 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-5 rounded bg-primary/10 text-primary flex items-center justify-center font-bold">
-                <TrendingUp className="h-3 w-3" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 min-h-0 overflow-hidden">
+        
+        {/* LEFT COLUMN: Pipeline Conversion Velocity (8 Cols) */}
+        <div className="lg:col-span-8 flex flex-col rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+          {/* Header */}
+          <div className="px-4 py-3 border-b border-border/60 bg-muted/20 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded-xl bg-blue-50 border border-blue-200/60 text-blue-600 dark:bg-blue-950/40 dark:border-blue-900/40 dark:text-blue-400 flex items-center justify-center font-bold">
+                <TrendingUp className="h-4 w-4" />
               </div>
-              <h4 className="text-xs font-black uppercase tracking-wider text-foreground">
-                Recruitment Funnel Velocity
-              </h4>
+              <div>
+                <h4 className="text-xs font-black tracking-tight text-foreground uppercase">
+                  Recruitment Pipeline Velocity
+                </h4>
+                <p className="text-[10px] text-muted-foreground font-medium">
+                  Active candidate attrition & conversion through selection stages
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
+
+            <div className="flex items-center gap-2">
               <Badge
                 variant="outline"
-                className="text-[9.5px] font-bold bg-muted/30 text-muted-foreground border-border/60 py-0 px-1.5 h-4.5"
+                className="text-[10px] font-bold bg-[#EFF6FF] text-blue-700 border-blue-200 py-0.5 px-2.5 rounded-full"
               >
-                {pipelineTotal} Total Candidates
+                {pipelineTotal} Total In Funnel
               </Badge>
+              <Link
+                href="/reactruterpipeline/pipeline"
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors px-2 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/30"
+              >
+                <span>Kanban</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </div>
 
-          {/* Funnel Body */}
-          <div className="flex-1 min-h-0 p-3 sm:p-3.5 flex flex-col justify-between overflow-y-auto custom-scrollbar gap-3">
-            {/* Funnel Metric Pill Strip */}
-            <div className="grid grid-cols-3 gap-2 shrink-0">
-              <div className="p-2 rounded-lg bg-blue-500/5 border border-blue-500/15 flex flex-col">
-                <span className="text-[9px] font-black uppercase tracking-wider text-blue-600/80">
+          {/* Body */}
+          <div className="flex-1 min-h-0 p-4 flex flex-col justify-between overflow-y-auto custom-scrollbar gap-4">
+            {/* Metric Pill Strip */}
+            <div className="grid grid-cols-3 gap-3 shrink-0">
+              <div className="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-900/40 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700/80 dark:text-blue-400">
                   Active Pipelines
                 </span>
-                <span className="text-lg font-black text-blue-600 tracking-tight mt-0.5">
+                <span className="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-tight mt-0.5">
                   {activePipelines}
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-amber-500/5 border border-amber-500/15 flex flex-col">
-                <span className="text-[9px] font-black uppercase tracking-wider text-amber-600/80">
+              <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700/80 dark:text-amber-400">
                   In Screening / Review
                 </span>
-                <span className="text-lg font-black text-amber-600 tracking-tight mt-0.5">
+                <span className="text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight mt-0.5">
                   {candidatesInProcess}
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/15 flex flex-col">
-                <span className="text-[9px] font-black uppercase tracking-wider text-emerald-600/80">
-                  Successfully Hired
+              <div className="p-3 rounded-xl bg-[#FFF1F2] dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/40 flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+                  Successfully Placed
                 </span>
-                <span className="text-lg font-black text-emerald-600 tracking-tight mt-0.5">
+                <span className="text-2xl font-black text-rose-600 dark:text-rose-400 tracking-tight mt-0.5">
                   {candidatesCompleted}
                 </span>
               </div>
             </div>
 
-            {/* Visual Stage Progression Stepper */}
-            <div className="space-y-1.5">
+            {/* Candidate Stage Progression Tracker */}
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-primary" /> Candidate Stage Distribution
+                <span className="text-[10.5px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Workflow className="w-3.5 h-3.5 text-blue-600" /> Stage-by-Stage Attrition
                 </span>
-                <span className="text-[9.5px] font-medium text-muted-foreground">
-                  Active pipeline attrition
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  7 Core Candidate Stages
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
                 {stageBreakdown.map((st, idx) => {
-                  const stageColors: Record<string, { bg: string; text: string; dot: string }> = {
-                    sourcing: { bg: "bg-purple-500/10", text: "text-purple-600", dot: "bg-purple-500" },
-                    screening: { bg: "bg-pink-500/10", text: "text-pink-600", dot: "bg-pink-500" },
-                    "client screening": { bg: "bg-amber-500/10", text: "text-amber-600", dot: "bg-amber-500" },
-                    interview: { bg: "bg-blue-500/10", text: "text-blue-600", dot: "bg-blue-500" },
-                    hired: { bg: "bg-emerald-500/10", text: "text-emerald-600", dot: "bg-emerald-500" },
-                    onboarding: { bg: "bg-teal-500/10", text: "text-teal-600", dot: "bg-teal-500" },
-                    verification: { bg: "bg-indigo-500/10", text: "text-indigo-600", dot: "bg-indigo-500" },
+                  const stageColors: Record<string, { bg: string; text: string; dot: string; border: string }> = {
+                    sourcing: { bg: "bg-purple-500/5", text: "text-purple-600 dark:text-purple-400", dot: "bg-purple-500", border: "border-purple-200/60 dark:border-purple-900/40" },
+                    screening: { bg: "bg-pink-500/5", text: "text-pink-600 dark:text-pink-400", dot: "bg-pink-500", border: "border-pink-200/60 dark:border-pink-900/40" },
+                    "client screening": { bg: "bg-amber-500/5", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500", border: "border-amber-200/60 dark:border-amber-900/40" },
+                    interview: { bg: "bg-blue-500/5", text: "text-blue-600 dark:text-blue-400", dot: "bg-blue-500", border: "border-blue-200/60 dark:border-blue-900/40" },
+                    hired: { bg: "bg-emerald-500/5", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", border: "border-emerald-200/60 dark:border-emerald-900/40" },
+                    onboarding: { bg: "bg-teal-500/5", text: "text-teal-600 dark:text-teal-400", dot: "bg-teal-500", border: "border-teal-200/60 dark:border-teal-900/40" },
+                    verification: { bg: "bg-indigo-500/5", text: "text-indigo-600 dark:text-indigo-400", dot: "bg-indigo-500", border: "border-indigo-200/60 dark:border-indigo-900/40" },
                   };
                   const color =
                     stageColors[st.stage.toLowerCase()] || {
-                      bg: "bg-muted/40",
+                      bg: "bg-muted/30",
                       text: "text-foreground",
                       dot: "bg-slate-400",
+                      border: "border-border/60",
                     };
 
                   const pct =
@@ -406,8 +421,9 @@ export function DashboardKpiCards({
                     <div
                       key={idx}
                       className={cn(
-                        "p-2 rounded-lg border border-border/50 flex flex-col justify-between transition-all hover:scale-[1.02]",
-                        color.bg
+                        "p-2.5 rounded-xl border flex flex-col justify-between transition-all hover:scale-[1.02] shadow-2xs",
+                        color.bg,
+                        color.border
                       )}
                     >
                       <div className="flex items-center gap-1.5">
@@ -416,11 +432,11 @@ export function DashboardKpiCards({
                           {st.stage}
                         </span>
                       </div>
-                      <div className="flex items-baseline justify-between mt-1">
-                        <span className={cn("text-sm font-black tracking-tight", color.text)}>
+                      <div className="flex items-baseline justify-between mt-2">
+                        <span className={cn("text-base font-black tracking-tight", color.text)}>
                           {st.count}
                         </span>
-                        <span className="text-[8.5px] font-bold text-muted-foreground/80">
+                        <span className="text-[9px] font-bold text-muted-foreground/75">
                           {pct}%
                         </span>
                       </div>
@@ -430,13 +446,13 @@ export function DashboardKpiCards({
               </div>
             </div>
 
-            {/* Job Requisitions Stage Breakdown Bar */}
-            <div className="p-2.5 rounded-lg border border-border/50 bg-muted/20 space-y-1.5 shrink-0">
+            {/* Job Requisitions Stage Cloud */}
+            <div className="p-3.5 rounded-xl border border-border/70 bg-muted/20 space-y-2 shrink-0">
               <div className="flex items-center justify-between">
-                <span className="text-[9.5px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                  <Briefcase className="w-3 h-3 text-primary" /> Active Job Requisition Stages
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-blue-600" /> Active Job Requisition Stages
                 </span>
-                <span className="text-[9.5px] font-bold text-foreground">
+                <span className="text-[10px] font-bold text-foreground">
                   {jobsTotal} Open Positions
                 </span>
               </div>
@@ -444,26 +460,26 @@ export function DashboardKpiCards({
               <div className="flex flex-wrap gap-2">
                 {jobStageBreakdown.map((js: any, idx: number) => {
                   const stageColors: Record<string, string> = {
-                    open: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-                    active: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-                    "on hold": "bg-amber-500/10 text-amber-600 border-amber-500/20",
-                    closed: "bg-slate-500/10 text-slate-600 border-slate-500/20",
-                    hired: "bg-teal-500/10 text-teal-600 border-teal-500/20",
-                    onboarding: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+                    open: "bg-blue-50 text-blue-700 border-blue-200",
+                    active: "bg-emerald-50 text-emerald-700 border-emerald-200",
+                    "on hold": "bg-amber-50 text-amber-700 border-amber-200",
+                    closed: "bg-slate-100 text-slate-700 border-slate-200",
+                    hired: "bg-teal-50 text-teal-700 border-teal-200",
+                    onboarding: "bg-indigo-50 text-indigo-700 border-indigo-200",
                   };
                   const color =
                     stageColors[js.stage?.toLowerCase()] ||
-                    "bg-muted text-muted-foreground border-border/50";
+                    "bg-muted text-muted-foreground border-border/60";
 
                   return (
                     <div
                       key={idx}
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9.5px] font-bold",
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border text-[10px] font-bold shadow-2xs",
                         color
                       )}
                     >
-                      <span>{js.stage}:</span>
+                      <span className="capitalize">{js.stage}:</span>
                       <span className="font-black">{js.count}</span>
                     </div>
                   );
@@ -473,131 +489,127 @@ export function DashboardKpiCards({
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Action Center & Operational Telemetry (4 Cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-2.5 overflow-hidden">
+        {/* RIGHT COLUMN: Quick Launchpad & Operational Pulse (4 Cols) */}
+        <div className="lg:col-span-4 flex flex-col gap-3 overflow-hidden">
           {/* Quick Action Launchpad */}
-          <div className="rounded-xl border border-border/70 bg-card/95 shadow-2xs p-3 flex flex-col gap-2 shrink-0">
-            <div className="flex items-center justify-between pb-1 border-b border-border/40">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                <Rocket className="w-3 h-3 text-primary" /> Quick Launchpad
+          <div className="rounded-2xl border border-border/80 bg-card shadow-xs p-3.5 sm:p-4 flex flex-col gap-2.5 shrink-0">
+            <div className="flex items-center justify-between pb-2 border-b border-border/60">
+              <span className="text-[10.5px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Rocket className="w-4 h-4 text-rose-500" /> Operations Launchpad
               </span>
-              <span className="text-[9px] font-bold text-primary">Immediate Actions</span>
+              <span className="text-[9.5px] font-bold text-rose-600 bg-[#FFF1F2] px-2 py-0.5 rounded-full border border-rose-200/80">
+                Direct Triggers
+              </span>
             </div>
 
-            {/* Action 1: Onboard Client */}
+            {/* Action 1: Capture Candidate (Crimson Rose Highlight with #FFF1F2) */}
             <button
-              onClick={onOpenClient}
+              onClick={onOpenCandidate}
               type="button"
-              className="group dashboard-action-card"
+              className="group flex items-center gap-3 p-3 rounded-xl bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-rose-400 hover:bg-[#FFF1F2]/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
             >
-              <div className="dashboard-action-icon bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground">
-                <Building2 className="w-4 h-4" />
+              <div className="p-2.5 rounded-xl bg-[#FFF1F2] border border-rose-200/80 text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-all shrink-0">
+                <UserCheck className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <h5 className="text-xs font-black text-foreground group-hover:text-primary transition-colors">
-                    Onboard Client
+                  <h5 className="text-xs font-bold text-foreground group-hover:text-rose-600 transition-colors">
+                    Capture Talent
                   </h5>
-                  <span className="dashboard-action-badge bg-primary/10 text-primary">
-                    + Client
+                  <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded-md bg-[#FFF1F2] text-rose-600 border border-rose-200">
+                    + Intake
                   </span>
                 </div>
-                <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
-                  Set up organization profile & contracts
+                <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
+                  Resume parse or manual candidate intake
                 </p>
               </div>
-              <div className="dashboard-action-circle">
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all shrink-0" />
             </button>
 
             {/* Action 2: Post Job Requirement */}
             <button
               onClick={onOpenJob}
               type="button"
-              className="group dashboard-action-card"
+              className="group flex items-center gap-3 p-3 rounded-xl bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-blue-400 hover:bg-blue-50/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
             >
-              <div className="dashboard-action-icon bg-amber-500/10 text-amber-600 group-hover:bg-amber-500 group-hover:text-white">
+              <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200/80 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
                 <Briefcase className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <h5 className="text-xs font-black text-foreground group-hover:text-amber-600 transition-colors">
+                  <h5 className="text-xs font-bold text-foreground group-hover:text-blue-600 transition-colors">
                     Post Requisition
                   </h5>
-                  <span className="dashboard-action-badge bg-amber-500/10 text-amber-600">
-                    + Jobs
+                  <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600 border border-blue-200">
+                    + Job
                   </span>
                 </div>
-                <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
+                <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
                   Publish open job targets & CV quotas
                 </p>
               </div>
-              <div className="dashboard-action-circle">
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0" />
             </button>
 
-            {/* Action 3: Capture Candidate */}
+            {/* Action 3: Onboard Client */}
             <button
-              onClick={onOpenCandidate}
+              onClick={onOpenClient}
               type="button"
-              className="group dashboard-action-card"
+              className="group flex items-center gap-3 p-3 rounded-xl bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-emerald-400 hover:bg-emerald-50/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
             >
-              <div className="dashboard-action-icon bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white">
-                <UserCheck className="w-4 h-4" />
+              <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all shrink-0">
+                <Building2 className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <h5 className="text-xs font-black text-foreground group-hover:text-emerald-600 transition-colors">
-                    Capture Talent
+                  <h5 className="text-xs font-bold text-foreground group-hover:text-emerald-600 transition-colors">
+                    Onboard Client
                   </h5>
-                  <span className="dashboard-action-badge bg-emerald-500/10 text-emerald-600">
-                    + Intake
+                  <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200">
+                    + Client
                   </span>
                 </div>
-                <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
-                  Resume parse or manual candidate intake
+                <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
+                  Set up corporate accounts & billing
                 </p>
               </div>
-              <div className="dashboard-action-circle">
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all shrink-0" />
             </button>
           </div>
 
-          {/* Operational Pulse (Team & Agreements) */}
-          <div className="flex-1 min-h-0 grid grid-cols-2 gap-2.5">
+          {/* Operational Pulse (Team, Agreements, Tasks) */}
+          <div className="flex-1 min-h-0 grid grid-cols-2 gap-3">
             {/* Team Members Card */}
             <Link
               href="/teammembers"
-              className="group p-2.5 rounded-xl border border-border/70 bg-card/95 shadow-2xs hover:shadow-xs hover:border-teal-500/40 flex flex-col justify-between transition-all"
+              className="group p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs hover:shadow-md hover:border-teal-500/50 flex flex-col justify-between transition-all"
             >
               <div>
                 <div className="flex justify-between items-start mb-1">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                    Team Users
+                  <span className="text-[9.5px] font-black uppercase tracking-wider text-muted-foreground">
+                    Team Members
                   </span>
-                  <div className="p-1 rounded-md bg-teal-500/10 text-teal-600">
-                    <UserCheck className="w-3 h-3" />
+                  <div className="p-1.5 rounded-lg bg-teal-50 border border-teal-200/60 text-teal-600 shadow-2xs">
+                    <UserCheck className="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div className="flex items-baseline gap-1 my-0.5">
-                  <span className="text-lg font-black tracking-tight text-foreground">
+                <div className="flex items-baseline gap-1 my-1">
+                  <span className="text-xl font-black tracking-tight text-foreground">
                     {usersTotal}
                   </span>
-                  <span className="text-[9.5px] font-bold text-muted-foreground">accounts</span>
+                  <span className="text-[10px] font-bold text-muted-foreground">recruiter profiles</span>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <div className="w-full h-1 bg-muted rounded-full overflow-hidden flex">
+              <div className="space-y-1.5">
+                <div className="w-full h-1.5 bg-muted/80 rounded-full overflow-hidden flex">
                   <div
-                    className="h-full bg-teal-500 transition-all duration-500"
+                    className="h-full bg-teal-500 transition-all duration-500 rounded-full"
                     style={{ width: `${usersActivePercent}%` }}
                   />
                 </div>
-                <div className="flex justify-between items-center text-[9px] font-bold text-teal-600">
+                <div className="flex justify-between items-center text-[9.5px] font-bold text-teal-600">
                   <span>{usersActive} Active</span>
                   <span className="text-muted-foreground">100%</span>
                 </div>
@@ -607,28 +619,28 @@ export function DashboardKpiCards({
             {/* Active Contracts Card */}
             <Link
               href="/clients"
-              className="group p-2.5 rounded-xl border border-border/70 bg-card/95 shadow-2xs hover:shadow-xs hover:border-pink-500/40 flex flex-col justify-between transition-all"
+              className="group p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs hover:shadow-md hover:border-rose-400/50 flex flex-col justify-between transition-all"
             >
               <div>
                 <div className="flex justify-between items-start mb-1">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                    Contracts
+                  <span className="text-[9.5px] font-black uppercase tracking-wider text-muted-foreground">
+                    Agreements
                   </span>
-                  <div className="p-1 rounded-md bg-pink-500/10 text-pink-600">
-                    <FileText className="w-3 h-3" />
+                  <div className="p-1.5 rounded-lg bg-[#FFF1F2] border border-rose-200/80 text-rose-600 shadow-2xs">
+                    <FileText className="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div className="flex items-baseline gap-1 my-0.5">
-                  <span className="text-lg font-black tracking-tight text-foreground">
+                <div className="flex items-baseline gap-1 my-1">
+                  <span className="text-xl font-black tracking-tight text-foreground">
                     {contractsTotal}
                   </span>
-                  <span className="text-[9.5px] font-bold text-muted-foreground">executed</span>
+                  <span className="text-[10px] font-bold text-muted-foreground">contracts signed</span>
                 </div>
               </div>
 
-              <div className="p-1 rounded-md bg-pink-500/5 border border-pink-500/15 flex items-center justify-between text-[9px] font-bold text-pink-600">
-                <span className="uppercase tracking-wider">Active</span>
-                <ShieldCheck className="w-3 h-3" />
+              <div className="p-1.5 rounded-lg bg-[#FFF1F2] border border-rose-200/80 flex items-center justify-between text-[9.5px] font-bold text-rose-600">
+                <span className="uppercase tracking-wider">Verified Legal</span>
+                <ShieldCheck className="w-3.5 h-3.5" />
               </div>
             </Link>
           </div>

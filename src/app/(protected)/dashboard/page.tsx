@@ -36,44 +36,51 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-container">
       {/* ─── MODERN EXECUTIVE COMMAND & ACTION HEADER ─── */}
-      <header className="dashboard-welcome-banner">
-        {/* Subtle Dual Ambient Glow: Crimson & Electric Blue */}
-        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-rose-500/25 blur-2xl" />
-        <div className="pointer-events-none absolute left-1/3 -bottom-10 h-24 w-32 rounded-full bg-blue-400/20 blur-xl" />
+      <header className="relative overflow-hidden rounded-2xl bg-card/95 dark:bg-card/95 backdrop-blur-xl border border-border/80 p-3 sm:p-4 shadow-xs shrink-0 transition-all duration-300">
+        {/* Subtle Ambient Radial Tints: #FFF1F2 & #EFF6FF */}
+        <div className="pointer-events-none absolute -right-6 -top-6 h-36 w-36 rounded-full bg-[#FFF1F2] dark:bg-rose-500/10 blur-2xl" />
+        <div className="pointer-events-none absolute left-1/3 -bottom-8 h-28 w-36 rounded-full bg-[#EFF6FF] dark:bg-blue-500/10 blur-xl" />
 
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          {/* Welcome & Status Pill */}
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="h-7.5 w-7.5 rounded-lg bg-gradient-to-br from-rose-500/25 to-blue-500/30 border border-white/20 flex items-center justify-center shrink-0 backdrop-blur-md shadow-2xs">
-              <Sparkles className="h-4 w-4 text-white" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Welcome & Context Strip */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#FFF1F2] to-[#EFF6FF] dark:from-rose-500/20 dark:to-blue-500/20 border border-rose-200/60 dark:border-rose-800/40 flex items-center justify-center shrink-0 shadow-2xs">
+              <Sparkles className="h-5 w-5 text-rose-500 dark:text-rose-400" />
             </div>
 
-            <div className="flex items-baseline gap-2">
-              <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-1.5">
-                Welcome back, {firstName}
-              </h1>
-              <span className="hidden md:inline text-[11px] font-medium text-white/75">
-                Talent Operations & Sourcing Hub
-              </span>
-            </div>
-
-            {/* Live Feed indicator */}
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-bold text-white/90">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Workspace Live</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base sm:text-lg font-black tracking-tight text-foreground">
+                  Welcome back, {firstName}
+                </h1>
+                {/* Live workspace indicator */}
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Workspace Live</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground font-medium">
+                Talent Operations & Sourcing Hub • Real-time Requisition & Pipeline Analytics
+              </p>
             </div>
           </div>
 
           {/* Action Bar & Date Badge */}
-          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
+          <div className="flex items-center gap-2 shrink-0 self-end md:self-auto flex-wrap">
+            {/* Current Date Badge with #FFF1F2 soft tint */}
+            <div className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF1F2] dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-[11px] font-bold text-rose-700 dark:text-rose-300 shadow-2xs">
+              <Calendar className="w-3.5 h-3.5 text-rose-500" />
+              <span>{currentDate}</span>
+            </div>
+
             {/* Quick Action: Client */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setOpenClientModal(true)}
-              className="h-7.5 px-2.5 sm:px-3 gap-1.5 bg-white/10 hover:bg-white/20 border-white/20 text-white hover:text-white rounded-lg transition-all active:scale-95 shadow-2xs text-[10.5px] font-black uppercase tracking-wider backdrop-blur-md"
+              className="h-8 px-3 gap-1.5 bg-card hover:bg-muted/80 border-border/80 text-foreground rounded-xl transition-all active:scale-95 shadow-2xs text-[11px] font-bold"
             >
-              <Building2 className="h-3 w-3 text-white" />
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
               <span>+ Client</span>
             </Button>
 
@@ -82,28 +89,22 @@ export default function DashboardPage() {
               variant="outline"
               size="sm"
               onClick={() => setOpenJobModal(true)}
-              className="h-7.5 px-2.5 sm:px-3 gap-1.5 bg-white/10 hover:bg-white/20 border-white/20 text-white hover:text-white rounded-lg transition-all active:scale-95 shadow-2xs text-[10.5px] font-black uppercase tracking-wider backdrop-blur-md"
+              className="h-8 px-3 gap-1.5 bg-blue-50/70 dark:bg-blue-950/30 hover:bg-blue-100/80 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl transition-all active:scale-95 shadow-2xs text-[11px] font-bold"
             >
-              <Briefcase className="h-3 w-3 text-white" />
-              <span>+ Jobs</span>
+              <Briefcase className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+              <span>+ Job</span>
             </Button>
 
-            {/* Quick Action: Candidate (Primary Crimson Standout) */}
+            {/* Quick Action: Candidate (Primary Crimson Rose Standout) */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setOpenCandidateModal(true)}
-              className="h-7.5 px-2.5 sm:px-3 gap-1.5 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white border border-rose-400/40 rounded-lg transition-all active:scale-95 shadow-xs shadow-rose-500/25 text-[10.5px] font-black uppercase tracking-wider"
+              className="h-8 px-3.5 gap-1.5 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white border border-rose-400/40 rounded-xl transition-all active:scale-95 shadow-xs shadow-rose-500/25 text-[11px] font-bold"
             >
-              <UserPlus className="h-3 w-3 text-white" />
+              <UserPlus className="h-3.5 w-3.5 text-white" />
               <span>+ Candidate</span>
             </Button>
-
-            {/* Current Date Badge */}
-            <div className="hidden lg:inline-flex dashboard-date-badge">
-              <Calendar className="w-3 h-3 text-white/80" />
-              <span>{currentDate}</span>
-            </div>
           </div>
         </div>
       </header>
