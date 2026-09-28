@@ -276,16 +276,16 @@ export function DashboardKpiCards({
           </div>
         </Link>
 
-        {/* Metric 4: Placement & Throughput (Signature Crimson Rose #FFF1F2 Card) */}
+        {/* Metric 4: Placement & Throughput (Emerald Green Theme) */}
         <Link
-          href="/reactruterpipeline/pipeline"
-          className="group relative p-3 sm:p-3.5 rounded-xl border border-rose-200/90 dark:border-rose-900/50 bg-gradient-to-br from-[#FFF1F2] via-card to-card hover:bg-card/95 shadow-2xs hover:shadow-xs hover:border-rose-400 transition-all duration-200 flex flex-col justify-between"
+          href="/reactruterpipeline"
+          className="group relative p-3 sm:p-3.5 rounded-xl border border-border/80 bg-card hover:bg-card/95 shadow-2xs hover:shadow-xs hover:border-emerald-500/50 transition-all duration-200 flex flex-col justify-between"
         >
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-300">
-              Placed / Throughput
+            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Placed / Hired
             </span>
-            <div className="h-7 w-7 rounded-lg bg-[#FFF1F2] border border-rose-300/80 text-rose-600 dark:bg-rose-950/40 dark:border-rose-800/40 dark:text-rose-400 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
+            <div className="h-7 w-7 rounded-lg bg-emerald-50 border border-emerald-200/80 text-emerald-600 dark:bg-emerald-950/40 dark:border-emerald-900/40 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
               <CheckCheck className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -295,32 +295,32 @@ export function DashboardKpiCards({
               <span className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
                 {candidatesCompleted.toLocaleString()}
               </span>
-              <span className="text-[10.5px] font-bold text-rose-600 dark:text-rose-400">hired</span>
+              <span className="text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400">hired</span>
             </div>
-            <ArrowUpRight className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-emerald-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </div>
 
           <div className="space-y-1 mt-0.5">
             <div className="w-full h-1.5 bg-muted/80 rounded-full overflow-hidden flex">
               <div
-                className="h-full bg-rose-500 transition-all duration-500 rounded-l-full"
+                className="h-full bg-emerald-500 transition-all duration-500 rounded-l-full"
                 style={{ width: `${Math.min((candidatesCompleted / (pipelineTotal || 1)) * 100, 100)}%` }}
               />
-              <div className="h-full bg-blue-500/70 flex-1" />
+              <div className="h-full bg-slate-300 dark:bg-slate-700 flex-1" />
             </div>
             <div className="flex items-center justify-between text-[9.5px] font-bold">
               <span className="text-blue-600 dark:text-blue-400 font-semibold">{activePipelines} Pipelines</span>
-              <span className="text-rose-600 dark:text-rose-400 font-black">{pipelineTotal} in Funnel</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{candidatesCompleted} Placements</span>
             </div>
           </div>
         </Link>
       </div>
 
       {/* ─── SECTION 2: MAIN OPERATIONS & ANALYTICS GRID ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-1 min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-1 min-h-0 h-full">
         
         {/* LEFT COLUMN: Pipeline Conversion Velocity (8 Cols) */}
-        <div className="lg:col-span-8 flex flex-col rounded-xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <div className="lg:col-span-8 flex flex-col rounded-xl border border-border/80 bg-card shadow-xs overflow-hidden h-full">
           {/* Header */}
           <div className="px-3.5 py-2 border-b border-border/60 bg-muted/20 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
@@ -342,10 +342,10 @@ export function DashboardKpiCards({
                 {pipelineTotal} In Funnel
               </Badge>
               <Link
-                href="/reactruterpipeline/pipeline"
+                href="/reactruterpipeline"
                 className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors px-1.5 py-0.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/30"
               >
-                <span>Kanban</span>
+                <span>View Pipeline</span>
                 <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -371,11 +371,11 @@ export function DashboardKpiCards({
                   {candidatesInProcess}
                 </span>
               </div>
-              <div className="p-2.5 rounded-xl bg-[#FFF1F2] dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/40 flex flex-col">
-                <span className="text-[9.5px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+              <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 flex flex-col">
+                <span className="text-[9.5px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                   Successfully Placed
                 </span>
-                <span className="text-xl font-black text-rose-600 dark:text-rose-400 tracking-tight mt-0.5">
+                <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight mt-0.5">
                   {candidatesCompleted}
                 </span>
               </div>
@@ -487,104 +487,115 @@ export function DashboardKpiCards({
         </div>
 
         {/* RIGHT COLUMN: Quick Launchpad & Operational Pulse (4 Cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-2.5">
+        <div className="lg:col-span-4 flex flex-col justify-between h-full gap-2.5">
           {/* Quick Action Launchpad */}
-          <div className="rounded-xl border border-border/80 bg-card shadow-xs p-3 flex flex-col gap-2 shrink-0">
-            <div className="flex items-center justify-between pb-1.5 border-b border-border/60">
-              <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <Rocket className="w-3.5 h-3.5 text-rose-500" /> Operations Launchpad
-              </span>
-              <span className="text-[9px] font-bold text-rose-600 bg-[#FFF1F2] px-2 py-0.2 rounded-full border border-rose-200/80">
+          <div className="flex-1 flex flex-col rounded-xl border border-border/80 bg-card shadow-xs overflow-hidden min-h-0">
+            {/* Header matching left column exactly */}
+            <div className="px-3.5 py-2 border-b border-border/60 bg-muted/20 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-lg bg-rose-50 border border-rose-200/60 text-rose-600 dark:bg-rose-950/40 dark:border-rose-900/40 dark:text-rose-400 flex items-center justify-center font-bold">
+                  <Rocket className="h-3.5 w-3.5" />
+                </div>
+                <h4 className="text-[11.5px] font-black tracking-tight text-foreground uppercase">
+                  Operations Launchpad
+                </h4>
+              </div>
+              <Badge
+                variant="outline"
+                className="text-[9.5px] font-bold bg-[#FFF1F2] text-rose-700 border-rose-200 py-0.5 px-2 rounded-full"
+              >
                 Direct Triggers
-              </span>
+              </Badge>
             </div>
 
-            {/* Action 1: Capture Candidate (Crimson Rose Highlight with #FFF1F2) */}
-            <button
-              onClick={onOpenCandidate}
-              type="button"
-              className="group flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-rose-400 hover:bg-[#FFF1F2]/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
-            >
-              <div className="p-1.5 rounded-md bg-[#FFF1F2] border border-rose-200/80 text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-all shrink-0">
-                <UserCheck className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h5 className="text-[11.5px] font-bold text-foreground group-hover:text-rose-600 transition-colors">
-                    Capture Talent
-                  </h5>
-                  <span className="text-[9px] font-black px-1.5 py-0.2 rounded-sm bg-[#FFF1F2] text-rose-600 border border-rose-200">
-                    + Intake
-                  </span>
+            <div className="p-2.5 sm:p-3 flex-1 flex flex-col justify-between gap-2 overflow-hidden">
+              {/* Action 1: Capture Candidate (Crimson Rose Highlight with #FFF1F2) */}
+              <button
+                onClick={onOpenCandidate}
+                type="button"
+                className="group flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-rose-400 hover:bg-[#FFF1F2]/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
+              >
+                <div className="p-1.5 rounded-md bg-[#FFF1F2] border border-rose-200/80 text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-all shrink-0">
+                  <UserCheck className="w-3.5 h-3.5" />
                 </div>
-                <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
-                  Resume parse or candidate intake
-                </p>
-              </div>
-              <ArrowRight className="w-3 h-3 text-muted-foreground/50 group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all shrink-0" />
-            </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-[11.5px] font-bold text-foreground group-hover:text-rose-600 transition-colors">
+                      Capture Talent
+                    </h5>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded-sm bg-[#FFF1F2] text-rose-600 border border-rose-200">
+                      + Intake
+                    </span>
+                  </div>
+                  <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
+                    Resume parse or candidate intake
+                  </p>
+                </div>
+                <ArrowRight className="w-3 h-3 text-muted-foreground/50 group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+              </button>
 
-            {/* Action 2: Post Job Requirement */}
-            <button
-              onClick={onOpenJob}
-              type="button"
-              className="group flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-blue-400 hover:bg-blue-50/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
-            >
-              <div className="p-1.5 rounded-md bg-blue-50 border border-blue-200/80 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
-                <Briefcase className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h5 className="text-[11.5px] font-bold text-foreground group-hover:text-blue-600 transition-colors">
-                    Post Requisition
-                  </h5>
-                  <span className="text-[9px] font-black px-1.5 py-0.2 rounded-sm bg-blue-50 text-blue-600 border border-blue-200">
-                    + Job
-                  </span>
+              {/* Action 2: Post Job Requirement */}
+              <button
+                onClick={onOpenJob}
+                type="button"
+                className="group flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-blue-400 hover:bg-blue-50/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
+              >
+                <div className="p-1.5 rounded-md bg-blue-50 border border-blue-200/80 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
+                  <Briefcase className="w-3.5 h-3.5" />
                 </div>
-                <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
-                  Publish open job targets & CV quotas
-                </p>
-              </div>
-              <ArrowRight className="w-3 h-3 text-muted-foreground/50 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0" />
-            </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-[11.5px] font-bold text-foreground group-hover:text-blue-600 transition-colors">
+                      Post Requisition
+                    </h5>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded-sm bg-blue-50 text-blue-600 border border-blue-200">
+                      + Job
+                    </span>
+                  </div>
+                  <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
+                    Publish open job targets & CV quotas
+                  </p>
+                </div>
+                <ArrowRight className="w-3 h-3 text-muted-foreground/50 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+              </button>
 
-            {/* Action 3: Onboard Client */}
-            <button
-              onClick={onOpenClient}
-              type="button"
-              className="group flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-emerald-400 hover:bg-emerald-50/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
-            >
-              <div className="p-1.5 rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all shrink-0">
-                <Building2 className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h5 className="text-[11.5px] font-bold text-foreground group-hover:text-emerald-600 transition-colors">
-                    Onboard Client
-                  </h5>
-                  <span className="text-[9px] font-black px-1.5 py-0.2 rounded-sm bg-emerald-50 text-emerald-600 border border-emerald-200">
-                    + Client
-                  </span>
+              {/* Action 3: Onboard Client */}
+              <button
+                onClick={onOpenClient}
+                type="button"
+                className="group flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/70 shadow-2xs hover:shadow-xs hover:border-emerald-400 hover:bg-emerald-50/50 transition-all text-left w-full cursor-pointer active:scale-[0.99]"
+              >
+                <div className="p-1.5 rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all shrink-0">
+                  <Building2 className="w-3.5 h-3.5" />
                 </div>
-                <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
-                  Set up corporate accounts & billing
-                </p>
-              </div>
-              <ArrowRight className="w-3 h-3 text-muted-foreground/50 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all shrink-0" />
-            </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-[11.5px] font-bold text-foreground group-hover:text-emerald-600 transition-colors">
+                      Onboard Client
+                    </h5>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded-sm bg-emerald-50 text-emerald-600 border border-emerald-200">
+                      + Client
+                    </span>
+                  </div>
+                  <p className="text-[9.5px] text-muted-foreground truncate leading-tight mt-0.5">
+                    Set up corporate accounts & billing
+                  </p>
+                </div>
+                <ArrowRight className="w-3 h-3 text-muted-foreground/50 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+              </button>
+            </div>
           </div>
 
-          {/* Operational Pulse (Team & Agreements Cards - Fully visible and well-proportioned) */}
-          <div className="grid grid-cols-2 gap-2.5 shrink-0">
+          {/* Operational Pulse (Team & Agreements Cards - Fully aligned and balanced) */}
+          <div className="grid grid-cols-2 gap-2.5 shrink-0 h-[105px]">
             {/* Team Members Card */}
             <Link
               href="/teammembers"
               className="group p-2.5 sm:p-3 rounded-xl border border-border/80 bg-card shadow-xs hover:shadow-md hover:border-teal-500/50 flex flex-col justify-between transition-all"
             >
               <div>
-                <div className="flex justify-between items-start mb-0.5">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
+                <div className="flex justify-between items-center mb-0.5">
+                  <span className="text-[9.5px] font-black uppercase tracking-wider text-muted-foreground">
                     Team Members
                   </span>
                   <div className="p-1 rounded-md bg-teal-50 border border-teal-200/60 text-teal-600 shadow-2xs">
@@ -595,12 +606,12 @@ export function DashboardKpiCards({
                   <span className="text-lg font-black tracking-tight text-foreground">
                     {usersTotal}
                   </span>
-                  <span className="text-[9px] font-bold text-muted-foreground">recruiters</span>
+                  <span className="text-[9.5px] font-semibold text-muted-foreground">recruiters</span>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="w-full h-1 bg-muted/80 rounded-full overflow-hidden flex">
+                <div className="w-full h-1.5 bg-muted/80 rounded-full overflow-hidden flex">
                   <div
                     className="h-full bg-teal-500 transition-all duration-500 rounded-full"
                     style={{ width: `${usersActivePercent}%` }}
@@ -616,14 +627,14 @@ export function DashboardKpiCards({
             {/* Active Contracts Card */}
             <Link
               href="/clients"
-              className="group p-2.5 sm:p-3 rounded-xl border border-border/80 bg-card shadow-xs hover:shadow-md hover:border-rose-400/50 flex flex-col justify-between transition-all"
+              className="group p-2.5 sm:p-3 rounded-xl border border-border/80 bg-card shadow-xs hover:shadow-md hover:border-purple-400/50 flex flex-col justify-between transition-all"
             >
               <div>
-                <div className="flex justify-between items-start mb-0.5">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
+                <div className="flex justify-between items-center mb-0.5">
+                  <span className="text-[9.5px] font-black uppercase tracking-wider text-muted-foreground">
                     Agreements
                   </span>
-                  <div className="p-1 rounded-md bg-[#FFF1F2] border border-rose-200/80 text-rose-600 shadow-2xs">
+                  <div className="p-1 rounded-md bg-purple-50 border border-purple-200/80 text-purple-600 shadow-2xs">
                     <FileText className="w-3 h-3" />
                   </div>
                 </div>
@@ -631,11 +642,11 @@ export function DashboardKpiCards({
                   <span className="text-lg font-black tracking-tight text-foreground">
                     {contractsTotal}
                   </span>
-                  <span className="text-[9px] font-bold text-muted-foreground">executed</span>
+                  <span className="text-[9.5px] font-semibold text-muted-foreground">executed</span>
                 </div>
               </div>
 
-              <div className="p-1 rounded-md bg-[#FFF1F2] border border-rose-200/80 flex items-center justify-between text-[9px] font-bold text-rose-600">
+              <div className="p-1 rounded-md bg-purple-50 border border-purple-200/80 flex items-center justify-between text-[9px] font-bold text-purple-600">
                 <span className="uppercase tracking-wider">Verified Legal</span>
                 <ShieldCheck className="w-3 h-3" />
               </div>
