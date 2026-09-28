@@ -178,7 +178,7 @@ export function Sidebar() {
   return (
     <UISidebar
       collapsible="icon"
-      className="border-r border-white/10 bg-brand/85 backdrop-blur-xl text-white shadow-sm transition-all duration-300 [&>div[data-sidebar=sidebar]]:bg-transparent"
+      className="border-r border-white/10 app-sidebar shadow-sm transition-all duration-300 [&>div[data-sidebar=sidebar]]:bg-transparent"
       data-variant="sidebar"
     >
       {/* Brand Header */}
@@ -187,21 +187,22 @@ export function Sidebar() {
           href="/"
           className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center select-none"
         >
-          {/* Logo Mark */}
+          {/* Logo Mark: Electric Blue with Crimson Accent Pill */}
           <div className="relative flex shrink-0 items-center justify-center">
-            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-primary shadow-md shadow-black/20 transition-transform duration-200 hover:scale-105 active:scale-95 font-black text-base tracking-tighter">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/30 border border-white/20 transition-transform duration-200 hover:scale-105 active:scale-95 font-black text-base tracking-tighter relative">
               CH
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-rose-500 ring-1 ring-white/60 animate-pulse" />
             </div>
           </div>
 
-          {/* Brand Text */}
+          {/* Brand Text: Cliq in White, Hire in Crimson Red */}
           <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-left-2 duration-300">
             <div className="flex items-center gap-1.5">
               <span className="text-[15px] font-black tracking-tight text-white leading-none">
-                Cliq<span className="text-red-400">Hire</span>
+                Cliq<span className="text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]">Hire</span>
               </span>
             </div>
-            <p className="text-[10px] font-medium text-white/70 mt-0.5 truncate">
+            <p className="text-[10px] font-medium text-white/60 mt-0.5 truncate">
               Talent & Recruitment
             </p>
           </div>
@@ -221,7 +222,7 @@ export function Sidebar() {
           <div className="space-y-4">
             {groupedModules.map((section, sIndex) => (
               <SidebarGroup key={sIndex} className="p-0">
-                <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-white/60 px-2 pb-1 pt-1 select-none group-data-[collapsible=icon]:hidden">
+                <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-white/50 px-2 pb-1 pt-1 select-none group-data-[collapsible=icon]:hidden">
                   {section.title}
                 </SidebarGroupLabel>
 
@@ -252,24 +253,24 @@ export function Sidebar() {
                             className={cn(
                               "relative flex items-center h-9 px-2.5 rounded-xl transition-all duration-150 select-none",
                               isActive
-                                ? "bg-white/20 text-white font-bold border border-white/25 shadow-2xs"
-                                : "text-white/80 hover:text-white hover:bg-white/10 border border-transparent font-medium"
+                                ? "bg-gradient-to-r from-blue-600/35 via-blue-500/20 to-transparent text-white font-bold border border-blue-400/30 shadow-xs"
+                                : "text-white/75 hover:text-white hover:bg-white/[0.08] border border-transparent font-medium"
                             )}
                           >
                             <Link
                               href={item.href}
                               className="flex items-center gap-2.5 w-full h-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 !no-underline hover:!no-underline"
                             >
-                              {/* Left active glowing indicator */}
+                              {/* Left active glowing indicator: Rose-to-Blue gradient bar */}
                               {isActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-white rounded-r-full group-data-[collapsible=icon]:hidden" />
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-gradient-to-b from-rose-500 to-blue-500 rounded-r-full shadow-[0_0_8px_rgba(244,63,94,0.6)] group-data-[collapsible=icon]:hidden" />
                               )}
 
                               <div
                                 className={cn(
                                   "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                                   isActive
-                                    ? "text-white"
+                                    ? "text-blue-400"
                                     : "text-white/70 group-hover:text-white"
                                 )}
                               >
@@ -281,7 +282,7 @@ export function Sidebar() {
                               </span>
 
                               {isActive && (
-                                <ChevronRight className="w-3.5 h-3.5 ml-auto text-white/70 group-data-[collapsible=icon]:hidden" />
+                                <ChevronRight className="w-3.5 h-3.5 ml-auto text-rose-400/90 group-data-[collapsible=icon]:hidden" />
                               )}
                             </Link>
                           </SidebarMenuButton>
@@ -298,26 +299,26 @@ export function Sidebar() {
 
       {/* Modern User Profile Footer */}
       <SidebarFooter className="p-2.5 border-t border-white/10 shrink-0 bg-transparent">
-        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-white/10 border border-white/15 group-data-[collapsible=icon]:justify-center">
+        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-white/[0.07] border border-white/10 group-data-[collapsible=icon]:justify-center hover:bg-white/[0.1] transition-colors">
           <Link
             href="/profile"
-            className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-90 transition-opacity"
           >
             <div className="relative shrink-0">
-              <Avatar className="h-8 w-8 rounded-lg border border-white/20 shadow-2xs">
+              <Avatar className="h-8 w-8 rounded-lg border border-blue-400/30 shadow-2xs">
                 <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-white/20 text-white font-bold text-[10px] rounded-lg">
+                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-800 text-white font-bold text-[10px] rounded-lg">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-brand" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#0B132B]" />
             </div>
 
             <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
               <span className="text-xs font-semibold text-white truncate leading-none">
                 {user?.name || "User"}
               </span>
-              <span className="text-[10px] font-medium text-white/70 truncate mt-0.5">
+              <span className="text-[10px] font-medium text-white/60 truncate mt-0.5">
                 {user?.role || "Member"}
               </span>
             </div>
@@ -327,7 +328,7 @@ export function Sidebar() {
             type="button"
             onClick={logout}
             title="Sign Out"
-            className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/15 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
+            className="p-1.5 rounded-lg text-white/70 hover:text-rose-400 hover:bg-rose-500/15 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>

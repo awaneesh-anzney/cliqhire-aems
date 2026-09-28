@@ -143,7 +143,7 @@ export function DashboardKpiCards({
                 Candidates Pool
               </span>
             </div>
-            <div className="p-1 rounded-md bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all duration-200">
+            <div className="p-1 rounded-md bg-primary-soft text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200">
               <Users className="w-3.5 h-3.5" />
             </div>
           </div>

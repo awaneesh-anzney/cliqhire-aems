@@ -34,17 +34,17 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="h-full min-h-0 w-full flex flex-col overflow-hidden p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-transparent animate-in fade-in duration-300">
+    <div className="dashboard-container">
       {/* ─── MODERN EXECUTIVE COMMAND & ACTION HEADER ─── */}
-      <header className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/95 to-slate-900 text-primary-foreground py-2 px-3 sm:px-4 border border-white/10 shadow-sm shrink-0">
-        {/* Subtle Ambient Glow */}
-        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent/20 blur-2xl" />
-        <div className="pointer-events-none absolute left-1/3 -bottom-10 h-24 w-32 rounded-full bg-white/5 blur-xl" />
+      <header className="dashboard-welcome-banner">
+        {/* Subtle Dual Ambient Glow: Crimson & Electric Blue */}
+        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-rose-500/25 blur-2xl" />
+        <div className="pointer-events-none absolute left-1/3 -bottom-10 h-24 w-32 rounded-full bg-blue-400/20 blur-xl" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           {/* Welcome & Status Pill */}
           <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="h-7.5 w-7.5 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center shrink-0 backdrop-blur-md shadow-2xs">
+            <div className="h-7.5 w-7.5 rounded-lg bg-gradient-to-br from-rose-500/25 to-blue-500/30 border border-white/20 flex items-center justify-center shrink-0 backdrop-blur-md shadow-2xs">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
 
@@ -88,19 +88,19 @@ export default function DashboardPage() {
               <span>+ Jobs</span>
             </Button>
 
-            {/* Quick Action: Candidate */}
+            {/* Quick Action: Candidate (Primary Crimson Standout) */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setOpenCandidateModal(true)}
-              className="h-7.5 px-2.5 sm:px-3 gap-1.5 bg-white text-primary hover:bg-white/90 border-white rounded-lg transition-all active:scale-95 shadow-2xs text-[10.5px] font-black uppercase tracking-wider"
+              className="h-7.5 px-2.5 sm:px-3 gap-1.5 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white border border-rose-400/40 rounded-lg transition-all active:scale-95 shadow-xs shadow-rose-500/25 text-[10.5px] font-black uppercase tracking-wider"
             >
-              <UserPlus className="h-3 w-3 text-primary" />
+              <UserPlus className="h-3 w-3 text-white" />
               <span>+ Candidate</span>
             </Button>
 
             {/* Current Date Badge */}
-            <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/20 border border-white/15 text-[10px] font-bold text-white/90 backdrop-blur-md">
+            <div className="hidden lg:inline-flex dashboard-date-badge">
               <Calendar className="w-3 h-3 text-white/80" />
               <span>{currentDate}</span>
             </div>

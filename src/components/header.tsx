@@ -136,8 +136,10 @@ export function Header() {
               </Button>
             ) : (
               <div className="flex items-center gap-1.5 text-xs text-white/70 font-medium truncate">
-                <span className="text-white/60 hidden sm:inline font-black tracking-tight">CliqHire</span>
-                <ChevronRight className="w-3 h-3 text-white/40 hidden sm:inline" />
+                <span className="text-white/60 hidden sm:inline font-black tracking-tight">
+                  Cliq<span className="text-rose-400">Hire</span>
+                </span>
+                <ChevronRight className="w-3 h-3 text-rose-400/80 hidden sm:inline" />
                 <span className="font-semibold text-white truncate">
                   {getPageTitle()}
                 </span>
@@ -166,13 +168,13 @@ export function Header() {
             </Button>
 
             {/* Status / Quick Action Pill */}
-            <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/10 border border-white/15 text-[11px] font-medium text-white/90">
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.08] border border-white/10 text-[11px] font-medium text-white/90">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>Workspace Live</span>
             </div>
 
             {/* Utility Controls Group */}
-            <div className="flex items-center gap-1 p-0.5 rounded-xl bg-white/10 border border-white/15 text-white">
+            <div className="flex items-center gap-1 p-0.5 rounded-xl bg-white/[0.08] border border-white/10 text-white">
               <ModeToggle />
               <NotificationDropdown />
 
@@ -182,7 +184,7 @@ export function Header() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-lg text-white/80 hover:text-white hover:bg-white/10"
+                    className="h-7 w-7 rounded-lg text-white/80 hover:text-white hover:bg-white/15"
                   >
                     <HelpCircle className="h-3.5 w-3.5" />
                   </Button>

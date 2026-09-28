@@ -22,6 +22,34 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Primary Theme Utility Classes */
+  .bg-primary-hover {
+    background-color: var(--color-primary-hover);
+  }
+  .bg-primary-soft {
+    background-color: var(--color-primary-soft);
+  }
+  .border-primary-border {
+    border-color: var(--color-primary-border);
+  }
+
+  /* Red Accent Theme Utility Classes */
+  .bg-red-accent {
+    background-color: var(--color-red-accent);
+  }
+  .text-red-accent {
+    color: var(--color-red-accent);
+  }
+  .border-red-accent {
+    border-color: var(--color-red-accent);
+  }
+  .bg-red-soft {
+    background-color: var(--color-red-soft);
+  }
+  .text-red-soft {
+    color: var(--color-red-soft);
+  }
 }
 
 @layer base {
@@ -36,51 +64,71 @@
     --popover: 0 0% 100%;
     --popover-foreground: 218 45% 12%;
     
-    /* FluxBridge Logo Navy Blue */
-    --primary: 216 100% 24%;
+    /* Primary Theme Tokens (buttons, active item, links): #3B82F6 */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 221 83% 53%; /* #2563EB */
+    --primary-soft: 214 100% 97%; /* #EFF6FF */
+    --primary-border: 214 95% 87%; /* #BFDBFE */
     
     /* Soft tinted surfaces */
     --secondary: 214 45% 93%;
-    --secondary-foreground: 216 85% 22%;
+    --secondary-foreground: 221 83% 53%;
     --muted: 214 35% 93%;
     --muted-foreground: 217 20% 44%;
     
-    /* Soft blended accent */
-    --accent: 350 45% 94%;
-    --accent-foreground: 351 75% 36%;
+    /* Red Accent Tokens (badge, primary CTA, alerts): #F43F5E */
+    --accent: 350 89% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 355 100% 97%; /* #FFF1F2 */
+
+    /* Red theme specific tokens */
+    --red-accent: 350 89% 60%; /* #F43F5E */
+    --red-soft: 355 100% 97%; /* #FFF1F2 */
+    --red-accent-foreground: 0 0% 100%;
     
-    /* FluxBridge Logo Crimson Red */
-    --destructive: 351 74% 42%;
+    /* Destructive aligned with red accent */
+    --destructive: 350 89% 60%;
     --destructive-foreground: 0 0% 100%;
     
     /* Borders */
     --border: 214 28% 88%;
     --input: 214 28% 88%;
-    --ring: 216 95% 30%;
+    --ring: 217 91% 60%;
     
-    --chart-1: 351 74% 44%;
-    --chart-2: 216 90% 28%;
+    --chart-1: 350 89% 60%;
+    --chart-2: 217 91% 60%;
     --chart-3: 200 65% 38%;
     --chart-4: 340 60% 55%;
     --chart-5: 220 50% 55%;
     --radius: 0.65rem;
-    
-    /* Sidebar Base Tokens: Brand color themed */
-    --sidebar-background: 216 100% 24%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 216 100% 24%;
-    --sidebar-accent: 216 80% 32%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 216 60% 35%;
-    --sidebar-ring: 216 95% 45%;
 
-    /* Brand identity — Balanced Navy & Crimson */
-    --brand-primary: 216 100% 24%;
+    /* Direct Hex Variables */
+    --color-primary: #3B82F6;
+    --color-primary-hover: #2563EB;
+    --color-primary-soft: #EFF6FF;
+    --color-primary-border: #BFDBFE;
+    --color-red-accent: #F43F5E;
+    --color-red-hover: #E11D48;
+    --color-red-soft: #FFF1F2;
+    --color-brand-navy: #0B132B;
+    
+    /* Sidebar Base Tokens: Midnight Navy chassis with Electric Blue & Crimson */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 40% 18%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 222 30% 20%;
+    --sidebar-ring: 217 91% 60%;
+
+    /* Brand identity — Electric Blue & Crimson Red */
+    --brand-primary: 217 91% 60%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 351 74% 42%;
+    --brand-secondary: 350 89% 60%;
     --brand-secondary-foreground: 0 0% 100%;
+    --brand-navy: 222 47% 11%;
 
     --protected-bg: 214 45% 94%;
     --candidate-name: 218 45% 12%;
@@ -95,42 +143,64 @@
     --popover: 216 28% 10%;
     --popover-foreground: 0 0% 95%;
     
-    --primary: 216 100% 45%;
+    /* Primary Theme Tokens (dark mode) */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 221 83% 53%;
+    --primary-soft: 217 91% 60% / 0.15;
+    --primary-border: 217 91% 60% / 0.35;
     
     --secondary: 216 20% 15%;
     --secondary-foreground: 0 0% 95%;
     --muted: 216 20% 15%;
     --muted-foreground: 216 15% 65%;
-    --accent: 351 20% 15%;
-    --accent-foreground: 351 100% 70%;
+
+    /* Red Accent Tokens (dark mode) */
+    --accent: 350 89% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 350 89% 60% / 0.15;
+
+    --red-accent: 350 89% 60%;
+    --red-soft: 350 89% 60% / 0.15;
+    --red-accent-foreground: 0 0% 100%;
     
-    --destructive: 351 74% 45%;
+    --destructive: 350 89% 60%;
     --destructive-foreground: 0 0% 100%;
     
     --border: 216 25% 18%;
     --input: 216 25% 18%;
-    --ring: 216 100% 45%;
+    --ring: 217 91% 60%;
     
-    --chart-1: 351 82% 58%;
-    --chart-2: 216 100% 45%;
+    --chart-1: 350 89% 60%;
+    --chart-2: 217 91% 60%;
     --chart-3: 30 70% 52%;
     --chart-4: 280 55% 56%;
     --chart-5: 340 65% 52%;
-    
-    --sidebar-background: 216 100% 18%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 216 100% 24%;
-    --sidebar-accent: 216 70% 26%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 216 50% 28%;
-    --sidebar-ring: 216 95% 45%;
 
-    --brand-primary: 216 100% 45%;
+    /* Direct Hex Variables (dark mode) */
+    --color-primary: #3B82F6;
+    --color-primary-hover: #2563EB;
+    --color-primary-soft: rgba(59, 130, 246, 0.15);
+    --color-primary-border: rgba(59, 130, 246, 0.35);
+    --color-red-accent: #F43F5E;
+    --color-red-hover: #E11D48;
+    --color-red-soft: rgba(244, 63, 94, 0.15);
+    --color-brand-navy: #070D1F;
+    
+    --sidebar-background: 222 55% 8%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 40% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 222 30% 16%;
+    --sidebar-ring: 217 91% 60%;
+
+    --brand-primary: 217 91% 60%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 351 74% 45%;
+    --brand-secondary: 350 89% 60%;
     --brand-secondary-foreground: 0 0% 100%;
+    --brand-navy: 222 55% 8%;
 
     --protected-bg: 216 32% 8.5%;
     --candidate-name: 0 0% 95%;
@@ -252,7 +322,7 @@
   }
 
   .dashboard-welcome-banner {
-    @apply relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/95 to-slate-900 text-white py-2 px-3 sm:px-4 shadow-sm border border-white/10 shrink-0 transition-all duration-300;
+    @apply relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-[#0B132B] text-white py-2.5 px-3.5 sm:px-4 shadow-md border border-blue-400/20 shrink-0 transition-all duration-300;
   }
 
   .dashboard-date-badge {
@@ -283,14 +353,14 @@
     @apply w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shrink-0;
   }
 
-  /* Header Styles: Brand color with lower opacity */
+  /* Header Styles: Midnight Navy luxury chassis with subtle border */
   .app-header {
-    @apply sticky top-0 z-30 w-full border-b border-white/10 bg-brand/80 dark:bg-brand/65 backdrop-blur-xl transition-all duration-300 shadow-[0_1px_4px_0_rgba(0,0,0,0.12)] text-white;
+    @apply sticky top-0 z-30 w-full border-b border-white/10 bg-[#0B132B]/95 dark:bg-[#070D1F]/95 backdrop-blur-xl transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.2)] text-white;
   }
 
-  /* Sidebar Styles: Brand color with lower opacity */
+  /* Sidebar Styles: Midnight Navy luxury chassis with subtle border */
   .app-sidebar {
-    @apply border-r border-white/10 bg-brand/85 dark:bg-brand/75 backdrop-blur-xl text-white shadow-[2px_0_12px_rgba(0,0,0,0.15)] transition-all duration-300;
+    @apply border-r border-white/10 bg-[#0B132B]/95 dark:bg-[#070D1F]/95 backdrop-blur-xl text-white shadow-[2px_0_16px_rgba(0,0,0,0.25)] transition-all duration-300;
   }
 
   .sidebar-logo-area {
