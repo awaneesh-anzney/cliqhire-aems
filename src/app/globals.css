@@ -313,7 +313,7 @@
 /* Dashboard Redesign Custom Styles */
 @layer components {
   .dashboard-container {
-    @apply flex flex-col w-full h-full min-h-0 p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-transparent overflow-hidden animate-in fade-in duration-300;
+    @apply flex flex-col w-full h-full min-h-0 p-2 sm:p-2.5 gap-2 bg-transparent overflow-y-auto animate-in fade-in duration-300;
   }
 
   #main-content > div.bg-background {
