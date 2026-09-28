@@ -46,6 +46,7 @@ export interface Mailbox {
   emailAddress: string;
   displayName: string;
   connectionStatus: MailboxConnectionStatus;
+  authType?: "basic" | "oauth2";
   lastSyncedAt?: string | null;
   lastSyncError?: string | null;
   isActive: boolean;
