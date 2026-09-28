@@ -61,6 +61,7 @@ export default function EmailPage() {
   const [composerInitialData, setComposerInitialData] = useState<ComposerInitialData | undefined>(undefined);
   const [adminMailboxesOpen, setAdminMailboxesOpen] = useState(false);
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const queryClient = useQueryClient();
@@ -292,9 +293,49 @@ export default function EmailPage() {
 
       {/* Main Mailbox Workspace */}
       {!isConnected ? (
-        <div className="flex-1 min-h-0 w-full flex flex-col overflow-hidden">
-          <MailboxConnectCard onSuccess={() => refetchStatus()} />
-        </div>
+        mailbox?.authType === "oauth2" && mailbox?.connectionStatus !== "connected" ? (
+          <div className="flex-1 min-h-0 w-full flex flex-col items-center justify-center bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl shadow-sm overflow-hidden p-8 text-center animate-in fade-in duration-500">
+            <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-4 shadow-sm">
+              <Mail className="h-8 w-8" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Reconnect your Microsoft Mailbox</h2>
+            <p className="text-muted-foreground mb-8 max-w-md text-sm leading-relaxed">
+              We&apos;ve upgraded our email integration to use Microsoft Graph for better reliability. Please reconnect your Microsoft account to continue syncing your emails.
+            </p>
+            <Button
+              onClick={async () => {
+                try {
+                  setOauthLoading(true);
+                  const { url } = await emailService.getMicrosoftAuthUrl();
+                  window.location.href = url;
+                } catch (error: any) {
+                  toast.error(error?.response?.data?.message || "Failed to initiate Microsoft sign-in");
+                  setOauthLoading(false);
+                }
+              }}
+              disabled={oauthLoading}
+              className="h-11 px-8 text-sm font-bold gap-2 bg-[#00a4ef] hover:bg-[#0078d4] text-white shadow-md rounded-xl transition-all"
+            >
+              {oauthLoading ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0h10v10H0zM11 0h10v10H11zM0 11h10v10H0zM11 11h10v10H11z"/>
+                  </svg>
+                  <span>Reconnect with Microsoft</span>
+                </>
+              )}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex-1 min-h-0 w-full flex flex-col overflow-hidden">
+            <MailboxConnectCard onSuccess={() => refetchStatus()} />
+          </div>
+        )
       ) : (
         <div className="flex-1 min-h-0 flex gap-2.5 sm:gap-3 overflow-hidden">
           {/* Desktop & Tablet Collapsible Left Sidebar */}
