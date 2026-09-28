@@ -137,9 +137,9 @@ export function Header() {
             ) : (
               <div className="flex items-center gap-1.5 text-xs text-white/70 font-medium truncate">
                 <span className="text-white/60 hidden sm:inline font-black tracking-tight">
-                  Cliq<span className="text-rose-400">Hire</span>
+                  Cliq<span className="text-blue-400">Hire</span>
                 </span>
-                <ChevronRight className="w-3 h-3 text-rose-400/80 hidden sm:inline" />
+                <ChevronRight className="w-3 h-3 text-white/40 hidden sm:inline" />
                 <span className="font-semibold text-white truncate">
                   {getPageTitle()}
                 </span>

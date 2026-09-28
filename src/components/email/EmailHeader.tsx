@@ -165,11 +165,9 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
               </Button>
             )}
 
-            {/* Email Client Logo Icon with vibrant Blue-Rose gradient */}
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-rose-500 p-0.5 shadow-sm shadow-blue-500/20 shrink-0">
-              <div className="h-full w-full rounded-[10px] bg-card/90 dark:bg-slate-900/90 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
-              </div>
+            {/* Email Client Logo Icon */}
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/25 shrink-0">
+              <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
 
             {/* Title & Active Filter */}
@@ -371,12 +369,12 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
               }
             />
 
-            {/* Compose CTA - Crimson Rose Primary Gradient Button */}
+            {/* Compose CTA - Electric Blue Primary Button */}
             <Button
               size="sm"
               onClick={onComposeClick}
               disabled={!isConnected}
-              className="h-8.5 px-3.5 gap-1.5 text-xs font-bold bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white shadow-xs shadow-rose-500/25 rounded-xl shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="h-8.5 px-3.5 gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs shadow-blue-500/25 rounded-xl shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <PenSquare className="h-3.5 w-3.5" />
               <span>Compose</span>

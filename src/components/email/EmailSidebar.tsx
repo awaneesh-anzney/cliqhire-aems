@@ -181,14 +181,14 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
             )}
           </div>
 
-          {/* New Message CTA - Crimson Rose Gradient */}
+          {/* New Message CTA - Electric Blue Primary */}
           {isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   onClick={onComposeClick}
                   size="icon"
-                  className="h-10 w-10 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white rounded-xl shadow-md shadow-rose-500/25 mx-auto transition-all active:scale-95"
+                  className="h-10 w-10 bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md shadow-blue-500/25 mx-auto transition-all active:scale-95"
                 >
                   <PenSquare className="h-4 w-4" />
                 </Button>
@@ -198,7 +198,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
           ) : (
             <Button
               onClick={onComposeClick}
-              className="w-full h-9.5 gap-2 text-xs font-bold bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700 hover:from-rose-600 hover:to-rose-800 text-white shadow-md shadow-rose-500/25 justify-start px-3.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full h-9.5 gap-2 text-xs font-bold bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/25 justify-start px-3.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <PenSquare className="h-4 w-4" />
               <span>New Message</span>
@@ -243,9 +243,9 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelectFolder(item.id)}
-                  className={`relative w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all border group ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all border group ${
                     isActive
-                      ? `${item.activeBg} shadow-2xs before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r`
+                      ? `${item.activeBg} shadow-2xs`
                       : `border-transparent text-muted-foreground hover:text-foreground ${item.hoverBg}`
                   }`}
                 >
@@ -310,9 +310,9 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                   id: "candidate" as EmailContactType,
                   label: "Candidate Emails",
                   icon: UserCheck,
-                  color: "text-rose-600 dark:text-rose-400",
-                  activeBg: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25",
-                  hoverBg: "hover:bg-rose-500/10 hover:text-rose-600",
+                  color: "text-emerald-600 dark:text-emerald-400",
+                  activeBg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
+                  hoverBg: "hover:bg-emerald-500/10 hover:text-emerald-600",
                 },
                 {
                   id: "team" as EmailContactType,
@@ -529,7 +529,7 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 mx-auto text-rose-600 hover:text-rose-700 hover:bg-rose-500/15 rounded-xl transition-colors"
+                      className="h-9 w-9 mx-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
                     </Button>
@@ -540,9 +540,9 @@ export const EmailSidebar: React.FC<EmailSidebarProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full h-8 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-500/10 border-rose-200/80 dark:border-rose-900/40 hover:border-rose-300 justify-start px-2.5 gap-2 rounded-xl transition-all"
+                  className="w-full h-8 text-xs font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 border-border/70 hover:border-destructive/30 justify-start px-2.5 gap-2 rounded-xl transition-all"
                 >
-                  <LogOut className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                  <LogOut className="h-3.5 w-3.5 text-muted-foreground group-hover:text-destructive shrink-0" />
                   <span className="truncate">Disconnect Mailbox</span>
                 </Button>
               )}

@@ -182,24 +182,24 @@ export function Sidebar() {
       data-variant="sidebar"
     >
       {/* Brand Header */}
-      <SidebarHeader className="p-3.5 border-b border-white/10 shrink-0 bg-transparent">
+      <SidebarHeader className="p-3.5 border-b-0 shrink-0 bg-transparent">
         <Link
           href="/"
-          className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center select-none"
+          className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center select-none !no-underline hover:!no-underline active:!no-underline focus:!no-underline outline-none"
         >
-          {/* Logo Mark: Electric Blue with Crimson Accent Pill */}
+          {/* Logo Mark: Electric Blue */}
           <div className="relative flex shrink-0 items-center justify-center">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/30 border border-white/20 transition-transform duration-200 hover:scale-105 active:scale-95 font-black text-base tracking-tighter relative">
               CH
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-rose-500 ring-1 ring-white/60 animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-400 ring-1 ring-white/60 animate-pulse" />
             </div>
           </div>
 
-          {/* Brand Text: Cliq in White, Hire in Crimson Red */}
+          {/* Brand Text: Cliq in White, Hire in Electric Blue */}
           <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-left-2 duration-300">
             <div className="flex items-center gap-1.5">
               <span className="text-[15px] font-black tracking-tight text-white leading-none">
-                Cliq<span className="text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]">Hire</span>
+                Cliq<span className="text-blue-400">Hire</span>
               </span>
             </div>
             <p className="text-[10px] font-medium text-white/60 mt-0.5 truncate">
@@ -253,24 +253,19 @@ export function Sidebar() {
                             className={cn(
                               "relative flex items-center h-9 px-2.5 rounded-xl transition-all duration-150 select-none",
                               isActive
-                                ? "bg-gradient-to-r from-blue-600/35 via-blue-500/20 to-transparent text-white font-bold border border-blue-400/30 shadow-xs"
-                                : "text-white/75 hover:text-white hover:bg-white/[0.08] border border-transparent font-medium"
+                                ? "bg-blue-600 text-white font-semibold shadow-xs"
+                                : "text-white/75 hover:text-white hover:bg-white/[0.08] font-medium"
                             )}
                           >
                             <Link
                               href={item.href}
                               className="flex items-center gap-2.5 w-full h-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 !no-underline hover:!no-underline"
                             >
-                              {/* Left active glowing indicator: Rose-to-Blue gradient bar */}
-                              {isActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-gradient-to-b from-rose-500 to-blue-500 rounded-r-full shadow-[0_0_8px_rgba(244,63,94,0.6)] group-data-[collapsible=icon]:hidden" />
-                              )}
-
                               <div
                                 className={cn(
                                   "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                                   isActive
-                                    ? "text-blue-400"
+                                    ? "text-white"
                                     : "text-white/70 group-hover:text-white"
                                 )}
                               >
@@ -280,10 +275,6 @@ export function Sidebar() {
                               <span className="text-xs tracking-tight truncate group-data-[collapsible=icon]:hidden">
                                 {item.name}
                               </span>
-
-                              {isActive && (
-                                <ChevronRight className="w-3.5 h-3.5 ml-auto text-rose-400/90 group-data-[collapsible=icon]:hidden" />
-                              )}
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -302,7 +293,7 @@ export function Sidebar() {
         <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-white/[0.07] border border-white/10 group-data-[collapsible=icon]:justify-center hover:bg-white/[0.1] transition-colors">
           <Link
             href="/profile"
-            className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-90 transition-opacity !no-underline hover:!no-underline"
           >
             <div className="relative shrink-0">
               <Avatar className="h-8 w-8 rounded-lg border border-blue-400/30 shadow-2xs">
@@ -328,7 +319,7 @@ export function Sidebar() {
             type="button"
             onClick={logout}
             title="Sign Out"
-            className="p-1.5 rounded-lg text-white/70 hover:text-rose-400 hover:bg-rose-500/15 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
+            className="p-1.5 rounded-lg text-white/70 hover:text-red-400 hover:bg-white/10 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>

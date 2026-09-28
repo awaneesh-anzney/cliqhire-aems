@@ -232,7 +232,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 {thread.subject || "(No Subject)"}
               </h2>
               {thread.unreadCount > 0 && (
-                <Badge variant="secondary" className="text-[10px] bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 rounded-full shrink-0 font-bold">
+                <Badge variant="secondary" className="text-[10px] bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 rounded-full shrink-0 font-bold">
                   Unread
                 </Badge>
               )}

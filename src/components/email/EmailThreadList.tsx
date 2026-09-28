@@ -237,13 +237,13 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
             onClick={() => setFilterType("unread")}
             className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 ${
               filterType === "unread"
-                ? "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/35 shadow-2xs"
-                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
+                ? "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/35 shadow-2xs"
+                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-sky-950/40"
             }`}
           >
             <span>Unread</span>
             {unreadTotal > 0 && (
-              <span className="h-4 px-1.5 rounded-full text-[9px] font-black bg-rose-500 text-white leading-none flex items-center">
+              <span className="h-4 px-1.5 rounded-full text-[9px] font-black bg-sky-500 text-white leading-none flex items-center">
                 {unreadTotal}
               </span>
             )}
