@@ -232,12 +232,12 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 {thread.subject || "(No Subject)"}
               </h2>
               {thread.unreadCount > 0 && (
-                <Badge variant="secondary" className="text-[10px] bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 rounded-full shrink-0 font-bold">
+                <Badge variant="secondary" className="text-[10px] bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 rounded-full shrink-0 font-bold">
                   Unread
                 </Badge>
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground truncate">
+            <p className="text-[11px] text-muted-foreground truncate font-medium">
               {thread.participants?.join(", ") || "Participants"}
             </p>
           </div>
@@ -251,7 +251,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
             size="sm"
             onClick={() => toggleStarMutation.mutate({ threadId: thread._id, isStarred: !thread.isStarred })}
             className={`h-8 w-8 p-0 rounded-xl border-border/70 transition-colors ${
-              thread.isStarred ? "text-amber-400 bg-amber-500/10 border-amber-500/30" : "text-muted-foreground hover:text-amber-400"
+              thread.isStarred ? "text-amber-500 bg-amber-500/15 border-amber-500/35" : "text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10"
             }`}
             title={thread.isStarred ? "Unstar conversation" : "Star conversation"}
           >
@@ -263,11 +263,11 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
             variant="outline"
             size="sm"
             onClick={() => markReadMutation.mutate({ threadId: thread._id, isRead: thread.unreadCount <= 0 })}
-            className="h-8 px-2.5 text-xs gap-1.5 rounded-xl border-border/70 hover:bg-muted/50"
+            className="h-8 px-2.5 text-xs gap-1.5 rounded-xl border-border/70 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/40 transition-colors"
             title={thread.unreadCount > 0 ? "Mark as Read" : "Mark as Unread"}
           >
-            {thread.unreadCount > 0 ? <Eye className="h-3.5 w-3.5 text-primary" /> : <EyeOff className="h-3.5 w-3.5" />}
-            <span className="hidden lg:inline">{thread.unreadCount > 0 ? "Mark Read" : "Mark Unread"}</span>
+            {thread.unreadCount > 0 ? <Eye className="h-3.5 w-3.5 text-blue-600" /> : <EyeOff className="h-3.5 w-3.5" />}
+            <span className="hidden lg:inline font-semibold">{thread.unreadCount > 0 ? "Mark Read" : "Mark Unread"}</span>
           </Button>
 
           {/* Open full reply */}
@@ -283,7 +283,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 });
               }
             }}
-            className="h-8 px-3 text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl transition-transform active:scale-95"
+            className="h-8 px-3.5 text-xs gap-1.5 bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xs shadow-blue-500/20 font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-95"
           >
             <Reply className="h-3.5 w-3.5" />
             <span>Reply</span>
@@ -306,7 +306,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 key={msg._id || idx}
                 className={`group rounded-2xl border p-4 sm:p-5 shadow-2xs transition-all ${
                   isSent
-                    ? "bg-blue-500/[0.03] dark:bg-blue-500/[0.08] border-blue-500/20 ml-2 sm:ml-8"
+                    ? "bg-gradient-to-br from-blue-50/60 via-card to-blue-50/20 dark:from-blue-950/25 dark:via-card dark:to-blue-950/10 border-blue-200/70 dark:border-blue-900/40 ml-2 sm:ml-8"
                     : "bg-card border-border/70 mr-2 sm:mr-8"
                 }`}
               >
@@ -317,7 +317,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                       <AvatarFallback
                         className={
                           isSent
-                            ? "bg-blue-600 text-white font-bold"
+                            ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold shadow-xs shadow-blue-500/20"
                             : "bg-muted text-foreground font-bold"
                         }
                       >
@@ -373,15 +373,15 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                               });
                             }
                           }}
-                          className="gap-2 cursor-pointer"
+                          className="gap-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950/40"
                         >
-                          <Reply className="h-3.5 w-3.5" />
+                          <Reply className="h-3.5 w-3.5 text-blue-600" />
                           <span>Reply to this</span>
                         </DropdownMenuItem>
                         {msg._id && msg.folder !== "trash" && (
                           <DropdownMenuItem
                             onClick={() => moveToTrashMutation.mutate(msg._id)}
-                            className="gap-2 text-destructive focus:text-destructive cursor-pointer"
+                            className="gap-2 text-rose-600 dark:text-rose-400 focus:text-rose-600 cursor-pointer"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                             <span>Move to trash</span>
@@ -398,7 +398,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => permanentDeleteMutation.mutate(msg._id)}
-                              className="gap-2 text-destructive focus:text-destructive cursor-pointer"
+                              className="gap-2 text-rose-600 dark:text-rose-400 focus:text-rose-600 cursor-pointer"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                               <span>Permanent Delete</span>
@@ -426,7 +426,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className="pt-3 border-t border-border/50 space-y-2 mt-3">
                     <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
-                      <Paperclip className="h-3.5 w-3.5 text-primary" />
+                      <Paperclip className="h-3.5 w-3.5 text-blue-600" />
                       Attachments ({msg.attachments.length})
                     </span>
 
@@ -439,8 +439,8 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                             href={hasUrl ? file.storageUrl : undefined}
                             target={hasUrl ? "_blank" : undefined}
                             rel={hasUrl ? "noreferrer" : undefined}
-                            className={`flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/30 transition-colors group/file ${
-                              hasUrl ? "hover:bg-muted/60 cursor-pointer" : "opacity-80 cursor-default"
+                            className={`flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-muted/30 transition-all group/file ${
+                              hasUrl ? "hover:bg-blue-50/50 hover:border-blue-200 dark:hover:bg-blue-950/30 cursor-pointer shadow-2xs" : "opacity-80 cursor-default"
                             }`}
                             title={!hasUrl ? "Attachment is processing or unavailable" : undefined}
                             onClick={(e) => {
@@ -458,7 +458,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                             </div>
 
                             {hasUrl && (
-                              <Download className="h-3.5 w-3.5 text-muted-foreground group-hover/file:text-primary transition-colors shrink-0 ml-2" />
+                              <Download className="h-3.5 w-3.5 text-muted-foreground group-hover/file:text-blue-600 transition-colors shrink-0 ml-2" />
                             )}
                           </a>
                         );
@@ -479,7 +479,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
           onChange={(e) => setQuickReplyText(e.target.value)}
           placeholder={`Write a quick reply to ${replyTargetEmail || "recipient"}...`}
           rows={2}
-          className="text-xs resize-none bg-background/90 border-border/60 rounded-xl focus-visible:ring-1 focus-visible:ring-primary/40 shadow-2xs"
+          className="text-xs resize-none bg-background/95 border-border/70 rounded-xl focus-visible:ring-2 focus-visible:ring-blue-500/30 shadow-2xs transition-all"
         />
 
         <div className="flex items-center justify-between gap-2 pt-0.5 flex-wrap">
@@ -489,9 +489,9 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
               <button
                 type="button"
                 onClick={() => setIncludeSignature(!includeSignature)}
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all ${
                   includeSignature
-                    ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300"
+                    ? "bg-amber-500/15 border-amber-500/35 text-amber-700 dark:text-amber-300 shadow-2xs"
                     : "bg-muted/40 border-border/60 text-muted-foreground hover:text-foreground"
                 }`}
                 title={includeSignature ? "Signature will be included" : "Signature excluded"}
@@ -520,7 +520,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
                     inReplyTo: lastReceivedMessage?.messageIdHeader,
                   });
                 }}
-                className="h-8 text-xs text-muted-foreground hover:text-foreground rounded-xl"
+                className="h-8 text-xs text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl font-medium transition-colors"
               >
                 <Maximize2 className="h-3 w-3 mr-1" />
                 Full Editor
@@ -531,7 +531,7 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
               size="sm"
               disabled={!quickReplyText.trim() || sendEmailMutation.isPending}
               onClick={handleSendQuickReply}
-              className="h-8 px-3.5 text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-xs rounded-xl transition-transform active:scale-95"
+              className="h-8 px-4 text-xs gap-1.5 bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-xs shadow-blue-500/20 rounded-xl transition-all hover:scale-[1.02] active:scale-95"
             >
               {sendEmailMutation.isPending ? (
                 <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />

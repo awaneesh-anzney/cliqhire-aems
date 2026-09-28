@@ -508,7 +508,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 border border-emerald-200/60 dark:border-emerald-800/40 transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20 border border-rose-200/60 dark:border-rose-800/40 transition-colors"
                     title="Select from candidate emails"
                   >
                     <UserCheck className="h-2.5 w-2.5" />
@@ -711,7 +711,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               type="button"
               disabled={sendEmailMutation.isPending || sendDraftMutation.isPending}
               onClick={handleSend}
-              className="h-8 px-4 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-xs"
+              className="h-8 px-4 gap-1.5 text-xs bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-xs shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-95"
             >
               {sendEmailMutation.isPending || sendDraftMutation.isPending ? (
                 <>
