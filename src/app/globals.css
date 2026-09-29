@@ -153,15 +153,15 @@
     --color-red-soft: #FFF1F2;
     --color-brand-navy: #0F172A;
     
-    /* Sidebar Base Tokens: Modern Executive Deep Slate Chassis */
-    --sidebar-background: 222 47% 9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 221 83% 58%;
+    /* Sidebar Base Tokens: Modern Light Slate Chassis (NOT black) */
+    --sidebar-background: 214 32% 96%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 35% 15%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 25% 16%;
-    --sidebar-ring: 221 83% 58%;
+    --sidebar-accent: 214 30% 90%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 30% 88%;
+    --sidebar-ring: 221 83% 53%;
 
     /* Brand identity */
     --brand-primary: 221 83% 53%;
@@ -229,13 +229,13 @@
     --color-brand-navy: #0F172A;
     
     /* Sidebar Base Tokens (Dark Mode) */
-    --sidebar-background: 222 47% 7.5%;
+    --sidebar-background: 222 40% 10%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 35% 14%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 25% 15%;
+    --sidebar-border: 222 25% 16%;
     --sidebar-ring: 217 91% 60%;
 
     --brand-primary: 217 91% 60%;
@@ -394,12 +394,12 @@
     @apply w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shrink-0;
   }
 
-  /* Header Styles: Modern frosted glass chassis */
+  /* Header Styles: Vibrant frosted glass chassis with subtle gradient tint */
   .app-header {
-    @apply sticky top-0 z-30 w-full border-b border-border/70 bg-background/85 dark:bg-background/80 backdrop-blur-xl transition-all duration-200 text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.03)] dark:shadow-[0_1px_8px_0_rgba(0,0,0,0.3)];
+    @apply sticky top-0 z-30 w-full border-b border-blue-200/60 dark:border-slate-800/80 bg-gradient-to-r from-blue-50/85 via-indigo-50/50 to-slate-50/85 dark:from-slate-900/90 dark:via-indigo-950/30 dark:to-slate-900/90 backdrop-blur-xl transition-all duration-200 text-foreground shadow-xs;
   }
 
-  /* Sidebar Styles: Clean, cohesive chassis */
+  /* Sidebar Styles: Clean, modern light slate chassis (NOT black) */
   .app-sidebar {
     @apply border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xs transition-all duration-200;
   }

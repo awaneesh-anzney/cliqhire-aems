@@ -131,15 +131,15 @@ export function GlobalSearch() {
     return (
         <div className="relative max-w-[500px] w-full mx-auto" ref={containerRef}>
             <div className={cn(
-                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-muted/50 hover:bg-muted/80 backdrop-blur-md shadow-2xs text-foreground",
-                isOpen ? "border-primary/50 ring-2 ring-primary/20 bg-background" : "border-border/70 hover:border-border"
+                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-white/90 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 backdrop-blur-md shadow-2xs text-foreground",
+                isOpen ? "border-blue-600 ring-2 ring-blue-500/20 bg-white dark:bg-slate-800" : "border-blue-200/80 dark:border-slate-700 hover:border-blue-400 dark:hover:border-slate-600"
             )}>
                 <Search className={cn(
                     "h-4 w-4 mr-2.5 transition-colors shrink-0",
-                    isOpen ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                    isOpen ? "text-blue-600" : "text-blue-500 group-hover:text-blue-600"
                 )} />
                 <input
-                    className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-muted-foreground/70"
+                    className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-slate-400 font-medium"
                     placeholder="Search anything... (Ctrl+K)"
                     value={query}
                     onChange={(e) => {
@@ -149,10 +149,10 @@ export function GlobalSearch() {
                     onFocus={() => setIsOpen(true)}
                 />
                 {isLoading && (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary ml-2 shrink-0" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600 ml-2 shrink-0" />
                 )}
                 {!isLoading && (
-                    <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded border border-border/80 bg-background/80 px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-2">
+                    <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded border border-blue-200/80 dark:border-blue-900 bg-blue-50/80 dark:bg-blue-950/50 px-1.5 font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 ml-2">
                         <span className="text-[10px]">⌘</span>K
                     </kbd>
                 )}

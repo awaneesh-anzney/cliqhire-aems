@@ -123,9 +123,9 @@ export function Header() {
         <>
           {/* Left: Sidebar Trigger & Breadcrumbs / Back */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <SidebarTrigger className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors" />
+            <SidebarTrigger className="h-8 w-8 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors" />
 
-            <div className="h-4 w-[1px] bg-border/70 hidden sm:block" />
+            <div className="h-4 w-[1px] bg-blue-200/80 dark:bg-slate-700/80 hidden sm:block" />
 
             {isOnIdPage ? (
               <Button
@@ -133,18 +133,18 @@ export function Header() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="h-8 px-2.5 rounded-xl text-xs font-semibold text-foreground hover:bg-muted/80 gap-1.5 transition-colors group"
+                className="h-8 px-2.5 rounded-xl text-xs font-semibold text-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 gap-1.5 transition-colors group"
               >
-                <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:-translate-x-0.5" />
+                <ArrowLeft className="h-3.5 w-3.5 text-blue-500 group-hover:text-blue-600 transition-transform group-hover:-translate-x-0.5" />
                 <span>{getBackNavigation().label}</span>
               </Button>
             ) : (
               <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium truncate">
-                <span className="text-muted-foreground/90 hidden sm:inline font-bold tracking-tight">
-                  Cliq<span className="text-primary font-black">Hire</span>
+                <span className="text-slate-800 dark:text-slate-100 hidden sm:inline font-bold tracking-tight">
+                  Cliq<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 font-black">Hire</span>
                 </span>
-                <ChevronRight className="w-3 h-3 text-muted-foreground/40 hidden sm:inline" />
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-bold bg-primary/10 text-primary border border-primary/20 tracking-tight shadow-2xs">
+                <ChevronRight className="w-3.5 h-3.5 text-blue-500/70 hidden sm:inline" />
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs shadow-blue-500/25 tracking-tight">
                   {getPageTitle()}
                 </span>
               </div>
@@ -166,19 +166,19 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setShowMobileSearch(true)}
-              className="flex md:hidden h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80"
+              className="flex md:hidden h-8 w-8 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
             >
               <Search className="h-4 w-4" />
             </Button>
 
             {/* Status Pill */}
-            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 shadow-2xs">
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Workspace Live</span>
             </div>
 
             {/* Utility Controls Group */}
-            <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-muted/50 border border-border/70 text-foreground">
+            <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-blue-200/60 dark:border-slate-700/80 shadow-2xs text-foreground">
               <ModeToggle />
               <NotificationDropdown />
 
@@ -188,7 +188,7 @@ export function Header() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                    className="h-7 w-7 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
                   >
                     <HelpCircle className="h-3.5 w-3.5" />
                   </Button>
@@ -197,33 +197,33 @@ export function Header() {
               </Tooltip>
             </div>
 
-            <div className="h-4 w-[1px] bg-border/70 hidden sm:block mx-0.5" />
+            <div className="h-4 w-[1px] bg-blue-200/80 dark:bg-slate-700/80 hidden sm:block mx-0.5" />
 
             {/* User Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-muted/70 transition-colors border border-transparent hover:border-border/60 outline-none group"
+                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all border border-transparent hover:border-blue-200/80 dark:hover:border-slate-700/80 outline-none group shadow-2xs"
                 >
                   <div className="relative shrink-0">
-                    <Avatar className="h-7 w-7 rounded-lg border border-border shadow-2xs">
+                    <Avatar className="h-7 w-7 rounded-lg border-2 border-blue-400/40 shadow-2xs">
                       <AvatarImage src={user?.avatar} alt={user?.name} className="object-cover" />
                       <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-[10px] rounded-lg">
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-background" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-800" />
                   </div>
                   <div className="hidden md:flex flex-col items-start leading-none">
-                    <span className="text-xs font-semibold text-foreground truncate max-w-[100px]">
+                    <span className="text-xs font-bold text-foreground truncate max-w-[100px]">
                       {user?.name || "User"}
                     </span>
-                    <span className="text-[10px] font-bold text-primary capitalize mt-0.5">
+                    <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-md bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-400/30 uppercase tracking-wider mt-0.5">
                       {user?.role?.toLowerCase() || "member"}
                     </span>
                   </div>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground/50 group-hover:text-foreground hidden sm:block transition-colors" />
+                  <ChevronDown className="w-3 h-3 text-slate-400 group-hover:text-blue-600 hidden sm:block transition-colors" />
                 </button>
               </DropdownMenuTrigger>
 
