@@ -45,26 +45,26 @@ import { SIDEBAR_MODULES, SidebarModule } from "@/lib/sidebarModules";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Map moduleKey → lucide icon
-const MODULE_ICONS: Record<string, React.ElementType> = {
-  home: Home,
-  todo: ListTodo,
-  leads: Building2,
-  clients: Building2,
-  "client-groups": Layers,
-  jobs: Briefcase,
-  candidates: User,
-  pipeline: Workflow,
-  recruiter: UserPlus,
-  headhunter: UserRoundSearch,
-  tem_candidates: UserRoundCog,
-  teams: Users,
-  roles: ShieldCheck,
-  settings: Settings,
-  profile: CircleUser,
-  admin: ShieldCheck,
-  notifications: Bell,
-  email: Mail,
+// Map moduleKey → lucide icon and color accents
+const MODULE_THEMES: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  home: { icon: Home, color: "text-blue-400", bg: "bg-blue-500/15" },
+  todo: { icon: ListTodo, color: "text-amber-400", bg: "bg-amber-500/15" },
+  leads: { icon: Building2, color: "text-cyan-400", bg: "bg-cyan-500/15" },
+  clients: { icon: Building2, color: "text-cyan-400", bg: "bg-cyan-500/15" },
+  "client-groups": { icon: Layers, color: "text-teal-400", bg: "bg-teal-500/15" },
+  jobs: { icon: Briefcase, color: "text-indigo-400", bg: "bg-indigo-500/15" },
+  candidates: { icon: User, color: "text-violet-400", bg: "bg-violet-500/15" },
+  pipeline: { icon: Workflow, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+  recruiter: { icon: UserPlus, color: "text-blue-400", bg: "bg-blue-500/15" },
+  headhunter: { icon: UserRoundSearch, color: "text-purple-400", bg: "bg-purple-500/15" },
+  tem_candidates: { icon: UserRoundCog, color: "text-pink-400", bg: "bg-pink-500/15" },
+  teams: { icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+  roles: { icon: ShieldCheck, color: "text-amber-400", bg: "bg-amber-500/15" },
+  settings: { icon: Settings, color: "text-slate-400", bg: "bg-slate-500/15" },
+  profile: { icon: CircleUser, color: "text-sky-400", bg: "bg-sky-500/15" },
+  admin: { icon: ShieldCheck, color: "text-rose-400", bg: "bg-rose-500/15" },
+  notifications: { icon: Bell, color: "text-rose-400", bg: "bg-rose-500/15" },
+  email: { icon: Mail, color: "text-sky-400", bg: "bg-sky-500/15" },
 };
 
 // Group categories for structured navigation
@@ -178,31 +178,31 @@ export function Sidebar() {
   return (
     <UISidebar
       collapsible="icon"
-      className="border-r border-white/10 app-sidebar shadow-sm transition-all duration-300 [&>div[data-sidebar=sidebar]]:bg-transparent"
+      className="border-r border-sidebar-border app-sidebar transition-all duration-200 [&>div[data-sidebar=sidebar]]:bg-sidebar"
       data-variant="sidebar"
     >
       {/* Brand Header */}
-      <SidebarHeader className="p-3.5 border-b-0 shrink-0 bg-transparent">
+      <SidebarHeader className="p-3 border-b border-sidebar-border/80 shrink-0 bg-transparent">
         <Link
           href="/"
-          className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center select-none !no-underline hover:!no-underline active:!no-underline focus:!no-underline outline-none"
+          className="group flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center select-none !no-underline hover:!no-underline active:!no-underline focus:!no-underline outline-none"
         >
-          {/* Logo Mark: Electric Blue */}
+          {/* Logo Mark: Gradient Brand Box */}
           <div className="relative flex shrink-0 items-center justify-center">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/30 border border-white/20 transition-transform duration-200 hover:scale-105 active:scale-95 font-black text-base tracking-tighter relative">
+            <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 border border-white/25 transition-transform duration-200 group-hover:scale-105 active:scale-95 font-black text-sm tracking-tight relative">
               CH
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-400 ring-1 ring-white/60 animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-sidebar animate-pulse" />
             </div>
           </div>
 
-          {/* Brand Text: Cliq in White, Hire in Electric Blue */}
-          <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-left-2 duration-300">
+          {/* Brand Text */}
+          <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-left-2 duration-200">
             <div className="flex items-center gap-1.5">
               <span className="text-[15px] font-black tracking-tight text-white leading-none">
-                Cliq<span className="text-blue-400">Hire</span>
+                Cliq<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Hire</span>
               </span>
             </div>
-            <p className="text-[10px] font-medium text-white/60 mt-0.5 truncate">
+            <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">
               Talent & Recruitment
             </p>
           </div>
@@ -210,11 +210,11 @@ export function Sidebar() {
       </SidebarHeader>
 
       {/* Navigation Links Content */}
-      <SidebarContent className="px-2.5 py-2 group-data-[collapsible=icon]:px-1.5 overflow-y-auto custom-scrollbar">
+      <SidebarContent className="px-2.5 py-3 group-data-[collapsible=icon]:px-1.5 overflow-y-auto custom-scrollbar">
         {loadingPerms ? (
           <div className="flex flex-col items-center justify-center py-10 gap-2 text-muted-foreground group-data-[collapsible=icon]:hidden animate-pulse">
-            <div className="w-6 h-6 rounded-full bg-primary/20 animate-spin" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">
+            <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Loading navigation...
             </span>
           </div>
@@ -222,8 +222,9 @@ export function Sidebar() {
           <div className="space-y-4">
             {groupedModules.map((section, sIndex) => (
               <SidebarGroup key={sIndex} className="p-0">
-                <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-white/50 px-2 pb-1 pt-1 select-none group-data-[collapsible=icon]:hidden">
-                  {section.title}
+                <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-400/80 px-2.5 pb-1 pt-1 select-none group-data-[collapsible=icon]:hidden flex items-center gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-slate-500/60" />
+                  <span>{section.title}</span>
                 </SidebarGroupLabel>
 
                 <SidebarGroupContent>
@@ -234,11 +235,18 @@ export function Sidebar() {
                           ? pathname === "/" || pathname === "/dashboard"
                           : pathname?.startsWith(item.href);
 
-                      // Determine icon based on route or moduleKey
-                      let Icon = MODULE_ICONS[item.moduleKey] ?? Home;
-                      if (item.href === "/leads") Icon = Building2;
-                      if (item.href === "/clients") Icon = Building2;
-                      if (item.href === "/client-groups") Icon = Layers;
+                      // Determine icon & color based on route or moduleKey
+                      let key = item.moduleKey;
+                      if (item.href === "/leads") key = "leads";
+                      if (item.href === "/clients") key = "clients";
+                      if (item.href === "/client-groups") key = "client-groups";
+
+                      const theme = MODULE_THEMES[key] ?? {
+                        icon: Home,
+                        color: "text-blue-400",
+                        bg: "bg-blue-500/15",
+                      };
+                      const Icon = theme.icon;
 
                       return (
                         <SidebarMenuItem key={index}>
@@ -248,13 +256,13 @@ export function Sidebar() {
                             tooltip={{
                               children: item.name,
                               className:
-                                "bg-popover text-popover-foreground border border-border text-xs font-semibold px-2.5 py-1 shadow-lg",
+                                "bg-popover text-popover-foreground border border-border text-xs font-semibold px-2.5 py-1 shadow-md",
                             }}
                             className={cn(
-                              "relative flex items-center h-9 px-2.5 rounded-xl transition-all duration-150 select-none",
+                              "relative flex items-center h-8.5 px-2.5 rounded-xl transition-all duration-150 select-none group/item",
                               isActive
-                                ? "bg-blue-600 text-white font-semibold shadow-xs"
-                                : "text-white/75 hover:text-white hover:bg-white/[0.08] font-medium"
+                                ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white font-semibold shadow-sm shadow-blue-500/25"
+                                : "text-slate-300 hover:text-white hover:bg-white/[0.08] font-medium"
                             )}
                           >
                             <Link
@@ -263,16 +271,16 @@ export function Sidebar() {
                             >
                               <div
                                 className={cn(
-                                  "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                                  "w-5.5 h-5.5 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover/item:scale-105",
                                   isActive
-                                    ? "text-white"
-                                    : "text-white/70 group-hover:text-white"
+                                    ? "bg-white/20 text-white shadow-2xs"
+                                    : `${theme.bg} ${theme.color}`
                                 )}
                               >
-                                <Icon className="h-4 w-4 shrink-0" />
+                                <Icon className="h-3.5 w-3.5 shrink-0" />
                               </div>
 
-                              <span className="text-xs tracking-tight truncate group-data-[collapsible=icon]:hidden">
+                              <span className="text-xs tracking-tight truncate group-data-[collapsible=icon]:hidden font-medium">
                                 {item.name}
                               </span>
                             </Link>
@@ -289,29 +297,36 @@ export function Sidebar() {
       </SidebarContent>
 
       {/* Modern User Profile Footer */}
-      <SidebarFooter className="p-2.5 border-t border-white/10 shrink-0 bg-transparent">
-        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-white/[0.07] border border-white/10 group-data-[collapsible=icon]:justify-center hover:bg-white/[0.1] transition-colors">
+      <SidebarFooter className="p-2.5 border-t border-sidebar-border/80 shrink-0 bg-transparent">
+        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-white/[0.05] border border-white/10 group-data-[collapsible=icon]:justify-center hover:bg-white/[0.08] transition-all">
           <Link
             href="/profile"
             className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-90 transition-opacity !no-underline hover:!no-underline"
           >
             <div className="relative shrink-0">
-              <Avatar className="h-8 w-8 rounded-lg border border-blue-400/30 shadow-2xs">
+              <Avatar className="h-7 w-7 rounded-lg border border-white/15 shadow-2xs">
                 <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-800 text-white font-bold text-[10px] rounded-lg">
+                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-[10px] rounded-lg">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#0B132B]" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-sidebar" />
             </div>
 
             <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
               <span className="text-xs font-semibold text-white truncate leading-none">
                 {user?.name || "User"}
               </span>
-              <span className="text-[10px] font-medium text-white/60 truncate mt-0.5">
-                {user?.role || "Member"}
-              </span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className={cn(
+                  "text-[9px] font-bold px-1.5 py-0.2 rounded-md uppercase tracking-wider truncate",
+                  user?.role === "ADMIN"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                    : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                )}>
+                  {user?.role || "Member"}
+                </span>
+              </div>
             </div>
           </Link>
 
@@ -319,7 +334,7 @@ export function Sidebar() {
             type="button"
             onClick={logout}
             title="Sign Out"
-            className="p-1.5 rounded-lg text-white/70 hover:text-red-400 hover:bg-white/10 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/10 transition-colors group-data-[collapsible=icon]:hidden shrink-0"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>

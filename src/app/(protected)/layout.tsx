@@ -21,8 +21,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Main Sidebar */}
           <Sidebar />
 
-          {/* Main Workspace Area with Soft Tint #FFF1F2 Layout Canvas */}
-          <SidebarInset className="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-hidden bg-gradient-to-br from-[#FFF1F2]/80 via-[#F8FAFC] to-[#EFF6FF]/60 dark:from-[#0B132B] dark:via-[#070D1F] dark:to-[#0F172A] text-foreground">
+          {/* Main Workspace Area */}
+          <SidebarInset className="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-hidden bg-slate-50/70 dark:bg-background text-foreground">
             {/* Unified Glassmorphism Header */}
             <Header />
 

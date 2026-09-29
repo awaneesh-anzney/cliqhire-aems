@@ -23,6 +23,46 @@
     text-wrap: balance;
   }
 
+  /* Minimal Vibrant Theme Accents & Gradients */
+  .gradient-brand {
+    background: linear-gradient(135deg, #2563EB 0%, #4F46E5 50%, #7C3AED 100%);
+  }
+  .gradient-primary {
+    background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+  }
+  .gradient-emerald {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  }
+  .gradient-amber {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  }
+  .gradient-rose {
+    background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
+  }
+
+  /* Minimal Badges with Clean Subtle Borders */
+  .badge-blue {
+    @apply bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/25;
+  }
+  .badge-indigo {
+    @apply bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25;
+  }
+  .badge-emerald {
+    @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25;
+  }
+  .badge-violet {
+    @apply bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/25;
+  }
+  .badge-amber {
+    @apply bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25;
+  }
+  .badge-rose {
+    @apply bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/25;
+  }
+  .badge-cyan {
+    @apply bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25;
+  }
+
   /* Primary Theme Utility Classes */
   .bg-primary-hover {
     background-color: var(--color-primary-hover);
@@ -54,8 +94,8 @@
 
 @layer base {
   :root {
-    /* Light Mode: Crisp, ultra-clean Slate-Ice canvas */
-    --background: 210 33% 98%;
+    /* Light Mode: Clean, modern Slate canvas */
+    --background: 210 40% 98%;
     --foreground: 222 47% 11%;
     
     /* Clean, elevated white cards */
@@ -64,78 +104,79 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     
-    /* Primary Theme Tokens (buttons, active item, links): #3B82F6 */
-    --primary: 217 91% 60%;
+    /* Primary Theme Tokens: Royal Sapphire Blue */
+    --primary: 221 83% 53%; /* #2563EB */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 221 83% 53%; /* #2563EB */
+    --primary-hover: 224 76% 48%; /* #1D4ED8 */
     --primary-soft: 214 100% 97%; /* #EFF6FF */
     --primary-border: 214 95% 87%; /* #BFDBFE */
     
     /* Soft tinted surfaces */
-    --secondary: 214 45% 93%;
-    --secondary-foreground: 221 83% 53%;
-    --muted: 214 35% 93%;
-    --muted-foreground: 217 20% 44%;
+    --secondary: 215 25% 95%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 215 25% 95%;
+    --muted-foreground: 215 16% 47%;
     
-    /* Red Accent Tokens (badge, primary CTA, alerts): #F43F5E */
-    --accent: 350 89% 60%;
+    /* Accent Tokens */
+    --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 355 100% 97%; /* #FFF1F2 */
+    --accent-soft: 214 100% 97%;
 
-    /* Red theme specific tokens */
-    --red-accent: 350 89% 60%; /* #F43F5E */
-    --red-soft: 355 100% 97%; /* #FFF1F2 */
+    /* Red / Priority Tokens */
+    --red-accent: 350 84% 58%;
+    --red-soft: 355 100% 97%;
     --red-accent-foreground: 0 0% 100%;
     
-    /* Destructive aligned with red accent */
-    --destructive: 350 89% 60%;
+    /* Destructive */
+    --destructive: 350 84% 58%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Borders */
-    --border: 215 22% 91%;
-    --input: 215 22% 91%;
-    --ring: 217 91% 60%;
+    /* Borders & Inputs */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
     
-    --chart-1: 350 89% 60%;
-    --chart-2: 217 91% 60%;
-    --chart-3: 200 65% 38%;
-    --chart-4: 340 60% 55%;
-    --chart-5: 220 50% 55%;
-    --radius: 0.65rem;
+    --chart-1: 221 83% 53%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 350 84% 58%;
+    --radius: 0.75rem;
 
     /* Direct Hex Variables */
-    --color-primary: #3B82F6;
-    --color-primary-hover: #2563EB;
+    --color-primary: #2563EB;
+    --color-primary-hover: #1D4ED8;
     --color-primary-soft: #EFF6FF;
     --color-primary-border: #BFDBFE;
     --color-red-accent: #F43F5E;
     --color-red-hover: #E11D48;
     --color-red-soft: #FFF1F2;
-    --color-brand-navy: #0B132B;
+    --color-brand-navy: #0F172A;
     
-    /* Sidebar Base Tokens: Midnight Navy chassis with Electric Blue & Crimson */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 217 91% 60%;
+    /* Sidebar Base Tokens: Modern Executive Deep Slate Chassis */
+    --sidebar-background: 222 47% 9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 40% 18%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 30% 20%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 222 35% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 25% 16%;
+    --sidebar-ring: 221 83% 58%;
 
-    /* Brand identity — Electric Blue & Crimson Red */
-    --brand-primary: 217 91% 60%;
+    /* Brand identity */
+    --brand-primary: 221 83% 53%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 350 89% 60%;
+    --brand-secondary: 262 83% 58%;
     --brand-secondary-foreground: 0 0% 100%;
     --brand-navy: 222 47% 11%;
 
-    --protected-bg: 215 25% 96%;
+    --protected-bg: 210 40% 98%;
     --candidate-name: 222 47% 11%;
-    --candidate-id: 217 20% 44%;
+    --candidate-id: 215 16% 47%;
   }
 
   .dark {
+    /* Dark Mode: Deep, refined Obsidian Slate */
     --background: 222 47% 7.5%;
     --foreground: 210 40% 98%;
     --card: 222 40% 10%;
@@ -150,32 +191,32 @@
     --primary-soft: 217 91% 60% / 0.15;
     --primary-border: 217 91% 60% / 0.35;
     
-    --secondary: 216 20% 15%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 216 20% 15%;
-    --muted-foreground: 216 15% 65%;
+    --secondary: 222 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 30% 15%;
+    --muted-foreground: 215 20% 65%;
 
-    /* Red Accent Tokens (dark mode) */
-    --accent: 350 89% 60%;
+    /* Accent Tokens (dark mode) */
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 350 89% 60% / 0.15;
+    --accent-soft: 217 91% 60% / 0.15;
 
-    --red-accent: 350 89% 60%;
-    --red-soft: 350 89% 60% / 0.15;
+    --red-accent: 350 84% 58%;
+    --red-soft: 350 84% 58% / 0.15;
     --red-accent-foreground: 0 0% 100%;
     
-    --destructive: 350 89% 60%;
+    --destructive: 350 84% 58%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 216 25% 18%;
-    --input: 216 25% 18%;
+    --border: 222 25% 18%;
+    --input: 222 25% 18%;
     --ring: 217 91% 60%;
     
-    --chart-1: 350 89% 60%;
-    --chart-2: 217 91% 60%;
-    --chart-3: 30 70% 52%;
-    --chart-4: 280 55% 56%;
-    --chart-5: 340 65% 52%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 350 84% 58%;
 
     /* Direct Hex Variables (dark mode) */
     --color-primary: #3B82F6;
@@ -185,26 +226,27 @@
     --color-red-accent: #F43F5E;
     --color-red-hover: #E11D48;
     --color-red-soft: rgba(244, 63, 94, 0.15);
-    --color-brand-navy: #070D1F;
+    --color-brand-navy: #0F172A;
     
-    --sidebar-background: 222 55% 8%;
-    --sidebar-foreground: 0 0% 100%;
+    /* Sidebar Base Tokens (Dark Mode) */
+    --sidebar-background: 222 47% 7.5%;
+    --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 40% 14%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 30% 16%;
+    --sidebar-accent: 222 35% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 25% 15%;
     --sidebar-ring: 217 91% 60%;
 
     --brand-primary: 217 91% 60%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 350 89% 60%;
+    --brand-secondary: 262 83% 58%;
     --brand-secondary-foreground: 0 0% 100%;
-    --brand-navy: 222 55% 8%;
+    --brand-navy: 222 47% 8.5%;
 
-    --protected-bg: 216 32% 8.5%;
+    --protected-bg: 222 47% 7.5%;
     --candidate-name: 0 0% 95%;
-    --candidate-id: 216 15% 65%;
+    --candidate-id: 215 20% 65%;
   }
 }
 
@@ -219,16 +261,16 @@
     letter-spacing: -0.011em;
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(at 0% 0%, rgba(255, 241, 242, 0.75) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(239, 246, 255, 0.65) 0px, transparent 45%),
-      radial-gradient(at 50% 100%, rgba(255, 241, 242, 0.5) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.04) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.03) 0px, transparent 45%),
+      radial-gradient(at 50% 100%, rgba(241, 245, 249, 0.5) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
   .dark body {
     background-image:
-      radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(244, 63, 94, 0.04) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.04) 0px, transparent 50%);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -352,39 +394,39 @@
     @apply w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shrink-0;
   }
 
-  /* Header Styles: Midnight Navy luxury chassis with subtle border */
+  /* Header Styles: Modern frosted glass chassis */
   .app-header {
-    @apply sticky top-0 z-30 w-full border-b border-white/10 bg-[#0B132B]/95 dark:bg-[#070D1F]/95 backdrop-blur-xl transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.2)] text-white;
+    @apply sticky top-0 z-30 w-full border-b border-border/70 bg-background/85 dark:bg-background/80 backdrop-blur-xl transition-all duration-200 text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.03)] dark:shadow-[0_1px_8px_0_rgba(0,0,0,0.3)];
   }
 
-  /* Sidebar Styles: Midnight Navy luxury chassis with subtle border */
+  /* Sidebar Styles: Clean, cohesive chassis */
   .app-sidebar {
-    @apply border-r border-white/10 bg-[#0B132B]/95 dark:bg-[#070D1F]/95 backdrop-blur-xl text-white shadow-[2px_0_16px_rgba(0,0,0,0.25)] transition-all duration-300;
+    @apply border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xs transition-all duration-200;
   }
 
   .sidebar-logo-area {
-    @apply py-4 px-5 border-b border-white/10 font-bold text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-300;
+    @apply py-4 px-5 border-b border-sidebar-border font-bold text-sidebar-foreground group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-200;
   }
 
-  /* Sidebar Menu Items: Crisp Light Typography for Brand Sidebar */
+  /* Sidebar Menu Items */
   .sidebar-nav-item {
-    @apply relative h-10 font-bold text-sm tracking-tight transition-all duration-200 ease-out rounded-xl px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-3 text-white/80 hover:bg-white/10 hover:text-white;
+    @apply relative h-9 font-semibold text-xs tracking-tight transition-all duration-150 ease-out rounded-xl px-2.5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-2.5 text-muted-foreground hover:bg-muted/80 hover:text-foreground;
   }
 
-  /* Active Menu Item: Elevated Solid White Accent */
+  /* Active Menu Item */
   .sidebar-nav-item-active {
-    @apply bg-white/20 text-white font-extrabold shadow-sm border border-white/25 hover:bg-white/25 hover:text-white relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-white before:rounded-r-full;
+    @apply bg-primary text-primary-foreground font-semibold shadow-xs hover:bg-primary hover:text-primary-foreground;
   }
 
   .sidebar-icon-wrap {
-    @apply flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-all duration-200 text-white/80 group-hover:text-white;
+    @apply flex shrink-0 items-center justify-center rounded-lg p-1 transition-all duration-150 text-muted-foreground group-hover:text-foreground;
   }
 
   .sidebar-pro-card {
-    @apply bg-gradient-to-br from-white/15 via-white/10 to-white/5 text-white font-medium rounded-2xl p-4 relative overflow-hidden shadow-xl border border-white/15 transition-all duration-300;
+    @apply bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-foreground font-medium rounded-2xl p-4 relative overflow-hidden shadow-xs border border-primary/20 transition-all duration-200;
   }
 
   .sidebar-footer-card {
-    @apply bg-white/10 backdrop-blur-md font-bold text-white rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-300 border border-white/15;
+    @apply bg-muted/50 backdrop-blur-md font-semibold text-foreground rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-200 border border-border/60;
   }
 }
