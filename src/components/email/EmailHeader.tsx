@@ -143,9 +143,13 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
 
   return (
     <>
-      <header className="flex flex-col gap-2.5 bg-card border border-border/80 rounded-2xl p-2.5 sm:p-3 shadow-xs transition-all">
+      <header className="relative overflow-hidden bg-card/95 border border-border/80 rounded-2xl p-2.5 sm:p-3 shadow-xs transition-all">
+        {/* Subtle Ambient Radial Tints */}
+        <div className="pointer-events-none absolute -right-6 -top-6 h-32 w-32 rounded-full bg-[#FFF1F2] dark:bg-rose-500/10 blur-xl" />
+        <div className="pointer-events-none absolute left-1/3 -bottom-6 h-24 w-32 rounded-full bg-[#EFF6FF] dark:bg-blue-500/10 blur-xl" />
+
         {/* Main Row */}
-        <div className="flex items-center justify-between gap-2.5 flex-wrap">
+        <div className="relative z-10 flex items-center justify-between gap-2.5 flex-wrap">
           {/* Left: Mobile Toggle, Brand Icon, Title & Status */}
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Mobile drawer toggle */}
@@ -162,14 +166,14 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
             )}
 
             {/* Email Client Logo Icon */}
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-blue-600/20 via-primary/10 to-primary/5 border border-primary/25 flex items-center justify-center text-primary shrink-0 shadow-2xs">
-              <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/25 shrink-0">
+              <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
 
             {/* Title & Active Filter */}
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base font-bold tracking-tight text-foreground truncate">
+                <h1 className="text-sm sm:text-base font-black tracking-tight text-foreground truncate">
                   {selectedEmailType ? EMAIL_TYPE_CONFIG[selectedEmailType].label : FOLDER_LABELS[activeFolder]}
                 </h1>
 
@@ -177,7 +181,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                 {selectedEmailAddress && (
                   <Badge
                     variant="outline"
-                    className="h-5 pl-2 pr-1 gap-1 text-[11px] font-mono bg-primary/10 text-primary border-primary/25 shrink-0"
+                    className="h-5 pl-2 pr-1 gap-1 text-[11px] font-mono bg-blue-500/10 text-blue-600 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/40 shrink-0"
                   >
                     <span className="truncate max-w-[140px] sm:max-w-[200px]">
                       {selectedEmailAddress}
@@ -185,7 +189,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                     <button
                       type="button"
                       onClick={() => onSelectEmailAddress?.(null)}
-                      className="p-0.5 rounded hover:bg-primary/20 text-muted-foreground hover:text-primary transition-colors"
+                      className="p-0.5 rounded hover:bg-blue-200/50 text-blue-600 dark:hover:bg-blue-900/50 transition-colors"
                       title="Clear selected email address"
                     >
                       <X className="h-2.5 w-2.5" />
@@ -199,7 +203,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 h-5 px-2 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/15 transition-colors cursor-pointer shadow-2xs"
+                        className="inline-flex items-center gap-1.5 h-5 px-2.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 transition-all cursor-pointer shadow-2xs"
                         title="Click to manage mailbox account"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -208,7 +212,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-64 p-2 rounded-2xl shadow-xl border-border/70">
-                      <div className="p-2.5 rounded-xl bg-muted/30 border border-border/50 space-y-1 text-xs">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-50/50 to-rose-50/30 dark:from-slate-900 dark:to-slate-800/80 border border-blue-100/60 dark:border-blue-900/40 space-y-1 text-xs">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-foreground truncate">{mailbox.displayName || "Work Mailbox"}</span>
                           <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-1.5 py-0.2 rounded-md">
@@ -226,13 +230,13 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
 
                       <DropdownMenuSeparator className="my-1.5" />
 
-                      <DropdownMenuItem onClick={onRefreshClick} className="gap-2 text-xs rounded-xl cursor-pointer">
+                      <DropdownMenuItem onClick={onRefreshClick} className="gap-2 text-xs rounded-xl cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950/40">
                         <RefreshCw className="h-3.5 w-3.5 text-blue-600" />
                         <span>Sync Mailbox Now</span>
                       </DropdownMenuItem>
 
                       {onOpenSignatures && (
-                        <DropdownMenuItem onClick={onOpenSignatures} className="gap-2 text-xs rounded-xl cursor-pointer">
+                        <DropdownMenuItem onClick={onOpenSignatures} className="gap-2 text-xs rounded-xl cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-950/40">
                           <PenTool className="h-3.5 w-3.5 text-amber-500" />
                           <span>Manage Email Signatures</span>
                         </DropdownMenuItem>
@@ -252,7 +256,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                       {/* Header Disconnect Trigger */}
                       <DropdownMenuItem
                         onClick={() => setHeaderDisconnectOpen(true)}
-                        className="gap-2 text-xs text-destructive focus:text-destructive focus:bg-destructive/10 rounded-xl cursor-pointer font-semibold"
+                        className="gap-2 text-xs text-rose-600 dark:text-rose-400 focus:text-rose-600 focus:bg-rose-500/10 rounded-xl cursor-pointer font-semibold"
                       >
                         <LogOut className="h-3.5 w-3.5" />
                         <span>Disconnect Mailbox</span>
@@ -279,20 +283,20 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
 
           {/* Right: Actions, Search, Compose */}
           <div className="flex items-center gap-2 ml-auto">
-            {/* Search input with clear button (on sm+ screens) */}
+            {/* Search input with clear button */}
             <div className="relative w-44 sm:w-56 md:w-64 lg:w-72">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70 pointer-events-none" />
               <Input
                 placeholder="Search emails, contacts..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-8 pr-7 h-8 text-xs bg-muted/30 border-border/60 rounded-xl focus-visible:ring-1 focus-visible:ring-primary/40 placeholder:text-muted-foreground/60 transition-colors"
+                className="pl-8 pr-7 h-8.5 text-xs bg-muted/40 hover:bg-muted/60 focus:bg-background border-border/70 rounded-xl focus-visible:ring-2 focus-visible:ring-blue-500/30 placeholder:text-muted-foreground/60 transition-all shadow-2xs"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded transition-colors"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -305,10 +309,10 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
               size="sm"
               onClick={onRefreshClick}
               disabled={isRefreshing || !isConnected}
-              className="h-8 w-8 p-0 shrink-0 rounded-xl border-border/70 hover:bg-muted/50"
+              className="h-8.5 w-8.5 p-0 shrink-0 rounded-xl border-border/70 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/40 transition-colors shadow-2xs"
               title="Refresh Mailbox"
             >
-              <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${isRefreshing ? "animate-spin text-primary" : ""}`} />
+              <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${isRefreshing ? "animate-spin text-blue-600" : ""}`} />
             </Button>
 
             {/* Signatures Button */}
@@ -317,11 +321,11 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={onOpenSignatures}
-                className="h-8 px-2.5 gap-1.5 text-xs text-muted-foreground hover:text-foreground rounded-xl border-border/70 shadow-2xs hover:bg-muted/50 shrink-0 transition-colors hidden sm:inline-flex"
+                className="h-8.5 px-3 gap-1.5 text-xs text-muted-foreground hover:text-amber-600 hover:bg-amber-500/10 hover:border-amber-500/30 rounded-xl border-border/70 shadow-2xs shrink-0 transition-all hidden sm:inline-flex"
                 title="Manage Email Signatures"
               >
                 <PenTool className="h-3.5 w-3.5 text-amber-500" />
-                <span className="hidden lg:inline font-medium">Signatures</span>
+                <span className="hidden lg:inline font-semibold">Signatures</span>
               </Button>
             )}
 
@@ -339,15 +343,15 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className={`h-8 px-2.5 gap-1.5 text-xs rounded-xl border-border/70 shadow-2xs hover:bg-muted/50 shrink-0 transition-colors hidden sm:inline-flex ${
+                  className={`h-8.5 px-3 gap-1.5 text-xs rounded-xl border-border/70 shadow-2xs hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/40 shrink-0 transition-all hidden sm:inline-flex ${
                     selectedEmailAddress
-                      ? "bg-primary/10 border-primary/30 text-primary font-medium"
+                      ? "bg-blue-500/10 border-blue-500/30 text-blue-600 font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                   title="Select contact address"
                 >
-                  <Users className="h-3.5 w-3.5 text-primary" />
-                  <span className="hidden xl:inline">
+                  <Users className="h-3.5 w-3.5 text-blue-600" />
+                  <span className="hidden xl:inline font-semibold">
                     {selectedEmailAddress ? selectedEmailAddress : "Contacts"}
                   </span>
                   {selectedEmailAddress && (
@@ -356,7 +360,7 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                         e.stopPropagation();
                         onSelectEmailAddress?.(null);
                       }}
-                      className="p-0.5 rounded hover:bg-foreground/10 text-muted-foreground hover:text-foreground"
+                      className="p-0.5 rounded hover:bg-blue-200 text-blue-600"
                     >
                       <X className="h-3 w-3" />
                     </span>
@@ -365,15 +369,15 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
               }
             />
 
-            {/* Compose CTA */}
+            {/* Compose CTA - Electric Blue Primary Button */}
             <Button
               size="sm"
               onClick={onComposeClick}
               disabled={!isConnected}
-              className="h-8 px-3 gap-1.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs font-semibold rounded-xl shrink-0 transition-transform active:scale-[0.98]"
+              className="h-8.5 px-3.5 gap-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs shadow-blue-500/25 rounded-xl shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <PenSquare className="h-3.5 w-3.5" />
-              <span className="hidden xs:inline">Compose</span>
+              <span>Compose</span>
             </Button>
 
             {/* Admin Tools */}
@@ -382,10 +386,10 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={onOpenAdminMailboxes}
-                className="h-8 px-2.5 gap-1.5 text-xs text-muted-foreground hover:text-foreground rounded-xl border-border/70 shadow-2xs hidden 2xl:inline-flex"
+                className="h-8.5 px-3 gap-1.5 text-xs text-muted-foreground hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 dark:hover:bg-blue-950/40 rounded-xl border-border/70 shadow-2xs hidden 2xl:inline-flex font-semibold transition-all"
                 title="View team employee mailboxes"
               >
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
                 <span>Team Mailboxes</span>
               </Button>
             )}

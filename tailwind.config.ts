@@ -35,7 +35,10 @@ const config: Config = {
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					hover: 'hsl(var(--primary-hover))',
+					soft: 'hsl(var(--primary-soft))',
+					border: 'hsl(var(--primary-border))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -47,7 +50,12 @@ const config: Config = {
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
+					foreground: 'hsl(var(--accent-foreground))',
+					soft: 'hsl(var(--accent-soft))'
+				},
+				red: {
+					accent: 'hsl(var(--red-accent))',
+					soft: 'hsl(var(--red-soft))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',

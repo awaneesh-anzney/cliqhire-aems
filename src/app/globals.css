@@ -22,119 +22,231 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Minimal Vibrant Theme Accents & Gradients */
+  .gradient-brand {
+    background: linear-gradient(135deg, #2563EB 0%, #4F46E5 50%, #7C3AED 100%);
+  }
+  .gradient-primary {
+    background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+  }
+  .gradient-emerald {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  }
+  .gradient-amber {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  }
+  .gradient-rose {
+    background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
+  }
+
+  /* Minimal Badges with Clean Subtle Borders */
+  .badge-blue {
+    @apply bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/25;
+  }
+  .badge-indigo {
+    @apply bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25;
+  }
+  .badge-emerald {
+    @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25;
+  }
+  .badge-violet {
+    @apply bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/25;
+  }
+  .badge-amber {
+    @apply bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25;
+  }
+  .badge-rose {
+    @apply bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/25;
+  }
+  .badge-cyan {
+    @apply bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25;
+  }
+
+  /* Primary Theme Utility Classes */
+  .bg-primary-hover {
+    background-color: var(--color-primary-hover);
+  }
+  .bg-primary-soft {
+    background-color: var(--color-primary-soft);
+  }
+  .border-primary-border {
+    border-color: var(--color-primary-border);
+  }
+
+  /* Red Accent Theme Utility Classes */
+  .bg-red-accent {
+    background-color: var(--color-red-accent);
+  }
+  .text-red-accent {
+    color: var(--color-red-accent);
+  }
+  .border-red-accent {
+    border-color: var(--color-red-accent);
+  }
+  .bg-red-soft {
+    background-color: var(--color-red-soft);
+  }
+  .text-red-soft {
+    color: var(--color-red-soft);
+  }
 }
 
 @layer base {
   :root {
-    /* Light Mode: Soft Ice-Blue canvas with subtle Crimson warmth */
-    --background: 214 55% 96.5%;
-    --foreground: 218 45% 12%;
+    /* Light Mode: Clean, modern Slate canvas */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     
     /* Clean, elevated white cards */
     --card: 0 0% 100%;
-    --card-foreground: 218 45% 12%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 218 45% 12%;
+    --popover-foreground: 222 47% 11%;
     
-    /* FluxBridge Logo Navy Blue */
-    --primary: 216 100% 24%;
+    /* Primary Theme Tokens: Royal Sapphire Blue */
+    --primary: 221 83% 53%; /* #2563EB */
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 224 76% 48%; /* #1D4ED8 */
+    --primary-soft: 214 100% 97%; /* #EFF6FF */
+    --primary-border: 214 95% 87%; /* #BFDBFE */
     
     /* Soft tinted surfaces */
-    --secondary: 214 45% 93%;
-    --secondary-foreground: 216 85% 22%;
-    --muted: 214 35% 93%;
-    --muted-foreground: 217 20% 44%;
+    --secondary: 215 25% 95%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 215 25% 95%;
+    --muted-foreground: 215 16% 47%;
     
-    /* Soft blended accent */
-    --accent: 350 45% 94%;
-    --accent-foreground: 351 75% 36%;
+    /* Accent Tokens */
+    --accent: 221 83% 53%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 214 100% 97%;
+
+    /* Red / Priority Tokens */
+    --red-accent: 350 84% 58%;
+    --red-soft: 355 100% 97%;
+    --red-accent-foreground: 0 0% 100%;
     
-    /* FluxBridge Logo Crimson Red */
-    --destructive: 351 74% 42%;
+    /* Destructive */
+    --destructive: 350 84% 58%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Borders */
-    --border: 214 28% 88%;
-    --input: 214 28% 88%;
-    --ring: 216 95% 30%;
+    /* Borders & Inputs */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
     
-    --chart-1: 351 74% 44%;
-    --chart-2: 216 90% 28%;
-    --chart-3: 200 65% 38%;
-    --chart-4: 340 60% 55%;
-    --chart-5: 220 50% 55%;
-    --radius: 0.65rem;
-    
-    /* Sidebar Base Tokens: Brand color themed */
-    --sidebar-background: 216 100% 24%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 216 100% 24%;
-    --sidebar-accent: 216 80% 32%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 216 60% 35%;
-    --sidebar-ring: 216 95% 45%;
+    --chart-1: 221 83% 53%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 350 84% 58%;
+    --radius: 0.75rem;
 
-    /* Brand identity — Balanced Navy & Crimson */
-    --brand-primary: 216 100% 24%;
+    /* Direct Hex Variables */
+    --color-primary: #2563EB;
+    --color-primary-hover: #1D4ED8;
+    --color-primary-soft: #EFF6FF;
+    --color-primary-border: #BFDBFE;
+    --color-red-accent: #F43F5E;
+    --color-red-hover: #E11D48;
+    --color-red-soft: #FFF1F2;
+    --color-brand-navy: #0F172A;
+    
+    /* Sidebar Base Tokens: Modern Light Slate Chassis (NOT black) */
+    --sidebar-background: 214 32% 96%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 30% 90%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 30% 88%;
+    --sidebar-ring: 221 83% 53%;
+
+    /* Brand identity */
+    --brand-primary: 221 83% 53%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 351 74% 42%;
+    --brand-secondary: 262 83% 58%;
     --brand-secondary-foreground: 0 0% 100%;
+    --brand-navy: 222 47% 11%;
 
-    --protected-bg: 214 45% 94%;
-    --candidate-name: 218 45% 12%;
-    --candidate-id: 217 20% 44%;
+    --protected-bg: 210 40% 98%;
+    --candidate-name: 222 47% 11%;
+    --candidate-id: 215 16% 47%;
   }
 
   .dark {
-    --background: 216 35% 6.5%;
-    --foreground: 0 0% 95%;
-    --card: 216 28% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 216 28% 10%;
-    --popover-foreground: 0 0% 95%;
+    /* Dark Mode: Deep, refined Obsidian Slate */
+    --background: 222 47% 7.5%;
+    --foreground: 210 40% 98%;
+    --card: 222 40% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 40% 10%;
+    --popover-foreground: 210 40% 98%;
     
-    --primary: 216 100% 45%;
+    /* Primary Theme Tokens (dark mode) */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 221 83% 53%;
+    --primary-soft: 217 91% 60% / 0.15;
+    --primary-border: 217 91% 60% / 0.35;
     
-    --secondary: 216 20% 15%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 216 20% 15%;
-    --muted-foreground: 216 15% 65%;
-    --accent: 351 20% 15%;
-    --accent-foreground: 351 100% 70%;
+    --secondary: 222 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 30% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent Tokens (dark mode) */
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: 217 91% 60% / 0.15;
+
+    --red-accent: 350 84% 58%;
+    --red-soft: 350 84% 58% / 0.15;
+    --red-accent-foreground: 0 0% 100%;
     
-    --destructive: 351 74% 45%;
+    --destructive: 350 84% 58%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 216 25% 18%;
-    --input: 216 25% 18%;
-    --ring: 216 100% 45%;
+    --border: 222 25% 18%;
+    --input: 222 25% 18%;
+    --ring: 217 91% 60%;
     
-    --chart-1: 351 82% 58%;
-    --chart-2: 216 100% 45%;
-    --chart-3: 30 70% 52%;
-    --chart-4: 280 55% 56%;
-    --chart-5: 340 65% 52%;
-    
-    --sidebar-background: 216 100% 18%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 216 100% 24%;
-    --sidebar-accent: 216 70% 26%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 216 50% 28%;
-    --sidebar-ring: 216 95% 45%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 350 84% 58%;
 
-    --brand-primary: 216 100% 45%;
+    /* Direct Hex Variables (dark mode) */
+    --color-primary: #3B82F6;
+    --color-primary-hover: #2563EB;
+    --color-primary-soft: rgba(59, 130, 246, 0.15);
+    --color-primary-border: rgba(59, 130, 246, 0.35);
+    --color-red-accent: #F43F5E;
+    --color-red-hover: #E11D48;
+    --color-red-soft: rgba(244, 63, 94, 0.15);
+    --color-brand-navy: #0F172A;
+    
+    /* Sidebar Base Tokens (Dark Mode) */
+    --sidebar-background: 222 40% 10%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 35% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 25% 16%;
+    --sidebar-ring: 217 91% 60%;
+
+    --brand-primary: 217 91% 60%;
     --brand-primary-foreground: 0 0% 100%;
-    --brand-secondary: 351 74% 45%;
+    --brand-secondary: 262 83% 58%;
     --brand-secondary-foreground: 0 0% 100%;
+    --brand-navy: 222 47% 8.5%;
 
-    --protected-bg: 216 32% 8.5%;
+    --protected-bg: 222 47% 7.5%;
     --candidate-name: 0 0% 95%;
-    --candidate-id: 216 15% 65%;
+    --candidate-id: 215 20% 65%;
   }
 }
 
@@ -149,17 +261,16 @@
     letter-spacing: -0.011em;
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(at 0% 0%, hsl(var(--brand-primary) / 0.08) 0px, transparent 45%),
-      radial-gradient(at 100% 10%, hsl(214 75% 91% / 0.8) 0px, transparent 50%),
-      radial-gradient(at 85% 95%, hsl(var(--brand-secondary) / 0.05) 0px, transparent 45%),
-      radial-gradient(at 10% 80%, hsl(var(--brand-primary) / 0.04) 0px, transparent 45%);
+      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.04) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.03) 0px, transparent 45%),
+      radial-gradient(at 50% 100%, rgba(241, 245, 249, 0.5) 0px, transparent 50%);
     background-attachment: fixed;
   }
 
   .dark body {
     background-image:
-      radial-gradient(at 0% 0%, hsl(var(--brand-primary) / 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsl(var(--brand-secondary) / 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.04) 0px, transparent 50%);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -244,7 +355,7 @@
 /* Dashboard Redesign Custom Styles */
 @layer components {
   .dashboard-container {
-    @apply flex flex-col w-full h-full min-h-0 p-2.5 sm:p-3 md:p-3.5 gap-2.5 bg-transparent overflow-hidden animate-in fade-in duration-300;
+    @apply flex flex-col w-full h-full min-h-0 p-2 sm:p-2.5 gap-2 bg-transparent overflow-y-auto animate-in fade-in duration-300;
   }
 
   #main-content > div.bg-background {
@@ -252,11 +363,11 @@
   }
 
   .dashboard-welcome-banner {
-    @apply relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/95 to-slate-900 text-white py-2 px-3 sm:px-4 shadow-sm border border-white/10 shrink-0 transition-all duration-300;
+    @apply relative overflow-hidden rounded-2xl bg-card/95 dark:bg-card/95 backdrop-blur-xl border border-border/80 p-3 sm:p-4 shadow-xs shrink-0 transition-all duration-300;
   }
 
   .dashboard-date-badge {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-[10px] font-bold tracking-wide backdrop-blur-md text-white/90 transition-all duration-300;
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF1F2] dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-[11px] font-bold text-rose-700 dark:text-rose-300 shadow-2xs;
   }
 
   .dashboard-kpi-card {
@@ -283,39 +394,39 @@
     @apply w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shrink-0;
   }
 
-  /* Header Styles: Brand color with lower opacity */
+  /* Header Styles: Vibrant frosted glass chassis with subtle gradient tint */
   .app-header {
-    @apply sticky top-0 z-30 w-full border-b border-white/10 bg-brand/80 dark:bg-brand/65 backdrop-blur-xl transition-all duration-300 shadow-[0_1px_4px_0_rgba(0,0,0,0.12)] text-white;
+    @apply sticky top-0 z-30 w-full border-b border-blue-200/60 dark:border-slate-800/80 bg-gradient-to-r from-blue-50/85 via-indigo-50/50 to-slate-50/85 dark:from-slate-900/90 dark:via-indigo-950/30 dark:to-slate-900/90 backdrop-blur-xl transition-all duration-200 text-foreground shadow-xs;
   }
 
-  /* Sidebar Styles: Brand color with lower opacity */
+  /* Sidebar Styles: Clean, modern light slate chassis (NOT black) */
   .app-sidebar {
-    @apply border-r border-white/10 bg-brand/85 dark:bg-brand/75 backdrop-blur-xl text-white shadow-[2px_0_12px_rgba(0,0,0,0.15)] transition-all duration-300;
+    @apply border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xs transition-all duration-200;
   }
 
   .sidebar-logo-area {
-    @apply py-4 px-5 border-b border-white/10 font-bold text-white group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-300;
+    @apply py-4 px-5 border-b border-sidebar-border font-bold text-sidebar-foreground group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:justify-center transition-all duration-200;
   }
 
-  /* Sidebar Menu Items: Crisp Light Typography for Brand Sidebar */
+  /* Sidebar Menu Items */
   .sidebar-nav-item {
-    @apply relative h-10 font-bold text-sm tracking-tight transition-all duration-200 ease-out rounded-xl px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-3 text-white/80 hover:bg-white/10 hover:text-white;
+    @apply relative h-9 font-semibold text-xs tracking-tight transition-all duration-150 ease-out rounded-xl px-2.5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center w-full flex items-center gap-2.5 text-muted-foreground hover:bg-muted/80 hover:text-foreground;
   }
 
-  /* Active Menu Item: Elevated Solid White Accent */
+  /* Active Menu Item */
   .sidebar-nav-item-active {
-    @apply bg-white/20 text-white font-extrabold shadow-sm border border-white/25 hover:bg-white/25 hover:text-white relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-white before:rounded-r-full;
+    @apply bg-primary text-primary-foreground font-semibold shadow-xs hover:bg-primary hover:text-primary-foreground;
   }
 
   .sidebar-icon-wrap {
-    @apply flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-all duration-200 text-white/80 group-hover:text-white;
+    @apply flex shrink-0 items-center justify-center rounded-lg p-1 transition-all duration-150 text-muted-foreground group-hover:text-foreground;
   }
 
   .sidebar-pro-card {
-    @apply bg-gradient-to-br from-white/15 via-white/10 to-white/5 text-white font-medium rounded-2xl p-4 relative overflow-hidden shadow-xl border border-white/15 transition-all duration-300;
+    @apply bg-gradient-to-br from-primary/10 via-primary/5 to-transparent text-foreground font-medium rounded-2xl p-4 relative overflow-hidden shadow-xs border border-primary/20 transition-all duration-200;
   }
 
   .sidebar-footer-card {
-    @apply bg-white/10 backdrop-blur-md font-bold text-white rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-300 border border-white/15;
+    @apply bg-muted/50 backdrop-blur-md font-semibold text-foreground rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-200 border border-border/60;
   }
 }

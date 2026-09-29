@@ -172,11 +172,11 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
               <button
                 type="button"
                 onClick={handleToggleSelectAll}
-                className="flex items-center justify-center w-4 h-4 rounded border border-border/70 hover:border-primary text-primary transition-colors bg-card"
+                className="flex items-center justify-center w-4 h-4 rounded border border-blue-500 hover:border-blue-600 text-white bg-blue-600 transition-colors shadow-2xs"
               >
-                {areAllSelected ? <Check className="w-3 h-3" /> : <span className="w-2 h-2 rounded-sm bg-primary/40" />}
+                {areAllSelected ? <Check className="w-3 h-3" /> : <span className="w-2 h-2 rounded-xs bg-white" />}
               </button>
-              <span className="text-xs font-semibold text-foreground">
+              <span className="text-xs font-bold text-foreground">
                 {selectedIds.length} selected
               </span>
             </div>
@@ -185,7 +185,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={onBulkDelete}
-                className="h-7 px-2 text-[11px] font-semibold text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 rounded-lg shadow-2xs"
+                className="h-7 px-2.5 text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 border-rose-300/80 rounded-lg shadow-2xs transition-colors"
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1" />
                 {activeFolder === "trash" ? "Delete Forever" : "Trash"}
@@ -194,40 +194,40 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           </div>
         ) : (
           <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {onSelectIdsChange && (
                 <button
                   type="button"
                   onClick={handleToggleSelectAll}
-                  className="flex items-center justify-center w-4 h-4 rounded border border-border/70 hover:border-primary transition-colors bg-card mt-0.5"
+                  className="flex items-center justify-center w-4 h-4 rounded border border-border/70 hover:border-blue-500 transition-colors bg-card mt-0.5 shadow-2xs"
                 >
-                  {areAllSelected && <Check className="w-3 h-3 text-primary" />}
+                  {areAllSelected && <Check className="w-3 h-3 text-blue-600" />}
                 </button>
               )}
-              <div className="flex items-center gap-1.5 font-bold text-foreground">
-                <div className="h-5 w-5 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <Inbox className="h-3 w-3" />
+              <div className="flex items-center gap-2 font-bold text-foreground">
+                <div className="h-6 w-6 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600">
+                  <Inbox className="h-3.5 w-3.5" />
                 </div>
                 <span>{totalThreads} {totalThreads === 1 ? "Conversation" : "Conversations"}</span>
               </div>
             </div>
             {totalPages > 1 && (
-              <span className="text-[11px] text-muted-foreground font-medium">
+              <span className="text-[11px] text-muted-foreground font-semibold px-2 py-0.5 rounded-md bg-muted/40">
                 Page {page} of {totalPages}
               </span>
             )}
           </div>
         )}
 
-        {/* Filter Pills with vibrant email client accents */}
+        {/* Filter Pills with vibrant Blue and Rose accents */}
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setFilterType("all")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border ${
               filterType === "all"
-                ? "bg-primary text-primary-foreground border-primary shadow-2xs"
-                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
+                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40"
             }`}
           >
             All ({threads.length})
@@ -235,15 +235,15 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           <button
             type="button"
             onClick={() => setFilterType("unread")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border flex items-center gap-1 ${
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 ${
               filterType === "unread"
-                ? "bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-500/40 shadow-2xs font-bold"
-                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                ? "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/35 shadow-2xs"
+                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-sky-950/40"
             }`}
           >
             <span>Unread</span>
             {unreadTotal > 0 && (
-              <span className="h-4 px-1 rounded-full text-[9px] font-bold bg-sky-500 text-white leading-none flex items-center">
+              <span className="h-4 px-1.5 rounded-full text-[9px] font-black bg-sky-500 text-white leading-none flex items-center">
                 {unreadTotal}
               </span>
             )}
@@ -251,16 +251,16 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           <button
             type="button"
             onClick={() => setFilterType("starred")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border flex items-center gap-1 ${
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 ${
               filterType === "starred"
-                ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 shadow-2xs font-bold"
-                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/35 shadow-2xs"
+                : "bg-muted/40 border-transparent text-muted-foreground hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-950/40"
             }`}
           >
-            <Star className={`h-3 w-3 ${filterType === "starred" ? "fill-amber-400 text-amber-400" : ""}`} />
+            <Star className={`h-3 w-3 ${filterType === "starred" ? "fill-amber-500 text-amber-500" : ""}`} />
             <span>Starred</span>
             {starredTotal > 0 && (
-              <span className="h-4 px-1 rounded-full text-[9px] font-bold bg-amber-500 text-white leading-none flex items-center">
+              <span className="h-4 px-1.5 rounded-full text-[9px] font-black bg-amber-500 text-white leading-none flex items-center">
                 {starredTotal}
               </span>
             )}
@@ -288,8 +288,8 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           </div>
         ) : filteredThreads.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[300px] p-6 text-center text-muted-foreground">
-            <div className="h-12 w-12 rounded-2xl bg-muted/40 border border-border/70 flex items-center justify-center mb-3 text-muted-foreground shadow-2xs">
-              <Mail className="h-6 w-6 text-muted-foreground/60" />
+            <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-3 text-blue-600 shadow-2xs">
+              <Mail className="h-6 w-6 text-blue-600/70" />
             </div>
             <p className="text-xs font-bold text-foreground">No conversations found</p>
             <p className="text-[11px] text-muted-foreground mt-1 max-w-[240px] leading-relaxed">
@@ -310,11 +310,11 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
               <div
                 key={thread.id}
                 onClick={() => onSelectThread(thread)}
-                className={`relative flex items-start gap-3 p-3 sm:p-3.5 cursor-pointer transition-all hover:bg-muted/40 group ${
+                className={`relative flex items-start gap-3 p-3 sm:p-3.5 cursor-pointer transition-all hover:bg-muted/50 group ${
                   isSelected
-                    ? "bg-primary/10 dark:bg-primary/15 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1.5 before:bg-primary before:rounded-r-full before:shadow-[0_0_8px_rgba(59,130,246,0.6)] shadow-2xs"
+                    ? "bg-gradient-to-r from-blue-500/15 via-blue-500/5 to-transparent border-l-[3.5px] border-blue-600 dark:border-blue-400 shadow-2xs"
                     : hasUnread
-                    ? "bg-sky-500/[0.04] dark:bg-sky-500/[0.08]"
+                    ? "bg-[#EFF6FF]/80 dark:bg-blue-950/25 hover:bg-[#EFF6FF] dark:hover:bg-blue-950/40"
                     : ""
                 }`}
               >
@@ -327,7 +327,11 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                   >
                     <button
                       type="button"
-                      className="flex items-center justify-center w-4 h-4 rounded border border-border/70 hover:border-primary text-primary transition-colors bg-card"
+                      className={`flex items-center justify-center w-4 h-4 rounded border transition-colors shadow-2xs ${
+                        selectedIds.includes(thread.id)
+                          ? "border-blue-600 bg-blue-600 text-white"
+                          : "border-border/70 hover:border-blue-500 bg-card"
+                      }`}
                     >
                       {selectedIds.includes(thread.id) && <Check className="w-3 h-3" />}
                     </button>
@@ -347,7 +351,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                   <div className="flex items-center justify-between gap-1.5">
                     <div className="flex items-center gap-1.5 min-w-0">
                       {hasUnread && (
-                        <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0 shadow-[0_0_6px_rgba(59,130,246,0.8)] animate-pulse" />
+                        <span className="h-2 w-2 rounded-full bg-blue-600 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.9)] animate-pulse" />
                       )}
                       <span
                         className={`text-xs truncate ${
@@ -379,13 +383,13 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                   <div className="flex items-center justify-between pt-0.5">
                     <div className="flex items-center gap-1.5">
                       {hasUnread && (
-                        <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25">
+                        <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25">
                           Unread
                         </span>
                       )}
 
                       {thread.hasAttachments && (
-                        <span className="inline-flex items-center gap-0.5 text-[10px] text-primary/80 bg-primary/10 px-1.5 py-0.2 rounded-md border border-primary/20" title="Has attachments">
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-blue-600 bg-blue-500/10 px-1.5 py-0.2 rounded-md border border-blue-500/20" title="Has attachments">
                           <Paperclip className="h-2.5 w-2.5" />
                         </span>
                       )}
@@ -396,7 +400,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                       <button
                         type="button"
                         onClick={(e) => onToggleStar(thread.id, e)}
-                        className="p-1 rounded-md text-muted-foreground/50 hover:text-amber-400 hover:bg-muted/60 transition-colors"
+                        className="p-1 rounded-md text-muted-foreground/50 hover:text-amber-500 hover:bg-amber-500/10 transition-colors"
                         title={thread.isStarred ? "Unstar" : "Star"}
                       >
                         <Star
@@ -422,13 +426,13 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
             size="sm"
             disabled={page <= 1 || isLoading}
             onClick={() => onPageChange(page - 1)}
-            className="h-7 px-2.5 text-xs gap-1 rounded-xl border-border/70"
+            className="h-7 px-2.5 text-xs gap-1 rounded-xl border-border/70 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/40 transition-colors"
           >
             <ChevronLeft className="h-3 w-3" />
             <span>Prev</span>
           </Button>
 
-          <span className="text-[11px] text-muted-foreground font-medium">
+          <span className="text-[11px] text-muted-foreground font-semibold">
             {page} / {totalPages}
           </span>
 
@@ -437,7 +441,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
             size="sm"
             disabled={page >= totalPages || isLoading}
             onClick={() => onPageChange(page + 1)}
-            className="h-7 px-2.5 text-xs gap-1 rounded-xl border-border/70"
+            className="h-7 px-2.5 text-xs gap-1 rounded-xl border-border/70 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/40 transition-colors"
           >
             <span>Next</span>
             <ChevronRight className="h-3 w-3" />

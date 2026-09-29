@@ -22,7 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Sidebar />
 
           {/* Main Workspace Area */}
-          <SidebarInset className="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-hidden bg-transparent text-foreground">
+          <SidebarInset className="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-hidden bg-slate-50/70 dark:bg-background text-foreground">
             {/* Unified Glassmorphism Header */}
             <Header />
 
