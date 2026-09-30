@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { normalizeContacts, parseContactString, getContactAvatarColor } from "./EmailRecipientBadges";
 
 export interface EmailListItem {
   id: string;
@@ -304,7 +305,14 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           filteredThreads.map((thread) => {
             const isSelected = selectedThreadId === thread.id || selectedThreadId === thread.threadId;
             const hasUnread = thread.unreadCount > 0 && !thread.isDraft;
-            const primaryParticipant = thread.participants?.[0] || "Unknown Contact";
+            const parsedParticipants = normalizeContacts(thread.participants);
+            const participantNames = parsedParticipants.length > 0 
+              ? parsedParticipants.map((p) => p.name).join(", ")
+              : (thread.participants?.join(", ") || "Participants");
+            const primaryContact = parsedParticipants[0] || parseContactString(thread.participants?.[0] || "");
+            const primaryName = primaryContact?.name || "Unknown Contact";
+            const primaryEmail = primaryContact?.email || primaryName;
+            const primaryInitials = primaryContact?.initials || "EM";
 
             return (
               <div
@@ -340,8 +348,8 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
 
                 {/* Avatar with initials */}
                 <Avatar className="h-9 w-9 border border-border/50 shrink-0 text-xs mt-0.5 shadow-2xs">
-                  <AvatarFallback className={`font-bold text-[11px] ${getAvatarColor(primaryParticipant)}`}>
-                    {thread.isDraft ? <FileEdit className="h-4 w-4" /> : getInitials(primaryParticipant)}
+                  <AvatarFallback className={`font-bold text-[11px] ${getContactAvatarColor(primaryEmail)}`}>
+                    {thread.isDraft ? <FileEdit className="h-4 w-4" /> : primaryInitials}
                   </AvatarFallback>
                 </Avatar>
 
@@ -361,7 +369,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                         {thread.isDraft && (
                           <span className="text-purple-600 dark:text-purple-400 font-bold mr-1.5">[Draft]</span>
                         )}
-                        {thread.participants?.join(", ") || "Participants"}
+                        {participantNames}
                       </span>
                     </div>
 

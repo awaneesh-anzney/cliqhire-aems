@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { 
   EmailHeader, 
   MailboxConnectCard, 
@@ -24,7 +24,7 @@ import {
   useToggleStar 
 } from "@/hooks/useEmail";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Loader2, Mail, X } from "lucide-react";
+import { Loader2, Mail, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { emailService } from "@/services/emailService";
 import { toast } from "sonner";
@@ -47,6 +47,7 @@ export default function EmailPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
 
   // Email type & address selection state (Client, Candidate, Team)
   const [selectedEmailType, setSelectedEmailType] = useState<EmailContactType | null>(null);
@@ -91,19 +92,20 @@ export default function EmailPage() {
 
   useEffect(() => {
     setSelectedIds([]);
+    setHasAutoSelected(false);
   }, [activeFolder, searchQuery, page, selectedEmailType, selectedEmailAddress]);
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
     try {
       if (activeFolder === "trash") {
-        await Promise.all(selectedIds.map(id => emailService.permanentDelete(id)));
+        await Promise.all(selectedIds.map((id) => emailService.permanentDelete(id)));
         toast.success("Conversations permanently deleted");
       } else if (activeFolder === "drafts") {
-        await Promise.all(selectedIds.map(id => emailService.deleteDraft(id)));
+        await Promise.all(selectedIds.map((id) => emailService.deleteDraft(id)));
         toast.success("Drafts discarded");
       } else {
-        await Promise.all(selectedIds.map(id => emailService.moveToTrash(id)));
+        await Promise.all(selectedIds.map((id) => emailService.moveToTrash(id)));
         toast.success("Conversations moved to Trash");
       }
       setSelectedIds([]);
@@ -199,17 +201,17 @@ export default function EmailPage() {
     }
   });
 
-  // Items are already filtered by the server when search is active
   const displayItems = mappedItems;
 
-  // Auto-select first thread on wide desktop displays only (>= 1280px)
+  // Auto-select first thread on initial desktop load (>= 1280px) without forcing re-selection if user closes it
   useEffect(() => {
-    if (!selectedThreadId && displayItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1280) {
+    if (!hasAutoSelected && !selectedThreadId && displayItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1280) {
       if (!displayItems[0].isDraft) {
         setSelectedThreadId(displayItems[0].threadId || displayItems[0].id);
+        setHasAutoSelected(true);
       }
     }
-  }, [displayItems, selectedThreadId]);
+  }, [displayItems, selectedThreadId, hasAutoSelected]);
 
   const handleSelectThread = (item: EmailListItem) => {
     if (item.isDraft) {
@@ -258,7 +260,7 @@ export default function EmailPage() {
 
   if (loadingStatus) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] w-full items-center justify-center bg-gradient-to-br from-slate-50/40 via-background to-blue-50/20 dark:from-slate-950/40 dark:via-background dark:to-slate-900/20">
+      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-50/40 via-background to-blue-50/20 dark:from-slate-950/40 dark:via-background dark:to-slate-900/20">
         <div className="flex items-center gap-3 text-xs text-muted-foreground font-semibold p-4 sm:p-5 rounded-2xl bg-card/95 border border-border/70 shadow-sm">
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
           <span>Connecting to mailbox service...</span>
@@ -298,8 +300,8 @@ export default function EmailPage() {
             <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-4 shadow-sm">
               <Mail className="h-8 w-8" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Reconnect your Microsoft Mailbox</h2>
-            <p className="text-muted-foreground mb-8 max-w-md text-sm leading-relaxed">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-foreground">Reconnect your Microsoft Mailbox</h2>
+            <p className="text-muted-foreground mb-8 max-w-md text-xs sm:text-sm leading-relaxed">
               We&apos;ve upgraded our email integration to use Microsoft Graph for better reliability. Please reconnect your Microsoft account to continue syncing your emails.
             </p>
             <Button
@@ -350,6 +352,7 @@ export default function EmailPage() {
                 setActiveFolder(folder);
                 setPage(1);
                 setSelectedThreadId(null);
+                setHasAutoSelected(false);
               }}
               onComposeClick={() => handleCompose()}
               unreadCount={totalUnread}
@@ -473,6 +476,7 @@ export default function EmailPage() {
                 setActiveFolder(folder);
                 setPage(1);
                 setSelectedThreadId(null);
+                setHasAutoSelected(false);
                 setMobileNavOpen(false);
               }}
               onComposeClick={() => {
