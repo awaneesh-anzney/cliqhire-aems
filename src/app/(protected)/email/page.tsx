@@ -342,8 +342,8 @@ export default function EmailPage() {
         <div className="flex-1 min-h-0 flex gap-2.5 sm:gap-3 overflow-hidden">
           {/* Desktop & Tablet Collapsible Left Sidebar */}
           <div
-            className={`hidden md:block shrink-0 transition-all duration-300 ${
-              isSidebarCollapsed ? "w-16" : "w-56 lg:w-60 xl:w-64"
+            className={`hidden md:block shrink-0 transition-all duration-300 overflow-hidden ${
+              isSidebarCollapsed ? "w-14 sm:w-16" : "w-44 lg:w-48 xl:w-52"
             }`}
           >
             <EmailSidebar
@@ -374,8 +374,8 @@ export default function EmailPage() {
           <div
             className={`flex flex-col min-w-0 transition-all ${
               selectedThreadId 
-                ? "hidden md:flex md:w-72 lg:w-80 xl:w-96 shrink-0" 
-                : "w-full md:w-80 lg:w-96 md:flex-initial shrink-0"
+                ? "hidden md:flex md:w-60 lg:w-68 xl:w-76 shrink-0" 
+                : "w-full md:w-72 lg:w-80 md:flex-initial shrink-0"
             }`}
           >
             {mailbox && mailbox.initialSyncCompleted === false ? (

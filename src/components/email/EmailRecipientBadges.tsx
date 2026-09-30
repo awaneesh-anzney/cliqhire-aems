@@ -8,9 +8,9 @@ import {
   Check, 
   Mail, 
   Users, 
-  ShieldCheck, 
   Calendar,
-  ExternalLink
+  ExternalLink,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 
 export interface ParsedContact {
@@ -94,7 +99,6 @@ export function normalizeContacts(contacts?: string | string[] | null): ParsedCo
   if (Array.isArray(contacts)) {
     contacts.forEach((item) => {
       if (typeof item === "string") {
-        // May contain comma-separated emails
         if (item.includes(",")) {
           item.split(",").forEach((sub) => {
             if (sub.trim()) list.push(sub.trim());
@@ -160,9 +164,10 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
   isSent = false,
   status,
   onComposeTo,
-  maxCollapsedChips = 2,
+  maxCollapsedChips = 3,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showAllToChips, setShowAllToChips] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const parsedFrom = parseContactString(from) || {
@@ -192,7 +197,7 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
     copyToClipboard(all, "all recipient emails", "all-recipients");
   };
 
-  const visibleToChips = toList.slice(0, maxCollapsedChips);
+  const visibleToChips = showAllToChips ? toList : toList.slice(0, maxCollapsedChips);
   const hiddenToCount = Math.max(0, toList.length - maxCollapsedChips);
 
   return (
@@ -200,8 +205,8 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
       <TooltipProvider delayDuration={200}>
         {/* Compact Bar / Recipient Summary Row */}
         <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-            <span className="text-[11px] font-semibold text-muted-foreground shrink-0 select-none">
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+            <span className="text-[11px] font-bold text-muted-foreground shrink-0 select-none">
               To:
             </span>
 
@@ -217,7 +222,7 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
                       onClick={() => onComposeTo?.(recipient.email)}
                       className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] font-medium transition-all ${
                         onComposeTo ? "cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/40" : ""
-                      } bg-muted/40 border-border/70 text-foreground/90 max-w-[200px] truncate`}
+                      } bg-muted/40 border-border/70 text-foreground/90 max-w-[240px] truncate shadow-2xs`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
                       <span className="truncate">{recipient.name}</span>
@@ -232,30 +237,113 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
               ))
             )}
 
-            {/* Hidden count badge */}
-            {hiddenToCount > 0 && (
+            {/* "+X more / View All" Interactive Badge */}
+            {hiddenToCount > 0 && !showAllToChips && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/25 hover:bg-blue-500/20 transition-all cursor-pointer shadow-2xs"
+                    title={`Click to view all ${toList.length} recipients`}
+                  >
+                    <span>+{hiddenToCount} more</span>
+                    <span className="opacity-75">• View All</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-80 p-3 rounded-2xl shadow-xl border-border/70 space-y-2.5">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-border/60">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5 text-blue-600" />
+                      <span className="text-xs font-bold text-foreground">
+                        All Recipients ({toList.length})
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setShowAllToChips(true);
+                      }}
+                      className="h-6 px-1.5 text-[10px] text-blue-600 font-semibold"
+                    >
+                      Expand inline
+                    </Button>
+                  </div>
+
+                  <div className="max-h-60 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
+                    {toList.map((rec, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border/60 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Avatar className="h-6 w-6 border border-border/50 text-[10px] shrink-0">
+                            <AvatarFallback className={`font-bold ${getContactAvatarColor(rec.email)}`}>
+                              {rec.initials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold text-foreground truncate">{rec.name}</p>
+                            <p className="text-[10px] font-mono text-muted-foreground truncate">{rec.email}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          {onComposeTo && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onComposeTo(rec.email)}
+                              className="h-6 w-6 rounded text-muted-foreground hover:text-blue-600"
+                              title="Compose to recipient"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => copyToClipboard(rec.email, rec.email, `pop-${rec.email}`)}
+                            className="h-6 w-6 rounded text-muted-foreground hover:text-foreground"
+                            title="Copy email address"
+                          >
+                            {copiedKey === `pop-${rec.email}` ? (
+                              <Check className="h-3 w-3 text-emerald-500" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+
+            {/* Show less button if inline chips are expanded */}
+            {showAllToChips && hiddenToCount > 0 && (
               <button
                 type="button"
-                onClick={() => setIsExpanded(true)}
-                className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors cursor-pointer"
-                title={`View all ${toList.length} recipients`}
+                onClick={() => setShowAllToChips(false)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/60 transition-colors"
               >
-                +{hiddenToCount} more
+                Show less
               </button>
             )}
 
             {/* CC snippet badge if available */}
             {ccList.length > 0 && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium text-muted-foreground bg-muted/40 border border-border/50">
-                <span className="font-semibold">Cc:</span>
-                <span>{ccList.length}</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium text-muted-foreground bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
+                <span className="font-bold">Cc:</span>
+                <span>{ccList.length} {ccList.length === 1 ? "contact" : "contacts"}</span>
               </span>
             )}
 
             {/* BCC snippet badge if available */}
             {bccList.length > 0 && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium text-muted-foreground bg-muted/40 border border-border/50">
-                <span className="font-semibold">Bcc:</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium text-muted-foreground bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                <span className="font-bold">Bcc:</span>
                 <span>{bccList.length}</span>
               </span>
             )}
@@ -265,11 +353,11 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 px-2 py-0.5 rounded-lg hover:bg-muted/60 transition-colors ml-auto shrink-0 select-none cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-lg hover:bg-muted/60 border border-transparent hover:border-border/60 transition-all ml-auto shrink-0 select-none cursor-pointer"
             aria-expanded={isExpanded}
-            aria-label="Toggle full recipient details"
+            aria-label="Toggle full recipient envelope details"
           >
-            <span>{isExpanded ? "Hide details" : totalRecipients > 1 ? `Details (${totalRecipients})` : "Details"}</span>
+            <span>{isExpanded ? "Hide Details" : totalRecipients > 1 ? `Details (${totalRecipients})` : "Details"}</span>
             {isExpanded ? (
               <ChevronUp className="h-3 w-3 text-muted-foreground/70" />
             ) : (
@@ -317,7 +405,7 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
             <div className="space-y-2.5 text-xs">
               {/* FROM ROW */}
               <div className="flex items-start gap-2.5">
-                <span className="w-14 shrink-0 text-[11px] font-bold text-muted-foreground pt-0.5">
+                <span className="w-16 shrink-0 text-[11px] font-bold text-muted-foreground pt-0.5">
                   From:
                 </span>
                 <div className="flex-1 min-w-0 flex items-center justify-between gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/50">
@@ -350,7 +438,7 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
 
               {/* TO ROW - All Recipients */}
               <div className="flex items-start gap-2.5">
-                <span className="w-14 shrink-0 text-[11px] font-bold text-muted-foreground pt-1">
+                <span className="w-16 shrink-0 text-[11px] font-bold text-muted-foreground pt-1">
                   To ({toList.length}):
                 </span>
                 <div className="flex-1 min-w-0">
@@ -414,7 +502,7 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
               {/* CC ROW */}
               {ccList.length > 0 && (
                 <div className="flex items-start gap-2.5">
-                  <span className="w-14 shrink-0 text-[11px] font-bold text-muted-foreground pt-1">
+                  <span className="w-16 shrink-0 text-[11px] font-bold text-muted-foreground pt-1">
                     Cc ({ccList.length}):
                   </span>
                   <div className="flex-1 min-w-0">
@@ -462,7 +550,7 @@ export const EmailRecipientBadges: React.FC<EmailRecipientBadgesProps> = ({
               {/* BCC ROW */}
               {bccList.length > 0 && (
                 <div className="flex items-start gap-2.5">
-                  <span className="w-14 shrink-0 text-[11px] font-bold text-muted-foreground pt-1">
+                  <span className="w-16 shrink-0 text-[11px] font-bold text-muted-foreground pt-1">
                     Bcc ({bccList.length}):
                   </span>
                   <div className="flex-1 min-w-0">
