@@ -14,7 +14,8 @@ import {
   Minimize2,
   Users,
   Copy,
-  Check
+  Check,
+  MailCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { EmailThread } from "@/types/email";
 import { normalizeContacts, getContactAvatarColor } from "./EmailRecipientBadges";
 import { toast } from "sonner";
@@ -77,217 +84,250 @@ export const EmailThreadHeader: React.FC<EmailThreadHeaderProps> = ({
   };
 
   return (
-    <div className="p-3 sm:p-3.5 md:p-4 border-b border-border/70 bg-card/95 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-      {/* LEFT: Back button + Subject title + Badge */}
-      <div className="flex items-center gap-3 min-w-0">
-        {onClose && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onClose}
-            className="h-8.5 w-8.5 rounded-xl border-border/70 shrink-0 md:hidden text-foreground hover:bg-muted/60"
-            aria-label="Back to conversations list"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        )}
-
-        <div className="space-y-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h2
-              className="text-base sm:text-lg font-bold text-foreground truncate max-w-[280px] sm:max-w-[420px] lg:max-w-[560px]"
-              title={thread.subject || "(No Subject)"}
+    <TooltipProvider delayDuration={200}>
+      <header className="px-3.5 sm:px-4 py-2 sm:py-2.5 border-b border-border/70 bg-gradient-to-r from-card via-card/98 to-blue-50/25 dark:to-blue-950/15 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+        {/* LEFT: Back button (mobile), Subject Title & Inline Participants */}
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          {onClose && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onClose}
+              className="h-7.5 w-7.5 rounded-lg border-border/70 shrink-0 md:hidden text-foreground hover:bg-muted/60"
+              aria-label="Back to conversations list"
             >
-              {thread.subject || "(No Subject)"}
-            </h2>
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </Button>
+          )}
 
-            {isUnread && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 rounded-full shrink-0 font-bold"
+          <div className="space-y-0.5 min-w-0 flex-1">
+            {/* Row 1: Subject Title & Status Badges */}
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <h2
+                className="text-sm sm:text-[15px] font-bold text-foreground tracking-tight truncate max-w-[280px] sm:max-w-[440px] lg:max-w-[620px]"
+                title={thread.subject || "(No Subject)"}
               >
-                Unread
-              </Badge>
-            )}
+                {thread.subject || "(No Subject)"}
+              </h2>
 
-            {messageCount > 1 && (
-              <Badge
-                variant="outline"
-                className="text-[10px] h-5 px-2 bg-muted/40 text-muted-foreground border-border/60 rounded-full shrink-0 font-semibold"
-              >
-                {messageCount} messages
-              </Badge>
-            )}
-          </div>
+              {isUnread && (
+                <span className="inline-flex items-center gap-1 text-[9.5px] font-bold px-2 py-0.2 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25 shadow-2xs shrink-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  <span>Unread</span>
+                </span>
+              )}
 
-          {/* Participant summary row with View All / +X more popover */}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-            <Users className="h-3 w-3 shrink-0 text-muted-foreground/70" />
-            <span className="font-semibold text-[11px]">Participants:</span>
+              {messageCount > 1 && (
+                <span className="text-[10px] h-4.5 px-1.5 bg-muted/60 text-muted-foreground border border-border/60 rounded-md shrink-0 font-medium inline-flex items-center">
+                  {messageCount} msgs
+                </span>
+              )}
+            </div>
 
-            {parsedParticipants.length === 0 ? (
-              <span className="text-[11px]">{participants.join(", ") || "No contacts"}</span>
-            ) : (
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {visibleParticipants.map((p, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 text-[11px] text-foreground/85 font-medium"
-                  >
-                    <span>{p.name}</span>
-                    {idx < visibleParticipants.length - 1 && <span className="text-muted-foreground/60">,</span>}
-                  </span>
-                ))}
+            {/* Row 2: Streamlined Participant Summary */}
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0 flex-wrap">
+              <Users className="h-3 w-3 shrink-0 text-blue-500/80" />
+              <span className="font-semibold text-[10px] text-muted-foreground/80 shrink-0">To:</span>
 
-                {/* +X More / View All Button */}
-                {hiddenCount > 0 && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-0.5 px-2 py-0.2 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors cursor-pointer shadow-2xs"
-                        title={`View all ${parsedParticipants.length} participants`}
-                      >
-                        <span>+{hiddenCount} more</span>
-                        <span className="opacity-75">• View All</span>
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="start" className="w-72 p-3 rounded-2xl shadow-xl border-border/70 space-y-2">
-                      <div className="flex items-center gap-1.5 pb-1.5 border-b border-border/60">
-                        <Users className="h-3.5 w-3.5 text-blue-600" />
-                        <span className="text-xs font-bold text-foreground">
-                          All Participants ({parsedParticipants.length})
-                        </span>
-                      </div>
+              {parsedParticipants.length === 0 ? (
+                <span className="text-[11px] truncate">{participants.join(", ") || "No contacts"}</span>
+              ) : (
+                <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                  {visibleParticipants.map((p, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 text-[11px] text-foreground/85 font-medium truncate max-w-[140px] sm:max-w-[200px]"
+                      title={`${p.name} <${p.email}>`}
+                    >
+                      <span className="truncate">{p.name}</span>
+                      {idx < visibleParticipants.length - 1 && <span className="text-muted-foreground/50">,</span>}
+                    </span>
+                  ))}
 
-                      <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
-                        {parsedParticipants.map((p, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border/60 transition-colors"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Avatar className="h-6 w-6 border border-border/50 text-[10px] shrink-0">
-                                <AvatarFallback className={`font-bold ${getContactAvatarColor(p.email)}`}>
-                                  {p.initials}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0">
-                                <p className="text-[11px] font-bold text-foreground truncate">{p.name}</p>
-                                <p className="text-[10px] font-mono text-muted-foreground truncate">{p.email}</p>
-                              </div>
-                            </div>
-
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCopyEmail(p.email)}
-                              className="h-6 w-6 rounded text-muted-foreground hover:text-foreground shrink-0"
-                              title="Copy email address"
-                            >
-                              {copiedEmail === p.email ? (
-                                <Check className="h-3 w-3 text-emerald-500" />
-                              ) : (
-                                <Copy className="h-3 w-3" />
-                              )}
-                            </Button>
+                  {/* +X More / View All Popover Trigger */}
+                  {hiddenCount > 0 && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-md text-[9.5px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/25 hover:bg-blue-500/20 transition-all cursor-pointer shadow-2xs shrink-0"
+                          title={`View all ${parsedParticipants.length} participants`}
+                        >
+                          <span>+{hiddenCount} more</span>
+                          <span className="opacity-75">• View All</span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-72 p-3 rounded-2xl shadow-xl border-border/70 space-y-2">
+                        <div className="flex items-center justify-between pb-1.5 border-b border-border/60">
+                          <div className="flex items-center gap-1.5">
+                            <Users className="h-3.5 w-3.5 text-blue-600" />
+                            <span className="text-xs font-bold text-foreground">
+                              All Participants ({parsedParticipants.length})
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                )}
-              </div>
-            )}
+                        </div>
+
+                        <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
+                          {parsedParticipants.map((p, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border/60 transition-colors"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Avatar className="h-6 w-6 border border-border/50 text-[10px] shrink-0">
+                                  <AvatarFallback className={`font-bold ${getContactAvatarColor(p.email)}`}>
+                                    {p.initials}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                  <p className="text-[11px] font-bold text-foreground truncate">{p.name}</p>
+                                  <p className="text-[10px] font-mono text-muted-foreground truncate">{p.email}</p>
+                                </div>
+                              </div>
+
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleCopyEmail(p.email)}
+                                className="h-6 w-6 rounded text-muted-foreground hover:text-foreground shrink-0"
+                                title="Copy email address"
+                              >
+                                {copiedEmail === p.email ? (
+                                  <Check className="h-3 w-3 text-emerald-500" />
+                                ) : (
+                                  <Copy className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* RIGHT: Action Toolbar */}
-      <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto flex-wrap">
-        {/* Toggle star */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleStar}
-          className={`h-8 w-8 p-0 rounded-xl border-border/70 transition-all ${
-            isStarred
-              ? "text-amber-500 bg-amber-500/15 border-amber-500/35 shadow-2xs"
-              : "text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10"
-          }`}
-          title={isStarred ? "Unstar conversation" : "Star conversation"}
-        >
-          <Star className={`h-3.5 w-3.5 ${isStarred ? "fill-amber-400 text-amber-400" : ""}`} />
-        </Button>
+        {/* RIGHT: Compact Unified Action Bar */}
+        <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto flex-wrap">
+          {/* Segmented quick actions rail */}
+          <div className="inline-flex items-center gap-0.5 p-0.5 rounded-xl bg-muted/40 border border-border/60">
+            {/* Toggle Star */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={onToggleStar}
+                  className={`h-7 w-7 rounded-lg inline-flex items-center justify-center transition-all ${
+                    isStarred
+                      ? "text-amber-500 bg-amber-500/15 shadow-2xs"
+                      : "text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10"
+                  }`}
+                  aria-label={isStarred ? "Unstar" : "Star"}
+                >
+                  <Star className={`h-3.5 w-3.5 ${isStarred ? "fill-amber-400 text-amber-400" : ""}`} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {isStarred ? "Unstar" : "Star"}
+              </TooltipContent>
+            </Tooltip>
 
-        {/* Mark read / unread */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleRead}
-          className="h-8 px-2.5 text-xs gap-1.5 rounded-xl border-border/70 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/40 transition-colors"
-          title={isUnread ? "Mark as Read" : "Mark as Unread"}
-        >
-          {isUnread ? <Eye className="h-3.5 w-3.5 text-blue-600" /> : <EyeOff className="h-3.5 w-3.5" />}
-          <span className="hidden lg:inline font-semibold">{isUnread ? "Mark Read" : "Mark Unread"}</span>
-        </Button>
+            {/* Mark Read / Unread */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={onToggleRead}
+                  className={`h-7 px-2 rounded-lg text-xs font-semibold inline-flex items-center gap-1 transition-all ${
+                    isUnread
+                      ? "text-blue-600 dark:text-blue-400 hover:bg-blue-500/15"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  }`}
+                  aria-label={isUnread ? "Mark as Read" : "Mark as Unread"}
+                >
+                  {isUnread ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  <span className="hidden xl:inline text-[11px]">{isUnread ? "Read" : "Unread"}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {isUnread ? "Mark as Read" : "Mark as Unread"}
+              </TooltipContent>
+            </Tooltip>
 
-        {/* Expand / Collapse all in multi-message threads */}
-        {messageCount > 1 && onToggleExpandAll && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onToggleExpandAll}
-            className="h-8 px-2.5 text-xs gap-1.5 rounded-xl border-border/70 hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
-            title={allExpanded ? "Collapse older messages" : "Expand all messages"}
-          >
-            {allExpanded ? (
-              <ChevronsDownUp className="h-3.5 w-3.5" />
-            ) : (
-              <ChevronsUpDown className="h-3.5 w-3.5" />
+            {/* Expand / Collapse All Messages (in multi-message threads) */}
+            {messageCount > 1 && onToggleExpandAll && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={onToggleExpandAll}
+                    className="h-7 w-7 rounded-lg inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                    aria-label={allExpanded ? "Collapse older messages" : "Expand all messages"}
+                  >
+                    {allExpanded ? (
+                      <ChevronsDownUp className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronsUpDown className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  {allExpanded ? "Collapse older messages" : "Expand all"}
+                </TooltipContent>
+              </Tooltip>
             )}
-            <span className="hidden xl:inline font-semibold">
-              {allExpanded ? "Collapse" : "Expand All"}
-            </span>
-          </Button>
-        )}
 
-        {/* Fullscreen focus reading mode toggle */}
-        {onToggleFullscreen && (
+            {/* Fullscreen Reading Mode */}
+            {onToggleFullscreen && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={onToggleFullscreen}
+                    className="h-7 w-7 rounded-lg hidden lg:inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                    aria-label={isFullscreen ? "Exit reading mode" : "Focus reading mode"}
+                  >
+                    {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  {isFullscreen ? "Exit Fullscreen" : "Focus Reading Mode"}
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {/* Move to Trash */}
+            {onMoveToTrash && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={onMoveToTrash}
+                    className="h-7 w-7 rounded-lg inline-flex items-center justify-center text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all"
+                    aria-label="Move to Trash"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">Move to Trash</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+
+          {/* Primary Quick Reply CTA */}
           <Button
-            variant="outline"
-            size="icon"
-            onClick={onToggleFullscreen}
-            className="h-8 w-8 rounded-xl border-border/70 text-muted-foreground hover:text-foreground hidden lg:flex"
-            title={isFullscreen ? "Exit reading mode" : "Focus reading mode"}
+            size="sm"
+            onClick={onOpenReply}
+            className="h-7.5 px-3 text-xs gap-1.5 bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg shadow-xs shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-95 ml-0.5"
           >
-            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            <Reply className="h-3 w-3" />
+            <span>Reply</span>
           </Button>
-        )}
-
-        {/* Move to trash */}
-        {onMoveToTrash && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onMoveToTrash}
-            className="h-8 w-8 rounded-xl border-border/70 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:border-rose-200 transition-colors"
-            title="Move conversation to Trash"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
-        )}
-
-        {/* Primary Reply Button */}
-        <Button
-          size="sm"
-          onClick={onOpenReply}
-          className="h-8 px-3.5 text-xs gap-1.5 bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xs shadow-blue-500/20 font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-95"
-        >
-          <Reply className="h-3.5 w-3.5" />
-          <span>Reply</span>
-        </Button>
-      </div>
-    </div>
+        </div>
+      </header>
+    </TooltipProvider>
   );
 };
