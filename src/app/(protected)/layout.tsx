@@ -12,6 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <AuthGuard>
       <SocketProvider>
         <SidebarProvider
+          defaultOpen={false}
           style={{
             ["--sidebar-width" as string]: "16.5rem",
             ["--sidebar-width-icon" as string]: "4.25rem",

@@ -13,29 +13,19 @@ import {
     ChevronRight,
     SearchX,
     Filter,
-    ArrowRight
+    ArrowRight,
+    X,
+    Mail,
+    Phone,
+    MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-    Command,
-    CommandList,
-    CommandItem,
-    CommandGroup,
-    CommandSeparator,
-} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { useSearchAll, useInfiniteSearch } from "@/hooks/use-search";
-import { 
-    CandidateItem, 
-    ClientItem, 
-    JobItem, 
-    UserItem, 
-    TempCandidateItem,
-    SearchEntityType
-} from "@/types/search";
+import { SearchEntityType } from "@/types/search";
 import { useInView } from "react-intersection-observer";
 
-const CATEGORIES: { label: string; value: SearchEntityType; icon: any }[] = [
+const CATEGORIES: { label: string; value: SearchEntityType; icon: React.ElementType }[] = [
     { label: "All", value: "all", icon: Filter },
     { label: "Candidates", value: "candidates", icon: User },
     { label: "Jobs", value: "jobs", icon: Briefcase },
@@ -44,16 +34,181 @@ const CATEGORIES: { label: string; value: SearchEntityType; icon: any }[] = [
     { label: "External", value: "temp", icon: UserPlus },
 ];
 
+interface ExtractedGroup {
+    items: any[];
+    count: number;
+}
+
+/**
+ * Resilient helper to extract items and counts from various backend response shapes:
+ * - { success: true, data: { candidates: { items: [...], count: 5 } } }
+ * - { status: "success", data: { candidates: [...] } }
+ * - { candidates: [...], jobs: [...] }
+ * - Direct array of mixed items with .type
+ * - { data: { items: [...] } }
+ */
+function extractEntityData(raw: any, entityKey: string): ExtractedGroup {
+    if (!raw) return { items: [], count: 0 };
+
+    // Drill down potential response envelopes
+    let root = raw;
+    if (root.data && typeof root.data === "object" && !Array.isArray(root.data)) {
+        if (root.data.data && typeof root.data.data === "object" && !Array.isArray(root.data.data)) {
+            root = root.data.data;
+        } else {
+            root = root.data;
+        }
+    }
+
+    const aliases: Record<string, string[]> = {
+        candidates: ["candidates", "candidate", "candidateList"],
+        jobs: ["jobs", "job", "jobList", "positions"],
+        clients: ["clients", "client", "clientList", "companies"],
+        users: ["users", "user", "team", "teamMembers", "teamMember", "members"],
+        temp: ["tempCandidates", "temp", "tempCandidate", "temporaryCandidates", "tem_candidates", "temCandidates"],
+        tempCandidates: ["tempCandidates", "temp", "tempCandidate", "temporaryCandidates", "tem_candidates", "temCandidates"],
+    };
+
+    const keys = aliases[entityKey] || [entityKey];
+
+    // Check if root itself is an array of items (each item might have .type)
+    if (Array.isArray(root)) {
+        const normKey = entityKey.toLowerCase().replace(/s$/, "");
+        const matched = root.filter((item: any) => {
+            const itemType = (item.type || "").toLowerCase().replace(/s$/, "");
+            if (normKey === "temp" || normKey === "tempcandidate") {
+                return itemType === "temp" || itemType === "tempcandidate" || itemType === "temporary";
+            }
+            return itemType === normKey;
+        });
+        if (matched.length > 0) {
+            return { items: matched, count: matched.length };
+        }
+    }
+
+    // Check direct property match on root
+    for (const k of keys) {
+        if (k in root) {
+            const val = root[k];
+            if (Array.isArray(val)) {
+                return { items: val, count: val.length };
+            }
+            if (val && typeof val === "object") {
+                const list = Array.isArray(val.items) 
+                    ? val.items 
+                    : Array.isArray(val.data) 
+                    ? val.data 
+                    : Array.isArray(val.results) 
+                    ? val.results 
+                    : [];
+                const count = typeof val.count === "number" 
+                    ? val.count 
+                    : typeof val.total === "number" 
+                    ? val.total 
+                    : typeof val.totalCount === "number" 
+                    ? val.totalCount 
+                    : list.length;
+                return { items: list, count };
+            }
+        }
+    }
+
+    // If searching a specific category tab, data might have items/results directly
+    if (Array.isArray(root.items)) {
+        const count = typeof root.count === "number" ? root.count : (root.totalCount ?? root.total ?? root.items.length);
+        return { items: root.items, count };
+    }
+    if (Array.isArray(root.results)) {
+        const count = typeof root.count === "number" ? root.count : (root.totalCount ?? root.total ?? root.results.length);
+        return { items: root.results, count };
+    }
+    if (Array.isArray(root.data)) {
+        return { items: root.data, count: root.data.length };
+    }
+
+    return { items: [], count: 0 };
+}
+
+function getItemId(item: any): string {
+    return item.id || item._id || item.jobId || item.clientId || item.candidateId || item.userId || item._doc?._id || "";
+}
+
+interface ParsedItemData {
+    title: string;
+    role: string;
+    email: string;
+    phone: string;
+    location: string;
+    experience: string;
+    department: string;
+    status: string;
+}
+
+function parseItemData(item: any, type: string): ParsedItemData {
+    const normType = (item.type || type || "").toLowerCase().replace(/s$/, "");
+
+    let title = "Untitled";
+    let role = "";
+    let email = item.email || "";
+    let phone = item.phone || item.phoneNumber || item.otherPhone || "";
+    let location = item.location || item.city || (item.address ? (typeof item.address === 'string' ? item.address : item.address.city) : "") || "";
+    let experience = "";
+    let department = item.department || "";
+    let status = item.status || item.stage || item.state || "";
+
+    if (normType === "candidate") {
+        title = item.name || item.fullName || (item.firstName ? `${item.firstName} ${item.lastName || ""}`.trim() : "") || "Candidate";
+        role = item.currentJobTitle || item.jobTitle || item.position || item.subtitle || "";
+        experience = item.experience ? (item.experience.toLowerCase().includes("year") ? item.experience : `${item.experience} exp`) : "";
+    } else if (normType === "job") {
+        title = item.jobTitle || item.title || item.name || item.positionName || "Untitled Job";
+        role = item.client ? (typeof item.client === 'string' ? item.client : (item.client.name || item.client.companyName || "")) : item.clientName || "";
+        department = item.department || item.industry || "";
+    } else if (normType === "client") {
+        title = item.name || item.companyName || item.clientName || "Untitled Client";
+        role = item.industry || item.lineOfBusiness || item.subtitle || "";
+    } else if (normType === "user" || normType === "team" || normType === "teammember") {
+        title = item.name || item.fullName || "Team Member";
+        role = item.role || item.department || item.subtitle || "Team Member";
+    } else if (normType === "temp" || normType === "tempcandidate") {
+        title = item.name || item.fullName || "External Candidate";
+        role = item.subtitle || item.currentJobTitle || "External Source";
+        experience = item.experience ? (item.experience.toLowerCase().includes("year") ? item.experience : `${item.experience} exp`) : "";
+    } else {
+        title = item.name || item.title || item.jobTitle || "Result";
+        role = item.subtitle || "";
+    }
+
+    return {
+        title,
+        role,
+        email,
+        phone,
+        location,
+        experience,
+        department,
+        status
+    };
+}
+
 export function GlobalSearch() {
     const router = useRouter();
     const [query, setQuery] = React.useState("");
     const [isOpen, setIsOpen] = React.useState(false);
     const [selectedCategory, setSelectedCategory] = React.useState<SearchEntityType>("all");
+    const [activeIndex, setActiveIndex] = React.useState<number>(-1);
+    
     const containerRef = React.useRef<HTMLDivElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const listRef = React.useRef<HTMLDivElement>(null);
     const { ref: scrollRef, inView } = useInView();
 
     // Summary search (used for "All" tab)
-    const { data: summaryData, isLoading: isSummaryLoading } = useSearchAll(query, 5, isOpen && selectedCategory === "all");
+    const { data: summaryData, isLoading: isSummaryLoading } = useSearchAll(
+        query, 
+        5, 
+        isOpen && query.trim().length >= 1 && selectedCategory === "all"
+    );
 
     // Infinite search (used for specific categories)
     const { 
@@ -62,7 +217,10 @@ export function GlobalSearch() {
         fetchNextPage, 
         hasNextPage, 
         isFetchingNextPage 
-    } = useInfiniteSearch({ q: query, type: selectedCategory, limit: 10 }, isOpen && selectedCategory !== "all");
+    } = useInfiniteSearch(
+        { q: query, type: selectedCategory, limit: 10 }, 
+        isOpen && query.trim().length >= 1 && selectedCategory !== "all"
+    );
 
     React.useEffect(() => {
         if (inView && hasNextPage) {
@@ -70,22 +228,74 @@ export function GlobalSearch() {
         }
     }, [inView, hasNextPage, fetchNextPage]);
 
-    const handleSelect = (type: string, id: string) => {
+    // Extract structured data for "All" tab
+    const candidateGroup = React.useMemo(() => extractEntityData(summaryData, "candidates"), [summaryData]);
+    const jobGroup = React.useMemo(() => extractEntityData(summaryData, "jobs"), [summaryData]);
+    const clientGroup = React.useMemo(() => extractEntityData(summaryData, "clients"), [summaryData]);
+    const userGroup = React.useMemo(() => extractEntityData(summaryData, "users"), [summaryData]);
+    const tempGroup = React.useMemo(() => extractEntityData(summaryData, "temp"), [summaryData]);
+
+    const totalSummaryCount = 
+        candidateGroup.items.length + 
+        jobGroup.items.length + 
+        clientGroup.items.length + 
+        userGroup.items.length + 
+        tempGroup.items.length;
+
+    // Detailed items for specific category tabs
+    const detailedItems = React.useMemo(() => {
+        if (selectedCategory === "all") return [];
+        return (infiniteData?.pages || []).flatMap((page: any) => {
+            return extractEntityData(page, selectedCategory).items;
+        });
+    }, [infiniteData, selectedCategory]);
+
+    // Flat list of visible items for keyboard navigation (ArrowUp/ArrowDown/Enter)
+    const flatItems = React.useMemo(() => {
+        if (selectedCategory === "all") {
+            return [
+                ...candidateGroup.items.map(item => ({ item, type: "candidate" })),
+                ...jobGroup.items.map(item => ({ item, type: "job" })),
+                ...clientGroup.items.map(item => ({ item, type: "client" })),
+                ...userGroup.items.map(item => ({ item, type: "user" })),
+                ...tempGroup.items.map(item => ({ item, type: "temp" })),
+            ];
+        }
+        const mappedType = selectedCategory === "temp" ? "temp" : selectedCategory.replace(/s$/, "");
+        return detailedItems.map(item => ({ item, type: item.type || mappedType }));
+    }, [selectedCategory, candidateGroup, jobGroup, clientGroup, userGroup, tempGroup, detailedItems]);
+
+    const hasResults = selectedCategory === "all" ? totalSummaryCount > 0 : detailedItems.length > 0;
+    const isLoading = selectedCategory === "all" ? isSummaryLoading : isInfiniteLoading;
+
+    // Reset active index when query, category, or results change
+    React.useEffect(() => {
+        setActiveIndex(-1);
+    }, [query, selectedCategory]);
+
+    const handleSelect = (rawType: string, item: any) => {
+        const id = getItemId(item);
+        if (!id) return;
+
         setIsOpen(false);
         setQuery("");
+        setActiveIndex(-1);
+
+        const normType = (item.type || rawType || "").toLowerCase().replace(/s$/, "");
 
         const routes: Record<string, string> = {
             candidate: `/candidates/${id}`,
             client: `/clients/${id}`,
             job: `/jobs/${id}`,
             user: `/teammembers?highlight=${id}`,
-            temp: `/temp-candidates/${id}`,
+            team: `/teammembers?highlight=${id}`,
+            teammember: `/teammembers?highlight=${id}`,
+            temp: `/tem-candidates?highlight=${id}`,
+            tempcandidate: `/tem-candidates?highlight=${id}`,
         };
 
-        const route = routes[type];
-        if (route) {
-            router.push(route);
-        }
+        const route = routes[normType] || `/candidates/${id}`;
+        router.push(route);
     };
 
     // Close on click outside
@@ -99,16 +309,13 @@ export function GlobalSearch() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Keyboard shortcut (Ctrl+K or Cmd+K)
+    // Global keyboard shortcut (Ctrl+K or Cmd+K)
     React.useEffect(() => {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                setIsOpen((open) => !open);
-                if (containerRef.current) {
-                    const input = containerRef.current.querySelector('input');
-                    input?.focus();
-                }
+                setIsOpen(true);
+                inputRef.current?.focus();
             }
         };
 
@@ -116,30 +323,60 @@ export function GlobalSearch() {
         return () => document.removeEventListener("keydown", down);
     }, []);
 
-    const isLoading = isSummaryLoading || isInfiniteLoading;
+    // Arrow navigation & Enter key handling on search input
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (!isOpen) {
+                setIsOpen(true);
+                return;
+            }
+            if (flatItems.length === 0) return;
+            setActiveIndex((prev) => (prev + 1 < flatItems.length ? prev + 1 : 0));
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (flatItems.length === 0) return;
+            setActiveIndex((prev) => (prev - 1 >= 0 ? prev - 1 : flatItems.length - 1));
+        } else if (e.key === "Enter") {
+            if (activeIndex >= 0 && activeIndex < flatItems.length) {
+                e.preventDefault();
+                const target = flatItems[activeIndex];
+                handleSelect(target.type, target.item);
+            }
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            setIsOpen(false);
+        }
+    };
 
-    const hasResults = selectedCategory === "all" 
-        ? summaryData?.success && (
-            (summaryData.data.candidates?.count ?? 0) > 0 ||
-            (summaryData.data.clients?.count ?? 0) > 0 ||
-            (summaryData.data.jobs?.count ?? 0) > 0 ||
-            (summaryData.data.users?.count ?? 0) > 0 ||
-            (summaryData.data.tempCandidates?.count ?? 0) > 0
-        )
-        : (infiniteData?.pages[0]?.totalCount ?? 0) > 0;
+    // Scroll active item into view
+    React.useEffect(() => {
+        if (activeIndex >= 0 && listRef.current) {
+            const activeEl = listRef.current.querySelector(`[data-search-index="${activeIndex}"]`);
+            if (activeEl) {
+                activeEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
+        }
+    }, [activeIndex]);
+
+    let runningIndex = 0;
 
     return (
         <div className="relative max-w-[500px] w-full mx-auto" ref={containerRef}>
+            {/* Input Bar */}
             <div className={cn(
-                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-white/90 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 backdrop-blur-md shadow-2xs text-foreground",
-                isOpen ? "border-blue-600 ring-2 ring-blue-500/20 bg-white dark:bg-slate-800" : "border-blue-200/80 dark:border-slate-700 hover:border-blue-400 dark:hover:border-slate-600"
+                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-white dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 shadow-2xs text-foreground",
+                isOpen 
+                    ? "border-blue-600 ring-2 ring-blue-500/20 bg-white dark:bg-slate-800" 
+                    : "border-blue-200/80 dark:border-slate-700 hover:border-blue-400 dark:hover:border-slate-600"
             )}>
                 <Search className={cn(
                     "h-4 w-4 mr-2.5 transition-colors shrink-0",
                     isOpen ? "text-blue-600" : "text-blue-500 group-hover:text-blue-600"
                 )} />
                 <input
-                    className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-slate-400 font-medium"
+                    ref={inputRef}
+                    className="flex-1 bg-transparent border-none outline-none text-xs text-foreground placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium"
                     placeholder="Search anything... (Ctrl+K)"
                     value={query}
                     onChange={(e) => {
@@ -147,284 +384,414 @@ export function GlobalSearch() {
                         setIsOpen(true);
                     }}
                     onFocus={() => setIsOpen(true)}
+                    onKeyDown={handleKeyDown}
                 />
+                
+                {query.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setQuery("");
+                            setActiveIndex(-1);
+                            inputRef.current?.focus();
+                        }}
+                        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors mr-1"
+                        title="Clear search"
+                    >
+                        <X className="h-3 w-3" />
+                    </button>
+                )}
+
                 {isLoading && (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600 ml-2 shrink-0" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600 ml-1 shrink-0" />
                 )}
                 {!isLoading && (
-                    <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded border border-blue-200/80 dark:border-blue-900 bg-blue-50/80 dark:bg-blue-950/50 px-1.5 font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 ml-2">
+                    <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded border border-blue-200/80 dark:border-blue-900 bg-blue-50/80 dark:bg-blue-950/50 px-1.5 font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 ml-1">
                         <span className="text-[10px]">⌘</span>K
                     </kbd>
                 )}
             </div>
 
-            {isOpen && query.length >= 1 && (
-                <div className="absolute top-full left-0 right-0 mt-3 z-50 bg-popover/95 backdrop-blur-xl text-popover-foreground rounded-2xl border shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 origin-top">
-                    {/* Category Tabs */}
-                    <div className="flex items-center gap-1 p-2 border-b bg-muted/20 overflow-x-auto scrollbar-none">
-                        {CATEGORIES.map((cat) => (
-                            <button
-                                key={cat.value}
-                                onClick={() => setSelectedCategory(cat.value)}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
-                                    selectedCategory === cat.value 
-                                        ? "bg-primary text-primary-foreground shadow-md" 
-                                        : "hover:bg-muted text-muted-foreground"
-                                )}
-                            >
-                                <cat.icon className="h-3.5 w-3.5" />
-                                {cat.label}
-                            </button>
-                        ))}
+            {/* Dropdown Results Panel - Centered, Solid Non-Transparent Card */}
+            {isOpen && query.trim().length >= 1 && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-[calc(100vw-2rem)] sm:w-[560px] md:w-[600px] max-w-[620px] z-50 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top">
+                    {/* Category Filter Tabs */}
+                    <div className="flex items-center gap-1.5 p-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-800/60 overflow-x-auto scrollbar-none">
+                        {CATEGORIES.map((cat) => {
+                            const IconComponent = cat.icon;
+                            const isSelected = selectedCategory === cat.value;
+                            return (
+                                <button
+                                    key={cat.value}
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedCategory(cat.value);
+                                        setActiveIndex(-1);
+                                    }}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+                                        isSelected 
+                                            ? "bg-blue-600 text-white shadow-xs" 
+                                            : "hover:bg-slate-200/70 dark:hover:bg-slate-700/70 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                                    )}
+                                >
+                                    <IconComponent className="h-3.5 w-3.5" />
+                                    <span>{cat.label}</span>
+                                </button>
+                            );
+                        })}
                     </div>
 
-                    <Command shouldFilter={false} className="max-h-[500px]">
-                        <CommandList className="scrollbar-thin scrollbar-thumb-muted-foreground/10 hover:scrollbar-thumb-muted-foreground/20">
-                            {isLoading ? (
-                                <SearchLoadingState />
-                            ) : !hasResults ? (
-                                <SearchEmptyState query={query} />
-                            ) : (
-                                <div className="p-2">
-                                    {selectedCategory === "all" ? (
-                                        <SummaryView 
-                                            data={summaryData?.data} 
-                                            onSelect={handleSelect} 
-                                            onSeeAll={(cat: SearchEntityType) => setSelectedCategory(cat)} 
+                    {/* Results Container */}
+                    <div 
+                        ref={listRef}
+                        className="max-h-[460px] overflow-y-auto overscroll-contain p-3 space-y-3 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 hover:scrollbar-thumb-slate-400"
+                    >
+                        {isLoading && !hasResults ? (
+                            <SearchLoadingState />
+                        ) : !hasResults ? (
+                            <SearchEmptyState query={query} />
+                        ) : (
+                            <div>
+                                {selectedCategory === "all" ? (
+                                    <>
+                                        <Section 
+                                            title="Candidates" 
+                                            icon={<User className="h-4 w-4 text-orange-500" />} 
+                                            items={candidateGroup.items} 
+                                            count={candidateGroup.count}
+                                            type="candidate"
+                                            activeIndex={activeIndex}
+                                            startIndex={(() => {
+                                                const start = runningIndex;
+                                                runningIndex += candidateGroup.items.length;
+                                                return start;
+                                            })()}
+                                            onHoverIndex={setActiveIndex}
+                                            onSelect={(item: any) => handleSelect("candidate", item)}
+                                            onSeeAll={() => setSelectedCategory("candidates")}
                                         />
-                                    ) : (
-                                        <DetailedView 
-                                            pages={infiniteData?.pages} 
-                                            onSelect={handleSelect} 
-                                            type={selectedCategory}
-                                            scrollRef={scrollRef}
-                                            isFetchingNextPage={isFetchingNextPage}
+                                        <Section 
+                                            title="Jobs" 
+                                            icon={<Briefcase className="h-4 w-4 text-blue-500" />} 
+                                            items={jobGroup.items} 
+                                            count={jobGroup.count}
+                                            type="job"
+                                            activeIndex={activeIndex}
+                                            startIndex={(() => {
+                                                const start = runningIndex;
+                                                runningIndex += jobGroup.items.length;
+                                                return start;
+                                            })()}
+                                            onHoverIndex={setActiveIndex}
+                                            onSelect={(item: any) => handleSelect("job", item)}
+                                            onSeeAll={() => setSelectedCategory("jobs")}
                                         />
-                                    )}
-                                </div>
-                            )}
-                        </CommandList>
-                        
-                        <SearchFooter hasResults={!!hasResults} isLoading={isLoading} />
-                    </Command>
+                                        <Section 
+                                            title="Clients" 
+                                            icon={<Building2 className="h-4 w-4 text-emerald-500" />} 
+                                            items={clientGroup.items} 
+                                            count={clientGroup.count}
+                                            type="client"
+                                            activeIndex={activeIndex}
+                                            startIndex={(() => {
+                                                const start = runningIndex;
+                                                runningIndex += clientGroup.items.length;
+                                                return start;
+                                            })()}
+                                            onHoverIndex={setActiveIndex}
+                                            onSelect={(item: any) => handleSelect("client", item)}
+                                            onSeeAll={() => setSelectedCategory("clients")}
+                                        />
+                                        <Section 
+                                            title="Team Members" 
+                                            icon={<Users className="h-4 w-4 text-violet-500" />} 
+                                            items={userGroup.items} 
+                                            count={userGroup.count}
+                                            type="user"
+                                            activeIndex={activeIndex}
+                                            startIndex={(() => {
+                                                const start = runningIndex;
+                                                runningIndex += userGroup.items.length;
+                                                return start;
+                                            })()}
+                                            onHoverIndex={setActiveIndex}
+                                            onSelect={(item: any) => handleSelect("user", item)}
+                                            onSeeAll={() => setSelectedCategory("users")}
+                                        />
+                                        <Section 
+                                            title="External Sources" 
+                                            icon={<UserPlus className="h-4 w-4 text-pink-500" />} 
+                                            items={tempGroup.items} 
+                                            count={tempGroup.count}
+                                            type="temp"
+                                            activeIndex={activeIndex}
+                                            startIndex={(() => {
+                                                const start = runningIndex;
+                                                runningIndex += tempGroup.items.length;
+                                                return start;
+                                            })()}
+                                            onHoverIndex={setActiveIndex}
+                                            onSelect={(item: any) => handleSelect("temp", item)}
+                                            onSeeAll={() => setSelectedCategory("temp")}
+                                        />
+                                    </>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-slate-100 dark:border-slate-800">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                                {selectedCategory.toUpperCase()} RESULTS
+                                            </span>
+                                            <Badge variant="secondary" className="text-[10px] h-4 px-1.5 font-bold">
+                                                {detailedItems.length} loaded
+                                            </Badge>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {detailedItems.map((item: any, idx: number) => {
+                                                const itemType = item.type || (selectedCategory === "temp" ? "temp" : selectedCategory.replace(/s$/, ""));
+                                                return (
+                                                    <SearchResultItemComponent 
+                                                        key={getItemId(item) || idx} 
+                                                        index={idx}
+                                                        isActive={activeIndex === idx}
+                                                        item={item} 
+                                                        type={itemType}
+                                                        icon={getIconForType(itemType)}
+                                                        iconBg={getIconBgForType(itemType)}
+                                                        onSelect={() => handleSelect(itemType, item)}
+                                                        onHover={() => setActiveIndex(idx)}
+                                                    />
+                                                );
+                                            })}
+                                        </div>
+
+                                        <div ref={scrollRef} className="h-10 flex items-center justify-center">
+                                            {isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-primary/60" />}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Footer */}
+                    <SearchFooter hasResults={hasResults} isLoading={isLoading} />
                 </div>
             )}
         </div>
     );
 }
 
-function SummaryView({ data, onSelect, onSeeAll }: { data: any; onSelect: any; onSeeAll: (cat: SearchEntityType) => void }) {
-    if (!data) return null;
-
-    return (
-        <>
-            <Section 
-                title="Candidates" 
-                icon={<User className="h-3.5 w-3.5" />} 
-                items={data.candidates?.items} 
-                count={data.candidates?.count}
-                type="candidate"
-                onSelect={onSelect}
-                onSeeAll={() => onSeeAll('candidates')}
-            />
-            <Section 
-                title="Jobs" 
-                icon={<Briefcase className="h-3.5 w-3.5" />} 
-                items={data.jobs?.items} 
-                count={data.jobs?.count}
-                type="job"
-                onSelect={onSelect}
-                onSeeAll={() => onSeeAll('jobs')}
-            />
-            <Section 
-                title="Clients" 
-                icon={<Building2 className="h-3.5 w-3.5" />} 
-                items={data.clients?.items} 
-                count={data.clients?.count}
-                type="client"
-                onSelect={onSelect}
-                onSeeAll={() => onSeeAll('clients')}
-            />
-            <Section 
-                title="Team Members" 
-                icon={<Users className="h-3.5 w-3.5" />} 
-                items={data.users?.items} 
-                count={data.users?.count}
-                type="user"
-                onSelect={onSelect}
-                onSeeAll={() => onSeeAll('users')}
-            />
-            <Section 
-                title="External Sources" 
-                icon={<UserPlus className="h-3.5 w-3.5" />} 
-                items={data.tempCandidates?.items} 
-                count={data.tempCandidates?.count}
-                type="temp"
-                onSelect={onSelect}
-                onSeeAll={() => onSeeAll('temp')}
-            />
-        </>
-    );
-}
-
-function DetailedView({ pages, onSelect, type, scrollRef, isFetchingNextPage }: { pages: any; onSelect: any; type: string; scrollRef: any; isFetchingNextPage: boolean }) {
-    if (!pages) return null;
-
-    const items = pages.flatMap((page: any) => {
-        if (type === 'all') return [];
-        const entityKey = type === 'temp' ? 'tempCandidates' : type;
-        return page.data[entityKey]?.items || [];
-    });
-
-    return (
-        <CommandGroup heading={
-            <div className="flex items-center justify-between px-2 py-1">
-                <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-                    {type.toUpperCase()} Results
-                </span>
-                <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
-                    {items.length} loaded
-                </Badge>
-            </div>
-        }>
-            {items.map((item: any) => (
-                <SearchResultItemComponent 
-                    key={item.id} 
-                    item={item} 
-                    icon={getIconForType(item.type || type.replace(/s$/, ''))}
-                    iconBg={getIconBgForType(item.type || type.replace(/s$/, ''))}
-                    onSelect={() => onSelect(item.type || type.replace(/s$/, ''), item.id)}
-                />
-            ))}
-            <div ref={scrollRef} className="h-10 flex items-center justify-center">
-                {isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-primary/40" />}
-            </div>
-        </CommandGroup>
-    );
-}
-
-function Section({ title, icon, items, count, type, onSelect, onSeeAll }: any) {
+function Section({ 
+    title, 
+    icon, 
+    items, 
+    count, 
+    type, 
+    activeIndex,
+    startIndex,
+    onHoverIndex,
+    onSelect, 
+    onSeeAll 
+}: {
+    title: string;
+    icon: React.ReactNode;
+    items: any[];
+    count: number;
+    type: string;
+    activeIndex: number;
+    startIndex: number;
+    onHoverIndex: (idx: number) => void;
+    onSelect: (item: any) => void;
+    onSeeAll: () => void;
+}) {
     if (!items || items.length === 0) return null;
 
     return (
-        <>
-            <CommandGroup heading={
-                <div className="flex items-center justify-between px-2 py-1 group/header">
-                    <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
-                        {icon}
-                        {title}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] h-4 px-1.5 font-bold border-muted-foreground/20">
-                            {count}
-                        </Badge>
-                        {count > 5 && (
-                            <button 
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onSeeAll();
-                                }}
-                                className="text-[10px] text-primary hover:underline font-bold flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity"
-                            >
-                                View all <ArrowRight className="h-2.5 w-2.5" />
-                            </button>
-                        )}
-                    </div>
+        <div className="mb-4 last:mb-0">
+            {/* Section Header */}
+            <div className="flex items-center justify-between px-2 py-1 mb-2 group/header border-b border-slate-100 dark:border-slate-800/80 pb-1.5">
+                <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    {icon}
+                    <span>{title}</span>
+                </span>
+                <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px] h-4.5 px-2 font-bold bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                        {count || items.length}
+                    </Badge>
+                    {(count > 5 || items.length >= 5) && (
+                        <button 
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onSeeAll();
+                            }}
+                            className="text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-bold flex items-center gap-1 hover:underline cursor-pointer ml-1"
+                        >
+                            <span>View all</span>
+                            <ArrowRight className="h-3 w-3" />
+                        </button>
+                    )}
                 </div>
-            }>
-                {items.map((item: any) => (
-                    <SearchResultItemComponent 
-                        key={item.id} 
-                        item={item} 
-                        icon={getIconForType(item.type || type)}
-                        iconBg={getIconBgForType(item.type || type)}
-                        onSelect={() => onSelect(item.type || type, item.id)}
-                    />
-                ))}
-            </CommandGroup>
-            <CommandSeparator className="my-2 opacity-50" />
-        </>
+            </div>
+
+            {/* Items List - Clearly defined individual result boxes */}
+            <div className="space-y-2">
+                {items.map((item: any, idx: number) => {
+                    const globalIdx = startIndex + idx;
+                    return (
+                        <SearchResultItemComponent 
+                            key={getItemId(item) || `${type}-${idx}`} 
+                            index={globalIdx}
+                            isActive={activeIndex === globalIdx}
+                            item={item} 
+                            type={type}
+                            icon={getIconForType(item.type || type)}
+                            iconBg={getIconBgForType(item.type || type)}
+                            onSelect={() => onSelect(item)}
+                            onHover={() => onHoverIndex(globalIdx)}
+                        />
+                    );
+                })}
+            </div>
+        </div>
     );
 }
 
 function SearchResultItemComponent({ 
     item, 
+    type,
+    index,
+    isActive,
     icon, 
     iconBg, 
-    onSelect 
+    onSelect,
+    onHover
 }: { 
     item: any; 
+    type: string;
+    index: number;
+    isActive: boolean;
     icon: React.ReactNode; 
     iconBg: string; 
     onSelect: () => void;
+    onHover: () => void;
 }) {
-    const title = item.name || item.jobTitle || "Untitled";
-    const subtitle = item.subtitle || item.email || item.department || (item.client ? (typeof item.client === 'string' ? item.client : item.client.name) : "");
-    const location = item.location;
-    const status = item.status;
+    const data = parseItemData(item, type);
 
     return (
-        <CommandItem
-            onSelect={onSelect}
-            className="group flex items-center gap-4 p-3.5 rounded-xl cursor-pointer transition-all duration-200 aria-selected:bg-primary/5 hover:bg-primary/5 mb-1"
+        <div
+            data-search-index={index}
+            onClick={onSelect}
+            onMouseEnter={onHover}
+            role="button"
+            tabIndex={0}
+            className={cn(
+                "group flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all duration-150 select-none border",
+                isActive 
+                    ? "bg-blue-50/90 dark:bg-blue-950/60 border-blue-500/50 dark:border-blue-600 shadow-xs ring-1 ring-blue-500/30 text-slate-900 dark:text-slate-100" 
+                    : "bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-900 dark:text-slate-100"
+            )}
         >
+            {/* Icon Avatar */}
             <div className={cn(
-                "flex-shrink-0 h-11 w-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm",
-                "group-hover:scale-105 group-hover:rotate-3 group-hover:shadow-md",
+                "shrink-0 h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 mt-0.5",
                 iconBg
             )}>
                 {icon}
             </div>
+
+            {/* Details Box - Structured to prevent any vertical or horizontal overlapping */}
             <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[14px] font-bold text-foreground/90 truncate group-hover:text-primary transition-colors">
-                        {title}
+                {/* Title & Status Header */}
+                <div className="flex items-center justify-between gap-2">
+                    <p className={cn(
+                        "text-[13px] font-bold truncate leading-tight transition-colors",
+                        isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                    )}>
+                        {data.title}
                     </p>
-                    {status && (
-                        <Badge variant="secondary" className={cn(
-                            "text-[9px] px-1.5 py-0 rounded-md font-bold uppercase tracking-wider",
-                            status === "Open" || status === "Active" || status === "Signed" 
-                                ? "bg-green-500/10 text-green-600 border-green-500/20" 
-                                : "bg-muted text-muted-foreground border-transparent"
-                        )}>
-                            {status}
+                    {data.status && (
+                        <Badge 
+                            variant="secondary" 
+                            className={cn(
+                                "text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider shrink-0 leading-none",
+                                data.status.toLowerCase() === "open" || data.status.toLowerCase() === "active" || data.status.toLowerCase() === "signed" 
+                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
+                                    : "bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-transparent"
+                            )}
+                        >
+                            {data.status}
                         </Badge>
                     )}
                 </div>
-                <div className="flex items-center gap-2">
-                    <p className="text-[12px] text-muted-foreground/70 truncate flex-1 font-medium">
-                        {subtitle}
-                    </p>
-                    {location && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground/40">
-                            <span className="h-1 w-1 rounded-full bg-current" />
-                            <p className="text-[10px] font-semibold truncate max-w-[100px]">
-                                {location}
-                            </p>
-                        </div>
+
+                {/* Values Below the Search Result Title - Cleanly wrapped and separated */}
+                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    {data.role && (
+                        <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[220px]">
+                            {data.role}
+                        </span>
+                    )}
+
+                    {data.email && (
+                        <span className="inline-flex items-center gap-1 text-[11px] truncate max-w-[200px]">
+                            <Mail className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span className="truncate">{data.email}</span>
+                        </span>
+                    )}
+
+                    {data.phone && (
+                        <span className="inline-flex items-center gap-1 text-[11px] shrink-0">
+                            <Phone className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span>{data.phone}</span>
+                        </span>
+                    )}
+
+                    {data.location && (
+                        <span className="inline-flex items-center gap-1 text-[11px] shrink-0">
+                            <MapPin className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span className="truncate max-w-[140px]">{data.location}</span>
+                        </span>
+                    )}
+
+                    {data.experience && (
+                        <span className="inline-flex items-center gap-1 text-[11px] shrink-0 font-medium text-slate-600 dark:text-slate-400">
+                            <Briefcase className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span>{data.experience}</span>
+                        </span>
+                    )}
+
+                    {data.department && !data.role.includes(data.department) && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+                            <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                            <span>{data.department}</span>
+                        </span>
                     )}
                 </div>
             </div>
-            <div className="h-8 w-8 rounded-full bg-muted/0 group-hover:bg-primary/10 flex items-center justify-center transition-all">
-                <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+
+            {/* Navigation Indicator Arrow */}
+            <div className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5">
+                <ChevronRight className="h-4 w-4" />
             </div>
-        </CommandItem>
+        </div>
     );
 }
 
 function SearchLoadingState() {
     return (
-        <div className="flex flex-col items-center justify-center py-16 space-y-4">
+        <div className="flex flex-col items-center justify-center py-12 space-y-3">
             <div className="relative">
-                <div className="h-16 w-16 rounded-full border-[3px] border-primary/5 border-t-primary animate-spin" />
+                <div className="h-12 w-12 rounded-full border-[3px] border-blue-500/15 border-t-blue-600 animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <Search className="h-6 w-6 text-primary/30" />
+                    <Search className="h-5 w-5 text-blue-600/40" />
                 </div>
             </div>
             <div className="text-center">
-                <p className="text-[15px] font-bold text-foreground/80">Analyzing your data...</p>
-                <p className="text-xs text-muted-foreground/60 mt-1 animate-pulse">Finding the best matches for you</p>
+                <p className="text-[14px] font-bold text-slate-900 dark:text-slate-100">Searching your database...</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 animate-pulse">Finding matching candidates, jobs, and records</p>
             </div>
         </div>
     );
@@ -432,13 +799,13 @@ function SearchLoadingState() {
 
 function SearchEmptyState({ query }: { query: string }) {
     return (
-        <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-            <div className="h-20 w-20 rounded-3xl bg-muted/30 flex items-center justify-center mb-6 rotate-3">
-                <SearchX className="h-10 w-10 text-muted-foreground/40 -rotate-3" />
+        <div className="flex flex-col items-center justify-center py-14 text-center px-4">
+            <div className="h-14 w-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                <SearchX className="h-7 w-7 text-slate-400 dark:text-slate-500" />
             </div>
-            <p className="text-xl font-black text-foreground/90">No results found</p>
-            <p className="text-sm text-muted-foreground/60 mt-2 max-w-[250px]">
-                We couldn&apos;t find anything matching &quot;<span className="text-foreground font-bold">{query}</span>&quot;. Try different keywords.
+            <p className="text-base font-bold text-slate-900 dark:text-slate-100">No matches found</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[280px]">
+                We couldn&apos;t find anything matching &quot;<span className="text-slate-900 dark:text-slate-100 font-semibold">{query}</span>&quot;. Try searching with a different name, job title, or email.
             </p>
         </div>
     );
@@ -446,17 +813,20 @@ function SearchEmptyState({ query }: { query: string }) {
 
 function SearchFooter({ hasResults, isLoading }: { hasResults: boolean; isLoading: boolean }) {
     return (
-        <div className="border-t bg-muted/30 px-4 py-3 flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-[0.1em] font-black">
+        <div className="border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 px-4 py-2.5 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
             <div className="flex items-center gap-2">
-                <div className={cn("h-1.5 w-1.5 rounded-full", hasResults ? "bg-green-500" : "bg-muted-foreground/30")} />
+                <div className={cn("h-1.5 w-1.5 rounded-full", isLoading ? "bg-amber-500 animate-pulse" : hasResults ? "bg-emerald-500" : "bg-slate-400")} />
                 <span>{isLoading ? "Searching..." : hasResults ? "Results Ready" : "No results"}</span>
             </div>
-            <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1.5">
-                    <kbd className="rounded-md border border-muted-foreground/20 bg-background px-1.5 py-0.5 shadow-sm text-foreground/70 font-bold">↑↓</kbd> Navigate
+            <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1">
+                    <kbd className="rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1 py-0.5 text-[9px] font-mono shadow-xs text-slate-700 dark:text-slate-300 font-bold">↑↓</kbd> Navigate
                 </span>
-                <span className="flex items-center gap-1.5">
-                    <kbd className="rounded-md border border-muted-foreground/20 bg-background px-1.5 py-0.5 shadow-sm text-foreground/70 font-bold">↵</kbd> Select
+                <span className="flex items-center gap-1">
+                    <kbd className="rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1 py-0.5 text-[9px] font-mono shadow-xs text-slate-700 dark:text-slate-300 font-bold">↵</kbd> Select
+                </span>
+                <span className="flex items-center gap-1">
+                    <kbd className="rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1 py-0.5 text-[9px] font-mono shadow-xs text-slate-700 dark:text-slate-300 font-bold">Esc</kbd> Close
                 </span>
             </div>
         </div>
@@ -464,25 +834,29 @@ function SearchFooter({ hasResults, isLoading }: { hasResults: boolean; isLoadin
 }
 
 function getIconForType(type: string) {
-    switch (type) {
-        case 'candidate': return <User className="h-5 w-5 text-orange-500" />;
-        case 'job': return <Briefcase className="h-5 w-5 text-blue-500" />;
-        case 'client': return <Building2 className="h-5 w-5 text-emerald-500" />;
-        case 'user': return <Users className="h-5 w-5 text-violet-500" />;
-        case 'temp': return <UserPlus className="h-5 w-5 text-pink-500" />;
-        default: return <Search className="h-5 w-5" />;
+    const t = (type || "").toLowerCase().replace(/s$/, "");
+    switch (t) {
+        case "candidate": return <User className="h-4.5 w-4.5 text-orange-500" />;
+        case "job": return <Briefcase className="h-4.5 w-4.5 text-blue-500" />;
+        case "client": return <Building2 className="h-4.5 w-4.5 text-emerald-500" />;
+        case "user": return <Users className="h-4.5 w-4.5 text-violet-500" />;
+        case "temp": 
+        case "tempcandidate": 
+            return <UserPlus className="h-4.5 w-4.5 text-pink-500" />;
+        default: return <Search className="h-4.5 w-4.5 text-blue-500" />;
     }
 }
 
 function getIconBgForType(type: string) {
-    switch (type) {
-        case 'candidate': return "bg-orange-500/10 border border-orange-500/10";
-        case 'job': return "bg-blue-500/10 border border-blue-500/10";
-        case 'client': return "bg-emerald-500/10 border border-emerald-500/10";
-        case 'user': return "bg-violet-500/10 border border-violet-500/10";
-        case 'temp': return "bg-pink-500/10 border border-pink-500/10";
-        default: return "bg-muted";
+    const t = (type || "").toLowerCase().replace(/s$/, "");
+    switch (t) {
+        case "candidate": return "bg-orange-500/10 border border-orange-500/20";
+        case "job": return "bg-blue-500/10 border border-blue-500/20";
+        case "client": return "bg-emerald-500/10 border border-emerald-500/20";
+        case "user": return "bg-violet-500/10 border border-violet-500/20";
+        case "temp": 
+        case "tempcandidate": 
+            return "bg-pink-500/10 border border-pink-500/20";
+        default: return "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700";
     }
 }
-
-

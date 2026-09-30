@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { normalizeContacts, parseContactString, getContactAvatarColor } from "./EmailRecipientBadges";
 
 export interface EmailListItem {
   id: string;
@@ -220,11 +221,11 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
         )}
 
         {/* Filter Pills with vibrant Blue and Rose accents */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 flex-wrap">
           <button
             type="button"
             onClick={() => setFilterType("all")}
-            className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border ${
+            className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
               filterType === "all"
                 ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
                 : "bg-muted/40 border-transparent text-muted-foreground hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/40"
@@ -235,7 +236,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           <button
             type="button"
             onClick={() => setFilterType("unread")}
-            className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border flex items-center gap-1 ${
               filterType === "unread"
                 ? "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/35 shadow-2xs"
                 : "bg-muted/40 border-transparent text-muted-foreground hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-sky-950/40"
@@ -243,7 +244,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           >
             <span>Unread</span>
             {unreadTotal > 0 && (
-              <span className="h-4 px-1.5 rounded-full text-[9px] font-black bg-sky-500 text-white leading-none flex items-center">
+              <span className="h-3.5 px-1 rounded-full text-[8.5px] font-black bg-sky-500 text-white leading-none flex items-center">
                 {unreadTotal}
               </span>
             )}
@@ -251,16 +252,16 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           <button
             type="button"
             onClick={() => setFilterType("starred")}
-            className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1.5 ${
+            className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border flex items-center gap-1 ${
               filterType === "starred"
                 ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/35 shadow-2xs"
                 : "bg-muted/40 border-transparent text-muted-foreground hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-950/40"
             }`}
           >
-            <Star className={`h-3 w-3 ${filterType === "starred" ? "fill-amber-500 text-amber-500" : ""}`} />
+            <Star className={`h-2.5 w-2.5 ${filterType === "starred" ? "fill-amber-500 text-amber-500" : ""}`} />
             <span>Starred</span>
             {starredTotal > 0 && (
-              <span className="h-4 px-1.5 rounded-full text-[9px] font-black bg-amber-500 text-white leading-none flex items-center">
+              <span className="h-3.5 px-1 rounded-full text-[8.5px] font-black bg-amber-500 text-white leading-none flex items-center">
                 {starredTotal}
               </span>
             )}
@@ -304,7 +305,14 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
           filteredThreads.map((thread) => {
             const isSelected = selectedThreadId === thread.id || selectedThreadId === thread.threadId;
             const hasUnread = thread.unreadCount > 0 && !thread.isDraft;
-            const primaryParticipant = thread.participants?.[0] || "Unknown Contact";
+            const parsedParticipants = normalizeContacts(thread.participants);
+            const participantNames = parsedParticipants.length > 0 
+              ? parsedParticipants.map((p) => p.name).join(", ")
+              : (thread.participants?.join(", ") || "Participants");
+            const primaryContact = parsedParticipants[0] || parseContactString(thread.participants?.[0] || "");
+            const primaryName = primaryContact?.name || "Unknown Contact";
+            const primaryEmail = primaryContact?.email || primaryName;
+            const primaryInitials = primaryContact?.initials || "EM";
 
             return (
               <div
@@ -340,8 +348,8 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
 
                 {/* Avatar with initials */}
                 <Avatar className="h-9 w-9 border border-border/50 shrink-0 text-xs mt-0.5 shadow-2xs">
-                  <AvatarFallback className={`font-bold text-[11px] ${getAvatarColor(primaryParticipant)}`}>
-                    {thread.isDraft ? <FileEdit className="h-4 w-4" /> : getInitials(primaryParticipant)}
+                  <AvatarFallback className={`font-bold text-[11px] ${getContactAvatarColor(primaryEmail)}`}>
+                    {thread.isDraft ? <FileEdit className="h-4 w-4" /> : primaryInitials}
                   </AvatarFallback>
                 </Avatar>
 
@@ -361,7 +369,7 @@ export const EmailThreadList: React.FC<EmailThreadListProps> = ({
                         {thread.isDraft && (
                           <span className="text-purple-600 dark:text-purple-400 font-bold mr-1.5">[Draft]</span>
                         )}
-                        {thread.participants?.join(", ") || "Participants"}
+                        {participantNames}
                       </span>
                     </div>
 
