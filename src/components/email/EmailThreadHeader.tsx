@@ -85,7 +85,7 @@ export const EmailThreadHeader: React.FC<EmailThreadHeaderProps> = ({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <header className="px-3.5 sm:px-4 py-2 sm:py-2.5 border-b border-border/70 bg-gradient-to-r from-card via-card/98 to-blue-50/25 dark:to-blue-950/15 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <header className="px-3.5 sm:px-4 py-2 sm:py-2.5 border-b border-border/80 bg-gradient-to-r from-slate-100/70 via-slate-50/90 to-blue-50/40 dark:from-slate-900/90 dark:via-slate-900/70 dark:to-blue-950/30 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 transition-all shadow-2xs">
         {/* LEFT: Back button (mobile), Subject Title & Inline Participants */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {onClose && (

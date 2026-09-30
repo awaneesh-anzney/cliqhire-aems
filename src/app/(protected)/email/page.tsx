@@ -374,8 +374,8 @@ export default function EmailPage() {
           <div
             className={`flex flex-col min-w-0 transition-all ${
               selectedThreadId 
-                ? "hidden md:flex md:w-[232px] lg:w-64 xl:w-[264px] shrink-0" 
-                : "w-full md:w-[264px] lg:w-[280px] md:flex-initial shrink-0"
+                ? "hidden md:flex md:w-64 lg:w-72 xl:w-[296px] shrink-0" 
+                : "w-full md:w-72 lg:w-80 md:flex-initial shrink-0"
             }`}
           >
             {mailbox && mailbox.initialSyncCompleted === false ? (
