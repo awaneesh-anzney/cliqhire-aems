@@ -14,7 +14,10 @@ import {
     SearchX,
     Filter,
     ArrowRight,
-    X
+    X,
+    Mail,
+    Phone,
+    MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -130,40 +133,62 @@ function getItemId(item: any): string {
     return item.id || item._id || item.jobId || item.clientId || item.candidateId || item.userId || item._doc?._id || "";
 }
 
-function getItemTitle(item: any): string {
-    return (
-        item.name || 
-        item.fullName || 
-        (item.firstName ? `${item.firstName} ${item.lastName || ""}`.trim() : "") ||
-        item.jobTitle || 
-        item.title || 
-        item.positionName ||
-        item.clientName || 
-        item.companyName ||
-        "Untitled"
-    );
+interface ParsedItemData {
+    title: string;
+    role: string;
+    email: string;
+    phone: string;
+    location: string;
+    experience: string;
+    department: string;
+    status: string;
 }
 
-function getItemSubtitle(item: any): string {
-    return (
-        item.subtitle || 
-        item.email || 
-        item.currentJobTitle ||
-        item.experience ||
-        item.department || 
-        (item.client ? (typeof item.client === 'string' ? item.client : (item.client.name || item.client.companyName || "")) : "") ||
-        item.industry ||
-        item.phone ||
-        ""
-    );
-}
+function parseItemData(item: any, type: string): ParsedItemData {
+    const normType = (item.type || type || "").toLowerCase().replace(/s$/, "");
 
-function getItemLocation(item: any): string {
-    return item.location || item.city || (item.address ? (typeof item.address === 'string' ? item.address : item.address.city) : "") || "";
-}
+    let title = "Untitled";
+    let role = "";
+    let email = item.email || "";
+    let phone = item.phone || item.phoneNumber || item.otherPhone || "";
+    let location = item.location || item.city || (item.address ? (typeof item.address === 'string' ? item.address : item.address.city) : "") || "";
+    let experience = "";
+    let department = item.department || "";
+    let status = item.status || item.stage || item.state || "";
 
-function getItemStatus(item: any): string {
-    return item.status || item.stage || item.state || "";
+    if (normType === "candidate") {
+        title = item.name || item.fullName || (item.firstName ? `${item.firstName} ${item.lastName || ""}`.trim() : "") || "Candidate";
+        role = item.currentJobTitle || item.jobTitle || item.position || item.subtitle || "";
+        experience = item.experience ? (item.experience.toLowerCase().includes("year") ? item.experience : `${item.experience} exp`) : "";
+    } else if (normType === "job") {
+        title = item.jobTitle || item.title || item.name || item.positionName || "Untitled Job";
+        role = item.client ? (typeof item.client === 'string' ? item.client : (item.client.name || item.client.companyName || "")) : item.clientName || "";
+        department = item.department || item.industry || "";
+    } else if (normType === "client") {
+        title = item.name || item.companyName || item.clientName || "Untitled Client";
+        role = item.industry || item.lineOfBusiness || item.subtitle || "";
+    } else if (normType === "user" || normType === "team" || normType === "teammember") {
+        title = item.name || item.fullName || "Team Member";
+        role = item.role || item.department || item.subtitle || "Team Member";
+    } else if (normType === "temp" || normType === "tempcandidate") {
+        title = item.name || item.fullName || "External Candidate";
+        role = item.subtitle || item.currentJobTitle || "External Source";
+        experience = item.experience ? (item.experience.toLowerCase().includes("year") ? item.experience : `${item.experience} exp`) : "";
+    } else {
+        title = item.name || item.title || item.jobTitle || "Result";
+        role = item.subtitle || "";
+    }
+
+    return {
+        title,
+        role,
+        email,
+        phone,
+        location,
+        experience,
+        department,
+        status
+    };
 }
 
 export function GlobalSearch() {
@@ -340,7 +365,7 @@ export function GlobalSearch() {
         <div className="relative max-w-[500px] w-full mx-auto" ref={containerRef}>
             {/* Input Bar */}
             <div className={cn(
-                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-white/95 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 backdrop-blur-md shadow-2xs text-foreground",
+                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-white dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 shadow-2xs text-foreground",
                 isOpen 
                     ? "border-blue-600 ring-2 ring-blue-500/20 bg-white dark:bg-slate-800" 
                     : "border-blue-200/80 dark:border-slate-700 hover:border-blue-400 dark:hover:border-slate-600"
@@ -387,11 +412,11 @@ export function GlobalSearch() {
                 )}
             </div>
 
-            {/* Dropdown Results Panel */}
+            {/* Dropdown Results Panel - Centered, Solid Non-Transparent Card */}
             {isOpen && query.trim().length >= 1 && (
-                <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-popover/98 backdrop-blur-2xl text-popover-foreground rounded-2xl border border-border shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-[calc(100vw-2rem)] sm:w-[560px] md:w-[600px] max-w-[620px] z-50 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top">
                     {/* Category Filter Tabs */}
-                    <div className="flex items-center gap-1.5 p-2 border-b border-border/80 bg-muted/30 overflow-x-auto scrollbar-none">
+                    <div className="flex items-center gap-1.5 p-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-800/60 overflow-x-auto scrollbar-none">
                         {CATEGORIES.map((cat) => {
                             const IconComponent = cat.icon;
                             const isSelected = selectedCategory === cat.value;
@@ -407,7 +432,7 @@ export function GlobalSearch() {
                                         "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
                                         isSelected 
                                             ? "bg-blue-600 text-white shadow-xs" 
-                                            : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                                            : "hover:bg-slate-200/70 dark:hover:bg-slate-700/70 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                                     )}
                                 >
                                     <IconComponent className="h-3.5 w-3.5" />
@@ -420,7 +445,7 @@ export function GlobalSearch() {
                     {/* Results Container */}
                     <div 
                         ref={listRef}
-                        className="max-h-[460px] overflow-y-auto overscroll-contain p-2 scrollbar-thin scrollbar-thumb-muted-foreground/15 hover:scrollbar-thumb-muted-foreground/25"
+                        className="max-h-[460px] overflow-y-auto overscroll-contain p-3 space-y-3 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 hover:scrollbar-thumb-slate-400"
                     >
                         {isLoading && !hasResults ? (
                             <SearchLoadingState />
@@ -432,7 +457,7 @@ export function GlobalSearch() {
                                     <>
                                         <Section 
                                             title="Candidates" 
-                                            icon={<User className="h-3.5 w-3.5 text-orange-500" />} 
+                                            icon={<User className="h-4 w-4 text-orange-500" />} 
                                             items={candidateGroup.items} 
                                             count={candidateGroup.count}
                                             type="candidate"
@@ -448,7 +473,7 @@ export function GlobalSearch() {
                                         />
                                         <Section 
                                             title="Jobs" 
-                                            icon={<Briefcase className="h-3.5 w-3.5 text-blue-500" />} 
+                                            icon={<Briefcase className="h-4 w-4 text-blue-500" />} 
                                             items={jobGroup.items} 
                                             count={jobGroup.count}
                                             type="job"
@@ -464,7 +489,7 @@ export function GlobalSearch() {
                                         />
                                         <Section 
                                             title="Clients" 
-                                            icon={<Building2 className="h-3.5 w-3.5 text-emerald-500" />} 
+                                            icon={<Building2 className="h-4 w-4 text-emerald-500" />} 
                                             items={clientGroup.items} 
                                             count={clientGroup.count}
                                             type="client"
@@ -480,7 +505,7 @@ export function GlobalSearch() {
                                         />
                                         <Section 
                                             title="Team Members" 
-                                            icon={<Users className="h-3.5 w-3.5 text-violet-500" />} 
+                                            icon={<Users className="h-4 w-4 text-violet-500" />} 
                                             items={userGroup.items} 
                                             count={userGroup.count}
                                             type="user"
@@ -496,7 +521,7 @@ export function GlobalSearch() {
                                         />
                                         <Section 
                                             title="External Sources" 
-                                            icon={<UserPlus className="h-3.5 w-3.5 text-pink-500" />} 
+                                            icon={<UserPlus className="h-4 w-4 text-pink-500" />} 
                                             items={tempGroup.items} 
                                             count={tempGroup.count}
                                             type="temp"
@@ -512,8 +537,8 @@ export function GlobalSearch() {
                                         />
                                     </>
                                 ) : (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center justify-between px-2.5 py-1.5 mb-1 border-b border-border/50">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-slate-100 dark:border-slate-800">
                                             <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                                                 {selectedCategory.toUpperCase()} RESULTS
                                             </span>
@@ -522,21 +547,24 @@ export function GlobalSearch() {
                                             </Badge>
                                         </div>
 
-                                        {detailedItems.map((item: any, idx: number) => {
-                                            const itemType = item.type || (selectedCategory === "temp" ? "temp" : selectedCategory.replace(/s$/, ""));
-                                            return (
-                                                <SearchResultItemComponent 
-                                                    key={getItemId(item) || idx} 
-                                                    index={idx}
-                                                    isActive={activeIndex === idx}
-                                                    item={item} 
-                                                    icon={getIconForType(itemType)}
-                                                    iconBg={getIconBgForType(itemType)}
-                                                    onSelect={() => handleSelect(itemType, item)}
-                                                    onHover={() => setActiveIndex(idx)}
-                                                />
-                                            );
-                                        })}
+                                        <div className="space-y-2">
+                                            {detailedItems.map((item: any, idx: number) => {
+                                                const itemType = item.type || (selectedCategory === "temp" ? "temp" : selectedCategory.replace(/s$/, ""));
+                                                return (
+                                                    <SearchResultItemComponent 
+                                                        key={getItemId(item) || idx} 
+                                                        index={idx}
+                                                        isActive={activeIndex === idx}
+                                                        item={item} 
+                                                        type={itemType}
+                                                        icon={getIconForType(itemType)}
+                                                        iconBg={getIconBgForType(itemType)}
+                                                        onSelect={() => handleSelect(itemType, item)}
+                                                        onHover={() => setActiveIndex(idx)}
+                                                    />
+                                                );
+                                            })}
+                                        </div>
 
                                         <div ref={scrollRef} className="h-10 flex items-center justify-center">
                                             {isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-primary/60" />}
@@ -581,15 +609,15 @@ function Section({
     if (!items || items.length === 0) return null;
 
     return (
-        <div className="mb-3 last:mb-0">
+        <div className="mb-4 last:mb-0">
             {/* Section Header */}
-            <div className="flex items-center justify-between px-2.5 py-1 mb-1 group/header">
-                <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+            <div className="flex items-center justify-between px-2 py-1 mb-2 group/header border-b border-slate-100 dark:border-slate-800/80 pb-1.5">
+                <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     {icon}
                     <span>{title}</span>
                 </span>
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px] h-4 px-1.5 font-bold border-muted-foreground/20">
+                    <Badge variant="outline" className="text-[10px] h-4.5 px-2 font-bold bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
                         {count || items.length}
                     </Badge>
                     {(count > 5 || items.length >= 5) && (
@@ -599,17 +627,17 @@ function Section({
                                 e.stopPropagation();
                                 onSeeAll();
                             }}
-                            className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-bold flex items-center gap-0.5 hover:underline cursor-pointer"
+                            className="text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-bold flex items-center gap-1 hover:underline cursor-pointer ml-1"
                         >
                             <span>View all</span>
-                            <ArrowRight className="h-2.5 w-2.5" />
+                            <ArrowRight className="h-3 w-3" />
                         </button>
                     )}
                 </div>
             </div>
 
-            {/* Items List */}
-            <div className="space-y-1">
+            {/* Items List - Clearly defined individual result boxes */}
+            <div className="space-y-2">
                 {items.map((item: any, idx: number) => {
                     const globalIdx = startIndex + idx;
                     return (
@@ -618,6 +646,7 @@ function Section({
                             index={globalIdx}
                             isActive={activeIndex === globalIdx}
                             item={item} 
+                            type={type}
                             icon={getIconForType(item.type || type)}
                             iconBg={getIconBgForType(item.type || type)}
                             onSelect={() => onSelect(item)}
@@ -632,6 +661,7 @@ function Section({
 
 function SearchResultItemComponent({ 
     item, 
+    type,
     index,
     isActive,
     icon, 
@@ -640,6 +670,7 @@ function SearchResultItemComponent({
     onHover
 }: { 
     item: any; 
+    type: string;
     index: number;
     isActive: boolean;
     icon: React.ReactNode; 
@@ -647,10 +678,7 @@ function SearchResultItemComponent({
     onSelect: () => void;
     onHover: () => void;
 }) {
-    const title = getItemTitle(item);
-    const subtitle = getItemSubtitle(item);
-    const location = getItemLocation(item);
-    const status = getItemStatus(item);
+    const data = parseItemData(item, type);
 
     return (
         <div
@@ -660,64 +688,92 @@ function SearchResultItemComponent({
             role="button"
             tabIndex={0}
             className={cn(
-                "group flex items-center gap-3.5 p-2.5 rounded-xl cursor-pointer transition-all duration-150 select-none",
+                "group flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all duration-150 select-none border",
                 isActive 
-                    ? "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 ring-1 ring-blue-500/30 shadow-xs" 
-                    : "hover:bg-muted/60 text-foreground"
+                    ? "bg-blue-50/90 dark:bg-blue-950/60 border-blue-500/50 dark:border-blue-600 shadow-xs ring-1 ring-blue-500/30 text-slate-900 dark:text-slate-100" 
+                    : "bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-900 dark:text-slate-100"
             )}
         >
             {/* Icon Avatar */}
             <div className={cn(
-                "shrink-0 h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-200 shadow-2xs",
-                "group-hover:scale-105 group-hover:rotate-2",
+                "shrink-0 h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 mt-0.5",
                 iconBg
             )}>
                 {icon}
             </div>
 
-            {/* Details */}
+            {/* Details Box - Structured to prevent any vertical or horizontal overlapping */}
             <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-0.5">
+                {/* Title & Status Header */}
+                <div className="flex items-center justify-between gap-2">
                     <p className={cn(
-                        "text-[13px] font-bold truncate transition-colors",
-                        isActive ? "text-blue-600 dark:text-blue-400" : "text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                        "text-[13px] font-bold truncate leading-tight transition-colors",
+                        isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
                     )}>
-                        {title}
+                        {data.title}
                     </p>
-                    {status && (
+                    {data.status && (
                         <Badge 
                             variant="secondary" 
                             className={cn(
-                                "text-[9px] px-1.5 py-0 rounded-md font-bold uppercase tracking-wider shrink-0",
-                                status.toLowerCase() === "open" || status.toLowerCase() === "active" || status.toLowerCase() === "signed" 
+                                "text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider shrink-0 leading-none",
+                                data.status.toLowerCase() === "open" || data.status.toLowerCase() === "active" || data.status.toLowerCase() === "signed" 
                                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
-                                    : "bg-muted text-muted-foreground border-transparent"
+                                    : "bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-transparent"
                             )}
                         >
-                            {status}
+                            {data.status}
                         </Badge>
                     )}
                 </div>
 
-                <div className="flex items-center gap-2 text-xs">
-                    {subtitle && (
-                        <p className="text-[11px] text-muted-foreground truncate flex-1 font-medium">
-                            {subtitle}
-                        </p>
+                {/* Values Below the Search Result Title - Cleanly wrapped and separated */}
+                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    {data.role && (
+                        <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[220px]">
+                            {data.role}
+                        </span>
                     )}
-                    {location && (
-                        <div className="flex items-center gap-1 text-muted-foreground/60 shrink-0">
-                            <span className="h-1 w-1 rounded-full bg-current" />
-                            <p className="text-[10px] font-semibold truncate max-w-[120px]">
-                                {location}
-                            </p>
-                        </div>
+
+                    {data.email && (
+                        <span className="inline-flex items-center gap-1 text-[11px] truncate max-w-[200px]">
+                            <Mail className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span className="truncate">{data.email}</span>
+                        </span>
+                    )}
+
+                    {data.phone && (
+                        <span className="inline-flex items-center gap-1 text-[11px] shrink-0">
+                            <Phone className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span>{data.phone}</span>
+                        </span>
+                    )}
+
+                    {data.location && (
+                        <span className="inline-flex items-center gap-1 text-[11px] shrink-0">
+                            <MapPin className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span className="truncate max-w-[140px]">{data.location}</span>
+                        </span>
+                    )}
+
+                    {data.experience && (
+                        <span className="inline-flex items-center gap-1 text-[11px] shrink-0 font-medium text-slate-600 dark:text-slate-400">
+                            <Briefcase className="h-3 w-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span>{data.experience}</span>
+                        </span>
+                    )}
+
+                    {data.department && !data.role.includes(data.department) && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+                            <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                            <span>{data.department}</span>
+                        </span>
                     )}
                 </div>
             </div>
 
-            {/* Arrow affordance */}
-            <div className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/30 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0">
+            {/* Navigation Indicator Arrow */}
+            <div className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5">
                 <ChevronRight className="h-4 w-4" />
             </div>
         </div>
@@ -734,8 +790,8 @@ function SearchLoadingState() {
                 </div>
             </div>
             <div className="text-center">
-                <p className="text-[14px] font-bold text-foreground">Searching your database...</p>
-                <p className="text-xs text-muted-foreground/70 mt-0.5 animate-pulse">Finding matching candidates, jobs, and records</p>
+                <p className="text-[14px] font-bold text-slate-900 dark:text-slate-100">Searching your database...</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 animate-pulse">Finding matching candidates, jobs, and records</p>
             </div>
         </div>
     );
@@ -744,12 +800,12 @@ function SearchLoadingState() {
 function SearchEmptyState({ query }: { query: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-14 text-center px-4">
-            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-                <SearchX className="h-7 w-7 text-muted-foreground/60" />
+            <div className="h-14 w-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                <SearchX className="h-7 w-7 text-slate-400 dark:text-slate-500" />
             </div>
-            <p className="text-base font-bold text-foreground">No matches found</p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-[280px]">
-                We couldn&apos;t find anything matching &quot;<span className="text-foreground font-semibold">{query}</span>&quot;. Try searching with a different name, job title, or email.
+            <p className="text-base font-bold text-slate-900 dark:text-slate-100">No matches found</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[280px]">
+                We couldn&apos;t find anything matching &quot;<span className="text-slate-900 dark:text-slate-100 font-semibold">{query}</span>&quot;. Try searching with a different name, job title, or email.
             </p>
         </div>
     );
@@ -757,20 +813,20 @@ function SearchEmptyState({ query }: { query: string }) {
 
 function SearchFooter({ hasResults, isLoading }: { hasResults: boolean; isLoading: boolean }) {
     return (
-        <div className="border-t border-border/80 bg-muted/25 px-3.5 py-2 flex items-center justify-between text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+        <div className="border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 px-4 py-2.5 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
             <div className="flex items-center gap-2">
-                <div className={cn("h-1.5 w-1.5 rounded-full", isLoading ? "bg-amber-500 animate-pulse" : hasResults ? "bg-emerald-500" : "bg-muted-foreground/40")} />
+                <div className={cn("h-1.5 w-1.5 rounded-full", isLoading ? "bg-amber-500 animate-pulse" : hasResults ? "bg-emerald-500" : "bg-slate-400")} />
                 <span>{isLoading ? "Searching..." : hasResults ? "Results Ready" : "No results"}</span>
             </div>
             <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-border bg-background px-1 py-0.5 text-[9px] font-mono shadow-xs text-foreground font-bold">↑↓</kbd> Navigate
+                    <kbd className="rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1 py-0.5 text-[9px] font-mono shadow-xs text-slate-700 dark:text-slate-300 font-bold">↑↓</kbd> Navigate
                 </span>
                 <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-border bg-background px-1 py-0.5 text-[9px] font-mono shadow-xs text-foreground font-bold">↵</kbd> Select
+                    <kbd className="rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1 py-0.5 text-[9px] font-mono shadow-xs text-slate-700 dark:text-slate-300 font-bold">↵</kbd> Select
                 </span>
                 <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-border bg-background px-1 py-0.5 text-[9px] font-mono shadow-xs text-foreground font-bold">Esc</kbd> Close
+                    <kbd className="rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1 py-0.5 text-[9px] font-mono shadow-xs text-slate-700 dark:text-slate-300 font-bold">Esc</kbd> Close
                 </span>
             </div>
         </div>
@@ -780,14 +836,14 @@ function SearchFooter({ hasResults, isLoading }: { hasResults: boolean; isLoadin
 function getIconForType(type: string) {
     const t = (type || "").toLowerCase().replace(/s$/, "");
     switch (t) {
-        case "candidate": return <User className="h-5 w-5 text-orange-500" />;
-        case "job": return <Briefcase className="h-5 w-5 text-blue-500" />;
-        case "client": return <Building2 className="h-5 w-5 text-emerald-500" />;
-        case "user": return <Users className="h-5 w-5 text-violet-500" />;
+        case "candidate": return <User className="h-4.5 w-4.5 text-orange-500" />;
+        case "job": return <Briefcase className="h-4.5 w-4.5 text-blue-500" />;
+        case "client": return <Building2 className="h-4.5 w-4.5 text-emerald-500" />;
+        case "user": return <Users className="h-4.5 w-4.5 text-violet-500" />;
         case "temp": 
         case "tempcandidate": 
-            return <UserPlus className="h-5 w-5 text-pink-500" />;
-        default: return <Search className="h-5 w-5 text-blue-500" />;
+            return <UserPlus className="h-4.5 w-4.5 text-pink-500" />;
+        default: return <Search className="h-4.5 w-4.5 text-blue-500" />;
     }
 }
 
@@ -801,6 +857,6 @@ function getIconBgForType(type: string) {
         case "temp": 
         case "tempcandidate": 
             return "bg-pink-500/10 border border-pink-500/20";
-        default: return "bg-muted border border-border";
+        default: return "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700";
     }
 }
