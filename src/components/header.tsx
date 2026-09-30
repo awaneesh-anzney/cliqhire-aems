@@ -98,9 +98,9 @@ export function Header() {
   };
 
   return (
-    <header className="relative h-14 app-header px-3 sm:px-4 md:px-5 flex items-center justify-between gap-3 shrink-0 select-none overflow-hidden">
+    <header className="relative h-14 app-header px-3 sm:px-4 md:px-5 flex items-center justify-between gap-3 shrink-0 select-none overflow-visible z-30">
       {/* Top Subtle Brand Gradient Line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-70" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-70 pointer-events-none" />
 
       {showMobileSearch ? (
         /* Mobile Search Bar Expand Mode */
