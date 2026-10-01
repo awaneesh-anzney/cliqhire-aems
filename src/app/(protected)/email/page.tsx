@@ -16,6 +16,7 @@ import {
   useSendEmail,
   useMoveToTrash,
   usePermanentDelete,
+  useDisconnectMailbox,
 } from "@/hooks/useEmail";
 import { emailService } from "@/services/emailService";
 import { Email } from "@/types/email";
@@ -159,6 +160,7 @@ export default function EmailPage() {
   const sendEmailMutation = useSendEmail();
   const moveToTrashMutation = useMoveToTrash();
   const permanentDeleteMutation = usePermanentDelete();
+  const disconnectMutation = useDisconnectMailbox();
 
   // Normalize raw list items from various API response shapes
   const rawList: any[] = listData?.data || [];
@@ -297,6 +299,17 @@ export default function EmailPage() {
     );
   };
 
+  const handleDisconnect = () => {
+    if (window.confirm("Are you sure you want to disconnect your mailbox? You will need to sign in again to access emails.")) {
+      disconnectMutation.mutate(undefined, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchStatus();
+        },
+      });
+    }
+  };
+
   const handleSendReply = async () => {
     if (!replyText.trim()) {
       toast.error("Please enter a reply message");
@@ -363,6 +376,45 @@ export default function EmailPage() {
     );
   }
 
+  // If not connected, present the fully polished, dedicated email login page
+  if (!isConnected) {
+    return (
+      <div className="h-full min-h-0 w-full p-2 sm:p-3 md:p-4 flex flex-col overflow-hidden font-['Public_Sans',sans-serif]">
+        {mailbox?.authType === "oauth2" && mailbox?.connectionStatus !== "connected" ? (
+          <div className="flex-1 min-h-0 w-full bg-white dark:bg-[#1C252E] border border-slate-200/80 dark:border-slate-800 rounded-2xl md:rounded-[20px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.08)] flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
+            <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-4 shadow-sm">
+              <MailOutlineIcon sx={{ fontSize: 32 }} />
+            </div>
+            <h2 className="text-xl font-bold text-[#1C252E] dark:text-white mb-2">Reconnect your Microsoft Mailbox</h2>
+            <p className="text-xs sm:text-sm text-[#919EAB] max-w-md mb-6 leading-relaxed">
+              Please authenticate with your Microsoft work account to sync your emails.
+            </p>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  setOauthLoading(true);
+                  const { url } = await emailService.getMicrosoftAuthUrl();
+                  window.location.href = url;
+                } catch (error: any) {
+                  toast.error(error?.response?.data?.message || "Failed to start sign-in");
+                  setOauthLoading(false);
+                }
+              }}
+              disabled={oauthLoading}
+              className="h-11 px-8 rounded-xl bg-[#00a4ef] hover:bg-[#0078d4] text-white font-bold text-xs shadow-md transition-all inline-flex items-center gap-2.5 active:scale-[0.99] disabled:opacity-50"
+            >
+              {oauthLoading ? <CircularProgress size={16} color="inherit" /> : null}
+              <span>Reconnect with Microsoft</span>
+            </button>
+          </div>
+        ) : (
+          <MailboxConnectCard onSuccess={() => refetchStatus()} />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="h-full min-h-0 w-full p-2 sm:p-3 md:p-4 flex flex-col overflow-hidden font-['Public_Sans',sans-serif]">
       {/* Outer Card Chassis matching the exact Minimals/Material UI Reference */}
@@ -386,51 +438,16 @@ export default function EmailPage() {
             refetchList();
           }}
           isRefreshing={refetchingList || refetchingStatus}
+          onDisconnect={handleDisconnect}
+          isDisconnecting={disconnectMutation.isPending}
           className={mobileView !== "folders" ? "hidden md:flex" : "flex"}
         />
 
         {/* ========================================================= */}
         {/* COLUMN 2 & 3: CONTENT VIEWPORT                            */}
         {/* ========================================================= */}
-        {!isConnected ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-            {mailbox?.authType === "oauth2" && mailbox?.connectionStatus !== "connected" ? (
-              <div className="max-w-md space-y-4">
-                <div className="h-14 w-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mx-auto shadow-sm">
-                  <MailOutlineIcon sx={{ fontSize: 28 }} />
-                </div>
-                <h2 className="text-lg font-bold text-[#1C252E] dark:text-white">Reconnect your Microsoft Mailbox</h2>
-                <p className="text-xs text-[#919EAB] leading-relaxed">
-                  Please authenticate with your Microsoft work account to sync your emails.
-                </p>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      setOauthLoading(true);
-                      const { url } = await emailService.getMicrosoftAuthUrl();
-                      window.location.href = url;
-                    } catch (error: any) {
-                      toast.error(error?.response?.data?.message || "Failed to start sign-in");
-                      setOauthLoading(false);
-                    }
-                  }}
-                  disabled={oauthLoading}
-                  className="h-10 px-6 rounded-xl bg-[#00a4ef] hover:bg-[#0078d4] text-white font-bold text-xs shadow-md transition-all inline-flex items-center gap-2"
-                >
-                  {oauthLoading ? <CircularProgress size={16} color="inherit" /> : null}
-                  <span>Reconnect with Microsoft</span>
-                </button>
-              </div>
-            ) : (
-              <div className="w-full max-w-lg">
-                <MailboxConnectCard onSuccess={() => refetchStatus()} />
-              </div>
-            )}
-          </div>
-        ) : (
-          <>
-            {/* COLUMN 2: CONVERSATION LIST COMPONENT */}
+        <>
+          {/* COLUMN 2: CONVERSATION LIST COMPONENT */}
             <EmailConversationList
               items={mappedItems}
               selectedId={selectedThreadId}
@@ -476,8 +493,7 @@ export default function EmailPage() {
               </div>
             )}
           </>
-        )}
-      </div>
+        </div>
 
       {/* Compose Dialog */}
       <EmailComposerDialog

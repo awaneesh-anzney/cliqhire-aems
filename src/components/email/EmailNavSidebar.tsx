@@ -3,6 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Mailbox } from "@/types/email";
+import { useAuth } from "@/contexts/AuthContext";
 
 // MUI Icons
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -15,6 +16,8 @@ import LabelImportantOutlinedIcon from "@mui/icons-material/LabelImportantOutlin
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import PowerSettingsNewOutlinedIcon from "@mui/icons-material/PowerSettingsNewOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export interface NavFolder {
   id: string;
@@ -47,7 +50,19 @@ export interface EmailNavSidebarProps {
   totalInboxCount?: number;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  onDisconnect?: () => void;
+  isDisconnecting?: boolean;
   className?: string;
+}
+
+function getUserInitials(name?: string) {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export function EmailNavSidebar({
@@ -58,8 +73,12 @@ export function EmailNavSidebar({
   totalInboxCount,
   onRefresh,
   isRefreshing = false,
+  onDisconnect,
+  isDisconnecting = false,
   className,
 }: EmailNavSidebarProps) {
+  const { user } = useAuth();
+
   return (
     <div
       className={cn(
@@ -148,24 +167,67 @@ export function EmailNavSidebar({
         })}
       </div>
 
-      {/* Mailbox Status Quick Action in Sidebar */}
-      {mailbox && (
-        <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-[#919EAB]">
-          <div className="flex items-center justify-between">
-            <span className="truncate max-w-[140px] font-medium">{mailbox.emailAddress}</span>
-            {onRefresh && (
-              <button
-                type="button"
-                onClick={onRefresh}
-                title="Sync Mailbox"
-                className="p-1 hover:text-foreground transition-colors"
-              >
-                <RefreshIcon sx={{ fontSize: 14 }} className={isRefreshing ? "animate-spin" : ""} />
-              </button>
-            )}
+      {/* Bottom: Logged-in User Profile & Disconnect Button */}
+      <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+        {/* User Card */}
+        <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-2 shadow-2xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative shrink-0">
+              {user?.avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatar}
+                  alt={user.name || "User"}
+                  className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-2xs">
+                  {getUserInitials(user?.name)}
+                </div>
+              )}
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-800" />
+            </div>
+
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-[#1C252E] dark:text-white truncate leading-tight">
+                {user?.name || "User"}
+              </span>
+              <span className="text-[10.5px] text-[#919EAB] truncate leading-tight mt-0.5">
+                {mailbox?.emailAddress || user?.email || "Connected"}
+              </span>
+            </div>
           </div>
+
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              title="Sync Mailbox"
+              className="p-1 rounded-lg text-[#919EAB] hover:text-[#1C252E] dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700 transition-colors shrink-0"
+            >
+              <RefreshIcon sx={{ fontSize: 15 }} className={isRefreshing ? "animate-spin" : ""} />
+            </button>
+          )}
         </div>
-      )}
+
+        {/* Disconnect Button at Bottom-Left Corner */}
+        {onDisconnect && (
+          <button
+            type="button"
+            onClick={onDisconnect}
+            disabled={isDisconnecting}
+            className="w-full py-1.5 px-2.5 rounded-xl border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20 hover:bg-rose-100/80 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs disabled:opacity-50"
+            title="Disconnect current mailbox"
+          >
+            {isDisconnecting ? (
+              <CircularProgress size={12} color="inherit" />
+            ) : (
+              <PowerSettingsNewOutlinedIcon sx={{ fontSize: 14 }} />
+            )}
+            <span>Disconnect</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
