@@ -76,8 +76,8 @@ export default function DashboardPage() {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 2, sm: 2.5 },
-        p: { xs: 2, sm: 2.5, md: 3 },
+        gap: 1.75,
+        p: { xs: 1.5, sm: 2 },
       }}
     >
       {/* ─── 1. EXECUTIVE HEADER & ACTIONS ─── */}
@@ -117,7 +117,7 @@ export default function DashboardPage() {
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", lg: "repeat(12, 1fr)" },
-          gap: { xs: 2, sm: 2.5 },
+          gap: 1.75,
           alignItems: "start",
         }}
       >
