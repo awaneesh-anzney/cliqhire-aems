@@ -111,9 +111,9 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/70 bg-card shadow-2xs">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-border/70 bg-card shadow-2xs">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <TimelineOutlinedIcon sx={{ fontSize: 18 }} />

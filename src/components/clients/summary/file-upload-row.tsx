@@ -41,18 +41,18 @@ export const FileUploadRow = ({
 
   return (
     <div
-      className={`group flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-border/60 bg-background/50 hover:bg-muted/40 transition-all duration-200 gap-3 ${className || ""}`}
+      className={`group flex flex-col sm:flex-row sm:items-center justify-between p-2.5 rounded-lg border border-border/60 bg-background/50 hover:bg-muted/40 transition-all duration-200 gap-2.5 ${className || ""}`}
     >
       {/* File Info */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex items-center gap-2.5 min-w-0 flex-1">
         <div
-          className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+          className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
             hasFile
               ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
               : "bg-muted text-muted-foreground"
           }`}
         >
-          <DescriptionOutlinedIcon sx={{ fontSize: 18 }} />
+          <DescriptionOutlinedIcon sx={{ fontSize: 16 }} />
         </div>
 
         <div className="min-w-0 flex-1">

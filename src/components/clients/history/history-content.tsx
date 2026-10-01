@@ -63,10 +63,10 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
     : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Top Progression Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
+        <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Current Stage</span>
             <p className="text-lg font-bold text-foreground mt-0.5">{currentStageRecord?.stage || "N/A"}</p>
@@ -74,7 +74,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
           <Badge className="bg-primary/10 text-primary border-primary/20 text-xs font-semibold">Active</Badge>
         </div>
 
-        <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
+        <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Days in Current Stage</span>
             <p className="text-lg font-bold text-foreground mt-0.5">{currentDurationDays} Days</p>
@@ -84,7 +84,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
           </div>
         </div>
 
-        <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
+        <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Stage Changes</span>
             <p className="text-lg font-bold text-foreground mt-0.5">{history.length}</p>
@@ -97,7 +97,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
 
       {/* History Log Table */}
       <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-        <div className="px-4 py-3 border-b border-border/60 bg-muted/30 flex items-center justify-between">
+        <div className="px-3.5 py-2.5 border-b border-border/60 bg-muted/30 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
               <HistoryOutlinedIcon sx={{ fontSize: 16 }} />

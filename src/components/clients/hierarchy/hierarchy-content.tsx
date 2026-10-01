@@ -46,30 +46,30 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
   const isParent = !parent;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Top Hierarchy KPI Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
+        <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Companies</span>
-            <p className="text-2xl font-bold text-foreground mt-0.5">{totalCompanies}</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{totalCompanies}</p>
           </div>
-          <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <ApartmentOutlinedIcon sx={{ fontSize: 22 }} />
+          <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <ApartmentOutlinedIcon sx={{ fontSize: 20 }} />
           </div>
         </div>
 
-        <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
+        <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Positions</span>
-            <p className="text-2xl font-bold text-foreground mt-0.5">{totalJobCount}</p>
+            <p className="text-xl font-bold text-foreground mt-0.5">{totalJobCount}</p>
           </div>
-          <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-            <WorkOutlineOutlinedIcon sx={{ fontSize: 22 }} />
+          <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <WorkOutlineOutlinedIcon sx={{ fontSize: 20 }} />
           </div>
         </div>
 
-        <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
+        <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Stage Breakdown</span>
             <LayersOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
@@ -90,7 +90,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
 
       {/* Parent Organization Section */}
       <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
               <ApartmentOutlinedIcon sx={{ fontSize: 16 }} />
@@ -104,7 +104,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
           </Badge>
         </div>
 
-        <div className="p-4">
+        <div className="p-3">
           {parent ? (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-border/70 bg-background/50 hover:bg-muted/40 transition-colors gap-3">
               <div className="space-y-1">
@@ -146,7 +146,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
 
       {/* Subsidiaries Section */}
       <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <AccountTreeOutlinedIcon sx={{ fontSize: 16 }} />
@@ -157,7 +157,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-3">
           {subsidiaries.length === 0 ? (
             <div className="text-center py-8">
               <ApartmentOutlinedIcon sx={{ fontSize: 32, opacity: 0.4 }} className="text-muted-foreground mx-auto mb-2" />

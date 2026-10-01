@@ -180,7 +180,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Search & Stage Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-2.5 rounded-xl border border-border/70 shadow-2xs">
         <div className="relative w-full sm:w-72">
@@ -233,13 +233,13 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-border/70 bg-muted/40 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              <th className="py-3 px-4">Position Title</th>
-              <th className="py-3 px-4">Job Type</th>
-              <th className="py-3 px-4">Location</th>
-              <th className="py-3 px-4 text-center">Headcount</th>
-              <th className="py-3 px-4">Stage</th>
-              <th className="py-3 px-4">Salary Range</th>
-              <th className="py-3 px-4 text-right">Action</th>
+              <th className="py-2.5 px-3">Position Title</th>
+              <th className="py-2.5 px-3">Job Type</th>
+              <th className="py-2.5 px-3">Location</th>
+              <th className="py-2.5 px-3 text-center">Headcount</th>
+              <th className="py-2.5 px-3">Stage</th>
+              <th className="py-2.5 px-3">Salary Range</th>
+              <th className="py-2.5 px-3 text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40">
@@ -257,7 +257,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
                     onClick={() => router.push(`/jobs/${job._id}`)}
                     className="group hover:bg-muted/40 cursor-pointer transition-colors"
                   >
-                    <td className="py-3 px-4 font-semibold text-foreground">
+                    <td className="py-2 px-3 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                           <WorkOutlineOutlinedIcon sx={{ fontSize: 16 }} />
@@ -268,25 +268,25 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
                       </div>
                     </td>
 
-                    <td className="py-3 px-4 text-muted-foreground capitalize">
+                    <td className="py-2 px-3 text-muted-foreground capitalize">
                       {job.jobType || "Full-time"}
                     </td>
 
-                    <td className="py-3 px-4 text-muted-foreground">
+                    <td className="py-2 px-3 text-muted-foreground">
                       <div className="flex items-center gap-1 truncate max-w-[160px]" title={locStr}>
                         <LocationOnOutlinedIcon sx={{ fontSize: 15 }} className="text-muted-foreground/60 shrink-0" />
                         <span className="truncate">{locStr}</span>
                       </div>
                     </td>
 
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-2 px-3 text-center">
                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/60 text-xs font-semibold text-foreground">
                         <PeopleAltOutlinedIcon sx={{ fontSize: 14 }} className="text-muted-foreground" />
                         <span>{job.headcount || 1}</span>
                       </div>
                     </td>
 
-                    <td className="py-3 px-4">
+                    <td className="py-2 px-3">
                       <Badge
                         variant="outline"
                         className={cn(
@@ -302,11 +302,11 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
                       </Badge>
                     </td>
 
-                    <td className="py-3 px-4 text-muted-foreground font-mono text-xs">
+                    <td className="py-2 px-3 text-muted-foreground font-mono text-xs">
                       {salaryStr || <span className="text-muted-foreground/40">—</span>}
                     </td>
 
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-2 px-3 text-right">
                       <Button
                         variant="ghost"
                         size="icon"

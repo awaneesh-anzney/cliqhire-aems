@@ -135,7 +135,7 @@ export function DetailRow({
   };
 
   return (
-    <div className="group/row flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors border-b border-border/40 last:border-b-0 gap-2">
+    <div className="group/row flex flex-col sm:flex-row sm:items-center justify-between py-1.5 sm:py-2 px-2.5 rounded-lg hover:bg-muted/40 transition-colors border-b border-border/40 last:border-b-0 gap-2">
       <div className="flex items-center gap-1.5 sm:w-1/3 shrink-0">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {label}

@@ -256,7 +256,7 @@ export function SummaryContent({
   const salesLead = clientData?.salesLead || "Unassigned";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Top Executive KPI Highlight Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
         <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
@@ -327,12 +327,12 @@ export function SummaryContent({
       </div>
 
       {/* Main Grid: 2 Columns on Desktop */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Left Column: Engagement & Classification */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Card 1: Engagement Details */}
           <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <DescriptionOutlinedIcon sx={{ fontSize: 16 }} />
@@ -477,7 +477,7 @@ export function SummaryContent({
 
           {/* Card 2: Company Profile */}
           <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <ApartmentOutlinedIcon sx={{ fontSize: 16 }} />
@@ -571,10 +571,10 @@ export function SummaryContent({
         </div>
 
         {/* Right Column: Online Presence & Compliance Documents */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Card 3: Online & Location Presence */}
           <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
                   <LanguageOutlinedIcon sx={{ fontSize: 16 }} />
@@ -629,7 +629,7 @@ export function SummaryContent({
 
           {/* Card 4: Compliance Documents */}
           <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                   <VerifiedUserOutlinedIcon sx={{ fontSize: 16 }} />
@@ -643,7 +643,7 @@ export function SummaryContent({
               </span>
             </div>
 
-            <div className="p-3 space-y-2.5">
+            <div className="p-2.5 space-y-2">
               <FileUploadRow
                 id="vat-copy-upload"
                 label="VAT Copy"

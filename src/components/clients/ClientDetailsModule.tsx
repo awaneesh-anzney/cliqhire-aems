@@ -459,7 +459,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
     <Box className="flex flex-col h-full w-full max-w-full overflow-hidden bg-background">
       {/* 1. Sleek Compact Header Bar (Breadcrumb & Action Bar) */}
       <Box className="bg-card/80 border-b border-border/70 backdrop-blur-md sticky top-0 z-20">
-        <Box className="px-3 sm:px-6 py-1.5 border-b border-border/40 flex items-center justify-between gap-2">
+        <Box className="px-3 sm:px-4 md:px-5 py-1.5 border-b border-border/40 flex items-center justify-between gap-2">
           {/* Breadcrumb Navigation */}
           <Box className="flex items-center gap-2 min-w-0">
             <MuiButton
@@ -559,7 +559,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
         </Box>
 
         {/* 2. Executive Hero Banner (Compact & Polished) */}
-        <Box className="px-3 sm:px-6 py-2.5 sm:py-3">
+        <Box className="px-3 sm:px-4 md:px-5 py-2 sm:py-2.5">
           <Box className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
             {/* Identity Column */}
             <Box className="flex items-center gap-3 min-w-0 flex-1">
@@ -919,7 +919,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
         </Box>
 
         {/* 3. Modern Material UI Compact Tab Navigation Strip */}
-        <Box className="w-full border-t border-border/60 bg-muted/20 px-2 sm:px-4">
+        <Box className="w-full border-t border-border/60 bg-muted/20 px-3 sm:px-4 md:px-5">
           <Box
             className="flex items-center gap-1 overflow-x-auto scrollbar-none py-1"
             sx={{
@@ -958,7 +958,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
       </Box>
 
       {/* 4. Tab Content Panels Viewport */}
-      <Box className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-5 max-w-7xl w-full mx-auto">
+      <Box className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 md:px-5 py-3 w-full">
         {activeTab === "Summary" && (
           <Box className="animate-in fade-in-50 duration-200">
             <SummaryContent

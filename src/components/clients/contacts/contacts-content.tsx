@@ -123,10 +123,10 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Subsidiary Warning / Source Toggle */}
       {isSubsidiary && (
-        <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-3 rounded-xl bg-card border border-border/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <PeopleAltOutlinedIcon sx={{ fontSize: 18 }} />
@@ -163,11 +163,11 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
       )}
 
       {/* Main Content Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         {/* Left: General Client Contact Channels */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className="lg:col-span-4 space-y-3">
           <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2">
                 <div className="h-7 w-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
                   <LanguageOutlinedIcon sx={{ fontSize: 16 }} />
@@ -189,7 +189,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
               )}
             </div>
 
-            <div className="p-4 space-y-3.5 text-xs">
+            <div className="p-3 space-y-2.5 text-xs">
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Main Phone</span>
                 <p className="font-semibold text-foreground">
@@ -263,7 +263,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
         </div>
 
         {/* Right: Primary Stakeholders List */}
-        <div className="lg:col-span-8 space-y-4">
+        <div className="lg:col-span-8 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-foreground">Stakeholders & Contacts</h3>
@@ -319,7 +319,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                 return (
                   <div
                     key={contact._id || index}
-                    className="bg-card rounded-xl border border-border/70 p-4 shadow-2xs hover:border-primary/40 transition-colors flex flex-col justify-between space-y-3"
+                    className="bg-card rounded-xl border border-border/70 p-3 shadow-2xs hover:border-primary/40 transition-colors flex flex-col justify-between space-y-2.5"
                   >
                     <div>
                       {/* Card Top: Avatar & Name & Actions */}

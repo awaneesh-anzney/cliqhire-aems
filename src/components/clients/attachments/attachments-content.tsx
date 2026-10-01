@@ -85,9 +85,9 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
   }, [clientId]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Header action bar */}
-      <div className="flex items-center justify-between bg-card p-3.5 rounded-xl border border-border/70 shadow-2xs">
+      <div className="flex items-center justify-between bg-card p-3 rounded-xl border border-border/70 shadow-2xs">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <AttachFileOutlinedIcon sx={{ fontSize: 18 }} />
@@ -116,7 +116,7 @@ export function AttachmentsContent({ clientId, canModify = true }: AttachmentsCo
         )}
       </div>
 
-      <div className="bg-card rounded-xl border border-border/70 shadow-2xs p-4 sm:p-5">
+      <div className="bg-card rounded-xl border border-border/70 shadow-2xs p-3 sm:p-4">
         <UploadAttachment
           show={showUploadBox}
           setShow={setShowUploadBox}
