@@ -262,7 +262,7 @@ export function Sidebar() {
                               "relative flex items-center h-8.5 px-2.5 rounded-xl transition-all duration-150 select-none group/item",
                               isActive
                                 ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white font-semibold shadow-sm shadow-blue-500/25"
-                                : "text-slate-700 dark:text-slate-300 hover:text-foreground hover:bg-slate-200/70 dark:hover:bg-slate-800/70 font-semibold"
+                                : "text-slate-700 dark:text-slate-300 hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800/70 font-semibold"
                             )}
                           >
                             <Link
@@ -298,7 +298,7 @@ export function Sidebar() {
 
       {/* Modern User Profile Footer */}
       <SidebarFooter className="p-2.5 border-t border-sidebar-border shrink-0 bg-transparent">
-        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs group-data-[collapsible=icon]:justify-center hover:bg-white/95 dark:hover:bg-slate-800 transition-all">
+        <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 shadow-2xs group-data-[collapsible=icon]:justify-center hover:bg-slate-100/90 dark:hover:bg-slate-800/80 transition-all">
           <Link
             href="/profile"
             className="flex items-center gap-2 min-w-0 flex-1 hover:opacity-90 transition-opacity !no-underline hover:!no-underline"

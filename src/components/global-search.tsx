@@ -365,10 +365,10 @@ export function GlobalSearch() {
         <div className="relative max-w-[500px] w-full mx-auto" ref={containerRef}>
             {/* Input Bar */}
             <div className={cn(
-                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-white dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-800 shadow-2xs text-foreground",
+                "group flex items-center px-3.5 py-1.5 rounded-xl border transition-all duration-200 bg-slate-50/90 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 shadow-2xs text-foreground",
                 isOpen 
                     ? "border-blue-600 ring-2 ring-blue-500/20 bg-white dark:bg-slate-800" 
-                    : "border-blue-200/80 dark:border-slate-700 hover:border-blue-400 dark:hover:border-slate-600"
+                    : "border-slate-200/80 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600"
             )}>
                 <Search className={cn(
                     "h-4 w-4 mr-2.5 transition-colors shrink-0",

@@ -123,9 +123,9 @@ export function Header() {
         <>
           {/* Left: Sidebar Trigger & Breadcrumbs / Back */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <SidebarTrigger className="h-8 w-8 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors" />
+            <SidebarTrigger className="h-8 w-8 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" />
 
-            <div className="h-4 w-[1px] bg-blue-200/80 dark:bg-slate-700/80 hidden sm:block" />
+            <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-700 hidden sm:block" />
 
             {isOnIdPage ? (
               <Button
@@ -133,7 +133,7 @@ export function Header() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="h-8 px-2.5 rounded-xl text-xs font-semibold text-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 gap-1.5 transition-colors group"
+                className="h-8 px-2.5 rounded-xl text-xs font-semibold text-foreground hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 gap-1.5 transition-colors group"
               >
                 <ArrowLeft className="h-3.5 w-3.5 text-blue-500 group-hover:text-blue-600 transition-transform group-hover:-translate-x-0.5" />
                 <span>{getBackNavigation().label}</span>
@@ -143,7 +143,7 @@ export function Header() {
                 <span className="text-slate-800 dark:text-slate-100 hidden sm:inline font-bold tracking-tight">
                   Cliq<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 font-black">Hire</span>
                 </span>
-                <ChevronRight className="w-3.5 h-3.5 text-blue-500/70 hidden sm:inline" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 hidden sm:inline" />
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs shadow-blue-500/25 tracking-tight">
                   {getPageTitle()}
                 </span>
@@ -166,7 +166,7 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setShowMobileSearch(true)}
-              className="flex md:hidden h-8 w-8 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+              className="flex md:hidden h-8 w-8 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <Search className="h-4 w-4" />
             </Button>
@@ -178,7 +178,7 @@ export function Header() {
             </div>
 
             {/* Utility Controls Group */}
-            <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-blue-200/60 dark:border-slate-700/80 shadow-2xs text-foreground">
+            <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs text-foreground">
               <ModeToggle />
               <NotificationDropdown />
 
@@ -188,7 +188,7 @@ export function Header() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                    className="h-7 w-7 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 transition-colors"
                   >
                     <HelpCircle className="h-3.5 w-3.5" />
                   </Button>
@@ -197,17 +197,17 @@ export function Header() {
               </Tooltip>
             </div>
 
-            <div className="h-4 w-[1px] bg-blue-200/80 dark:bg-slate-700/80 hidden sm:block mx-0.5" />
+            <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-700 hidden sm:block mx-0.5" />
 
             {/* User Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all border border-transparent hover:border-blue-200/80 dark:hover:border-slate-700/80 outline-none group shadow-2xs"
+                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-slate-200/80 dark:hover:border-slate-700/80 outline-none group shadow-2xs"
                 >
                   <div className="relative shrink-0">
-                    <Avatar className="h-7 w-7 rounded-lg border-2 border-blue-400/40 shadow-2xs">
+                    <Avatar className="h-7 w-7 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
                       <AvatarImage src={user?.avatar} alt={user?.name} className="object-cover" />
                       <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-[10px] rounded-lg">
                         {getUserInitials()}

@@ -153,14 +153,14 @@
     --color-red-soft: #FFF1F2;
     --color-brand-navy: #0F172A;
     
-    /* Sidebar Base Tokens: Modern Light Slate Chassis (NOT black) */
-    --sidebar-background: 214 32% 96%;
+    /* Sidebar Base Tokens: Crisp Modern Light Surface */
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 214 30% 90%;
+    --sidebar-accent: 215 25% 95%;
     --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 30% 88%;
+    --sidebar-border: 214 32% 91%;
     --sidebar-ring: 221 83% 53%;
 
     /* Brand identity */
@@ -228,14 +228,14 @@
     --color-red-soft: rgba(244, 63, 94, 0.15);
     --color-brand-navy: #0F172A;
     
-    /* Sidebar Base Tokens (Dark Mode) */
-    --sidebar-background: 222 40% 10%;
+    /* Sidebar Base Tokens (Dark Mode: Deep Obsidian Slate) */
+    --sidebar-background: 222 47% 9%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 35% 14%;
+    --sidebar-accent: 222 35% 15%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 25% 16%;
+    --sidebar-border: 222 25% 15%;
     --sidebar-ring: 217 91% 60%;
 
     --brand-primary: 217 91% 60%;
@@ -394,14 +394,14 @@
     @apply w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shrink-0;
   }
 
-  /* Header Styles: Vibrant frosted glass chassis with subtle gradient tint */
+  /* Header Styles: Sleek frosted glass chassis with subtle hairline border */
   .app-header {
-    @apply sticky top-0 z-30 w-full border-b border-blue-200/60 dark:border-slate-800/80 bg-gradient-to-r from-blue-50/85 via-indigo-50/50 to-slate-50/85 dark:from-slate-900/90 dark:via-indigo-950/30 dark:to-slate-900/90 backdrop-blur-xl transition-all duration-200 text-foreground shadow-xs;
+    @apply sticky top-0 z-30 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl transition-all duration-200 text-foreground shadow-2xs;
   }
 
-  /* Sidebar Styles: Clean, modern light slate chassis (NOT black) */
+  /* Sidebar Styles: Clean, modern surface with crisp division */
   .app-sidebar {
-    @apply border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xs transition-all duration-200;
+    @apply border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-2xs transition-all duration-200;
   }
 
   .sidebar-logo-area {
