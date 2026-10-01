@@ -1,128 +1,154 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  Building2, 
-  Briefcase, 
-  UserPlus, 
-  Calendar, 
-  Sparkles,
-  ShieldCheck,
-  Plus,
-  Layers,
-  ArrowRight
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
+import Box from "@mui/material/Box";
 import { useAuth } from "@/contexts/AuthContext";
-import { DashboardKpiCards } from "@/components/dashboard/dashboard-kpi-cards";
+import { useDashboardStats } from "@/hooks/useDashboard";
+import {
+  DashboardHeader,
+  ExecutiveKpiStrip,
+  PipelineVelocityCard,
+  OperationsLaunchpad,
+  DashboardSkeleton,
+} from "@/components/dashboard";
 import { CreateClientModal } from "@/components/create-client-modal/create-client-modal";
 import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
 import { CreateCandidateModal } from "@/components/candidates/create-candidate-modal";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { data: dashboardStats, isLoading } = useDashboardStats();
+
   const [openClientModal, setOpenClientModal] = useState(false);
   const [openJobModal, setOpenJobModal] = useState(false);
   const [openCandidateModal, setOpenCandidateModal] = useState(false);
 
-  const firstName = user?.name ? user.name.split(" ")[0] : "Partner";
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+  // 1. Candidates calculations
+  const candidatesTotal = dashboardStats?.candidates?.total || 0;
+  const candidatesActive = dashboardStats?.candidates?.active || 0;
+  const candidatesInactive = dashboardStats?.candidates?.inactive || 0;
+  const candidatesActivePercent =
+    candidatesTotal > 0 ? (candidatesActive / candidatesTotal) * 100 : 0;
+  const candidatesInactivePercent =
+    candidatesTotal > 0 ? (candidatesInactive / candidatesTotal) * 100 : 0;
+
+  // 2. Jobs calculations
+  const jobsTotal = dashboardStats?.jobs?.total || 0;
+  const jobStageBreakdown = dashboardStats?.jobs?.stageBreakdown || [];
+  const jobsOpen =
+    jobStageBreakdown.find((s: any) => s.stage?.toLowerCase() === "open")?.count || 0;
+  const jobsActiveStage =
+    jobStageBreakdown.find((s: any) => s.stage?.toLowerCase() === "active")?.count || 0;
+  const jobsOpenPercent = jobsTotal > 0 ? (jobsOpen / jobsTotal) * 100 : 0;
+  const jobsActivePercent = jobsTotal > 0 ? (jobsActiveStage / jobsTotal) * 100 : 0;
+
+  // 3. Clients calculations
+  const clientsTotal = dashboardStats?.clients?.total || 0;
+  const clientsLead = dashboardStats?.clients?.byStage?.lead || 0;
+  const clientsEngaged = dashboardStats?.clients?.byStage?.engaged || 0;
+  const clientsSigned = dashboardStats?.clients?.byStage?.signed || 0;
+  const clientsLeadPercent = clientsTotal > 0 ? (clientsLead / clientsTotal) * 100 : 0;
+  const clientsEngagedPercent =
+    clientsTotal > 0 ? (clientsEngaged / clientsTotal) * 100 : 0;
+  const clientsSignedPercent =
+    clientsTotal > 0 ? (clientsSigned / clientsTotal) * 100 : 0;
+
+  // 4. Pipeline calculations
+  const pipelineTotal = dashboardStats?.pipeline?.totalCandidatesInPipeline || 0;
+  const activePipelines = dashboardStats?.pipeline?.activePipelines || 0;
+  const candidatesInProcess = dashboardStats?.pipeline?.candidatesInProcess || 0;
+  const candidatesCompleted = dashboardStats?.pipeline?.candidatesCompleted || 0;
+  const stageBreakdown = dashboardStats?.pipeline?.stageBreakdown || [];
+
+  // 5. Operations, Team & Contracts
+  const usersTotal = dashboardStats?.users?.total || 0;
+  const usersActive = dashboardStats?.users?.active || 0;
+  const usersActivePercent = usersTotal > 0 ? Math.round((usersActive / usersTotal) * 100) : 0;
+  const contractsTotal = dashboardStats?.contracts?.total || 0;
 
   return (
-    <div className="dashboard-container">
-      {/* ─── MODERN EXECUTIVE COMMAND & ACTION HEADER ─── */}
-      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-white via-blue-50/50 to-indigo-50/50 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-800/80 border border-blue-100/80 dark:border-slate-800 p-3.5 sm:p-4 shadow-sm shrink-0 transition-all duration-300">
-        {/* Top subtle brand gradient highlight */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-80" />
-
-        {/* Subtle Ambient Radial Tints: Sapphire & Indigo */}
-        <div className="pointer-events-none absolute -right-6 -top-6 h-36 w-36 rounded-full bg-blue-500/10 blur-2xl" />
-        <div className="pointer-events-none absolute left-1/4 -bottom-8 h-28 w-36 rounded-full bg-indigo-500/10 blur-xl" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Welcome & Context Strip */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20 text-white">
-              <Sparkles className="h-4.5 w-4.5 text-white" />
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">
-                  Welcome back,{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
-                    {firstName}
-                  </span>
-                </h1>
-                {/* Live workspace indicator */}
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 shadow-2xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Workspace Live</span>
-                </div>
-              </div>
-              <p className="text-[11.5px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                Talent Operations & Sourcing Hub • Real-time Requisition & Pipeline Analytics
-              </p>
-            </div>
-          </div>
-
-          {/* Action Bar & Date Badge */}
-          <div className="flex items-center gap-2 shrink-0 self-end md:self-auto flex-wrap">
-            {/* Current Date Badge */}
-            <div className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-[11px] font-bold text-slate-700 dark:text-slate-200 shadow-2xs">
-              <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>{currentDate}</span>
-            </div>
-
-            {/* Quick Action: Client */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setOpenClientModal(true)}
-              className="h-8 px-3 gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-all active:scale-95 shadow-2xs text-[11px] font-bold cursor-pointer"
-            >
-              <Building2 className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
-              <span>+ Client</span>
-            </Button>
-
-            {/* Quick Action: Jobs (Royal Blue CTA) */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setOpenJobModal(true)}
-              className="h-8 px-3 gap-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:from-blue-700 active:to-blue-800 border-0 text-white hover:text-white rounded-xl transition-all active:scale-95 shadow-sm shadow-blue-500/25 text-[11px] font-bold cursor-pointer"
-            >
-              <Briefcase className="h-3.5 w-3.5 text-white" />
-              <span>+ Jobs</span>
-            </Button>
-
-            {/* Quick Action: Candidate (Indigo CTA) */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setOpenCandidateModal(true)}
-              className="h-8 px-3.5 gap-1.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:from-indigo-700 active:to-indigo-800 border-0 text-white hover:text-white rounded-xl transition-all active:scale-95 shadow-sm shadow-indigo-500/25 text-[11px] font-bold cursor-pointer"
-            >
-              <UserPlus className="h-3.5 w-3.5 text-white" />
-              <span>+ Candidate</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* ─── PRIMARY METRICS & ANALYTICS WORKSPACE ─── */}
-      <DashboardKpiCards
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: { xs: 2, sm: 2.5 },
+        p: { xs: 2, sm: 2.5, md: 3 },
+      }}
+    >
+      {/* ─── 1. EXECUTIVE HEADER & ACTIONS ─── */}
+      <DashboardHeader
+        userName={user?.name}
         onOpenClient={() => setOpenClientModal(true)}
         onOpenJob={() => setOpenJobModal(true)}
         onOpenCandidate={() => setOpenCandidateModal(true)}
       />
 
-      {/* ─── MODALS ─── */}
+      {/* ─── 2. PRIMARY EXECUTIVE METRICS KPI STRIP ─── */}
+      <ExecutiveKpiStrip
+        candidatesTotal={candidatesTotal}
+        candidatesActive={candidatesActive}
+        candidatesInactive={candidatesInactive}
+        candidatesActivePercent={candidatesActivePercent}
+        candidatesInactivePercent={candidatesInactivePercent}
+        jobsTotal={jobsTotal}
+        jobsOpen={jobsOpen}
+        jobsActiveStage={jobsActiveStage}
+        jobsOpenPercent={jobsOpenPercent}
+        jobsActivePercent={jobsActivePercent}
+        clientsTotal={clientsTotal}
+        clientsLead={clientsLead}
+        clientsEngaged={clientsEngaged}
+        clientsSigned={clientsSigned}
+        clientsLeadPercent={clientsLeadPercent}
+        clientsEngagedPercent={clientsEngagedPercent}
+        clientsSignedPercent={clientsSignedPercent}
+        candidatesCompleted={candidatesCompleted}
+        activePipelines={activePipelines}
+        pipelineTotal={pipelineTotal}
+      />
+
+      {/* ─── 3. ANALYTICAL WORKSPACE: PIPELINE VELOCITY & OPERATIONS LAUNCHPAD ─── */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "repeat(12, 1fr)" },
+          gap: { xs: 2, sm: 2.5 },
+          alignItems: "start",
+        }}
+      >
+        {/* Pipeline Analytics & Candidate Funnel (8 cols on desktop) */}
+        <Box sx={{ gridColumn: { xs: "1fr", lg: "span 8" } }}>
+          <PipelineVelocityCard
+            pipelineTotal={pipelineTotal}
+            activePipelines={activePipelines}
+            candidatesInProcess={candidatesInProcess}
+            candidatesCompleted={candidatesCompleted}
+            stageBreakdown={stageBreakdown}
+            jobsTotal={jobsTotal}
+            jobStageBreakdown={jobStageBreakdown}
+          />
+        </Box>
+
+        {/* Operations Launchpad & Enterprise Health (4 cols on desktop) */}
+        <Box sx={{ gridColumn: { xs: "1fr", lg: "span 4" } }}>
+          <OperationsLaunchpad
+            onOpenCandidate={() => setOpenCandidateModal(true)}
+            onOpenJob={() => setOpenJobModal(true)}
+            onOpenClient={() => setOpenClientModal(true)}
+            usersTotal={usersTotal}
+            usersActive={usersActive}
+            usersActivePercent={usersActivePercent}
+            contractsTotal={contractsTotal}
+          />
+        </Box>
+      </Box>
+
+      {/* ─── 4. MODALS PRESERVED WITH 100% REAL APIS ─── */}
       <CreateClientModal
         open={openClientModal}
         onOpenChange={setOpenClientModal}
@@ -137,6 +163,6 @@ export default function DashboardPage() {
         isOpen={openCandidateModal}
         onClose={() => setOpenCandidateModal(false)}
       />
-    </div>
+    </Box>
   );
 }
