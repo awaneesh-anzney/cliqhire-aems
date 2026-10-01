@@ -3,38 +3,74 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
 import { listClientGroups, ClientGroup } from "@/services/clientService";
 import { CreateGroupModal } from "./CreateGroupModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Search,
-  Plus,
-  Loader2,
-  Building2,
-  LayoutGrid,
-  List,
-  Users,
-  Briefcase,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  ExternalLink,
-  Layers,
-  Sparkles,
-} from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+// Material UI Icons
+import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
+import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
+import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
+import NavigateBeforeOutlinedIcon from "@mui/icons-material/NavigateBeforeOutlined";
+import NavigateNextOutlinedIcon from "@mui/icons-material/NavigateNextOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+
+function getInitials(name: string = ""): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0 || !parts[0]) return "CG";
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function getAvatarGradient(name: string = ""): string {
+  const gradients = [
+    "from-purple-600 to-indigo-600",
+    "from-blue-600 to-indigo-600",
+    "from-indigo-600 to-violet-600",
+    "from-emerald-600 to-teal-600",
+    "from-sky-600 to-blue-700",
+    "from-amber-500 to-orange-600",
+    "from-rose-600 to-pink-600",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return gradients[Math.abs(hash) % gradients.length];
+}
 
 export default function ClientGroupsModule() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 400);
+  const debouncedSearch = useDebounce(search, 300);
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const limit = 20;
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -53,288 +89,638 @@ export default function ClientGroupsModule() {
     return data.data.reduce((acc, g) => acc + (g.memberCount || 0), 0);
   }, [data?.data]);
 
+  const activeConglomeratesCount = useMemo(() => {
+    if (!data?.data) return 0;
+    return data.data.filter((g) => (g.memberCount || 0) > 0).length;
+  }, [data?.data]);
+
+  const handleCopyCode = (e: React.MouseEvent, code?: string) => {
+    e.stopPropagation();
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopiedId(code);
+    toast.success(`Copied Group Code: ${code}`);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen w-full bg-transparent text-foreground">
-      <div className="flex-1 p-3 sm:p-4 md:p-5 max-w-7xl w-full mx-auto space-y-3.5 sm:space-y-4">
-        {/* Executive Page Header Banner */}
-        <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary/95 to-slate-900 text-white p-3.5 sm:p-5 border border-white/10 shadow-sm shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent/20 blur-2xl" />
-          <div className="pointer-events-none absolute left-1/3 -bottom-10 h-24 w-32 rounded-full bg-white/5 blur-xl" />
+    <Box
+      sx={{
+        height: "calc(100vh - 4.25rem)",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0,
+        overflow: "hidden",
+        p: { xs: 1.5, sm: 2 },
+        gap: 1.5,
+      }}
+    >
+      {/* ─── 1. EXECUTIVE COMMAND HEADER ─── */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          borderRadius: "12px",
+          border: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          boxShadow: "0px 1px 3px 0px rgba(0, 0, 0, 0.04)",
+          p: { xs: 1.5, sm: 2 },
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "stretch", md: "center" },
+            justifyContent: "space-between",
+            gap: 1.5,
+          }}
+        >
+          {/* Left: Module Title & Icon */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flexShrink: 0 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: "8px",
+                bgcolor: "rgba(142, 51, 255, 0.1)",
+                color: "#8E33FF",
+                border: 1,
+                borderColor: "rgba(142, 51, 255, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <AccountTreeOutlinedIcon sx={{ fontSize: 20 }} />
+            </Box>
 
-          <div className="relative z-10 flex items-center gap-3 min-w-0">
-            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-white backdrop-blur-md shadow-2xs shrink-0">
-              <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography sx={{ fontSize: "1rem", fontWeight: 800, color: "text.primary", lineHeight: 1.2 }}>
                   Client Groups
-                </h1>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 text-[10.5px] font-bold text-white/90 border border-white/20 backdrop-blur-md">
-                  <Layers className="w-3 h-3 text-white/80" />
-                  Holding Portfolios
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-white/75 font-medium mt-0.5 truncate">
-                Organize corporate conglomerates, holding companies, and related subsidiaries
-              </p>
-            </div>
-          </div>
+                </Typography>
+                <Chip
+                  icon={<LayersOutlinedIcon sx={{ fontSize: "12px !important", color: "#8E33FF !important" }} />}
+                  label="Holding Portfolios"
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: "0.65rem",
+                    fontWeight: 700,
+                    bgcolor: "rgba(142, 51, 255, 0.1)",
+                    color: "#8E33FF",
+                    border: 0,
+                    "& .MuiChip-label": { px: 0.6 },
+                  }}
+                />
+              </Box>
+              <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary", mt: 0.25, display: { xs: "none", sm: "block" } }}>
+                Organize corporate conglomerates, holding companies, and affiliated subsidiaries
+              </Typography>
+            </Box>
+          </Box>
 
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="relative z-10 h-9 sm:h-9.5 px-4 rounded-xl bg-white text-primary hover:bg-white/90 font-black shadow-sm active:scale-95 transition-all text-xs tracking-wide self-start sm:self-center shrink-0 flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4 text-primary stroke-[2.5]" />
-            <span>New Group</span>
-          </Button>
-        </header>
-
-        {/* Top Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between hover:shadow-xs hover:border-primary/40 transition-all">
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                Total Corporate Groups
-              </span>
-              <p className="text-2xl font-black text-foreground mt-0.5 tracking-tight">{totalGroups}</p>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary border border-primary/15 flex items-center justify-center shadow-2xs">
-              <Layers className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between hover:shadow-xs hover:border-emerald-500/40 transition-all">
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                Affiliated Companies
-              </span>
-              <p className="text-2xl font-black text-foreground mt-0.5 tracking-tight">{totalMembersCount}</p>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15 flex items-center justify-center shadow-2xs">
-              <Users className="h-5 w-5" />
-            </div>
-          </div>
-
-          <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex items-center justify-between hover:shadow-xs hover:border-amber-500/40 transition-all">
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                Active Conglomerates
-              </span>
-              <p className="text-2xl font-black text-foreground mt-0.5 tracking-tight">
-                {data?.data?.filter((g) => (g.memberCount || 0) > 0).length || 0}
-              </p>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/15 flex items-center justify-center shadow-2xs">
-              <Sparkles className="h-5 w-5" />
-            </div>
-          </div>
-        </div>
-
-        {/* Search Bar & View Mode Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-2.5 sm:p-3 rounded-xl border border-border/70 shadow-2xs">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
+          {/* Middle: Search Input */}
+          <Box sx={{ position: "relative", flex: 1, maxWidth: { md: 360 }, minWidth: 200 }}>
+            <Box sx={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "text.disabled", display: "flex", alignItems: "center", pointerEvents: "none" }}>
+              <SearchOutlinedIcon sx={{ fontSize: 16 }} />
+            </Box>
+            <input
+              type="text"
               placeholder="Search by group name or code..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="pl-9 h-9 text-xs rounded-xl border-border/70 bg-background/50 hover:bg-background focus:bg-background transition-all"
+              className="w-full pl-8 pr-7 h-8 text-xs bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100/70 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8E33FF] focus:border-[#8E33FF] text-[#1C252E] dark:text-white placeholder:text-slate-400 transition-all font-medium"
             />
-          </div>
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setPage(1);
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+              >
+                <CloseOutlinedIcon sx={{ fontSize: 13 }} />
+              </button>
+            )}
+          </Box>
 
-          <div className="flex items-center gap-2.5 self-end sm:self-center">
-            <span className="text-xs font-bold text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg border border-border/50">
-              {totalGroups} {totalGroups === 1 ? "group" : "groups"} found
-            </span>
+          {/* Right: Actions (View Mode Switcher, Refresh, + New Group) */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", flexShrink: 0 }}>
+            <Chip
+              label={`${totalGroups} ${totalGroups === 1 ? "group" : "groups"}`}
+              size="small"
+              sx={{
+                height: 28,
+                fontSize: "0.6875rem",
+                fontWeight: 700,
+                bgcolor: "background.paper",
+                color: "text.secondary",
+                border: 1,
+                borderColor: "divider",
+              }}
+            />
 
-            {/* View Mode Toggle */}
-            <div className="flex items-center bg-muted/60 p-0.5 rounded-xl border border-border/60">
+            {/* View Switcher: Grid vs Table */}
+            <Box sx={{ display: "flex", alignItems: "center", p: 0.25, borderRadius: "8px", bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
-                className={cn(
-                  "p-1.5 rounded-lg text-xs font-semibold transition-all",
-                  viewMode === "grid"
-                    ? "bg-card text-primary shadow-xs border border-border/60"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
                 title="Grid View"
+                className={cn(
+                  "p-1 rounded-md text-xs transition-all flex items-center justify-center",
+                  viewMode === "grid"
+                    ? "bg-[#8E33FF] text-white shadow-2xs font-semibold"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
               >
-                <LayoutGrid className="h-4 w-4" />
+                <GridViewOutlinedIcon sx={{ fontSize: 16 }} />
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("table")}
-                className={cn(
-                  "p-1.5 rounded-lg text-xs font-semibold transition-all",
-                  viewMode === "table"
-                    ? "bg-card text-primary shadow-xs border border-border/60"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
                 title="Table View"
+                className={cn(
+                  "p-1 rounded-md text-xs transition-all flex items-center justify-center",
+                  viewMode === "table"
+                    ? "bg-[#8E33FF] text-white shadow-2xs font-semibold"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
               >
-                <List className="h-4 w-4" />
+                <ViewListOutlinedIcon sx={{ fontSize: 16 }} />
               </button>
-            </div>
-          </div>
-        </div>
+            </Box>
 
-        {/* Content Section: Grid View vs Table View */}
+            {/* Refresh Button */}
+            <Button
+              type="button"
+              variant="outlined"
+              size="small"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              title="Refresh"
+              sx={{
+                height: 32,
+                minWidth: 32,
+                p: 0,
+                borderRadius: "8px",
+                borderColor: "divider",
+                color: "text.primary",
+              }}
+            >
+              <RefreshOutlinedIcon sx={{ fontSize: 16 }} className={cn(isFetching && "animate-spin text-[#8E33FF]")} />
+            </Button>
+
+            {/* Primary Action Button: + New Group */}
+            <Button
+              type="button"
+              variant="contained"
+              size="small"
+              onClick={() => setIsCreateModalOpen(true)}
+              startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
+              sx={{
+                height: 32,
+                px: 1.5,
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: "11.5px",
+                bgcolor: "#8E33FF",
+                boxShadow: "0 2px 8px rgba(142, 51, 255, 0.24)",
+                "&:hover": {
+                  bgcolor: "#7927E0",
+                },
+              }}
+            >
+              <span>New Group</span>
+            </Button>
+          </Box>
+        </Box>
+
+        {/* ─── 2. COMPACT SUMMARY METRIC CARDS STRIP ─── */}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 1.5, pt: 1, borderTop: 1, borderColor: "divider" }}>
+          {/* Metric 1: Total Corporate Groups */}
+          <Box
+            sx={{
+              p: 1.5,
+              borderRadius: "10px",
+              bgcolor: "rgba(142, 51, 255, 0.04)",
+              border: 1,
+              borderColor: "rgba(142, 51, 255, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", color: "#8E33FF", letterSpacing: "0.5px" }}>
+                Total Holding Groups
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75, mt: 0.25 }}>
+                <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "text.primary", lineHeight: 1 }}>
+                  {totalGroups}
+                </Typography>
+                <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary" }}>
+                  entities
+                </Typography>
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: "8px",
+                bgcolor: "rgba(142, 51, 255, 0.1)",
+                color: "#8E33FF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <AccountTreeOutlinedIcon sx={{ fontSize: 18 }} />
+            </Box>
+          </Box>
+
+          {/* Metric 2: Affiliated Subsidiaries */}
+          <Box
+            sx={{
+              p: 1.5,
+              borderRadius: "10px",
+              bgcolor: "rgba(0, 167, 111, 0.04)",
+              border: 1,
+              borderColor: "rgba(0, 167, 111, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", color: "#00A76F", letterSpacing: "0.5px" }}>
+                Affiliated Subsidiaries
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75, mt: 0.25 }}>
+                <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "text.primary", lineHeight: 1 }}>
+                  {totalMembersCount}
+                </Typography>
+                <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary" }}>
+                  companies
+                </Typography>
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: "8px",
+                bgcolor: "rgba(0, 167, 111, 0.1)",
+                color: "#00A76F",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <PeopleOutlineOutlinedIcon sx={{ fontSize: 18 }} />
+            </Box>
+          </Box>
+
+          {/* Metric 3: Active Conglomerates */}
+          <Box
+            sx={{
+              p: 1.5,
+              borderRadius: "10px",
+              bgcolor: "rgba(255, 171, 0, 0.04)",
+              border: 1,
+              borderColor: "rgba(255, 171, 0, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", color: "#FFAB00", letterSpacing: "0.5px" }}>
+                Active Conglomerates
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75, mt: 0.25 }}>
+                <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "text.primary", lineHeight: 1 }}>
+                  {activeConglomeratesCount}
+                </Typography>
+                <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary" }}>
+                  with members
+                </Typography>
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: "8px",
+                bgcolor: "rgba(255, 171, 0, 0.1)",
+                color: "#FFAB00",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <BusinessOutlinedIcon sx={{ fontSize: 18 }} />
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* ─── 3. MAIN WORKSPACE: GRID VIEW OR TABLE VIEW ─── */}
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflow: "hidden",
+          borderRadius: "12px",
+          border: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          boxShadow: "0px 1px 3px 0px rgba(0, 0, 0, 0.04)",
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+        }}
+      >
+        {/* Top subtle fetching pulse */}
+        {isFetching && !isLoading && (
+          <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, bgcolor: "rgba(142, 51, 255, 0.2)", overflow: "hidden", zIndex: 30 }}>
+            <Box sx={{ height: "100%", width: "100%", bgcolor: "#8E33FF" }} className="animate-pulse" />
+          </Box>
+        )}
+
+        {/* Loading State */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-3 bg-card rounded-2xl border border-border/70 shadow-2xs">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", p: 4, gap: 1.5 }}>
+            <Box sx={{ width: 36, height: 36, borderRadius: "10px", bgcolor: "rgba(142, 51, 255, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#8E33FF" }}>
+              <RefreshOutlinedIcon sx={{ fontSize: 22 }} className="animate-spin" />
+            </Box>
+            <Typography sx={{ fontSize: "11.5px", fontWeight: 700, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.5px" }}>
               Loading Client Groups...
-            </p>
-          </div>
+            </Typography>
+          </Box>
         ) : !data?.data || data.data.length === 0 ? (
-          <div className="bg-card rounded-2xl border border-dashed border-border/80 p-12 text-center flex flex-col items-center shadow-2xs">
-            <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mb-3 text-muted-foreground">
-              <Building2 className="h-6 w-6" />
-            </div>
-            <h3 className="text-sm font-bold text-foreground">
+          /* Empty State */
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", p: 4, textAlign: "center" }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: "12px", bgcolor: "rgba(145, 158, 171, 0.08)", border: 1, borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "center", color: "text.disabled", mb: 1.5 }}>
+              <FolderOpenOutlinedIcon sx={{ fontSize: 26 }} />
+            </Box>
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: 800, color: "text.primary", mb: 0.5 }}>
               {search ? "No matching groups found" : "No client groups yet"}
-            </h3>
-            <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-4">
+            </Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: "text.secondary", maxWidth: 360, mb: 2 }}>
               {search
                 ? "Try searching for a different keyword or group code."
                 : "Create a group to consolidate parent companies and related subsidiaries together."}
-            </p>
+            </Typography>
             <Button
+              variant="contained"
+              size="small"
               onClick={() => setIsCreateModalOpen(true)}
-              variant="outline"
-              size="sm"
-              className="text-xs font-semibold rounded-xl"
+              startIcon={<AddOutlinedIcon sx={{ fontSize: 15 }} />}
+              sx={{ height: 30, px: 1.5, fontSize: "11px", fontWeight: 700, textTransform: "none", borderRadius: "8px", bgcolor: "#8E33FF" }}
             >
-              <Plus className="h-3.5 w-3.5 mr-1" /> Create Group
+              Create Group
             </Button>
-          </div>
+          </Box>
         ) : viewMode === "grid" ? (
-          /* Visual Conglomerate Cards Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            {data.data.map((group) => {
-              const initials = group.name ? group.name.slice(0, 2).toUpperCase() : "CG";
-              const membersCount = group.memberCount || 0;
+          /* Grid View */
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {data.data.map((group) => {
+                const initials = getInitials(group.name);
+                const membersCount = group.memberCount || 0;
 
-              return (
-                <div
-                  key={group._id}
-                  onClick={() => router.push(`/client-groups/${group._id}`)}
-                  className="group bg-card rounded-2xl border border-border/70 p-4 sm:p-5 shadow-2xs hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4"
-                >
-                  <div className="space-y-3">
-                    {/* Card Top: Avatar, Name, Code */}
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary via-primary/95 to-slate-900 text-white font-black text-xs shrink-0 shadow-2xs border border-white/10">
-                          <AvatarFallback className="rounded-xl">{initials}</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <h3 className="text-sm sm:text-base font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                            {group.name}
-                          </h3>
-                          {group.groupCode ? (
-                            <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted/80 px-2 py-0.5 rounded border border-border/60">
-                              {group.groupCode}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground/60 italic">No code</span>
-                          )}
-                        </div>
-                      </div>
+                return (
+                  <Box
+                    key={group._id}
+                    onClick={() => router.push(`/client-groups/${group._id}`)}
+                    sx={{
+                      bgcolor: "background.paper",
+                      borderRadius: "12px",
+                      border: 1,
+                      borderColor: "divider",
+                      p: 2,
+                      cursor: "pointer",
+                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      gap: 1.5,
+                      boxShadow: "0px 1px 3px 0px rgba(0, 0, 0, 0.04)",
+                      "&:hover": {
+                        borderColor: "rgba(142, 51, 255, 0.4)",
+                        transform: "translateY(-1px)",
+                        boxShadow: "0 4px 12px rgba(142, 51, 255, 0.08)",
+                      },
+                    }}
+                  >
+                    {/* Top Row: Avatar, Name, Code & Count Badge */}
+                    <div>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+                          <div
+                            className={cn(
+                              "w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-2xs bg-gradient-to-br",
+                              getAvatarGradient(group.name)
+                            )}
+                          >
+                            {initials}
+                          </div>
 
-                      <Badge
-                        variant="outline"
-                        className="bg-primary/10 text-primary border-primary/20 text-xs font-bold shrink-0 rounded-lg px-2 py-0.5"
-                      >
-                        {membersCount} {membersCount === 1 ? "Company" : "Companies"}
-                      </Badge>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: "text.primary", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {group.name}
+                            </Typography>
+                            {group.groupCode ? (
+                              <button
+                                type="button"
+                                onClick={(e) => handleCopyCode(e, group.groupCode)}
+                                className="inline-flex items-center gap-1 font-mono text-[10px] text-muted-foreground hover:text-foreground mt-0.5"
+                              >
+                                {copiedId === group.groupCode ? (
+                                  <CheckOutlinedIcon sx={{ fontSize: 11, color: "#00A76F" }} />
+                                ) : (
+                                  <ContentCopyOutlinedIcon sx={{ fontSize: 10 }} />
+                                )}
+                                <span>{group.groupCode}</span>
+                              </button>
+                            ) : (
+                              <Typography sx={{ fontSize: "10px", color: "text.disabled", fontStyle: "italic" }}>
+                                No code
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+
+                        <Chip
+                          label={`${membersCount} ${membersCount === 1 ? "Company" : "Companies"}`}
+                          size="small"
+                          sx={{
+                            height: 18,
+                            fontSize: "0.625rem",
+                            fontWeight: 700,
+                            bgcolor: membersCount > 0 ? "rgba(142, 51, 255, 0.1)" : "rgba(145, 158, 171, 0.1)",
+                            color: membersCount > 0 ? "#8E33FF" : "text.secondary",
+                            border: 0,
+                            "& .MuiChip-label": { px: 0.6 },
+                          }}
+                        />
+                      </Box>
+
+                      {/* Description */}
+                      <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary", mt: 1.25, lineClamp: 2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: 32, lineHeight: 1.4 }}>
+                        {group.description || "No description provided for this corporate holding group."}
+                      </Typography>
                     </div>
 
-                    {/* Description */}
-                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed min-h-[32px]">
-                      {group.description || "No description provided for this client group."}
-                    </p>
-                  </div>
+                    {/* Bottom Row: Member Indicator & Navigation Link */}
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pt: 1, borderTop: 1, borderColor: "divider" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                        <PeopleOutlineOutlinedIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                        <Typography sx={{ fontSize: "10.5px", fontWeight: 600, color: "text.secondary" }}>
+                          {membersCount} Member {membersCount === 1 ? "Entity" : "Entities"}
+                        </Typography>
+                      </Box>
 
-                  {/* Card Bottom: Navigation action */}
-                  <div className="pt-3 border-t border-border/50 flex items-center justify-between text-xs">
-                    <span className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
-                      <Users className="h-3.5 w-3.5 text-muted-foreground/70" />
-                      {membersCount} Member {membersCount === 1 ? "Entity" : "Entities"}
-                    </span>
-
-                    <span className="inline-flex items-center text-xs font-bold text-primary group-hover:translate-x-0.5 transition-transform">
-                      <span>View details</span>
-                      <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, color: "#8E33FF" }}>
+                        <Typography sx={{ fontSize: "11px", fontWeight: 700 }}>
+                          View
+                        </Typography>
+                        <ArrowOutwardOutlinedIcon sx={{ fontSize: 13 }} />
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </div>
           </div>
         ) : (
-          /* Dense Table View */
-          <div className="bg-card rounded-xl border border-border/70 shadow-2xs overflow-hidden">
-            <Table>
-              <TableHeader className="bg-muted/40">
-                <tr className="border-b border-border/70 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  <TableHead className="py-3 px-4">Group Name</TableHead>
-                  <TableHead className="py-3 px-4">Group Code</TableHead>
-                  <TableHead className="py-3 px-4">Description</TableHead>
-                  <TableHead className="py-3 px-4 text-center">Affiliated Members</TableHead>
-                  <TableHead className="py-3 px-4 text-right">Action</TableHead>
-                </tr>
+          /* Table View */
+          <div className="flex-1 overflow-auto custom-scrollbar relative">
+            <Table className="w-full border-separate border-spacing-0 table-auto">
+              <TableHeader className="sticky top-0 z-20 bg-slate-50/95 dark:bg-[#1C252E]/95 backdrop-blur-md">
+                <TableRow className="border-b border-border/80 hover:bg-transparent">
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    Group Name
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    Group Code
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    Description
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider text-center">
+                    Affiliated Companies
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider text-right pr-4">
+                    Action
+                  </TableHead>
+                </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-border/40 text-xs">
+              <TableBody>
                 {data.data.map((group) => {
-                  const initials = group.name ? group.name.slice(0, 2).toUpperCase() : "CG";
+                  const initials = getInitials(group.name);
+                  const membersCount = group.memberCount || 0;
+
                   return (
                     <TableRow
                       key={group._id}
-                      className="cursor-pointer hover:bg-muted/40 transition-colors"
                       onClick={() => router.push(`/client-groups/${group._id}`)}
+                      className="group border-b border-border/50 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
                     >
-                      <TableCell className="py-3 px-4 font-semibold text-foreground">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar className="h-7 w-7 rounded-lg bg-primary/10 text-primary font-bold text-xs shrink-0">
-                            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-                          </Avatar>
-                          <span className="truncate max-w-[200px]">{group.name}</span>
+                      {/* Name + Avatar */}
+                      <TableCell className="px-3 py-2">
+                        <div className="flex items-center gap-2 max-w-[240px]">
+                          <div
+                            className={cn(
+                              "w-6 h-6 rounded-md flex items-center justify-center text-white font-bold text-[9.5px] shrink-0 shadow-2xs bg-gradient-to-br",
+                              getAvatarGradient(group.name)
+                            )}
+                          >
+                            {initials}
+                          </div>
+                          <Typography sx={{ fontSize: "12px", fontWeight: 700, color: "text.primary" }} className="truncate group-hover:text-[#8E33FF] transition-colors">
+                            {group.name}
+                          </Typography>
                         </div>
                       </TableCell>
 
-                      <TableCell className="py-3 px-4">
+                      {/* Code */}
+                      <TableCell className="px-3 py-2">
                         {group.groupCode ? (
-                          <span className="px-2 py-0.5 rounded-md bg-muted/80 text-[11px] font-mono border border-border/60">
-                            {group.groupCode}
-                          </span>
+                          <Chip
+                            label={group.groupCode}
+                            size="small"
+                            onClick={(e) => handleCopyCode(e, group.groupCode)}
+                            sx={{
+                              height: 20,
+                              fontFamily: "monospace",
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              bgcolor: "rgba(145, 158, 171, 0.1)",
+                              color: "text.primary",
+                              border: 1,
+                              borderColor: "divider",
+                              cursor: "pointer",
+                            }}
+                          />
                         ) : (
-                          <span className="text-muted-foreground/60">—</span>
+                          <span className="text-[10.5px] text-muted-foreground/60">—</span>
                         )}
                       </TableCell>
 
-                      <TableCell className="py-3 px-4 max-w-xs truncate text-muted-foreground">
-                        {group.description || <span className="text-muted-foreground/40">—</span>}
+                      {/* Description */}
+                      <TableCell className="px-3 py-2 max-w-xs">
+                        <Typography sx={{ fontSize: "11.5px", color: "text.secondary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {group.description || "—"}
+                        </Typography>
                       </TableCell>
 
-                      <TableCell className="py-3 px-4 text-center">
-                        <Badge variant="secondary" className="text-xs font-semibold px-2 py-0.5">
-                          {group.memberCount || 0}
-                        </Badge>
+                      {/* Members Count */}
+                      <TableCell className="px-3 py-2 text-center">
+                        <Chip
+                          label={`${membersCount} ${membersCount === 1 ? "member" : "members"}`}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "10.5px",
+                            fontWeight: 700,
+                            bgcolor: membersCount > 0 ? "rgba(142, 51, 255, 0.1)" : "rgba(145, 158, 171, 0.1)",
+                            color: membersCount > 0 ? "#8E33FF" : "text.secondary",
+                            border: 0,
+                          }}
+                        />
                       </TableCell>
 
-                      <TableCell className="py-3 px-4 text-right">
+                      {/* Action */}
+                      <TableCell className="px-3 py-2 text-right pr-4">
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-xs font-semibold text-primary hover:bg-primary/10"
+                          variant="text"
+                          size="small"
+                          endIcon={<ArrowOutwardOutlinedIcon sx={{ fontSize: 13 }} />}
+                          sx={{
+                            height: 26,
+                            px: 1,
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            textTransform: "none",
+                            color: "#8E33FF",
+                            borderRadius: "6px",
+                            "&:hover": { bgcolor: "rgba(142, 51, 255, 0.08)" },
+                          }}
                         >
-                          View <ExternalLink className="h-3 w-3 ml-1" />
+                          View
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -345,39 +731,74 @@ export default function ClientGroupsModule() {
           </div>
         )}
 
-        {/* Pagination Controls */}
+        {/* Integrated Pagination Footer */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between bg-card p-3 rounded-xl border border-border/70 shadow-2xs text-xs">
-            <span className="text-muted-foreground font-medium">
-              Page {page} of {totalPages}
-            </span>
+          <Box
+            sx={{
+              flexShrink: 0,
+              bgcolor: "background.paper",
+              borderTop: 1,
+              borderColor: "divider",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 2,
+              py: 1,
+            }}
+          >
+            <Typography sx={{ fontSize: "11px", color: "text.secondary" }}>
+              Page <Typography component="span" sx={{ fontWeight: 800, color: "text.primary", fontSize: "11px" }}>{page}</Typography> of{" "}
+              <Typography component="span" sx={{ fontWeight: 800, color: "text.primary", fontSize: "11px" }}>{totalPages}</Typography>
+            </Typography>
 
-            <div className="flex items-center gap-1.5">
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-2.5 text-xs font-semibold rounded-lg"
-                disabled={page <= 1 || isFetching}
+                variant="outlined"
+                size="small"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1 || isFetching}
+                startIcon={<NavigateBeforeOutlinedIcon sx={{ fontSize: 15 }} />}
+                sx={{
+                  height: 28,
+                  px: 1.25,
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  borderRadius: "6px",
+                  textTransform: "none",
+                  borderColor: "divider",
+                  color: "text.primary",
+                  "&:disabled": { opacity: 0.4 },
+                }}
               >
-                <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
+                Previous
               </Button>
 
               <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-2.5 text-xs font-semibold rounded-lg"
-                disabled={page >= totalPages || isFetching}
+                variant="outlined"
+                size="small"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages || isFetching}
+                endIcon={<NavigateNextOutlinedIcon sx={{ fontSize: 15 }} />}
+                sx={{
+                  height: 28,
+                  px: 1.25,
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  borderRadius: "6px",
+                  textTransform: "none",
+                  borderColor: "divider",
+                  color: "text.primary",
+                  "&:disabled": { opacity: 0.4 },
+                }}
               >
-                Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                Next
               </Button>
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
-      </div>
+      </Box>
 
-      {/* Create Group Modal */}
+      {/* ─── 4. CREATE GROUP MODAL ─── */}
       <CreateGroupModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
@@ -387,6 +808,6 @@ export default function ClientGroupsModule() {
           refetch();
         }}
       />
-    </div>
+    </Box>
   );
 }
