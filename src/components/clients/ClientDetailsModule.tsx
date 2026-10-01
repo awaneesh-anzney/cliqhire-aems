@@ -3,80 +3,73 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Plus,
-  RefreshCcw,
-  StickyNote,
-  Paperclip,
-  Users,
-  Clock,
-  FileIcon,
-  TriangleAlert,
-  Loader,
-  FilePen,
-  Mail,
-  FileText,
-  Download,
-  MapPin,
-  Forklift,
-  LayoutDashboard,
-  Briefcase,
-  History,
-  Activity,
-  GitCommit,
-  Building2,
-  ChevronLeft,
-  Copy,
-  Check,
-  Calendar,
-  Network,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+  Box,
+  Typography,
+  Button as MuiButton,
+  IconButton,
+  Chip,
+  Tooltip,
+  LinearProgress,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select as MuiSelect,
+  Checkbox as MuiCheckbox,
+  FormControlLabel,
+  Menu,
+} from "@mui/material";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
+import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
+import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+
 import { api } from "@/lib/axios-config";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryContent } from "@/components/clients/summary/summary-content";
 import { ActivitiesContent } from "@/components/clients/activities/activities-content";
 import { TimelineContent } from "@/components/clients/timeline/timeline-content";
 import { NotesContent } from "@/components/clients/notes/notes-content";
 import { AttachmentsContent } from "@/components/clients/attachments/attachments-content";
-import TeamContent from "@/components/clients/team/team-content";
 import { ContactsContent } from "@/components/clients/contacts/contacts-content";
 import { HierarchyContent } from "@/components/clients/hierarchy/hierarchy-content";
 import { HistoryContent } from "@/components/clients/history/history-content";
 import { JobsContent } from "@/components/clients/jobs/jobs-content";
-import { updateClientStageStatus, ClientStageStatus, changeClientStage } from "@/services/clientService";
+import { EmailTemplatesContent } from "@/components/clients/email-templates";
+import { updateClientStageStatus, ClientStageStatus, changeClientStage, linkClientToGroup } from "@/services/clientService";
 import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
 import { useClientById } from "@/hooks/useClient";
 import { useQuery } from "@tanstack/react-query";
 import { ClientStageBadge } from "@/components/client-stage-badge";
 import { ClientStageStatusBadge } from "@/components/client-stage-status-badge";
-import { EmailTemplatesContent } from "@/components/clients/email-templates";
 import { FollowUpModal } from "@/components/clients/modals/follow-up-modal";
+import { AddClientToGroupModal } from "@/components/client-groups/AddClientToGroupModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { AddClientToGroupModal } from "@/components/client-groups/AddClientToGroupModal";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { linkClientToGroup } from "@/services/clientService";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { generateWeeklyReport } from "@/services/reportService";
 import { getJobs, Job } from "@/services/jobService";
 import { toast } from "sonner";
@@ -106,6 +99,19 @@ const CANDIDATE_STAGE_STATUS_MAP: Record<string, string[]> = {
   "Client Review": ["pending", "shortlisted", "Disqualified"],
 };
 
+const DETAIL_TABS = [
+  { id: "Summary", label: "Summary", icon: DashboardOutlinedIcon },
+  { id: "Jobs", label: "Jobs", icon: WorkOutlineOutlinedIcon },
+  { id: "Hierarchy", label: "Hierarchy", icon: AccountTreeOutlinedIcon },
+  { id: "Notes", label: "Notes", icon: NoteAltOutlinedIcon },
+  { id: "Attachments", label: "Attachments", icon: AttachFileOutlinedIcon },
+  { id: "Contacts", label: "Contacts", icon: PeopleAltOutlinedIcon },
+  { id: "History", label: "History", icon: HistoryOutlinedIcon },
+  { id: "Activities", label: "Activities", icon: BoltOutlinedIcon },
+  { id: "Timeline", label: "Timeline", icon: TimelineOutlinedIcon },
+  { id: "EmailTemplates", label: "Email Templates", icon: EmailOutlinedIcon },
+] as const;
+
 interface ClientDetailsModuleProps {
   id: string;
   moduleType?: "clients" | "leads";
@@ -120,9 +126,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   const [activeTab, setActiveTab] = useState("Summary");
   const [reportStatus, setReportStatus] = useState<"idle" | "generating" | "completed">("idle");
   const [reportProgress, setReportProgress] = useState(0);
-  const [buttonWidth, setButtonWidth] = useState<number | null>(null);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [selectedJobStages, setSelectedJobStages] = useState<string[]>([]);
   const [selectedCandidateStages, setSelectedCandidateStages] = useState<string[]>([]);
@@ -160,11 +164,15 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
 
+  // Group Dropdown Menu Anchor
+  const [groupMenuAnchor, setGroupMenuAnchor] = useState<null | HTMLElement>(null);
+
   const {
     data: client,
     isLoading,
     isError,
     refetch,
+    isFetching,
   } = useClientById(id);
 
   const { data: clientJobsData } = useQuery({
@@ -186,7 +194,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
           return { jobs: allJobs };
         }
       } catch (e) {
-        // Fallback to modern getJobs
+        // Fallback
       }
 
       try {
@@ -198,7 +206,7 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
           return { jobs: (res as any).data };
         }
       } catch (e) {
-        // Fallback to client-side filter
+        // Fallback
       }
 
       try {
@@ -227,13 +235,13 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
   const handleRefresh = () => {
     refetch();
-    toast.success("Client data refreshed");
+    toast.success(`${entityName} data refreshed`);
   };
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(id);
     setCopiedId(true);
-    toast.success("Client ID copied");
+    toast.success(`${entityName} ID copied`);
     setTimeout(() => setCopiedId(false), 2000);
   };
 
@@ -271,8 +279,8 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
       toast.success("Stage updated successfully");
       refetch();
     } catch (error: any) {
-      console.error("Error updating client stage:", error);
-      setError(error.message || "Failed to update client stage. Please try again.");
+      console.error("Error updating stage:", error);
+      setError(error.message || `Failed to update ${entityNameLower} stage. Please try again.`);
     }
   };
 
@@ -340,10 +348,6 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
   const handleConfirmGenerate = async () => {
     setIsReportDialogOpen(false);
 
-    if (buttonRef.current) {
-      setButtonWidth(buttonRef.current.offsetWidth);
-    }
-
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
@@ -403,164 +407,309 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
-        <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-4">
-          <TriangleAlert className="h-6 w-6" />
-        </div>
-        <h3 className="text-lg font-bold text-foreground">Failed to load client details</h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-sm mb-4">
+      <Box className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
+        <Box className="h-12 w-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center mb-4">
+          <WarningAmberOutlinedIcon sx={{ fontSize: 28 }} />
+        </Box>
+        <Typography variant="h6" className="font-bold text-foreground mb-1">
+          Failed to load {entityNameLower} details
+        </Typography>
+        <Typography variant="body2" className="text-muted-foreground max-w-sm mb-4">
           An error occurred while fetching information for this {entityNameLower}.
-        </p>
-        <Button onClick={() => refetch()} variant="outline" size="sm">
-          <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
-        </Button>
-      </div>
+        </Typography>
+        <MuiButton
+          onClick={() => refetch()}
+          variant="outlined"
+          size="small"
+          startIcon={<RefreshOutlinedIcon />}
+          className="rounded-xl capitalize"
+        >
+          Try Again
+        </MuiButton>
+      </Box>
     );
   }
 
   if (isLoading || !client) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
-        <Loader className="h-8 w-8 animate-spin text-primary mb-3" />
-        <p className="text-sm font-medium text-muted-foreground">Loading {entityNameLower} profile...</p>
-      </div>
+      <Box className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <CircularProgress size={32} thickness={4} sx={{ color: "var(--color-primary-base, #1976d2)", mb: 2 }} />
+        <Typography variant="body2" className="text-muted-foreground font-medium">
+          Loading {entityNameLower} profile...
+        </Typography>
+      </Box>
     );
   }
 
   if (!canViewClients) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
-        <div className="text-muted-foreground font-medium">
+      <Box className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
+        <Typography variant="body1" className="text-muted-foreground font-medium">
           You do not have permission to view this {entityNameLower}.
-        </div>
-      </div>
+        </Typography>
+      </Box>
     );
   }
 
   const isFollowUpOverdue = client.nextFollowUpDate && new Date(client.nextFollowUpDate) < new Date();
+  const clientInitials = client.name ? client.name.slice(0, 2).toUpperCase() : "CL";
+  const avatarSrc = (client as any).avatarUrl || (client as any).logo;
 
   return (
-    <div className="flex flex-col h-full w-full max-w-full overflow-x-hidden">
-      {/* Top Header & Executive Hero Section */}
-      <div className="bg-card/70 border-b border-border/80 backdrop-blur-md sticky top-0 z-10 transition-all">
-        {/* Navigation Breadcrumb Bar */}
-        <div className="px-4 py-2 border-b border-border/40 flex items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 min-w-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/80"
+    <Box className="flex flex-col h-full w-full max-w-full overflow-hidden bg-background">
+      {/* 1. Sleek Compact Header Bar (Breadcrumb & Action Bar) */}
+      <Box className="bg-card/80 border-b border-border/70 backdrop-blur-md sticky top-0 z-20">
+        <Box className="px-3 sm:px-6 py-1.5 border-b border-border/40 flex items-center justify-between gap-2">
+          {/* Breadcrumb Navigation */}
+          <Box className="flex items-center gap-2 min-w-0">
+            <MuiButton
+              variant="text"
+              size="small"
               onClick={() => router.push(`/${moduleType === "leads" ? "leads" : "clients"}`)}
+              startIcon={<ArrowBackOutlinedIcon sx={{ fontSize: 16 }} />}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                color: "var(--color-slate-600, #475569)",
+                px: 1,
+                py: 0.25,
+                borderRadius: "8px",
+                minWidth: "auto",
+                "&:hover": { bgcolor: "rgba(0,0,0,0.04)", color: "var(--foreground)" },
+              }}
             >
-              <ChevronLeft className="h-3.5 w-3.5 mr-1" />
-              <span>{entityName}s</span>
-            </Button>
-            <span className="text-muted-foreground/40">/</span>
-            <span className="font-semibold text-foreground truncate max-w-[200px] sm:max-w-[320px]">
+              {entityName}s
+            </MuiButton>
+
+            <Typography variant="caption" sx={{ color: "text.disabled", mx: 0.25 }}>
+              /
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 700,
+                color: "text.primary",
+                fontSize: "0.8125rem",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: { xs: 160, sm: 260, md: 360 },
+              }}
+            >
               {client.name || "Unnamed"}
-            </span>
+            </Typography>
 
-            <button
-              type="button"
-              onClick={handleCopyId}
-              className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground/70 hover:text-foreground bg-muted/50 hover:bg-muted px-1.5 py-0.5 rounded border border-border/50 transition-colors"
-              title="Copy Client ID"
-            >
-              {copiedId ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-              <span>{id.slice(-6)}</span>
-            </button>
-          </div>
+            {/* ID Chip with Copy */}
+            <Tooltip title={copiedId ? "Copied!" : "Click to copy ID"} arrow>
+              <Chip
+                label={id.slice(-6).toUpperCase()}
+                size="small"
+                onClick={handleCopyId}
+                icon={
+                  copiedId ? (
+                    <CheckOutlinedIcon sx={{ fontSize: "14px !important", color: "#10b981 !important" }} />
+                  ) : (
+                    <ContentCopyOutlinedIcon sx={{ fontSize: "13px !important" }} />
+                  )
+                }
+                sx={{
+                  height: 22,
+                  fontSize: "0.6875rem",
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                  bgcolor: "var(--color-slate-100, #f1f5f9)",
+                  border: "1px solid var(--color-slate-200, #e2e8f0)",
+                  cursor: "pointer",
+                  "& .MuiChip-label": { px: 0.75 },
+                  "&:hover": { bgcolor: "var(--color-slate-200, #e2e8f0)" },
+                }}
+              />
+            </Tooltip>
+          </Box>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
+          {/* Quick Refresh */}
+          <Tooltip title="Refresh Profile" arrow>
+            <IconButton
+              size="small"
               onClick={handleRefresh}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
-              title="Refresh Data"
+              sx={{
+                width: 28,
+                height: 28,
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                bgcolor: "background.paper",
+                "&:hover": { bgcolor: "action.hover" },
+              }}
             >
-              <RefreshCcw className={`h-3 w-3 ${isLoading ? "animate-spin text-primary" : ""}`} />
-              <span className="hidden sm:inline text-[11px] font-medium">Refresh</span>
-            </button>
-          </div>
-        </div>
+              <RefreshOutlinedIcon
+                sx={{
+                  fontSize: 16,
+                  color: isFetching ? "primary.main" : "text.secondary",
+                  animation: isFetching ? "spin 1s linear infinite" : "none",
+                  "@keyframes spin": {
+                    "0%": { transform: "rotate(0deg)" },
+                    "100%": { transform: "rotate(360deg)" },
+                  },
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        </Box>
 
-        {/* Hero Identity Banner */}
-        <div className="px-4 py-3 sm:px-6 sm:py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            {/* Left: Avatar & Identity Details */}
-            <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
-              <Avatar className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl border-2 border-background shadow-sm ring-1 ring-border/80 shrink-0">
-                <AvatarImage
-                  src={(client as any).avatarUrl || (client as any).logo}
-                  alt={client.name || "Client"}
-                />
-                <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white font-extrabold text-sm sm:text-base">
-                  {client.name ? client.name.slice(0, 2).toUpperCase() : "CL"}
-                </AvatarFallback>
-              </Avatar>
+        {/* 2. Executive Hero Banner (Compact & Polished) */}
+        <Box className="px-3 sm:px-6 py-2.5 sm:py-3">
+          <Box className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            {/* Identity Column */}
+            <Box className="flex items-center gap-3 min-w-0 flex-1">
+              {/* Client Avatar / Logo */}
+              <Box className="relative shrink-0">
+                {avatarSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarSrc}
+                    alt={client.name || "Client"}
+                    className="h-12 w-12 sm:h-13 sm:w-13 rounded-xl object-cover border border-border shadow-xs"
+                  />
+                ) : (
+                  <Box className="h-12 w-12 sm:h-13 sm:w-13 rounded-xl bg-gradient-to-br from-[#1C252E] to-[#2563EB] text-white flex items-center justify-center font-bold text-sm sm:text-base shadow-xs border border-border/80">
+                    {clientInitials}
+                  </Box>
+                )}
+              </Box>
 
-              <div className="min-w-0 flex-1 space-y-1">
-                {/* Title & Organization Badges */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground truncate max-w-full">
+              {/* Title & Metadata Strip */}
+              <Box className="min-w-0 flex-1 space-y-1">
+                <Box className="flex flex-wrap items-center gap-2">
+                  <Typography
+                    variant="h6"
+                    component="h1"
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: "1.125rem", sm: "1.25rem" },
+                      color: "text.primary",
+                      lineHeight: 1.2,
+                    }}
+                    className="truncate max-w-[280px] sm:max-w-md"
+                  >
                     {client.name || `Unnamed ${entityName}`}
-                  </h1>
+                  </Typography>
 
+                  {/* Subsidiary Tag */}
                   {client.parentClientId && (
-                    <Badge
-                      variant="outline"
-                      className="bg-primary/5 text-primary border-primary/20 flex items-center gap-1 font-semibold text-[10px] uppercase tracking-wider"
-                    >
-                      <Building2 className="w-3 h-3" />
-                      Subsidiary of {client.parentCompany?.name || "Parent"}
-                    </Badge>
+                    <Chip
+                      size="small"
+                      icon={<ApartmentOutlinedIcon sx={{ fontSize: "14px !important", color: "inherit" }} />}
+                      label={`Subsidiary of ${client.parentCompany?.name || "Parent"}`}
+                      sx={{
+                        height: 22,
+                        fontSize: "0.6875rem",
+                        fontWeight: 700,
+                        bgcolor: "rgba(37, 99, 235, 0.08)",
+                        color: "#2563EB",
+                        border: "1px solid rgba(37, 99, 235, 0.2)",
+                        "& .MuiChip-label": { px: 0.75 },
+                      }}
+                    />
                   )}
 
+                  {/* Client Group Dropdown / Add Badge */}
                   {client.groupId ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Badge
-                          variant="outline"
-                          className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 font-semibold text-[10px] uppercase tracking-wider cursor-pointer hover:bg-amber-500/20 transition-colors"
+                    <>
+                      <Chip
+                        size="small"
+                        icon={<GroupOutlinedIcon sx={{ fontSize: "14px !important", color: "inherit" }} />}
+                        label={client.group?.name ? `Group: ${client.group.name}` : "Group Member"}
+                        onClick={(e) => setGroupMenuAnchor(e.currentTarget)}
+                        sx={{
+                          height: 22,
+                          fontSize: "0.6875rem",
+                          fontWeight: 700,
+                          bgcolor: "rgba(245, 158, 11, 0.1)",
+                          color: "#D97706",
+                          border: "1px solid rgba(245, 158, 11, 0.25)",
+                          cursor: "pointer",
+                          "& .MuiChip-label": { px: 0.75 },
+                          "&:hover": { bgcolor: "rgba(245, 158, 11, 0.18)" },
+                        }}
+                      />
+                      <Menu
+                        anchorEl={groupMenuAnchor}
+                        open={Boolean(groupMenuAnchor)}
+                        onClose={() => setGroupMenuAnchor(null)}
+                        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                        transformOrigin={{ vertical: "top", horizontal: "left" }}
+                        slotProps={{
+                          paper: {
+                            sx: {
+                              borderRadius: "12px",
+                              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
+                              border: "1px solid var(--border)",
+                              minWidth: 180,
+                              py: 0.5,
+                            },
+                          },
+                        }}
+                      >
+                        <MenuItem
+                          dense
+                          onClick={() => {
+                            setGroupMenuAnchor(null);
+                            router.push(`/client-groups/${client.groupId}`);
+                          }}
+                          sx={{ fontSize: "0.8125rem", fontWeight: 600 }}
                         >
-                          <Building2 className="w-3 h-3" />
-                          {client.group?.name ? `Group: ${client.group.name}` : "Group Member"}
-                        </Badge>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem onClick={() => router.push(`/client-groups/${client.groupId}`)}>
-                          View Group details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setIsGroupModalOpen(true)}>
-                          Move to another group
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
+                          View Group Details
+                        </MenuItem>
+                        <MenuItem
+                          dense
+                          onClick={() => {
+                            setGroupMenuAnchor(null);
+                            setIsGroupModalOpen(true);
+                          }}
+                          sx={{ fontSize: "0.8125rem", fontWeight: 600 }}
+                        >
+                          Move to Another Group
+                        </MenuItem>
+                        <MenuItem
+                          dense
                           onClick={async () => {
+                            setGroupMenuAnchor(null);
                             if (window.confirm("Client will stay as-is, only its group tag is removed. Are you sure?")) {
                               await linkClientToGroup(client._id, null);
                               refetch();
                             }
                           }}
+                          sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "error.main" }}
                         >
                           Remove from Group
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </MenuItem>
+                      </Menu>
+                    </>
                   ) : (
-                    <Badge
-                      variant="outline"
-                      className="bg-muted text-muted-foreground border-border flex items-center gap-1 font-semibold text-[10px] uppercase tracking-wider cursor-pointer hover:bg-muted/80 transition-colors"
+                    <Chip
+                      size="small"
+                      icon={<AddOutlinedIcon sx={{ fontSize: "14px !important", color: "inherit" }} />}
+                      label="Add to Group"
                       onClick={() => setIsGroupModalOpen(true)}
-                    >
-                      <Plus className="w-3 h-3" />
-                      Add to Group
-                    </Badge>
+                      sx={{
+                        height: 22,
+                        fontSize: "0.6875rem",
+                        fontWeight: 600,
+                        bgcolor: "var(--muted)",
+                        color: "text.secondary",
+                        border: "1px solid var(--border)",
+                        cursor: "pointer",
+                        "& .MuiChip-label": { px: 0.75 },
+                        "&:hover": { bgcolor: "action.hover", color: "text.primary" },
+                      }}
+                    />
                   )}
-                </div>
+                </Box>
 
-                {/* Status Badges & Follow-Up Strip */}
-                <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                {/* Subtitle Status & Follow-Up Badges */}
+                <Box className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <ClientStageBadge
                     id={client._id}
                     stage={client.clientStage || "Lead"}
@@ -576,263 +725,307 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
                     disabled={!canModifyClients}
                   />
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => setIsFollowUpModalOpen(true)}
-                          className={cn(
-                            "flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all shadow-2xs",
-                            isFollowUpOverdue
-                              ? "border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
-                              : "border-border/70 bg-card hover:bg-muted/80 text-foreground",
-                          )}
-                        >
-                          <Clock className={cn("h-3.5 w-3.5", isFollowUpOverdue ? "text-destructive" : "text-primary")} />
-                          <span>
-                            {client.nextFollowUpDate
-                              ? new Date(client.nextFollowUpDate).toLocaleDateString("en-GB", {
-                                  day: "2-digit",
-                                  month: "short",
-                                })
-                              : "Set Follow-up"}
-                          </span>
-                        </button>
-                      </TooltipTrigger>
-                      {client.nextFollowUpOwner && (
-                        <TooltipContent className="text-xs font-medium">
-                          {typeof client.nextFollowUpOwner === "string"
-                            ? client.nextFollowUpOwner
-                            : `${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`}
-                        </TooltipContent>
+                  {/* Follow-Up Pill */}
+                  <Tooltip
+                    title={
+                      client.nextFollowUpOwner
+                        ? typeof client.nextFollowUpOwner === "string"
+                          ? `Follow-up Owner: ${client.nextFollowUpOwner}`
+                          : `Owner: ${client.nextFollowUpOwner.firstName} ${client.nextFollowUpOwner.lastName}`
+                        : "Click to set next follow-up date and owner"
+                    }
+                    arrow
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setIsFollowUpModalOpen(true)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-lg border px-2 py-0.5 text-xs font-semibold transition-all shadow-2xs cursor-pointer",
+                        isFollowUpOverdue
+                          ? "border-rose-500/30 bg-rose-500/10 text-rose-600 hover:bg-rose-500/20"
+                          : "border-border/80 bg-background hover:bg-muted text-foreground",
                       )}
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  {/* Metadata Chips */}
-                  <div className="hidden md:flex items-center gap-3 text-xs text-muted-foreground ml-2">
-                    {client.industry && (
-                      <span className="flex items-center gap-1">
-                        <Forklift className="h-3.5 w-3.5 text-muted-foreground/70" />
-                        <span className="truncate max-w-[140px]">{client.industry}</span>
+                    >
+                      <AccessTimeOutlinedIcon
+                        sx={{
+                          fontSize: 14,
+                          color: isFollowUpOverdue ? "#E11D48" : "var(--color-primary-base, #2563EB)",
+                        }}
+                      />
+                      <span>
+                        {client.nextFollowUpDate
+                          ? new Date(client.nextFollowUpDate).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                            })
+                          : "Set Follow-up"}
                       </span>
-                    )}
-                    {(client.location || client.address) && (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
-                        <span className="truncate max-w-[140px]">{client.location || client.address}</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+                    </button>
+                  </Tooltip>
 
-            {/* Right: Action Toolbar */}
-            <div className="flex flex-wrap items-center gap-2 self-start lg:self-center shrink-0">
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-9 rounded-xl border-border/80 bg-card px-3.5 text-xs font-semibold shadow-2xs hover:bg-muted"
+                  {/* Industry & Location */}
+                  {client.industry && (
+                    <Box className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground ml-1">
+                      <WorkOutlineOutlinedIcon sx={{ fontSize: 13, opacity: 0.7 }} />
+                      <span className="truncate max-w-[130px]">{client.industry}</span>
+                    </Box>
+                  )}
+
+                  {(client.location || client.address) && (
+                    <Box className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                      <LocationOnOutlinedIcon sx={{ fontSize: 13, opacity: 0.7 }} />
+                      <span className="truncate max-w-[130px]">{client.location || client.address}</span>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Action Buttons Toolbar */}
+            <Box className="flex flex-wrap items-center gap-2 self-start lg:self-center shrink-0">
+              {/* Contract Action */}
+              <MuiButton
+                variant="outlined"
+                size="small"
+                startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
                 onClick={() => router.push(`/${moduleType === "leads" ? "leads" : "clients"}/${id}/contract`)}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "0.75rem",
+                  borderRadius: "10px",
+                  borderColor: "var(--border)",
+                  color: "text.primary",
+                  bgcolor: "background.paper",
+                  px: 1.5,
+                  py: 0.6,
+                  height: 32,
+                  "&:hover": { bgcolor: "action.hover", borderColor: "var(--border)" },
+                }}
               >
-                <FilePen className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
                 Contract
-              </Button>
+              </MuiButton>
 
+              {/* Weekly Report Action */}
               {jobsAvailable &&
                 (reportStatus === "idle" ? (
-                  <Button
-                    ref={buttonRef}
-                    size="sm"
-                    variant="outline"
-                    className="h-9 rounded-xl border-border/80 bg-card px-3.5 text-xs font-semibold shadow-2xs hover:bg-muted"
+                  <MuiButton
+                    variant="outlined"
+                    size="small"
+                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
                     onClick={handleGenerateReportClick}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      fontSize: "0.75rem",
+                      borderRadius: "10px",
+                      borderColor: "var(--border)",
+                      color: "text.primary",
+                      bgcolor: "background.paper",
+                      px: 1.5,
+                      py: 0.6,
+                      height: 32,
+                      "&:hover": { bgcolor: "action.hover", borderColor: "var(--border)" },
+                    }}
                   >
-                    <FileText className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
                     Weekly Report
-                  </Button>
+                  </MuiButton>
                 ) : reportStatus === "generating" ? (
-                  <div
-                    className="relative inline-flex h-9 min-w-[120px] items-center justify-center overflow-hidden rounded-xl border border-border bg-muted px-3.5 shadow-inner"
-                    style={{ width: buttonWidth ? `${buttonWidth}px` : undefined }}
+                  <Box
+                    sx={{
+                      height: 32,
+                      minWidth: 120,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      position: "relative",
+                      overflow: "hidden",
+                      borderRadius: "10px",
+                      border: "1px solid var(--border)",
+                      bgcolor: "var(--muted)",
+                      px: 1.5,
+                    }}
                   >
-                    <div
-                      className="absolute inset-y-0 left-0 bg-primary/20 transition-all duration-100"
-                      style={{ width: `${reportProgress}%` }}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        width: `${reportProgress}%`,
+                        bgcolor: "rgba(37, 99, 235, 0.2)",
+                        transition: "width 0.15s ease",
+                      }}
                     />
-                    <span className="relative z-10 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-foreground">
-                      <Loader className="h-3.5 w-3.5 animate-spin text-primary" />
-                      {reportProgress}%
-                    </span>
-                  </div>
+                    <Box sx={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                      <CircularProgress size={12} thickness={5} />
+                      <Typography sx={{ fontSize: "0.6875rem", fontWeight: 700 }}>
+                        {reportProgress}%
+                      </Typography>
+                    </Box>
+                  </Box>
                 ) : (
-                  <Button
-                    size="sm"
-                    className="h-9 rounded-xl bg-emerald-600 px-3.5 text-xs font-semibold text-white shadow-md hover:bg-emerald-700 animate-in zoom-in-95 duration-200"
+                  <MuiButton
+                    variant="contained"
+                    size="small"
+                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
                     onClick={handleDownloadReport}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                      fontSize: "0.75rem",
+                      borderRadius: "10px",
+                      bgcolor: "#10B981",
+                      color: "#FFFFFF",
+                      px: 1.5,
+                      py: 0.6,
+                      height: 32,
+                      "&:hover": { bgcolor: "#059669" },
+                    }}
                   >
-                    <Download className="mr-1.5 h-3.5 w-3.5" />
-                    Download
-                  </Button>
+                    Download Excel
+                  </MuiButton>
                 ))}
 
+              {/* New Job Action */}
               {canModifyJobs && (
-                <Button
-                  size="sm"
-                  className="h-9 rounded-xl bg-primary text-primary-foreground px-4 text-xs font-bold shadow-md hover:bg-primary/90 active:scale-95 transition-all"
+                <MuiButton
+                  variant="contained"
+                  size="small"
+                  startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
                   onClick={() => setIsCreateJobOpen(true)}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                    borderRadius: "10px",
+                    bgcolor: "var(--color-primary-base, #1C252E)",
+                    color: "#FFFFFF",
+                    px: 1.75,
+                    py: 0.6,
+                    height: 32,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.12)",
+                    "&:hover": {
+                      bgcolor: "var(--color-primary-dark, #0F172A)",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.18)",
+                    },
+                  }}
                 >
-                  <Plus className="mr-1.5 h-3.5 w-3.5" />
                   New Job
-                </Button>
+                </MuiButton>
               )}
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
 
-        {/* Tabs Bar */}
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <div className="w-full border-t border-border/60 bg-muted/20 px-3 sm:px-6">
-            <TabsList className="flex w-full items-center justify-start gap-1 p-0 bg-transparent overflow-x-auto scrollbar-none h-11">
-              <TabsTrigger
-                value="Summary"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                <span>Summary</span>
-              </TabsTrigger>
+        {/* 3. Modern Material UI Compact Tab Navigation Strip */}
+        <Box className="w-full border-t border-border/60 bg-muted/20 px-2 sm:px-4">
+          <Box
+            className="flex items-center gap-1 overflow-x-auto scrollbar-none py-1"
+            sx={{
+              "&::-webkit-scrollbar": { display: "none" },
+              scrollbarWidth: "none",
+            }}
+          >
+            {DETAIL_TABS.map((tab) => {
+              const IconComp = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer shrink-0",
+                    isActive
+                      ? "bg-background text-primary shadow-xs border border-border/80 font-bold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
+                  )}
+                >
+                  <IconComp
+                    sx={{
+                      fontSize: 16,
+                      color: isActive ? "var(--color-primary-base, #2563EB)" : "inherit",
+                      opacity: isActive ? 1 : 0.8,
+                    }}
+                  />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </Box>
+        </Box>
+      </Box>
 
-              <TabsTrigger
-                value="Jobs"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <Briefcase className="h-3.5 w-3.5" />
-                <span>Jobs</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="Hierarchy"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <Network className="h-3.5 w-3.5" />
-                <span>Hierarchy</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="Notes"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <StickyNote className="h-3.5 w-3.5" />
-                <span>Notes</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="Attachments"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <Paperclip className="h-3.5 w-3.5" />
-                <span>Attachments</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="Contacts"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <Users className="h-3.5 w-3.5" />
-                <span>Contacts</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="History"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <History className="h-3.5 w-3.5" />
-                <span>History</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="Activities"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <Activity className="h-3.5 w-3.5" />
-                <span>Activities</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="Timeline"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <GitCommit className="h-3.5 w-3.5" />
-                <span>Timeline</span>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="EmailTemplates"
-                className="h-9 px-3 text-xs font-medium rounded-lg text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-background data-[state=active]:shadow-2xs data-[state=active]:font-semibold flex items-center gap-1.5 shrink-0 transition-all"
-              >
-                <Mail className="h-3.5 w-3.5" />
-                <span>Email Templates</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </Tabs>
-      </div>
-
-      {/* Tab Panels with Smooth Animation and Responsive Container */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 max-w-7xl w-full mx-auto">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="Summary" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+      {/* 4. Tab Content Panels Viewport */}
+      <Box className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-5 max-w-7xl w-full mx-auto">
+        {activeTab === "Summary" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <SummaryContent
               clientId={id}
               clientData={client}
               onTabSwitch={handleTabSwitch}
               canModify={canModifyClients}
             />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="Jobs" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "Jobs" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <JobsContent clientId={id} clientName={client.name} setJobsAvailable={setJobsAvailable} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="Hierarchy" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "Hierarchy" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <HierarchyContent clientId={id} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="Notes" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "Notes" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <NotesContent clientId={id} canModify={canModifyClients} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="Attachments" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "Attachments" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <AttachmentsContent clientId={id} canModify={canModifyClients} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="Contacts" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "Contacts" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <ContactsContent clientId={id} clientData={client} canModify={canModifyClients} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="History" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "History" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <HistoryContent clientId={id} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="Activities" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "Activities" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <ActivitiesContent clientId={id} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="Timeline" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "Timeline" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <TimelineContent clientId={id} />
-          </TabsContent>
+          </Box>
+        )}
 
-          <TabsContent value="EmailTemplates" className="m-0 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-50 duration-200">
+        {activeTab === "EmailTemplates" && (
+          <Box className="animate-in fade-in-50 duration-200">
             <EmailTemplatesContent clientId={id} clientData={client} canModify={canModifyClients} />
-          </TabsContent>
-        </Tabs>
-      </div>
+          </Box>
+        )}
+      </Box>
+
+      {/* 5. Modals & Dialogs (Preserving all Real API Logic) */}
 
       {/* Follow-up Modal */}
       <FollowUpModal
@@ -863,196 +1056,309 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
       )}
 
       {/* Confirm Stage Change Dialog */}
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Stage Change</DialogTitle>
-            <DialogDescription>
-              Update the {entityNameLower} stage to <span className="font-bold text-foreground">{pendingChange?.stage}</span>?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-3 py-3">
-            <div className="grid gap-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Reason (Optional)</Label>
-              <Input
-                value={stageChangeReason}
-                onChange={(e) => setStageChangeReason(e.target.value)}
-                placeholder="e.g. Client agreed to terms"
-                className="h-10 rounded-lg"
-              />
-            </div>
-            <div className="grid gap-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Closure Summary (Optional)</Label>
-              <Input
-                value={stageChangeClosureSummary}
-                onChange={(e) => setStageChangeClosureSummary(e.target.value)}
-                placeholder="Summary of the previous stage"
-                className="h-10 rounded-lg"
-              />
-            </div>
-          </div>
-          {error && <div className="text-destructive text-xs">{error}</div>}
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmChange} disabled={isLoading}>
-              Confirm
-            </Button>
-          </DialogFooter>
+      <Dialog
+        open={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+              border: "1px solid var(--border)",
+              p: 1,
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: "1.05rem", pb: 0.5 }}>
+          Confirm Stage Change
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+            Update the {entityNameLower} stage to <strong className="text-foreground">{pendingChange?.stage}</strong>?
+          </Typography>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <TextField
+              size="small"
+              label="Reason (Optional)"
+              value={stageChangeReason}
+              onChange={(e) => setStageChangeReason(e.target.value)}
+              placeholder="e.g. Client agreed to terms"
+              fullWidth
+              slotProps={{
+                input: { sx: { borderRadius: "10px", fontSize: "0.8125rem" } },
+                inputLabel: { sx: { fontSize: "0.8125rem" } },
+              }}
+            />
+            <TextField
+              size="small"
+              label="Closure Summary (Optional)"
+              value={stageChangeClosureSummary}
+              onChange={(e) => setStageChangeClosureSummary(e.target.value)}
+              placeholder="Summary of the previous stage"
+              fullWidth
+              multiline
+              rows={2}
+              slotProps={{
+                input: { sx: { borderRadius: "10px", fontSize: "0.8125rem" } },
+                inputLabel: { sx: { fontSize: "0.8125rem" } },
+              }}
+            />
+          </Box>
+
+          {error && (
+            <Typography variant="caption" sx={{ color: "error.main", mt: 1.5, display: "block" }}>
+              {error}
+            </Typography>
+          )}
         </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <MuiButton
+            onClick={() => setShowConfirmDialog(false)}
+            variant="outlined"
+            size="small"
+            sx={{ textTransform: "none", borderRadius: "10px", fontWeight: 600 }}
+          >
+            Cancel
+          </MuiButton>
+          <MuiButton
+            onClick={handleConfirmChange}
+            variant="contained"
+            size="small"
+            disabled={isLoading}
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              fontWeight: 700,
+              bgcolor: "var(--color-primary-base, #1C252E)",
+              "&:hover": { bgcolor: "var(--color-primary-dark, #0F172A)" },
+            }}
+          >
+            Confirm Change
+          </MuiButton>
+        </DialogActions>
       </Dialog>
 
       {/* Confirm Status Change Dialog */}
-      <Dialog open={showStatusConfirmDialog} onOpenChange={setShowStatusConfirmDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Status Change</DialogTitle>
-            <DialogDescription>
-              Update the {entityNameLower} stage status to{" "}
-              <span className="font-bold text-foreground">{pendingStatusChange?.status}</span>.
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog
+        open={showStatusConfirmDialog}
+        onClose={() => setShowStatusConfirmDialog(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+              border: "1px solid var(--border)",
+              p: 1,
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: "1.05rem", pb: 0.5 }}>
+          Confirm Status Change
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+            Update the {entityNameLower} stage status to{" "}
+            <strong className="text-foreground">{pendingStatusChange?.status}</strong>.
+          </Typography>
+
           {pendingStatusChange?.status === "Profile Sent" && (
-            <div className="grid gap-3 py-3">
-              <div className="grid gap-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Channel <span className="text-destructive">*</span>
-                </Label>
-                <Select value={subStageChannel} onValueChange={setSubStageChannel}>
-                  <SelectTrigger className="h-10 rounded-lg">
-                    <SelectValue placeholder="Select channel" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Email">Email</SelectItem>
-                    <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                    <SelectItem value="WhatsApp">WhatsApp</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sent Date (Optional)</Label>
-                <Input
-                  type="date"
-                  value={subStageSentDate}
-                  onChange={(e) => setSubStageSentDate(e.target.value)}
-                  className="h-10 rounded-lg"
-                />
-              </div>
-            </div>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 1.5 }}>
+              <FormControl size="small" fullWidth>
+                <InputLabel sx={{ fontSize: "0.8125rem" }}>Channel *</InputLabel>
+                <MuiSelect
+                  value={subStageChannel}
+                  label="Channel *"
+                  onChange={(e) => setSubStageChannel(e.target.value)}
+                  sx={{ borderRadius: "10px", fontSize: "0.8125rem" }}
+                >
+                  <MenuItem value="Email" sx={{ fontSize: "0.8125rem" }}>Email</MenuItem>
+                  <MenuItem value="LinkedIn" sx={{ fontSize: "0.8125rem" }}>LinkedIn</MenuItem>
+                  <MenuItem value="WhatsApp" sx={{ fontSize: "0.8125rem" }}>WhatsApp</MenuItem>
+                </MuiSelect>
+              </FormControl>
+
+              <TextField
+                size="small"
+                type="date"
+                label="Sent Date (Optional)"
+                value={subStageSentDate}
+                onChange={(e) => setSubStageSentDate(e.target.value)}
+                slotProps={{
+                  inputLabel: { shrink: true, sx: { fontSize: "0.8125rem" } },
+                  input: { sx: { borderRadius: "10px", fontSize: "0.8125rem" } },
+                }}
+                fullWidth
+              />
+            </Box>
           )}
 
-          <div className="py-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="schedule-followup"
+          <FormControlLabel
+            control={
+              <MuiCheckbox
+                size="small"
                 checked={scheduleFollowUpOnSubstage}
-                onCheckedChange={(checked) => setScheduleFollowUpOnSubstage(checked === true)}
+                onChange={(e) => setScheduleFollowUpOnSubstage(e.target.checked)}
               />
-              <Label htmlFor="schedule-followup" className="cursor-pointer text-xs font-medium">
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: "0.8125rem", fontWeight: 500 }}>
                 Schedule Follow-up for this Activity
-              </Label>
-            </div>
-          </div>
+              </Typography>
+            }
+            sx={{ mt: 1 }}
+          />
 
-          {error && <div className="text-destructive text-xs">{error}</div>}
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowStatusConfirmDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmStatusChange} disabled={isLoading}>
-              Confirm
-            </Button>
-          </DialogFooter>
+          {error && (
+            <Typography variant="caption" sx={{ color: "error.main", mt: 1.5, display: "block" }}>
+              {error}
+            </Typography>
+          )}
         </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <MuiButton
+            onClick={() => setShowStatusConfirmDialog(false)}
+            variant="outlined"
+            size="small"
+            sx={{ textTransform: "none", borderRadius: "10px", fontWeight: 600 }}
+          >
+            Cancel
+          </MuiButton>
+          <MuiButton
+            onClick={handleConfirmStatusChange}
+            variant="contained"
+            size="small"
+            disabled={isLoading}
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              fontWeight: 700,
+              bgcolor: "var(--color-primary-base, #1C252E)",
+              "&:hover": { bgcolor: "var(--color-primary-dark, #0F172A)" },
+            }}
+          >
+            Confirm Status
+          </MuiButton>
+        </DialogActions>
       </Dialog>
 
       {/* Generate Report Dialog */}
-      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Generate Weekly Report</DialogTitle>
-            <DialogDescription>
-              Select position and stages to include in the Excel report.
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog
+        open={isReportDialogOpen}
+        onClose={() => setIsReportDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+              border: "1px solid var(--border)",
+              p: 1,
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: "1.1rem", pb: 0.5 }}>
+          Generate Weekly Report
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
+            Select position and stages to compile the comprehensive Excel report.
+          </Typography>
 
-          <div className="grid gap-4 py-3">
-            <div className="grid gap-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Position</Label>
-              <Select
-                value={selectedPositionId}
-                onValueChange={(val) => {
-                  setSelectedPositionId(val);
-                  if (val !== "all") {
-                    const selectedJob = clientJobsData?.jobs?.find((j: Job) => j._id === val);
-                    const currentStage = selectedJob?.stage || "Open";
-                    setSelectedJobStages([currentStage]);
-                    setSelectedCandidateStages(CANDIDATE_STAGES);
+          <FormControl size="small" fullWidth sx={{ mb: 2.5 }}>
+            <InputLabel sx={{ fontSize: "0.8125rem" }}>Position</InputLabel>
+            <MuiSelect
+              value={selectedPositionId}
+              label="Position"
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedPositionId(val);
+                if (val !== "all") {
+                  const selectedJob = clientJobsData?.jobs?.find((j: Job) => j._id === val);
+                  const currentStage = selectedJob?.stage || "Open";
+                  setSelectedJobStages([currentStage]);
+                  setSelectedCandidateStages(CANDIDATE_STAGES);
 
-                    const allStatuses: Record<string, string[]> = {};
-                    CANDIDATE_STAGES.forEach((stage) => {
-                      if (CANDIDATE_STAGE_STATUS_MAP[stage]) {
-                        allStatuses[stage] = [...CANDIDATE_STAGE_STATUS_MAP[stage]];
-                      }
-                    });
-                    setSelectedCandidateStageStatuses(allStatuses);
-                  } else {
-                    setSelectedJobStages([]);
-                    setSelectedCandidateStages([]);
-                    setSelectedCandidateStageStatuses({});
-                  }
-                }}
-              >
-                <SelectTrigger className="h-10 rounded-lg">
-                  <SelectValue placeholder="Select a position" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Positions</SelectItem>
-                  {clientJobsData?.jobs?.map((job: Job) => (
-                    <SelectItem key={job._id} value={job._id}>
-                      {job.jobTitle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  const allStatuses: Record<string, string[]> = {};
+                  CANDIDATE_STAGES.forEach((stage) => {
+                    if (CANDIDATE_STAGE_STATUS_MAP[stage]) {
+                      allStatuses[stage] = [...CANDIDATE_STAGE_STATUS_MAP[stage]];
+                    }
+                  });
+                  setSelectedCandidateStageStatuses(allStatuses);
+                } else {
+                  setSelectedJobStages([]);
+                  setSelectedCandidateStages([]);
+                  setSelectedCandidateStageStatuses({});
+                }
+              }}
+              sx={{ borderRadius: "10px", fontSize: "0.8125rem" }}
+            >
+              <MenuItem value="all" sx={{ fontSize: "0.8125rem" }}>All Positions</MenuItem>
+              {clientJobsData?.jobs?.map((job: Job) => (
+                <MenuItem key={job._id} value={job._id} sx={{ fontSize: "0.8125rem" }}>
+                  {job.jobTitle}
+                </MenuItem>
+              ))}
+            </MuiSelect>
+          </FormControl>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-              <div className="space-y-2.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Job Stages</Label>
-                <div className="space-y-2 border border-border/70 rounded-xl p-3 bg-muted/20">
-                  {JOB_STAGES.map((stage) => {
-                    const checked = selectedJobStages.includes(stage);
-                    return (
-                      <label key={stage} className="flex items-center gap-2 cursor-pointer text-xs font-medium">
-                        <Checkbox
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+            {/* Job Stages Box */}
+            <Box sx={{ border: "1px solid var(--border)", borderRadius: "12px", p: 1.5, bgcolor: "var(--muted)/30" }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", color: "text.secondary", mb: 1, display: "block" }}>
+                Job Stages
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                {JOB_STAGES.map((stage) => {
+                  const checked = selectedJobStages.includes(stage);
+                  return (
+                    <FormControlLabel
+                      key={stage}
+                      control={
+                        <MuiCheckbox
+                          size="small"
                           checked={checked}
-                          onCheckedChange={(v) => {
-                            const isChecked = Boolean(v);
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
                             setSelectedJobStages((prev) =>
                               isChecked ? [...prev, stage] : prev.filter((s) => s !== stage),
                             );
                           }}
                         />
-                        <span>{stage}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
+                      }
+                      label={<Typography sx={{ fontSize: "0.75rem", fontWeight: 500 }}>{stage}</Typography>}
+                    />
+                  );
+                })}
+              </Box>
+            </Box>
 
-              <div className="space-y-2.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Candidate Stages</Label>
-                <div className="space-y-2 border border-border/70 rounded-xl p-3 bg-muted/20">
-                  {CANDIDATE_STAGES.map((stage) => {
-                    const checked = selectedCandidateStages.includes(stage);
-                    return (
-                      <label key={stage} className="flex items-center gap-2 cursor-pointer text-xs font-medium">
-                        <Checkbox
+            {/* Candidate Stages Box */}
+            <Box sx={{ border: "1px solid var(--border)", borderRadius: "12px", p: 1.5, bgcolor: "var(--muted)/30" }}>
+              <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", color: "text.secondary", mb: 1, display: "block" }}>
+                Candidate Stages
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                {CANDIDATE_STAGES.map((stage) => {
+                  const checked = selectedCandidateStages.includes(stage);
+                  return (
+                    <FormControlLabel
+                      key={stage}
+                      control={
+                        <MuiCheckbox
+                          size="small"
                           checked={checked}
-                          onCheckedChange={(v) => {
-                            const isChecked = Boolean(v);
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
                             setSelectedCandidateStages((prev) =>
                               isChecked ? [...prev, stage] : prev.filter((s) => s !== stage),
                             );
@@ -1069,28 +1375,41 @@ export default function ClientDetailsModule({ id, moduleType = "clients" }: Clie
                             }
                           }}
                         />
-                        <span>{stage}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmGenerate}
-              disabled={selectedJobStages.length === 0 && selectedCandidateStages.length === 0}
-            >
-              Generate Excel
-            </Button>
-          </DialogFooter>
+                      }
+                      label={<Typography sx={{ fontSize: "0.75rem", fontWeight: 500 }}>{stage}</Typography>}
+                    />
+                  );
+                })}
+              </Box>
+            </Box>
+          </Box>
         </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <MuiButton
+            onClick={() => setIsReportDialogOpen(false)}
+            variant="outlined"
+            size="small"
+            sx={{ textTransform: "none", borderRadius: "10px", fontWeight: 600 }}
+          >
+            Cancel
+          </MuiButton>
+          <MuiButton
+            onClick={handleConfirmGenerate}
+            variant="contained"
+            size="small"
+            disabled={selectedJobStages.length === 0 && selectedCandidateStages.length === 0}
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              fontWeight: 700,
+              bgcolor: "var(--color-primary-base, #1C252E)",
+              "&:hover": { bgcolor: "var(--color-primary-dark, #0F172A)" },
+            }}
+          >
+            Generate Excel
+          </MuiButton>
+        </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 }

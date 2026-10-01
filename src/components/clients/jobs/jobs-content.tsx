@@ -14,7 +14,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MapPin, Briefcase, Users, Search, ArrowUpRight, DollarSign, Filter } from "lucide-react";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
 import { useRouter } from "next/navigation";
 import { Job, getJobs, updateJobById } from "@/services/jobService";
 import { api, initializeAuth } from "@/lib/axios-config";
@@ -178,9 +182,9 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
   return (
     <div className="space-y-4">
       {/* Search & Stage Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border/70 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-2.5 rounded-xl border border-border/70 shadow-2xs">
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <SearchOutlinedIcon sx={{ fontSize: 18 }} className="absolute left-3 top-2.5 text-muted-foreground" />
           <Input
             placeholder="Search positions..."
             value={searchQuery}
@@ -256,7 +260,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
                     <td className="py-3 px-4 font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <Briefcase className="h-3.5 w-3.5" />
+                          <WorkOutlineOutlinedIcon sx={{ fontSize: 16 }} />
                         </div>
                         <span className="truncate max-w-[240px] group-hover:text-primary transition-colors">
                           {job.jobTitle}
@@ -270,14 +274,14 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
 
                     <td className="py-3 px-4 text-muted-foreground">
                       <div className="flex items-center gap-1 truncate max-w-[160px]" title={locStr}>
-                        <MapPin className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                        <LocationOnOutlinedIcon sx={{ fontSize: 15 }} className="text-muted-foreground/60 shrink-0" />
                         <span className="truncate">{locStr}</span>
                       </div>
                     </td>
 
                     <td className="py-3 px-4 text-center">
                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/60 text-xs font-semibold text-foreground">
-                        <Users className="h-3 w-3 text-muted-foreground" />
+                        <PeopleAltOutlinedIcon sx={{ fontSize: 14 }} className="text-muted-foreground" />
                         <span>{job.headcount || 1}</span>
                       </div>
                     </td>
@@ -309,7 +313,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
                         className="h-7 w-7 rounded-lg text-muted-foreground group-hover:text-primary group-hover:bg-primary/10"
                         title="View Job Details"
                       >
-                        <ArrowUpRight className="h-4 w-4" />
+                        <ArrowOutwardOutlinedIcon sx={{ fontSize: 16 }} />
                       </Button>
                     </td>
                   </tr>
@@ -320,7 +324,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
                 <td colSpan={7} className="py-12 text-center">
                   <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                      <Briefcase className="h-5 w-5" />
+                      <WorkOutlineOutlinedIcon sx={{ fontSize: 20 }} />
                     </div>
                     <p className="text-sm font-semibold text-foreground">
                       {searchQuery ? "No matching jobs found" : "No jobs posted yet"}
@@ -357,7 +361,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-start gap-2.5">
                     <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
-                      <Briefcase className="h-4 w-4" />
+                      <WorkOutlineOutlinedIcon sx={{ fontSize: 18 }} />
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-foreground leading-snug">{job.jobTitle}</h4>
@@ -377,11 +381,11 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
                   <div className="flex items-center gap-1 truncate max-w-[160px]">
-                    <MapPin className="h-3 w-3 text-muted-foreground/70 shrink-0" />
+                    <LocationOnOutlinedIcon sx={{ fontSize: 14 }} className="text-muted-foreground/70 shrink-0" />
                     <span className="truncate">{locStr}</span>
                   </div>
                   <div className="flex items-center gap-1 font-semibold text-foreground">
-                    <Users className="h-3 w-3 text-muted-foreground" />
+                    <PeopleAltOutlinedIcon sx={{ fontSize: 14 }} className="text-muted-foreground" />
                     <span>{job.headcount || 1} Headcount</span>
                   </div>
                 </div>
@@ -396,7 +400,7 @@ export function JobsContent({ clientId, clientName, setJobsAvailable }: JobsCont
           })
         ) : (
           <div className="bg-card rounded-xl border border-dashed border-border p-8 text-center">
-            <Briefcase className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+            <WorkOutlineOutlinedIcon sx={{ fontSize: 32 }} className="text-muted-foreground/50 mx-auto mb-2" />
             <p className="text-sm font-semibold text-foreground">No jobs found</p>
           </div>
         )}

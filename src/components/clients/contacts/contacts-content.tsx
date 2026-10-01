@@ -1,7 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Mail, Phone, Linkedin, MapPin, User, Briefcase, Globe, Info, Loader2, Users, ExternalLink } from "lucide-react";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useEffect } from "react";
 import { AddContactModal } from "../modals/add-contact-modal";
 import EditContactDetailsModal from "./EditContactDetailsModal";
@@ -93,7 +103,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <CircularProgress size={32} thickness={4} sx={{ color: "primary.main" }} />
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Loading Contacts...</p>
       </div>
     );
@@ -119,7 +129,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
         <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Users className="w-4 h-4" />
+              <PeopleAltOutlinedIcon sx={{ fontSize: 18 }} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-foreground">Subsidiary Contact Settings</h4>
@@ -160,7 +170,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2">
                 <div className="h-7 w-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                  <Globe className="w-3.5 h-3.5" />
+                  <LanguageOutlinedIcon sx={{ fontSize: 16 }} />
                 </div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Official Channels
@@ -173,7 +183,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                   className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
                   onClick={() => setIsContactEditOpen(true)}
                 >
-                  <Pencil className="h-3 w-3 mr-1" />
+                  <EditOutlinedIcon sx={{ fontSize: 13, mr: 0.5 }} />
                   Edit
                 </Button>
               )}
@@ -202,7 +212,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                       className="font-semibold text-primary hover:underline inline-flex items-center gap-1 truncate max-w-full"
                     >
                       <span className="truncate">{clientInfo.website}</span>
-                      <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+                      <OpenInNewOutlinedIcon sx={{ fontSize: 13, opacity: 0.7 }} className="shrink-0" />
                     </a>
                   ) : (
                     <p className="text-muted-foreground/60 italic font-normal">Not provided</p>
@@ -220,7 +230,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                         href={`mailto:${email}`}
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/60 hover:bg-muted text-foreground font-medium text-[11px] transition-colors"
                       >
-                        <Mail className="h-3 w-3 text-muted-foreground" />
+                        <EmailOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
                         <span>{email}</span>
                       </a>
                     ))
@@ -241,7 +251,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                       className="font-semibold text-primary hover:underline inline-flex items-center gap-1"
                     >
                       <span>Company Profile</span>
-                      <Linkedin className="w-3 h-3 text-sky-600" />
+                      <LinkedInIcon sx={{ fontSize: 15, color: "#0077B5" }} />
                     </a>
                   ) : (
                     <p className="text-muted-foreground/60 italic font-normal">Not provided</p>
@@ -271,7 +281,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                 size="sm"
                 className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                <Plus className="w-3.5 h-3.5 mr-1" /> New Contact
+                <AddOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} /> New Contact
               </Button>
             )}
           </div>
@@ -279,7 +289,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
           {primaryContacts.length === 0 ? (
             <div className="bg-card rounded-xl border border-dashed border-border/80 p-10 text-center flex flex-col items-center">
               <div className="h-10 w-10 bg-muted rounded-xl flex items-center justify-center mb-3 text-muted-foreground">
-                <Users className="w-5 h-5" />
+                <PeopleAltOutlinedIcon sx={{ fontSize: 22 }} />
               </div>
               <h4 className="text-sm font-bold text-foreground">No Stakeholders Added</h4>
               <p className="text-xs text-muted-foreground max-w-xs mt-1 mb-4">
@@ -292,7 +302,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                   size="sm"
                   className="text-xs font-semibold"
                 >
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Add First Contact
+                  <AddOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} /> Add First Contact
                 </Button>
               )}
             </div>
@@ -340,7 +350,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                               }}
                               title="Edit Contact"
                             >
-                              <Pencil className="h-3.5 w-3.5" />
+                              <EditOutlinedIcon sx={{ fontSize: 15 }} />
                             </Button>
                             <Button
                               variant="ghost"
@@ -349,7 +359,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                               onClick={() => setDeleteContactId(contact._id || null)}
                               title="Delete Contact"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <DeleteOutlineOutlinedIcon sx={{ fontSize: 16 }} />
                             </Button>
                           </div>
                         )}
@@ -359,7 +369,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
                       <div className="space-y-1.5 pt-3 text-xs text-muted-foreground">
                         {contact.email && (
                           <div className="flex items-center gap-2 truncate">
-                            <Mail className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" />
+                            <EmailOutlinedIcon sx={{ fontSize: 15, opacity: 0.7 }} className="shrink-0" />
                             <a href={`mailto:${contact.email}`} className="truncate hover:text-primary transition-colors">
                               {contact.email}
                             </a>
@@ -368,7 +378,7 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
 
                         {phoneStr && (
                           <div className="flex items-center gap-2">
-                            <Phone className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" />
+                            <PhoneOutlinedIcon sx={{ fontSize: 15, opacity: 0.7 }} className="shrink-0" />
                             <a href={`tel:${phoneStr}`} className="hover:text-primary transition-colors">
                               {phoneStr}
                             </a>
@@ -377,14 +387,14 @@ export function ContactsContent({ clientId, clientData, canModify }: ContactsCon
 
                         {contact.location && (
                           <div className="flex items-center gap-2 truncate">
-                            <MapPin className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" />
+                            <LocationOnOutlinedIcon sx={{ fontSize: 15, opacity: 0.7 }} className="shrink-0" />
                             <span className="truncate">{contact.location}</span>
                           </div>
                         )}
 
                         {contact.linkedin && (
                           <div className="flex items-center gap-2">
-                            <Linkedin className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                            <LinkedInIcon sx={{ fontSize: 15, color: "#0077B5" }} className="shrink-0" />
                             <a
                               href={contact.linkedin}
                               target="_blank"

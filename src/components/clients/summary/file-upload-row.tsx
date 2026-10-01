@@ -1,7 +1,11 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Eye, Download, FileText, CheckCircle2 } from "lucide-react";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { Badge } from "@/components/ui/badge";
 
 interface FileUploadRowProps {
@@ -48,7 +52,7 @@ export const FileUploadRow = ({
               : "bg-muted text-muted-foreground"
           }`}
         >
-          <FileText className="h-4 w-4" />
+          <DescriptionOutlinedIcon sx={{ fontSize: 18 }} />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -83,7 +87,7 @@ export const FileUploadRow = ({
             onClick={onPreview}
             title="Preview Document"
           >
-            <Eye className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+            <VisibilityOutlinedIcon sx={{ fontSize: 14, mr: 0.5, color: "text.secondary" }} />
             <span>View</span>
           </Button>
         )}
@@ -96,7 +100,7 @@ export const FileUploadRow = ({
             onClick={onDownload}
             title="Download Document"
           >
-            <Download className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+            <FileDownloadOutlinedIcon sx={{ fontSize: 14, mr: 0.5, color: "text.secondary" }} />
             <span>Save</span>
           </Button>
         )}
@@ -112,7 +116,7 @@ export const FileUploadRow = ({
           onClick={onUploadClick}
           title={hasFile ? "Replace Document" : "Upload Document"}
         >
-          <UploadCloud className="h-3.5 w-3.5 mr-1" />
+          <CloudUploadOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} />
           <span>{hasFile ? "Replace" : "Upload"}</span>
         </Button>
       </div>

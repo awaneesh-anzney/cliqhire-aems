@@ -8,19 +8,15 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { FileUploadRow } from "./file-upload-row";
 import { FileUploadModal } from "../modals/file-upload-modal";
-import {
-  FileText,
-  Users,
-  Building2,
-  Globe,
-  ShieldCheck,
-  Briefcase,
-  Layers,
-  MapPin,
-  Clock,
-  Sparkles,
-  Search,
-} from "lucide-react";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getFileType, ClientDetails, PrimaryContact, TeamMemberType } from "./summaryType";
@@ -266,7 +262,7 @@ export function SummaryContent({
         <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[10px] font-bold uppercase tracking-wider">Priority</span>
-            <Sparkles className="h-3.5 w-3.5 text-brand" />
+            <AutoAwesomeOutlinedIcon sx={{ fontSize: 16, color: "var(--brand, #2563EB)" }} />
           </div>
           <div className="mt-1">
             <Badge
@@ -286,7 +282,7 @@ export function SummaryContent({
         <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[10px] font-bold uppercase tracking-wider">Segment</span>
-            <Layers className="h-3.5 w-3.5 text-primary" />
+            <LayersOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
           </div>
           <div className="mt-1">
             <span className="text-xs font-bold text-foreground">{segment}</span>
@@ -296,7 +292,7 @@ export function SummaryContent({
         <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[10px] font-bold uppercase tracking-wider">Industry</span>
-            <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <ApartmentOutlinedIcon sx={{ fontSize: 16, color: "#10B981" }} />
           </div>
           <div className="mt-1">
             <span className="text-xs font-bold text-foreground truncate block" title={industry}>
@@ -308,7 +304,7 @@ export function SummaryContent({
         <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[10px] font-bold uppercase tracking-wider">Source</span>
-            <Briefcase className="h-3.5 w-3.5 text-indigo-500" />
+            <WorkOutlineOutlinedIcon sx={{ fontSize: 16, color: "#6366F1" }} />
           </div>
           <div className="mt-1">
             <span className="text-xs font-bold text-foreground truncate block" title={source}>
@@ -320,7 +316,7 @@ export function SummaryContent({
         <div className="col-span-2 sm:col-span-1 bg-card p-3 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[10px] font-bold uppercase tracking-wider">Sales Lead</span>
-            <Users className="h-3.5 w-3.5 text-amber-500" />
+            <PeopleAltOutlinedIcon sx={{ fontSize: 16, color: "#F59E0B" }} />
           </div>
           <div className="mt-1">
             <span className="text-xs font-bold text-foreground truncate block" title={salesLead}>
@@ -339,7 +335,7 @@ export function SummaryContent({
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                  <FileText className="h-3.5 w-3.5" />
+                  <DescriptionOutlinedIcon sx={{ fontSize: 16 }} />
                 </div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Engagement & Source
@@ -484,7 +480,7 @@ export function SummaryContent({
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                  <Building2 className="h-3.5 w-3.5" />
+                  <ApartmentOutlinedIcon sx={{ fontSize: 16 }} />
                 </div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Company Profile & Classification
@@ -581,7 +577,7 @@ export function SummaryContent({
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                  <Globe className="h-3.5 w-3.5" />
+                  <LanguageOutlinedIcon sx={{ fontSize: 16 }} />
                 </div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Online & Location Presence
@@ -636,7 +632,7 @@ export function SummaryContent({
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <VerifiedUserOutlinedIcon sx={{ fontSize: 16 }} />
                 </div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Compliance & Legal Documents
@@ -932,7 +928,7 @@ export function SummaryContent({
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <SearchOutlinedIcon sx={{ fontSize: 18 }} className="absolute left-3 top-2.5 text-muted-foreground" />
                 <Input
                   placeholder="Search groups..."
                   value={groupSearchQuery}

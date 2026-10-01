@@ -1,7 +1,13 @@
 "use client";
 
+import React from "react";
 import { useClientHierarchy } from "@/hooks/useClient";
-import { Loader2, Building2, ExternalLink, Network, Briefcase, Layers } from "lucide-react";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +24,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <CircularProgress size={32} thickness={4} sx={{ color: "primary.main" }} />
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Loading Corporate Hierarchy...
         </p>
@@ -49,7 +55,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
             <p className="text-2xl font-bold text-foreground mt-0.5">{totalCompanies}</p>
           </div>
           <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <Building2 className="h-5 w-5" />
+            <ApartmentOutlinedIcon sx={{ fontSize: 22 }} />
           </div>
         </div>
 
@@ -59,12 +65,15 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
             <p className="text-2xl font-bold text-foreground mt-0.5">{totalJobCount}</p>
           </div>
           <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-            <Briefcase className="h-5 w-5" />
+            <WorkOutlineOutlinedIcon sx={{ fontSize: 22 }} />
           </div>
         </div>
 
         <div className="bg-card p-4 rounded-xl border border-border/70 shadow-2xs flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Stage Breakdown</span>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Stage Breakdown</span>
+            <LayersOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+          </div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {Object.entries(stageBreakdown).length > 0 ? (
               Object.entries(stageBreakdown).map(([stage, count]) => (
@@ -84,7 +93,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
         <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <Building2 className="w-3.5 h-3.5" />
+              <ApartmentOutlinedIcon sx={{ fontSize: 16 }} />
             </div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
               Parent Entity
@@ -105,7 +114,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Building2 className="w-3 h-3" /> {parent.industry || "General Industry"}
+                    <ApartmentOutlinedIcon sx={{ fontSize: 14, opacity: 0.7 }} /> {parent.industry || "General Industry"}
                   </span>
                 </div>
               </div>
@@ -116,7 +125,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
                 className="h-8 text-xs font-semibold rounded-lg self-start sm:self-center"
                 onClick={() => router.push(`/clients/${parent._id}`)}
               >
-                <ExternalLink className="w-3.5 h-3.5 mr-1" /> View Parent
+                <OpenInNewOutlinedIcon sx={{ fontSize: 13, mr: 0.5 }} /> View Parent
               </Button>
             </div>
           ) : (
@@ -140,7 +149,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
         <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <Network className="w-3.5 h-3.5" />
+              <AccountTreeOutlinedIcon sx={{ fontSize: 16 }} />
             </div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
               Subsidiaries ({subsidiaries.length})
@@ -151,7 +160,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
         <div className="p-4">
           {subsidiaries.length === 0 ? (
             <div className="text-center py-8">
-              <Building2 className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+              <ApartmentOutlinedIcon sx={{ fontSize: 32, opacity: 0.4 }} className="text-muted-foreground mx-auto mb-2" />
               <h4 className="text-xs font-bold text-foreground">No Subsidiaries Recorded</h4>
               <p className="text-xs text-muted-foreground mt-0.5">
                 There are currently no child entities linked under this organization.
@@ -183,7 +192,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
 
                       <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1 text-[11px]">
-                          <Building2 className="w-3 h-3 text-muted-foreground/60" /> {sub.industry || "General Industry"}
+                          <ApartmentOutlinedIcon sx={{ fontSize: 13, opacity: 0.7 }} /> {sub.industry || "General Industry"}
                         </span>
                         {sub.contractSource === "parent" && (
                           <Badge variant="outline" className="text-[9px] font-semibold bg-muted/60">
@@ -205,7 +214,7 @@ export function HierarchyContent({ clientId }: HierarchyContentProps) {
                         className="h-7 px-2 text-xs font-semibold text-primary hover:bg-primary/10 self-end"
                         onClick={() => router.push(`/clients/${sub._id}`)}
                       >
-                        <ExternalLink className="w-3 h-3 mr-1" /> View Entity
+                        <OpenInNewOutlinedIcon sx={{ fontSize: 13, mr: 0.5 }} /> View Entity
                       </Button>
                     )}
                   </div>

@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getClientStageHistory, ClientStageHistory } from "@/services/clientService";
-import { Loader2, AlertCircle, History, Clock, Calendar, ArrowRight } from "lucide-react";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 import { format, differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -35,7 +37,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <CircularProgress size={32} thickness={4} sx={{ color: "primary.main" }} />
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Loading Stage Progression...
         </p>
@@ -46,7 +48,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
   if (history.length === 0) {
     return (
       <div className="bg-card rounded-xl border border-dashed border-border p-10 text-center max-w-lg mx-auto">
-        <History className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+        <HistoryOutlinedIcon sx={{ fontSize: 32 }} className="text-muted-foreground/50 mx-auto mb-2" />
         <h4 className="text-sm font-bold text-foreground">No Stage History</h4>
         <p className="text-xs text-muted-foreground mt-1">
           Stage transition logs will be recorded as this client moves through stages.
@@ -78,7 +80,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
             <p className="text-lg font-bold text-foreground mt-0.5">{currentDurationDays} Days</p>
           </div>
           <div className="h-8 w-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-            <Clock className="h-4 w-4" />
+            <AccessTimeOutlinedIcon sx={{ fontSize: 18 }} />
           </div>
         </div>
 
@@ -88,7 +90,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
             <p className="text-lg font-bold text-foreground mt-0.5">{history.length}</p>
           </div>
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <History className="h-4 w-4" />
+            <HistoryOutlinedIcon sx={{ fontSize: 18 }} />
           </div>
         </div>
       </div>
@@ -98,7 +100,7 @@ export function HistoryContent({ clientId }: HistoryContentProps) {
         <div className="px-4 py-3 border-b border-border/60 bg-muted/30 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <History className="w-3.5 h-3.5" />
+              <HistoryOutlinedIcon sx={{ fontSize: 16 }} />
             </div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
               Progression Audit Log
