@@ -1,246 +1,237 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { 
-  EmailHeader, 
-  MailboxConnectCard, 
-  EmailSidebar, 
-  EmailFolder, 
-  EmailThreadList, 
-  EmailListItem, 
-  EmailThreadDetail, 
-  EmailComposerDialog, 
-  ComposerInitialData, 
-  AdminMailboxesDialog, 
-  EmailSignatureDialog, 
-  EmailContactType, 
-  EMAIL_TYPE_CONFIG 
-} from "@/components/email";
-import { 
-  useMailboxStatus, 
-  useEmailList, 
-  useEmailThread, 
-  useMarkThreadRead, 
-  useToggleStar 
-} from "@/hooks/useEmail";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Loader2, Mail, X, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { emailService } from "@/services/emailService";
+import React, { useState, useMemo } from "react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSearchParams, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { EmailComposerDialog, ComposerInitialData } from "@/components/email";
+
+// Material UI Icons
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import DraftsOutlinedIcon from "@mui/icons-material/DraftsOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import ReportGmailerrorredOutlinedIcon from "@mui/icons-material/ReportGmailerrorredOutlined";
+import LabelImportantOutlinedIcon from "@mui/icons-material/LabelImportantOutlined";
+import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
+import StarIcon from "@mui/icons-material/Star";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import ReplyIcon from "@mui/icons-material/Reply";
+import ReplyAllIcon from "@mui/icons-material/ReplyAll";
+import ForwardIcon from "@mui/icons-material/Forward";
+import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
+import FormatListNumberedOutlinedIcon from "@mui/icons-material/FormatListNumberedOutlined";
+import FormatAlignLeftOutlinedIcon from "@mui/icons-material/FormatAlignLeftOutlined";
+import FormatAlignCenterOutlinedIcon from "@mui/icons-material/FormatAlignCenterOutlined";
+import FormatAlignRightOutlinedIcon from "@mui/icons-material/FormatAlignRightOutlined";
+import FormatAlignJustifyOutlinedIcon from "@mui/icons-material/FormatAlignJustifyOutlined";
+import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
+import LinkOffOutlinedIcon from "@mui/icons-material/LinkOffOutlined";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import FormatIndentIncreaseOutlinedIcon from "@mui/icons-material/FormatIndentIncreaseOutlined";
+import FormatClearOutlinedIcon from "@mui/icons-material/FormatClearOutlined";
+import CropFreeOutlinedIcon from "@mui/icons-material/CropFreeOutlined";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SendIcon from "@mui/icons-material/Send";
+
+// Navigation Folders Definition
+const FOLDERS = [
+  { id: "all", label: "All", icon: MailOutlineIcon, count: 3 },
+  { id: "inbox", label: "Inbox", icon: InboxOutlinedIcon, count: 1 },
+  { id: "sent", label: "Sent", icon: SendOutlinedIcon },
+  { id: "drafts", label: "Drafts", icon: DraftsOutlinedIcon },
+  { id: "trash", label: "Trash", icon: DeleteOutlineIcon },
+  { id: "spam", label: "Spam", icon: ReportGmailerrorredOutlinedIcon, count: 1 },
+  { id: "important", label: "Important", icon: LabelImportantOutlinedIcon, count: 1 },
+  { id: "starred", label: "Starred", icon: StarBorderOutlinedIcon, count: 1 },
+];
+
+// Navigation Labels Definition
+const LABELS = [
+  { id: "social", label: "Social", color: "#22C55E" },
+  { id: "promotions", label: "Promotions", color: "#F59E0B", count: 2 },
+  { id: "forums", label: "Forums", color: "#FF5630", count: 1 },
+];
+
+interface EmailItem {
+  id: string;
+  sender: string;
+  email: string;
+  to: string;
+  subject: string;
+  snippet: string;
+  time: string;
+  date: string;
+  avatar?: string;
+  avatarLetter?: string;
+  avatarColor?: string;
+  body: string;
+  isStarred?: boolean;
+  isImportant?: boolean;
+  folder: string;
+}
+
+// Initial Mock Emails exactly matching reference image
+const INITIAL_EMAILS: EmailItem[] = [
+  {
+    id: "email-1",
+    sender: "Jayvion Simon",
+    email: "nannie.abernathy70@yahoo.com",
+    to: "demo@minimals.cc, tyrel.greenholt@gmail.com,",
+    subject: "Re: The Future of Renewable Energy: Innovations and Challenges Ahead",
+    snippet: "Occaecati est et ...",
+    time: "a few seconds",
+    date: "01 Oct 2026 5:22 pm",
+    avatar: "https://api-dev-minimal-v510.vercel.app/assets/images/avatar/avatar_1.jpg",
+    body: "Occaecati est et illo quibusdam accusamus qui. Incidunt aut et molestiae ut facere aut. Est quidem iusto praesentium excepturi harum nihil tenetur facilis. Ut omnis voluptates nihil accusantium doloribus eaque debitis.",
+    isStarred: false,
+    isImportant: true,
+    folder: "inbox",
+  },
+  {
+    id: "email-2",
+    sender: "Lainey Davidson",
+    email: "lainey.davidson@example.com",
+    to: "demo@minimals.cc",
+    subject: "Design System Updates & Component Guidelines",
+    snippet: "Non rerum modi. Accus...",
+    time: "5 days",
+    date: "26 Sep 2026 2:15 pm",
+    avatar: "https://api-dev-minimal-v510.vercel.app/assets/images/avatar/avatar_2.jpg",
+    body: "Non rerum modi. Accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
+    isStarred: true,
+    isImportant: false,
+    folder: "inbox",
+  },
+  {
+    id: "email-3",
+    sender: "Cristopher Cardenas",
+    email: "cristopher.cardenas@company.org",
+    to: "demo@minimals.cc",
+    subject: "Candidate Screening Report & Next Steps",
+    snippet: "Est enim et sit non imp...",
+    time: "6 days",
+    date: "25 Sep 2026 11:30 am",
+    avatarLetter: "C",
+    avatarColor: "#00A76F",
+    body: "Est enim et sit non impedit quas. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.",
+    isStarred: false,
+    isImportant: true,
+    folder: "inbox",
+  },
+  {
+    id: "email-4",
+    sender: "Melanie Noble",
+    email: "melanie.noble@designstudio.io",
+    to: "demo@minimals.cc",
+    subject: "Weekly Recruitment Metrics & Pipeline Status",
+    snippet: "Unde a inventore et. Se...",
+    time: "7 days",
+    date: "24 Sep 2026 4:45 pm",
+    avatar: "https://api-dev-minimal-v510.vercel.app/assets/images/avatar/avatar_4.jpg",
+    body: "Unde a inventore et. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.",
+    isStarred: false,
+    isImportant: false,
+    folder: "inbox",
+  },
+  {
+    id: "email-5",
+    sender: "Chase Day",
+    email: "chase.day@venturegroup.co",
+    to: "demo@minimals.cc",
+    subject: "Executive Summary & Placement Projections",
+    snippet: "Eaque natus adipisci so...",
+    time: "8 days",
+    date: "23 Sep 2026 9:10 am",
+    avatar: "https://api-dev-minimal-v510.vercel.app/assets/images/avatar/avatar_5.jpg",
+    body: "Eaque natus adipisci soluta voluptatem consequatur sit amet lorem ipsum dolor sit amet consectetur adipisicing elit.",
+    isStarred: false,
+    isImportant: false,
+    folder: "inbox",
+  },
+];
 
 export default function EmailPage() {
-  const { 
-    data: mailboxData, 
-    isLoading: loadingStatus, 
-    refetch: refetchStatus, 
-    isRefetching: refetchingStatus 
-  } = useMailboxStatus();
-
-  const isConnected = !!mailboxData?.connected && !!mailboxData?.data;
-  const mailbox = mailboxData?.data || null;
-
-  // Folder & list state
-  const [activeFolder, setActiveFolder] = useState<EmailFolder>("inbox");
+  const [activeFolder, setActiveFolder] = useState<string>("inbox");
   const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
-  const [hasAutoSelected, setHasAutoSelected] = useState(false);
-
-  // Email type & address selection state (Client, Candidate, Team)
-  const [selectedEmailType, setSelectedEmailType] = useState<EmailContactType | null>(null);
-  const [selectedEmailAddress, setSelectedEmailAddress] = useState<string | null>(null);
-
-  // Responsive sidebar states (default collapsed on tablet, expanded on desktop)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
-  // Modals state
+  const [selectedEmailId, setSelectedEmailId] = useState<string>("email-1");
+  const [emails, setEmails] = useState<EmailItem[]>(INITIAL_EMAILS);
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerInitialData, setComposerInitialData] = useState<ComposerInitialData | undefined>(undefined);
-  const [adminMailboxesOpen, setAdminMailboxesOpen] = useState(false);
-  const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState(false);
 
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const queryClient = useQueryClient();
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  // Reply box state
+  const [replyText, setReplyText] = useState("");
+  const [activeFormats, setActiveFormats] = useState<{
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+    strike?: boolean;
+    align?: "left" | "center" | "right" | "justify";
+  }>({ align: "left" });
 
-  useEffect(() => {
-    if (!searchParams) return;
-    const connected = searchParams.get("connected");
-    const message = searchParams.get("message");
-    
-    if (connected === "success") {
-      toast.success("Mailbox connected successfully!");
-      refetchStatus();
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("connected");
-      params.delete("message");
-      router.replace(`/email?${params.toString()}`, { scroll: false });
-    } else if (connected === "error") {
-      toast.error(message || "Could not connect mailbox");
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("connected");
-      params.delete("message");
-      router.replace(`/email?${params.toString()}`, { scroll: false });
-    }
-  }, [searchParams, router, refetchStatus]);
+  // Mobile navigation state
+  const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("list");
 
-  useEffect(() => {
-    setSelectedIds([]);
-    setHasAutoSelected(false);
-  }, [activeFolder, searchQuery, page, selectedEmailType, selectedEmailAddress]);
-
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
-    try {
-      if (activeFolder === "trash") {
-        await Promise.all(selectedIds.map((id) => emailService.permanentDelete(id)));
-        toast.success("Conversations permanently deleted");
-      } else if (activeFolder === "drafts") {
-        await Promise.all(selectedIds.map((id) => emailService.deleteDraft(id)));
-        toast.success("Drafts discarded");
-      } else {
-        await Promise.all(selectedIds.map((id) => emailService.moveToTrash(id)));
-        toast.success("Conversations moved to Trash");
+  // Filter emails based on folder and search query
+  const filteredEmails = useMemo(() => {
+    return emails.filter((item) => {
+      // Search filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matches =
+          item.sender.toLowerCase().includes(q) ||
+          item.subject.toLowerCase().includes(q) ||
+          item.snippet.toLowerCase().includes(q) ||
+          item.email.toLowerCase().includes(q);
+        if (!matches) return false;
       }
-      setSelectedIds([]);
-      queryClient.invalidateQueries({ queryKey: ["email-list"] });
-      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
-      refetchList();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Some actions failed");
-      queryClient.invalidateQueries({ queryKey: ["email-list"] });
-      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
-      refetchList();
+
+      // Folder filter
+      if (activeFolder === "all") return true;
+      if (activeFolder === "starred") return !!item.isStarred;
+      if (activeFolder === "important") return !!item.isImportant;
+      if (activeFolder === "inbox") return item.folder === "inbox";
+      if (activeFolder === "social" || activeFolder === "promotions" || activeFolder === "forums") return true;
+      return item.folder === activeFolder;
+    });
+  }, [emails, activeFolder, searchQuery]);
+
+  // Selected email detail
+  const currentEmail = useMemo(() => {
+    return emails.find((e) => e.id === selectedEmailId) || emails[0] || null;
+  }, [emails, selectedEmailId]);
+
+  const toggleStar = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEmails((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, isStarred: !item.isStarred } : item
+      )
+    );
+    toast.success("Star status updated");
+  };
+
+  const handleDelete = (id: string) => {
+    setEmails((prev) => prev.filter((item) => item.id !== id));
+    toast.success("Conversation moved to trash");
+    if (selectedEmailId === id && emails.length > 1) {
+      const remaining = emails.filter((item) => item.id !== id);
+      setSelectedEmailId(remaining[0]?.id || "");
     }
   };
 
-  // Set initial collapse based on screen width on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-        setIsSidebarCollapsed(true);
-      }
+  const handleSendReply = () => {
+    if (!replyText.trim()) {
+      toast.error("Please enter a reply message");
+      return;
     }
-  }, []);
-
-  const effectiveSearchQuery = searchQuery || selectedEmailAddress || "";
-  const isSearchActive = !!effectiveSearchQuery;
-
-  // Fetch lists
-  const { 
-    data: listData, 
-    isLoading: loadingList, 
-    refetch: refetchList, 
-    isRefetching: refetchingList 
-  } = useEmailList(
-    activeFolder,
-    {
-      page,
-      limit: 25,
-      q: effectiveSearchQuery ? effectiveSearchQuery : undefined,
-    },
-    isConnected
-  );
-
-  // Fetch active thread detail
-  const { 
-    data: threadDetailData, 
-    isLoading: loadingDetail 
-  } = useEmailThread(selectedThreadId);
-
-  const markReadMutation = useMarkThreadRead();
-  const toggleStarMutation = useToggleStar();
-
-  const rawList = listData?.data || [];
-  const totalThreads = listData?.total || 0;
-  const totalPages = listData?.pages || 1;
-
-  const mappedItems: EmailListItem[] = rawList.map((item: any) => {
-    if (isSearchActive || activeFolder === "starred") {
-      return {
-        id: item._id,
-        threadId: item._id,
-        subject: item.subject,
-        participants: item.participants || ["Participants"],
-        date: item.lastMessageAt || item.createdAt,
-        unreadCount: item.unreadCount || 0,
-        isStarred: item.isStarred ?? true,
-        isDraft: false,
-        hasAttachments: item.hasAttachments || false,
-      };
-    } else if (activeFolder === "drafts") {
-      return {
-        id: item._id,
-        threadId: item.threadId,
-        subject: item.subject || "(No Subject)",
-        participants: item.to && item.to.length > 0 ? item.to : ["No Recipients"],
-        date: item.updatedAt || item.createdAt,
-        unreadCount: 0,
-        isStarred: false,
-        isDraft: true,
-        hasAttachments: item.attachments && item.attachments.length > 0,
-      };
-    } else {
-      return {
-        id: item._id,
-        threadId: item.threadId,
-        subject: item.subject || "(No Subject)",
-        participants: item.direction === "received" ? [item.from] : (item.to || ["Unknown Contact"]),
-        date: item.receivedAt || item.sentAt || item.createdAt,
-        unreadCount: item.isRead ? 0 : 1,
-        isStarred: item.isStarred || false,
-        isDraft: false,
-        hasAttachments: item.attachments && item.attachments.length > 0,
-      };
-    }
-  });
-
-  const displayItems = mappedItems;
-
-  // Auto-select first thread on initial desktop load (>= 1280px) without forcing re-selection if user closes it
-  useEffect(() => {
-    if (!hasAutoSelected && !selectedThreadId && displayItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1280) {
-      if (!displayItems[0].isDraft) {
-        setSelectedThreadId(displayItems[0].threadId || displayItems[0].id);
-        setHasAutoSelected(true);
-      }
-    }
-  }, [displayItems, selectedThreadId, hasAutoSelected]);
-
-  const handleSelectThread = (item: EmailListItem) => {
-    if (item.isDraft) {
-      const rawDraft: any = rawList.find((d: any) => d._id === item.id);
-      handleCompose({
-        to: rawDraft?.to?.join(", "),
-        cc: rawDraft?.cc?.join(", "),
-        bcc: rawDraft?.bcc?.join(", "),
-        subject: rawDraft?.subject,
-        text: rawDraft?.bodyText,
-        threadId: rawDraft?.threadId,
-        inReplyTo: rawDraft?.inReplyTo,
-        draftId: item.id,
-      });
-    } else {
-      const targetId = item.threadId || item.id;
-      setSelectedThreadId(targetId);
-      if (item.unreadCount > 0) {
-        markReadMutation.mutate({ threadId: targetId, isRead: true });
-      }
-    }
-  };
-
-  const handleToggleStar = (threadId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const item = mappedItems.find((i) => i.id === threadId || i.threadId === threadId);
-    const targetId = item?.threadId || threadId;
-    const currentStatus = item?.isStarred || false;
-    toggleStarMutation.mutate({ threadId: targetId, isStarred: !currentStatus });
+    toast.success("Reply sent successfully");
+    setReplyText("");
   };
 
   const handleCompose = (prefill?: ComposerInitialData) => {
@@ -248,281 +239,615 @@ export default function EmailPage() {
     setComposerOpen(true);
   };
 
-  const handleRefresh = () => {
-    refetchStatus();
-    refetchList();
+  const toggleFormat = (format: "bold" | "italic" | "underline" | "strike") => {
+    setActiveFormats((prev) => ({ ...prev, [format]: !prev[format] }));
   };
 
-  // Compute unread count (only meaningful for inbox and starred)
-  const totalUnread = activeFolder === "inbox" || activeFolder === "starred"
-    ? mappedItems.reduce((acc, t) => acc + (t.unreadCount || 0), 0)
-    : 0;
-
-  if (loadingStatus) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-50/40 via-background to-blue-50/20 dark:from-slate-950/40 dark:via-background dark:to-slate-900/20">
-        <div className="flex items-center gap-3 text-xs text-muted-foreground font-semibold p-4 sm:p-5 rounded-2xl bg-card/95 border border-border/70 shadow-sm">
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          <span>Connecting to mailbox service...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="h-full min-h-0 w-full p-2 sm:p-2.5 md:p-3 flex flex-col gap-2.5 sm:gap-3 overflow-hidden bg-transparent">
-      {/* Top Application Bar */}
-      <EmailHeader
-        mailbox={mailbox}
-        isConnected={isConnected}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onComposeClick={() => handleCompose()}
-        onRefreshClick={handleRefresh}
-        isRefreshing={refetchingStatus || refetchingList}
-        onOpenAdminMailboxes={() => setAdminMailboxesOpen(true)}
-        onOpenMobileNav={() => setMobileNavOpen(true)}
-        onOpenSignatures={() => setSignatureDialogOpen(true)}
-        activeFolder={activeFolder}
-        selectedEmailType={selectedEmailType}
-        onSelectEmailType={(type) => {
-          setSelectedEmailType(type);
-          setSelectedEmailAddress(null);
-        }}
-        selectedEmailAddress={selectedEmailAddress}
-        onSelectEmailAddress={(email) => setSelectedEmailAddress(email)}
-      />
-
-      {/* Main Mailbox Workspace */}
-      {!isConnected ? (
-        mailbox?.authType === "oauth2" && mailbox?.connectionStatus !== "connected" ? (
-          <div className="flex-1 min-h-0 w-full flex flex-col items-center justify-center bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl shadow-sm overflow-hidden p-8 text-center animate-in fade-in duration-500">
-            <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-4 shadow-sm">
-              <Mail className="h-8 w-8" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-foreground">Reconnect your Microsoft Mailbox</h2>
-            <p className="text-muted-foreground mb-8 max-w-md text-xs sm:text-sm leading-relaxed">
-              We&apos;ve upgraded our email integration to use Microsoft Graph for better reliability. Please reconnect your Microsoft account to continue syncing your emails.
-            </p>
-            <Button
-              onClick={async () => {
-                try {
-                  setOauthLoading(true);
-                  const { url } = await emailService.getMicrosoftAuthUrl();
-                  window.location.href = url;
-                } catch (error: any) {
-                  toast.error(error?.response?.data?.message || "Failed to initiate Microsoft sign-in");
-                  setOauthLoading(false);
-                }
-              }}
-              disabled={oauthLoading}
-              className="h-11 px-8 text-sm font-bold gap-2 bg-[#00a4ef] hover:bg-[#0078d4] text-white shadow-md rounded-xl transition-all"
-            >
-              {oauthLoading ? (
-                <>
-                  <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  <span>Connecting...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 0h10v10H0zM11 0h10v10H11zM0 11h10v10H0zM11 11h10v10H11z"/>
-                  </svg>
-                  <span>Reconnect with Microsoft</span>
-                </>
-              )}
-            </Button>
-          </div>
-        ) : (
-          <div className="flex-1 min-h-0 w-full flex flex-col overflow-hidden">
-            <MailboxConnectCard onSuccess={() => refetchStatus()} />
-          </div>
-        )
-      ) : (
-        <div className="flex-1 min-h-0 flex gap-2.5 sm:gap-3 overflow-hidden">
-          {/* Desktop & Tablet Collapsible Left Sidebar */}
-          <div
-            className={`hidden md:block shrink-0 transition-all duration-300 overflow-hidden ${
-              isSidebarCollapsed ? "w-14 sm:w-16" : "w-44 lg:w-48 xl:w-52"
-            }`}
+    <div className="h-full min-h-0 w-full p-2 sm:p-3 md:p-4 flex flex-col overflow-hidden font-['Public_Sans',sans-serif]">
+      {/* Outer Card Chassis matching the exact Minimals/Material UI Reference */}
+      <div className="flex-1 min-h-0 w-full bg-white dark:bg-[#1C252E] border border-slate-200/80 dark:border-slate-800 rounded-2xl md:rounded-[20px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.08)] flex overflow-hidden">
+        
+        {/* ========================================================= */}
+        {/* COLUMN 1: LEFT NAVIGATION (FOLDERS & LABELS)             */}
+        {/* ========================================================= */}
+        <div
+          className={cn(
+            "w-full md:w-[210px] lg:w-[220px] shrink-0 p-4 sm:p-5 flex flex-col gap-4 overflow-y-auto bg-transparent border-r border-slate-100 dark:border-slate-800/80 transition-all",
+            mobileView !== "folders" && "hidden md:flex"
+          )}
+        >
+          {/* Compose Button */}
+          <button
+            type="button"
+            onClick={() => handleCompose()}
+            className="w-full h-10 px-4 rounded-xl bg-[#1C252E] hover:bg-[#28323D] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-[#1C252E] font-bold text-[13px] flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] outline-none"
           >
-            <EmailSidebar
-              activeFolder={activeFolder}
-              onFolderChange={(folder) => {
-                setActiveFolder(folder);
-                setPage(1);
-                setSelectedThreadId(null);
-                setHasAutoSelected(false);
-              }}
-              onComposeClick={() => handleCompose()}
-              unreadCount={totalUnread}
-              mailbox={mailbox}
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              onOpenSignatures={() => setSignatureDialogOpen(true)}
-              selectedEmailType={selectedEmailType}
-              onSelectEmailType={(type) => {
-                setSelectedEmailType(type);
-                setSelectedEmailAddress(null);
-              }}
-              selectedEmailAddress={selectedEmailAddress}
-              onSelectEmailAddress={(email) => setSelectedEmailAddress(email)}
+            <EditOutlinedIcon sx={{ fontSize: 17 }} />
+            <span>Compose</span>
+          </button>
+
+          {/* Folders List */}
+          <div className="flex flex-col space-y-0.5">
+            {FOLDERS.map((f) => {
+              const Icon = f.icon;
+              const isActive = activeFolder === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveFolder(f.id);
+                    setMobileView("list");
+                  }}
+                  className={cn(
+                    "flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-colors outline-none",
+                    isActive
+                      ? "bg-slate-100/90 dark:bg-slate-800 font-bold text-[#1C252E] dark:text-white"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/40 font-medium"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      sx={{
+                        fontSize: 19,
+                        color: isActive ? "#1C252E" : "#637381",
+                      }}
+                      className={isActive ? "dark:!text-white" : "dark:!text-slate-400"}
+                    />
+                    <span className="capitalize">{f.label}</span>
+                  </div>
+                  {f.count !== undefined && (
+                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 tabular-nums">
+                      {f.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Labels Section */}
+          <div className="flex flex-col space-y-1 pt-3">
+            {LABELS.map((lbl) => {
+              const isActive = activeFolder === lbl.id;
+              return (
+                <button
+                  key={lbl.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveFolder(lbl.id);
+                    setMobileView("list");
+                  }}
+                  className={cn(
+                    "flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-colors outline-none",
+                    isActive
+                      ? "bg-slate-100/90 dark:bg-slate-800 font-bold text-[#1C252E] dark:text-white"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/40 font-medium"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    {/* Vertical Pill Tag exactly like reference image */}
+                    <span
+                      className="w-1.5 h-3.5 rounded-full shrink-0"
+                      style={{ backgroundColor: lbl.color }}
+                    />
+                    <span>{lbl.label}</span>
+                  </div>
+                  {lbl.count !== undefined && (
+                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 tabular-nums">
+                      {lbl.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* COLUMN 2: EMAIL CONVERSATION LIST                        */}
+        {/* ========================================================= */}
+        <div
+          className={cn(
+            "w-full md:w-[280px] lg:w-[320px] shrink-0 p-3.5 sm:p-4 flex flex-col gap-3 overflow-hidden border-r border-slate-100 dark:border-slate-800/80 bg-transparent transition-all",
+            mobileView !== "list" && "hidden md:flex"
+          )}
+        >
+          {/* Mobile Back to Folders */}
+          <div className="flex md:hidden items-center justify-between pb-1">
+            <button
+              type="button"
+              onClick={() => setMobileView("folders")}
+              className="flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300"
+            >
+              <ArrowBackIcon sx={{ fontSize: 16 }} />
+              <span>Folders</span>
+            </button>
+            <span className="text-xs font-bold text-[#1C252E] dark:text-white capitalize">
+              {activeFolder}
+            </span>
+          </div>
+
+          {/* Search Bar Input */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-900/60 shadow-2xs focus-within:border-slate-400 dark:focus-within:border-slate-500 transition-all">
+            <SearchOutlinedIcon sx={{ fontSize: 19, color: "#919EAB" }} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
+              className="w-full bg-transparent border-none outline-none text-xs sm:text-[13px] text-[#1C252E] dark:text-white placeholder:text-[#919EAB] font-normal"
             />
           </div>
 
-          {/* Middle Thread List Panel */}
-          <div
-            className={`flex flex-col min-w-0 transition-all ${
-              selectedThreadId 
-                ? "hidden md:flex md:w-64 lg:w-72 xl:w-[296px] shrink-0" 
-                : "w-full md:w-72 lg:w-80 md:flex-initial shrink-0"
-            }`}
-          >
-            {mailbox && mailbox.initialSyncCompleted === false ? (
-              <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl shadow-xs min-h-[400px]">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3 shadow-2xs">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-                <h3 className="text-sm font-bold mb-1.5 text-foreground">Importing mailbox history...</h3>
-                <p className="text-xs text-muted-foreground max-w-[240px] leading-relaxed">
-                  Syncing your past emails over IMAP. Recent emails will show up as they are indexed.
-                </p>
+          {/* Emails Conversation List */}
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-1 pr-0.5 custom-scrollbar">
+            {filteredEmails.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center text-slate-400">
+                <MailOutlineIcon sx={{ fontSize: 36, color: "#919EAB", opacity: 0.6 }} />
+                <p className="text-xs font-medium mt-2 text-slate-500">No emails found</p>
               </div>
             ) : (
-              <div className="flex flex-col h-full min-h-0">
-                {/* Active Stakeholder Email Type / Address Filter Banner */}
-                {(selectedEmailType || selectedEmailAddress) && (
-                  <div className="mb-2 p-2 px-3 rounded-xl bg-card border border-border/70 shadow-2xs flex items-center justify-between gap-2 text-xs shrink-0 animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className={`h-2 w-2 rounded-full shrink-0 ${
-                          selectedEmailType === "client"
-                            ? "bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"
-                            : selectedEmailType === "candidate"
-                            ? "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]"
-                            : "bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.8)]"
-                        }`}
-                      />
-                      <span className="font-semibold text-foreground truncate">
-                        {selectedEmailType ? EMAIL_TYPE_CONFIG[selectedEmailType].label : "Filtered"}
-                      </span>
-                      {selectedEmailAddress && (
-                        <span className="font-mono text-[11px] text-muted-foreground truncate">
-                          • {selectedEmailAddress}
-                        </span>
+              filteredEmails.map((item) => {
+                const isSelected = item.id === selectedEmailId;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      setSelectedEmailId(item.id);
+                      setMobileView("detail");
+                    }}
+                    className={cn(
+                      "group p-3 rounded-xl cursor-pointer transition-all flex items-center gap-3 select-none",
+                      isSelected
+                        ? "bg-[#F4F6F8] dark:bg-slate-800/80 shadow-2xs"
+                        : "hover:bg-[#F4F6F8]/60 dark:hover:bg-slate-800/40"
+                    )}
+                  >
+                    {/* Avatar */}
+                    <div className="relative shrink-0">
+                      {item.avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.avatar}
+                          alt={item.sender}
+                          className="w-10 h-10 rounded-full object-cover shadow-2xs"
+                        />
+                      ) : (
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-2xs"
+                          style={{ backgroundColor: item.avatarColor || "#00A76F" }}
+                        >
+                          {item.avatarLetter || item.sender.charAt(0)}
+                        </div>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedEmailType(null);
-                        setSelectedEmailAddress(null);
-                      }}
-                      className="h-6 px-2 text-[10px] text-muted-foreground hover:text-destructive rounded-lg transition-colors shrink-0"
-                    >
-                      <X className="h-3 w-3 mr-1" />
-                      <span>Reset</span>
-                    </Button>
+
+                    {/* Sender, Subject snippet & time */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1 leading-tight">
+                        <span className="text-[13px] font-bold text-[#1C252E] dark:text-white truncate">
+                          {item.sender}
+                        </span>
+                        <span className="text-[11px] font-medium text-[#919EAB] shrink-0">
+                          {item.time}
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-[#919EAB] truncate mt-1">
+                        {item.snippet}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* COLUMN 3: EMAIL DETAIL & COMPOSER                        */}
+        {/* ========================================================= */}
+        <div
+          className={cn(
+            "flex-1 min-w-0 flex flex-col overflow-hidden bg-transparent",
+            mobileView !== "detail" && "hidden md:flex"
+          )}
+        >
+          {currentEmail ? (
+            <>
+              {/* Top Action Bar */}
+              <div className="h-12 px-4 sm:px-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 shrink-0">
+                {/* Mobile Back Button */}
+                <button
+                  type="button"
+                  onClick={() => setMobileView("list")}
+                  className="flex md:hidden items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300"
+                >
+                  <ArrowBackIcon sx={{ fontSize: 16 }} />
+                  <span>List</span>
+                </button>
+
+                {/* Right Header Action Icons */}
+                <div className="flex items-center gap-1 sm:gap-2 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => toggleStar(currentEmail.id)}
+                    className="p-1.5 rounded-lg text-[#637381] hover:text-[#1C252E] dark:text-[#919EAB] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="Star"
+                  >
+                    {currentEmail.isStarred ? (
+                      <StarIcon sx={{ fontSize: 19, color: "#F59E0B" }} />
+                    ) : (
+                      <StarBorderOutlinedIcon sx={{ fontSize: 19 }} />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => toast.success("Marked as important")}
+                    className="p-1.5 rounded-lg text-[#637381] hover:text-[#1C252E] dark:text-[#919EAB] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="Important"
+                  >
+                    <LabelImportantOutlinedIcon sx={{ fontSize: 19 }} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => toast.success("Archived conversation")}
+                    className="p-1.5 rounded-lg text-[#637381] hover:text-[#1C252E] dark:text-[#919EAB] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="Archive"
+                  >
+                    <ArchiveOutlinedIcon sx={{ fontSize: 19 }} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => toast.success("Marked as unread")}
+                    className="p-1.5 rounded-lg text-[#637381] hover:text-[#1C252E] dark:text-[#919EAB] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="Mark unread"
+                  >
+                    <MailOutlineIcon sx={{ fontSize: 19 }} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(currentEmail.id)}
+                    className="p-1.5 rounded-lg text-[#637381] hover:text-rose-600 dark:text-[#919EAB] dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="Delete"
+                  >
+                    <DeleteOutlineIcon sx={{ fontSize: 19 }} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => toast.info("More actions")}
+                    className="p-1.5 rounded-lg text-[#637381] hover:text-[#1C252E] dark:text-[#919EAB] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    title="More"
+                  >
+                    <MoreVertIcon sx={{ fontSize: 19 }} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Subject Header & Quick Reply Actions */}
+              <div className="px-5 sm:px-7 pt-4 pb-1 shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                  <h1 className="text-[15px] sm:text-[16px] font-bold text-[#1C252E] dark:text-white tracking-tight leading-snug">
+                    {currentEmail.subject}
+                  </h1>
+
+                  <div className="flex flex-col items-end shrink-0">
+                    <div className="flex items-center gap-1 text-[#637381] dark:text-[#919EAB]">
+                      <button
+                        type="button"
+                        onClick={() => handleCompose({ inReplyTo: currentEmail.id, subject: `Re: ${currentEmail.subject}` })}
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Reply"
+                      >
+                        <ReplyIcon sx={{ fontSize: 18 }} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCompose({ inReplyTo: currentEmail.id, subject: `Re: ${currentEmail.subject}` })}
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Reply all"
+                      >
+                        <ReplyAllIcon sx={{ fontSize: 18 }} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCompose({ subject: `Fwd: ${currentEmail.subject}` })}
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Forward"
+                      >
+                        <ForwardIcon sx={{ fontSize: 18 }} />
+                      </button>
+                    </div>
+                    <span className="text-[11px] text-[#919EAB] font-normal mt-0.5">
+                      {currentEmail.date}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subtle Dashed Divider */}
+              <div className="border-b border-dashed border-slate-200 dark:border-slate-800 mx-5 sm:mx-7 my-3" />
+
+              {/* Sender Info Row */}
+              <div className="px-5 sm:px-7 py-1 flex items-start gap-3 shrink-0">
+                {currentEmail.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={currentEmail.avatar}
+                    alt={currentEmail.sender}
+                    className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5 shadow-2xs"
+                  />
+                ) : (
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 mt-0.5 shadow-2xs"
+                    style={{ backgroundColor: currentEmail.avatarColor || "#00A76F" }}
+                  >
+                    {currentEmail.avatarLetter || currentEmail.sender.charAt(0)}
                   </div>
                 )}
 
-                <div className="flex-1 min-h-0">
-                  <EmailThreadList
-                    threads={displayItems}
-                    isLoading={loadingList}
-                    selectedThreadId={selectedThreadId}
-                    onSelectThread={handleSelectThread}
-                    page={page}
-                    totalPages={totalPages}
-                    totalThreads={totalThreads}
-                    onPageChange={setPage}
-                    searchQuery={searchQuery}
-                    onToggleStar={handleToggleStar}
-                    selectedIds={selectedIds}
-                    onSelectIdsChange={setSelectedIds}
-                    onBulkDelete={handleBulkDelete}
-                    activeFolder={activeFolder}
+                <div className="flex flex-col min-w-0">
+                  <div className="flex flex-wrap items-baseline gap-1.5 leading-snug">
+                    <span className="text-[13.5px] font-bold text-[#1C252E] dark:text-white">
+                      {currentEmail.sender}
+                    </span>
+                    <span className="text-[12px] text-[#637381] dark:text-[#919EAB]">
+                      &lt;{currentEmail.email}&gt;
+                    </span>
+                  </div>
+                  <span className="text-[11.5px] text-[#919EAB] mt-0.5">
+                    To: {currentEmail.to}
+                  </span>
+                </div>
+              </div>
+
+              {/* Email Content Body */}
+              <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-7 py-4 text-[13.5px] text-[#212B36] dark:text-slate-200 leading-relaxed font-normal">
+                <p>{currentEmail.body}</p>
+              </div>
+
+              {/* Bottom Rich-Text Reply Composer */}
+              <div className="p-4 sm:p-6 pt-2 shrink-0">
+                <div className="rounded-2xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-900/40 p-3 shadow-2xs focus-within:border-slate-300 dark:focus-within:border-slate-600 transition-all">
+                  {/* Toolbar Row 1: Formatting options */}
+                  <div className="flex flex-wrap items-center gap-1 pb-2 border-b border-slate-100 dark:border-slate-800 text-[#637381] dark:text-[#919EAB]">
+                    {/* Paragraph Dropdown */}
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-[#1C252E] dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <span>Paragraph</span>
+                      <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16 }} />
+                    </button>
+
+                    <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1" />
+
+                    {/* Text Styling: B, I, U, S */}
+                    <button
+                      type="button"
+                      onClick={() => toggleFormat("bold")}
+                      className={cn(
+                        "h-7 w-7 rounded-lg text-xs font-bold transition-colors flex items-center justify-center",
+                        activeFormats.bold
+                          ? "bg-slate-200 text-[#1C252E] dark:bg-slate-700 dark:text-white"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      )}
+                    >
+                      B
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleFormat("italic")}
+                      className={cn(
+                        "h-7 w-7 rounded-lg text-xs italic font-serif transition-colors flex items-center justify-center",
+                        activeFormats.italic
+                          ? "bg-slate-200 text-[#1C252E] dark:bg-slate-700 dark:text-white"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      )}
+                    >
+                      I
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleFormat("underline")}
+                      className={cn(
+                        "h-7 w-7 rounded-lg text-xs underline transition-colors flex items-center justify-center",
+                        activeFormats.underline
+                          ? "bg-slate-200 text-[#1C252E] dark:bg-slate-700 dark:text-white"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      )}
+                    >
+                      U
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleFormat("strike")}
+                      className={cn(
+                        "h-7 w-7 rounded-lg text-xs line-through transition-colors flex items-center justify-center",
+                        activeFormats.strike
+                          ? "bg-slate-200 text-[#1C252E] dark:bg-slate-700 dark:text-white"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      )}
+                    >
+                      S
+                    </button>
+
+                    <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1" />
+
+                    {/* Lists & Alignment */}
+                    <button
+                      type="button"
+                      className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      title="Bulleted list"
+                    >
+                      <FormatListBulletedOutlinedIcon sx={{ fontSize: 17 }} />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      title="Numbered list"
+                    >
+                      <FormatListNumberedOutlinedIcon sx={{ fontSize: 17 }} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveFormats((p) => ({ ...p, align: "left" }))}
+                      className={cn(
+                        "p-1 rounded transition-colors",
+                        activeFormats.align === "left" && "bg-slate-100 text-[#1C252E] dark:bg-slate-800 dark:text-white"
+                      )}
+                      title="Align left"
+                    >
+                      <FormatAlignLeftOutlinedIcon sx={{ fontSize: 17 }} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveFormats((p) => ({ ...p, align: "center" }))}
+                      className={cn(
+                        "p-1 rounded transition-colors",
+                        activeFormats.align === "center" && "bg-slate-100 text-[#1C252E] dark:bg-slate-800 dark:text-white"
+                      )}
+                      title="Align center"
+                    >
+                      <FormatAlignCenterOutlinedIcon sx={{ fontSize: 17 }} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveFormats((p) => ({ ...p, align: "right" }))}
+                      className={cn(
+                        "p-1 rounded transition-colors",
+                        activeFormats.align === "right" && "bg-slate-100 text-[#1C252E] dark:bg-slate-800 dark:text-white"
+                      )}
+                      title="Align right"
+                    >
+                      <FormatAlignRightOutlinedIcon sx={{ fontSize: 17 }} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveFormats((p) => ({ ...p, align: "justify" }))}
+                      className={cn(
+                        "p-1 rounded transition-colors",
+                        activeFormats.align === "justify" && "bg-slate-100 text-[#1C252E] dark:bg-slate-800 dark:text-white"
+                      )}
+                      title="Justify"
+                    >
+                      <FormatAlignJustifyOutlinedIcon sx={{ fontSize: 17 }} />
+                    </button>
+                  </div>
+
+                  {/* Toolbar Row 2: Secondary media & tools */}
+                  <div className="flex items-center justify-between pt-1 text-[#637381] dark:text-[#919EAB]">
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Insert link"
+                      >
+                        <InsertLinkOutlinedIcon sx={{ fontSize: 18 }} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Remove link"
+                      >
+                        <LinkOffOutlinedIcon sx={{ fontSize: 18 }} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Add image"
+                      >
+                        <ImageOutlinedIcon sx={{ fontSize: 18 }} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Indent"
+                      >
+                        <FormatIndentIncreaseOutlinedIcon sx={{ fontSize: 18 }} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Clear formatting"
+                      >
+                        <FormatClearOutlinedIcon sx={{ fontSize: 18 }} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        title="Fullscreen"
+                      >
+                        <CropFreeOutlinedIcon sx={{ fontSize: 17 }} />
+                      </button>
+                    </div>
+
+                    {/* Send Reply Button */}
+                    <button
+                      type="button"
+                      onClick={handleSendReply}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#1C252E] hover:bg-[#28323D] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-[#1C252E] font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs"
+                    >
+                      <span>Reply</span>
+                      <SendIcon sx={{ fontSize: 13 }} />
+                    </button>
+                  </div>
+
+                  {/* Typing Textarea */}
+                  <textarea
+                    rows={2}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Write a message..."
+                    className={cn(
+                      "w-full bg-transparent border-none outline-none text-xs sm:text-[13px] text-[#1C252E] dark:text-white placeholder:text-[#919EAB] resize-none pt-2 font-normal",
+                      activeFormats.bold && "font-bold",
+                      activeFormats.italic && "italic",
+                      activeFormats.underline && "underline",
+                      activeFormats.strike && "line-through",
+                      activeFormats.align === "center" && "text-center",
+                      activeFormats.align === "right" && "text-right",
+                      activeFormats.align === "justify" && "text-justify"
+                    )}
                   />
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Right Conversation View Panel */}
-          <div
-            className={`flex-1 min-w-0 flex flex-col transition-all ${
-              selectedThreadId ? "flex" : "hidden md:flex"
-            }`}
-          >
-            <EmailThreadDetail
-              thread={threadDetailData?.data?.thread || null}
-              messages={threadDetailData?.data?.messages || []}
-              isLoading={loadingDetail}
-              onClose={() => setSelectedThreadId(null)}
-              onOpenFullComposer={(replyData) => handleCompose(replyData)}
-            />
-          </div>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
+              <MailOutlineIcon sx={{ fontSize: 44, color: "#919EAB", opacity: 0.5 }} />
+              <p className="text-sm font-semibold mt-3 text-slate-600 dark:text-slate-300">
+                Select an email to view details
+              </p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Mobile Drawer (Folder Navigation) */}
-      <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-        <SheetContent side="left" className="p-0 w-72 max-w-[85vw] border-r border-border/70">
-          <div className="h-full p-2">
-            <EmailSidebar
-              activeFolder={activeFolder}
-              onFolderChange={(folder) => {
-                setActiveFolder(folder);
-                setPage(1);
-                setSelectedThreadId(null);
-                setHasAutoSelected(false);
-                setMobileNavOpen(false);
-              }}
-              onComposeClick={() => {
-                setMobileNavOpen(false);
-                handleCompose();
-              }}
-              unreadCount={totalUnread}
-              mailbox={mailbox}
-              onCloseMobile={() => setMobileNavOpen(false)}
-              onOpenSignatures={() => {
-                setMobileNavOpen(false);
-                setSignatureDialogOpen(true);
-              }}
-              selectedEmailType={selectedEmailType}
-              onSelectEmailType={(type) => {
-                setSelectedEmailType(type);
-                setSelectedEmailAddress(null);
-                setMobileNavOpen(false);
-              }}
-              selectedEmailAddress={selectedEmailAddress}
-              onSelectEmailAddress={(email) => {
-                setSelectedEmailAddress(email);
-                setMobileNavOpen(false);
-              }}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Compose Modal */}
+      {/* Compose Dialog */}
       <EmailComposerDialog
         open={composerOpen}
         onOpenChange={setComposerOpen}
         initialData={composerInitialData}
-      />
-
-      {/* Admin Mailboxes Status Modal */}
-      <AdminMailboxesDialog
-        open={adminMailboxesOpen}
-        onOpenChange={setAdminMailboxesOpen}
-      />
-
-      {/* Email Signature Management Dialog */}
-      <EmailSignatureDialog
-        open={signatureDialogOpen}
-        onOpenChange={setSignatureDialogOpen}
       />
     </div>
   );
