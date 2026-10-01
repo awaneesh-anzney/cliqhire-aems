@@ -1,37 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import {
-  ChevronRight,
-  ChevronDown,
-  FileText,
-  Calendar,
-  Edit,
-  Trash2,
-  Plus,
-  Building2,
-  Users,
-  Briefcase,
-  ShieldCheck,
-  Code2,
-  UserCheck,
-  Clock,
-  AlertTriangle,
-  CheckCircle2,
-  DollarSign,
-  FileCheck,
-  History,
-  ExternalLink,
-  Sparkles,
-  Search,
-  RefreshCcw,
-  BadgePercent,
-  Layers,
-  ArrowUpRight,
-} from "lucide-react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import MuiButton from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import CircularProgress from "@mui/material/CircularProgress";
+
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import ApartmentOutlinedIcon from "@mui/icons-material/ApartmentOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
+import CodeOutlinedIcon from "@mui/icons-material/CodeOutlined";
+import PersonSearchOutlinedIcon from "@mui/icons-material/PersonSearchOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
+import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+
 import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
@@ -49,28 +51,22 @@ import OutsourcingForm from "@/components/contract-forms/outsourcing-form";
 import { useClientContracts } from "@/hooks/useClientContracts";
 import { useToggleContractSource } from "@/hooks/useClient";
 import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 interface ContractSectionProps {
   clientId: string;
   clientData?: any;
+  canModify?: boolean;
 }
 
 // Mapping between line of business and contract object keys
-const CONTRACT_MAPPING = {
+const CONTRACT_MAPPING: Record<string, string> = {
   Recruitment: "businessContractRQT",
   "HR Managed Services": "businessContractHMS",
   "IT & Technology": "businessContractIT",
   "Mgt Consulting": "consultingContractMGTC",
   "HR Consulting": "consultingContractHRC",
   Outsourcing: "outsourcingContract",
-};
-
-// Mapping between level type names from backend and object keys
-const LEVEL_TYPE_MAPPING: { [key: string]: string } = {
-  "Non-Executives": "nonExecutives",
-  Executives: "executives",
-  "Senior Level": "seniorLevel",
-  Other: "other",
 };
 
 const getContractStatus = (contract: any) => {
@@ -105,57 +101,49 @@ const getStatusBadgeConfig = (status: string) => {
     case "ACTIVE":
       return {
         label: "Active",
-        className:
-          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 ring-emerald-500/10",
+        className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
         dotColor: "bg-emerald-500",
       };
     case "RENEWAL_OVERDUE":
       return {
         label: "Renewal Overdue",
-        className:
-          "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 ring-red-500/10 animate-pulse",
-        dotColor: "bg-red-500",
+        className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 animate-pulse",
+        dotColor: "bg-rose-500",
       };
     case "RENEWAL_SOON":
       return {
         label: "Renewal Soon",
-        className:
-          "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 ring-orange-500/10",
+        className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
         dotColor: "bg-orange-500",
       };
     case "RENEWAL_DUE":
       return {
         label: "Renewal Due",
-        className:
-          "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 ring-amber-500/10",
+        className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
         dotColor: "bg-amber-500",
       };
     case "EXPIRED":
       return {
         label: "Expired",
-        className:
-          "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 ring-red-500/10",
-        dotColor: "bg-red-500",
+        className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+        dotColor: "bg-rose-500",
       };
     case "EXPIRING_SOON":
       return {
         label: "Expiring Soon",
-        className:
-          "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 ring-orange-500/10",
+        className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
         dotColor: "bg-orange-500",
       };
     case "EXPIRY_WARNING":
       return {
         label: "Expiry Warning",
-        className:
-          "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 ring-amber-500/10",
+        className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
         dotColor: "bg-amber-500",
       };
     default:
       return {
         label: "Active",
-        className:
-          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 ring-emerald-500/10",
+        className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
         dotColor: "bg-emerald-500",
       };
   }
@@ -166,49 +154,49 @@ const getServiceConfig = (businessType: string) => {
   switch (businessType) {
     case "Recruitment":
       return {
-        icon: Users,
+        icon: PeopleAltOutlinedIcon,
         color: "text-blue-600 dark:text-blue-400",
         bgColor: "bg-blue-500/10",
         borderColor: "border-blue-500/20",
       };
     case "HR Managed Services":
       return {
-        icon: ShieldCheck,
+        icon: VerifiedUserOutlinedIcon,
         color: "text-indigo-600 dark:text-indigo-400",
         bgColor: "bg-indigo-500/10",
         borderColor: "border-indigo-500/20",
       };
     case "IT & Technology":
       return {
-        icon: Code2,
+        icon: CodeOutlinedIcon,
         color: "text-purple-600 dark:text-purple-400",
         bgColor: "bg-purple-500/10",
         borderColor: "border-purple-500/20",
       };
     case "Mgt Consulting":
       return {
-        icon: Briefcase,
+        icon: WorkOutlineOutlinedIcon,
         color: "text-emerald-600 dark:text-emerald-400",
         bgColor: "bg-emerald-500/10",
         borderColor: "border-emerald-500/20",
       };
     case "HR Consulting":
       return {
-        icon: UserCheck,
+        icon: PersonSearchOutlinedIcon,
         color: "text-teal-600 dark:text-teal-400",
         bgColor: "bg-teal-500/10",
         borderColor: "border-teal-500/20",
       };
     case "Outsourcing":
       return {
-        icon: Building2,
+        icon: ApartmentOutlinedIcon,
         color: "text-amber-600 dark:text-amber-400",
         bgColor: "bg-amber-500/10",
         borderColor: "border-amber-500/20",
       };
     default:
       return {
-        icon: FileText,
+        icon: DescriptionOutlinedIcon,
         color: "text-primary",
         bgColor: "bg-primary/10",
         borderColor: "border-primary/20",
@@ -218,11 +206,7 @@ const getServiceConfig = (businessType: string) => {
 
 // Helper function to get form type based on business type
 const getFormType = (businessType: string) => {
-  if (
-    ["Recruitment", "HR Managed Services", "IT & Technology"].includes(
-      businessType
-    )
-  ) {
+  if (["Recruitment", "HR Managed Services", "IT & Technology"].includes(businessType)) {
     return "business";
   }
   if (["Mgt Consulting", "HR Consulting"].includes(businessType)) {
@@ -231,22 +215,18 @@ const getFormType = (businessType: string) => {
   if (businessType === "Outsourcing") {
     return "outsourcing";
   }
-  return "business"; // default
+  return "business";
 };
 
 export function ContractSection({
   clientId,
   clientData,
   canModify = true,
-}: ContractSectionProps & { canModify?: boolean }) {
-  const [expandedContract, setExpandedContract] = useState<string | null>(
-    null
-  );
+}: ContractSectionProps) {
+  const [expandedContract, setExpandedContract] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>({});
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(
-    null
-  );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
   const [renewDialogOpen, setRenewDialogOpen] = useState<string | null>(null);
   const [renewNotes, setRenewNotes] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -259,43 +239,31 @@ export function ContractSection({
     renewContractMutation,
   } = useClientContracts(clientId);
   const toggleContractSourceMutation = useToggleContractSource();
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   const isSubmitting = updateContractMutation.isPending;
   const isDeleting = deleteContractMutation.isPending;
   const isSubsidiary = !!clientData?.parentClientId;
   const contractSource = clientData?.contractSource || "own";
-  const sharedFromParent = contractsQuery.data?.sharedFromParent || false;
   const effectiveCanModify = canModify && contractSource !== "parent";
 
   // Use contracts from the new API if available, fallback to clientData
-  const contractsObj =
-    contractsQuery.data?.data || clientData?.contracts || {};
+  const contractsObj = contractsQuery.data?.data || clientData?.contracts || {};
 
   // Function to map contract data to form data structure
-  const mapContractDataToFormData = (
-    contractData: any,
-    businessType: string
-  ) => {
+  const mapContractDataToFormData = (contractData: any, businessType: string) => {
     const formType = getFormType(businessType);
     if (formType === "business") {
       return {
-        contractStartDate: contractData?.contractStartDate
-          ? new Date(contractData.contractStartDate)
-          : null,
-        contractEndDate: contractData?.contractEndDate
-          ? new Date(contractData.contractEndDate)
-          : null,
+        contractStartDate: contractData?.contractStartDate ? new Date(contractData.contractStartDate) : null,
+        contractEndDate: contractData?.contractEndDate ? new Date(contractData.contractEndDate) : null,
         endDateType: contractData?.endDateType || "fixed",
         renewalPeriod: contractData?.renewalPeriod || "",
-        contractType:
-          contractData?.contractType || contractData?.ContractType || "",
+        contractType: contractData?.contractType || contractData?.ContractType || "",
         fixedPercentage: contractData?.fixedPercentage || 0,
         advanceMoneyCurrency: contractData?.advanceMoneyCurrency || "SAR",
         advanceMoneyAmount: contractData?.advanceMoneyAmount || 0,
-        fixedPercentageAdvanceNotes:
-          contractData?.fixedPercentageAdvanceNotes || "",
+        fixedPercentageAdvanceNotes: contractData?.fixedPercentageAdvanceNotes || "",
         contractDocument: contractData?.contractDocument || null,
         fixWithoutAdvanceValue: contractData?.fixWithoutAdvanceValue || 0,
         fixWithoutAdvanceNotes: contractData?.fixWithoutAdvanceNotes || "",
@@ -303,24 +271,14 @@ export function ContractSection({
           levelTypes: [],
           seniorLevel: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
           executives: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
-          nonExecutives: {
-            percentage: 0,
-            notes: "",
-            amount: 0,
-            currency: "SAR",
-          },
+          nonExecutives: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
           other: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
         },
         levelBasedAdvanceHiring: contractData?.levelBasedAdvanceHiring || {
           levelTypes: [],
           seniorLevel: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
           executives: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
-          nonExecutives: {
-            percentage: 0,
-            notes: "",
-            amount: 0,
-            currency: "SAR",
-          },
+          nonExecutives: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
           other: { percentage: 0, notes: "", amount: 0, currency: "SAR" },
         },
       };
@@ -337,19 +295,13 @@ export function ContractSection({
         technicalProposalDocument = contractData?.techProposalDocMGTC || null;
         financialProposalDocument = contractData?.finProposalDocMGTC || null;
       } else {
-        technicalProposalDocument =
-          contractData?.technicalProposalDocument || null;
-        financialProposalDocument =
-          contractData?.financialProposalDocument || null;
+        technicalProposalDocument = contractData?.technicalProposalDocument || null;
+        financialProposalDocument = contractData?.financialProposalDocument || null;
       }
 
       return {
-        contractStartDate: contractData?.contractStartDate
-          ? new Date(contractData.contractStartDate)
-          : null,
-        contractEndDate: contractData?.contractEndDate
-          ? new Date(contractData.contractEndDate)
-          : null,
+        contractStartDate: contractData?.contractStartDate ? new Date(contractData.contractStartDate) : null,
+        contractEndDate: contractData?.contractEndDate ? new Date(contractData.contractEndDate) : null,
         endDateType: contractData?.endDateType || "fixed",
         renewalPeriod: contractData?.renewalPeriod || "",
         contractType: contractData?.contractType || "",
@@ -373,16 +325,11 @@ export function ContractSection({
 
     if (formType === "outsourcing") {
       return {
-        contractStartDate: contractData?.contractStartDate
-          ? new Date(contractData.contractStartDate)
-          : null,
-        contractEndDate: contractData?.contractEndDate
-          ? new Date(contractData.contractEndDate)
-          : null,
+        contractStartDate: contractData?.contractStartDate ? new Date(contractData.contractStartDate) : null,
+        contractEndDate: contractData?.contractEndDate ? new Date(contractData.contractEndDate) : null,
         endDateType: contractData?.endDateType || "fixed",
         renewalPeriod: contractData?.renewalPeriod || "",
-        contractType:
-          contractData?.ContractType || contractData?.contractType || "",
+        contractType: contractData?.ContractType || contractData?.contractType || "",
         serviceCategory: contractData?.serviceCategory || "",
         numberOfResources: contractData?.numberOfResources || 0,
         durationPerResource: contractData?.durationPerResource || 0,
@@ -397,8 +344,7 @@ export function ContractSection({
 
   const handleEditContract = (businessType: string) => {
     if (!effectiveCanModify) return;
-    const contractKey =
-      CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
+    const contractKey = CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
     const contractData = contractsObj[contractKey];
     const mappedData = mapContractDataToFormData(contractData, businessType);
     setFormData(mappedData);
@@ -406,12 +352,10 @@ export function ContractSection({
   };
 
   const handleFormSubmit = async (updatedFormData: any) => {
-    if (!effectiveCanModify) return;
-    if (!editDialogOpen || !clientId) return;
+    if (!effectiveCanModify || !editDialogOpen || !clientId) return;
 
     try {
-      const contractKey =
-        CONTRACT_MAPPING[editDialogOpen as keyof typeof CONTRACT_MAPPING];
+      const contractKey = CONTRACT_MAPPING[editDialogOpen as keyof typeof CONTRACT_MAPPING];
       await updateContractMutation.mutateAsync({
         contractType: contractKey,
         contractData: updatedFormData,
@@ -423,12 +367,10 @@ export function ContractSection({
   };
 
   const handleDeleteContract = async () => {
-    if (!effectiveCanModify) return;
-    if (!deleteDialogOpen || !clientId) return;
+    if (!effectiveCanModify || !deleteDialogOpen || !clientId) return;
 
     try {
-      const contractKey =
-        CONTRACT_MAPPING[deleteDialogOpen as keyof typeof CONTRACT_MAPPING];
+      const contractKey = CONTRACT_MAPPING[deleteDialogOpen as keyof typeof CONTRACT_MAPPING];
       await deleteContractMutation.mutateAsync(contractKey);
       setDeleteDialogOpen(null);
     } catch (error) {
@@ -440,8 +382,7 @@ export function ContractSection({
     if (!effectiveCanModify || !renewDialogOpen || !clientId) return;
 
     try {
-      const contractKey =
-        CONTRACT_MAPPING[renewDialogOpen as keyof typeof CONTRACT_MAPPING];
+      const contractKey = CONTRACT_MAPPING[renewDialogOpen as keyof typeof CONTRACT_MAPPING];
       await renewContractMutation.mutateAsync({
         contractType: contractKey,
         notes: renewNotes,
@@ -486,12 +427,12 @@ export function ContractSection({
 
   if (!clientData) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-center rounded-2xl border border-border bg-card shadow-xs">
-        <Clock className="h-8 w-8 animate-spin text-muted-foreground mb-3" />
-        <p className="text-sm font-medium text-muted-foreground">
+      <Box className="flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-border bg-card shadow-xs">
+        <CircularProgress size={32} thickness={4} sx={{ color: "primary.main", mb: 1.5 }} />
+        <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.8125rem" }}>
           Loading contract information...
-        </p>
-      </div>
+        </Typography>
+      </Box>
     );
   }
 
@@ -510,8 +451,7 @@ export function ContractSection({
 
   const lobArray = Array.isArray(lineOfBusiness) ? lineOfBusiness : [];
   const lobWithExistingContracts = lobArray.filter((business: string) => {
-    const contractKey =
-      CONTRACT_MAPPING[business as keyof typeof CONTRACT_MAPPING];
+    const contractKey = CONTRACT_MAPPING[business as keyof typeof CONTRACT_MAPPING];
     return !!(contractKey && contractsObj[contractKey]);
   });
 
@@ -547,25 +487,37 @@ export function ContractSection({
   // Empty State Layout
   if (availableContracts.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-border/80 bg-card/60 p-2  text-center shadow-xs backdrop-blur-sm">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 ring-8 ring-primary/5">
-          <FileText className="size-8" />
-        </div>
-        <h3 className="text-lg font-bold text-foreground tracking-tight">
+      <Box className="rounded-2xl border border-dashed border-border/80 bg-card/60 p-8 sm:p-12 text-center shadow-xs">
+        <Box className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
+          <DescriptionOutlinedIcon sx={{ fontSize: 30 }} />
+        </Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "text.primary" }}>
           No Contracts Configured Yet
-        </h3>
-        <p className="mx-auto mt-2 max-w-sm text-xs text-muted-foreground leading-relaxed">
+        </Typography>
+        <Typography variant="body2" sx={{ mx: "auto", mt: 1, maxWidth: 400, fontSize: "0.75rem", color: "text.secondary" }}>
           Create and configure formal service agreements, terms, pricing structures, and renewal cycles for {clientData.name}.
-        </p>
-        <Button
+        </Typography>
+        <MuiButton
+          variant="contained"
+          size="small"
           onClick={handleAddContract}
           disabled={!effectiveCanModify}
-          className="mt-6 shadow-sm gap-2 rounded-xl px-5 h-10 bg-primary hover:bg-primary/90 text-white font-medium"
+          startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
+          sx={{
+            mt: 3,
+            textTransform: "none",
+            fontWeight: 700,
+            borderRadius: "10px",
+            fontSize: "0.75rem",
+            px: 2.5,
+            py: 0.75,
+            bgcolor: "primary.main",
+            "&:hover": { bgcolor: "primary.dark" },
+          }}
         >
-          <Plus className="size-4" />
           Add First Contract
-        </Button>
-      </div>
+        </MuiButton>
+      </Box>
     );
   }
 
@@ -596,10 +548,7 @@ export function ContractSection({
       hasTechProposal?: boolean;
       hasFinProposal?: boolean;
     } = {
-      contractType:
-        contractData.ContractType ||
-        contractData.contractType ||
-        "Not specified",
+      contractType: contractData.ContractType || contractData.contractType || "Not specified",
       startDate: contractData.contractStartDate,
       endDate: contractData.contractEndDate,
       endDateType: contractData.endDateType || "fixed",
@@ -626,31 +575,15 @@ export function ContractSection({
         const levelTypes = contractData.levelBasedHiring?.levelTypes || [];
         summary.details = `${levelTypes.length} Seniority Tiers Configured`;
       } else if (type === "Level Based Advance Hiring") {
-        const levelTypes =
-          contractData.levelBasedAdvanceHiring?.levelTypes || [];
+        const levelTypes = contractData.levelBasedAdvanceHiring?.levelTypes || [];
         summary.details = `${levelTypes.length} Seniority Tiers (With Advance)`;
       }
-    } else if (
-      contractType === "HR Consulting" ||
-      contractType === "Mgt Consulting"
-    ) {
-      if (contractType === "HR Consulting") {
-        summary.hasTechProposal = !!contractData.techProposalDocHRC?.url;
-        summary.hasFinProposal = !!contractData.finProposalDocHRC?.url;
-        summary.details = `Total Value: ${
-          contractData.totalCost || 0
-        } ${contractData.salaryCurrency || "SAR"}`;
-      } else {
-        summary.hasTechProposal = !!contractData.techProposalDocMGTC?.url;
-        summary.hasFinProposal = !!contractData.finProposalDocMGTC?.url;
-        summary.details = `Total Value: ${
-          contractData.totalCost || 0
-        } ${contractData.salaryCurrency || "SAR"}`;
-      }
+    } else if (contractType === "HR Consulting" || contractType === "Mgt Consulting") {
+      summary.hasTechProposal = !!(contractData.techProposalDocHRC?.url || contractData.techProposalDocMGTC?.url);
+      summary.hasFinProposal = !!(contractData.finProposalDocHRC?.url || contractData.finProposalDocMGTC?.url);
+      summary.details = `Total Value: ${contractData.totalCost || 0} ${contractData.salaryCurrency || "SAR"}`;
     } else if (contractType === "Outsourcing") {
-      summary.details = `${
-        contractData.numberOfResources || 0
-      } Resources Allocated • Total Cost: ${contractData.totalCost || 0} SAR`;
+      summary.details = `${contractData.numberOfResources || 0} Resources Allocated • Total Cost: ${contractData.totalCost || 0} SAR`;
     }
 
     return summary;
@@ -691,11 +624,10 @@ export function ContractSection({
     };
 
     return (
-      <div className="mt-2 pt-2 border-t border-border/60 space-y-5 animate-in fade-in duration-200">
-        
+      <Box className="mt-3 pt-3 border-t border-border/60 space-y-3.5 animate-in fade-in duration-200">
         {/* Core Timeline & Renewal Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
               Contract Model
             </span>
@@ -703,35 +635,33 @@ export function ContractSection({
               {contractData.ContractType || contractData.contractType || "Not specified"}
             </p>
           </div>
-          <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
               Start Date
             </span>
             <p className="text-xs font-semibold text-foreground mt-1 flex items-center gap-1.5">
-              <Calendar className="size-3.5 text-primary" />
+              <CalendarTodayOutlinedIcon sx={{ fontSize: 14, color: "primary.main" }} />
               {formatDate(contractData.contractStartDate)}
             </p>
           </div>
           {!isOpenEnded ? (
-            <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
+            <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Contract End Date
               </span>
               <p className="text-xs font-semibold text-foreground mt-1 flex items-center gap-1.5">
-                <Calendar className="size-3.5 text-muted-foreground" />
+                <CalendarTodayOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                 {formatDate(contractData.contractEndDate)}
               </p>
             </div>
           ) : (
-            <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
+            <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Renewal Cycle Frequency
               </span>
               <p className="text-xs font-semibold text-foreground mt-1 flex items-center gap-1.5">
-                <RefreshCcw className="size-3.5 text-emerald-500" />
-                {RENEWAL_PERIOD_LABELS[contractData.renewalPeriod] ||
-                  contractData.renewalPeriod ||
-                  "—"}
+                <AutorenewOutlinedIcon sx={{ fontSize: 14, color: "#10b981" }} />
+                {RENEWAL_PERIOD_LABELS[contractData.renewalPeriod] || contractData.renewalPeriod || "—"}
               </p>
             </div>
           )}
@@ -739,19 +669,19 @@ export function ContractSection({
 
         {/* Open Ended Renewal Summary Box */}
         {isOpenEnded && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/5 via-card to-card border border-emerald-500/20 shadow-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center">
+          <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-500/5 via-card to-card border border-emerald-500/20 shadow-2xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-center">
               <div>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                   Next Renewal Date
                 </span>
-                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                   {formatDate(contractData.nextRenewalDate)}
                 </p>
               </div>
               <div>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-                  Last Renewed On
+                  Last Renewed
                 </span>
                 <p className="text-xs font-semibold text-foreground mt-0.5">
                   {formatDate(contractData.lastRenewedAt)}
@@ -759,306 +689,59 @@ export function ContractSection({
               </div>
               <div>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-                  Completed Cycles
+                  Cycles Completed
                 </span>
                 <p className="text-xs font-semibold text-foreground mt-0.5">
-                  {contractData.renewalCount || 0} Renewal Cycles
+                  {contractData.renewalCount || 0} times
                 </p>
               </div>
-              <div className="sm:col-span-2 md:col-span-1">
-                <Button
-                  type="button"
-                  onClick={() => setRenewDialogOpen(contractType)}
-                  disabled={!canModify}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 rounded-xl shadow-xs gap-1.5"
-                >
-                  <Calendar className="size-3.5" />
-                  Trigger Contract Renewal
-                </Button>
+              <div className="text-right col-span-2 sm:col-span-1">
+                {effectiveCanModify && (
+                  <MuiButton
+                    variant="contained"
+                    size="small"
+                    onClick={() => setRenewDialogOpen(contractType)}
+                    startIcon={<AutorenewOutlinedIcon sx={{ fontSize: 15 }} />}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 700,
+                      fontSize: "0.75rem",
+                      borderRadius: "8px",
+                      px: 1.5,
+                      py: 0.5,
+                      bgcolor: "#059669",
+                      "&:hover": { bgcolor: "#047857" },
+                    }}
+                  >
+                    Renew Contract
+                  </MuiButton>
+                )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Commercial Details Breakdown: Recruitment / IT / HR Managed Services */}
-        {(contractType === "Recruitment" ||
-          contractType === "IT & Technology" ||
-          contractType === "HR Managed Services") && (
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <BadgePercent className="size-3.5 text-primary" />
-              Commercial & Pricing Structure
-            </h4>
-
-            {/* Fix with Advance */}
-            {(contractData.ContractType || contractData.contractType) ===
-              "Fix with Advance" && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-card border border-border/80 shadow-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Placement Fee Percentage
-                  </span>
-                  <p className="text-sm font-bold text-primary mt-0.5">
-                    {contractData.fixedPercentage || 0}%
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Advance Payment
-                  </span>
-                  <p className="text-sm font-bold text-foreground mt-0.5">
-                    {contractData.advanceMoneyAmount || 0}{" "}
-                    {contractData.advanceMoneyCurrency || "SAR"}
-                  </p>
-                </div>
-                <div className="sm:col-span-3 pt-2 border-t border-border/40">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Commercial Notes
-                  </span>
-                  <p className="text-xs text-muted-foreground italic mt-0.5">
-                    {contractData.fixedPercentageAdvanceNotes || "No additional commercial terms notes specified."}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Fix without Advance */}
-            {(contractData.ContractType || contractData.contractType) ===
-              "Fix without Advance" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-card border border-border/80 shadow-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Fixed Placement Fee
-                  </span>
-                  <p className="text-sm font-bold text-primary mt-0.5">
-                    {contractData.fixWithoutAdvanceValue || 0}%
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Commercial Notes
-                  </span>
-                  <p className="text-xs text-muted-foreground italic mt-0.5">
-                    {contractData.fixWithoutAdvanceNotes || "No notes specified."}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Level Based Hiring */}
-            {(contractData.ContractType || contractData.contractType) ===
-              "Level Based Hiring" &&
-              contractData.levelBasedHiring?.levelTypes?.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {contractData.levelBasedHiring.levelTypes.map(
-                    (level: string) => {
-                      const levelKey =
-                        LEVEL_TYPE_MAPPING[level] ||
-                        level.toLowerCase().replace(/[^a-z]/g, "");
-                      const levelData =
-                        contractData.levelBasedHiring[levelKey] || {};
-                      return (
-                        <div
-                          key={level}
-                          className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs space-y-2"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-xs text-foreground">
-                              {level}
-                            </span>
-                            <Badge
-                              variant="secondary"
-                              className="text-[11px] font-bold text-primary"
-                            >
-                              {levelData.percentage || 0}% Fee
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            <span>Target Amount: </span>
-                            <span className="font-medium text-foreground">
-                              {levelData.amount || 0}{" "}
-                              {levelData.currency || "SAR"}
-                            </span>
-                          </div>
-                          {levelData.notes && (
-                            <p className="text-[11px] text-muted-foreground italic border-t border-border/40 pt-1.5">
-                              {levelData.notes}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              )}
-
-            {/* Level Based Advance Hiring */}
-            {(contractData.ContractType || contractData.contractType) ===
-              "Level Based Advance Hiring" &&
-              contractData.levelBasedAdvanceHiring?.levelTypes?.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {contractData.levelBasedAdvanceHiring.levelTypes.map(
-                    (level: string) => {
-                      const levelKey =
-                        LEVEL_TYPE_MAPPING[level] ||
-                        level.toLowerCase().replace(/[^a-z]/g, "");
-                      const levelData =
-                        contractData.levelBasedAdvanceHiring[levelKey] || {};
-                      return (
-                        <div
-                          key={level}
-                          className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs space-y-2"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-xs text-foreground">
-                              {level}
-                            </span>
-                            <Badge
-                              variant="secondary"
-                              className="text-[11px] font-bold text-primary"
-                            >
-                              {levelData.percentage || 0}% Fee
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            <span>Advance Amount: </span>
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                              {levelData.amount || 0}{" "}
-                              {levelData.currency || "SAR"}
-                            </span>
-                          </div>
-                          {levelData.notes && (
-                            <p className="text-[11px] text-muted-foreground italic border-t border-border/40 pt-1.5">
-                              {levelData.notes}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              )}
-          </div>
-        )}
-
-        {/* Consulting Specific Details */}
-        {(contractType === "HR Consulting" ||
-          contractType === "Mgt Consulting") && (
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <Briefcase className="size-3.5 text-primary" />
-              Scope of Work & Commercial Terms
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Total Contract Cost
-                </span>
-                <p className="text-sm font-bold text-primary mt-0.5">
-                  {contractData.totalCost || 0}{" "}
-                  {contractData.salaryCurrency || "SAR"}
-                </p>
-              </div>
-              <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Contract Currency
-                </span>
-                <p className="text-xs font-semibold text-foreground mt-0.5">
-                  {contractData.salaryCurrency || "SAR"}
-                </p>
-              </div>
-              {contractType === "HR Consulting" && (
-                <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Estimated Hours
-                  </span>
-                  <p className="text-xs font-semibold text-foreground mt-0.5">
-                    {contractData.estimatedHours || "Not specified"}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {contractType === "HR Consulting" ? (
-                <>
-                  <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-1">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Service Scope
-                    </span>
-                    <p className="text-xs text-foreground leading-relaxed">
-                      {contractData.serviceScope || "No specific scope defined."}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-1">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Client Contact Person
-                    </span>
-                    <p className="text-xs font-semibold text-foreground">
-                      {contractData.clientContact || "Not specified"}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-1">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Project Scope
-                    </span>
-                    <p className="text-xs text-foreground leading-relaxed">
-                      {contractData.projectScope || "No project scope defined."}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-2">
-                    <div>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        Client Entity / Company
-                      </span>
-                      <p className="text-xs font-semibold text-foreground">
-                        {contractData.clientCompany || "Not specified"}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        Key Deliverables
-                      </span>
-                      <p className="text-xs text-foreground leading-relaxed mt-0.5">
-                        {contractData.keyDeliverables || "Not specified"}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Outsourcing Details */}
+        {/* Outsourcing Resources Details Box */}
         {contractType === "Outsourcing" && (
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <Building2 className="size-3.5 text-primary" />
-              Outsourcing & Resource Terms
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
+          <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="p-3 rounded-xl bg-card border border-border/70 shadow-2xs">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Allocated Resources
+                  Resource Count
                 </span>
-                <p className="text-sm font-bold text-primary mt-0.5">
+                <p className="text-xs font-bold text-foreground mt-0.5">
                   {contractData.numberOfResources || 0} Staff
                 </p>
               </div>
-              <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
+              <div className="p-3 rounded-xl bg-card border border-border/70 shadow-2xs">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                   Total Contract Cost
                 </span>
-                <p className="text-sm font-bold text-foreground mt-0.5">
+                <p className="text-xs font-bold text-foreground mt-0.5">
                   {contractData.totalCost || 0} SAR
                 </p>
               </div>
-              <div className="p-3.5 rounded-xl bg-card border border-border/80 shadow-xs">
+              <div className="p-3 rounded-xl bg-card border border-border/70 shadow-2xs">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                   Service Category
                 </span>
@@ -1068,7 +751,7 @@ export function ContractSection({
               </div>
             </div>
             {contractData.slaTerms && (
-              <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-1">
+              <div className="p-3 rounded-xl bg-card border border-border/70 shadow-2xs space-y-1">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                   SLA Terms & Service Guarantees
                 </span>
@@ -1082,18 +765,18 @@ export function ContractSection({
 
         {/* Contract Documents Section */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-            <FileCheck className="size-3.5 text-primary" />
+          <Typography variant="caption" sx={{ fontWeight: 700, color: "text.primary", display: "flex", alignItems: "center", gap: 1, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 15, color: "primary.main" }} />
             Contract Documents & Attachments
-          </h4>
+          </Typography>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {/* Standard Contract Document */}
             {contractData.contractDocument?.url && (
-              <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/80 shadow-xs hover:border-primary/40 transition-all group">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-card border border-border/70 shadow-2xs hover:border-primary/40 transition-colors">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <FileText className="size-4" />
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <DescriptionOutlinedIcon sx={{ fontSize: 16 }} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-foreground truncate">
@@ -1104,27 +787,24 @@ export function ContractSection({
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    window.open(contractData.contractDocument.url, "_blank")
-                  }
-                  className="h-8 text-xs gap-1 rounded-lg shrink-0"
+                <MuiButton
+                  variant="outlined"
+                  size="small"
+                  onClick={() => window.open(contractData.contractDocument.url, "_blank")}
+                  endIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 13 }} />}
+                  sx={{ textTransform: "none", fontSize: "0.6875rem", fontWeight: 600, borderRadius: "7px", py: 0.25, px: 1, minWidth: "auto" }}
                 >
-                  <ExternalLink className="size-3" />
                   View
-                </Button>
+                </MuiButton>
               </div>
             )}
 
             {/* Consulting Technical Proposal */}
-            {(contractData.techProposalDocHRC?.url ||
-              contractData.techProposalDocMGTC?.url) && (
-              <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/80 shadow-xs hover:border-primary/40 transition-all group">
+            {(contractData.techProposalDocHRC?.url || contractData.techProposalDocMGTC?.url) && (
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-card border border-border/70 shadow-2xs hover:border-primary/40 transition-colors">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
-                    <FileText className="size-4" />
+                  <div className="h-8 w-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                    <DescriptionOutlinedIcon sx={{ fontSize: 16 }} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-foreground truncate">
@@ -1137,31 +817,29 @@ export function ContractSection({
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
+                <MuiButton
+                  variant="outlined"
+                  size="small"
                   onClick={() =>
                     window.open(
-                      contractData.techProposalDocHRC?.url ||
-                        contractData.techProposalDocMGTC?.url,
+                      contractData.techProposalDocHRC?.url || contractData.techProposalDocMGTC?.url,
                       "_blank"
                     )
                   }
-                  className="h-8 text-xs gap-1 rounded-lg shrink-0"
+                  endIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 13 }} />}
+                  sx={{ textTransform: "none", fontSize: "0.6875rem", fontWeight: 600, borderRadius: "7px", py: 0.25, px: 1, minWidth: "auto" }}
                 >
-                  <ExternalLink className="size-3" />
                   View
-                </Button>
+                </MuiButton>
               </div>
             )}
 
             {/* Consulting Financial Proposal */}
-            {(contractData.finProposalDocHRC?.url ||
-              contractData.finProposalDocMGTC?.url) && (
-              <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/80 shadow-xs hover:border-primary/40 transition-all group">
+            {(contractData.finProposalDocHRC?.url || contractData.finProposalDocMGTC?.url) && (
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-card border border-border/70 shadow-2xs hover:border-primary/40 transition-colors">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                    <FileText className="size-4" />
+                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <DescriptionOutlinedIcon sx={{ fontSize: 16 }} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-foreground truncate">
@@ -1174,250 +852,256 @@ export function ContractSection({
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
+                <MuiButton
+                  variant="outlined"
+                  size="small"
                   onClick={() =>
                     window.open(
-                      contractData.finProposalDocHRC?.url ||
-                        contractData.finProposalDocMGTC?.url,
+                      contractData.finProposalDocHRC?.url || contractData.finProposalDocMGTC?.url,
                       "_blank"
                     )
                   }
-                  className="h-8 text-xs gap-1 rounded-lg shrink-0"
+                  endIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 13 }} />}
+                  sx={{ textTransform: "none", fontSize: "0.6875rem", fontWeight: 600, borderRadius: "7px", py: 0.25, px: 1, minWidth: "auto" }}
                 >
-                  <ExternalLink className="size-3" />
                   View
-                </Button>
+                </MuiButton>
               </div>
             )}
           </div>
         </div>
 
         {/* Renewal History Timeline */}
-        {isOpenEnded &&
-          contractData.renewalHistory &&
-          contractData.renewalHistory.length > 0 && (
-            <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                <History className="size-3.5 text-emerald-500" />
-                Renewal Audit History
-              </h4>
-              <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-muted/60 text-muted-foreground uppercase tracking-wider text-[10px] font-semibold border-b border-border/60">
-                      <tr>
-                        <th className="px-4 py-3">Renewed Date</th>
-                        <th className="px-4 py-3">Cycle Start</th>
-                        <th className="px-4 py-3">Cycle End</th>
-                        <th className="px-4 py-3">Renewal Notes</th>
+        {isOpenEnded && contractData.renewalHistory && contractData.renewalHistory.length > 0 && (
+          <div className="space-y-2 pt-1">
+            <Typography variant="caption" sx={{ fontWeight: 700, color: "text.primary", display: "flex", alignItems: "center", gap: 1, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <HistoryOutlinedIcon sx={{ fontSize: 15, color: "#10b981" }} />
+              Renewal Audit History
+            </Typography>
+            <div className="rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 text-muted-foreground uppercase tracking-wider text-[10px] font-bold border-b border-border/60">
+                    <tr>
+                      <th className="px-3 py-2">Renewed Date</th>
+                      <th className="px-3 py-2">Cycle Start</th>
+                      <th className="px-3 py-2">Cycle End</th>
+                      <th className="px-3 py-2">Renewal Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/40 text-foreground">
+                    {contractData.renewalHistory.map((historyItem: any, index: number) => (
+                      <tr key={index} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-3 py-2 font-semibold text-emerald-600 dark:text-emerald-400">
+                          {formatDate(historyItem.renewedAt)}
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground">
+                          {formatDate(historyItem.newCycleStart || historyItem.previousNextRenewalDate)}
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground">
+                          {formatDate(historyItem.newCycleEnd || historyItem.newNextRenewalDate)}
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground max-w-[200px] truncate" title={historyItem.notes}>
+                          {historyItem.notes || "Standard Renewal"}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/40 text-foreground">
-                      {contractData.renewalHistory.map(
-                        (historyItem: any, index: number) => (
-                          <tr
-                            key={index}
-                            className="hover:bg-muted/30 transition-colors"
-                          >
-                            <td className="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400">
-                              {formatDate(historyItem.renewedAt)}
-                            </td>
-                            <td className="px-4 py-3">
-                              {formatDate(
-                                historyItem.newCycleStart ||
-                                  historyItem.previousNextRenewalDate
-                              )}
-                            </td>
-                            <td className="px-4 py-3">
-                              {formatDate(
-                                historyItem.newCycleEnd ||
-                                  historyItem.newNextRenewalDate
-                              )}
-                            </td>
-                            <td
-                              className="px-4 py-3 text-muted-foreground font-medium max-w-[220px] truncate"
-                              title={historyItem.notes}
-                            >
-                              {historyItem.notes || "Standard Renewal"}
-                            </td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          )}
-      </div>
+          </div>
+        )}
+      </Box>
     );
   };
 
   return (
-    <div className="space-y-2">
+    <Box className="space-y-3">
+      {/* Subsidiary Warning Banner */}
       {isSubsidiary && (
-        <div className="p-4 rounded-2xl bg-muted/50 border border-border flex items-center justify-between mb-4">
+        <div className="p-3 rounded-xl bg-card border border-border/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Building2 className="w-5 h-5 text-primary" />
+            <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <ApartmentOutlinedIcon sx={{ fontSize: 18 }} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-foreground">Subsidiary Client</h4>
+              <h4 className="text-xs font-bold text-foreground">Subsidiary Client Terms</h4>
               <p className="text-xs text-muted-foreground">
-                This client is a subsidiary of <span className="font-semibold text-foreground">{clientData.parentCompany?.name || "its parent company"}</span>.
-                {contractSource === 'parent' 
-                  ? " It currently shares the parent's contract." 
-                  : " It uses its own standalone contract."}
+                Parent: <span className="font-semibold text-foreground">{clientData.parentCompany?.name || "Parent Company"}</span>.
+                {contractSource === "parent"
+                  ? " Sharing parent's contract agreements."
+                  : " Managing dedicated contracts."}
               </p>
             </div>
           </div>
           {canModify && (
-            <Button
-              variant="outline"
-              size="sm"
+            <MuiButton
+              variant="outlined"
+              size="small"
               disabled={toggleContractSourceMutation.isPending}
               onClick={() => {
-                const newSource = contractSource === 'parent' ? 'own' : 'parent';
+                const newSource = contractSource === "parent" ? "own" : "parent";
                 toggleContractSourceMutation.mutate({ clientId, contractSource: newSource });
               }}
-              className="text-xs font-semibold rounded-xl h-9"
+              sx={{ textTransform: "none", fontSize: "0.75rem", fontWeight: 600, borderRadius: "8px", height: 32, shrink: 0 }}
             >
-              {toggleContractSourceMutation.isPending ? "Updating..." : contractSource === 'parent' ? "Switch to Own Contract" : "Share Parent Contract"}
-            </Button>
+              {toggleContractSourceMutation.isPending
+                ? "Updating..."
+                : contractSource === "parent"
+                ? "Manage Own Contracts"
+                : "Share Parent Contract"}
+            </MuiButton>
           )}
         </div>
       )}
 
-      {/* Portfolio Overview & Actions Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      {/* Portfolio Overview KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {/* KPI Card 1: Active Contracts */}
-        <div className="rounded-2xl border border-border/80 bg-card/90 p-4 shadow-xs backdrop-blur-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+        <div className="rounded-xl border border-border/70 bg-card p-3 shadow-2xs flex items-center justify-between">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
               Total Contracts
             </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-foreground">
+              <span className="text-xl font-bold text-foreground">
                 {availableContracts.length}
               </span>
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                 {activeCount} Active
               </span>
             </div>
           </div>
-          <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-            <FileText className="size-5" />
+          <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
           </div>
         </div>
 
         {/* KPI Card 2: Renewal & Expiry Status */}
-        <div className="rounded-2xl border border-border/80 bg-card/90 p-4 shadow-xs backdrop-blur-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+        <div className="rounded-xl border border-border/70 bg-card p-3 shadow-2xs flex items-center justify-between">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
               Lifecycle Alerts
             </span>
             <div className="flex items-baseline gap-2">
               <span
-                className={`text-2xl font-bold ${
-                  warningCount > 0
-                    ? "text-amber-600 dark:text-amber-400"
-                    : "text-foreground"
+                className={`text-xl font-bold ${
+                  warningCount > 0 ? "text-amber-600 dark:text-amber-400" : "text-foreground"
                 }`}
               >
                 {warningCount}
               </span>
-              <span className="text-xs text-muted-foreground">
-                {warningCount === 0
-                  ? "All contracts healthy"
-                  : "Requires attention"}
+              <span className="text-[11px] text-muted-foreground">
+                {warningCount === 0 ? "All agreements healthy" : "Requires review"}
               </span>
             </div>
           </div>
           <div
-            className={`p-3 rounded-2xl ${
+            className={`h-9 w-9 rounded-lg flex items-center justify-center ${
               warningCount > 0
-                ? "bg-amber-500/10 text-amber-500"
-                : "bg-emerald-500/10 text-emerald-500"
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
             }`}
           >
             {warningCount > 0 ? (
-              <AlertTriangle className="size-5" />
+              <WarningAmberOutlinedIcon sx={{ fontSize: 20 }} />
             ) : (
-              <CheckCircle2 className="size-5" />
+              <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 20 }} />
             )}
           </div>
         </div>
 
-        {/* KPI Card 3: Action & Quick Filter */}
-        <div className="rounded-2xl border border-border/80 bg-card/90 p-4 shadow-xs backdrop-blur-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+        {/* KPI Card 3: Action & Management */}
+        <div className="rounded-xl border border-border/70 bg-card p-3 shadow-2xs flex items-center justify-between">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
               Management
             </span>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground">
               Configure contract parameters
             </p>
           </div>
-          <Button
+          <MuiButton
+            variant="contained"
+            size="small"
             onClick={handleAddContract}
             disabled={!effectiveCanModify}
-            className="shadow-xs gap-2 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium text-xs px-4 h-9"
+            startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "0.75rem",
+              borderRadius: "8px",
+              height: 32,
+              px: 1.5,
+              bgcolor: "primary.main",
+              "&:hover": { bgcolor: "primary.dark" },
+            }}
           >
-            <Plus className="size-4" />
             Add Contract
-          </Button>
+          </MuiButton>
         </div>
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-card p-2 rounded-2xl border border-border/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-card p-2 rounded-xl border border-border/70 shadow-2xs">
         {/* Search Input */}
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <SearchOutlinedIcon sx={{ fontSize: 17 }} className="absolute left-3 top-2.5 text-muted-foreground" />
           <Input
             placeholder="Search contracts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9 text-xs rounded-xl border-border/60 bg-muted/30 focus-visible:bg-background"
+            className="pl-9 h-8 text-xs rounded-lg border-border/70 bg-background/60"
           />
         </div>
 
         {/* Tab Filters */}
-        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-          <Button
-            variant={selectedTab === "all" ? "default" : "ghost"}
-            size="sm"
+        <div className="flex items-center gap-1 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+          <button
+            type="button"
             onClick={() => setSelectedTab("all")}
-            className="h-8 text-xs rounded-lg font-medium px-3"
+            className={cn(
+              "h-7 px-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
+              selectedTab === "all"
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+            )}
           >
             All ({availableContracts.length})
-          </Button>
-          <Button
-            variant={selectedTab === "open-ended" ? "default" : "ghost"}
-            size="sm"
+          </button>
+          <button
+            type="button"
             onClick={() => setSelectedTab("open-ended")}
-            className="h-8 text-xs rounded-lg font-medium px-3"
+            className={cn(
+              "h-7 px-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
+              selectedTab === "open-ended"
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+            )}
           >
             Open-Ended
-          </Button>
-          <Button
-            variant={selectedTab === "fixed" ? "default" : "ghost"}
-            size="sm"
+          </button>
+          <button
+            type="button"
             onClick={() => setSelectedTab("fixed")}
-            className="h-8 text-xs rounded-lg font-medium px-3"
+            className={cn(
+              "h-7 px-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
+              selectedTab === "fixed"
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+            )}
           >
             Fixed Term
-          </Button>
+          </button>
         </div>
       </div>
 
-      {/* Contract Cards Grid */}
-      <div className="space-y-4">
+      {/* Contract Cards List */}
+      <div className="space-y-3">
         {filteredContracts.map((businessType: string) => {
-          const contractKey =
-            CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
+          const contractKey = CONTRACT_MAPPING[businessType as keyof typeof CONTRACT_MAPPING];
           const contractData = contractsObj[contractKey];
           const summary = getContractSummary(contractData, businessType);
           const serviceCfg = getServiceConfig(businessType);
@@ -1428,84 +1112,98 @@ export function ContractSection({
           return (
             <div
               key={businessType}
-              className={`rounded-2xl border bg-card transition-all duration-200 shadow-xs hover:shadow-md overflow-hidden ${
-                isExpanded ? "border-primary/40 ring-1 ring-primary/20" : "border-border/80"
-              }`}
+              className={cn(
+                "rounded-xl border bg-card transition-all duration-200 shadow-2xs overflow-hidden",
+                isExpanded ? "border-primary/50 ring-1 ring-primary/20" : "border-border/70 hover:border-border"
+              )}
             >
-              <div className="p-5">
+              <div className="p-3.5 sm:p-4">
                 {isEditing ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b pb-3 mb-2">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b pb-2.5">
                       <div className="flex items-center gap-2">
-                        <div
-                          className={`p-2 rounded-xl ${serviceCfg.bgColor} ${serviceCfg.color}`}
-                        >
-                          <ServiceIcon className="size-4" />
+                        <div className={`p-1.5 rounded-lg ${serviceCfg.bgColor} ${serviceCfg.color}`}>
+                          <ServiceIcon sx={{ fontSize: 18 }} />
                         </div>
-                        <h3 className="text-base font-bold text-foreground">
-                          Edit {businessType} Contract
+                        <h3 className="text-sm font-bold text-foreground">
+                          Edit {businessType} Contract Terms
                         </h3>
                       </div>
                     </div>
                     {renderEditForm(businessType)}
-                    <div className="flex justify-end space-x-2 pt-4 border-t border-border/60">
-                      <Button
-                        variant="outline"
+                    <div className="flex justify-end gap-2 pt-3 border-t border-border/60">
+                      <MuiButton
+                        variant="outlined"
+                        size="small"
                         onClick={() => setEditDialogOpen(null)}
                         disabled={isSubmitting}
-                        className="rounded-xl h-9 text-xs"
+                        sx={{ textTransform: "none", fontSize: "0.75rem", fontWeight: 600, borderRadius: "8px" }}
                       >
                         Cancel
-                      </Button>
-                      <Button
+                      </MuiButton>
+                      <MuiButton
+                        variant="contained"
+                        size="small"
                         onClick={() => handleFormSubmit(formData)}
                         disabled={isSubmitting || !effectiveCanModify}
-                        className="rounded-xl h-9 text-xs bg-primary hover:bg-primary/90 text-white font-medium"
+                        sx={{
+                          textTransform: "none",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          borderRadius: "8px",
+                          bgcolor: "primary.main",
+                          "&:hover": { bgcolor: "primary.dark" },
+                        }}
                       >
-                        {isSubmitting ? "Saving Changes..." : "Save Contract"}
-                      </Button>
+                        {isSubmitting ? "Saving..." : "Save Contract"}
+                      </MuiButton>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                       {/* Left Contract Category Identity & Status */}
-                      <div className="flex items-start gap-3.5 min-w-0">
+                      <div className="flex items-start gap-3 min-w-0">
                         <div
-                          className={`p-3 rounded-2xl ${serviceCfg.bgColor} ${serviceCfg.color} border ${serviceCfg.borderColor} shrink-0`}
+                          className={`p-2.5 rounded-xl ${serviceCfg.bgColor} ${serviceCfg.color} border ${serviceCfg.borderColor} shrink-0 mt-0.5`}
                         >
-                          <ServiceIcon className="size-5" />
+                          <ServiceIcon sx={{ fontSize: 20 }} />
                         </div>
 
                         <div className="space-y-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-base font-bold text-foreground tracking-tight">
+                            <h3 className="text-sm font-bold text-foreground tracking-tight">
                               {businessType} Contract
                             </h3>
 
                             {summary?.contractType && (
-                              <Badge
-                                variant="secondary"
-                                className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                              >
-                                {summary.contractType}
-                              </Badge>
+                              <Chip
+                                label={summary.contractType}
+                                size="small"
+                                sx={{
+                                  height: 20,
+                                  fontSize: "0.625rem",
+                                  fontWeight: 600,
+                                  bgcolor: "action.selected",
+                                  border: "1px solid",
+                                  borderColor: "divider",
+                                }}
+                              />
                             )}
 
                             {contractData && (() => {
                               const status = getContractStatus(contractData);
                               const badgeConfig = getStatusBadgeConfig(status);
                               return (
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5 border ${badgeConfig.className}`}
+                                <span
+                                  className={cn(
+                                    "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-flex items-center gap-1.5 border",
+                                    badgeConfig.className
+                                  )}
                                 >
-                                  <span
-                                    className={`size-1.5 rounded-full ${badgeConfig.dotColor}`}
-                                  />
+                                  <span className={cn("size-1.5 rounded-full", badgeConfig.dotColor)} />
                                   {badgeConfig.label}
-                                </Badge>
+                                </span>
                               );
                             })()}
                           </div>
@@ -1517,39 +1215,29 @@ export function ContractSection({
                           )}
 
                           {/* Quick Info Badges */}
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-xs text-muted-foreground">
-                            <div className="flex items-center space-x-1.5">
-                              <Calendar className="size-3.5 text-muted-foreground/70" />
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-0.5 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <CalendarTodayOutlinedIcon sx={{ fontSize: 13, opacity: 0.7 }} />
                               <span>
                                 {summary?.endDateType === "open-ended"
-                                  ? `Open-Ended • Started ${formatDate(
-                                      summary.startDate
-                                    )}`
+                                  ? `Open-Ended • Started ${formatDate(summary.startDate)}`
                                   : summary?.startDate
-                                  ? `${formatDate(
-                                      summary.startDate
-                                    )} to ${formatDate(summary.endDate)}`
+                                  ? `${formatDate(summary.startDate)} to ${formatDate(summary.endDate)}`
                                   : "Duration not set"}
                               </span>
                             </div>
 
-                            {summary?.endDateType === "open-ended" &&
-                              summary?.nextRenewalDate && (
-                                <div className="flex items-center space-x-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-md border border-amber-500/20 text-[10px] font-bold">
-                                  <Clock className="size-3" />
-                                  <span>
-                                    Next Renewal:{" "}
-                                    {formatDate(summary.nextRenewalDate)}
-                                  </span>
-                                </div>
-                              )}
+                            {summary?.endDateType === "open-ended" && summary?.nextRenewalDate && (
+                              <div className="flex items-center gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-md border border-amber-500/20 text-[10px] font-bold">
+                                <AccessTimeOutlinedIcon sx={{ fontSize: 12 }} />
+                                <span>Next Renewal: {formatDate(summary.nextRenewalDate)}</span>
+                              </div>
+                            )}
 
                             {summary?.hasDocument && (
-                              <div className="flex items-center space-x-1 text-primary">
-                                <FileCheck className="size-3.5" />
-                                <span className="font-medium text-[11px]">
-                                  Document Attached
-                                </span>
+                              <div className="flex items-center gap-1 text-primary text-[11px] font-semibold">
+                                <AttachFileOutlinedIcon sx={{ fontSize: 13 }} />
+                                <span>Document Attached</span>
                               </div>
                             )}
                           </div>
@@ -1557,46 +1245,71 @@ export function ContractSection({
                       </div>
 
                       {/* Action Button Controls */}
-                      <div className="flex items-center gap-2 self-end md:self-center shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                      <div className="flex items-center gap-1.5 self-end md:self-center shrink-0">
+                        <MuiButton
+                          variant="text"
+                          size="small"
                           onClick={() => handleShowDetails(businessType)}
-                          className="text-xs font-semibold h-8 rounded-xl gap-1 hover:bg-muted"
+                          endIcon={
+                            isExpanded ? (
+                              <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16 }} />
+                            ) : (
+                              <KeyboardArrowRightOutlinedIcon sx={{ fontSize: 16 }} />
+                            )
+                          }
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 600,
+                            fontSize: "0.75rem",
+                            height: 28,
+                            borderRadius: "7px",
+                            px: 1,
+                            color: "text.secondary",
+                            "&:hover": { bgcolor: "action.hover", color: "text.primary" },
+                          }}
                         >
                           {isExpanded ? "Hide Details" : "View Details"}
-                          <ChevronRight
-                            className={`size-4 transition-transform duration-200 ${
-                              isExpanded ? "rotate-90" : ""
-                            }`}
-                          />
-                        </Button>
+                        </MuiButton>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditContract(businessType)}
-                          disabled={!effectiveCanModify}
-                          className="text-xs h-8 rounded-xl gap-1 border-border/80"
-                        >
-                          <Edit className="size-3.5" />
-                          Edit
-                        </Button>
+                        <Tooltip title="Edit Contract Parameters" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditContract(businessType)}
+                            disabled={!effectiveCanModify}
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "7px",
+                              border: "1px solid",
+                              borderColor: "divider",
+                              "&:hover": { bgcolor: "action.hover" },
+                            }}
+                          >
+                            <EditOutlinedIcon sx={{ fontSize: 15 }} />
+                          </IconButton>
+                        </Tooltip>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setDeleteDialogOpen(businessType)}
-                          disabled={!effectiveCanModify}
-                          className="text-xs h-8 rounded-xl gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
+                        <Tooltip title="Delete Contract" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={() => setDeleteDialogOpen(businessType)}
+                            disabled={!effectiveCanModify}
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "7px",
+                              border: "1px solid rgba(239, 68, 68, 0.2)",
+                              color: "error.main",
+                              "&:hover": { bgcolor: "rgba(239, 68, 68, 0.08)" },
+                            }}
+                          >
+                            <DeleteOutlineOutlinedIcon sx={{ fontSize: 15 }} />
+                          </IconButton>
+                        </Tooltip>
                       </div>
                     </div>
 
-                    {isExpanded &&
-                      renderContractDetails(contractData, businessType)}
+                    {isExpanded && renderContractDetails(contractData, businessType)}
                   </>
                 )}
               </div>
@@ -1624,57 +1337,64 @@ export function ContractSection({
         open={!!renewDialogOpen}
         onOpenChange={(open) => !open && setRenewDialogOpen(null)}
       >
-        <DialogContent className="max-w-md w-full p-6 bg-card border border-border rounded-2xl shadow-xl">
+        <DialogContent className="max-w-md w-full p-5 bg-card border border-border rounded-xl shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <Calendar className="size-5" />
+            <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground">
+              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <AutorenewOutlinedIcon sx={{ fontSize: 18 }} />
               </div>
               Renew {renewDialogOpen} Contract
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 my-3">
-            <p className="text-xs text-muted-foreground leading-relaxed">
+          <div className="space-y-3 my-2 text-xs">
+            <p className="text-muted-foreground leading-relaxed">
               This action will mark the current contract cycle as completed and calculate the next renewal date based on the configured cycle frequency.
             </p>
             <div className="space-y-1.5">
               <Label htmlFor="renewNotes" className="text-xs font-semibold">
-                Renewal Notes & Term Revisions
+                Renewal Notes & Revisions
               </Label>
               <Textarea
                 id="renewNotes"
-                placeholder="Enter any notes for this renewal cycle (e.g. Annual rate revision, scope addition, client approval reference)..."
+                placeholder="Enter notes for this renewal cycle (e.g. Annual rate revision, scope addition, client approval reference)..."
                 value={renewNotes}
                 onChange={(e) => setRenewNotes(e.target.value)}
-                className="min-h-[100px] text-xs resize-none rounded-xl border-border/80 focus-visible:ring-emerald-500"
+                className="min-h-[90px] text-xs resize-none rounded-lg border-border/80"
               />
             </div>
           </div>
           <DialogFooter className="flex gap-2 justify-end pt-2">
-            <Button
-              variant="outline"
+            <MuiButton
+              variant="outlined"
+              size="small"
               onClick={() => {
                 setRenewDialogOpen(null);
                 setRenewNotes("");
               }}
               disabled={renewContractMutation.isPending}
-              className="rounded-xl h-9 text-xs"
+              sx={{ textTransform: "none", fontSize: "0.75rem", fontWeight: 600, borderRadius: "8px" }}
             >
               Cancel
-            </Button>
-            <Button
+            </MuiButton>
+            <MuiButton
+              variant="contained"
+              size="small"
               onClick={handleRenewContract}
               disabled={renewContractMutation.isPending}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl h-9 text-xs shadow-xs"
+              sx={{
+                textTransform: "none",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                borderRadius: "8px",
+                bgcolor: "#059669",
+                "&:hover": { bgcolor: "#047857" },
+              }}
             >
-              {renewContractMutation.isPending
-                ? "Renewing Contract..."
-                : "Confirm Renewal"}
-            </Button>
+              {renewContractMutation.isPending ? "Renewing..." : "Confirm Renewal"}
+            </MuiButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Box>
   );
 }
-
