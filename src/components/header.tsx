@@ -22,10 +22,10 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import Chip from "@mui/material/Chip";
 
 // Material UI Icons
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import MenuOpenOutlinedIcon from "@mui/icons-material/MenuOpenOutlined";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
@@ -34,6 +34,29 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import NavigateNextOutlinedIcon from "@mui/icons-material/NavigateNextOutlined";
+import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+
+const ROUTE_ICONS: Record<string, React.ElementType> = {
+  dashboard: DashboardOutlinedIcon,
+  leads: BusinessOutlinedIcon,
+  clients: BusinessOutlinedIcon,
+  jobs: WorkOutlineOutlinedIcon,
+  candidates: PersonOutlineOutlinedIcon,
+  pipeline: AccountTreeOutlinedIcon,
+  reactruterpipeline: AccountTreeOutlinedIcon,
+  email: MailOutlineOutlinedIcon,
+  teammembers: GroupsOutlinedIcon,
+  teams: GroupsOutlinedIcon,
+  settings: SettingsOutlinedIcon,
+  profile: PersonOutlineOutlinedIcon,
+  admin: AdminPanelSettingsOutlinedIcon,
+};
 
 function getUserInitials(name?: string) {
   if (!name) return "U";
@@ -86,26 +109,32 @@ export function Header() {
     }
   };
 
-  const getPageTitle = () => {
-    if (!pathname || pathname === "/" || pathname === "/dashboard") return "Dashboard";
+  const getPageInfo = () => {
+    if (!pathname || pathname === "/" || pathname === "/dashboard") {
+      return { title: "Dashboard", key: "dashboard" };
+    }
     const segment = pathname.split("/").filter(Boolean)[0];
-    if (segment === "leads") return "Leads";
-    if (segment === "clients") return "Clients";
-    if (segment === "jobs") return "Jobs";
-    if (segment === "candidates") return "Candidates";
-    if (segment === "reactruterpipeline") return "Pipeline";
-    if (segment === "email") return "Email";
-    if (segment === "teammembers") return "Team Members";
-    if (segment === "settings") return "Settings";
-    if (segment === "profile") return "Profile";
-    if (segment === "admin") return "Administration";
-    return segment.charAt(0).toUpperCase() + segment.slice(1);
+    let title = segment.charAt(0).toUpperCase() + segment.slice(1);
+    if (segment === "leads") title = "Leads";
+    if (segment === "clients") title = "Clients";
+    if (segment === "jobs") title = "Jobs";
+    if (segment === "candidates") title = "Candidates";
+    if (segment === "reactruterpipeline") title = "Pipeline";
+    if (segment === "email") title = "Email";
+    if (segment === "teammembers") title = "Team Members";
+    if (segment === "settings") title = "Settings";
+    if (segment === "profile") title = "Profile";
+    if (segment === "admin") title = "Administration";
+    return { title, key: segment };
   };
+
+  const pageInfo = getPageInfo();
+  const RouteIcon = ROUTE_ICONS[pageInfo.key] || DashboardOutlinedIcon;
 
   return (
     <Box
       component="header"
-      className="relative h-[58px] px-3 sm:px-4 md:px-5 flex items-center justify-between gap-3 shrink-0 select-none bg-white/95 dark:bg-[#161C24]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 z-30 font-['Public_Sans',sans-serif]"
+      className="relative h-[60px] px-3 sm:px-4 md:px-5 flex items-center justify-between gap-3 shrink-0 select-none bg-white/95 dark:bg-[#161C24]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 z-30 font-sans"
     >
       {/* Top Subtle Brand Gradient Line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 opacity-80 pointer-events-none" />
@@ -136,7 +165,9 @@ export function Header() {
             <Tooltip
               title={open ? "Collapse Sidebar" : "Expand Sidebar"}
               arrow
+              disableInteractive
               slotProps={{
+                popper: { sx: { zIndex: 9999 } },
                 tooltip: {
                   sx: {
                     bgcolor: "#1C252E",
@@ -162,7 +193,11 @@ export function Header() {
                   },
                 }}
               >
-                <MenuOutlinedIcon sx={{ fontSize: 20 }} />
+                {open ? (
+                  <MenuOpenOutlinedIcon sx={{ fontSize: 20 }} />
+                ) : (
+                  <MenuOutlinedIcon sx={{ fontSize: 20 }} />
+                )}
               </IconButton>
             </Tooltip>
 
@@ -186,9 +221,9 @@ export function Header() {
                     backgroundColor: "rgba(145, 158, 171, 0.08)",
                   },
                 }}
-                className="dark:!text-white"
+                className="dark:!text-white group"
               >
-                {getBackNavigation().label}
+                <span>{getBackNavigation().label}</span>
               </Button>
             ) : (
               <Box className="flex items-center gap-2 text-xs truncate">
@@ -196,9 +231,10 @@ export function Header() {
                   Cliq<span className="text-blue-600 dark:text-blue-400 font-extrabold">Hire</span>
                 </span>
                 <NavigateNextOutlinedIcon sx={{ fontSize: 16 }} className="text-[#919EAB] hidden sm:inline" />
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800/80 text-[#1C252E] dark:text-white border border-slate-200/70 dark:border-slate-700/70 shadow-2xs tracking-tight">
-                  {getPageTitle()}
-                </span>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100/90 dark:bg-slate-800/80 text-[#1C252E] dark:text-white border border-slate-200/70 dark:border-slate-700/70 shadow-2xs tracking-tight">
+                  <RouteIcon sx={{ fontSize: 15, color: "#2563EB" }} className="dark:!text-blue-400" />
+                  <span>{pageInfo.title}</span>
+                </div>
               </Box>
             )}
           </Box>
@@ -245,7 +281,9 @@ export function Header() {
               <Tooltip
                 title="Help & Documentation"
                 arrow
+                disableInteractive
                 slotProps={{
+                  popper: { sx: { zIndex: 9999 } },
                   tooltip: {
                     sx: {
                       bgcolor: "#1C252E",

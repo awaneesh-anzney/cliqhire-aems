@@ -256,8 +256,8 @@ export function Sidebar() {
       <Box
         component="header"
         className={cn(
-          "h-16 px-3.5 flex items-center border-b border-slate-200/80 dark:border-slate-800/80 shrink-0",
-          isCollapsed ? "justify-center px-1" : "justify-between"
+          "h-16 flex items-center border-b border-slate-200/80 dark:border-slate-800/80 shrink-0",
+          isCollapsed ? "justify-center px-1" : "justify-between px-3.5"
         )}
       >
         <Link
@@ -292,7 +292,12 @@ export function Sidebar() {
       {/* Navigation List Viewport */}
       <Box
         component="nav"
-        className="flex-1 overflow-y-auto px-2.5 py-3 custom-scrollbar flex flex-col gap-3.5"
+        className={cn(
+          "flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-3 transition-all",
+          isCollapsed
+            ? "px-1 py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            : "px-2.5 py-3 custom-scrollbar"
+        )}
       >
         {loadingPerms ? (
           <Box className="flex flex-col items-center justify-center py-12 gap-2 text-slate-400">
@@ -345,30 +350,35 @@ export function Sidebar() {
                     component={Link}
                     href={item.href}
                     className={cn(
-                      "h-10 rounded-xl transition-all duration-150 outline-none select-none",
-                      isCollapsed ? "w-10 h-10 p-0 mx-auto justify-center" : "w-full px-2.5 justify-start gap-2.5",
+                      "rounded-xl transition-all duration-150 outline-none select-none",
+                      isCollapsed
+                        ? "w-11 h-11 p-0 mx-auto justify-center flex items-center"
+                        : "w-full h-10 px-2.5 justify-start gap-2.5 flex items-center",
                       isActive
                         ? "!bg-[#2563EB] !text-white font-bold shadow-sm shadow-blue-500/30"
                         : "!bg-transparent text-slate-700 dark:text-slate-200 hover:!bg-slate-100/80 dark:hover:!bg-slate-800/60 font-semibold"
                     )}
                     sx={{
-                      minHeight: 40,
+                      minHeight: isCollapsed ? 44 : 40,
+                      width: isCollapsed ? 44 : "100%",
+                      justifyContent: isCollapsed ? "center" : "flex-start",
+                      p: isCollapsed ? 0 : undefined,
                     }}
                   >
                     {/* Multicolored Icon Container */}
                     <ListItemIcon
-                      className={cn(
-                        "min-w-0 transition-colors flex items-center justify-center shrink-0",
-                        isCollapsed ? "mx-auto" : ""
-                      )}
-                      sx={{ minWidth: isCollapsed ? 0 : 30 }}
+                      className="transition-colors flex items-center justify-center shrink-0"
+                      sx={{
+                        minWidth: "unset",
+                        width: isCollapsed ? "100%" : 30,
+                        justifyContent: "center",
+                        m: 0,
+                      }}
                     >
                       <div
                         className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center transition-transform",
-                          isActive
-                            ? "bg-white/20 text-white"
-                            : ""
+                          "w-7.5 h-7.5 rounded-lg flex items-center justify-center transition-transform",
+                          isActive ? "bg-white/20 text-white" : ""
                         )}
                         style={{
                           backgroundColor: isActive ? "rgba(255, 255, 255, 0.2)" : theme.bg,
@@ -377,7 +387,7 @@ export function Sidebar() {
                       >
                         <Icon
                           sx={{
-                            fontSize: 18,
+                            fontSize: 19,
                             color: isActive ? "#FFFFFF" : theme.color,
                           }}
                         />
@@ -455,61 +465,129 @@ export function Sidebar() {
       <Box
         component="footer"
         className={cn(
-          "p-2.5 border-t border-slate-200/80 dark:border-slate-800/80 shrink-0",
+          "p-2 border-t border-slate-200/80 dark:border-slate-800/80 shrink-0",
           isCollapsed ? "flex justify-center" : ""
         )}
       >
-        <div
-          className={cn(
-            "p-2 rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center transition-all",
-            isCollapsed ? "justify-center p-1.5" : "justify-between gap-2 shadow-2xs"
-          )}
-        >
-          <Link
-            href="/profile"
-            className={cn(
-              "flex items-center gap-2.5 min-w-0 no-underline hover:opacity-90 transition-opacity",
-              isCollapsed && "justify-center"
-            )}
-          >
-            <Badge
-              overlap="circular"
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              variant="dot"
-              sx={{
-                "& .MuiBadge-badge": {
-                  backgroundColor: "#22C55E",
-                  color: "#22C55E",
-                  boxShadow: "0 0 0 2px #FFFFFF",
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
+        {isCollapsed ? (
+          <Tooltip
+            title={user?.name || "Profile"}
+            placement="right"
+            arrow
+            disableInteractive
+            slotProps={{
+              popper: {
+                sx: { zIndex: 9999 },
+              },
+              tooltip: {
+                sx: {
+                  bgcolor: "#1C252E",
+                  color: "#FFFFFF",
+                  fontFamily: "'Public Sans', sans-serif",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  borderRadius: "10px",
+                  px: 1.5,
+                  py: 0.6,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                  border: "1px solid rgba(255,255,255,0.15)",
                 },
-              }}
+              },
+              arrow: {
+                sx: {
+                  color: "#1C252E",
+                  "&::before": {
+                    border: "1px solid rgba(255,255,255,0.15)",
+                  },
+                },
+              },
+            }}
+          >
+            <Link
+              href="/profile"
+              className="flex items-center justify-center p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
-              {user?.avatar ? (
-                <Avatar
-                  src={user.avatar}
-                  alt={user.name || "User"}
-                  sx={{ width: 32, height: 32, borderRadius: "10px" }}
-                />
-              ) : (
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "10px",
-                    background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {getUserInitials(user?.name)}
-                </Avatar>
-              )}
-            </Badge>
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                variant="dot"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: "#22C55E",
+                    color: "#22C55E",
+                    boxShadow: "0 0 0 2px #FFFFFF",
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                  },
+                }}
+              >
+                {user?.avatar ? (
+                  <Avatar
+                    src={user.avatar}
+                    alt={user.name || "User"}
+                    sx={{ width: 34, height: 34, borderRadius: "10px" }}
+                  />
+                ) : (
+                  <Avatar
+                    sx={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: "10px",
+                      background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {getUserInitials(user?.name)}
+                  </Avatar>
+                )}
+              </Badge>
+            </Link>
+          </Tooltip>
+        ) : (
+          <div className="p-2 rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-2 shadow-2xs transition-all">
+            <Link
+              href="/profile"
+              className="flex items-center gap-2.5 min-w-0 no-underline hover:opacity-90 transition-opacity"
+            >
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                variant="dot"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: "#22C55E",
+                    color: "#22C55E",
+                    boxShadow: "0 0 0 2px #FFFFFF",
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                  },
+                }}
+              >
+                {user?.avatar ? (
+                  <Avatar
+                    src={user.avatar}
+                    alt={user.name || "User"}
+                    sx={{ width: 32, height: 32, borderRadius: "10px" }}
+                  />
+                ) : (
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "10px",
+                      background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {getUserInitials(user?.name)}
+                  </Avatar>
+                )}
+              </Badge>
 
-            {!isCollapsed && (
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-bold text-[#1C252E] dark:text-white truncate leading-tight">
                   {user?.name || "User"}
@@ -518,10 +596,8 @@ export function Sidebar() {
                   {user?.role || "Member"}
                 </span>
               </div>
-            )}
-          </Link>
+            </Link>
 
-          {!isCollapsed && (
             <IconButton
               size="small"
               onClick={logout}
@@ -539,8 +615,8 @@ export function Sidebar() {
             >
               <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
             </IconButton>
-          )}
-        </div>
+          </div>
+        )}
       </Box>
 
       <SidebarRail />
