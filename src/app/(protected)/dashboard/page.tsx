@@ -9,6 +9,8 @@ import {
   ExecutiveKpiStrip,
   PipelineVelocityCard,
   OperationsLaunchpad,
+  RecruitmentForceCard,
+  LegalAgreementsCard,
   DashboardSkeleton,
 } from "@/components/dashboard";
 import { CreateClientModal } from "@/components/create-client-modal/create-client-modal";
@@ -112,17 +114,17 @@ export default function DashboardPage() {
         pipelineTotal={pipelineTotal}
       />
 
-      {/* ─── 3. ANALYTICAL WORKSPACE: PIPELINE VELOCITY & OPERATIONS LAUNCHPAD ─── */}
+      {/* ─── 3. ANALYTICAL WORKSPACE: PERFECTLY ALIGNED ROWS ─── */}
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", lg: "repeat(12, 1fr)" },
           gap: 1.75,
-          alignItems: "start",
+          alignItems: "stretch",
         }}
       >
-        {/* Pipeline Analytics & Candidate Funnel (8 cols on desktop) */}
-        <Box sx={{ gridColumn: { xs: "1fr", lg: "span 8" } }}>
+        {/* Row 1 Left: Recruitment Pipeline Velocity (8 cols on desktop) */}
+        <Box sx={{ gridColumn: { xs: "span 12", lg: "span 8" }, display: "flex" }}>
           <PipelineVelocityCard
             pipelineTotal={pipelineTotal}
             activePipelines={activePipelines}
@@ -134,15 +136,27 @@ export default function DashboardPage() {
           />
         </Box>
 
-        {/* Operations Launchpad & Enterprise Health (4 cols on desktop) */}
-        <Box sx={{ gridColumn: { xs: "1fr", lg: "span 4" } }}>
+        {/* Row 1 Right: Operations Launchpad (4 cols on desktop) - Matched Height */}
+        <Box sx={{ gridColumn: { xs: "span 12", lg: "span 4" }, display: "flex" }}>
           <OperationsLaunchpad
             onOpenCandidate={() => setOpenCandidateModal(true)}
             onOpenJob={() => setOpenJobModal(true)}
             onOpenClient={() => setOpenClientModal(true)}
+          />
+        </Box>
+
+        {/* Row 2 Left: Recruitment Force (8 cols on desktop) - Directly below Pipeline Velocity */}
+        <Box sx={{ gridColumn: { xs: "span 12", lg: "span 8" }, display: "flex" }}>
+          <RecruitmentForceCard
             usersTotal={usersTotal}
             usersActive={usersActive}
             usersActivePercent={usersActivePercent}
+          />
+        </Box>
+
+        {/* Row 2 Right: Legal & MSAs (4 cols on desktop) - Directly below Operations Launchpad */}
+        <Box sx={{ gridColumn: { xs: "span 12", lg: "span 4" }, display: "flex" }}>
+          <LegalAgreementsCard
             contractsTotal={contractsTotal}
           />
         </Box>

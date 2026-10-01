@@ -90,7 +90,7 @@ export function PipelineVelocityCard({
   };
 
   return (
-    <Box className="lg:col-span-8 flex flex-col rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_8px_16px_-4px_rgba(145,158,171,0.06)] overflow-hidden font-sans">
+    <Box className="w-full h-full flex flex-col rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_8px_16px_-4px_rgba(145,158,171,0.06)] overflow-hidden font-sans">
       {/* Header Bar */}
       <Box className="px-3.5 py-2 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
