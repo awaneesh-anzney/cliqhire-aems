@@ -14,7 +14,6 @@
  */
 
 import type { Metadata } from "next";
-import { Public_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -23,13 +22,6 @@ import { PermissionProvider } from "@/contexts/PermissionContext";
 import { QueryProvider } from "@/contexts/query-provider";
 // Interceptors initialize karo — initializeAuth() nahi chalega yahan
 import "@/lib/axios-config";
-
-const publicSans = Public_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-public-sans",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "CliqHire",
@@ -42,7 +34,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${publicSans.className} ${publicSans.variable} font-sans h-full min-h-screen bg-background text-foreground antialiased selection:bg-primary-soft selection:text-primary relative`} suppressHydrationWarning>
+      <body className="h-full min-h-screen bg-background text-foreground antialiased selection:bg-primary-soft selection:text-primary relative font-sans" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* Subtle Ambient Background Lighting Mapped to Theme */}
           <div

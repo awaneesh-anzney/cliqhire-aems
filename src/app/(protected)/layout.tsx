@@ -14,8 +14,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <SidebarProvider
           defaultOpen={true}
           style={{
-            ["--sidebar-width" as string]: "16.5rem",
-            ["--sidebar-width-icon" as string]: "4.25rem",
+            ["--sidebar-width" as string]: "14.5rem",
+            ["--sidebar-width-icon" as string]: "4rem",
           }}
           className="h-dvh max-h-dvh w-full flex bg-transparent text-foreground antialiased overflow-hidden"
         >

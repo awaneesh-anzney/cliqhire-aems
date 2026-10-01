@@ -20,7 +20,6 @@ import ListSubheader from "@mui/material/ListSubheader";
 import Tooltip from "@mui/material/Tooltip";
 import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -43,26 +42,104 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
-// Icon mapping per module key
-const MODULE_ICONS: Record<string, React.ElementType> = {
-  home: HomeOutlinedIcon,
-  todo: FormatListBulletedOutlinedIcon,
-  leads: BusinessOutlinedIcon,
-  clients: BusinessOutlinedIcon,
-  "client-groups": LayersOutlinedIcon,
-  jobs: WorkOutlineOutlinedIcon,
-  candidates: PersonOutlineOutlinedIcon,
-  pipeline: AccountTreeOutlinedIcon,
-  recruiter: PersonAddAlt1OutlinedIcon,
-  headhunter: PersonSearchOutlinedIcon,
-  tem_candidates: ManageAccountsOutlinedIcon,
-  teams: GroupsOutlinedIcon,
-  roles: AdminPanelSettingsOutlinedIcon,
-  settings: SettingsOutlinedIcon,
-  profile: AccountCircleOutlinedIcon,
-  admin: AdminPanelSettingsOutlinedIcon,
-  notifications: NotificationsOutlinedIcon,
-  email: MailOutlineOutlinedIcon,
+// Multicolored icon theme mapping per module key
+interface ModuleTheme {
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+}
+
+const MODULE_THEMES: Record<string, ModuleTheme> = {
+  home: {
+    icon: HomeOutlinedIcon,
+    color: "#3B82F6",
+    bg: "rgba(59, 130, 246, 0.12)",
+  },
+  todo: {
+    icon: FormatListBulletedOutlinedIcon,
+    color: "#F59E0B",
+    bg: "rgba(245, 158, 11, 0.12)",
+  },
+  leads: {
+    icon: BusinessOutlinedIcon,
+    color: "#06B6D4",
+    bg: "rgba(6, 182, 212, 0.12)",
+  },
+  clients: {
+    icon: BusinessOutlinedIcon,
+    color: "#0EA5E9",
+    bg: "rgba(14, 165, 233, 0.12)",
+  },
+  "client-groups": {
+    icon: LayersOutlinedIcon,
+    color: "#14B8A6",
+    bg: "rgba(20, 184, 166, 0.12)",
+  },
+  jobs: {
+    icon: WorkOutlineOutlinedIcon,
+    color: "#6366F1",
+    bg: "rgba(99, 102, 241, 0.12)",
+  },
+  candidates: {
+    icon: PersonOutlineOutlinedIcon,
+    color: "#8B5CF6",
+    bg: "rgba(139, 92, 246, 0.12)",
+  },
+  pipeline: {
+    icon: AccountTreeOutlinedIcon,
+    color: "#22C55E",
+    bg: "rgba(34, 197, 94, 0.12)",
+  },
+  recruiter: {
+    icon: PersonAddAlt1OutlinedIcon,
+    color: "#2563EB",
+    bg: "rgba(37, 99, 235, 0.12)",
+  },
+  headhunter: {
+    icon: PersonSearchOutlinedIcon,
+    color: "#A855F7",
+    bg: "rgba(168, 85, 247, 0.12)",
+  },
+  tem_candidates: {
+    icon: ManageAccountsOutlinedIcon,
+    color: "#EC4899",
+    bg: "rgba(236, 72, 153, 0.12)",
+  },
+  teams: {
+    icon: GroupsOutlinedIcon,
+    color: "#10B981",
+    bg: "rgba(16, 185, 129, 0.12)",
+  },
+  roles: {
+    icon: AdminPanelSettingsOutlinedIcon,
+    color: "#D97706",
+    bg: "rgba(217, 119, 6, 0.12)",
+  },
+  settings: {
+    icon: SettingsOutlinedIcon,
+    color: "#64748B",
+    bg: "rgba(100, 116, 139, 0.12)",
+  },
+  profile: {
+    icon: AccountCircleOutlinedIcon,
+    color: "#0284C7",
+    bg: "rgba(2, 132, 199, 0.12)",
+  },
+  admin: {
+    icon: AdminPanelSettingsOutlinedIcon,
+    color: "#F43F5E",
+    bg: "rgba(244, 63, 94, 0.12)",
+  },
+  notifications: {
+    icon: NotificationsOutlinedIcon,
+    color: "#F97316",
+    bg: "rgba(249, 115, 22, 0.12)",
+  },
+  email: {
+    icon: MailOutlineOutlinedIcon,
+    color: "#0284C7",
+    bg: "rgba(2, 132, 199, 0.12)",
+  },
 };
 
 interface NavSection {
@@ -173,20 +250,20 @@ export function Sidebar() {
   return (
     <UISidebar
       collapsible="icon"
-      className="border-r border-slate-200/80 dark:border-slate-800 app-sidebar bg-white dark:bg-[#161C24] font-['Public_Sans',sans-serif] select-none transition-all duration-200"
+      className="border-r border-slate-200/80 dark:border-slate-800 app-sidebar bg-white dark:bg-[#161C24] font-sans select-none transition-all duration-200"
     >
       {/* Brand Header */}
       <Box
         component="header"
         className={cn(
-          "h-16 px-4 flex items-center border-b border-slate-200/80 dark:border-slate-800/80 shrink-0",
-          isCollapsed ? "justify-center px-2" : "justify-between"
+          "h-16 px-3.5 flex items-center border-b border-slate-200/80 dark:border-slate-800/80 shrink-0",
+          isCollapsed ? "justify-center px-1" : "justify-between"
         )}
       >
         <Link
           href="/"
           className={cn(
-            "flex items-center gap-3 no-underline outline-none group",
+            "flex items-center gap-2.5 no-underline outline-none group",
             isCollapsed && "justify-center"
           )}
         >
@@ -204,7 +281,7 @@ export function Sidebar() {
               <span className="text-[15px] font-extrabold tracking-tight text-[#1C252E] dark:text-white leading-tight">
                 Cliq<span className="text-blue-600 dark:text-blue-400 font-extrabold">Hire</span>
               </span>
-              <span className="text-[10.5px] font-medium text-[#919EAB] truncate leading-tight mt-0.5">
+              <span className="text-[10px] font-medium text-[#637381] dark:text-[#919EAB] truncate leading-tight mt-0.5">
                 Talent & Recruitment
               </span>
             </div>
@@ -215,7 +292,7 @@ export function Sidebar() {
       {/* Navigation List Viewport */}
       <Box
         component="nav"
-        className="flex-1 overflow-y-auto px-3 py-3 custom-scrollbar flex flex-col gap-4"
+        className="flex-1 overflow-y-auto px-2.5 py-3 custom-scrollbar flex flex-col gap-3.5"
       >
         {loadingPerms ? (
           <Box className="flex flex-col items-center justify-center py-12 gap-2 text-slate-400">
@@ -236,9 +313,9 @@ export function Sidebar() {
                   <ListSubheader
                     disableSticky
                     disableGutters
-                    className="bg-transparent text-[10px] font-extrabold uppercase tracking-wider text-[#919EAB] px-3 pb-1.5 pt-1 select-none flex items-center gap-1.5 leading-none"
+                    className="bg-transparent text-[10px] font-extrabold uppercase tracking-wider text-[#637381] dark:text-[#919EAB] px-2.5 pb-1.5 pt-1 select-none flex items-center gap-1.5 leading-none"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500/60" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500/70" />
                     <span>{section.title}</span>
                   </ListSubheader>
                 ) : undefined
@@ -249,94 +326,125 @@ export function Sidebar() {
                 const isActive =
                   item.href === "/"
                     ? pathname === "/" || pathname === "/dashboard"
-                    : pathname?.startsWith(item.href);
+                    : pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
 
                 let key = item.moduleKey;
                 if (item.href === "/leads") key = "leads";
                 if (item.href === "/clients") key = "clients";
                 if (item.href === "/client-groups") key = "client-groups";
 
-                const Icon = MODULE_ICONS[key] || HomeOutlinedIcon;
+                const theme = MODULE_THEMES[key] || {
+                  icon: HomeOutlinedIcon,
+                  color: "#3B82F6",
+                  bg: "rgba(59, 130, 246, 0.12)",
+                };
+                const Icon = theme.icon;
 
                 const navButton = (
-                  <ListItem disablePadding key={iIdx} className="block mb-0.5">
-                    <ListItemButton
-                      component={Link}
-                      href={item.href}
+                  <ListItemButton
+                    component={Link}
+                    href={item.href}
+                    className={cn(
+                      "h-10 rounded-xl transition-all duration-150 outline-none select-none",
+                      isCollapsed ? "w-10 h-10 p-0 mx-auto justify-center" : "w-full px-2.5 justify-start gap-2.5",
+                      isActive
+                        ? "!bg-[#2563EB] !text-white font-bold shadow-sm shadow-blue-500/30"
+                        : "!bg-transparent text-slate-700 dark:text-slate-200 hover:!bg-slate-100/80 dark:hover:!bg-slate-800/60 font-semibold"
+                    )}
+                    sx={{
+                      minHeight: 40,
+                    }}
+                  >
+                    {/* Multicolored Icon Container */}
+                    <ListItemIcon
                       className={cn(
-                        "h-10 px-3 rounded-xl transition-all duration-150 outline-none",
-                        isCollapsed ? "justify-center px-0 w-10 mx-auto" : "justify-start gap-3",
-                        isActive
-                          ? "bg-[#1C252E] dark:bg-white text-white dark:text-[#1C252E] font-bold shadow-xs"
-                          : "text-slate-600 dark:text-slate-300 hover:text-[#1C252E] dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60 font-medium"
+                        "min-w-0 transition-colors flex items-center justify-center shrink-0",
+                        isCollapsed ? "mx-auto" : ""
                       )}
-                      sx={{
-                        minHeight: 40,
-                        "&:hover": {
-                          backgroundColor: isActive ? undefined : "rgba(145, 158, 171, 0.08)",
-                        },
-                      }}
+                      sx={{ minWidth: isCollapsed ? 0 : 30 }}
                     >
-                      <ListItemIcon
+                      <div
                         className={cn(
-                          "min-w-0 transition-colors",
-                          isCollapsed ? "mx-auto" : "",
+                          "w-7 h-7 rounded-lg flex items-center justify-center transition-transform",
                           isActive
-                            ? "text-white dark:text-[#1C252E]"
-                            : "text-[#637381] dark:text-[#919EAB] group-hover:text-[#1C252E] dark:group-hover:text-white"
+                            ? "bg-white/20 text-white"
+                            : ""
                         )}
-                        sx={{ minWidth: isCollapsed ? 0 : 28 }}
+                        style={{
+                          backgroundColor: isActive ? "rgba(255, 255, 255, 0.2)" : theme.bg,
+                          color: isActive ? "#FFFFFF" : theme.color,
+                        }}
                       >
-                        <Icon sx={{ fontSize: 20 }} />
-                      </ListItemIcon>
-
-                      {!isCollapsed && (
-                        <ListItemText
-                          primary={
-                            <span
-                              className={cn(
-                                "text-[13px] tracking-tight truncate block",
-                                isActive ? "font-bold" : "font-medium"
-                              )}
-                            >
-                              {item.name}
-                            </span>
-                          }
+                        <Icon
+                          sx={{
+                            fontSize: 18,
+                            color: isActive ? "#FFFFFF" : theme.color,
+                          }}
                         />
-                      )}
-                    </ListItemButton>
-                  </ListItem>
+                      </div>
+                    </ListItemIcon>
+
+                    {/* Navigation Item Label */}
+                    {!isCollapsed && (
+                      <ListItemText
+                        primary={
+                          <span
+                            className={cn(
+                              "text-[13px] tracking-tight truncate block",
+                              isActive ? "font-bold text-white" : "font-semibold text-slate-700 dark:text-slate-200"
+                            )}
+                          >
+                            {item.name}
+                          </span>
+                        }
+                      />
+                    )}
+                  </ListItemButton>
                 );
 
-                if (isCollapsed) {
-                  return (
-                    <Tooltip
-                      key={iIdx}
-                      title={item.name}
-                      placement="right"
-                      arrow
-                      slotProps={{
-                        tooltip: {
-                          sx: {
-                            bgcolor: "#1C252E",
-                            color: "#FFFFFF",
-                            fontSize: "11px",
-                            fontWeight: 600,
-                            borderRadius: "8px",
-                            px: 1.5,
-                            py: 0.5,
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                return (
+                  <ListItem disablePadding key={iIdx} className="block mb-0.5">
+                    {isCollapsed ? (
+                      <Tooltip
+                        title={item.name}
+                        placement="right"
+                        arrow
+                        disableInteractive
+                        slotProps={{
+                          popper: {
+                            sx: { zIndex: 9999 },
                           },
-                        },
-                        arrow: { sx: { color: "#1C252E" } },
-                      }}
-                    >
-                      {navButton}
-                    </Tooltip>
-                  );
-                }
-
-                return navButton;
+                          tooltip: {
+                            sx: {
+                              bgcolor: "#1C252E",
+                              color: "#FFFFFF",
+                              fontFamily: "'Public Sans', sans-serif",
+                              fontSize: "12px",
+                              fontWeight: 600,
+                              borderRadius: "10px",
+                              px: 1.5,
+                              py: 0.6,
+                              boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                              border: "1px solid rgba(255,255,255,0.15)",
+                            },
+                          },
+                          arrow: {
+                            sx: {
+                              color: "#1C252E",
+                              "&::before": {
+                                border: "1px solid rgba(255,255,255,0.15)",
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        {navButton}
+                      </Tooltip>
+                    ) : (
+                      navButton
+                    )}
+                  </ListItem>
+                );
               })}
             </List>
           ))
@@ -347,7 +455,7 @@ export function Sidebar() {
       <Box
         component="footer"
         className={cn(
-          "p-3 border-t border-slate-200/80 dark:border-slate-800/80 shrink-0",
+          "p-2.5 border-t border-slate-200/80 dark:border-slate-800/80 shrink-0",
           isCollapsed ? "flex justify-center" : ""
         )}
       >
@@ -406,7 +514,7 @@ export function Sidebar() {
                 <span className="text-xs font-bold text-[#1C252E] dark:text-white truncate leading-tight">
                   {user?.name || "User"}
                 </span>
-                <span className="text-[10px] font-semibold text-[#919EAB] truncate leading-tight mt-0.5 uppercase tracking-wider">
+                <span className="text-[10px] font-semibold text-[#637381] dark:text-[#919EAB] truncate leading-tight mt-0.5 uppercase tracking-wider">
                   {user?.role || "Member"}
                 </span>
               </div>
