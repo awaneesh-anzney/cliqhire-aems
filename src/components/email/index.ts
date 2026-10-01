@@ -15,4 +15,8 @@ export * from "./RecipientInput";
 export * from "./AdminMailboxesDialog";
 export * from "./EmailSignatureDialog";
 export * from "./EmailAddressSelector";
+export * from "./EmailEditor";
+export * from "./EmailNavSidebar";
+export * from "./EmailConversationList";
+export * from "./EmailDetailPane";
 export * from "@/types/emailContactTypes";
