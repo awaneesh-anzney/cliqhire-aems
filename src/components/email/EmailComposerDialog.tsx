@@ -1,39 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect, DragEvent } from "react";
-import { 
-  Send, 
-  Paperclip, 
-  X, 
-  Trash2, 
-  Minus, 
-  Maximize2, 
-  Minimize2, 
-  FileIcon, 
-  Check, 
-  Type, 
-  Link2, 
-  Sparkles, 
-  Save,
-  PenTool,
-  Building2,
-  UserCheck,
-  Users,
-  FileText,
-  Image as ImageIcon,
-  Sheet,
-  FileArchive
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useSendEmail, useSaveDraft, useSendDraft, useUpdateDraft } from "@/hooks/useEmail";
 import { useEmailSignatures } from "@/hooks/useEmailSignatures";
@@ -41,6 +8,41 @@ import { RecipientInput } from "./RecipientInput";
 import { EmailRichEditor, EmailRichEditorRef } from "./EmailRichEditor";
 import { EmailSignatureDialog } from "./EmailSignatureDialog";
 import { EmailAddressSelector } from "./EmailAddressSelector";
+
+// Material UI Components
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
+import Badge from "@mui/material/Badge";
+
+// Material UI Icons
+import SendIcon from "@mui/icons-material/Send";
+import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import MinimizeIcon from "@mui/icons-material/Minimize";
+import CropFreeOutlinedIcon from "@mui/icons-material/CropFreeOutlined";
+import CloseFullscreenOutlinedIcon from "@mui/icons-material/CloseFullscreenOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
+import TextFormatOutlinedIcon from "@mui/icons-material/TextFormatOutlined";
+import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import FolderZipOutlinedIcon from "@mui/icons-material/FolderZipOutlined";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import CheckIcon from "@mui/icons-material/Check";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 
 export interface ComposerInitialData {
   to?: string;
@@ -62,7 +64,7 @@ interface EmailComposerDialogProps {
 type WindowMode = "docked" | "minimized" | "fullscreen";
 
 const MAX_ATTACHMENTS = 10;
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB standard email limit
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB
 
 export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   open,
@@ -83,9 +85,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     getSignatureById,
   } = useEmailSignatures();
 
-  // Signature state
+  // Signature state & MUI Menu anchor
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
   const [activeSignatureId, setActiveSignatureId] = useState<string | null>(null);
+  const [signatureMenuAnchor, setSignatureMenuAnchor] = useState<null | HTMLElement>(null);
 
   // Window display state
   const [windowMode, setWindowMode] = useState<WindowMode>("docked");
@@ -139,7 +142,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         }
       }
 
-      // If no draft ID and a default signature is configured, append it!
+      // If no draft ID and a default signature is configured, append it
       if (!initialData?.draftId && targetDefaultSig) {
         const sigBlock = `<div class="gmail_signature" data-signature-block="true">${targetDefaultSig.contentHtml}</div>`;
         if (initialHtml) {
@@ -170,17 +173,18 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       setFiles([]);
       setShowFormattingBar(true);
       setActiveSignatureId(null);
+      setSignatureMenuAnchor(null);
     }
   }, [open, initialData, defaultNewSignature, defaultReplySignature]);
 
   if (!open) return null;
 
-  // Signature switching & insertion (Gmail style)
+  // Signature switching & insertion
   const handleSelectSignature = (sigId: string | null) => {
     setActiveSignatureId(sigId);
+    setSignatureMenuAnchor(null);
     let currentHtml = editorRef.current?.getHTML() || bodyHtml || "";
 
-    // Regex to match existing signature block
     const sigRegex = /<div class="gmail_signature"[\s\S]*?<\/div>(\s*<\/div>)?/i;
 
     if (sigId) {
@@ -195,7 +199,6 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       }
       toast.success(`Inserted "${sig.name}" signature`);
     } else {
-      // Remove signature
       currentHtml = currentHtml.replace(sigRegex, "");
       toast.info("Signature removed from message");
     }
@@ -215,7 +218,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     const validFiles: File[] = [];
     for (const file of selectedFiles) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast.error(`File "${file.name}" exceeds the 15MB limit.`);
+        toast.error(`File "${file.name}" exceeds the 25MB limit.`);
       } else {
         validFiles.push(file);
       }
@@ -264,21 +267,45 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   const getAttachmentMeta = (fileName: string) => {
     const lower = fileName.toLowerCase();
     if (lower.endsWith(".pdf")) {
-      return { icon: <FileText className="h-3.5 w-3.5 text-rose-500" />, badge: "PDF", color: "border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20" };
+      return {
+        icon: <PictureAsPdfOutlinedIcon sx={{ fontSize: 16, color: "#E11D48" }} />,
+        badge: "PDF",
+        chipStyle: "border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300",
+      };
     }
     if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") || lower.endsWith(".gif")) {
-      return { icon: <ImageIcon className="h-3.5 w-3.5 text-purple-500" />, badge: "IMG", color: "border-purple-200 dark:border-purple-900/40 bg-purple-50/60 dark:bg-purple-950/20" };
+      return {
+        icon: <ImageOutlinedIcon sx={{ fontSize: 16, color: "#8E33FF" }} />,
+        badge: "IMG",
+        chipStyle: "border-purple-200 dark:border-purple-900/50 bg-purple-50/70 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300",
+      };
     }
     if (lower.endsWith(".xls") || lower.endsWith(".xlsx") || lower.endsWith(".csv")) {
-      return { icon: <Sheet className="h-3.5 w-3.5 text-emerald-500" />, badge: "XLS", color: "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20" };
+      return {
+        icon: <TableChartOutlinedIcon sx={{ fontSize: 16, color: "#00A76F" }} />,
+        badge: "XLS",
+        chipStyle: "border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/70 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300",
+      };
     }
     if (lower.endsWith(".doc") || lower.endsWith(".docx")) {
-      return { icon: <FileText className="h-3.5 w-3.5 text-blue-500" />, badge: "DOC", color: "border-blue-200 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/20" };
+      return {
+        icon: <DescriptionOutlinedIcon sx={{ fontSize: 16, color: "#1877F2" }} />,
+        badge: "DOC",
+        chipStyle: "border-blue-200 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300",
+      };
     }
     if (lower.endsWith(".zip") || lower.endsWith(".rar") || lower.endsWith(".tar") || lower.endsWith(".gz")) {
-      return { icon: <FileArchive className="h-3.5 w-3.5 text-amber-500" />, badge: "ZIP", color: "border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20" };
+      return {
+        icon: <FolderZipOutlinedIcon sx={{ fontSize: 16, color: "#F59E0B" }} />,
+        badge: "ZIP",
+        chipStyle: "border-amber-200 dark:border-amber-900/50 bg-amber-50/70 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300",
+      };
     }
-    return { icon: <FileIcon className="h-3.5 w-3.5 text-primary" />, badge: "FILE", color: "border-border/80 bg-card" };
+    return {
+      icon: <InsertDriveFileOutlinedIcon sx={{ fontSize: 16, color: "#637381" }} />,
+      badge: "FILE",
+      chipStyle: "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300",
+    };
   };
 
   // Dispatch Email
@@ -368,6 +395,9 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     }
   };
 
+  const isSending = sendEmailMutation.isPending || sendDraftMutation.isPending;
+  const isSaving = saveDraftMutation.isPending || updateDraftMutation.isPending;
+
   // Title display
   const windowTitle = initialData?.draftId
     ? "Edit Draft"
@@ -375,37 +405,41 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     ? subject
     : "New Message";
 
-  // Minimized Bar (Docked bottom-right slim pill like Gmail)
+  // Minimized Bar (Docked bottom-right slim pill)
   if (windowMode === "minimized") {
     return (
-      <div className="fixed bottom-0 right-4 sm:right-8 z-50 w-72 sm:w-80 h-11 rounded-t-xl bg-card border border-border/80 shadow-lg flex items-center justify-between px-3.5 transition-transform hover:bg-muted/40 cursor-pointer">
+      <div
+        className="fixed bottom-0 right-4 sm:right-8 z-50 w-72 sm:w-80 h-11 rounded-t-xl bg-white dark:bg-[#1C252E] border border-slate-200/90 dark:border-slate-800 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.12)] flex items-center justify-between px-3.5 transition-all hover:bg-slate-50 dark:hover:bg-slate-850 cursor-pointer font-['Public_Sans',sans-serif]"
+      >
         <div
           onClick={() => setWindowMode("docked")}
           className="flex items-center gap-2 flex-1 min-w-0"
         >
-          <span className="w-2 h-2 rounded-full bg-primary" />
-          <span className="text-xs font-semibold text-foreground truncate">{windowTitle}</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#1877F2]" />
+          <span className="text-xs font-bold text-[#1C252E] dark:text-white truncate">
+            {windowTitle}
+          </span>
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setWindowMode("docked")}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md"
-            title="Expand"
-          >
-            <Maximize2 className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDiscard}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md"
-            title="Close"
-          >
-            <X className="h-3.5 w-3.5" />
-          </Button>
+          <Tooltip title="Expand">
+            <IconButton
+              size="small"
+              onClick={() => setWindowMode("docked")}
+              sx={{ color: "#637381", "&:hover": { color: "#1C252E" } }}
+            >
+              <CropFreeOutlinedIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Close">
+            <IconButton
+              size="small"
+              onClick={handleDiscard}
+              sx={{ color: "#637381", "&:hover": { color: "#E11D48" } }}
+            >
+              <CloseIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
         </div>
       </div>
     );
@@ -416,37 +450,44 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
   return (
     <>
-      {/* Dim backdrop only when in fullscreen modal mode */}
+      {/* Dim backdrop when in fullscreen mode */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs transition-opacity"
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity"
           onClick={() => setWindowMode("docked")}
         />
       )}
 
+      {/* Main Material UI Composer Container */}
       <div
         onKeyDown={handleKeyDown}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`fixed z-50 bg-card/95 backdrop-blur-md border border-border/70 shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+        className={`fixed z-50 bg-white dark:bg-[#1C252E] border border-slate-200/90 dark:border-slate-800 shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_16px_32px_-4px_rgba(145,158,171,0.14)] flex flex-col overflow-hidden transition-all duration-200 font-['Public_Sans',sans-serif] ${
           isFullscreen
-            ? "inset-2 sm:inset-6 md:inset-10 lg:inset-14 rounded-2xl"
-            : "bottom-0 right-0 sm:right-6 md:right-8 w-full sm:w-[600px] lg:w-[640px] max-w-[calc(100vw-1rem)] h-[90vh] sm:h-[590px] max-h-[calc(100vh-1rem)] rounded-t-2xl sm:rounded-t-2xl border-b-0"
+            ? "inset-2 sm:inset-6 md:inset-10 lg:inset-12 rounded-2xl"
+            : "bottom-0 right-0 sm:right-6 md:right-8 w-full sm:w-[620px] lg:w-[660px] max-w-[calc(100vw-1rem)] h-[92vh] sm:h-[620px] max-h-[calc(100vh-1rem)] rounded-t-2xl sm:rounded-t-2xl border-b-0"
         }`}
       >
-        {/* Header Bar */}
-        <div className="px-3.5 py-2.5 bg-muted/35 border-b border-border/60 flex items-center justify-between gap-2 select-none shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-xs font-bold text-foreground truncate">
+        {/* ========================================================= */}
+        {/* 1. TOP HEADER BAR                                         */}
+        {/* ========================================================= */}
+        <div className="px-4 py-2.5 bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2 select-none shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-[13px] font-bold text-[#1C252E] dark:text-white truncate">
               {windowTitle}
             </span>
+
             {draftStatus === "saving" && (
-              <span className="text-[10px] text-muted-foreground animate-pulse">Saving...</span>
+              <span className="text-[11px] text-[#919EAB] flex items-center gap-1">
+                <CircularProgress size={10} color="inherit" />
+                <span>Saving...</span>
+              </span>
             )}
             {draftStatus === "saved" && (
-              <span className="text-[10px] text-muted-foreground/80 flex items-center gap-0.5">
-                <Check className="h-2.5 w-2.5 text-emerald-500" />
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                <CheckCircleOutlinedIcon sx={{ fontSize: 13 }} />
                 <span>Saved</span>
               </span>
             )}
@@ -454,54 +495,68 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
           {/* Window action controls */}
           <div className="flex items-center gap-0.5 shrink-0">
-            {/* Minimize button (desktop only) */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setWindowMode("minimized")}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md hidden sm:inline-flex"
-              title="Minimize"
-            >
-              <Minus className="h-3.5 w-3.5" />
-            </Button>
+            {/* Minimize button (desktop) */}
+            <Tooltip title="Minimize">
+              <IconButton
+                size="small"
+                onClick={() => setWindowMode("minimized")}
+                sx={{
+                  color: "#637381",
+                  "&:hover": { color: "#1C252E", bgcolor: "rgba(145, 158, 171, 0.08)" },
+                  display: { xs: "none", sm: "inline-flex" },
+                }}
+              >
+                <MinimizeIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
 
             {/* Maximize / Restore button */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setWindowMode(isFullscreen ? "docked" : "fullscreen")}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md hidden sm:inline-flex"
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            >
-              {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-            </Button>
+            <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+              <IconButton
+                size="small"
+                onClick={() => setWindowMode(isFullscreen ? "docked" : "fullscreen")}
+                sx={{
+                  color: "#637381",
+                  "&:hover": { color: "#1C252E", bgcolor: "rgba(145, 158, 171, 0.08)" },
+                  display: { xs: "none", sm: "inline-flex" },
+                }}
+              >
+                {isFullscreen ? (
+                  <CloseFullscreenOutlinedIcon sx={{ fontSize: 16 }} />
+                ) : (
+                  <CropFreeOutlinedIcon sx={{ fontSize: 16 }} />
+                )}
+              </IconButton>
+            </Tooltip>
 
             {/* Close button */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleDiscard}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md"
-              title="Close"
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
+            <Tooltip title="Close">
+              <IconButton
+                size="small"
+                onClick={handleDiscard}
+                sx={{
+                  color: "#637381",
+                  "&:hover": { color: "#E11D48", bgcolor: "rgba(225, 29, 72, 0.08)" },
+                }}
+              >
+                <CloseIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
           </div>
         </div>
 
-        {/* Recipients Form Header */}
-        <div className="bg-card shrink-0">
-          {/* Stakeholder Quick Email Address Selector */}
-          <div className="px-3 py-1 bg-muted/20 border-b border-border/50 flex items-center justify-between gap-2 text-[11px] overflow-x-auto">
-            <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 shrink-0">
-              <Users className="h-3 w-3 text-primary" />
-              <span>Select Email:</span>
+        {/* ========================================================= */}
+        {/* 2. RECIPIENTS & SUBJECT SECTION                           */}
+        {/* ========================================================= */}
+        <div className="bg-white dark:bg-[#1C252E] shrink-0">
+          {/* Quick Stakeholder Address Selector Bar */}
+          <div className="px-3.5 py-1.5 bg-slate-50/40 dark:bg-slate-800/20 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 overflow-x-auto">
+            <span className="text-[11px] font-semibold text-[#637381] dark:text-[#919EAB] flex items-center gap-1.5 shrink-0 select-none">
+              <GroupsOutlinedIcon sx={{ fontSize: 15, color: "#1877F2" }} />
+              <span>Quick Add:</span>
             </span>
 
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               <EmailAddressSelector
                 initialType="client"
                 align="start"
@@ -515,10 +570,9 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300 hover:bg-blue-500/20 border border-blue-200/60 dark:border-blue-800/40 transition-colors"
-                    title="Select from client emails"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 hover:bg-blue-500/20 border border-blue-200/70 dark:border-blue-800/50 transition-colors"
                   >
-                    <Building2 className="h-2.5 w-2.5" />
+                    <BusinessOutlinedIcon sx={{ fontSize: 13 }} />
                     <span>Client</span>
                   </button>
                 }
@@ -537,10 +591,9 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20 border border-rose-200/60 dark:border-rose-800/40 transition-colors"
-                    title="Select from candidate emails"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20 border border-rose-200/70 dark:border-rose-800/50 transition-colors"
                   >
-                    <UserCheck className="h-2.5 w-2.5" />
+                    <PersonOutlineOutlinedIcon sx={{ fontSize: 13 }} />
                     <span>Candidate</span>
                   </button>
                 }
@@ -559,10 +612,9 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 border border-purple-200/60 dark:border-purple-800/40 transition-colors"
-                    title="Select from team member emails"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 border border-purple-200/70 dark:border-purple-800/50 transition-colors"
                   >
-                    <Users className="h-2.5 w-2.5" />
+                    <GroupsOutlinedIcon sx={{ fontSize: 13 }} />
                     <span>Team</span>
                   </button>
                 }
@@ -581,12 +633,12 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             placeholder="Recipients..."
             autoFocus
             rightAction={
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <div className="flex items-center gap-1 text-[11px] text-[#637381]">
                 {!showCc && (
                   <button
                     type="button"
                     onClick={() => setShowCc(true)}
-                    className="hover:text-primary transition-colors font-medium px-1 py-0.5 rounded hover:bg-muted"
+                    className="hover:text-primary transition-colors font-bold px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     Cc
                   </button>
@@ -595,7 +647,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowBcc(true)}
-                    className="hover:text-primary transition-colors font-medium px-1 py-0.5 rounded hover:bg-muted"
+                    className="hover:text-primary transition-colors font-bold px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     Bcc
                   </button>
@@ -621,7 +673,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                     setShowCc(false);
                     setCcRecipients([]);
                   }}
-                  className="text-[10px] text-muted-foreground hover:text-foreground"
+                  className="text-[11px] text-[#919EAB] hover:text-[#1C252E] dark:hover:text-white"
                 >
                   Remove
                 </button>
@@ -646,7 +698,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                     setShowBcc(false);
                     setBccRecipients([]);
                   }}
-                  className="text-[10px] text-muted-foreground hover:text-foreground"
+                  className="text-[11px] text-[#919EAB] hover:text-[#1C252E] dark:hover:text-white"
                 >
                   Remove
                 </button>
@@ -655,7 +707,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
           )}
 
           {/* Subject Field */}
-          <div className="px-3 py-1.5 border-b border-border/60 flex items-center">
+          <div className="px-3.5 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center">
             <input
               type="text"
               placeholder="Subject"
@@ -664,24 +716,26 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 setSubject(e.target.value);
                 setDraftStatus("unsaved");
               }}
-              className="w-full bg-transparent outline-none text-xs sm:text-sm font-semibold text-foreground placeholder:text-muted-foreground/60 h-7"
+              className="w-full bg-transparent outline-none text-xs sm:text-[13.5px] font-semibold text-[#1C252E] dark:text-white placeholder:text-[#919EAB] h-7"
             />
           </div>
         </div>
 
-        {/* Rich Text Editor Body Area */}
+        {/* ========================================================= */}
+        {/* 3. RICH TEXT EDITOR BODY CANVAS                          */}
+        {/* ========================================================= */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
           {/* Drag & Drop Visual Overlay */}
           {isDraggingOver && (
-            <div className="absolute inset-0 z-20 bg-primary/10 border-2 border-dashed border-primary rounded-xl flex items-center justify-center pointer-events-none backdrop-blur-2xs">
-              <div className="flex items-center gap-2 text-xs font-bold text-primary bg-card px-4 py-2 rounded-xl shadow-lg border">
-                <Paperclip className="h-4 w-4" />
-                <span>Drop files here to attach (up to 15MB each)</span>
+            <div className="absolute inset-0 z-20 bg-blue-500/10 border-2 border-dashed border-[#1877F2] rounded-xl flex items-center justify-center pointer-events-none backdrop-blur-[2px]">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#1877F2] bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl shadow-lg border border-blue-200 dark:border-blue-800">
+                <AttachFileOutlinedIcon sx={{ fontSize: 18 }} />
+                <span>Drop files here to attach (up to 25MB each)</span>
               </div>
             </div>
           )}
 
-          {/* Rich Text Editor with imperative ref for signature updates */}
+          {/* Rich Text Editor with Ref for Signature Injection */}
           <EmailRichEditor
             ref={editorRef}
             initialContent={bodyHtml || bodyText}
@@ -695,15 +749,15 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             onAttachClick={() => fileInputRef.current?.click()}
           />
 
-          {/* Attachments Chip List */}
+          {/* Attachments Section */}
           {files.length > 0 && (
-            <div className="px-3 py-2 border-t border-border/60 bg-muted/20 space-y-1.5 shrink-0 max-h-36 overflow-y-auto">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
-                <span className="flex items-center gap-1.5 text-foreground font-semibold">
-                  <Paperclip className="h-3.5 w-3.5 text-primary" />
+            <div className="px-3.5 py-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 space-y-2 shrink-0 max-h-40 overflow-y-auto">
+              <div className="flex items-center justify-between text-[11px] text-[#637381] font-medium">
+                <span className="flex items-center gap-1.5 text-[#1C252E] dark:text-white font-bold">
+                  <AttachFileOutlinedIcon sx={{ fontSize: 15, color: "#1877F2" }} />
                   <span>Attachments ({files.length}/{MAX_ATTACHMENTS})</span>
                 </span>
-                <span className="text-[10px] text-muted-foreground">Max 15MB each</span>
+                <span className="text-[10px] text-[#919EAB]">Max 25MB each</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -712,22 +766,22 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                   return (
                     <div
                       key={idx}
-                      className={`flex items-center gap-2 px-2.5 py-1 rounded-xl border text-xs shadow-2xs group ${meta.color}`}
+                      className={`flex items-center gap-2 px-2.5 py-1 rounded-xl border text-xs shadow-2xs ${meta.chipStyle}`}
                     >
                       {meta.icon}
-                      <span className="truncate max-w-[150px] text-[11px] font-semibold text-foreground" title={file.name}>
+                      <span className="truncate max-w-[160px] text-[11.5px] font-semibold" title={file.name}>
                         {file.name}
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-medium">
+                      <span className="text-[10px] opacity-75 font-medium">
                         ({formatFileSize(file.size)})
                       </span>
                       <button
                         type="button"
                         onClick={() => removeFile(idx)}
-                        className="p-0.5 text-muted-foreground hover:text-destructive rounded transition-colors"
+                        className="p-0.5 hover:text-rose-600 rounded transition-colors"
                         title="Remove attachment"
                       >
-                        <X className="h-3 w-3" />
+                        <CloseIcon sx={{ fontSize: 13 }} />
                       </button>
                     </div>
                   );
@@ -737,45 +791,62 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
           )}
         </div>
 
-        {/* Bottom Action Toolbar (Gmail Style) */}
-        <div className="p-2 sm:p-2.5 border-t border-border/70 bg-muted/15 flex items-center justify-between gap-2 shrink-0 select-none">
-          {/* Left Actions: Send Button & Quick Tools */}
-          <div className="flex items-center gap-1.5">
-            {/* Primary Send Button */}
+        {/* ========================================================= */}
+        {/* 4. BOTTOM ACTION TOOLBAR (MATERIAL UI GMAIL STYLE)        */}
+        {/* ========================================================= */}
+        <div className="p-2.5 sm:px-4 sm:py-3 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between gap-2 shrink-0 select-none">
+          {/* Left Actions: Send Button & Quick Format Icons */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Primary Material UI Send Button */}
             <Button
-              type="button"
-              disabled={sendEmailMutation.isPending || sendDraftMutation.isPending}
+              variant="contained"
+              disabled={isSending}
               onClick={handleSend}
-              className="h-8 px-4 gap-1.5 text-xs bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-xs shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-95"
+              startIcon={
+                isSending ? (
+                  <CircularProgress size={14} color="inherit" />
+                ) : (
+                  <SendIcon sx={{ fontSize: 15 }} />
+                )
+              }
+              sx={{
+                bgcolor: "#1C252E",
+                color: "#FFFFFF",
+                "&:hover": { bgcolor: "#28323D" },
+                ".dark &": {
+                  bgcolor: "#FFFFFF",
+                  color: "#1C252E",
+                  "&:hover": { bgcolor: "#F4F6F8" },
+                },
+                borderRadius: "12px",
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: "12.5px",
+                px: 2.2,
+                py: 0.7,
+                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+              }}
             >
-              {sendEmailMutation.isPending || sendDraftMutation.isPending ? (
-                <>
-                  <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  <span>Sending...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="h-3.5 w-3.5" />
-                  <span>Send</span>
-                </>
-              )}
+              {isSending ? "Sending..." : "Send"}
             </Button>
 
-            {/* Formatting Ribbon Toggle (Gmail 'A' icon) */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowFormattingBar(!showFormattingBar)}
-              className={`h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground ${
-                showFormattingBar ? "bg-muted text-primary font-bold shadow-2xs" : ""
-              }`}
-              title="Formatting options"
-            >
-              <Type className="h-4 w-4" />
-            </Button>
+            {/* Formatting Ribbon Toggle */}
+            <Tooltip title="Formatting options">
+              <IconButton
+                size="small"
+                onClick={() => setShowFormattingBar(!showFormattingBar)}
+                sx={{
+                  color: showFormattingBar ? "#1877F2" : "#637381",
+                  bgcolor: showFormattingBar ? "rgba(24, 119, 242, 0.08)" : "transparent",
+                  borderRadius: "10px",
+                  "&:hover": { bgcolor: "rgba(145, 158, 171, 0.12)" },
+                }}
+              >
+                <TextFormatOutlinedIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+            </Tooltip>
 
-            {/* Attach File Paperclip Button */}
+            {/* Attach File Button */}
             <input
               type="file"
               ref={fileInputRef}
@@ -791,108 +862,181 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.rtf,.zip,.rar,.png,.jpg,.jpeg,.gif,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain,image/*"
               className="hidden"
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={files.length >= MAX_ATTACHMENTS}
-              className={`h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground ${
-                files.length > 0 ? "text-primary bg-primary/10" : ""
-              }`}
-              title="Attach files (PDF, Word, Excel, Images, etc.)"
+            <Tooltip title="Attach files (PDF, Word, Excel, Images, etc.)">
+              <Badge
+                badgeContent={files.length}
+                color="primary"
+                invisible={files.length === 0}
+                sx={{
+                  "& .MuiBadge-badge": {
+                    fontSize: 9,
+                    height: 16,
+                    minWidth: 16,
+                    bgcolor: "#1877F2",
+                  },
+                }}
+              >
+                <IconButton
+                  size="small"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={files.length >= MAX_ATTACHMENTS}
+                  sx={{
+                    color: files.length > 0 ? "#1877F2" : "#637381",
+                    bgcolor: files.length > 0 ? "rgba(24, 119, 242, 0.08)" : "transparent",
+                    borderRadius: "10px",
+                    "&:hover": { bgcolor: "rgba(145, 158, 171, 0.12)" },
+                  }}
+                >
+                  <AttachFileOutlinedIcon sx={{ fontSize: 20 }} />
+                </IconButton>
+              </Badge>
+            </Tooltip>
+
+            {/* Signature Management Menu Button (MUI Menu) */}
+            <Tooltip title="Insert signature">
+              <IconButton
+                size="small"
+                onClick={(e) => setSignatureMenuAnchor(e.currentTarget)}
+                sx={{
+                  color: activeSignatureId ? "#1877F2" : "#637381",
+                  bgcolor: activeSignatureId ? "rgba(24, 119, 242, 0.08)" : "transparent",
+                  borderRadius: "10px",
+                  "&:hover": { bgcolor: "rgba(145, 158, 171, 0.12)" },
+                }}
+              >
+                <DriveFileRenameOutlineOutlinedIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+            </Tooltip>
+
+            <Menu
+              anchorEl={signatureMenuAnchor}
+              open={Boolean(signatureMenuAnchor)}
+              onClose={() => setSignatureMenuAnchor(null)}
+              anchorOrigin={{ vertical: "top", horizontal: "left" }}
+              transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+              slotProps={{
+                paper: {
+                  sx: {
+                    borderRadius: "14px",
+                    minWidth: 200,
+                    p: 0.5,
+                    boxShadow: "0 8px 24px rgba(145, 158, 171, 0.16)",
+                    border: "1px solid rgba(145, 158, 171, 0.2)",
+                  },
+                },
+              }}
             >
-              <Paperclip className="h-4 w-4" />
-            </Button>
+              <div className="px-3 py-1.5 text-[10px] font-bold text-[#919EAB] uppercase tracking-wider flex items-center justify-between">
+                <span>Signatures</span>
+                {activeSignatureId && (
+                  <span className="text-[9px] text-[#1877F2] font-semibold lowercase">active</span>
+                )}
+              </div>
+              <Divider sx={{ my: 0.5 }} />
 
-            {/* Signature Management Menu Button (Gmail Style) */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={`h-8 w-8 rounded-lg transition-colors ${
-                    activeSignatureId
-                      ? "text-primary bg-primary/10 hover:bg-primary/20"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  title="Insert signature"
-                >
-                  <PenTool className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 rounded-xl p-1.5 shadow-xl border-border/70">
-                <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase px-2 py-1 flex items-center justify-between">
-                  <span>Insert Signature</span>
-                  {activeSignatureId && (
-                    <span className="text-[9px] text-primary font-semibold lowercase">active</span>
-                  )}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+              {signatures.map((sig) => {
+                const sigId = sig._id || sig.id || "";
+                const isSelected = activeSignatureId === sigId;
+                return (
+                  <MenuItem
+                    key={sigId}
+                    onClick={() => handleSelectSignature(sigId)}
+                    sx={{
+                      borderRadius: "8px",
+                      fontSize: "12.5px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      py: 0.8,
+                    }}
+                  >
+                    <span className="truncate font-medium">{sig.name}</span>
+                    {isSelected && <CheckIcon sx={{ fontSize: 16, color: "#1877F2" }} />}
+                  </MenuItem>
+                );
+              })}
 
-                {signatures.map((sig) => {
-                  const sigId = sig._id || sig.id || "";
-                  const isSelected = activeSignatureId === sigId;
-                  return (
-                    <DropdownMenuItem
-                      key={sigId}
-                      onClick={() => handleSelectSignature(sigId)}
-                      className="flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg cursor-pointer"
-                    >
-                      <span className="truncate font-medium">{sig.name}</span>
-                      {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
-                    </DropdownMenuItem>
-                  );
-                })}
+              <MenuItem
+                onClick={() => handleSelectSignature(null)}
+                sx={{
+                  borderRadius: "8px",
+                  fontSize: "12.5px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  py: 0.8,
+                  color: "#637381",
+                }}
+              >
+                <span>No signature</span>
+                {!activeSignatureId && <CheckIcon sx={{ fontSize: 16, color: "#919EAB" }} />}
+              </MenuItem>
 
-                <DropdownMenuItem
-                  onClick={() => handleSelectSignature(null)}
-                  className="flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg cursor-pointer text-muted-foreground hover:text-foreground"
-                >
-                  <span>No signature</span>
-                  {!activeSignatureId && <Check className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                </DropdownMenuItem>
+              <Divider sx={{ my: 0.5 }} />
 
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setSignatureDialogOpen(true)}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-primary hover:text-primary hover:bg-primary/10 rounded-lg cursor-pointer flex items-center gap-1.5"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Manage signatures...</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <MenuItem
+                onClick={() => {
+                  setSignatureMenuAnchor(null);
+                  setSignatureDialogOpen(true);
+                }}
+                sx={{
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "#1877F2",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  py: 0.8,
+                  "&:hover": { bgcolor: "rgba(24, 119, 242, 0.08)" },
+                }}
+              >
+                <AutoAwesomeOutlinedIcon sx={{ fontSize: 16 }} />
+                <span>Manage signatures...</span>
+              </MenuItem>
+            </Menu>
           </div>
 
-          {/* Right Actions: Save Draft & Discard Trash Button */}
+          {/* Right Actions: Save Draft & Discard */}
           <div className="flex items-center gap-1">
             {/* Save Draft Button */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={saveDraftMutation.isPending || updateDraftMutation.isPending}
-              onClick={handleSaveDraft}
-              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground rounded-lg gap-1"
-              title="Save draft"
-            >
-              <Save className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Save</span>
-            </Button>
+            <Tooltip title="Save draft">
+              <Button
+                variant="text"
+                disabled={isSaving}
+                onClick={handleSaveDraft}
+                startIcon={<SaveOutlinedIcon sx={{ fontSize: 16 }} />}
+                sx={{
+                  color: "#637381",
+                  borderRadius: "10px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "12px",
+                  py: 0.5,
+                  px: 1.5,
+                  "&:hover": { color: "#1C252E", bgcolor: "rgba(145, 158, 171, 0.08)" },
+                  display: { xs: "none", sm: "inline-flex" },
+                }}
+              >
+                Save
+              </Button>
+            </Tooltip>
 
             {/* Discard Trash Button */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleDiscard}
-              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
-              title="Discard draft"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            <Tooltip title="Discard draft">
+              <IconButton
+                size="small"
+                onClick={handleDiscard}
+                sx={{
+                  color: "#637381",
+                  borderRadius: "10px",
+                  "&:hover": {
+                    color: "#E11D48",
+                    bgcolor: "rgba(225, 29, 72, 0.08)",
+                  },
+                }}
+              >
+                <DeleteOutlineOutlinedIcon sx={{ fontSize: 19 }} />
+              </IconButton>
+            </Tooltip>
           </div>
         </div>
       </div>
