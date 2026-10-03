@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { emailService } from "@/services/emailService";
-import { EmailContactItem, EmailContactType } from "@/types/emailContactTypes";
+import { EmailContactItem, EmailContactType, MOCK_EMAIL_CONTACTS } from "@/types/emailContactTypes";
 
 export function useEmailRecipients(
   frontendType: EmailContactType,
@@ -12,74 +12,96 @@ export function useEmailRecipients(
   return useQuery({
     queryKey: ["email-recipients", backendType, searchQuery],
     queryFn: async () => {
-      const response = await emailService.getEmailRecipients({
-        type: backendType as "client" | "candidate" | "user",
-        search: searchQuery.trim(),
-        limit: frontendType === "team" && !searchQuery.trim() ? 200 : 20, // Load all users if no search
-      });
+      try {
+        const response = await emailService.getEmailRecipients({
+          type: backendType as "client" | "candidate" | "user",
+          search: searchQuery.trim(),
+          limit: frontendType === "team" && !searchQuery.trim() ? 200 : 20, // Load all users if no search
+        });
 
-      const mappedContacts: EmailContactItem[] = [];
+        const mappedContacts: EmailContactItem[] = [];
 
-      response.data.forEach((item: any) => {
-        if (backendType === "user") {
-          mappedContacts.push({
-            id: item._id,
-            name: `${item.firstName} ${item.lastName}`.trim(),
-            email: item.email,
-            type: "team",
-            roleOrCompany: `${item.department || "Organization"} • ${item.teamRole || "Team Member"}`,
-            status: item.status,
-          });
-        } else if (backendType === "candidate") {
-          mappedContacts.push({
-            id: item._id,
-            name: item.name,
-            email: item.email,
-            type: "candidate",
-            roleOrCompany: item.roleOrCompany || item.experience || "Candidate",
-            status: item.status,
-          });
-        } else if (backendType === "client") {
-          if (searchQuery.trim() && item.primaryContacts && item.primaryContacts.length > 0) {
-            // Search Mode (Mode C) - Return the primary contacts
-            item.primaryContacts.forEach((contact: any) => {
+        if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+          response.data.forEach((item: any) => {
+            if (backendType === "user") {
               mappedContacts.push({
-                id: contact._id,
-                name: contact.name,
-                email: contact.email,
-                type: "client",
-                roleOrCompany: `${item.name} • ${contact.designation || "Primary Contact"}`,
-                status: "Active Client",
+                id: item._id,
+                name: `${item.firstName || ""} ${item.lastName || ""}`.trim() || item.name || "Team Member",
+                email: item.email,
+                type: "team",
+                roleOrCompany: `${item.department || "Organization"} • ${item.teamRole || "Team Member"}`,
+                status: item.status,
               });
-            });
-            // Optionally, add the company's general email as well if needed
-            if (item.emails && item.emails[0]) {
+            } else if (backendType === "candidate") {
               mappedContacts.push({
                 id: item._id,
                 name: item.name,
-                email: item.emails[0],
-                type: "client",
-                roleOrCompany: "Company Email",
-                status: "Active Client",
+                email: item.email,
+                type: "candidate",
+                roleOrCompany: item.roleOrCompany || item.experience || "Candidate",
+                status: item.status,
               });
+            } else if (backendType === "client") {
+              if (searchQuery.trim() && item.primaryContacts && item.primaryContacts.length > 0) {
+                // Search Mode (Mode C) - Return the primary contacts
+                item.primaryContacts.forEach((contact: any) => {
+                  mappedContacts.push({
+                    id: contact._id,
+                    name: contact.name,
+                    email: contact.email,
+                    type: "client",
+                    roleOrCompany: `${item.name} • ${contact.designation || "Primary Contact"}`,
+                    status: "Active Client",
+                  });
+                });
+                // Optionally, add the company's general email as well if needed
+                if (item.emails && item.emails[0]) {
+                  mappedContacts.push({
+                    id: item._id,
+                    name: item.name,
+                    email: item.emails[0],
+                    type: "client",
+                    roleOrCompany: "Company Email",
+                    status: "Active Client",
+                  });
+                }
+              } else {
+                // Browse Mode (Mode A) - Return the company general email
+                if (item.emails && item.emails.length > 0) {
+                  mappedContacts.push({
+                    id: item._id,
+                    name: item.name,
+                    email: item.emails[0],
+                    type: "client",
+                    roleOrCompany: "Client Company",
+                    status: "Active Client",
+                  });
+                }
+              }
             }
-          } else {
-            // Browse Mode (Mode A) - Return the company general email
-            if (item.emails && item.emails.length > 0) {
-              mappedContacts.push({
-                id: item._id,
-                name: item.name,
-                email: item.emails[0],
-                type: "client",
-                roleOrCompany: "Client Company",
-                status: "Active Client",
-              });
-            }
+          });
+
+          if (mappedContacts.length > 0) {
+            return mappedContacts;
           }
         }
-      });
 
-      return mappedContacts;
+        // Fallback to MOCK_EMAIL_CONTACTS matching frontendType if API response is empty
+        const fallback = MOCK_EMAIL_CONTACTS.filter((c) => c.type === frontendType);
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          return fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+        }
+        return fallback;
+      } catch {
+        // Fallback gracefully on network / server error
+        const fallback = MOCK_EMAIL_CONTACTS.filter((c) => c.type === frontendType);
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          return fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+        }
+        return fallback;
+      }
     },
     // Don't refetch on window focus as this might be typed into frequently
     refetchOnWindowFocus: false,

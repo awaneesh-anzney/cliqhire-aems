@@ -89,10 +89,12 @@ export default function EmailPage() {
   const isConnected = !!mailboxData?.connected && !!mailboxData?.data;
   const mailbox = mailboxData?.data || null;
 
-  // Folder & search state
+  // Folder, contact filter & search state
   const [activeFolder, setActiveFolder] = useState<string>("inbox");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedContactEmail, setSelectedContactEmail] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const pageSize = 20;
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
 
@@ -133,6 +135,8 @@ export default function EmailPage() {
 
   // Real API: List emails for current folder & query
   const folderQueryKey = activeFolder === "all" ? "inbox" : activeFolder;
+  const effectiveQuery = searchQuery.trim() || selectedContactEmail || undefined;
+
   const {
     data: listData,
     isLoading: loadingList,
@@ -142,8 +146,8 @@ export default function EmailPage() {
     folderQueryKey,
     {
       page,
-      limit: 30,
-      q: searchQuery.trim() ? searchQuery.trim() : undefined,
+      limit: pageSize,
+      q: effectiveQuery,
     },
     isConnected
   );
@@ -164,11 +168,12 @@ export default function EmailPage() {
 
   // Normalize raw list items from various API response shapes
   const rawList: any[] = listData?.data || [];
-  const totalThreads = listData?.total || 0;
+  const totalItems = listData?.total ?? rawList.length;
+  const totalPages = listData?.pages ?? Math.max(1, Math.ceil(totalItems / pageSize));
 
   const mappedItems: ConversationItem[] = useMemo(() => {
     return rawList.map((item: any) => {
-      if (activeFolder === "starred" || !!searchQuery.trim()) {
+      if (activeFolder === "starred" || !!searchQuery.trim() || !!selectedContactEmail) {
         const primaryParticipant = item.participants?.[0] || "Contact";
         const parsed = parseSender(primaryParticipant);
         return {
@@ -224,16 +229,28 @@ export default function EmailPage() {
         };
       }
     });
-  }, [rawList, activeFolder, searchQuery]);
+  }, [rawList, activeFolder, searchQuery, selectedContactEmail]);
+
+  // Display items with client-side fallback pagination if server does not slice
+  const displayItems = useMemo(() => {
+    if (listData?.pages && listData.pages > 1) {
+      return mappedItems;
+    }
+    if (mappedItems.length > pageSize) {
+      const start = (page - 1) * pageSize;
+      return mappedItems.slice(start, start + pageSize);
+    }
+    return mappedItems;
+  }, [mappedItems, listData?.pages, page, pageSize]);
 
   // Auto-select first thread on desktop load
   useEffect(() => {
-    if (!hasAutoSelected && !selectedThreadId && mappedItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1024) {
-      const firstId = mappedItems[0].threadId || mappedItems[0].id;
+    if (!hasAutoSelected && !selectedThreadId && displayItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1024) {
+      const firstId = displayItems[0].threadId || displayItems[0].id;
       setSelectedThreadId(firstId);
       setHasAutoSelected(true);
     }
-  }, [mappedItems, selectedThreadId, hasAutoSelected]);
+  }, [displayItems, selectedThreadId, hasAutoSelected]);
 
   // Active Thread & Messages
   const activeThread = threadDetailData?.data?.thread || null;
@@ -241,8 +258,12 @@ export default function EmailPage() {
   const latestMessage = threadMessages[threadMessages.length - 1] || null;
 
   const selectedListItem = useMemo(() => {
-    return mappedItems.find((i) => i.threadId === selectedThreadId || i.id === selectedThreadId) || null;
-  }, [mappedItems, selectedThreadId]);
+    return (
+      displayItems.find((i) => i.threadId === selectedThreadId || i.id === selectedThreadId) ||
+      mappedItems.find((i) => i.threadId === selectedThreadId || i.id === selectedThreadId) ||
+      null
+    );
+  }, [displayItems, mappedItems, selectedThreadId]);
 
   // Handlers
   const handleSelectThread = (item: ConversationItem) => {
@@ -428,11 +449,12 @@ export default function EmailPage() {
           onSelectFolder={(f) => {
             setActiveFolder(f);
             setPage(1);
+            setSelectedContactEmail(null);
             setMobileView("list");
           }}
           onCompose={() => handleCompose()}
           mailbox={mailbox}
-          totalInboxCount={activeFolder === "inbox" ? totalThreads : undefined}
+          totalInboxCount={activeFolder === "inbox" ? totalItems : undefined}
           onRefresh={() => {
             refetchStatus();
             refetchList();
@@ -440,6 +462,20 @@ export default function EmailPage() {
           isRefreshing={refetchingList || refetchingStatus}
           onDisconnect={handleDisconnect}
           isDisconnecting={disconnectMutation.isPending}
+          onOpenSignatures={() => setSignatureDialogOpen(true)}
+          selectedContactEmail={selectedContactEmail}
+          onSelectContactFilter={(email) => {
+            setSelectedContactEmail(email);
+            setPage(1);
+            setMobileView("list");
+          }}
+          onComposeToContact={(email, name) => {
+            handleCompose({
+              to: name ? `${name} <${email}>` : email,
+              subject: "",
+              text: "",
+            });
+          }}
           className={mobileView !== "folders" ? "hidden md:flex" : "flex"}
         />
 
@@ -449,14 +485,27 @@ export default function EmailPage() {
         <>
           {/* COLUMN 2: CONVERSATION LIST COMPONENT */}
             <EmailConversationList
-              items={mappedItems}
+              items={displayItems}
               selectedId={selectedThreadId}
               onSelectItem={handleSelectThread}
               searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              onSearchChange={(q) => {
+                setSearchQuery(q);
+                setPage(1);
+              }}
               activeFolder={activeFolder}
               isLoading={loadingList}
               onMobileBack={() => setMobileView("folders")}
+              page={page}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={(p) => setPage(p)}
+              selectedContactEmail={selectedContactEmail}
+              onClearContactFilter={() => {
+                setSelectedContactEmail(null);
+                setPage(1);
+              }}
               className={mobileView !== "list" ? "hidden md:flex" : "flex"}
             />
 

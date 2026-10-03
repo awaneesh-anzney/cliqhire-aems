@@ -8,6 +8,12 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CircularProgress from "@mui/material/CircularProgress";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import FirstPageIcon from "@mui/icons-material/FirstPage";
+import LastPageIcon from "@mui/icons-material/LastPage";
+import CloseIcon from "@mui/icons-material/Close";
+import FilterListIcon from "@mui/icons-material/FilterList";
 
 export interface ConversationItem {
   id: string;
@@ -35,6 +41,15 @@ export interface EmailConversationListProps {
   isLoading?: boolean;
   onMobileBack?: () => void;
   className?: string;
+  // Pagination Props
+  page?: number;
+  totalPages?: number;
+  totalItems?: number;
+  pageSize?: number;
+  onPageChange?: (newPage: number) => void;
+  // Filter Prop
+  selectedContactEmail?: string | null;
+  onClearContactFilter?: () => void;
 }
 
 // Deterministic pastel color for initials
@@ -57,7 +72,17 @@ export function EmailConversationList({
   isLoading = false,
   onMobileBack,
   className,
+  page = 1,
+  totalPages = 1,
+  totalItems = 0,
+  pageSize = 20,
+  onPageChange,
+  selectedContactEmail,
+  onClearContactFilter,
 }: EmailConversationListProps) {
+  const startItem = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endItem = Math.min(page * pageSize, totalItems);
+
   return (
     <div
       className={cn(
@@ -92,7 +117,37 @@ export function EmailConversationList({
           placeholder="Search..."
           className="w-full bg-transparent border-none outline-none text-xs sm:text-[13px] text-[#1C252E] dark:text-white placeholder:text-[#919EAB] font-normal"
         />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => onSearchChange("")}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+            title="Clear search"
+          >
+            <CloseIcon sx={{ fontSize: 14 }} />
+          </button>
+        )}
       </div>
+
+      {/* Active Filter Pill */}
+      {selectedContactEmail && (
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-900/40 text-[11px] text-blue-700 dark:text-blue-300">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <FilterListIcon sx={{ fontSize: 13 }} />
+            <span className="truncate">Contact: {selectedContactEmail}</span>
+          </div>
+          {onClearContactFilter && (
+            <button
+              type="button"
+              onClick={onClearContactFilter}
+              className="p-0.5 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded text-blue-600 dark:text-blue-300"
+              title="Clear filter"
+            >
+              <CloseIcon sx={{ fontSize: 12 }} />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Emails Conversation List */}
       <div className="flex-1 min-h-0 overflow-y-auto space-y-1 pr-0.5 custom-scrollbar">
@@ -157,6 +212,79 @@ export function EmailConversationList({
           })
         )}
       </div>
+
+      {/* Pagination Footer */}
+      {onPageChange && (
+        <div className="shrink-0 pt-2.5 pb-0.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 select-none">
+          <span className="font-medium tabular-nums text-slate-600 dark:text-slate-300">
+            {totalItems > 0 ? (
+              <>
+                <span className="font-semibold text-[#1C252E] dark:text-white">
+                  {startItem}–{endItem}
+                </span>{" "}
+                of {totalItems}
+              </>
+            ) : (
+              "0 emails"
+            )}
+          </span>
+
+          <div className="flex items-center gap-1">
+            {/* First Page */}
+            {totalPages > 2 && (
+              <button
+                type="button"
+                onClick={() => onPageChange(1)}
+                disabled={page <= 1 || isLoading}
+                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="First page"
+              >
+                <FirstPageIcon sx={{ fontSize: 16 }} />
+              </button>
+            )}
+
+            {/* Previous Page */}
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.max(1, page - 1))}
+              disabled={page <= 1 || isLoading}
+              className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              title="Previous page"
+            >
+              <ChevronLeftIcon sx={{ fontSize: 16 }} />
+            </button>
+
+            {/* Page indicator pill */}
+            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10.5px] font-bold text-slate-700 dark:text-slate-300 tabular-nums">
+              {page} / {Math.max(1, totalPages)}
+            </span>
+
+            {/* Next Page */}
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+              disabled={page >= totalPages || isLoading}
+              className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              title="Next page"
+            >
+              <ChevronRightIcon sx={{ fontSize: 16 }} />
+            </button>
+
+            {/* Last Page */}
+            {totalPages > 2 && (
+              <button
+                type="button"
+                onClick={() => onPageChange(totalPages)}
+                disabled={page >= totalPages || isLoading}
+                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Last page"
+              >
+                <LastPageIcon sx={{ fontSize: 16 }} />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
