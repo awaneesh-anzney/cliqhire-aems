@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNowStrict, format } from "date-fns";
@@ -10,6 +10,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import {
   useMailboxStatus,
   useEmailList,
+  useEmailSearch,
   useEmailThread,
   useMarkThreadRead,
   useToggleStar,
@@ -74,6 +75,98 @@ function formatFullDate(dateInput: string | Date | undefined): string {
   }
 }
 
+/** Map a thread-level search result item into a ConversationItem */
+function mapSearchThread(item: any): ConversationItem {
+  // Search response: { _id, subject, participants[], lastMessageAt, unreadCount, isStarred }
+  const firstParticipant = item.participants?.[0] || "Contact";
+  const parsed = parseSender(firstParticipant);
+  return {
+    id: item._id,
+    threadId: item._id,
+    subject: item.subject || "(No Subject)",
+    sender: parsed.name,
+    senderEmail: parsed.email,
+    to: item.participants || [],
+    date: item.lastMessageAt || item.createdAt,
+    relativeTime: formatRelativeTime(item.lastMessageAt || item.createdAt),
+    unread: (item.unreadCount || 0) > 0,
+    isStarred: item.isStarred ?? false,
+    isImportant: item.isStarred ?? false,
+    snippet: item.snippet || item.subject || "...",
+    hasAttachments: item.hasAttachments || false,
+  };
+}
+
+/** Map a folder-list email item into a ConversationItem */
+function mapFolderEmail(item: any, folder: string): ConversationItem {
+  if (folder === "starred") {
+    // Threads endpoint for starred
+    const primaryParticipant = item.participants?.[0] || "Contact";
+    const parsed = parseSender(primaryParticipant);
+    return {
+      id: item._id,
+      threadId: item._id,
+      subject: item.subject || "(No Subject)",
+      sender: parsed.name,
+      senderEmail: parsed.email,
+      to: item.participants || [],
+      date: item.lastMessageAt || item.createdAt,
+      relativeTime: formatRelativeTime(item.lastMessageAt || item.createdAt),
+      unread: (item.unreadCount || 0) > 0,
+      isStarred: item.isStarred ?? true,
+      isImportant: item.isStarred ?? false,
+      snippet: item.snippet || item.subject || "...",
+      hasAttachments: item.hasAttachments || false,
+    };
+  } else if (folder === "drafts") {
+    const toRecipients = item.to && item.to.length > 0 ? item.to : ["(No recipient)"];
+    const parsed = parseSender(toRecipients[0]);
+    return {
+      id: item._id,
+      threadId: item.threadId || item._id,
+      subject: item.subject || "(No Subject)",
+      sender: parsed.name,
+      senderEmail: parsed.email,
+      to: item.to || [],
+      date: item.updatedAt || item.createdAt,
+      relativeTime: formatRelativeTime(item.updatedAt || item.createdAt),
+      unread: false,
+      isStarred: false,
+      isImportant: false,
+      snippet: item.bodyText || item.subject || "(Draft)",
+      hasAttachments: item.attachments && item.attachments.length > 0,
+    };
+  } else {
+    const rawFrom = item.direction === "received" ? item.from : item.to?.[0] || item.from;
+    const parsed = parseSender(rawFrom);
+    return {
+      id: item._id,
+      threadId: item.threadId || item._id,
+      subject: item.subject || "(No Subject)",
+      sender: parsed.name,
+      senderEmail: parsed.email,
+      to: item.to || [],
+      date: item.receivedAt || item.sentAt || item.createdAt,
+      relativeTime: formatRelativeTime(item.receivedAt || item.sentAt || item.createdAt),
+      unread: !item.isRead,
+      isStarred: item.isStarred || false,
+      isImportant: false,
+      snippet: item.bodyText?.slice(0, 80) || item.subject || "...",
+      hasAttachments: item.attachments && item.attachments.length > 0,
+    };
+  }
+}
+
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
 export default function EmailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -89,12 +182,22 @@ export default function EmailPage() {
   const isConnected = !!mailboxData?.connected && !!mailboxData?.data;
   const mailbox = mailboxData?.data || null;
 
-  // Folder, contact filter & search state
+  // ─── State ─────────────────────────────────────────────────────────────────
   const [activeFolder, setActiveFolder] = useState<string>("inbox");
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // Raw input value — updated on every keystroke
+  const [searchInputValue, setSearchInputValue] = useState("");
+
+  // Debounced value — triggers the search API call (400ms delay)
+  const debouncedSearch = useDebounce(searchInputValue, 400);
+
+  // Contact filter from nav sidebar
   const [selectedContactEmail, setSelectedContactEmail] = useState<string | null>(null);
+
   const [page, setPage] = useState(1);
+  const [searchPage, setSearchPage] = useState(1);
   const pageSize = 20;
+
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
 
@@ -111,7 +214,15 @@ export default function EmailPage() {
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("list");
 
-  // Query parameter handling (OAuth redirects)
+  // ─── Derived: are we in search mode? ───────────────────────────────────────
+  // Search mode = user typed something in search box OR contact filter is active
+  const activeSearchQuery = debouncedSearch.trim();
+  const isSearchMode = activeSearchQuery.length > 0 || !!selectedContactEmail;
+
+  // The actual search term: if contact filter is active with no text, use the email as query
+  const effectiveSearchTerm = activeSearchQuery || selectedContactEmail || "";
+
+  // ─── OAuth redirect handling ────────────────────────────────────────────────
   useEffect(() => {
     if (!searchParams) return;
     const connected = searchParams.get("connected");
@@ -133,32 +244,48 @@ export default function EmailPage() {
     }
   }, [searchParams, router, refetchStatus]);
 
-  // Real API: List emails for current folder & query
+  // ─── Data Fetching ──────────────────────────────────────────────────────────
+
+  // SEARCH: dedicated hook hitting /api/email/search
+  // Folder passed as undefined when "all" so backend searches across all folders
+  const searchFolder = ["inbox", "sent", "trash"].includes(activeFolder) ? activeFolder : undefined;
+
+  const {
+    data: searchData,
+    isLoading: searchLoading,
+    isRefetching: searchRefetching,
+  } = useEmailSearch(
+    {
+      q: effectiveSearchTerm,
+      folder: searchFolder,
+      starredOnly: activeFolder === "starred" ? true : undefined,
+      page: searchPage,
+      limit: pageSize,
+    },
+    isConnected && isSearchMode
+  );
+
+  // FOLDER LIST: normal folder browsing (when not in search mode)
   const folderQueryKey = activeFolder === "all" ? "inbox" : activeFolder;
-  const effectiveQuery = searchQuery.trim() || selectedContactEmail || undefined;
 
   const {
     data: listData,
-    isLoading: loadingList,
+    isLoading: listLoading,
     refetch: refetchList,
     isRefetching: refetchingList,
   } = useEmailList(
     folderQueryKey,
-    {
-      page,
-      limit: pageSize,
-      q: effectiveQuery,
-    },
-    isConnected
+    { page, limit: pageSize },
+    isConnected && !isSearchMode
   );
 
-  // Real API: Active thread detail
+  // ─── Thread Detail ──────────────────────────────────────────────────────────
   const {
     data: threadDetailData,
     isLoading: loadingDetail,
   } = useEmailThread(selectedThreadId);
 
-  // Real Mutations
+  // ─── Mutations ──────────────────────────────────────────────────────────────
   const markReadMutation = useMarkThreadRead();
   const toggleStarMutation = useToggleStar();
   const sendEmailMutation = useSendEmail();
@@ -166,82 +293,39 @@ export default function EmailPage() {
   const permanentDeleteMutation = usePermanentDelete();
   const disconnectMutation = useDisconnectMailbox();
 
-  // Normalize raw list items from various API response shapes
-  const rawList: any[] = listData?.data || [];
-  const totalItems = listData?.total ?? rawList.length;
-  const totalPages = listData?.pages ?? Math.max(1, Math.ceil(totalItems / pageSize));
+  // ─── Derived List State ─────────────────────────────────────────────────────
+  const isLoading = isSearchMode ? searchLoading || searchRefetching : listLoading || refetchingList;
 
+  // Pagination for active mode
+  const activeData = isSearchMode ? searchData : listData;
+  const rawList: any[] = activeData?.data || [];
+  const totalItems = isSearchMode
+    ? (searchData?.total ?? searchData?.count ?? rawList.length)
+    : (listData?.total ?? rawList.length);
+  const totalPages = isSearchMode
+    ? (searchData?.pages ?? Math.max(1, Math.ceil(totalItems / pageSize)))
+    : (listData?.pages ?? Math.max(1, Math.ceil(totalItems / pageSize)));
+  const activePage = isSearchMode ? searchPage : page;
+
+  // Map items based on mode
   const mappedItems: ConversationItem[] = useMemo(() => {
-    return rawList.map((item: any) => {
-      if (activeFolder === "starred" || !!searchQuery.trim() || !!selectedContactEmail) {
-        const primaryParticipant = item.participants?.[0] || "Contact";
-        const parsed = parseSender(primaryParticipant);
-        return {
-          id: item._id,
-          threadId: item._id,
-          subject: item.subject || "(No Subject)",
-          sender: parsed.name,
-          senderEmail: parsed.email,
-          to: item.participants || [],
-          date: item.lastMessageAt || item.createdAt,
-          relativeTime: formatRelativeTime(item.lastMessageAt || item.createdAt),
-          unread: (item.unreadCount || 0) > 0,
-          isStarred: item.isStarred ?? true,
-          isImportant: item.isStarred ?? false,
-          snippet: item.snippet || item.subject || "...",
-          hasAttachments: item.hasAttachments || false,
-        };
-      } else if (activeFolder === "drafts") {
-        const toRecipients = item.to && item.to.length > 0 ? item.to : ["(No recipient)"];
-        const parsed = parseSender(toRecipients[0]);
-        return {
-          id: item._id,
-          threadId: item.threadId || item._id,
-          subject: item.subject || "(No Subject)",
-          sender: parsed.name,
-          senderEmail: parsed.email,
-          to: item.to || [],
-          date: item.updatedAt || item.createdAt,
-          relativeTime: formatRelativeTime(item.updatedAt || item.createdAt),
-          unread: false,
-          isStarred: false,
-          isImportant: false,
-          snippet: item.bodyText || item.subject || "(Draft)",
-          hasAttachments: item.attachments && item.attachments.length > 0,
-        };
-      } else {
-        const rawFrom = item.direction === "received" ? item.from : item.to?.[0] || item.from;
-        const parsed = parseSender(rawFrom);
-        return {
-          id: item._id,
-          threadId: item.threadId || item._id,
-          subject: item.subject || "(No Subject)",
-          sender: parsed.name,
-          senderEmail: parsed.email,
-          to: item.to || [],
-          date: item.receivedAt || item.sentAt || item.createdAt,
-          relativeTime: formatRelativeTime(item.receivedAt || item.sentAt || item.createdAt),
-          unread: !item.isRead,
-          isStarred: item.isStarred || false,
-          isImportant: false,
-          snippet: item.bodyText?.slice(0, 60) || item.subject || "...",
-          hasAttachments: item.attachments && item.attachments.length > 0,
-        };
-      }
-    });
-  }, [rawList, activeFolder, searchQuery, selectedContactEmail]);
+    if (isSearchMode) {
+      return rawList.map((item) => mapSearchThread(item));
+    }
+    return rawList.map((item) => mapFolderEmail(item, activeFolder));
+  }, [rawList, isSearchMode, activeFolder]);
 
-  // Display items with client-side fallback pagination if server does not slice
+  // Client-side fallback pagination if server doesn't slice
   const displayItems = useMemo(() => {
-    if (listData?.pages && listData.pages > 1) {
+    if (activeData?.pages && activeData.pages > 1) {
       return mappedItems;
     }
     if (mappedItems.length > pageSize) {
-      const start = (page - 1) * pageSize;
+      const start = (activePage - 1) * pageSize;
       return mappedItems.slice(start, start + pageSize);
     }
     return mappedItems;
-  }, [mappedItems, listData?.pages, page, pageSize]);
+  }, [mappedItems, activeData?.pages, activePage, pageSize]);
 
   // Auto-select first thread on desktop load
   useEffect(() => {
@@ -251,6 +335,14 @@ export default function EmailPage() {
       setHasAutoSelected(true);
     }
   }, [displayItems, selectedThreadId, hasAutoSelected]);
+
+  // Reset auto-select when entering search mode so first result can be selected
+  useEffect(() => {
+    if (isSearchMode) {
+      setHasAutoSelected(false);
+      setSelectedThreadId(null);
+    }
+  }, [isSearchMode]);
 
   // Active Thread & Messages
   const activeThread = threadDetailData?.data?.thread || null;
@@ -265,7 +357,7 @@ export default function EmailPage() {
     );
   }, [displayItems, mappedItems, selectedThreadId]);
 
-  // Handlers
+  // ─── Handlers ───────────────────────────────────────────────────────────────
   const handleSelectThread = (item: ConversationItem) => {
     const targetId = item.threadId || item.id;
     setSelectedThreadId(targetId);
@@ -374,6 +466,39 @@ export default function EmailPage() {
     });
   };
 
+  // Handle search input change — reset to page 1
+  const handleSearchChange = useCallback((q: string) => {
+    setSearchInputValue(q);
+    setSearchPage(1);
+    if (!q.trim()) {
+      // Exiting search mode — reset state
+      setSelectedThreadId(null);
+      setHasAutoSelected(false);
+    }
+  }, []);
+
+  // Handle folder change — exit search mode
+  const handleFolderChange = (f: string) => {
+    setActiveFolder(f);
+    setPage(1);
+    setSearchPage(1);
+    setSearchInputValue("");
+    setSelectedContactEmail(null);
+    setSelectedThreadId(null);
+    setHasAutoSelected(false);
+    setMobileView("list");
+  };
+
+  // Handle page change depending on mode
+  const handlePageChange = (p: number) => {
+    if (isSearchMode) {
+      setSearchPage(p);
+    } else {
+      setPage(p);
+    }
+    setSelectedThreadId(null);
+  };
+
   // Detail fallback values
   const detailSender = useMemo(() => {
     if (latestMessage?.from) return parseSender(latestMessage.from);
@@ -382,7 +507,7 @@ export default function EmailPage() {
   }, [latestMessage, selectedListItem]);
 
   const detailSubject = activeThread?.subject || latestMessage?.subject || selectedListItem?.subject || "(No Subject)";
-  const detailDate = formatFullDate(latestMessage?.sentAt || latestMessage?.receivedAt || latestMessage?.createdAt || selectedListItem?.date);
+  const detailDate = formatFullDate(latestMessage?.sentAt || latestMessage?.receivedAt || (latestMessage as any)?.createdAt || selectedListItem?.date);
   const detailRecipients = latestMessage?.to?.join(", ") || selectedListItem?.to?.join(", ") || mailbox?.emailAddress || "";
 
   // Loading indicator for mailbox service check
@@ -446,15 +571,10 @@ export default function EmailPage() {
         {/* ========================================================= */}
         <EmailNavSidebar
           activeFolder={activeFolder}
-          onSelectFolder={(f) => {
-            setActiveFolder(f);
-            setPage(1);
-            setSelectedContactEmail(null);
-            setMobileView("list");
-          }}
+          onSelectFolder={handleFolderChange}
           onCompose={() => handleCompose()}
           mailbox={mailbox}
-          totalInboxCount={activeFolder === "inbox" ? totalItems : undefined}
+          totalInboxCount={activeFolder === "inbox" && !isSearchMode ? totalItems : undefined}
           onRefresh={() => {
             refetchStatus();
             refetchList();
@@ -466,7 +586,7 @@ export default function EmailPage() {
           selectedContactEmail={selectedContactEmail}
           onSelectContactFilter={(email) => {
             setSelectedContactEmail(email);
-            setPage(1);
+            setSearchPage(1);
             setMobileView("list");
           }}
           onComposeToContact={(email, name) => {
@@ -488,23 +608,22 @@ export default function EmailPage() {
               items={displayItems}
               selectedId={selectedThreadId}
               onSelectItem={handleSelectThread}
-              searchQuery={searchQuery}
-              onSearchChange={(q) => {
-                setSearchQuery(q);
-                setPage(1);
-              }}
+              searchQuery={searchInputValue}
+              onSearchChange={handleSearchChange}
               activeFolder={activeFolder}
-              isLoading={loadingList}
+              isLoading={isLoading}
+              isSearchMode={isSearchMode}
+              searchResultCount={isSearchMode ? totalItems : undefined}
               onMobileBack={() => setMobileView("folders")}
-              page={page}
+              page={activePage}
               totalPages={totalPages}
               totalItems={totalItems}
               pageSize={pageSize}
-              onPageChange={(p) => setPage(p)}
+              onPageChange={handlePageChange}
               selectedContactEmail={selectedContactEmail}
               onClearContactFilter={() => {
                 setSelectedContactEmail(null);
-                setPage(1);
+                setSearchPage(1);
               }}
               className={mobileView !== "list" ? "hidden md:flex" : "flex"}
             />
@@ -537,7 +656,11 @@ export default function EmailPage() {
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
                 <MailOutlineIcon sx={{ fontSize: 44, color: "#919EAB", opacity: 0.5 }} />
                 <p className="text-sm font-semibold mt-3 text-slate-600 dark:text-slate-300">
-                  Select an email to view details
+                  {isSearchMode
+                    ? searchLoading
+                      ? "Searching..."
+                      : `No results for "${effectiveSearchTerm}"`
+                    : "Select an email to view details"}
                 </p>
               </div>
             )}

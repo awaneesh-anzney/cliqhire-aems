@@ -165,15 +165,6 @@ export function useEmailList(folder: string, params: any = {}, enabled: boolean 
   return useQuery({
     queryKey: EMAIL_QUERY_KEYS.emailList(folder, params),
     queryFn: () => {
-      if (params.q) {
-        return emailService.searchEmailThreads({
-          q: params.q,
-          folder: ["inbox", "sent", "trash"].includes(folder) ? folder : undefined,
-          starredOnly: folder === "starred" ? true : undefined,
-          page: params.page,
-          limit: params.limit,
-        });
-      }
       if (folder === "starred") {
         return emailService.getThreads({
           starredOnly: true,
@@ -184,6 +175,18 @@ export function useEmailList(folder: string, params: any = {}, enabled: boolean 
       return emailService.getEmailsList(folder, params);
     },
     enabled: enabled && !!folder,
+    staleTime: 1000 * 20, // 20s
+  });
+}
+
+/**
+ * Hook for searching email threads across folders
+ */
+export function useEmailSearch(params: { q: string; folder?: string; starredOnly?: boolean; page?: number; limit?: number }, enabled: boolean = true) {
+  return useQuery({
+    queryKey: ["email-search", params],
+    queryFn: () => emailService.searchEmailThreads(params),
+    enabled: enabled && !!params.q,
     staleTime: 1000 * 20, // 20s
   });
 }

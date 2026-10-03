@@ -50,6 +50,9 @@ export interface EmailConversationListProps {
   // Filter Prop
   selectedContactEmail?: string | null;
   onClearContactFilter?: () => void;
+  // Search state
+  isSearchMode?: boolean;
+  searchResultCount?: number;
 }
 
 // Deterministic pastel color for initials
@@ -79,6 +82,8 @@ export function EmailConversationList({
   onPageChange,
   selectedContactEmail,
   onClearContactFilter,
+  isSearchMode,
+  searchResultCount,
 }: EmailConversationListProps) {
   const startItem = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
   const endItem = Math.min(page * pageSize, totalItems);
@@ -102,7 +107,7 @@ export function EmailConversationList({
             <span>Folders</span>
           </button>
           <span className="text-xs font-bold text-[#1C252E] dark:text-white capitalize">
-            {activeFolder}
+            {isSearchMode ? "Search Results" : activeFolder}
           </span>
         </div>
       )}
@@ -159,7 +164,9 @@ export function EmailConversationList({
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 text-center text-slate-400">
             <MailOutlineIcon sx={{ fontSize: 36, color: "#919EAB", opacity: 0.6 }} />
-            <p className="text-xs font-medium mt-2 text-slate-500">No emails in this folder</p>
+            <p className="text-xs font-medium mt-2 text-slate-500">
+              {isSearchMode ? "No results found" : "No emails in this folder"}
+            </p>
           </div>
         ) : (
           items.map((item) => {
