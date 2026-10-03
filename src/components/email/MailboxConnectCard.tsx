@@ -349,7 +349,7 @@ export const MailboxConnectCard: React.FC<MailboxConnectCardProps> = ({
                 <button
                   type="submit"
                   disabled={connectMutation.isPending || !email || !password}
-                  className="w-full h-11 text-xs sm:text-sm font-bold gap-2 bg-[#1C252E] hover:bg-[#28323D] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-[#1C252E] shadow-sm rounded-xl transition-all flex items-center justify-center active:scale-[0.99] disabled:opacity-50"
+                  className="w-full h-11 text-xs sm:text-sm font-bold gap-2 bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground shadow-sm shadow-primary/25 hover:shadow-md hover:shadow-primary/30 rounded-xl transition-all flex items-center justify-center active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 cursor-pointer"
                 >
                   {connectMutation.isPending ? (
                     <>

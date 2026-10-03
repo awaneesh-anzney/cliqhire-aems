@@ -543,7 +543,7 @@ export function EmailEditor({
                 type="button"
                 onClick={handleApplyLink}
                 disabled={!linkUrl.trim()}
-                className="px-3 py-1 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40"
+                className="px-3 py-1 text-xs font-bold rounded-lg bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-40"
               >
                 Apply
               </button>
@@ -643,7 +643,7 @@ export function EmailEditor({
                   type="button"
                   onClick={onSend}
                   disabled={isSending}
-                  className="px-4 py-1.5 rounded-xl bg-[#1C252E] hover:bg-[#28323D] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-[#1C252E] font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-xl bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-primary/25 hover:shadow-md hover:shadow-primary/30 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 cursor-pointer"
                 >
                   {isSending ? (
                     <CircularProgress size={12} color="inherit" />
@@ -746,7 +746,7 @@ export function EmailEditor({
                 type="button"
                 onClick={onSend}
                 disabled={isSending}
-                className="px-3.5 py-1.5 rounded-xl bg-[#1C252E] hover:bg-[#28323D] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-[#1C252E] font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs disabled:opacity-50"
+                className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-primary/25 hover:shadow-md hover:shadow-primary/30 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 cursor-pointer"
               >
                 {isSending ? (
                   <CircularProgress size={12} color="inherit" />

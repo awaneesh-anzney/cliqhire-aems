@@ -810,21 +810,33 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 )
               }
               sx={{
-                bgcolor: "#1C252E",
+                bgcolor: "var(--color-primary, #2563EB)",
                 color: "#FFFFFF",
-                "&:hover": { bgcolor: "#28323D" },
-                ".dark &": {
-                  bgcolor: "#FFFFFF",
-                  color: "#1C252E",
-                  "&:hover": { bgcolor: "#F4F6F8" },
+                "&:hover": {
+                  bgcolor: "var(--color-primary-hover, #1D4ED8)",
+                  boxShadow: "0 4px 12px rgba(37, 99, 235, 0.35)",
+                },
+                "&:active": {
+                  bgcolor: "var(--color-primary-hover, #1D4ED8)",
+                  transform: "scale(0.98)",
+                },
+                "&:focus-visible": {
+                  outline: "2px solid var(--color-primary, #2563EB)",
+                  outlineOffset: "2px",
+                },
+                "&.Mui-disabled": {
+                  bgcolor: "var(--color-primary, #2563EB)",
+                  color: "rgba(255, 255, 255, 0.7)",
+                  opacity: 0.6,
                 },
                 borderRadius: "12px",
                 textTransform: "none",
                 fontWeight: 700,
                 fontSize: "12.5px",
-                px: 2.2,
-                py: 0.7,
-                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+                px: 2.5,
+                py: 0.75,
+                boxShadow: "0 2px 8px rgba(37, 99, 235, 0.28)",
+                transition: "all 0.15s ease-in-out",
               }}
             >
               {isSending ? "Sending..." : "Send"}
@@ -836,10 +848,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 size="small"
                 onClick={() => setShowFormattingBar(!showFormattingBar)}
                 sx={{
-                  color: showFormattingBar ? "#1877F2" : "#637381",
-                  bgcolor: showFormattingBar ? "rgba(24, 119, 242, 0.08)" : "transparent",
+                  color: showFormattingBar ? "var(--color-primary, #2563EB)" : "#637381",
+                  bgcolor: showFormattingBar ? "rgba(37, 99, 235, 0.08)" : "transparent",
                   borderRadius: "10px",
-                  "&:hover": { bgcolor: "rgba(145, 158, 171, 0.12)" },
+                  "&:hover": { bgcolor: "rgba(37, 99, 235, 0.12)", color: "var(--color-primary, #2563EB)" },
                 }}
               >
                 <TextFormatOutlinedIcon sx={{ fontSize: 20 }} />
@@ -872,7 +884,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                     fontSize: 9,
                     height: 16,
                     minWidth: 16,
-                    bgcolor: "#1877F2",
+                    bgcolor: "var(--color-primary, #2563EB)",
                   },
                 }}
               >
@@ -881,10 +893,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   disabled={files.length >= MAX_ATTACHMENTS}
                   sx={{
-                    color: files.length > 0 ? "#1877F2" : "#637381",
-                    bgcolor: files.length > 0 ? "rgba(24, 119, 242, 0.08)" : "transparent",
+                    color: files.length > 0 ? "var(--color-primary, #2563EB)" : "#637381",
+                    bgcolor: files.length > 0 ? "rgba(37, 99, 235, 0.08)" : "transparent",
                     borderRadius: "10px",
-                    "&:hover": { bgcolor: "rgba(145, 158, 171, 0.12)" },
+                    "&:hover": { bgcolor: "rgba(37, 99, 235, 0.12)", color: "var(--color-primary, #2563EB)" },
                   }}
                 >
                   <AttachFileOutlinedIcon sx={{ fontSize: 20 }} />
@@ -898,10 +910,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 size="small"
                 onClick={(e) => setSignatureMenuAnchor(e.currentTarget)}
                 sx={{
-                  color: activeSignatureId ? "#1877F2" : "#637381",
-                  bgcolor: activeSignatureId ? "rgba(24, 119, 242, 0.08)" : "transparent",
+                  color: activeSignatureId ? "var(--color-primary, #2563EB)" : "#637381",
+                  bgcolor: activeSignatureId ? "rgba(37, 99, 235, 0.08)" : "transparent",
                   borderRadius: "10px",
-                  "&:hover": { bgcolor: "rgba(145, 158, 171, 0.12)" },
+                  "&:hover": { bgcolor: "rgba(37, 99, 235, 0.12)", color: "var(--color-primary, #2563EB)" },
                 }}
               >
                 <DriveFileRenameOutlineOutlinedIcon sx={{ fontSize: 20 }} />
@@ -929,7 +941,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               <div className="px-3 py-1.5 text-[10px] font-bold text-[#919EAB] uppercase tracking-wider flex items-center justify-between">
                 <span>Signatures</span>
                 {activeSignatureId && (
-                  <span className="text-[9px] text-[#1877F2] font-semibold lowercase">active</span>
+                  <span className="text-[9px] text-primary font-semibold lowercase">active</span>
                 )}
               </div>
               <Divider sx={{ my: 0.5 }} />
@@ -950,7 +962,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                     }}
                   >
                     <span className="truncate font-medium">{sig.name}</span>
-                    {isSelected && <CheckIcon sx={{ fontSize: 16, color: "#1877F2" }} />}
+                    {isSelected && <CheckIcon sx={{ fontSize: 16, color: "var(--color-primary, #2563EB)" }} />}
                   </MenuItem>
                 );
               })}
@@ -981,12 +993,12 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                   borderRadius: "8px",
                   fontSize: "12px",
                   fontWeight: 600,
-                  color: "#1877F2",
+                  color: "var(--color-primary, #2563EB)",
                   display: "flex",
                   alignItems: "center",
                   gap: 1,
                   py: 0.8,
-                  "&:hover": { bgcolor: "rgba(24, 119, 242, 0.08)" },
+                  "&:hover": { bgcolor: "rgba(37, 99, 235, 0.08)" },
                 }}
               >
                 <AutoAwesomeOutlinedIcon sx={{ fontSize: 16 }} />
@@ -1012,7 +1024,13 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                   fontSize: "12px",
                   py: 0.5,
                   px: 1.5,
-                  "&:hover": { color: "#1C252E", bgcolor: "rgba(145, 158, 171, 0.08)" },
+                  "&:hover": { 
+                    color: "var(--color-primary, #2563EB)", 
+                    bgcolor: "rgba(37, 99, 235, 0.08)" 
+                  },
+                  "&:active": {
+                    transform: "scale(0.97)",
+                  },
                   display: { xs: "none", sm: "inline-flex" },
                 }}
               >

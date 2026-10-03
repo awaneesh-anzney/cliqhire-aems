@@ -165,7 +165,7 @@ export function EmailNavSidebar({
       <button
         type="button"
         onClick={onCompose}
-        className="w-full h-10 px-4 rounded-xl bg-[#1C252E] hover:bg-[#28323D] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-[#1C252E] font-bold text-[13px] flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] outline-none"
+        className="w-full h-10 px-4 rounded-xl bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground font-bold text-[13px] flex items-center justify-center gap-2 shadow-sm shadow-primary/25 hover:shadow-md hover:shadow-primary/30 transition-all active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
       >
         <EditOutlinedIcon sx={{ fontSize: 17 }} />
         <span>Compose</span>
