@@ -430,4 +430,178 @@
   .sidebar-footer-card {
     @apply bg-muted/50 backdrop-blur-md font-semibold text-foreground rounded-2xl p-2.5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:bg-transparent transition-all duration-200 border border-border/60;
   }
+
+}
+
+/* ========================================================= */
+/* Tiptap & Email Rich Editor Typography (Unconditional Styles)*/
+/* ========================================================= */
+.email-rich-editor,
+.tiptap,
+div[contenteditable="true"].tiptap,
+div[contenteditable="true"].email-rich-editor {
+  outline: none !important;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.email-rich-editor h1,
+.tiptap h1,
+div.tiptap h1,
+div[contenteditable="true"] h1 {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+  color: inherit !important;
+  display: block !important;
+}
+
+.email-rich-editor h2,
+.tiptap h2,
+div.tiptap h2,
+div[contenteditable="true"] h2 {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  margin-top: 12px !important;
+  margin-bottom: 5px !important;
+  color: inherit !important;
+  display: block !important;
+}
+
+.email-rich-editor h3,
+.tiptap h3,
+div.tiptap h3,
+div[contenteditable="true"] h3 {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  margin-top: 10px !important;
+  margin-bottom: 4px !important;
+  color: inherit !important;
+  display: block !important;
+}
+
+.email-rich-editor p,
+.tiptap p,
+div.tiptap p,
+div[contenteditable="true"] p {
+  margin-top: 6px !important;
+  margin-bottom: 6px !important;
+  line-height: 1.6 !important;
+  font-size: 14px !important;
+  display: block !important;
+}
+
+.email-rich-editor p.is-editor-empty:first-child::before,
+.tiptap p.is-editor-empty:first-child::before,
+div[contenteditable="true"] p.is-editor-empty:first-child::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.email-rich-editor ul,
+.tiptap ul,
+div.tiptap ul,
+div[contenteditable="true"] ul {
+  list-style-type: disc !important;
+  padding-left: 24px !important;
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+.email-rich-editor ol,
+.tiptap ol,
+div.tiptap ol,
+div[contenteditable="true"] ol {
+  list-style-type: decimal !important;
+  padding-left: 24px !important;
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+.email-rich-editor li,
+.tiptap li,
+div.tiptap li,
+div[contenteditable="true"] li {
+  display: list-item !important;
+  margin-top: 3px !important;
+  margin-bottom: 3px !important;
+  line-height: 1.5 !important;
+}
+
+.email-rich-editor blockquote,
+.tiptap blockquote,
+div.tiptap blockquote,
+div[contenteditable="true"] blockquote {
+  border-left: 3px solid #3b82f6 !important;
+  padding-left: 12px !important;
+  font-style: italic !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  opacity: 0.9 !important;
+  display: block !important;
+}
+
+.email-rich-editor pre,
+.tiptap pre,
+div.tiptap pre,
+div[contenteditable="true"] pre {
+  background-color: rgba(100, 116, 139, 0.12) !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 0.85rem !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+  overflow-x: auto !important;
+}
+
+.email-rich-editor code,
+.tiptap code,
+div.tiptap code,
+div[contenteditable="true"] code {
+  background-color: rgba(100, 116, 139, 0.12) !important;
+  padding: 0.15rem 0.35rem !important;
+  border-radius: 0.25rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 0.85rem !important;
+}
+
+.email-rich-editor a,
+.tiptap a,
+div.tiptap a,
+div[contenteditable="true"] a {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+}
+
+.dark .email-rich-editor a,
+.dark .tiptap a,
+.dark div.tiptap a,
+.dark div[contenteditable="true"] a {
+  color: #60a5fa !important;
+}
+
+.email-rich-editor u,
+.tiptap u,
+div[contenteditable="true"] u {
+  text-decoration: underline !important;
+}
+
+.email-rich-editor s,
+.tiptap s,
+.email-rich-editor strike,
+.tiptap strike,
+div[contenteditable="true"] s {
+  text-decoration: line-through !important;
 }

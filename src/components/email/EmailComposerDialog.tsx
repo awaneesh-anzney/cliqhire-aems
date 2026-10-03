@@ -18,7 +18,11 @@ import {
   PenTool,
   Building2,
   UserCheck,
-  Users
+  Users,
+  FileText,
+  Image as ImageIcon,
+  Sheet,
+  FileArchive
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,8 +61,8 @@ interface EmailComposerDialogProps {
 
 type WindowMode = "docked" | "minimized" | "fullscreen";
 
-const MAX_ATTACHMENTS = 5;
-const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
+const MAX_ATTACHMENTS = 10;
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB standard email limit
 
 export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   open,
@@ -97,7 +101,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   const [bodyHtml, setBodyHtml] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  const [showFormattingBar, setShowFormattingBar] = useState(false);
+  const [showFormattingBar, setShowFormattingBar] = useState(true);
   const [draftStatus, setDraftStatus] = useState<"saved" | "unsaved" | "saving">("saved");
 
   // Sync initial data when opened
@@ -112,8 +116,11 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
       if (initialData) {
         if (initialData.to) {
-          const parsedTo = initialData.to.split(/[\s,;]+/).filter(Boolean);
-          setToRecipients(parsedTo);
+          const rawTo = initialData.to;
+          const match = rawTo.match(/<([^>]+)>/);
+          const emailOnly = match ? match[1] : rawTo;
+          const parsedTo = emailOnly.split(/[,;]+/).map((e) => e.trim()).filter(Boolean);
+          setToRecipients(parsedTo.length > 0 ? parsedTo : [rawTo]);
         }
         if (initialData.cc) {
           const parsedCc = initialData.cc.split(/[\s,;]+/).filter(Boolean);
@@ -149,6 +156,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       setBodyHtml(initialHtml);
       setWindowMode("docked");
       setDraftStatus("saved");
+      setShowFormattingBar(true);
     } else {
       // Reset state on close
       setToRecipients([]);
@@ -160,7 +168,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       setBodyHtml("");
       setBodyText("");
       setFiles([]);
-      setShowFormattingBar(false);
+      setShowFormattingBar(true);
       setActiveSignatureId(null);
     }
   }, [open, initialData, defaultNewSignature, defaultReplySignature]);
@@ -216,6 +224,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     if (validFiles.length > 0) {
       setFiles((prev) => [...prev, ...validFiles]);
       setDraftStatus("unsaved");
+      toast.success(`Attached ${validFiles.length} file${validFiles.length > 1 ? "s" : ""}`);
     }
 
     if (fileInputRef.current) {
@@ -250,6 +259,26 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const getAttachmentMeta = (fileName: string) => {
+    const lower = fileName.toLowerCase();
+    if (lower.endsWith(".pdf")) {
+      return { icon: <FileText className="h-3.5 w-3.5 text-rose-500" />, badge: "PDF", color: "border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20" };
+    }
+    if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") || lower.endsWith(".gif")) {
+      return { icon: <ImageIcon className="h-3.5 w-3.5 text-purple-500" />, badge: "IMG", color: "border-purple-200 dark:border-purple-900/40 bg-purple-50/60 dark:bg-purple-950/20" };
+    }
+    if (lower.endsWith(".xls") || lower.endsWith(".xlsx") || lower.endsWith(".csv")) {
+      return { icon: <Sheet className="h-3.5 w-3.5 text-emerald-500" />, badge: "XLS", color: "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20" };
+    }
+    if (lower.endsWith(".doc") || lower.endsWith(".docx")) {
+      return { icon: <FileText className="h-3.5 w-3.5 text-blue-500" />, badge: "DOC", color: "border-blue-200 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/20" };
+    }
+    if (lower.endsWith(".zip") || lower.endsWith(".rar") || lower.endsWith(".tar") || lower.endsWith(".gz")) {
+      return { icon: <FileArchive className="h-3.5 w-3.5 text-amber-500" />, badge: "ZIP", color: "border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20" };
+    }
+    return { icon: <FileIcon className="h-3.5 w-3.5 text-primary" />, badge: "FILE", color: "border-border/80 bg-card" };
   };
 
   // Dispatch Email
@@ -663,40 +692,46 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             }}
             showToolbar={showFormattingBar}
             placeholder="Write your email message here..."
+            onAttachClick={() => fileInputRef.current?.click()}
           />
 
           {/* Attachments Chip List */}
           {files.length > 0 && (
-            <div className="px-3 py-2 border-t border-border/60 bg-muted/20 space-y-1.5 shrink-0 max-h-32 overflow-y-auto">
+            <div className="px-3 py-2 border-t border-border/60 bg-muted/20 space-y-1.5 shrink-0 max-h-36 overflow-y-auto">
               <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
-                <span className="flex items-center gap-1">
-                  <Paperclip className="h-3 w-3" />
-                  Attachments ({files.length}/{MAX_ATTACHMENTS})
+                <span className="flex items-center gap-1.5 text-foreground font-semibold">
+                  <Paperclip className="h-3.5 w-3.5 text-primary" />
+                  <span>Attachments ({files.length}/{MAX_ATTACHMENTS})</span>
                 </span>
-                <span className="text-[10px]">Max 15MB each</span>
+                <span className="text-[10px] text-muted-foreground">Max 15MB each</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {files.map((file, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border/80 text-xs shadow-2xs group"
-                  >
-                    <FileIcon className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="truncate max-w-[140px] text-[11px] font-medium text-foreground">
-                      {file.name}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">({formatFileSize(file.size)})</span>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(idx)}
-                      className="p-0.5 text-muted-foreground hover:text-destructive rounded transition-colors"
-                      title="Remove attachment"
+                {files.map((file, idx) => {
+                  const meta = getAttachmentMeta(file.name);
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex items-center gap-2 px-2.5 py-1 rounded-xl border text-xs shadow-2xs group ${meta.color}`}
                     >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
+                      {meta.icon}
+                      <span className="truncate max-w-[150px] text-[11px] font-semibold text-foreground" title={file.name}>
+                        {file.name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        ({formatFileSize(file.size)})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(idx)}
+                        className="p-0.5 text-muted-foreground hover:text-destructive rounded transition-colors"
+                        title="Remove attachment"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -744,12 +779,16 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             <input
               type="file"
               ref={fileInputRef}
+              onClick={(e) => {
+                (e.target as HTMLInputElement).value = "";
+              }}
               onChange={(e) => {
-                if (e.target.files) {
+                if (e.target.files && e.target.files.length > 0) {
                   handleFileSelect(Array.from(e.target.files));
                 }
               }}
               multiple
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.rtf,.zip,.rar,.png,.jpg,.jpeg,.gif,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain,image/*"
               className="hidden"
             />
             <Button
@@ -758,8 +797,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
               size="icon"
               onClick={() => fileInputRef.current?.click()}
               disabled={files.length >= MAX_ATTACHMENTS}
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-              title="Attach files"
+              className={`h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground ${
+                files.length > 0 ? "text-primary bg-primary/10" : ""
+              }`}
+              title="Attach files (PDF, Word, Excel, Images, etc.)"
             >
               <Paperclip className="h-4 w-4" />
             </Button>

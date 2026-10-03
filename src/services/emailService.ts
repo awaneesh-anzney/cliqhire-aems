@@ -189,9 +189,7 @@ export const emailService = {
         formData.append("attachments", file);
       });
 
-      const response = await api.post("/api/email/send", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.post("/api/email/send", formData);
       return response.data;
     } else {
       const jsonBody: Record<string, any> = {
@@ -290,9 +288,7 @@ export const emailService = {
         formData.append("attachments", file);
       });
 
-      const response = await api.post("/api/email/drafts", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.post("/api/email/drafts", formData);
       return response.data;
     } else {
       const response = await api.post("/api/email/drafts", payload);
@@ -327,9 +323,7 @@ export const emailService = {
         formData.append("attachments", file);
       });
 
-      const response = await api.patch(`/api/email/drafts/${draftId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.patch(`/api/email/drafts/${draftId}`, formData);
       return response.data;
     } else {
       const response = await api.patch(`/api/email/drafts/${draftId}`, payload);
