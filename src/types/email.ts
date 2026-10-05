@@ -68,6 +68,11 @@ export interface EmailThread {
   updatedAt?: string;
 }
 
+export interface Recipient {
+  name: string;
+  email: string;
+}
+
 export interface EmailAttachment {
   fileName: string;
   mimeType: string;
@@ -85,9 +90,14 @@ export interface Email {
   serverFolder?: string;
   serverUid?: number;
   from: string;
+  fromName?: string;
+  fromEmail?: string;
   to: string[];
+  toRecipients?: Recipient[];
   cc?: string[];
+  ccRecipients?: Recipient[];
   bcc?: string[];
+  bccRecipients?: Recipient[];
   subject: string;
   bodyText?: string;
   bodyHtml?: string;
@@ -107,8 +117,11 @@ export interface Draft {
   _id: string;
   mailboxId: string;
   to?: string[];
+  toRecipients?: Recipient[];
   cc?: string[];
+  ccRecipients?: Recipient[];
   bcc?: string[];
+  bccRecipients?: Recipient[];
   subject?: string;
   bodyText?: string;
   bodyHtml?: string;

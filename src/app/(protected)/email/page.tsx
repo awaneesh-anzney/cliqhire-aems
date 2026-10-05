@@ -134,14 +134,27 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
       hasAttachments: item.hasAttachments || false,
     };
   } else if (folder === "drafts") {
-    const toRecipients = item.to && item.to.length > 0 ? item.to : ["(No recipient)"];
-    const parsed = parseSender(toRecipients[0]);
+    let displayName = "To: (No recipient)";
+    let avatarEmail = "";
+    
+    const firstRecipient = item.toRecipients && item.toRecipients.length > 0 ? item.toRecipients[0] : null;
+    if (firstRecipient) {
+      const nameToUse = firstRecipient.name || firstRecipient.email;
+      const extraCount = item.toRecipients.length - 1;
+      displayName = extraCount > 0 ? `To: ${nameToUse} +${extraCount}` : `To: ${nameToUse}`;
+      avatarEmail = firstRecipient.email;
+    } else if (item.to && item.to.length > 0) {
+      const parsed = parseSender(item.to[0]);
+      displayName = `To: ${parsed.name}`;
+      avatarEmail = parsed.email;
+    }
+
     return {
       id: item._id,
       threadId: item.threadId || item._id,
       subject: item.subject || "(No Subject)",
-      sender: parsed.name,
-      senderEmail: parsed.email,
+      sender: displayName,
+      senderEmail: avatarEmail,
       to: item.to || [],
       date: item.updatedAt || item.createdAt,
       relativeTime: formatRelativeTime(item.updatedAt || item.createdAt),
@@ -152,18 +165,35 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
       hasAttachments: item.attachments && item.attachments.length > 0,
     };
   } else {
-    let parsed;
-    if (item.direction === "received") {
-      parsed = getSenderDisplayInfo(item);
+    let displayName = "Unknown Sender";
+    let avatarEmail = "";
+    
+    const isSent = item.folder === "sent" || item.direction === "sent";
+
+    if (isSent) {
+      const firstRecipient = item.toRecipients && item.toRecipients.length > 0 ? item.toRecipients[0] : null;
+      if (firstRecipient) {
+        const nameToUse = firstRecipient.name || firstRecipient.email;
+        const extraCount = item.toRecipients.length - 1;
+        displayName = extraCount > 0 ? `To: ${nameToUse} +${extraCount}` : `To: ${nameToUse}`;
+        avatarEmail = firstRecipient.email;
+      } else {
+        const parsed = parseSender(item.to?.[0] || item.from);
+        displayName = `To: ${parsed.name}`;
+        avatarEmail = parsed.email;
+      }
     } else {
-      parsed = parseSender(item.to?.[0] || item.from);
+      const parsed = getSenderDisplayInfo(item);
+      displayName = parsed.name;
+      avatarEmail = parsed.email;
     }
+
     return {
       id: item._id,
       threadId: item.threadId || item._id,
       subject: item.subject || "(No Subject)",
-      sender: parsed.name,
-      senderEmail: parsed.email,
+      sender: displayName,
+      senderEmail: avatarEmail,
       to: item.to || [],
       date: item.receivedAt || item.sentAt || item.createdAt,
       relativeTime: formatRelativeTime(item.receivedAt || item.sentAt || item.createdAt),

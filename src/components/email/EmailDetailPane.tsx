@@ -93,9 +93,16 @@ export function EmailDetailPane({
   const latestMessage = messages[messages.length - 1] || null;
 
   const subject = thread?.subject || latestMessage?.subject || fallbackSubject;
-  const senderName = fallbackSender.name || "Sender";
-  const senderEmail = fallbackSender.email || "";
-  const recipients = latestMessage?.to?.join(", ") || fallbackRecipients || "";
+  const senderName = latestMessage?.fromName || fallbackSender.name || "Sender";
+  const senderEmail = latestMessage?.fromEmail || fallbackSender.email || "";
+  
+  const formatRecipients = (recs?: any[]) => {
+    if (!recs || recs.length === 0) return "";
+    return recs.map(r => r.name ? `${r.name} <${r.email}>` : r.email).join(", ");
+  };
+
+  const toStr = formatRecipients(latestMessage?.toRecipients) || latestMessage?.to?.join(", ") || fallbackRecipients || "";
+  const ccStr = formatRecipients(latestMessage?.ccRecipients);
   const displayDate = fallbackDate;
 
   if (isLoading && !latestMessage) {
@@ -262,8 +269,13 @@ export function EmailDetailPane({
             )}
           </div>
           <span className="text-[11.5px] text-[#919EAB] mt-0.5 truncate">
-            To: {recipients}
+            To: {toStr}
           </span>
+          {ccStr && (
+            <span className="text-[11.5px] text-[#919EAB] truncate">
+              Cc: {ccStr}
+            </span>
+          )}
         </div>
       </div>
 
