@@ -58,6 +58,16 @@ function parseSender(fromStr: string | undefined): { name: string; email: string
   return { name: fromStr, email: fromStr };
 }
 
+function getSenderDisplayInfo(item: any): { name: string; email: string } {
+  if (item.fromName !== undefined || item.fromEmail !== undefined) {
+    const email = item.fromEmail || "";
+    const name = item.fromName || email.split("@")[0] || "Unknown";
+    return { name, email };
+  }
+  const raw = typeof item === "string" ? item : (item.direction === "received" ? item.from : item.to?.[0] || item.from);
+  return parseSender(raw);
+}
+
 function formatRelativeTime(dateInput: string | Date | undefined): string {
   if (!dateInput) return "";
   try {
@@ -84,7 +94,7 @@ function formatFullDate(dateInput: string | Date | undefined): string {
 function mapSearchThread(item: any): ConversationItem {
   // Search response: { _id, subject, participants[], lastMessageAt, unreadCount, isStarred }
   const firstParticipant = item.participants?.[0] || "Contact";
-  const parsed = parseSender(firstParticipant);
+  const parsed = getSenderDisplayInfo(firstParticipant);
   return {
     id: item._id,
     threadId: item._id,
@@ -107,7 +117,7 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
   if (folder === "starred") {
     // Threads endpoint for starred
     const primaryParticipant = item.participants?.[0] || "Contact";
-    const parsed = parseSender(primaryParticipant);
+    const parsed = getSenderDisplayInfo(primaryParticipant);
     return {
       id: item._id,
       threadId: item._id,
@@ -142,8 +152,12 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
       hasAttachments: item.attachments && item.attachments.length > 0,
     };
   } else {
-    const rawFrom = item.direction === "received" ? item.from : item.to?.[0] || item.from;
-    const parsed = parseSender(rawFrom);
+    let parsed;
+    if (item.direction === "received") {
+      parsed = getSenderDisplayInfo(item);
+    } else {
+      parsed = parseSender(item.to?.[0] || item.from);
+    }
     return {
       id: item._id,
       threadId: item.threadId || item._id,

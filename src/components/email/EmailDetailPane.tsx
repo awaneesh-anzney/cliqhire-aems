@@ -45,14 +45,25 @@ export interface EmailDetailPaneProps {
   className?: string;
 }
 
-// Deterministic pastel color for initials
-function getInitialsColor(name: string): string {
-  const colors = ["#00A76F", "#1877F2", "#8E33FF", "#FF5630", "#00B8D9", "#FFAB00"];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+export function getInitials(name?: string, emailAddress?: string) {
+  if (name) {
+    return name.split(" ")
+               .map(word => word[0])
+               .join("")
+               .toUpperCase()
+               .substring(0, 2);
   }
-  return colors[Math.abs(hash) % colors.length];
+  return emailAddress ? emailAddress[0].toUpperCase() : "?";
+}
+
+export function getAvatarColor(emailAddress?: string) {
+  const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#D4A5A5"];
+  if (!emailAddress) return colors[0];
+  let sum = 0;
+  for (let i = 0; i < emailAddress.length; i++) {
+    sum += emailAddress.charCodeAt(i);
+  }
+  return colors[sum % colors.length];
 }
 
 export function EmailDetailPane({
@@ -234,9 +245,9 @@ export function EmailDetailPane({
       <div className="px-5 sm:px-7 py-1 flex items-start gap-3 shrink-0">
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 mt-0.5 shadow-2xs"
-          style={{ backgroundColor: getInitialsColor(senderName) }}
+          style={{ backgroundColor: getAvatarColor(senderEmail) }}
         >
-          {senderName.charAt(0).toUpperCase()}
+          {getInitials(senderName, senderEmail)}
         </div>
 
         <div className="flex flex-col min-w-0">

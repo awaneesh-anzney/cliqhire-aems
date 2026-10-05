@@ -14,6 +14,7 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import CloseIcon from "@mui/icons-material/Close";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import { getInitials, getAvatarColor } from "./EmailDetailPane";
 
 export interface ConversationItem {
   id: string;
@@ -55,15 +56,7 @@ export interface EmailConversationListProps {
   searchResultCount?: number;
 }
 
-// Deterministic pastel color for initials
-function getInitialsColor(name: string): string {
-  const colors = ["#00A76F", "#1877F2", "#8E33FF", "#FF5630", "#00B8D9", "#FFAB00"];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
+
 
 export function EmailConversationList({
   items,
@@ -171,8 +164,8 @@ export function EmailConversationList({
         ) : (
           items.map((item) => {
             const isSelected = item.threadId === selectedId || item.id === selectedId;
-            const initialLetter = (item.sender || "U").charAt(0).toUpperCase();
-            const color = getInitialsColor(item.sender || "U");
+            const initials = getInitials(item.sender, item.senderEmail);
+            const color = getAvatarColor(item.senderEmail);
 
             return (
               <div
@@ -190,7 +183,7 @@ export function EmailConversationList({
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-2xs"
                   style={{ backgroundColor: color }}
                 >
-                  {initialLetter}
+                  {initials}
                 </div>
 
                 {/* Sender, Subject snippet & time */}
