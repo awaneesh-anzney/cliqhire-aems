@@ -18,6 +18,7 @@ import ReportGmailerrorredOutlinedIcon from "@mui/icons-material/ReportGmailerro
 import LabelImportantOutlinedIcon from "@mui/icons-material/LabelImportantOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PowerSettingsNewOutlinedIcon from "@mui/icons-material/PowerSettingsNewOutlined";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -43,6 +44,7 @@ export const EMAIL_NAV_FOLDERS: NavFolder[] = [
   { id: "inbox", label: "Inbox", icon: InboxOutlinedIcon },
   { id: "sent", label: "Sent", icon: SendOutlinedIcon },
   { id: "drafts", label: "Drafts", icon: DraftsOutlinedIcon },
+  { id: "archive", label: "Archive", icon: ArchiveOutlinedIcon },
   { id: "trash", label: "Trash", icon: DeleteOutlineIcon },
   { id: "spam", label: "Spam", icon: ReportGmailerrorredOutlinedIcon },
   { id: "important", label: "Important", icon: LabelImportantOutlinedIcon },

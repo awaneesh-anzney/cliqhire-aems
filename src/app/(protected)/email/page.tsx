@@ -14,8 +14,13 @@ import {
   useEmailThread,
   useMarkThreadRead,
   useToggleStar,
+  useToggleImportant,
+  useArchiveEmail,
+  useUnarchiveEmail,
   useSendEmail,
   useMoveToTrash,
+  useRestoreEmail,
+  useDeleteDraft,
   usePermanentDelete,
   useDisconnectMailbox,
 } from "@/hooks/useEmail";
@@ -91,7 +96,7 @@ function mapSearchThread(item: any): ConversationItem {
     relativeTime: formatRelativeTime(item.lastMessageAt || item.createdAt),
     unread: (item.unreadCount || 0) > 0,
     isStarred: item.isStarred ?? false,
-    isImportant: item.isStarred ?? false,
+    isImportant: item.isImportant ?? false,
     snippet: item.snippet || item.subject || "...",
     hasAttachments: item.hasAttachments || false,
   };
@@ -114,7 +119,7 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
       relativeTime: formatRelativeTime(item.lastMessageAt || item.createdAt),
       unread: (item.unreadCount || 0) > 0,
       isStarred: item.isStarred ?? true,
-      isImportant: item.isStarred ?? false,
+      isImportant: item.isImportant ?? false,
       snippet: item.snippet || item.subject || "...",
       hasAttachments: item.hasAttachments || false,
     };
@@ -150,7 +155,7 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
       relativeTime: formatRelativeTime(item.receivedAt || item.sentAt || item.createdAt),
       unread: !item.isRead,
       isStarred: item.isStarred || false,
-      isImportant: false,
+      isImportant: item.isImportant || false,
       snippet: item.bodyText?.slice(0, 80) || item.subject || "...",
       hasAttachments: item.attachments && item.attachments.length > 0,
     };
@@ -288,10 +293,15 @@ export default function EmailPage() {
   // ─── Mutations ──────────────────────────────────────────────────────────────
   const markReadMutation = useMarkThreadRead();
   const toggleStarMutation = useToggleStar();
+  const toggleImportantMutation = useToggleImportant();
+  const archiveMutation = useArchiveEmail();
+  const unarchiveMutation = useUnarchiveEmail();
+  const restoreMutation = useRestoreEmail();
   const sendEmailMutation = useSendEmail();
   const moveToTrashMutation = useMoveToTrash();
   const permanentDeleteMutation = usePermanentDelete();
   const disconnectMutation = useDisconnectMailbox();
+  const deleteDraftMutation = useDeleteDraft();
 
   // ─── Derived List State ─────────────────────────────────────────────────────
   const isLoading = isSearchMode ? searchLoading || searchRefetching : listLoading || refetchingList;
@@ -377,20 +387,55 @@ export default function EmailPage() {
     toggleStarMutation.mutate({ threadId: targetId, isStarred: !currentStatus });
   };
 
-  const handleDelete = () => {
-    if (!selectedThreadId && !selectedListItem) return;
-    const targetId = selectedListItem?.id || selectedThreadId;
-    if (!targetId) return;
+  const handleToggleImportant = () => {
+    const targetEmailId = latestMessage?._id;
+    if (!targetEmailId) return;
 
-    if (activeFolder === "trash") {
-      permanentDeleteMutation.mutate(targetId, {
+    const currentStatus = activeThread?.isImportant ?? selectedListItem?.isImportant ?? false;
+    toggleImportantMutation.mutate({ emailId: targetEmailId, isImportant: !currentStatus });
+  };
+
+  const handleArchive = () => {
+    const targetEmailId = latestMessage?._id;
+    if (!targetEmailId) return;
+
+    if (activeFolder === "archive") {
+      unarchiveMutation.mutate(targetEmailId, {
         onSuccess: () => {
           setSelectedThreadId(null);
           refetchList();
         },
       });
     } else {
-      moveToTrashMutation.mutate(targetId, {
+      archiveMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    }
+  };
+
+  const handleDelete = () => {
+    const targetEmailId = latestMessage?._id;
+    if (!targetEmailId) return;
+
+    if (activeFolder === "trash") {
+      permanentDeleteMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    } else if (activeFolder === "drafts") {
+      deleteDraftMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    } else {
+      moveToTrashMutation.mutate(targetEmailId, {
         onSuccess: () => {
           setSelectedThreadId(null);
           refetchList();
@@ -639,10 +684,12 @@ export default function EmailPage() {
                 fallbackRecipients={detailRecipients}
                 fallbackSnippet={selectedListItem?.snippet}
                 isStarred={activeThread?.isStarred ?? selectedListItem?.isStarred ?? false}
+                isImportant={activeThread?.isImportant ?? selectedListItem?.isImportant ?? false}
                 isLoading={loadingDetail}
                 onToggleStar={handleToggleStar}
+                onToggleImportant={handleToggleImportant}
                 onDelete={handleDelete}
-                onArchive={handleDelete}
+                onArchive={handleArchive}
                 onMarkUnread={handleMarkUnread}
                 onReplyQuick={handleQuickAction}
                 onMobileBack={() => setMobileView("list")}

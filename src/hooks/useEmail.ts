@@ -256,6 +256,63 @@ export function useToggleStar() {
 }
 
 /**
+ * Mutation to toggle important flag on an email
+ */
+export function useToggleImportant() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ emailId, isImportant }: { emailId: string; isImportant: boolean }) =>
+      emailService.toggleImportantEmail(emailId, isImportant),
+    onSuccess: (_res, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["email-list"] });
+      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to mark as important");
+    },
+  });
+}
+
+/**
+ * Mutation to archive an email
+ */
+export function useArchiveEmail() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (emailId: string) => emailService.archiveEmail(emailId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-list"] });
+      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
+      toast.success("Email archived");
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to archive email");
+    },
+  });
+}
+
+/**
+ * Mutation to unarchive an email
+ */
+export function useUnarchiveEmail() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (emailId: string) => emailService.unarchiveEmail(emailId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-list"] });
+      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
+      toast.success("Email unarchived");
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to unarchive email");
+    },
+  });
+}
+
+/**
  * Mutation to move an email to Trash
  */
 export function useMoveToTrash() {

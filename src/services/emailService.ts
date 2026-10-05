@@ -238,6 +238,30 @@ export const emailService = {
   },
 
   /**
+   * Toggle Important flag on an email
+   */
+  async toggleImportantEmail(emailId: string, isImportant: boolean = true): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.patch(`/api/email/emails/${emailId}/important`, { isImportant });
+    return response.data;
+  },
+
+  /**
+   * Archive an email
+   */
+  async archiveEmail(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/emails/${emailId}/archive`);
+    return response.data;
+  },
+
+  /**
+   * Unarchive an email
+   */
+  async unarchiveEmail(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/archive/${emailId}/unarchive`);
+    return response.data;
+  },
+
+  /**
    * Move an email to Trash (soft delete)
    */
   async moveToTrash(emailId: string): Promise<{ success: boolean; message: string; data: any }> {

@@ -28,8 +28,10 @@ export interface EmailDetailPaneProps {
   fallbackRecipients?: string;
   fallbackSnippet?: string;
   isStarred?: boolean;
+  isImportant?: boolean;
   isLoading?: boolean;
   onToggleStar: () => void;
+  onToggleImportant?: () => void;
   onDelete: () => void;
   onArchive?: () => void;
   onMarkUnread?: () => void;
@@ -62,8 +64,10 @@ export function EmailDetailPane({
   fallbackRecipients = "",
   fallbackSnippet = "",
   isStarred = false,
+  isImportant = false,
   isLoading = false,
   onToggleStar,
+  onToggleImportant,
   onDelete,
   onArchive,
   onMarkUnread,
@@ -130,11 +134,15 @@ export function EmailDetailPane({
 
           <button
             type="button"
-            onClick={onToggleStar}
+            onClick={onToggleImportant}
             className="p-1.5 rounded-lg text-[#637381] hover:text-[#1C252E] dark:text-[#919EAB] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             title="Important"
           >
-            <LabelImportantOutlinedIcon sx={{ fontSize: 19 }} />
+            {isImportant ? (
+              <LabelImportantOutlinedIcon sx={{ fontSize: 19, color: "#F59E0B" }} />
+            ) : (
+              <LabelImportantOutlinedIcon sx={{ fontSize: 19 }} />
+            )}
           </button>
 
           {onArchive && (
