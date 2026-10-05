@@ -343,7 +343,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     }
 
     const payload = {
-      to: toRecipients.length > 0 ? toRecipients.map(formatRecipient) : undefined,
+      to: toRecipients.map(formatRecipient),
       subject,
       cc: ccRecipients.length > 0 ? ccRecipients.map(formatRecipient) : undefined,
       bcc: bccRecipients.length > 0 ? bccRecipients.map(formatRecipient) : undefined,

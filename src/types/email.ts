@@ -64,6 +64,7 @@ export interface EmailThread {
   lastMessageAt: string;
   unreadCount: number;
   isStarred: boolean;
+  isImportant?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -105,6 +106,7 @@ export interface Email {
   messageIdHeader?: string;
   inReplyTo?: string;
   isRead: boolean;
+  isImportant?: boolean;
   status: EmailStatus;
   errorMessage?: string;
   sentAt?: string;
