@@ -189,9 +189,7 @@ export const emailService = {
         formData.append("attachments", file);
       });
 
-      const response = await api.post("/api/email/send", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.post("/api/email/send", formData);
       return response.data;
     } else {
       const jsonBody: Record<string, any> = {
@@ -236,6 +234,30 @@ export const emailService = {
    */
   async toggleStarThread(threadId: string, isStarred: boolean = true): Promise<{ success: boolean; message: string; data: any }> {
     const response = await api.patch(`/api/email/threads/${threadId}/star`, { isStarred });
+    return response.data;
+  },
+
+  /**
+   * Toggle Important flag on an email
+   */
+  async toggleImportantEmail(emailId: string, isImportant: boolean = true): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.patch(`/api/email/emails/${emailId}/important`, { isImportant });
+    return response.data;
+  },
+
+  /**
+   * Archive an email
+   */
+  async archiveEmail(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/emails/${emailId}/archive`);
+    return response.data;
+  },
+
+  /**
+   * Unarchive an email
+   */
+  async unarchiveEmail(emailId: string): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await api.post(`/api/email/archive/${emailId}/unarchive`);
     return response.data;
   },
 
@@ -290,9 +312,7 @@ export const emailService = {
         formData.append("attachments", file);
       });
 
-      const response = await api.post("/api/email/drafts", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.post("/api/email/drafts", formData);
       return response.data;
     } else {
       const response = await api.post("/api/email/drafts", payload);
@@ -327,9 +347,7 @@ export const emailService = {
         formData.append("attachments", file);
       });
 
-      const response = await api.patch(`/api/email/drafts/${draftId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.patch(`/api/email/drafts/${draftId}`, formData);
       return response.data;
     } else {
       const response = await api.patch(`/api/email/drafts/${draftId}`, payload);

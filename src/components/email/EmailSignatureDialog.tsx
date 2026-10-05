@@ -331,7 +331,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
                   <Button
                     size="sm"
                     onClick={handleConfirmCreate}
-                    className="h-6 px-2.5 text-[11px] rounded-md bg-primary text-primary-foreground font-medium"
+                    className="h-6 px-2.5 text-[11px] rounded-md bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground font-medium transition-all active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
                   >
                     Create
                   </Button>
@@ -741,7 +741,7 @@ export const EmailSignatureDialog: React.FC<EmailSignatureDialogProps> = ({
           </span>
           <Button
             onClick={handleSaveAndClose}
-            className="h-8 px-4 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
+            className="h-8 px-4 text-xs font-bold rounded-xl bg-primary hover:bg-primary-hover active:bg-primary-hover text-primary-foreground shadow-sm shadow-primary/25 hover:shadow-md hover:shadow-primary/30 transition-all active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
           >
             Save &amp; Close
           </Button>

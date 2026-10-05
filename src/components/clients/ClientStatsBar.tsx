@@ -1,7 +1,16 @@
 "use client";
 
 import React from "react";
-import { Building2, Users, Briefcase, TrendingUp, CheckCircle2, Clock } from "lucide-react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
+import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import { cn } from "@/lib/utils";
 
 interface ClientStatsBarProps {
@@ -45,90 +54,226 @@ export const ClientStatsBar: React.FC<ClientStatsBarProps> = ({
   }, [clients]);
 
   return (
-    <div
+    <Box
       className={cn(
-        "flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 select-none",
+        "flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-0.5 select-none",
         className
       )}
     >
-      {/* Total Records Pill */}
-      <button
+      {/* Total Records Button / Pill */}
+      <Button
         type="button"
         onClick={() => onSelectStage && onSelectStage("All")}
-        className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-          selectedStage === "All"
-            ? "bg-primary/10 border-primary/30 text-primary shadow-xs"
-            : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-        )}
+        variant="text"
+        size="small"
+        sx={{
+          height: 28,
+          px: 1.25,
+          borderRadius: "8px",
+          textTransform: "none",
+          fontWeight: 700,
+          fontSize: "11px",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          flexShrink: 0,
+          bgcolor: selectedStage === "All" ? "rgba(37, 99, 235, 0.1)" : "background.paper",
+          color: selectedStage === "All" ? "#2563EB" : "text.secondary",
+          border: 1,
+          borderColor: selectedStage === "All" ? "rgba(37, 99, 235, 0.3)" : "divider",
+          "&:hover": {
+            bgcolor: selectedStage === "All" ? "rgba(37, 99, 235, 0.15)" : "rgba(145, 158, 171, 0.08)",
+            color: selectedStage === "All" ? "#1D4ED8" : "text.primary",
+          },
+        }}
       >
-        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-        <span className="text-[11px] font-medium">All {isLeads ? "Leads" : "Clients"}</span>
-        <span className="px-1.5 py-0.2 rounded-md bg-primary/15 text-primary text-[10px] font-bold">
-          {totalCount}
-        </span>
-      </button>
+        <Box
+          sx={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            bgcolor: "#2563EB",
+          }}
+        />
+        <span>All {isLeads ? "Leads" : "Clients"}</span>
+        <Chip
+          label={totalCount}
+          size="small"
+          sx={{
+            height: 16,
+            fontSize: "0.625rem",
+            fontWeight: 800,
+            bgcolor: selectedStage === "All" ? "#2563EB" : "rgba(145, 158, 171, 0.16)",
+            color: selectedStage === "All" ? "#FFFFFF" : "text.primary",
+            border: 0,
+            "& .MuiChip-label": { px: 0.6 },
+          }}
+        />
+      </Button>
 
       {isLeads ? (
         <>
           {/* Lead Stage Pill */}
-          <button
+          <Button
             type="button"
             onClick={() => onSelectStage && onSelectStage("Lead")}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-              selectedStage === "Lead"
-                ? "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400 shadow-xs"
-                : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-            )}
+            variant="text"
+            size="small"
+            sx={{
+              height: 28,
+              px: 1.25,
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "11px",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexShrink: 0,
+              bgcolor: selectedStage === "Lead" ? "rgba(0, 184, 217, 0.12)" : "background.paper",
+              color: selectedStage === "Lead" ? "#00B8D9" : "text.secondary",
+              border: 1,
+              borderColor: selectedStage === "Lead" ? "rgba(0, 184, 217, 0.35)" : "divider",
+              "&:hover": {
+                bgcolor: selectedStage === "Lead" ? "rgba(0, 184, 217, 0.18)" : "rgba(145, 158, 171, 0.08)",
+                color: selectedStage === "Lead" ? "#00A3BF" : "text.primary",
+              },
+            }}
           >
-            <Clock className="w-3.5 h-3.5 text-blue-500" />
-            <span className="text-[11px] font-medium">New Leads</span>
-            <span className="px-1.5 py-0.2 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold">
-              {stageCounts.leadCount}
-            </span>
-          </button>
+            <AccessTimeOutlinedIcon sx={{ fontSize: 14, color: "#00B8D9" }} />
+            <span>New Leads</span>
+            <Chip
+              label={stageCounts.leadCount}
+              size="small"
+              sx={{
+                height: 16,
+                fontSize: "0.625rem",
+                fontWeight: 800,
+                bgcolor: selectedStage === "Lead" ? "#00B8D9" : "rgba(0, 184, 217, 0.12)",
+                color: selectedStage === "Lead" ? "#FFFFFF" : "#00B8D9",
+                border: 0,
+                "& .MuiChip-label": { px: 0.6 },
+              }}
+            />
+          </Button>
 
           {/* Engaged Stage Pill */}
-          <button
+          <Button
             type="button"
             onClick={() => onSelectStage && onSelectStage("Engaged")}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-              selectedStage === "Engaged"
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-xs"
-                : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-            )}
+            variant="text"
+            size="small"
+            sx={{
+              height: 28,
+              px: 1.25,
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "11px",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexShrink: 0,
+              bgcolor: selectedStage === "Engaged" ? "rgba(255, 171, 0, 0.12)" : "background.paper",
+              color: selectedStage === "Engaged" ? "#FFAB00" : "text.secondary",
+              border: 1,
+              borderColor: selectedStage === "Engaged" ? "rgba(255, 171, 0, 0.35)" : "divider",
+              "&:hover": {
+                bgcolor: selectedStage === "Engaged" ? "rgba(255, 171, 0, 0.18)" : "rgba(145, 158, 171, 0.08)",
+                color: selectedStage === "Engaged" ? "#E09700" : "text.primary",
+              },
+            }}
           >
-            <TrendingUp className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-[11px] font-medium">Engaged</span>
-            <span className="px-1.5 py-0.2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold">
-              {stageCounts.engagedCount}
-            </span>
-          </button>
+            <TrendingUpOutlinedIcon sx={{ fontSize: 14, color: "#FFAB00" }} />
+            <span>Engaged</span>
+            <Chip
+              label={stageCounts.engagedCount}
+              size="small"
+              sx={{
+                height: 16,
+                fontSize: "0.625rem",
+                fontWeight: 800,
+                bgcolor: selectedStage === "Engaged" ? "#FFAB00" : "rgba(255, 171, 0, 0.12)",
+                color: selectedStage === "Engaged" ? "#FFFFFF" : "#FFAB00",
+                border: 0,
+                "& .MuiChip-label": { px: 0.6 },
+              }}
+            />
+          </Button>
         </>
       ) : (
         <>
           {/* Signed Clients Pill */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/70 bg-card/70 text-xs text-muted-foreground shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span className="text-[11px] font-medium">Signed Contracts</span>
-            <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-              {totalCount}
-            </span>
-          </div>
+          <Box
+            sx={{
+              height: 28,
+              px: 1.25,
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexShrink: 0,
+              bgcolor: "rgba(0, 167, 111, 0.08)",
+              border: 1,
+              borderColor: "rgba(0, 167, 111, 0.25)",
+            }}
+          >
+            <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14, color: "#00A76F" }} />
+            <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#00A76F" }}>
+              Signed Contracts
+            </Typography>
+            <Chip
+              label={totalCount}
+              size="small"
+              sx={{
+                height: 16,
+                fontSize: "0.625rem",
+                fontWeight: 800,
+                bgcolor: "#00A76F",
+                color: "#FFFFFF",
+                border: 0,
+                "& .MuiChip-label": { px: 0.6 },
+              }}
+            />
+          </Box>
         </>
       )}
 
       {/* Jobs Metric Pill */}
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/70 bg-card/70 text-xs text-muted-foreground shrink-0 ml-auto hidden sm:flex">
-        <Briefcase className="w-3.5 h-3.5 text-indigo-500" />
-        <span className="text-[11px] font-medium">Page Jobs:</span>
-        <span className="px-1.5 py-0.2 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold">
-          {stageCounts.totalJobs}
-        </span>
-      </div>
-    </div>
+      <Box
+        sx={{
+          height: 28,
+          px: 1.25,
+          borderRadius: "8px",
+          display: { xs: "none", sm: "flex" },
+          alignItems: "center",
+          gap: 1,
+          flexShrink: 0,
+          ml: "auto",
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: "divider",
+        }}
+      >
+        <WorkOutlineOutlinedIcon sx={{ fontSize: 13, color: "#8E33FF" }} />
+        <Typography sx={{ fontSize: "11px", fontWeight: 600, color: "text.secondary" }}>
+          Page Requisitions:
+        </Typography>
+        <Chip
+          label={stageCounts.totalJobs}
+          size="small"
+          sx={{
+            height: 16,
+            fontSize: "0.625rem",
+            fontWeight: 800,
+            bgcolor: "rgba(142, 51, 255, 0.1)",
+            color: "#8E33FF",
+            border: 0,
+            "& .MuiChip-label": { px: 0.6 },
+          }}
+        />
+      </Box>
+    </Box>
   );
 };
 

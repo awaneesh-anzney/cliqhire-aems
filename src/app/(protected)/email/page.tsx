@@ -1,61 +1,254 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { 
-  EmailHeader, 
-  MailboxConnectCard, 
-  EmailSidebar, 
-  EmailFolder, 
-  EmailThreadList, 
-  EmailListItem, 
-  EmailThreadDetail, 
-  EmailComposerDialog, 
-  ComposerInitialData, 
-  AdminMailboxesDialog, 
-  EmailSignatureDialog, 
-  EmailContactType, 
-  EMAIL_TYPE_CONFIG 
-} from "@/components/email";
-import { 
-  useMailboxStatus, 
-  useEmailList, 
-  useEmailThread, 
-  useMarkThreadRead, 
-  useToggleStar 
-} from "@/hooks/useEmail";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Loader2, Mail, X, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { emailService } from "@/services/emailService";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import { formatDistanceToNowStrict, format } from "date-fns";
 import { useSearchParams, useRouter } from "next/navigation";
 
+// Real API Hooks & Services
+import {
+  useMailboxStatus,
+  useEmailList,
+  useEmailSearch,
+  useEmailThread,
+  useMarkThreadRead,
+  useToggleStar,
+  useToggleImportant,
+  useArchiveEmail,
+  useUnarchiveEmail,
+  useSendEmail,
+  useMoveToTrash,
+  useRestoreEmail,
+  useDeleteDraft,
+  usePermanentDelete,
+  useDisconnectMailbox,
+} from "@/hooks/useEmail";
+import { emailService } from "@/services/emailService";
+import { Email } from "@/types/email";
+
+// Modular Reusable Components
+import {
+  EmailNavSidebar,
+  EmailConversationList,
+  EmailDetailPane,
+  ConversationItem,
+  EmailComposerDialog,
+  ComposerInitialData,
+  AdminMailboxesDialog,
+  EmailSignatureDialog,
+  MailboxConnectCard,
+} from "@/components/email";
+
+// Material UI Icons
+import CircularProgress from "@mui/material/CircularProgress";
+import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
+
+function parseSender(fromStr: string | undefined): { name: string; email: string } {
+  if (!fromStr) return { name: "Unknown", email: "" };
+  const match = fromStr.match(/^(.*?)(?:<(.+?)>)?$/);
+  if (match) {
+    const name = (match[1] || "").trim().replace(/^["']|["']$/g, "");
+    const email = (match[2] || "").trim();
+    return {
+      name: name || email || "Unknown",
+      email: email || (name.includes("@") ? name : ""),
+    };
+  }
+  return { name: fromStr, email: fromStr };
+}
+
+function getSenderDisplayInfo(item: any): { name: string; email: string } {
+  if (item.fromName !== undefined || item.fromEmail !== undefined) {
+    const email = item.fromEmail || "";
+    const name = item.fromName || email.split("@")[0] || "Unknown";
+    return { name, email };
+  }
+  const raw = typeof item === "string" ? item : (item.direction === "received" ? item.from : item.to?.[0] || item.from);
+  return parseSender(raw);
+}
+
+function formatRelativeTime(dateInput: string | Date | undefined): string {
+  if (!dateInput) return "";
+  try {
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return "";
+    return formatDistanceToNowStrict(d, { addSuffix: false });
+  } catch {
+    return "";
+  }
+}
+
+function formatFullDate(dateInput: string | Date | undefined): string {
+  if (!dateInput) return "";
+  try {
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return "";
+    return format(d, "dd MMM yyyy h:mm a");
+  } catch {
+    return "";
+  }
+}
+
+/** Map a thread-level search result item into a ConversationItem */
+function mapSearchThread(item: any): ConversationItem {
+  // Search response: { _id, subject, participants[], lastMessageAt, unreadCount, isStarred }
+  const firstParticipant = item.participants?.[0] || "Contact";
+  const parsed = getSenderDisplayInfo(firstParticipant);
+  return {
+    id: item._id,
+    threadId: item._id,
+    subject: item.subject || "(No Subject)",
+    sender: parsed.name,
+    senderEmail: parsed.email,
+    to: item.participants || [],
+    date: item.lastMessageAt || item.createdAt,
+    relativeTime: formatRelativeTime(item.lastMessageAt || item.createdAt),
+    unread: (item.unreadCount || 0) > 0,
+    isStarred: item.isStarred ?? false,
+    isImportant: item.isImportant ?? false,
+    snippet: item.snippet || item.subject || "...",
+    hasAttachments: item.hasAttachments || false,
+  };
+}
+
+/** Map a folder-list email item into a ConversationItem */
+function mapFolderEmail(item: any, folder: string): ConversationItem {
+  if (folder === "starred") {
+    // Threads endpoint for starred
+    const primaryParticipant = item.participants?.[0] || "Contact";
+    const parsed = getSenderDisplayInfo(primaryParticipant);
+    return {
+      id: item._id,
+      threadId: item._id,
+      subject: item.subject || "(No Subject)",
+      sender: parsed.name,
+      senderEmail: parsed.email,
+      to: item.participants || [],
+      date: item.lastMessageAt || item.createdAt,
+      relativeTime: formatRelativeTime(item.lastMessageAt || item.createdAt),
+      unread: (item.unreadCount || 0) > 0,
+      isStarred: item.isStarred ?? true,
+      isImportant: item.isImportant ?? false,
+      snippet: item.snippet || item.subject || "...",
+      hasAttachments: item.hasAttachments || false,
+    };
+  } else if (folder === "drafts") {
+    let displayName = "To: (No recipient)";
+    let avatarEmail = "";
+    
+    const firstRecipient = item.toRecipients && item.toRecipients.length > 0 ? item.toRecipients[0] : null;
+    if (firstRecipient) {
+      const nameToUse = firstRecipient.name || firstRecipient.email;
+      const extraCount = item.toRecipients.length - 1;
+      displayName = extraCount > 0 ? `${nameToUse} +${extraCount}` : nameToUse;
+      avatarEmail = firstRecipient.email;
+    } else if (item.to && item.to.length > 0) {
+      const parsed = parseSender(item.to[0]);
+      displayName = parsed.name;
+      avatarEmail = parsed.email;
+    }
+
+    return {
+      id: item._id,
+      threadId: item.threadId || item._id,
+      subject: item.subject || "(No Subject)",
+      sender: displayName,
+      senderEmail: avatarEmail,
+      to: item.to || [],
+      date: item.updatedAt || item.createdAt,
+      relativeTime: formatRelativeTime(item.updatedAt || item.createdAt),
+      unread: false,
+      isStarred: false,
+      isImportant: false,
+      snippet: item.bodyText || item.subject || "(Draft)",
+      hasAttachments: item.attachments && item.attachments.length > 0,
+    };
+  } else {
+    let displayName = "Unknown Sender";
+    let avatarEmail = "";
+    
+    const isSent = item.folder === "sent" || item.direction === "sent";
+
+    if (isSent) {
+      const firstRecipient = item.toRecipients && item.toRecipients.length > 0 ? item.toRecipients[0] : null;
+      if (firstRecipient) {
+        const nameToUse = firstRecipient.name || firstRecipient.email;
+        const extraCount = item.toRecipients.length - 1;
+        displayName = extraCount > 0 ? `${nameToUse} +${extraCount}` : nameToUse;
+        avatarEmail = firstRecipient.email;
+      } else {
+        const parsed = parseSender(item.to?.[0] || item.from);
+        displayName = parsed.name;
+        avatarEmail = parsed.email;
+      }
+    } else {
+      const parsed = getSenderDisplayInfo(item);
+      displayName = parsed.name;
+      avatarEmail = parsed.email;
+    }
+
+    return {
+      id: item._id,
+      threadId: item.threadId || item._id,
+      subject: item.subject || "(No Subject)",
+      sender: displayName,
+      senderEmail: avatarEmail,
+      to: item.to || [],
+      date: item.receivedAt || item.sentAt || item.createdAt,
+      relativeTime: formatRelativeTime(item.receivedAt || item.sentAt || item.createdAt),
+      unread: !item.isRead,
+      isStarred: item.isStarred || false,
+      isImportant: item.isImportant || false,
+      snippet: item.bodyText?.slice(0, 80) || item.subject || "...",
+      hasAttachments: item.attachments && item.attachments.length > 0,
+    };
+  }
+}
+
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
 export default function EmailPage() {
-  const { 
-    data: mailboxData, 
-    isLoading: loadingStatus, 
-    refetch: refetchStatus, 
-    isRefetching: refetchingStatus 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Real Mailbox Status API
+  const {
+    data: mailboxData,
+    isLoading: loadingStatus,
+    refetch: refetchStatus,
+    isRefetching: refetchingStatus,
   } = useMailboxStatus();
 
   const isConnected = !!mailboxData?.connected && !!mailboxData?.data;
   const mailbox = mailboxData?.data || null;
 
-  // Folder & list state
-  const [activeFolder, setActiveFolder] = useState<EmailFolder>("inbox");
-  const [searchQuery, setSearchQuery] = useState("");
+  // ─── State ─────────────────────────────────────────────────────────────────
+  const [activeFolder, setActiveFolder] = useState<string>("inbox");
+
+  // Raw input value — updated on every keystroke
+  const [searchInputValue, setSearchInputValue] = useState("");
+
+  // Debounced value — triggers the search API call (400ms delay)
+  const debouncedSearch = useDebounce(searchInputValue, 400);
+
+  // Contact filter from nav sidebar
+  const [selectedContactEmail, setSelectedContactEmail] = useState<string | null>(null);
+
   const [page, setPage] = useState(1);
+  const [searchPage, setSearchPage] = useState(1);
+  const pageSize = 20;
+
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
-
-  // Email type & address selection state (Client, Candidate, Team)
-  const [selectedEmailType, setSelectedEmailType] = useState<EmailContactType | null>(null);
-  const [selectedEmailAddress, setSelectedEmailAddress] = useState<string | null>(null);
-
-  // Responsive sidebar states (default collapsed on tablet, expanded on desktop)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Modals state
   const [composerOpen, setComposerOpen] = useState(false);
@@ -64,16 +257,26 @@ export default function EmailPage() {
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const queryClient = useQueryClient();
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  // Reply Composer State
+  const [replyText, setReplyText] = useState("");
 
+  // Mobile navigation state
+  const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("list");
+
+  // ─── Derived: are we in search mode? ───────────────────────────────────────
+  // Search mode = user typed something in search box OR contact filter is active
+  const activeSearchQuery = debouncedSearch.trim();
+  const isSearchMode = activeSearchQuery.length > 0 || !!selectedContactEmail;
+
+  // The actual search term: if contact filter is active with no text, use the email as query
+  const effectiveSearchTerm = activeSearchQuery || selectedContactEmail || "";
+
+  // ─── OAuth redirect handling ────────────────────────────────────────────────
   useEffect(() => {
     if (!searchParams) return;
     const connected = searchParams.get("connected");
     const message = searchParams.get("message");
-    
+
     if (connected === "success") {
       toast.success("Mailbox connected successfully!");
       refetchStatus();
@@ -90,157 +293,248 @@ export default function EmailPage() {
     }
   }, [searchParams, router, refetchStatus]);
 
-  useEffect(() => {
-    setSelectedIds([]);
-    setHasAutoSelected(false);
-  }, [activeFolder, searchQuery, page, selectedEmailType, selectedEmailAddress]);
+  // ─── Data Fetching ──────────────────────────────────────────────────────────
 
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
-    try {
-      if (activeFolder === "trash") {
-        await Promise.all(selectedIds.map((id) => emailService.permanentDelete(id)));
-        toast.success("Conversations permanently deleted");
-      } else if (activeFolder === "drafts") {
-        await Promise.all(selectedIds.map((id) => emailService.deleteDraft(id)));
-        toast.success("Drafts discarded");
-      } else {
-        await Promise.all(selectedIds.map((id) => emailService.moveToTrash(id)));
-        toast.success("Conversations moved to Trash");
-      }
-      setSelectedIds([]);
-      queryClient.invalidateQueries({ queryKey: ["email-list"] });
-      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
-      refetchList();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Some actions failed");
-      queryClient.invalidateQueries({ queryKey: ["email-list"] });
-      queryClient.invalidateQueries({ queryKey: ["email-threads"] });
-      refetchList();
-    }
-  };
+  // SEARCH: dedicated hook hitting /api/email/search
+  // Folder passed as undefined when "all" so backend searches across all folders
+  const searchFolder = ["inbox", "sent", "trash"].includes(activeFolder) ? activeFolder : undefined;
 
-  // Set initial collapse based on screen width on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-        setIsSidebarCollapsed(true);
-      }
-    }
-  }, []);
-
-  const effectiveSearchQuery = searchQuery || selectedEmailAddress || "";
-  const isSearchActive = !!effectiveSearchQuery;
-
-  // Fetch lists
-  const { 
-    data: listData, 
-    isLoading: loadingList, 
-    refetch: refetchList, 
-    isRefetching: refetchingList 
-  } = useEmailList(
-    activeFolder,
+  const {
+    data: searchData,
+    isLoading: searchLoading,
+    isRefetching: searchRefetching,
+  } = useEmailSearch(
     {
-      page,
-      limit: 25,
-      q: effectiveSearchQuery ? effectiveSearchQuery : undefined,
+      q: effectiveSearchTerm,
+      folder: searchFolder,
+      starredOnly: activeFolder === "starred" ? true : undefined,
+      page: searchPage,
+      limit: pageSize,
     },
-    isConnected
+    isConnected && isSearchMode
   );
 
-  // Fetch active thread detail
-  const { 
-    data: threadDetailData, 
-    isLoading: loadingDetail 
+  // FOLDER LIST: normal folder browsing (when not in search mode)
+  const folderQueryKey = activeFolder === "all" ? "inbox" : activeFolder;
+
+  const {
+    data: listData,
+    isLoading: listLoading,
+    refetch: refetchList,
+    isRefetching: refetchingList,
+  } = useEmailList(
+    folderQueryKey,
+    { page, limit: pageSize },
+    isConnected && !isSearchMode
+  );
+
+  // ─── Thread Detail ──────────────────────────────────────────────────────────
+  const {
+    data: threadDetailData,
+    isLoading: loadingDetail,
   } = useEmailThread(selectedThreadId);
 
+  // ─── Mutations ──────────────────────────────────────────────────────────────
   const markReadMutation = useMarkThreadRead();
   const toggleStarMutation = useToggleStar();
+  const toggleImportantMutation = useToggleImportant();
+  const archiveMutation = useArchiveEmail();
+  const unarchiveMutation = useUnarchiveEmail();
+  const restoreMutation = useRestoreEmail();
+  const sendEmailMutation = useSendEmail();
+  const moveToTrashMutation = useMoveToTrash();
+  const permanentDeleteMutation = usePermanentDelete();
+  const disconnectMutation = useDisconnectMailbox();
+  const deleteDraftMutation = useDeleteDraft();
 
-  const rawList = listData?.data || [];
-  const totalThreads = listData?.total || 0;
-  const totalPages = listData?.pages || 1;
+  // ─── Derived List State ─────────────────────────────────────────────────────
+  const isLoading = isSearchMode ? searchLoading || searchRefetching : listLoading || refetchingList;
 
-  const mappedItems: EmailListItem[] = rawList.map((item: any) => {
-    if (isSearchActive || activeFolder === "starred") {
-      return {
-        id: item._id,
-        threadId: item._id,
-        subject: item.subject,
-        participants: item.participants || ["Participants"],
-        date: item.lastMessageAt || item.createdAt,
-        unreadCount: item.unreadCount || 0,
-        isStarred: item.isStarred ?? true,
-        isDraft: false,
-        hasAttachments: item.hasAttachments || false,
-      };
-    } else if (activeFolder === "drafts") {
-      return {
-        id: item._id,
-        threadId: item.threadId,
-        subject: item.subject || "(No Subject)",
-        participants: item.to && item.to.length > 0 ? item.to : ["No Recipients"],
-        date: item.updatedAt || item.createdAt,
-        unreadCount: 0,
-        isStarred: false,
-        isDraft: true,
-        hasAttachments: item.attachments && item.attachments.length > 0,
-      };
-    } else {
-      return {
-        id: item._id,
-        threadId: item.threadId,
-        subject: item.subject || "(No Subject)",
-        participants: item.direction === "received" ? [item.from] : (item.to || ["Unknown Contact"]),
-        date: item.receivedAt || item.sentAt || item.createdAt,
-        unreadCount: item.isRead ? 0 : 1,
-        isStarred: item.isStarred || false,
-        isDraft: false,
-        hasAttachments: item.attachments && item.attachments.length > 0,
-      };
+  // Pagination for active mode
+  const activeData = isSearchMode ? searchData : listData;
+  const rawList: any[] = activeData?.data || [];
+  const totalItems = isSearchMode
+    ? (searchData?.total ?? searchData?.count ?? rawList.length)
+    : (listData?.total ?? rawList.length);
+  const totalPages = isSearchMode
+    ? (searchData?.pages ?? Math.max(1, Math.ceil(totalItems / pageSize)))
+    : (listData?.pages ?? Math.max(1, Math.ceil(totalItems / pageSize)));
+  const activePage = isSearchMode ? searchPage : page;
+
+  // Map items based on mode
+  const mappedItems: ConversationItem[] = useMemo(() => {
+    if (isSearchMode) {
+      return rawList.map((item) => mapSearchThread(item));
     }
-  });
+    return rawList.map((item) => mapFolderEmail(item, activeFolder));
+  }, [rawList, isSearchMode, activeFolder]);
 
-  const displayItems = mappedItems;
+  // Client-side fallback pagination if server doesn't slice
+  const displayItems = useMemo(() => {
+    if (activeData?.pages && activeData.pages > 1) {
+      return mappedItems;
+    }
+    if (mappedItems.length > pageSize) {
+      const start = (activePage - 1) * pageSize;
+      return mappedItems.slice(start, start + pageSize);
+    }
+    return mappedItems;
+  }, [mappedItems, activeData?.pages, activePage, pageSize]);
 
-  // Auto-select first thread on initial desktop load (>= 1280px) without forcing re-selection if user closes it
+  // Auto-select first thread on desktop load
   useEffect(() => {
-    if (!hasAutoSelected && !selectedThreadId && displayItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1280) {
-      if (!displayItems[0].isDraft) {
-        setSelectedThreadId(displayItems[0].threadId || displayItems[0].id);
-        setHasAutoSelected(true);
-      }
+    if (!hasAutoSelected && !selectedThreadId && displayItems.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1024) {
+      const firstId = displayItems[0].threadId || displayItems[0].id;
+      setSelectedThreadId(firstId);
+      setHasAutoSelected(true);
     }
   }, [displayItems, selectedThreadId, hasAutoSelected]);
 
-  const handleSelectThread = (item: EmailListItem) => {
-    if (item.isDraft) {
-      const rawDraft: any = rawList.find((d: any) => d._id === item.id);
-      handleCompose({
-        to: rawDraft?.to?.join(", "),
-        cc: rawDraft?.cc?.join(", "),
-        bcc: rawDraft?.bcc?.join(", "),
-        subject: rawDraft?.subject,
-        text: rawDraft?.bodyText,
-        threadId: rawDraft?.threadId,
-        inReplyTo: rawDraft?.inReplyTo,
-        draftId: item.id,
-      });
-    } else {
-      const targetId = item.threadId || item.id;
-      setSelectedThreadId(targetId);
-      if (item.unreadCount > 0) {
-        markReadMutation.mutate({ threadId: targetId, isRead: true });
-      }
+  // Reset auto-select when entering search mode so first result can be selected
+  useEffect(() => {
+    if (isSearchMode) {
+      setHasAutoSelected(false);
+      setSelectedThreadId(null);
+    }
+  }, [isSearchMode]);
+
+  // Active Thread & Messages
+  const activeThread = threadDetailData?.data?.thread || null;
+  const threadMessages: Email[] = threadDetailData?.data?.messages || [];
+  const latestMessage = threadMessages[threadMessages.length - 1] || null;
+
+  const selectedListItem = useMemo(() => {
+    return (
+      displayItems.find((i) => i.threadId === selectedThreadId || i.id === selectedThreadId) ||
+      mappedItems.find((i) => i.threadId === selectedThreadId || i.id === selectedThreadId) ||
+      null
+    );
+  }, [displayItems, mappedItems, selectedThreadId]);
+
+  // ─── Handlers ───────────────────────────────────────────────────────────────
+  const handleSelectThread = (item: ConversationItem) => {
+    const targetId = item.threadId || item.id;
+    setSelectedThreadId(targetId);
+    setMobileView("detail");
+
+    if (item.unread) {
+      markReadMutation.mutate({ threadId: targetId, isRead: true });
     }
   };
 
-  const handleToggleStar = (threadId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const item = mappedItems.find((i) => i.id === threadId || i.threadId === threadId);
-    const targetId = item?.threadId || threadId;
-    const currentStatus = item?.isStarred || false;
+  const handleToggleStar = () => {
+    if (!selectedThreadId && !selectedListItem) return;
+    const targetId = selectedThreadId || selectedListItem?.threadId || selectedListItem?.id;
+    if (!targetId) return;
+
+    const currentStatus = activeThread?.isStarred ?? selectedListItem?.isStarred ?? false;
     toggleStarMutation.mutate({ threadId: targetId, isStarred: !currentStatus });
+  };
+
+  const handleToggleImportant = () => {
+    const targetEmailId = latestMessage?._id;
+    if (!targetEmailId) return;
+
+    const currentStatus = activeThread?.isImportant ?? selectedListItem?.isImportant ?? false;
+    toggleImportantMutation.mutate({ emailId: targetEmailId, isImportant: !currentStatus });
+  };
+
+  const handleArchive = () => {
+    const targetEmailId = latestMessage?._id;
+    if (!targetEmailId) return;
+
+    if (activeFolder === "archive") {
+      unarchiveMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    } else {
+      archiveMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    }
+  };
+
+  const handleDelete = () => {
+    const targetEmailId = latestMessage?._id;
+    if (!targetEmailId) return;
+
+    if (activeFolder === "trash") {
+      permanentDeleteMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    } else if (activeFolder === "drafts") {
+      deleteDraftMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    } else {
+      moveToTrashMutation.mutate(targetEmailId, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchList();
+        },
+      });
+    }
+  };
+
+  const handleMarkUnread = () => {
+    if (!selectedThreadId) return;
+    markReadMutation.mutate(
+      { threadId: selectedThreadId, isRead: false },
+      {
+        onSuccess: () => {
+          toast.success("Marked conversation as unread");
+          refetchList();
+        },
+      }
+    );
+  };
+
+  const handleDisconnect = () => {
+    if (window.confirm("Are you sure you want to disconnect your mailbox? You will need to sign in again to access emails.")) {
+      disconnectMutation.mutate(undefined, {
+        onSuccess: () => {
+          setSelectedThreadId(null);
+          refetchStatus();
+        },
+      });
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyText.trim()) {
+      toast.error("Please enter a reply message");
+      return;
+    }
+    if (!selectedThreadId || !latestMessage) {
+      toast.error("No active email to reply to");
+      return;
+    }
+
+    try {
+      const recipient = latestMessage.from || selectedListItem?.senderEmail || "";
+      await sendEmailMutation.mutateAsync({
+        to: recipient,
+        subject: latestMessage.subject?.startsWith("Re:") ? latestMessage.subject : `Re: ${latestMessage.subject || ""}`,
+        text: replyText,
+        threadId: selectedThreadId,
+        inReplyTo: latestMessage._id,
+      });
+      setReplyText("");
+    } catch {
+      // Error handled by mutation
+    }
   };
 
   const handleCompose = (prefill?: ComposerInitialData) => {
@@ -248,265 +542,223 @@ export default function EmailPage() {
     setComposerOpen(true);
   };
 
-  const handleRefresh = () => {
-    refetchStatus();
-    refetchList();
+  const handleQuickAction = (type: "reply" | "replyAll" | "forward") => {
+    if (!latestMessage) return;
+    const subjectPrefix = type === "forward" ? "Fwd: " : "Re: ";
+    const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
+    handleCompose({
+      to: type === "forward" ? "" : latestMessage.from,
+      subject: `${subjectPrefix}${cleanSubject}`,
+      text: type === "forward" ? latestMessage.bodyText : undefined,
+      inReplyTo: type === "forward" ? undefined : latestMessage._id,
+      threadId: type === "forward" ? undefined : selectedThreadId || undefined,
+    });
   };
 
-  // Compute unread count (only meaningful for inbox and starred)
-  const totalUnread = activeFolder === "inbox" || activeFolder === "starred"
-    ? mappedItems.reduce((acc, t) => acc + (t.unreadCount || 0), 0)
-    : 0;
+  // Handle search input change — reset to page 1
+  const handleSearchChange = useCallback((q: string) => {
+    setSearchInputValue(q);
+    setSearchPage(1);
+    if (!q.trim()) {
+      // Exiting search mode — reset state
+      setSelectedThreadId(null);
+      setHasAutoSelected(false);
+    }
+  }, []);
 
+  // Handle folder change — exit search mode
+  const handleFolderChange = (f: string) => {
+    setActiveFolder(f);
+    setPage(1);
+    setSearchPage(1);
+    setSearchInputValue("");
+    setSelectedContactEmail(null);
+    setSelectedThreadId(null);
+    setHasAutoSelected(false);
+    setMobileView("list");
+  };
+
+  // Handle page change depending on mode
+  const handlePageChange = (p: number) => {
+    if (isSearchMode) {
+      setSearchPage(p);
+    } else {
+      setPage(p);
+    }
+    setSelectedThreadId(null);
+  };
+
+  // Detail fallback values
+  const detailSender = useMemo(() => {
+    if (latestMessage?.from) return parseSender(latestMessage.from);
+    if (selectedListItem?.sender) return { name: selectedListItem.sender, email: selectedListItem.senderEmail };
+    return { name: "Sender", email: "" };
+  }, [latestMessage, selectedListItem]);
+
+  const detailSubject = activeThread?.subject || latestMessage?.subject || selectedListItem?.subject || "(No Subject)";
+  const detailDate = formatFullDate(latestMessage?.sentAt || latestMessage?.receivedAt || (latestMessage as any)?.createdAt || selectedListItem?.date);
+  const detailRecipients = latestMessage?.to?.join(", ") || selectedListItem?.to?.join(", ") || mailbox?.emailAddress || "";
+
+  // Loading indicator for mailbox service check
   if (loadingStatus) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-50/40 via-background to-blue-50/20 dark:from-slate-950/40 dark:via-background dark:to-slate-900/20">
-        <div className="flex items-center gap-3 text-xs text-muted-foreground font-semibold p-4 sm:p-5 rounded-2xl bg-card/95 border border-border/70 shadow-sm">
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+      <div className="h-full w-full flex items-center justify-center p-4">
+        <div className="flex items-center gap-3 p-5 rounded-2xl bg-white dark:bg-[#1C252E] border border-slate-200/80 dark:border-slate-800 shadow-sm text-xs font-semibold text-slate-600 dark:text-slate-300">
+          <CircularProgress size={18} thickness={4} />
           <span>Connecting to mailbox service...</span>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="h-full min-h-0 w-full p-2 sm:p-2.5 md:p-3 flex flex-col gap-2.5 sm:gap-3 overflow-hidden bg-transparent">
-      {/* Top Application Bar */}
-      <EmailHeader
-        mailbox={mailbox}
-        isConnected={isConnected}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onComposeClick={() => handleCompose()}
-        onRefreshClick={handleRefresh}
-        isRefreshing={refetchingStatus || refetchingList}
-        onOpenAdminMailboxes={() => setAdminMailboxesOpen(true)}
-        onOpenMobileNav={() => setMobileNavOpen(true)}
-        onOpenSignatures={() => setSignatureDialogOpen(true)}
-        activeFolder={activeFolder}
-        selectedEmailType={selectedEmailType}
-        onSelectEmailType={(type) => {
-          setSelectedEmailType(type);
-          setSelectedEmailAddress(null);
-        }}
-        selectedEmailAddress={selectedEmailAddress}
-        onSelectEmailAddress={(email) => setSelectedEmailAddress(email)}
-      />
-
-      {/* Main Mailbox Workspace */}
-      {!isConnected ? (
-        mailbox?.authType === "oauth2" && mailbox?.connectionStatus !== "connected" ? (
-          <div className="flex-1 min-h-0 w-full flex flex-col items-center justify-center bg-card/90 backdrop-blur-md border border-border/70 rounded-2xl shadow-sm overflow-hidden p-8 text-center animate-in fade-in duration-500">
+  // If not connected, present the fully polished, dedicated email login page
+  if (!isConnected) {
+    return (
+      <div className="h-full min-h-0 w-full p-2 sm:p-3 md:p-4 flex flex-col overflow-hidden font-['Public_Sans',sans-serif]">
+        {mailbox?.authType === "oauth2" && mailbox?.connectionStatus !== "connected" ? (
+          <div className="flex-1 min-h-0 w-full bg-white dark:bg-[#1C252E] border border-slate-200/80 dark:border-slate-800 rounded-2xl md:rounded-[20px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.08)] flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
             <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 mb-4 shadow-sm">
-              <Mail className="h-8 w-8" />
+              <MailOutlineIcon sx={{ fontSize: 32 }} />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-foreground">Reconnect your Microsoft Mailbox</h2>
-            <p className="text-muted-foreground mb-8 max-w-md text-xs sm:text-sm leading-relaxed">
-              We&apos;ve upgraded our email integration to use Microsoft Graph for better reliability. Please reconnect your Microsoft account to continue syncing your emails.
+            <h2 className="text-xl font-bold text-[#1C252E] dark:text-white mb-2">Reconnect your Microsoft Mailbox</h2>
+            <p className="text-xs sm:text-sm text-[#919EAB] max-w-md mb-6 leading-relaxed">
+              Please authenticate with your Microsoft work account to sync your emails.
             </p>
-            <Button
+            <button
+              type="button"
               onClick={async () => {
                 try {
                   setOauthLoading(true);
                   const { url } = await emailService.getMicrosoftAuthUrl();
                   window.location.href = url;
                 } catch (error: any) {
-                  toast.error(error?.response?.data?.message || "Failed to initiate Microsoft sign-in");
+                  toast.error(error?.response?.data?.message || "Failed to start sign-in");
                   setOauthLoading(false);
                 }
               }}
               disabled={oauthLoading}
-              className="h-11 px-8 text-sm font-bold gap-2 bg-[#00a4ef] hover:bg-[#0078d4] text-white shadow-md rounded-xl transition-all"
+              className="h-11 px-8 rounded-xl bg-[#00a4ef] hover:bg-[#0078d4] text-white font-bold text-xs shadow-md transition-all inline-flex items-center gap-2.5 active:scale-[0.99] disabled:opacity-50"
             >
-              {oauthLoading ? (
-                <>
-                  <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  <span>Connecting...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 0h10v10H0zM11 0h10v10H11zM0 11h10v10H0zM11 11h10v10H11z"/>
-                  </svg>
-                  <span>Reconnect with Microsoft</span>
-                </>
-              )}
-            </Button>
+              {oauthLoading ? <CircularProgress size={16} color="inherit" /> : null}
+              <span>Reconnect with Microsoft</span>
+            </button>
           </div>
         ) : (
-          <div className="flex-1 min-h-0 w-full flex flex-col overflow-hidden">
-            <MailboxConnectCard onSuccess={() => refetchStatus()} />
-          </div>
-        )
-      ) : (
-        <div className="flex-1 min-h-0 flex gap-2.5 sm:gap-3 overflow-hidden">
-          {/* Desktop & Tablet Collapsible Left Sidebar */}
-          <div
-            className={`hidden md:block shrink-0 transition-all duration-300 overflow-hidden ${
-              isSidebarCollapsed ? "w-14 sm:w-16" : "w-44 lg:w-48 xl:w-52"
-            }`}
-          >
-            <EmailSidebar
-              activeFolder={activeFolder}
-              onFolderChange={(folder) => {
-                setActiveFolder(folder);
-                setPage(1);
-                setSelectedThreadId(null);
-                setHasAutoSelected(false);
-              }}
-              onComposeClick={() => handleCompose()}
-              unreadCount={totalUnread}
-              mailbox={mailbox}
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              onOpenSignatures={() => setSignatureDialogOpen(true)}
-              selectedEmailType={selectedEmailType}
-              onSelectEmailType={(type) => {
-                setSelectedEmailType(type);
-                setSelectedEmailAddress(null);
-              }}
-              selectedEmailAddress={selectedEmailAddress}
-              onSelectEmailAddress={(email) => setSelectedEmailAddress(email)}
-            />
-          </div>
+          <MailboxConnectCard onSuccess={() => refetchStatus()} />
+        )}
+      </div>
+    );
+  }
 
-          {/* Middle Thread List Panel */}
-          <div
-            className={`flex flex-col min-w-0 transition-all ${
-              selectedThreadId 
-                ? "hidden md:flex md:w-64 lg:w-72 xl:w-[296px] shrink-0" 
-                : "w-full md:w-72 lg:w-80 md:flex-initial shrink-0"
-            }`}
-          >
-            {mailbox && mailbox.initialSyncCompleted === false ? (
-              <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-card/90 backdrop-blur-md border border-border/60 rounded-2xl shadow-xs min-h-[400px]">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3 shadow-2xs">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-                <h3 className="text-sm font-bold mb-1.5 text-foreground">Importing mailbox history...</h3>
-                <p className="text-xs text-muted-foreground max-w-[240px] leading-relaxed">
-                  Syncing your past emails over IMAP. Recent emails will show up as they are indexed.
+  return (
+    <div className="h-full min-h-0 w-full p-2 sm:p-3 md:p-4 flex flex-col overflow-hidden font-['Public_Sans',sans-serif]">
+      {/* Outer Card Chassis matching the exact Minimals/Material UI Reference */}
+      <div className="flex-1 min-h-0 w-full bg-white dark:bg-[#1C252E] border border-slate-200/80 dark:border-slate-800 rounded-2xl md:rounded-[20px] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_12px_24px_-4px_rgba(145,158,171,0.08)] flex overflow-hidden">
+        
+        {/* ========================================================= */}
+        {/* COLUMN 1: LEFT NAVIGATION COMPONENT                      */}
+        {/* ========================================================= */}
+        <EmailNavSidebar
+          activeFolder={activeFolder}
+          onSelectFolder={handleFolderChange}
+          onCompose={() => handleCompose()}
+          mailbox={mailbox}
+          totalInboxCount={activeFolder === "inbox" && !isSearchMode ? totalItems : undefined}
+          onRefresh={() => {
+            refetchStatus();
+            refetchList();
+          }}
+          isRefreshing={refetchingList || refetchingStatus}
+          onDisconnect={handleDisconnect}
+          isDisconnecting={disconnectMutation.isPending}
+          onOpenSignatures={() => setSignatureDialogOpen(true)}
+          selectedContactEmail={selectedContactEmail}
+          onSelectContactFilter={(email) => {
+            setSelectedContactEmail(email);
+            setSearchPage(1);
+            setMobileView("list");
+          }}
+          onComposeToContact={(email, name) => {
+            handleCompose({
+              to: name ? `${name} <${email}>` : email,
+              subject: "",
+              text: "",
+            });
+          }}
+          className={mobileView !== "folders" ? "hidden md:flex" : "flex"}
+        />
+
+        {/* ========================================================= */}
+        {/* COLUMN 2 & 3: CONTENT VIEWPORT                            */}
+        {/* ========================================================= */}
+        <>
+          {/* COLUMN 2: CONVERSATION LIST COMPONENT */}
+            <EmailConversationList
+              items={displayItems}
+              selectedId={selectedThreadId}
+              onSelectItem={handleSelectThread}
+              searchQuery={searchInputValue}
+              onSearchChange={handleSearchChange}
+              activeFolder={activeFolder}
+              isLoading={isLoading}
+              isSearchMode={isSearchMode}
+              searchResultCount={isSearchMode ? totalItems : undefined}
+              onMobileBack={() => setMobileView("folders")}
+              page={activePage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              selectedContactEmail={selectedContactEmail}
+              onClearContactFilter={() => {
+                setSelectedContactEmail(null);
+                setSearchPage(1);
+              }}
+              className={mobileView !== "list" ? "hidden md:flex" : "flex"}
+            />
+
+            {/* COLUMN 3: DETAIL PANE COMPONENT (WITH FULLSCREEN-ENABLED EDITOR) */}
+            {selectedListItem || latestMessage ? (
+              <EmailDetailPane
+                thread={activeThread}
+                messages={threadMessages}
+                fallbackSubject={detailSubject}
+                fallbackSender={detailSender}
+                fallbackDate={detailDate}
+                fallbackRecipients={detailRecipients}
+                fallbackSnippet={selectedListItem?.snippet}
+                isStarred={activeThread?.isStarred ?? selectedListItem?.isStarred ?? false}
+                isImportant={activeThread?.isImportant ?? selectedListItem?.isImportant ?? false}
+                isLoading={loadingDetail}
+                onToggleStar={handleToggleStar}
+                onToggleImportant={handleToggleImportant}
+                onDelete={handleDelete}
+                onArchive={handleArchive}
+                onMarkUnread={handleMarkUnread}
+                onReplyQuick={handleQuickAction}
+                onMobileBack={() => setMobileView("list")}
+                replyText={replyText}
+                onReplyTextChange={setReplyText}
+                onSendReply={handleSendReply}
+                isSendingReply={sendEmailMutation.isPending}
+                className={mobileView !== "detail" ? "hidden md:flex" : "flex"}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
+                <MailOutlineIcon sx={{ fontSize: 44, color: "#919EAB", opacity: 0.5 }} />
+                <p className="text-sm font-semibold mt-3 text-slate-600 dark:text-slate-300">
+                  {isSearchMode
+                    ? searchLoading
+                      ? "Searching..."
+                      : `No results for "${effectiveSearchTerm}"`
+                    : "Select an email to view details"}
                 </p>
               </div>
-            ) : (
-              <div className="flex flex-col h-full min-h-0">
-                {/* Active Stakeholder Email Type / Address Filter Banner */}
-                {(selectedEmailType || selectedEmailAddress) && (
-                  <div className="mb-2 p-2 px-3 rounded-xl bg-card border border-border/70 shadow-2xs flex items-center justify-between gap-2 text-xs shrink-0 animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className={`h-2 w-2 rounded-full shrink-0 ${
-                          selectedEmailType === "client"
-                            ? "bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"
-                            : selectedEmailType === "candidate"
-                            ? "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]"
-                            : "bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.8)]"
-                        }`}
-                      />
-                      <span className="font-semibold text-foreground truncate">
-                        {selectedEmailType ? EMAIL_TYPE_CONFIG[selectedEmailType].label : "Filtered"}
-                      </span>
-                      {selectedEmailAddress && (
-                        <span className="font-mono text-[11px] text-muted-foreground truncate">
-                          • {selectedEmailAddress}
-                        </span>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedEmailType(null);
-                        setSelectedEmailAddress(null);
-                      }}
-                      className="h-6 px-2 text-[10px] text-muted-foreground hover:text-destructive rounded-lg transition-colors shrink-0"
-                    >
-                      <X className="h-3 w-3 mr-1" />
-                      <span>Reset</span>
-                    </Button>
-                  </div>
-                )}
-
-                <div className="flex-1 min-h-0">
-                  <EmailThreadList
-                    threads={displayItems}
-                    isLoading={loadingList}
-                    selectedThreadId={selectedThreadId}
-                    onSelectThread={handleSelectThread}
-                    page={page}
-                    totalPages={totalPages}
-                    totalThreads={totalThreads}
-                    onPageChange={setPage}
-                    searchQuery={searchQuery}
-                    onToggleStar={handleToggleStar}
-                    selectedIds={selectedIds}
-                    onSelectIdsChange={setSelectedIds}
-                    onBulkDelete={handleBulkDelete}
-                    activeFolder={activeFolder}
-                  />
-                </div>
-              </div>
             )}
-          </div>
-
-          {/* Right Conversation View Panel */}
-          <div
-            className={`flex-1 min-w-0 flex flex-col transition-all ${
-              selectedThreadId ? "flex" : "hidden md:flex"
-            }`}
-          >
-            <EmailThreadDetail
-              thread={threadDetailData?.data?.thread || null}
-              messages={threadDetailData?.data?.messages || []}
-              isLoading={loadingDetail}
-              onClose={() => setSelectedThreadId(null)}
-              onOpenFullComposer={(replyData) => handleCompose(replyData)}
-            />
-          </div>
+          </>
         </div>
-      )}
 
-      {/* Mobile Drawer (Folder Navigation) */}
-      <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-        <SheetContent side="left" className="p-0 w-72 max-w-[85vw] border-r border-border/70">
-          <div className="h-full p-2">
-            <EmailSidebar
-              activeFolder={activeFolder}
-              onFolderChange={(folder) => {
-                setActiveFolder(folder);
-                setPage(1);
-                setSelectedThreadId(null);
-                setHasAutoSelected(false);
-                setMobileNavOpen(false);
-              }}
-              onComposeClick={() => {
-                setMobileNavOpen(false);
-                handleCompose();
-              }}
-              unreadCount={totalUnread}
-              mailbox={mailbox}
-              onCloseMobile={() => setMobileNavOpen(false)}
-              onOpenSignatures={() => {
-                setMobileNavOpen(false);
-                setSignatureDialogOpen(true);
-              }}
-              selectedEmailType={selectedEmailType}
-              onSelectEmailType={(type) => {
-                setSelectedEmailType(type);
-                setSelectedEmailAddress(null);
-                setMobileNavOpen(false);
-              }}
-              selectedEmailAddress={selectedEmailAddress}
-              onSelectEmailAddress={(email) => {
-                setSelectedEmailAddress(email);
-                setMobileNavOpen(false);
-              }}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Compose Modal */}
+      {/* Compose Dialog */}
       <EmailComposerDialog
         open={composerOpen}
         onOpenChange={setComposerOpen}

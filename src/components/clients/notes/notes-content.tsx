@@ -1,8 +1,10 @@
 "use client";
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, StickyNote } from "lucide-react";
-import { useState } from "react";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 import { AddNoteDialog } from "./add-note-dialog";
 import { NotesList } from "./notes-list";
 import { useClientNotes } from "@/hooks/use-clientNotes";
@@ -87,23 +89,24 @@ export function NotesContent({
 
   if (isLoading) {
     return (
-      <div className="p-12 text-center text-muted-foreground animate-pulse text-xs uppercase tracking-wider font-semibold">
-        Loading notes...
+      <div className="flex flex-col items-center justify-center p-16 space-y-3">
+        <CircularProgress size={32} thickness={4} sx={{ color: "primary.main" }} />
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Loading Notes...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Header Action Bar */}
-      <div className="flex items-center justify-between p-4 rounded-xl border border-border/70 bg-card shadow-2xs">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-border/70 bg-card shadow-2xs">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <StickyNote className="w-4 h-4" />
+            <NoteAltOutlinedIcon sx={{ fontSize: 18 }} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-foreground">Client Notes</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Client Notes</h3>
               <Badge variant="outline" className="h-5 px-1.5 text-xs font-bold bg-primary/10 text-primary border-primary/20">
                 {notes.length}
               </Badge>
@@ -118,7 +121,7 @@ export function NotesContent({
             size="sm"
             className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            <Plus className="h-3.5 w-3.5 mr-1" /> Add Note
+            <AddOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} /> Add Note
           </Button>
         )}
       </div>
@@ -139,7 +142,7 @@ export function NotesContent({
       ) : (
         <div className="flex flex-col items-center justify-center text-center bg-card rounded-xl border border-dashed border-border/80 p-12">
           <div className="w-12 h-12 mb-3 bg-muted text-muted-foreground rounded-2xl flex items-center justify-center">
-            <StickyNote className="w-6 h-6" />
+            <NoteAltOutlinedIcon sx={{ fontSize: 26 }} />
           </div>
           <h4 className="text-sm font-bold text-foreground">No notes recorded yet</h4>
           <p className="text-xs text-muted-foreground max-w-xs mt-1 mb-4">
@@ -152,7 +155,7 @@ export function NotesContent({
               size="sm"
               className="text-xs font-semibold"
             >
-              <Plus className="h-3.5 w-3.5 mr-1" /> Add First Note
+              <AddOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} /> Add First Note
             </Button>
           )}
         </div>

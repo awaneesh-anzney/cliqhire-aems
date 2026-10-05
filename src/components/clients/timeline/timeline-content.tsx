@@ -1,27 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   getClientTimeline,
   getClientSubStageHistory,
   ClientStageHistory,
   ClientSubStageHistory,
 } from "@/services/clientService";
-import {
-  Loader2,
-  Calendar,
-  Clock,
-  MessageSquare,
-  Phone,
-  Mail,
-  Users,
-  FileText,
-  ChevronDown,
-  Handshake,
-  Layers,
-  History,
-  GitCommit,
-} from "lucide-react";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -34,23 +31,23 @@ interface TimelineContentProps {
 const getActivityIcon = (type: string) => {
   switch (type?.toLowerCase()) {
     case "call":
-      return <Phone className="w-3.5 h-3.5 text-blue-500" />;
+      return <PhoneOutlinedIcon sx={{ fontSize: 15, color: "#2563EB" }} />;
     case "whatsapp":
-      return <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />;
+      return <ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 15, color: "#10B981" }} />;
     case "linkedin":
-      return <Users className="w-3.5 h-3.5 text-sky-600" />;
+      return <PeopleAltOutlinedIcon sx={{ fontSize: 15, color: "#0077B5" }} />;
     case "email":
-      return <Mail className="w-3.5 h-3.5 text-amber-500" />;
+      return <EmailOutlinedIcon sx={{ fontSize: 15, color: "#F59E0B" }} />;
     case "meeting":
-      return <Users className="w-3.5 h-3.5 text-purple-500" />;
+      return <PeopleAltOutlinedIcon sx={{ fontSize: 15, color: "#8B5CF6" }} />;
     case "data update":
-      return <FileText className="w-3.5 h-3.5 text-slate-500" />;
+      return <DescriptionOutlinedIcon sx={{ fontSize: 15, color: "#64748B" }} />;
     case "negotiation":
-      return <Handshake className="w-3.5 h-3.5 text-indigo-500" />;
+      return <HandshakeOutlinedIcon sx={{ fontSize: 15, color: "#6366F1" }} />;
     case "proposal sent":
-      return <FileText className="w-3.5 h-3.5 text-rose-500" />;
+      return <DescriptionOutlinedIcon sx={{ fontSize: 15, color: "#F43F5E" }} />;
     default:
-      return <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />;
+      return <ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} />;
   }
 };
 
@@ -64,15 +61,15 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
     const fetchTimeline = async () => {
       try {
         setIsLoading(true);
-        const [data, subData] = await Promise.all([
+        const [timelineData, subStageData] = await Promise.all([
           getClientTimeline(clientId),
-          getClientSubStageHistory(clientId).catch(() => []),
+          getClientSubStageHistory(clientId),
         ]);
-        setTimeline(data || []);
-        setSubStageTimeline(subData || []);
+        setTimeline(timelineData || []);
+        setSubStageTimeline(subStageData || []);
       } catch (error) {
         console.error("Failed to fetch timeline:", error);
-        toast.error("Failed to load client timeline");
+        toast.error("Failed to load timeline");
       } finally {
         setIsLoading(false);
       }
@@ -82,51 +79,47 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
 
   const toggleItem = (index: number) => {
     setExpandedItems((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
       } else {
-        newSet.add(index);
+        next.add(index);
       }
-      return newSet;
+      return next;
     });
   };
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[300px] gap-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Loading Timeline...
-        </p>
+      <div className="flex flex-col items-center justify-center p-16 space-y-3">
+        <CircularProgress size={32} thickness={4} sx={{ color: "primary.main" }} />
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Loading Timeline...</p>
       </div>
     );
   }
 
   if (timeline.length === 0 && subStageTimeline.length === 0) {
     return (
-      <div className="border border-dashed rounded-xl p-12 text-center flex flex-col items-center bg-card shadow-2xs">
-        <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center mb-3 text-muted-foreground">
-          <Calendar className="w-5 h-5" />
-        </div>
-        <h4 className="text-sm font-bold text-foreground">No Timeline Available</h4>
-        <p className="text-xs text-muted-foreground max-w-xs mt-1">
-          This client does not have any stage history or activity progression recorded yet.
+      <div className="bg-card rounded-xl border border-dashed border-border p-10 text-center max-w-lg mx-auto">
+        <TimelineOutlinedIcon sx={{ fontSize: 32 }} className="text-muted-foreground/50 mx-auto mb-2" />
+        <h4 className="text-sm font-bold text-foreground">No Timeline Records</h4>
+        <p className="text-xs text-muted-foreground mt-1">
+          Stage progressions and communication history will be logged here as activities occur.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 rounded-xl border border-border/70 bg-card shadow-2xs">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-border/70 bg-card shadow-2xs">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <GitCommit className="w-4 h-4" />
+            <TimelineOutlinedIcon sx={{ fontSize: 18 }} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-foreground">Stage & Journey Progress</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Stage & Journey Progress</h3>
             <p className="text-xs text-muted-foreground">Historical progression and stage transition logs</p>
           </div>
         </div>
@@ -134,15 +127,15 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
 
       {/* Sub-Stage Progression Stream */}
       {subStageTimeline.length > 0 && (
-        <section className="space-y-3">
+        <section className="space-y-2.5">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-primary" />
+            <LayersOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
             <h4 className="text-xs font-bold tracking-wider uppercase text-muted-foreground">
               Sub-Stage Transitions
             </h4>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {subStageTimeline.map((row) => {
               const userName =
                 typeof row.changedBy === "object"
@@ -152,7 +145,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
               return (
                 <div
                   key={row._id}
-                  className="bg-card border border-border/70 rounded-xl p-3.5 shadow-2xs space-y-2 relative"
+                  className="bg-card border border-border/70 rounded-xl p-3 shadow-2xs space-y-1.5 relative"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-xs text-foreground truncate">{row.subStage}</span>
@@ -177,15 +170,15 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
 
       {/* Main Stage History Timeline */}
       {timeline.length > 0 && (
-        <section className="space-y-3">
+        <section className="space-y-2.5">
           <div className="flex items-center gap-2">
-            <History className="w-4 h-4 text-primary" />
+            <HistoryOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
             <h4 className="text-xs font-bold tracking-wider uppercase text-muted-foreground">
               Stage History & Activities
             </h4>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {timeline.map((period, index) => {
               const isCurrent = index === 0;
               const isExpanded = expandedItems.has(index);
@@ -202,7 +195,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
                   <button
                     type="button"
                     onClick={() => toggleItem(index)}
-                    className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                    className="w-full p-3.5 flex items-center justify-between text-left hover:bg-muted/30 transition-colors cursor-pointer"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -214,7 +207,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
+                        <AccessTimeOutlinedIcon sx={{ fontSize: 13, opacity: 0.7 }} />
                         {period.startedAt ? format(new Date(period.startedAt), "MMM d, yyyy") : "Unknown"}
                         {period.endedAt ? ` – ${format(new Date(period.endedAt), "MMM d, yyyy")}` : " – Ongoing"}
                       </p>
@@ -229,9 +222,10 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
                       <span className="hidden sm:inline font-semibold bg-muted/70 px-2.5 py-1 rounded-md text-[11px]">
                         {period.activityCount || 0} activities
                       </span>
-                      <ChevronDown
+                      <KeyboardArrowDownOutlinedIcon
+                        sx={{ fontSize: 18 }}
                         className={cn(
-                          "h-4 w-4 shrink-0 transition-transform duration-200",
+                          "shrink-0 transition-transform duration-200",
                           isExpanded && "rotate-180",
                         )}
                       />
@@ -240,9 +234,9 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
 
                   {/* Collapsible Body */}
                   {isExpanded && (
-                    <div className="px-4 pb-4 pt-2 border-t border-border/40 space-y-3 bg-muted/10">
+                    <div className="px-3.5 pb-3.5 pt-2 border-t border-border/40 space-y-2.5 bg-muted/10">
                       {period.reason && (
-                        <div className="bg-muted/40 p-3 rounded-lg text-xs space-y-0.5 border border-border/60">
+                        <div className="bg-muted/40 p-2.5 rounded-lg text-xs space-y-0.5 border border-border/60">
                           <span className="font-bold text-foreground uppercase text-[10px] tracking-wider">
                             Reason for Transition
                           </span>
@@ -251,7 +245,7 @@ export function TimelineContent({ clientId }: TimelineContentProps) {
                       )}
 
                       {/* Activities Section */}
-                      <div className="space-y-2.5">
+                      <div className="space-y-2">
                         {period.activities && period.activities.length > 0 ? (
                           period.activities.map((activity: any) => (
                             <div

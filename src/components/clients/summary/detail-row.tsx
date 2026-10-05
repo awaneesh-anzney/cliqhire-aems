@@ -1,7 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Copy, Check, ExternalLink } from "lucide-react";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import { useState } from "react";
 import { EditFieldModal } from "./edit-field-modal";
 import DatePicker from "react-datepicker";
@@ -131,7 +135,7 @@ export function DetailRow({
   };
 
   return (
-    <div className="group/row flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/40 transition-colors border-b border-border/40 last:border-b-0 gap-2">
+    <div className="group/row flex flex-col sm:flex-row sm:items-center justify-between py-1.5 sm:py-2 px-2.5 rounded-lg hover:bg-muted/40 transition-colors border-b border-border/40 last:border-b-0 gap-2">
       <div className="flex items-center gap-1.5 sm:w-1/3 shrink-0">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {label}
@@ -173,7 +177,7 @@ export function DetailRow({
                   className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1 truncate max-w-[240px]"
                 >
                   <span className="truncate">{rawDisplay}</span>
-                  <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
+                  <OpenInNewOutlinedIcon sx={{ fontSize: 13, opacity: 0.7 }} />
                 </a>
               ) : (
                 <span className="text-xs font-medium text-foreground truncate max-w-[280px]" title={rawDisplay}>
@@ -191,7 +195,7 @@ export function DetailRow({
                 className="opacity-0 group-hover/row:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted shrink-0"
                 title="Copy to clipboard"
               >
-                {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                {copied ? <CheckOutlinedIcon sx={{ fontSize: 13, color: "#10b981" }} /> : <ContentCopyOutlinedIcon sx={{ fontSize: 13 }} />}
               </button>
             )}
           </div>
@@ -214,12 +218,12 @@ export function DetailRow({
           >
             {alwaysShowEdit || value ? (
               <>
-                <Pencil className="h-3 w-3 mr-1 opacity-70" />
+                <EditOutlinedIcon sx={{ fontSize: 13, mr: 0.5, opacity: 0.7 }} />
                 <span>Edit</span>
               </>
             ) : (
               <>
-                <Plus className="h-3 w-3 mr-1 opacity-70" />
+                <AddOutlinedIcon sx={{ fontSize: 14, mr: 0.5, opacity: 0.7 }} />
                 <span>Add</span>
               </>
             )}

@@ -1,7 +1,11 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Eye, Download, FileText, CheckCircle2 } from "lucide-react";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { Badge } from "@/components/ui/badge";
 
 interface FileUploadRowProps {
@@ -37,18 +41,18 @@ export const FileUploadRow = ({
 
   return (
     <div
-      className={`group flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-border/60 bg-background/50 hover:bg-muted/40 transition-all duration-200 gap-3 ${className || ""}`}
+      className={`group flex flex-col sm:flex-row sm:items-center justify-between p-2.5 rounded-lg border border-border/60 bg-background/50 hover:bg-muted/40 transition-all duration-200 gap-2.5 ${className || ""}`}
     >
       {/* File Info */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex items-center gap-2.5 min-w-0 flex-1">
         <div
-          className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+          className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
             hasFile
               ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
               : "bg-muted text-muted-foreground"
           }`}
         >
-          <FileText className="h-4 w-4" />
+          <DescriptionOutlinedIcon sx={{ fontSize: 16 }} />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -83,7 +87,7 @@ export const FileUploadRow = ({
             onClick={onPreview}
             title="Preview Document"
           >
-            <Eye className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+            <VisibilityOutlinedIcon sx={{ fontSize: 14, mr: 0.5, color: "text.secondary" }} />
             <span>View</span>
           </Button>
         )}
@@ -96,7 +100,7 @@ export const FileUploadRow = ({
             onClick={onDownload}
             title="Download Document"
           >
-            <Download className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+            <FileDownloadOutlinedIcon sx={{ fontSize: 14, mr: 0.5, color: "text.secondary" }} />
             <span>Save</span>
           </Button>
         )}
@@ -112,7 +116,7 @@ export const FileUploadRow = ({
           onClick={onUploadClick}
           title={hasFile ? "Replace Document" : "Upload Document"}
         >
-          <UploadCloud className="h-3.5 w-3.5 mr-1" />
+          <CloudUploadOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} />
           <span>{hasFile ? "Replace" : "Upload"}</span>
         </Button>
       </div>

@@ -1,6 +1,12 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
+import Checkbox from "@mui/material/Checkbox";
 import {
   Table,
   TableHead,
@@ -24,24 +30,13 @@ import ClientStatsBar from "@/components/clients/ClientStatsBar";
 import ClientFilterDrawer from "@/components/clients/ClientFilterDrawer";
 import ClientPaginationControls from "@/components/clients/ClientPaginationControls";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { DeleteConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { ExportDialog, ExportFilterParams } from "@/components/common/export-dialog";
+import { ExportDialog } from "@/components/common/export-dialog";
 import { useExportClients } from "@/hooks/useExportClients";
 import { useClients } from "@/hooks/useClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/contexts/PermissionContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -53,23 +48,29 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  Building2,
-  Users,
-  Search,
-  SlidersHorizontal,
-  X,
-  Lock,
-  Plus,
-  RefreshCw,
-  Download,
-  Upload,
-  Trash2,
-  LayoutGrid,
-  List,
-  FolderOpen,
-  FilterX,
-  Sparkles,
-} from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Material UI Icons
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
+import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
+import FilterAltOffOutlinedIcon from "@mui/icons-material/FilterAltOffOutlined";
 
 interface Client extends ClientCardItem {}
 
@@ -406,596 +407,724 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
 
   if (!canViewClients) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="p-4 rounded-2xl bg-destructive/10 text-destructive border border-destructive/20 shadow-xs">
-          <Lock className="w-8 h-8" />
-        </div>
-        <div className="text-center font-bold text-foreground text-lg tracking-tight">
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 2 }}>
+        <Box sx={{ p: 2, borderRadius: "16px", bgcolor: "rgba(255, 86, 48, 0.1)", color: "#FF5630", border: 1, borderColor: "rgba(255, 86, 48, 0.2)" }}>
+          <LockOutlinedIcon sx={{ fontSize: 32 }} />
+        </Box>
+        <Typography sx={{ fontWeight: 800, fontSize: "1.125rem", color: "text.primary" }}>
           Access Restricted
-        </div>
-        <div className="text-center text-muted-foreground text-xs uppercase tracking-wider font-semibold">
+        </Typography>
+        <Typography sx={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 700, color: "text.secondary" }}>
           You do not have permission to view {entityNamePlural.toLowerCase()}.
-        </div>
-      </div>
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <TooltipProvider delayDuration={150}>
-      {/* Container: strictly fits viewport under Header */}
-      <div className="h-[calc(100vh-4.25rem)] w-full flex flex-col min-h-0 overflow-hidden bg-background p-2 sm:p-3 md:p-3.5 gap-2.5 select-text">
-        {/* Top Workstation Command Panel */}
-        <div className="shrink-0 rounded-2xl border border-border/80 bg-card/95 backdrop-blur-md shadow-xs p-3 sm:p-3.5 flex flex-col gap-2.5">
-          {/* Main Action Strip */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            {/* Left: Title + Entity Icon + Badge */}
-            <div className="flex items-center gap-2.5 shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs">
-                {isLeads ? (
-                  <Users className="w-4 h-4" />
-                ) : (
-                  <Building2 className="w-4 h-4" />
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
-                    {entityNamePlural}
-                  </h1>
-                  <span className="px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground text-xs font-semibold border border-border/60">
-                    {totalClientsCalc}
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted-foreground hidden sm:block">
-                  {isLeads
-                    ? "Track and manage prospective leads and engagement"
-                    : "Manage active client partnerships and contracts"}
-                </p>
-              </div>
-            </div>
-
-            {/* Middle: Fast Search */}
-            <div className="relative flex-1 max-w-md min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70" />
-              <input
-                type="text"
-                placeholder={`Search ${entityNamePlural.toLowerCase()} by name, ID, or contact...`}
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full pl-9 pr-8 h-9 text-xs bg-muted/30 hover:bg-muted/50 border border-border/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground/60 transition-all font-medium"
-              />
-              {searchInput && (
-                <button
-                  type="button"
-                  onClick={() => setSearchInput("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Right: Actions (Filters, Views, Import, Export, Refresh, Create) */}
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap shrink-0">
-              {/* Filter Drawer Toggle */}
-              <Button
-                type="button"
-                variant={activeFiltersCount > 0 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterDrawerOpen(true)}
-                className={cn(
-                  "h-9 px-3 rounded-xl text-xs font-semibold gap-1.5 transition-all",
-                  activeFiltersCount > 0
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "border-border/80 hover:bg-muted/60 text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <SlidersHorizontal className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Filters</span>
-                {activeFiltersCount > 0 && (
-                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-white/20 text-[10px] font-bold">
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </Button>
-
-              {/* View Switcher: Table vs Grid */}
-              <div className="flex items-center p-0.5 rounded-xl bg-muted/50 border border-border/80">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("table")}
-                  title="Table View"
-                  className={cn(
-                    "p-1.5 rounded-lg text-xs transition-all",
-                    viewMode === "table"
-                      ? "bg-card text-foreground shadow-2xs font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <List className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  title="Grid View"
-                  className={cn(
-                    "p-1.5 rounded-lg text-xs transition-all",
-                    viewMode === "grid"
-                      ? "bg-card text-foreground shadow-2xs font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* Refresh Button */}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                title="Refresh"
-                className="h-9 w-9 p-0 rounded-xl border-border/80 hover:bg-muted/60 text-muted-foreground hover:text-foreground"
-              >
-                <RefreshCw
-                  className={cn("h-3.5 w-3.5", isFetching && "animate-spin text-primary")}
-                />
-              </Button>
-
-              {/* Import Button */}
-              {canModifyClients && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOpenBulkUpload(true)}
-                  title="Import Data"
-                  className="h-9 px-2.5 sm:px-3 rounded-xl border-border/80 hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold gap-1.5"
-                >
-                  <Upload className="h-3.5 w-3.5" />
-                  <span className="hidden md:inline">Import</span>
-                </Button>
-              )}
-
-              {/* Export Button */}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setOpenExportDialog(true)}
-                title="Export CSV"
-                className="h-9 px-2.5 sm:px-3 rounded-xl border-border/80 hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold gap-1.5"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">Export</span>
-              </Button>
-
-              {/* Primary Create Button */}
-              {canModifyClients && (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => setOpenCreateModal(true)}
-                  className="h-9 px-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold gap-1.5 shadow-xs transition-all active:scale-[0.98]"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>New {entityName}</span>
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Sub-strip: Stats & Filter Pills */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-2 border-t border-border/60">
-            {/* KPI Metrics & Stage quick switcher */}
-            <ClientStatsBar
-              totalCount={totalClientsCalc}
-              clients={allClients}
-              moduleType={moduleType}
-              selectedStage={selectedClientStage}
-              onSelectStage={isLeads ? setSelectedClientStage : undefined}
-            />
-
-            {/* Active Filters Clear Button if any */}
-            {(activeFiltersCount > 0 || searchInput) && (
-              <button
-                type="button"
-                onClick={clearAllFilters}
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground hover:text-destructive px-2 py-1 rounded-lg hover:bg-destructive/10 transition-colors self-end sm:self-auto shrink-0"
-              >
-                <FilterX className="w-3.5 h-3.5" />
-                <span>Reset Filters</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Floating / Contextual Bulk Action Bar */}
-        {selectedRows.size > 0 && canDeleteClients && (
-          <div className="shrink-0 rounded-xl bg-card border border-border shadow-md px-3.5 py-2 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary" />
-              <span className="text-xs font-semibold text-foreground">
-                <span className="text-primary font-bold">{selectedRows.size}</span> of{" "}
-                {allClients.length} selected
-              </span>
-              <button
-                type="button"
-                onClick={toggleSelectAll}
-                className="text-[11px] text-primary hover:underline font-semibold ml-2"
-              >
-                {selectedRows.size === allClients.length ? "Deselect All" : "Select All Page"}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedRows(new Set())}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-              >
-                Clear
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowDeleteDialog(true)}
-                className="h-7 px-3 text-xs font-semibold gap-1.5 rounded-lg shadow-xs"
-              >
-                <Trash2 className="w-3 h-3" />
-                <span>Delete Selected ({selectedRows.size})</span>
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Main Content Area: Table / Grid */}
-        <div className="flex-1 min-h-0 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs flex flex-col relative">
-          {/* Subtle fetching indicator */}
-          {isFetching && !isLoading && (
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary/20 overflow-hidden z-30">
-              <div className="h-full bg-primary animate-pulse w-full" />
-            </div>
-          )}
-
-          {/* Loading State */}
-          {isLoading && allClients.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary animate-pulse">
-                <RefreshCw className="w-5 h-5 animate-spin" />
-              </div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Loading {entityNamePlural.toLowerCase()}...
-              </p>
-            </div>
-          ) : allClients.length === 0 ? (
-            /* Empty State */
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-muted/60 border border-border flex items-center justify-center text-muted-foreground mb-3 shadow-2xs">
-                <FolderOpen className="w-7 h-7 stroke-[1.5]" />
-              </div>
-              <h3 className="text-sm font-bold text-foreground mb-1">
-                No {entityNamePlural} Found
-              </h3>
-              <p className="text-xs text-muted-foreground max-w-sm mb-4 leading-relaxed">
-                {activeFiltersCount > 0 || searchInput
-                  ? "No records matched your current search filters. Try clearing your filters or changing criteria."
-                  : `There are no ${entityNamePlural.toLowerCase()} available yet in the system.`}
-              </p>
-              <div className="flex items-center gap-2">
-                {activeFiltersCount > 0 || searchInput ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearAllFilters}
-                    className="text-xs rounded-xl h-8 px-3"
-                  >
-                    <FilterX className="w-3.5 h-3.5 mr-1.5" />
-                    Reset All Filters
-                  </Button>
-                ) : null}
-                {canModifyClients && (
-                  <Button
-                    size="sm"
-                    onClick={() => setOpenCreateModal(true)}
-                    className="text-xs rounded-xl h-8 px-3 bg-primary text-primary-foreground"
-                  >
-                    <Plus className="w-3.5 h-3.5 mr-1.5" />
-                    Add {entityName}
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : viewMode === "grid" ? (
-            /* Grid View */
-            <ClientCardView
-              clients={allClients}
-              selectedRows={selectedRows}
-              onToggleSelect={toggleRowSelection}
-              onStageChange={handleStageChange}
-              onStatusChange={handleStageStatusChange}
-              canModify={canModifyClients}
-              canDelete={canDeleteClients}
-              moduleType={moduleType}
-            />
-          ) : (
-            /* Table View */
-            <div className="flex-1 overflow-auto custom-scrollbar relative">
-              <Table className="w-full border-separate border-spacing-0 table-auto">
-                <TableHeader className="sticky top-0 z-20 bg-muted/95 backdrop-blur-md">
-                  <TableRow className="border-b border-border/80 hover:bg-transparent">
-                    {canDeleteClients && (
-                      <TableHead className="w-[44px] px-3 py-2.5 border-b border-border/80">
-                        <div className="flex items-center justify-center">
-                          <Checkbox
-                            checked={
-                              selectedRows.size > 0 &&
-                              selectedRows.size === allClients.length
-                            }
-                            onCheckedChange={toggleSelectAll}
-                            className="rounded-md border-border"
-                          />
-                        </div>
-                      </TableHead>
-                    )}
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      ID
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Name
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Industry
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Location
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Stage
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
-                      Status
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
-                      Age
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
-                      Jobs
-                    </TableHead>
-                    <TableHead className="px-3 py-2.5 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-right pr-4">
-                      Created By
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allClients.map((client) => {
-                    const isSelected = selectedRows.has(client.id);
-
-                    return (
-                      <TableRow
-                        key={client.id}
-                        className={cn(
-                          "group border-b border-border/50 transition-colors",
-                          "hover:bg-muted/40",
-                          isSelected ? "bg-primary/[0.03]" : ""
-                        )}
-                      >
-                        {canDeleteClients && (
-                          <TableCell className="px-3 py-2.5 w-[44px]">
-                            <div className="flex items-center justify-center">
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => toggleRowSelection(client.id)}
-                                className="rounded-md border-border"
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                          </TableCell>
-                        )}
-                        <ClientTableRow
-                          client={client}
-                          onStageChange={handleStageChange}
-                          onStatusChange={handleStageStatusChange}
-                          canModify={canModifyClients}
-                          moduleType={moduleType}
-                        />
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-          {/* Integrated Compact Pagination Footer */}
-          <div className="shrink-0 bg-card/90 border-t border-border/80">
-            <ClientPaginationControls
-              currentPage={currentPage}
-              totalPages={totalPagesCalc}
-              totalClients={totalClientsCalc}
-              pageSize={pageSize}
-              setPageSize={(s) => {
-                setPageSize(s);
-                setCurrentPage(1);
+    <Box
+      sx={{
+        height: "calc(100vh - 4.25rem)",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0,
+        overflow: "hidden",
+        p: { xs: 1.5, sm: 2 },
+        gap: 1.5,
+      }}
+    >
+      {/* ─── 1. TOP COMMAND & FILTER PANEL ─── */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          borderRadius: "12px",
+          border: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          boxShadow: "0px 1px 3px 0px rgba(0, 0, 0, 0.04)",
+          p: { xs: 1.5, sm: 2 },
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        {/* Main Action Strip: Title, Search, and Action Buttons */}
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: { xs: "stretch", md: "center" }, justifyContent: "space-between", gap: 1.5 }}>
+          {/* Left: Entity Title & Counter */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flexShrink: 0 }}>
+            <Box
+              sx={{
+                width: 34,
+                height: 34,
+                borderRadius: "8px",
+                bgcolor: isLeads ? "rgba(0, 184, 217, 0.1)" : "rgba(37, 99, 235, 0.1)",
+                color: isLeads ? "#00B8D9" : "#2563EB",
+                border: 1,
+                borderColor: isLeads ? "rgba(0, 184, 217, 0.2)" : "rgba(37, 99, 235, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-              handlePageChange={handlePageChange}
-              clientsLength={allClients.length}
-              entityName={entityNamePlural.toLowerCase()}
+            >
+              {isLeads ? (
+                <PeopleOutlineOutlinedIcon sx={{ fontSize: 18 }} />
+              ) : (
+                <BusinessOutlinedIcon sx={{ fontSize: 18 }} />
+              )}
+            </Box>
+
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography sx={{ fontSize: "1rem", fontWeight: 800, color: "text.primary", lineHeight: 1.2 }}>
+                  {entityNamePlural}
+                </Typography>
+                <Chip
+                  label={totalClientsCalc}
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: "0.6875rem",
+                    fontWeight: 700,
+                    bgcolor: "rgba(145, 158, 171, 0.12)",
+                    color: "text.primary",
+                    border: 0,
+                    "& .MuiChip-label": { px: 0.75 },
+                  }}
+                />
+              </Box>
+              <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary", display: { xs: "none", sm: "block" } }}>
+                {isLeads
+                  ? "Track and manage prospective enterprise leads & stages"
+                  : "Manage active corporate client accounts & service agreements"}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Middle: Compact Search Input */}
+          <Box sx={{ position: "relative", flex: 1, maxWidth: { md: 400 }, minWidth: 200 }}>
+            <Box sx={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "text.disabled", display: "flex", alignItems: "center", pointerEvents: "none" }}>
+              <SearchOutlinedIcon sx={{ fontSize: 16 }} />
+            </Box>
+            <input
+              type="text"
+              placeholder={`Search ${entityNamePlural.toLowerCase()} by name, ID, or contact...`}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="w-full pl-8 pr-7 h-8 text-xs bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100/70 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-[#2563EB] text-[#1C252E] dark:text-white placeholder:text-slate-400 transition-all font-medium"
             />
-          </div>
-        </div>
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchInput("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+              >
+                <CloseOutlinedIcon sx={{ fontSize: 13 }} />
+              </button>
+            )}
+          </Box>
 
-        {/* Filter Drawer */}
-        <ClientFilterDrawer
-          open={filterDrawerOpen}
-          onOpenChange={setFilterDrawerOpen}
-          entityName={entityName}
-          nameInput={nameInput}
-          setNameInput={setNameInput}
-          clientIdInput={clientIdInput}
-          setClientIdInput={setClientIdInput}
-          emailInput={emailInput}
-          setEmailInput={setEmailInput}
-          phoneNumberInput={phoneNumberInput}
-          setPhoneNumberInput={setPhoneNumberInput}
-          industryInput={industryInput}
-          setIndustryInput={setIndustryInput}
-          locationInput={locationInput}
-          setLocationInput={setLocationInput}
-          salesLeadInput={salesLeadInput}
-          setSalesLeadInput={setSalesLeadInput}
-          referredByInput={referredByInput}
-          setReferredByInput={setReferredByInput}
-          createdByInput={createdByInput}
-          setCreatedByInput={setCreatedByInput}
-          selectedClientStage={selectedClientStage}
-          setSelectedClientStage={isLeads ? setSelectedClientStage : undefined}
-          isLeads={isLeads}
-          onClearAll={clearAllFilters}
-          activeCount={activeFiltersCount}
-        />
+          {/* Right: Actions (Filters, View Switcher, Refresh, Import, Export, Create) */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", flexShrink: 0 }}>
+            {/* Filter Drawer Toggle */}
+            <Button
+              type="button"
+              variant={activeFiltersCount > 0 ? "contained" : "outlined"}
+              size="small"
+              onClick={() => setFilterDrawerOpen(true)}
+              startIcon={<FilterListOutlinedIcon sx={{ fontSize: 15 }} />}
+              sx={{
+                height: 32,
+                px: 1.25,
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: "11.5px",
+                borderColor: activeFiltersCount > 0 ? "transparent" : "divider",
+                bgcolor: activeFiltersCount > 0 ? "#2563EB" : "background.paper",
+                color: activeFiltersCount > 0 ? "#FFFFFF" : "text.primary",
+                "&:hover": {
+                  bgcolor: activeFiltersCount > 0 ? "#1D4ED8" : "rgba(145, 158, 171, 0.08)",
+                },
+              }}
+            >
+              <span>Filters</span>
+              {activeFiltersCount > 0 && (
+                <Chip
+                  label={activeFiltersCount}
+                  size="small"
+                  sx={{
+                    height: 16,
+                    ml: 0.5,
+                    fontSize: "0.625rem",
+                    fontWeight: 800,
+                    bgcolor: "rgba(255, 255, 255, 0.25)",
+                    color: "#FFFFFF",
+                    border: 0,
+                    "& .MuiChip-label": { px: 0.5 },
+                  }}
+                />
+              )}
+            </Button>
 
-        {/* Create Client Modal */}
-        {canModifyClients && (
-          <CreateClientModal
-            open={openCreateModal}
-            onOpenChange={setOpenCreateModal}
+            {/* View Switcher: Table vs Grid */}
+            <Box sx={{ display: "flex", alignItems: "center", p: 0.25, borderRadius: "8px", bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                title="Table View"
+                className={cn(
+                  "p-1 rounded-md text-xs transition-all flex items-center justify-center",
+                  viewMode === "table"
+                    ? "bg-[#2563EB] text-white shadow-2xs font-semibold"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
+              >
+                <ViewListOutlinedIcon sx={{ fontSize: 16 }} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                title="Grid View"
+                className={cn(
+                  "p-1 rounded-md text-xs transition-all flex items-center justify-center",
+                  viewMode === "grid"
+                    ? "bg-[#2563EB] text-white shadow-2xs font-semibold"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
+              >
+                <GridViewOutlinedIcon sx={{ fontSize: 16 }} />
+              </button>
+            </Box>
+
+            {/* Refresh Button */}
+            <Button
+              type="button"
+              variant="outlined"
+              size="small"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              title="Refresh"
+              sx={{
+                height: 32,
+                minWidth: 32,
+                p: 0,
+                borderRadius: "8px",
+                borderColor: "divider",
+                color: "text.primary",
+              }}
+            >
+              <RefreshOutlinedIcon sx={{ fontSize: 16 }} className={cn(isFetching && "animate-spin text-[#2563EB]")} />
+            </Button>
+
+            {/* Import Button */}
+            {canModifyClients && (
+              <Button
+                type="button"
+                variant="outlined"
+                size="small"
+                onClick={() => setOpenBulkUpload(true)}
+                startIcon={<FileUploadOutlinedIcon sx={{ fontSize: 15 }} />}
+                sx={{
+                  height: 32,
+                  px: 1.25,
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  fontSize: "11.5px",
+                  borderColor: "divider",
+                  color: "text.primary",
+                  display: { xs: "none", sm: "inline-flex" },
+                }}
+              >
+                Import
+              </Button>
+            )}
+
+            {/* Export Button */}
+            <Button
+              type="button"
+              variant="outlined"
+              size="small"
+              onClick={() => setOpenExportDialog(true)}
+              startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 15 }} />}
+              sx={{
+                height: 32,
+                px: 1.25,
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: "11.5px",
+                borderColor: "divider",
+                color: "text.primary",
+                display: { xs: "none", sm: "inline-flex" },
+              }}
+            >
+              Export
+            </Button>
+
+            {/* Primary Action Button: + New Lead / Client */}
+            {canModifyClients && (
+              <Button
+                type="button"
+                variant="contained"
+                size="small"
+                onClick={() => setOpenCreateModal(true)}
+                startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
+                sx={{
+                  height: 32,
+                  px: 1.5,
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  fontSize: "11.5px",
+                  bgcolor: isLeads ? "#00B8D9" : "#2563EB",
+                  boxShadow: isLeads ? "0 2px 8px rgba(0, 184, 217, 0.24)" : "0 2px 8px rgba(37, 99, 235, 0.24)",
+                  "&:hover": {
+                    bgcolor: isLeads ? "#00A3BF" : "#1D4ED8",
+                  },
+                }}
+              >
+                <span>New {entityName}</span>
+              </Button>
+            )}
+          </Box>
+        </Box>
+
+        {/* Sub-Strip: Quick Stage Filter Pills & Reset */}
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between", gap: 1, pt: 1, borderTop: 1, borderColor: "divider" }}>
+          <ClientStatsBar
+            totalCount={totalClientsCalc}
+            clients={allClients}
+            moduleType={moduleType}
+            selectedStage={selectedClientStage}
+            onSelectStage={isLeads ? setSelectedClientStage : undefined}
           />
-        )}
 
-        {/* Bulk Upload Dialog */}
-        {canModifyClients && (
-          <BulkClientUploadDialog
-            open={openBulkUpload}
-            onOpenChange={setOpenBulkUpload}
-            entityName={entityNamePlural}
-          />
-        )}
+          {(activeFiltersCount > 0 || searchInput) && (
+            <Button
+              type="button"
+              onClick={clearAllFilters}
+              variant="text"
+              size="small"
+              startIcon={<FilterAltOffOutlinedIcon sx={{ fontSize: 13 }} />}
+              sx={{
+                height: 26,
+                px: 1,
+                fontSize: "11px",
+                fontWeight: 700,
+                color: "text.secondary",
+                textTransform: "none",
+                borderRadius: "6px",
+                alignSelf: { xs: "flex-end", sm: "center" },
+                "&:hover": {
+                  color: "#FF5630",
+                  bgcolor: "rgba(255, 86, 48, 0.08)",
+                },
+              }}
+            >
+              Reset Filters
+            </Button>
+          )}
+        </Box>
+      </Box>
 
-        {/* Delete Confirmation Dialog */}
-        <DeleteConfirmationDialog
-          isOpen={showDeleteDialog}
-          onClose={() => setShowDeleteDialog(false)}
-          onConfirm={confirmDeleteSelected}
-          title={`Delete ${selectedRows.size} ${entityName.toLowerCase()}(s)?`}
-          description={`This action will permanently remove ${selectedRows.size} ${entityName.toLowerCase()}(s). This action cannot be undone.`}
-          confirmText={isDeleting ? "Deleting..." : "Delete"}
-          cancelText="Cancel"
-          isDeleting={isDeleting}
-        />
-
-        {/* Export Dialog */}
-        <ExportDialog
-          isOpen={openExportDialog}
-          onClose={() => setOpenExportDialog(false)}
-          title={`Export ${entityNamePlural}`}
-          description={`Download CSV report for ${entityNamePlural.toLowerCase()}.`}
-          onExport={(params: ExportFilterParams | undefined) =>
-            exportClientsMutation(params)
-          }
-          filename={entityNamePlural.toLowerCase()}
-        />
-
-        {/* Stage Change Confirm Dialog */}
-        <ConfirmDialog
-          open={showConfirmDialog}
-          onOpenChange={setShowConfirmDialog}
-          onConfirm={handleConfirmChange}
-          onCancel={() => setShowConfirmDialog(false)}
-          title="Confirm Stage Change"
-          description={`Are you sure you want to update the stage to "${pendingChange?.stage}"?`}
-          confirmText="Confirm"
-          cancelText="Cancel"
-          loading={isLoading}
-          error={error}
-        />
-
-        {/* Status Change Dialog (with Profile Sent options) */}
-        <Dialog
-          open={showStatusConfirmDialog}
-          onOpenChange={setShowStatusConfirmDialog}
+      {/* ─── 2. CONTEXTUAL BULK SELECTION ACTION BAR ─── */}
+      {selectedRows.size > 0 && canDeleteClients && (
+        <Box
+          sx={{
+            flexShrink: 0,
+            borderRadius: "10px",
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
+            px: 2,
+            py: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+          className="animate-in fade-in slide-in-from-top-1 duration-200"
         >
-          <DialogContent className="rounded-2xl border-border bg-card shadow-2xl">
-            <DialogHeader>
-              <DialogTitle className="text-base font-bold text-foreground">
-                Confirm Status Change
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Update status to &ldquo;{pendingStatusChange?.status}&rdquo; for this{" "}
-                {entityName.toLowerCase()}.
-              </DialogDescription>
-            </DialogHeader>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#2563EB" }} />
+            <Typography sx={{ fontSize: "11.5px", fontWeight: 700, color: "text.primary" }}>
+              <Typography component="span" sx={{ color: "#2563EB", fontWeight: 800, fontSize: "11.5px" }}>
+                {selectedRows.size}
+              </Typography>{" "}
+              of {allClients.length} records selected
+            </Typography>
+            <button
+              type="button"
+              onClick={toggleSelectAll}
+              className="text-[11px] text-[#2563EB] hover:underline font-bold ml-1 cursor-pointer"
+            >
+              {selectedRows.size === allClients.length ? "Deselect All" : "Select All Page"}
+            </button>
+          </Box>
 
-            {pendingStatusChange?.status === "Profile Sent" && (
-              <div className="grid gap-3.5 py-3">
-                <div className="grid gap-1.5">
-                  <Label className="text-xs font-semibold text-foreground">
-                    Channel <span className="text-destructive">*</span>
-                  </Label>
-                  <Select
-                    value={subStageChannel}
-                    onValueChange={setSubStageChannel}
-                  >
-                    <SelectTrigger className="rounded-xl h-9 text-xs border-border bg-muted/30">
-                      <SelectValue placeholder="Select channel" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border">
-                      <SelectItem value="Email" className="text-xs">
-                        Email
-                      </SelectItem>
-                      <SelectItem value="LinkedIn" className="text-xs">
-                        LinkedIn
-                      </SelectItem>
-                      <SelectItem value="WhatsApp" className="text-xs">
-                        WhatsApp
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-1.5">
-                  <Label className="text-xs font-semibold text-foreground">
-                    Sent Date (Optional)
-                  </Label>
-                  <Input
-                    type="date"
-                    value={subStageSentDate}
-                    onChange={(e) => setSubStageSentDate(e.target.value)}
-                    className="rounded-xl h-9 text-xs border-border bg-muted/30"
-                  />
-                </div>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => setSelectedRows(new Set())}
+              sx={{ height: 26, px: 1, fontSize: "11px", fontWeight: 700, textTransform: "none", color: "text.secondary" }}
+            >
+              Clear
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => setShowDeleteDialog(true)}
+              startIcon={<DeleteOutlineOutlinedIcon sx={{ fontSize: 14 }} />}
+              sx={{
+                height: 26,
+                px: 1.5,
+                fontSize: "11px",
+                fontWeight: 700,
+                textTransform: "none",
+                bgcolor: "#FF5630",
+                "&:hover": { bgcolor: "#E04826" },
+              }}
+            >
+              Delete ({selectedRows.size})
+            </Button>
+          </Box>
+        </Box>
+      )}
+
+      {/* ─── 3. MAIN WORKSPACE: TABLE OR GRID VIEW ─── */}
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflow: "hidden",
+          borderRadius: "12px",
+          border: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          boxShadow: "0px 1px 3px 0px rgba(0, 0, 0, 0.04)",
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+        }}
+      >
+        {/* Top subtle fetching pulse */}
+        {isFetching && !isLoading && (
+          <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, bgcolor: "rgba(37, 99, 235, 0.2)", overflow: "hidden", zIndex: 30 }}>
+            <Box sx={{ height: "100%", width: "100%", bgcolor: "#2563EB" }} className="animate-pulse" />
+          </Box>
+        )}
+
+        {/* Loading State */}
+        {isLoading && allClients.length === 0 ? (
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", p: 4, gap: 1.5 }}>
+            <Box sx={{ width: 36, height: 36, borderRadius: "10px", bgcolor: "rgba(37, 99, 235, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#2563EB" }}>
+              <RefreshOutlinedIcon sx={{ fontSize: 22 }} className="animate-spin" />
+            </Box>
+            <Typography sx={{ fontSize: "11.5px", fontWeight: 700, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Loading {entityNamePlural.toLowerCase()}...
+            </Typography>
+          </Box>
+        ) : allClients.length === 0 ? (
+          /* Empty State */
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", p: 4, textAlign: "center" }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: "12px", bgcolor: "rgba(145, 158, 171, 0.08)", border: 1, borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "center", color: "text.disabled", mb: 1.5 }}>
+              <FolderOpenOutlinedIcon sx={{ fontSize: 26 }} />
+            </Box>
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: 800, color: "text.primary", mb: 0.5 }}>
+              No {entityNamePlural} Found
+            </Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: "text.secondary", maxWidth: 360, mb: 2 }}>
+              {activeFiltersCount > 0 || searchInput
+                ? "No records matched your current search filters. Try clearing your filters or changing search criteria."
+                : `There are currently no ${entityNamePlural.toLowerCase()} in your system workspace.`}
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {activeFiltersCount > 0 || searchInput ? (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={clearAllFilters}
+                  startIcon={<FilterAltOffOutlinedIcon sx={{ fontSize: 14 }} />}
+                  sx={{ height: 30, px: 1.5, fontSize: "11px", fontWeight: 700, textTransform: "none", borderRadius: "8px" }}
+                >
+                  Reset All Filters
+                </Button>
+              ) : null}
+              {canModifyClients && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => setOpenCreateModal(true)}
+                  startIcon={<AddOutlinedIcon sx={{ fontSize: 15 }} />}
+                  sx={{ height: 30, px: 1.5, fontSize: "11px", fontWeight: 700, textTransform: "none", borderRadius: "8px", bgcolor: isLeads ? "#00B8D9" : "#2563EB" }}
+                >
+                  Add {entityName}
+                </Button>
+              )}
+            </Box>
+          </Box>
+        ) : viewMode === "grid" ? (
+          /* Grid View */
+          <ClientCardView
+            clients={allClients}
+            selectedRows={selectedRows}
+            onToggleSelect={toggleRowSelection}
+            onStageChange={handleStageChange}
+            onStatusChange={handleStageStatusChange}
+            canModify={canModifyClients}
+            canDelete={canDeleteClients}
+            moduleType={moduleType}
+          />
+        ) : (
+          /* Table View */
+          <div className="flex-1 overflow-auto custom-scrollbar relative">
+            <Table className="w-full border-separate border-spacing-0 table-auto">
+              <TableHeader className="sticky top-0 z-20 bg-slate-50/95 dark:bg-[#1C252E]/95 backdrop-blur-md">
+                <TableRow className="border-b border-border/80 hover:bg-transparent">
+                  {canDeleteClients && (
+                    <TableHead className="w-[40px] px-2 py-2 border-b border-border/80">
+                      <div className="flex items-center justify-center">
+                        <Checkbox
+                          size="small"
+                          checked={selectedRows.size > 0 && selectedRows.size === allClients.length}
+                          onChange={toggleSelectAll}
+                          sx={{ p: 0.25 }}
+                        />
+                      </div>
+                    </TableHead>
+                  )}
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    ID
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    Name
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    Industry
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    Location
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider">
+                    Stage
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider text-center">
+                    Status
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider text-center">
+                    Age
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider text-center">
+                    Jobs
+                  </TableHead>
+                  <TableHead className="px-3 py-2 border-b border-border/80 text-[10.5px] font-extrabold text-[#637381] dark:text-[#919EAB] uppercase tracking-wider text-right pr-4">
+                    Created By
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allClients.map((client) => {
+                  const isSelected = selectedRows.has(client.id);
+
+                  return (
+                    <TableRow
+                      key={client.id}
+                      className={cn(
+                        "group border-b border-border/50 transition-colors",
+                        "hover:bg-slate-50/70 dark:hover:bg-slate-800/40",
+                        isSelected ? "bg-blue-50/40 dark:bg-blue-950/20" : ""
+                      )}
+                    >
+                      {canDeleteClients && (
+                        <TableCell className="px-2 py-2 w-[40px]">
+                          <div className="flex items-center justify-center">
+                            <Checkbox
+                              size="small"
+                              checked={isSelected}
+                              onChange={() => toggleRowSelection(client.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              sx={{ p: 0.25 }}
+                            />
+                          </div>
+                        </TableCell>
+                      )}
+                      <ClientTableRow
+                        client={client}
+                        onStageChange={handleStageChange}
+                        onStatusChange={handleStageStatusChange}
+                        canModify={canModifyClients}
+                        moduleType={moduleType}
+                      />
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {/* Integrated Pagination Footer */}
+        <Box sx={{ flexShrink: 0, bgcolor: "background.paper", borderTop: 1, borderColor: "divider" }}>
+          <ClientPaginationControls
+            currentPage={currentPage}
+            totalPages={totalPagesCalc}
+            totalClients={totalClientsCalc}
+            pageSize={pageSize}
+            setPageSize={(s) => {
+              setPageSize(s);
+              setCurrentPage(1);
+            }}
+            handlePageChange={handlePageChange}
+            clientsLength={allClients.length}
+            entityName={entityNamePlural.toLowerCase()}
+          />
+        </Box>
+      </Box>
+
+      {/* ─── 4. MODALS & SLIDE-OVER DRAWERS ─── */}
+      <ClientFilterDrawer
+        open={filterDrawerOpen}
+        onOpenChange={setFilterDrawerOpen}
+        entityName={entityName}
+        nameInput={nameInput}
+        setNameInput={setNameInput}
+        clientIdInput={clientIdInput}
+        setClientIdInput={setClientIdInput}
+        emailInput={emailInput}
+        setEmailInput={setEmailInput}
+        phoneNumberInput={phoneNumberInput}
+        setPhoneNumberInput={setPhoneNumberInput}
+        industryInput={industryInput}
+        setIndustryInput={setIndustryInput}
+        locationInput={locationInput}
+        setLocationInput={setLocationInput}
+        salesLeadInput={salesLeadInput}
+        setSalesLeadInput={setSalesLeadInput}
+        referredByInput={referredByInput}
+        setReferredByInput={setReferredByInput}
+        createdByInput={createdByInput}
+        setCreatedByInput={setCreatedByInput}
+        selectedClientStage={selectedClientStage}
+        setSelectedClientStage={setSelectedClientStage}
+        isLeads={isLeads}
+        onClearAll={clearAllFilters}
+        activeCount={activeFiltersCount}
+      />
+
+      {/* Create Modal */}
+      <CreateClientModal
+        open={openCreateModal}
+        onOpenChange={setOpenCreateModal}
+      />
+
+      {/* Bulk Upload Dialog */}
+      <BulkClientUploadDialog
+        open={openBulkUpload}
+        onOpenChange={setOpenBulkUpload}
+        entityName={entityNamePlural}
+      />
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={openExportDialog}
+        onClose={() => setOpenExportDialog(false)}
+        title={`Export ${entityNamePlural}`}
+        description={`Download CSV report for ${entityNamePlural.toLowerCase()}.`}
+        onExport={(params) => exportClientsMutation(params)}
+      />
+
+      {/* Stage Change Confirmation Dialog */}
+      <ConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        title="Confirm Stage Update"
+        description={`Are you sure you want to change the stage of this ${entityName.toLowerCase()} to "${pendingChange?.stage}"?`}
+        onConfirm={handleConfirmChange}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={`Delete Selected ${entityNamePlural}`}
+        description={`Are you sure you want to permanently delete ${selectedRows.size} selected ${entityName.toLowerCase()}(s)? This action cannot be undone.`}
+        onConfirm={confirmDeleteSelected}
+      />
+
+      {/* Substage Status Change Modal */}
+      <Dialog
+        open={showStatusConfirmDialog}
+        onOpenChange={setShowStatusConfirmDialog}
+      >
+        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-foreground">
+              Update Status: {pendingStatusChange?.status}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Configure details for this status change.
+            </DialogDescription>
+          </DialogHeader>
+
+          {error && (
+            <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-semibold">
+              {error}
+            </div>
+          )}
+
+          {pendingStatusChange?.status === "Profile Sent" && (
+            <div className="grid gap-3 py-2 text-xs">
+              <div className="space-y-1">
+                <Label className="text-xs font-bold text-foreground">Channel</Label>
+                <Select value={subStageChannel} onValueChange={setSubStageChannel}>
+                  <SelectTrigger className="h-8 text-xs rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="Email">Email</SelectItem>
+                    <SelectItem value="WhatsApp">WhatsApp</SelectItem>
+                    <SelectItem value="Portal">Client Portal</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
 
-            {error && (
-              <div className="text-destructive text-xs font-medium bg-destructive/10 p-2.5 rounded-xl border border-destructive/20">
-                {error}
+              <div className="space-y-1">
+                <Label className="text-xs font-bold text-foreground">Date Sent</Label>
+                <Input
+                  type="date"
+                  value={subStageSentDate}
+                  onChange={(e) => setSubStageSentDate(e.target.value)}
+                  className="h-8 text-xs rounded-xl"
+                />
               </div>
-            )}
+            </div>
+          )}
 
-            <DialogFooter className="gap-2 sm:space-x-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowStatusConfirmDialog(false)}
-                className="rounded-xl text-xs h-9 px-3.5"
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleConfirmStatusChange}
-                disabled={isLoading}
-                className="rounded-xl text-xs h-9 px-4 bg-primary text-primary-foreground"
-              >
-                Confirm
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </TooltipProvider>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setShowStatusConfirmDialog(false)}
+              sx={{ fontSize: "11px", borderRadius: "8px", height: 32, textTransform: "none" }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleConfirmStatusChange}
+              sx={{ fontSize: "11px", borderRadius: "8px", height: 32, bgcolor: "#2563EB", textTransform: "none" }}
+            >
+              Confirm Update
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
 }

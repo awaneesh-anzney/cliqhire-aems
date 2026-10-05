@@ -64,8 +64,14 @@ export interface EmailThread {
   lastMessageAt: string;
   unreadCount: number;
   isStarred: boolean;
+  isImportant?: boolean;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface Recipient {
+  name: string;
+  email: string;
 }
 
 export interface EmailAttachment {
@@ -85,9 +91,14 @@ export interface Email {
   serverFolder?: string;
   serverUid?: number;
   from: string;
+  fromName?: string;
+  fromEmail?: string;
   to: string[];
+  toRecipients?: Recipient[];
   cc?: string[];
+  ccRecipients?: Recipient[];
   bcc?: string[];
+  bccRecipients?: Recipient[];
   subject: string;
   bodyText?: string;
   bodyHtml?: string;
@@ -95,6 +106,7 @@ export interface Email {
   messageIdHeader?: string;
   inReplyTo?: string;
   isRead: boolean;
+  isImportant?: boolean;
   status: EmailStatus;
   errorMessage?: string;
   sentAt?: string;
@@ -107,8 +119,11 @@ export interface Draft {
   _id: string;
   mailboxId: string;
   to?: string[];
+  toRecipients?: Recipient[];
   cc?: string[];
+  ccRecipients?: Recipient[];
   bcc?: string[];
+  bccRecipients?: Recipient[];
   subject?: string;
   bodyText?: string;
   bodyHtml?: string;

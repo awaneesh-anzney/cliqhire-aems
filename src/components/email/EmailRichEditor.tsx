@@ -29,12 +29,14 @@ import {
   RemoveFormatting,
   Heading1,
   Heading2,
+  Heading3,
   Pilcrow,
-  Baseline,
   Highlighter,
   Ban,
   Check,
-  Pipette
+  Pipette,
+  Paperclip,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +45,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface EmailRichEditorProps {
   initialContent?: string;
@@ -51,6 +54,7 @@ interface EmailRichEditorProps {
   placeholder?: string;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
+  onAttachClick?: () => void;
 }
 
 const TEXT_COLORS = [
@@ -78,17 +82,32 @@ export interface EmailRichEditorRef {
 export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEditorProps>(({
   initialContent = "",
   onChange,
-  showToolbar = false,
+  showToolbar = true,
   placeholder = "Write your message here...",
   onKeyDown,
   className = "",
+  onAttachClick,
 }, ref) => {
   const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
   const [colorPopoverOpen, setColorPopoverOpen] = useState(false);
   const [activeColorTab, setActiveColorTab] = useState<"text" | "highlight">("text");
   const [customTextColor, setCustomTextColor] = useState("#1a73e8");
   const [customHighlightColor, setCustomHighlightColor] = useState("#fef08a");
+  const [showParagraphMenu, setShowParagraphMenu] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const savedSelectionRef = React.useRef<{ from: number; to: number } | null>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowParagraphMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -106,7 +125,9 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-primary underline hover:text-primary/80 font-medium",
+          class: "text-blue-600 dark:text-blue-400 underline font-medium hover:underline cursor-pointer",
+          target: "_blank",
+          rel: "noopener noreferrer",
         },
       }),
       TextAlign.configure({
@@ -117,7 +138,10 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
     content: initialContent,
     editorProps: {
       attributes: {
-        class: `prose dark:prose-invert max-w-none text-xs sm:text-sm p-3 sm:p-4 min-h-[220px] focus:outline-none leading-relaxed select-text ${className}`,
+        class: cn(
+          "email-rich-editor tiptap max-w-none p-3 sm:p-4 min-h-[220px] focus:outline-none leading-relaxed select-text",
+          className
+        ),
         "data-placeholder": placeholder,
       },
     },
@@ -164,16 +188,71 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
     return null;
   }
 
-  const setLink = () => {
-    if (!linkUrl.trim()) {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+  const handleOpenLinkPopover = () => {
+    const { from, to, empty } = editor.state.selection;
+    savedSelectionRef.current = { from, to };
+    const selectedText = empty ? "" : editor.state.doc.textBetween(from, to, " ");
+    const existingHref = editor.getAttributes("link").href || "";
+    setLinkUrl(existingHref);
+    setLinkText(selectedText);
+    setLinkPopoverOpen(true);
+  };
+
+  const handleApplyLink = () => {
+    const url = linkUrl.trim();
+    const sel = savedSelectionRef.current || editor.state.selection;
+    const { from, to } = sel;
+
+    if (!url) {
+      editor.chain().focus().setTextSelection({ from, to }).extendMarkRange("link").unsetLink().run();
       setLinkPopoverOpen(false);
       return;
     }
 
-    const formattedUrl = /^https?:\/\//i.test(linkUrl) ? linkUrl : `https://${linkUrl}`;
-    editor.chain().focus().extendMarkRange("link").setLink({ href: formattedUrl }).run();
+    const formattedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+
+    if (from !== to) {
+      const docText = editor.state.doc.textBetween(from, to, " ");
+      if (linkText.trim() && linkText.trim() !== docText) {
+        // User customized display text for highlighted range
+        editor
+          .chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .insertContent(`<a href="${formattedUrl}" target="_blank" rel="noopener noreferrer">${linkText.trim()}</a>`)
+          .run();
+      } else {
+        // Turn selected text into link
+        editor
+          .chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .extendMarkRange("link")
+          .setLink({ href: formattedUrl })
+          .run();
+      }
+    } else {
+      // Insert new link node with text
+      const displayText = linkText.trim() || formattedUrl;
+      editor
+        .chain()
+        .focus()
+        .setTextSelection({ from, to })
+        .insertContent(`<a href="${formattedUrl}" target="_blank" rel="noopener noreferrer">${displayText}</a>&nbsp;`)
+        .run();
+    }
+
     setLinkUrl("");
+    setLinkText("");
+    setLinkPopoverOpen(false);
+  };
+
+  const handleRemoveLink = () => {
+    const sel = savedSelectionRef.current || editor.state.selection;
+    const { from, to } = sel;
+    editor.chain().focus().setTextSelection({ from, to }).extendMarkRange("link").unsetLink().run();
+    setLinkUrl("");
+    setLinkText("");
     setLinkPopoverOpen(false);
   };
 
@@ -193,21 +272,42 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
     editor.chain().focus().unsetHighlight().run();
   };
 
+  const getCurrentStyleLabel = () => {
+    if (!editor) return "Paragraph";
+    if (editor.isActive("heading", { level: 1 })) return "Heading 1";
+    if (editor.isActive("heading", { level: 2 })) return "Heading 2";
+    if (editor.isActive("heading", { level: 3 })) return "Heading 3";
+    if (editor.isActive("blockquote")) return "Quote";
+    return "Paragraph";
+  };
+
+  const handleParagraphSelect = (type: string) => {
+    setShowParagraphMenu(false);
+    if (!editor) return;
+    if (type === "Heading 1") {
+      editor.chain().focus().setHeading({ level: 1 }).run();
+    } else if (type === "Heading 2") {
+      editor.chain().focus().setHeading({ level: 2 }).run();
+    } else if (type === "Heading 3") {
+      editor.chain().focus().setHeading({ level: 3 }).run();
+    } else if (type === "Quote") {
+      editor.chain().focus().toggleBlockquote().run();
+    } else {
+      editor.chain().focus().setParagraph().run();
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden" onKeyDown={onKeyDown}>
-      {/* Editor Content Area */}
-      <div className="flex-1 overflow-y-auto cursor-text overscroll-contain">
-        <EditorContent editor={editor} />
-      </div>
-
-      {/* Optional Rich Text Formatting Ribbon (Gmail-style toggleable ribbon) */}
+      {/* Top Rich Text Formatting Ribbon (Natural word processor placement) */}
       {showToolbar && (
-        <div className="border-t border-border/60 bg-muted/30 px-2 py-1.5 flex items-center flex-wrap gap-0.5 text-muted-foreground animate-in slide-in-from-bottom-2 duration-150 shrink-0">
+        <div className="border-b border-border/60 bg-muted/25 px-2.5 py-1.5 flex items-center flex-wrap gap-0.5 text-muted-foreground select-none shrink-0 transition-all">
           {/* Undo / Redo */}
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
             className="h-7 w-7 rounded-md hover:bg-muted"
@@ -219,6 +319,7 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
             className="h-7 w-7 rounded-md hover:bg-muted"
@@ -229,42 +330,136 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
 
           <span className="w-px h-4 bg-border/80 mx-1" />
 
-          {/* Heading / Style Toggles */}
+          {/* Paragraph / Heading Style Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setShowParagraphMenu((prev) => !prev)}
+              className={cn(
+                "h-7 px-2 gap-1 rounded-md text-xs font-semibold hover:bg-muted transition-colors",
+                getCurrentStyleLabel() !== "Paragraph"
+                  ? "bg-muted text-primary font-bold shadow-2xs"
+                  : "text-foreground"
+              )}
+            >
+              <span>{getCurrentStyleLabel()}</span>
+              <ChevronDown className="h-3 w-3 opacity-60" />
+            </Button>
+
+            {showParagraphMenu && (
+              <div className="absolute top-full left-0 mt-1 w-36 bg-popover border border-border/70 rounded-xl shadow-xl p-1 z-50 text-xs font-medium animate-in fade-in duration-100">
+                {[
+                  { label: "Paragraph", desc: "Normal text" },
+                  { label: "Heading 1", desc: "Large heading" },
+                  { label: "Heading 2", desc: "Medium heading" },
+                  { label: "Heading 3", desc: "Small heading" },
+                  { label: "Quote", desc: "Blockquote" },
+                ].map(({ label, desc }) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleParagraphSelect(label);
+                    }}
+                    onClick={() => handleParagraphSelect(label)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-1.5 rounded-lg transition-colors flex flex-col",
+                      getCurrentStyleLabel() === label
+                        ? "bg-muted text-primary font-bold"
+                        : "text-foreground hover:bg-muted/70"
+                    )}
+                  >
+                    <span>{label}</span>
+                    <span className="text-[10px] text-muted-foreground font-normal">{desc}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Heading / Paragraph Style Toggles */}
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            onClick={() => editor.chain().focus().setParagraph().run()}
-            className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("paragraph") ? "bg-muted text-foreground font-bold" : ""
+            size="sm"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              editor.chain().focus().setParagraph().run();
+            }}
+            className={`h-7 px-2 rounded-md hover:bg-muted text-xs font-semibold ${
+              editor.isActive("paragraph") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
-            title="Normal Text"
+            title="Normal Paragraph"
           >
-            <Pilcrow className="h-3.5 w-3.5" />
+            <Pilcrow className="h-3.5 w-3.5 mr-1" />
+            <span>P</span>
           </Button>
+
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("heading", { level: 1 }) ? "bg-muted text-foreground font-bold" : ""
+            size="sm"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              if (editor.isActive("heading", { level: 1 })) {
+                editor.chain().focus().setParagraph().run();
+              } else {
+                editor.chain().focus().setHeading({ level: 1 }).run();
+              }
+            }}
+            className={`h-7 px-2 rounded-md hover:bg-muted text-xs font-bold ${
+              editor.isActive("heading", { level: 1 }) ? "bg-muted text-primary font-bold shadow-2xs" : ""
             }`}
-            title="Large Heading"
+            title="Heading 1 (Large)"
           >
-            <Heading1 className="h-3.5 w-3.5" />
+            <Heading1 className="h-3.5 w-3.5 mr-0.5" />
+            <span>H1</span>
           </Button>
+
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("heading", { level: 2 }) ? "bg-muted text-foreground font-bold" : ""
+            size="sm"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              if (editor.isActive("heading", { level: 2 })) {
+                editor.chain().focus().setParagraph().run();
+              } else {
+                editor.chain().focus().setHeading({ level: 2 }).run();
+              }
+            }}
+            className={`h-7 px-2 rounded-md hover:bg-muted text-xs font-bold ${
+              editor.isActive("heading", { level: 2 }) ? "bg-muted text-primary font-bold shadow-2xs" : ""
             }`}
-            title="Medium Heading"
+            title="Heading 2 (Medium)"
           >
-            <Heading2 className="h-3.5 w-3.5" />
+            <Heading2 className="h-3.5 w-3.5 mr-0.5" />
+            <span>H2</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              if (editor.isActive("heading", { level: 3 })) {
+                editor.chain().focus().setParagraph().run();
+              } else {
+                editor.chain().focus().setHeading({ level: 3 }).run();
+              }
+            }}
+            className={`h-7 px-2 rounded-md hover:bg-muted text-xs font-bold ${
+              editor.isActive("heading", { level: 3 }) ? "bg-muted text-primary font-bold shadow-2xs" : ""
+            }`}
+            title="Heading 3 (Small)"
+          >
+            <Heading3 className="h-3.5 w-3.5 mr-0.5" />
+            <span>H3</span>
           </Button>
 
           <span className="w-px h-4 bg-border/80 mx-1" />
@@ -274,60 +469,68 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("bold") ? "bg-muted text-foreground font-bold" : ""
+              editor.isActive("bold") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Bold (Ctrl+B)"
           >
             <Bold className="h-3.5 w-3.5" />
           </Button>
+
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleItalic().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("italic") ? "bg-muted text-foreground font-bold" : ""
+              editor.isActive("italic") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Italic (Ctrl+I)"
           >
             <Italic className="h-3.5 w-3.5" />
           </Button>
+
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleUnderline().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("underline") ? "bg-muted text-foreground font-bold" : ""
+              editor.isActive("underline") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Underline (Ctrl+U)"
           >
             <UnderlineIcon className="h-3.5 w-3.5" />
           </Button>
+
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleStrike().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("strike") ? "bg-muted text-foreground font-bold" : ""
+              editor.isActive("strike") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Strikethrough"
           >
             <Strikethrough className="h-3.5 w-3.5" />
           </Button>
 
-          {/* Gmail-Style Text Color & Background / Highlight Color Picker */}
+          {/* Text Color & Highlight Popover */}
           <Popover open={colorPopoverOpen} onOpenChange={setColorPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
+                onMouseDown={(e) => e.preventDefault()}
                 className="h-7 px-1.5 gap-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
-                title="Text color & Highlight color"
+                title="Text Color & Highlight"
               >
                 <div className="flex items-center">
                   <span className="font-bold font-serif text-sm leading-none border-b-2 border-primary pb-0.5 px-0.5">
@@ -338,7 +541,6 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             </PopoverTrigger>
             <PopoverContent className="w-[300px] sm:w-[320px] p-3 text-xs rounded-2xl shadow-xl" align="start">
               <div className="space-y-3">
-                {/* Tabs for Background Color vs Text Color */}
                 <div className="grid grid-cols-2 p-1 bg-muted/60 rounded-xl gap-1">
                   <button
                     type="button"
@@ -349,7 +551,6 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    <Baseline className="h-3.5 w-3.5 text-primary" />
                     <span>Text Color</span>
                   </button>
                   <button
@@ -361,27 +562,24 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    <Highlighter className="h-3.5 w-3.5 text-amber-500" />
                     <span>Highlight</span>
                   </button>
                 </div>
 
-                {/* Content based on Active Tab */}
                 {activeColorTab === "text" ? (
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                      <span className="font-medium">Text Palette</span>
+                      <span className="font-medium">Theme Colors</span>
                       <button
                         type="button"
                         onClick={handleClearTextColor}
                         className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <Ban className="h-3 w-3" />
-                        <span>Default Color</span>
+                        <span>Default</span>
                       </button>
                     </div>
 
-                    {/* Swatches Grid */}
                     <div className="grid grid-cols-6 gap-1.5 p-1 rounded-xl bg-muted/20 border border-border/60">
                       {TEXT_COLORS.map((hex) => {
                         const isActive = editor.isActive("textStyle", { color: hex });
@@ -408,7 +606,6 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
                       })}
                     </div>
 
-                    {/* Custom Hex Color Picker */}
                     <div className="flex items-center justify-between pt-1 border-t border-border/60 text-[11px]">
                       <div className="flex items-center gap-1.5">
                         <Pipette className="h-3.5 w-3.5 text-muted-foreground" />
@@ -431,7 +628,7 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
                 ) : (
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                      <span className="font-medium">Background Marker</span>
+                      <span className="font-medium">Marker Colors</span>
                       <button
                         type="button"
                         onClick={handleClearHighlightColor}
@@ -442,7 +639,6 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
                       </button>
                     </div>
 
-                    {/* Swatches Grid */}
                     <div className="grid grid-cols-6 gap-1.5 p-1 rounded-xl bg-muted/20 border border-border/60">
                       {HIGHLIGHT_COLORS.map((hex) => {
                         const isActive = editor.isActive("highlight", { color: hex });
@@ -463,7 +659,6 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
                       })}
                     </div>
 
-                    {/* Custom Hex Color Picker */}
                     <div className="flex items-center justify-between pt-1 border-t border-border/60 text-[11px]">
                       <div className="flex items-center gap-1.5">
                         <Pipette className="h-3.5 w-3.5 text-muted-foreground" />
@@ -495,6 +690,7 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign("left").run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
               editor.isActive({ textAlign: "left" }) ? "bg-muted text-foreground" : ""
@@ -507,6 +703,7 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign("center").run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
               editor.isActive({ textAlign: "center" }) ? "bg-muted text-foreground" : ""
@@ -519,6 +716,7 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign("right").run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
               editor.isActive({ textAlign: "right" }) ? "bg-muted text-foreground" : ""
@@ -531,6 +729,7 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign("justify").run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
               editor.isActive({ textAlign: "justify" }) ? "bg-muted text-foreground" : ""
@@ -542,14 +741,15 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
 
           <span className="w-px h-4 bg-border/80 mx-1" />
 
-          {/* Lists */}
+          {/* Bulleted & Numbered Lists */}
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("bulletList") ? "bg-muted text-foreground" : ""
+              editor.isActive("bulletList") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Bulleted List"
           >
@@ -559,9 +759,10 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("orderedList") ? "bg-muted text-foreground" : ""
+              editor.isActive("orderedList") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Numbered List"
           >
@@ -575,9 +776,10 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("blockquote") ? "bg-muted text-foreground" : ""
+              editor.isActive("blockquote") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Quote"
           >
@@ -587,66 +789,96 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
             className={`h-7 w-7 rounded-md hover:bg-muted ${
-              editor.isActive("codeBlock") ? "bg-muted text-foreground" : ""
+              editor.isActive("codeBlock") ? "bg-muted text-foreground font-bold shadow-2xs" : ""
             }`}
             title="Code Block"
           >
             <Code className="h-3.5 w-3.5" />
           </Button>
 
-          {/* Link Popover */}
+          {/* Hyperlink Dialog Popover */}
           <Popover open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleOpenLinkPopover}
                 className={`h-7 w-7 rounded-md hover:bg-muted ${
-                  editor.isActive("link") ? "bg-muted text-primary" : ""
+                  editor.isActive("link") ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold" : ""
                 }`}
-                title="Insert Link"
+                title="Insert Link (Ctrl+K)"
               >
                 <Link2 className="h-3.5 w-3.5" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-72 p-2.5 text-xs rounded-xl" align="start">
-              <div className="space-y-2">
-                <p className="font-semibold text-foreground">Insert Hyperlink</p>
-                <Input
-                  placeholder="https://example.com"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      setLink();
-                    }
-                  }}
-                  className="h-8 text-xs rounded-lg"
-                />
-                <div className="flex items-center justify-end gap-1.5 pt-1">
+            <PopoverContent className="w-80 p-3 text-xs rounded-xl shadow-xl" align="start">
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-foreground">Insert Hyperlink</span>
                   {editor.isActive("link") && (
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        editor.chain().focus().unsetLink().run();
-                        setLinkPopoverOpen(false);
-                      }}
-                      className="h-7 text-xs text-destructive hover:text-destructive"
+                      onClick={handleRemoveLink}
+                      className="text-[11px] text-destructive hover:underline flex items-center gap-1"
                     >
-                      <Unlink className="h-3 w-3 mr-1" />
-                      Remove
-                    </Button>
+                      <Unlink className="h-3 w-3" />
+                      <span>Remove Link</span>
+                    </button>
                   )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Text to display
+                  </label>
+                  <Input
+                    placeholder="Link text..."
+                    value={linkText}
+                    onChange={(e) => setLinkText(e.target.value)}
+                    className="h-8 text-xs rounded-lg"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Web Address (URL)
+                  </label>
+                  <Input
+                    placeholder="https://example.com"
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleApplyLink();
+                      }
+                    }}
+                    autoFocus
+                    className="h-8 text-xs rounded-lg"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-border/50">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLinkPopoverOpen(false)}
+                    className="h-7 text-xs rounded-lg"
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     type="button"
                     size="sm"
-                    onClick={setLink}
-                    className="h-7 px-3 text-xs bg-primary text-primary-foreground rounded-lg"
+                    onClick={handleApplyLink}
+                    disabled={!linkUrl.trim()}
+                    className="h-7 px-3 text-xs bg-primary text-primary-foreground font-semibold rounded-lg"
                   >
                     Apply
                   </Button>
@@ -655,11 +887,26 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
             </PopoverContent>
           </Popover>
 
+          {/* Quick Attach Document from Toolbar */}
+          {onAttachClick && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onAttachClick}
+              className="h-7 w-7 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+              title="Attach Document"
+            >
+              <Paperclip className="h-3.5 w-3.5" />
+            </Button>
+          )}
+
           {/* Clear Formatting */}
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
             className="h-7 w-7 rounded-md hover:bg-muted ml-auto"
             title="Clear Formatting"
@@ -668,6 +915,11 @@ export const EmailRichEditor = React.forwardRef<EmailRichEditorRef, EmailRichEdi
           </Button>
         </div>
       )}
+
+      {/* Editor Content Area */}
+      <div className="flex-1 overflow-y-auto cursor-text overscroll-contain">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 });

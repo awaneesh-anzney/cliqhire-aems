@@ -1,14 +1,16 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, Mail, Copy } from "lucide-react";
-import { useEffect, useState } from "react";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
 import { AddTemplateDialog } from "@/components/clients/email-templates/add-template-dialog";
 import { TemplatesList } from "@/components/clients/email-templates/templates-list";
 import { PreviewTemplateDialog } from "@/components/clients/email-templates/preview-template-dialog";
 import { EmailTemplate } from "@/components/clients/email-templates/types";
 
-// Dummy data for email templates
+// Default pre-configured templates
 const DUMMY_TEMPLATES: EmailTemplate[] = [
   {
     id: "1",
@@ -33,7 +35,7 @@ Best regards,
     isDefault: true,
     createdAt: "2024-01-15T10:00:00Z",
     updatedAt: "2024-01-15T10:00:00Z",
-    author: { name: "John Doe", avatar: "JD" }
+    author: { name: "John Doe", avatar: "JD" },
   },
   {
     id: "2",
@@ -58,7 +60,7 @@ Best regards,
     isDefault: false,
     createdAt: "2024-01-16T14:30:00Z",
     updatedAt: "2024-01-16T14:30:00Z",
-    author: { name: "Sarah Smith", avatar: "SS" }
+    author: { name: "Sarah Smith", avatar: "SS" },
   },
   {
     id: "3",
@@ -75,57 +77,24 @@ This proposal includes:
 - Our team introduction
 - Success metrics and KPIs
 
-We've tailored this proposal specifically to address your unique requirements and challenges. Our approach focuses on finding the right talent that aligns with your company culture and values.
+We've tailored this proposal specifically to address your unique requirements and challenges.
 
-I'm available to discuss any aspects of the proposal and answer any questions you might have. We can schedule a call at your convenience.
-
-Thank you for considering our services.
-
-Best regards,
-{{senderName}}
-{{companyName}}`,
-    category: "Proposal",
-    isDefault: true,
-    createdAt: "2024-01-17T09:15:00Z",
-    updatedAt: "2024-01-17T09:15:00Z",
-    author: { name: "Mike Johnson", avatar: "MJ" }
-  },
-  {
-    id: "4",
-    name: "Contract Reminder",
-    subject: "Contract Renewal Reminder - {{clientCompany}}",
-    content: `Dear {{clientName}},
-
-I hope this email finds you well. This is a friendly reminder that your recruitment services contract with us is due for renewal on {{renewalDate}}.
-
-We've been honored to serve {{clientCompany}} and would love to continue our partnership. Over the past year, we've:
-- Successfully filled [X] positions
-- Maintained a [X]% success rate
-- Reduced your time-to-hire by [X]%
-
-I'd like to schedule a brief call to discuss:
-- Your upcoming recruitment needs
-- Contract renewal terms
-- Any feedback or suggestions you might have
-
-Please let me know your availability for next week.
-
-Thank you for your continued trust in our services.
+I'm available to discuss any aspects of the proposal and answer any questions you might have.
 
 Best regards,
 {{senderName}}`,
-    category: "Contract",
+    category: "Proposal",
     isDefault: false,
-    createdAt: "2024-01-18T16:45:00Z",
-    updatedAt: "2024-01-18T16:45:00Z",
-    author: { name: "Emily Davis", avatar: "ED" }
-  }
+    createdAt: "2024-01-17T09:15:00Z",
+    updatedAt: "2024-01-17T09:15:00Z",
+    author: { name: "Mike Johnson", avatar: "MJ" },
+  },
 ];
 
 export function EmailTemplatesContent({
   clientId,
   clientData,
-  canModify = true
+  canModify = true,
 }: {
   clientId: string;
   clientData?: any;
@@ -140,12 +109,11 @@ export function EmailTemplatesContent({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading and set empty data to show empty state
     setLoading(true);
     setTimeout(() => {
-      setTemplates([]); // Start with empty templates to show empty state
+      setTemplates([]);
       setLoading(false);
-    }, 500); // Simulate network delay
+    }, 400);
   }, [clientId]);
 
   const handleAddTemplate = async (template: {
@@ -156,7 +124,6 @@ export function EmailTemplatesContent({
     isDefault: boolean;
   }) => {
     if (!canModify) return;
-    // Create new template with dummy data
     const newTemplate: EmailTemplate = {
       id: Date.now().toString(),
       ...template,
@@ -165,7 +132,6 @@ export function EmailTemplatesContent({
       author: { name: "Current User", avatar: "CU" },
     };
 
-    // Add to the beginning of the templates array
     setTemplates([newTemplate, ...templates]);
   };
 
@@ -179,7 +145,6 @@ export function EmailTemplatesContent({
     if (!canModify) return;
     if (!editTemplate) return;
 
-    // Update template with dummy data
     const updatedTemplate: EmailTemplate = {
       ...editTemplate,
       ...updated,
@@ -187,7 +152,7 @@ export function EmailTemplatesContent({
     };
 
     const updatedTemplates = templates.map((t) =>
-      t.id === editTemplate.id ? updatedTemplate : t
+      t.id === editTemplate.id ? updatedTemplate : t,
     );
 
     setTemplates(updatedTemplates);
@@ -197,21 +162,8 @@ export function EmailTemplatesContent({
 
   const handleDeleteTemplate = async (templateToDelete: EmailTemplate) => {
     if (!canModify) return;
-    // Delete template from dummy data
     setTemplates(templates.filter((t) => t.id !== templateToDelete.id));
   };
-
-  // const handleDuplicateTemplate = async (templateToDuplicate: EmailTemplate) => {
-  //   const duplicatedTemplate = {
-  //     name: `${templateToDuplicate.name} (Copy)`,
-  //     subject: templateToDuplicate.subject,
-  //     content: templateToDuplicate.content,
-  //     category: templateToDuplicate.category,
-  //     isDefault: false,
-  //   };
-
-  //   await handleAddTemplate(duplicatedTemplate);
-  // };
 
   const handlePreviewTemplate = (template: EmailTemplate) => {
     setPreviewTemplate(template);
@@ -220,34 +172,39 @@ export function EmailTemplatesContent({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading email templates...</div>
+      <div className="flex flex-col items-center justify-center p-16 space-y-3">
+        <CircularProgress size={32} thickness={4} sx={{ color: "primary.main" }} />
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Loading Templates...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Header action bar */}
-      <div className="flex items-center justify-between p-4 rounded-xl border border-border/70 bg-card shadow-2xs">
+      <div className="flex items-center justify-between p-3 rounded-xl border border-border/70 bg-card shadow-2xs">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <Mail className="w-4 h-4" />
+            <EmailOutlinedIcon sx={{ fontSize: 18 }} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-foreground">Email Templates</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Email Templates</h3>
             <p className="text-xs text-muted-foreground">
               Pre-configured templates for automated and direct communication
             </p>
           </div>
         </div>
-        <Button onClick={() => canModify && setIsAddDialogOpen(true)} disabled={!canModify} className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
-          <Plus className="h-3.5 w-3.5 mr-1" /> Create Template
+        <Button
+          onClick={() => canModify && setIsAddDialogOpen(true)}
+          disabled={!canModify}
+          size="sm"
+          className="h-8 px-3 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          <AddOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} /> Create Template
         </Button>
       </div>
 
-      <div className="bg-card rounded-xl border border-border/70 shadow-2xs p-5 flex-1">
-
+      <div className="bg-card rounded-xl border border-border/70 shadow-2xs p-4 sm:p-5 flex-1">
         {templates.length > 0 ? (
           <TemplatesList
             templates={templates}
@@ -259,43 +216,40 @@ export function EmailTemplatesContent({
               }, 0);
             }}
             onDelete={handleDeleteTemplate}
-            // onDuplicate={handleDuplicateTemplate}
             onPreview={handlePreviewTemplate}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center text-center py-12 px-4 min-h-[300px]">
-            {/* Illustration */}
-            <div className="relative mb-6">
-              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center">
-                <Mail className="w-12 h-12 text-muted-foreground" />
-              </div>
+          <div className="flex flex-col items-center justify-center text-center py-12 px-4 min-h-[260px]">
+            <div className="w-12 h-12 mb-3 bg-muted rounded-2xl flex items-center justify-center text-muted-foreground">
+              <EmailOutlinedIcon sx={{ fontSize: 26 }} />
             </div>
 
-            {/* Content */}
             <div className="max-w-sm">
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <h4 className="text-sm font-bold text-foreground mb-1">
                 No email templates created yet
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-                Create professional email templates to streamline your communication with {clientData?.name || "this client"}.
+              </h4>
+              <p className="text-muted-foreground text-xs leading-relaxed mb-4">
+                Create reusable email templates to streamline your communications with {clientData?.name || "this client"}.
               </p>
 
-              {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <Button
                   onClick={() => canModify && setIsAddDialogOpen(true)}
-                  className="bg-brand hover:bg-brand/90 text-white"
+                  size="sm"
+                  className="text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                   disabled={!canModify}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <AddOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} />
                   Create Template
                 </Button>
                 <Button
                   variant="outline"
+                  size="sm"
+                  className="text-xs font-semibold rounded-lg"
                   onClick={() => canModify && setTemplates(DUMMY_TEMPLATES)}
                   disabled={!canModify}
                 >
-                  Load Samples
+                  Load Sample Templates
                 </Button>
               </div>
             </div>
