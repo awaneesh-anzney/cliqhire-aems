@@ -141,11 +141,11 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
     if (firstRecipient) {
       const nameToUse = firstRecipient.name || firstRecipient.email;
       const extraCount = item.toRecipients.length - 1;
-      displayName = extraCount > 0 ? `To: ${nameToUse} +${extraCount}` : `To: ${nameToUse}`;
+      displayName = extraCount > 0 ? `${nameToUse} +${extraCount}` : nameToUse;
       avatarEmail = firstRecipient.email;
     } else if (item.to && item.to.length > 0) {
       const parsed = parseSender(item.to[0]);
-      displayName = `To: ${parsed.name}`;
+      displayName = parsed.name;
       avatarEmail = parsed.email;
     }
 
@@ -175,11 +175,11 @@ function mapFolderEmail(item: any, folder: string): ConversationItem {
       if (firstRecipient) {
         const nameToUse = firstRecipient.name || firstRecipient.email;
         const extraCount = item.toRecipients.length - 1;
-        displayName = extraCount > 0 ? `To: ${nameToUse} +${extraCount}` : `To: ${nameToUse}`;
+        displayName = extraCount > 0 ? `${nameToUse} +${extraCount}` : nameToUse;
         avatarEmail = firstRecipient.email;
       } else {
         const parsed = parseSender(item.to?.[0] || item.from);
-        displayName = `To: ${parsed.name}`;
+        displayName = parsed.name;
         avatarEmail = parsed.email;
       }
     } else {

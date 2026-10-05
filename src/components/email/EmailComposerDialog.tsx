@@ -66,6 +66,29 @@ type WindowMode = "docked" | "minimized" | "fullscreen";
 const MAX_ATTACHMENTS = 10;
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB
 
+function formatRecipient(input: string): string {
+  input = input.trim();
+  if (/<.+@.+>/.test(input)) {
+    return input;
+  }
+  const emailMatch = input.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+  if (!emailMatch) return input;
+
+  const email = emailMatch[1];
+  let namePart = input.replace(email, "").trim();
+
+  if (!namePart) {
+    namePart = email.split("@")[0];
+    namePart = namePart
+      .split(/[._-]/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+  
+  namePart = namePart.replace(/[<>"]/g, "").trim();
+  return `${namePart} <${email}>`;
+}
+
 export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   open,
   onOpenChange,
@@ -320,10 +343,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     }
 
     const payload = {
-      to: toRecipients,
+      to: toRecipients.length > 0 ? toRecipients.map(formatRecipient) : undefined,
       subject,
-      cc: ccRecipients.length > 0 ? ccRecipients : undefined,
-      bcc: bccRecipients.length > 0 ? bccRecipients : undefined,
+      cc: ccRecipients.length > 0 ? ccRecipients.map(formatRecipient) : undefined,
+      bcc: bccRecipients.length > 0 ? bccRecipients.map(formatRecipient) : undefined,
       text: bodyText,
       html: bodyHtml || `<p>${bodyText.replace(/\n/g, "<br/>")}</p>`,
       threadId: initialData?.threadId,
@@ -348,10 +371,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   // Draft Preservation
   const handleSaveDraft = () => {
     const payload = {
-      to: toRecipients.length > 0 ? toRecipients : undefined,
+      to: toRecipients.length > 0 ? toRecipients.map(formatRecipient) : undefined,
       subject,
-      cc: ccRecipients.length > 0 ? ccRecipients : undefined,
-      bcc: bccRecipients.length > 0 ? bccRecipients : undefined,
+      cc: ccRecipients.length > 0 ? ccRecipients.map(formatRecipient) : undefined,
+      bcc: bccRecipients.length > 0 ? bccRecipients.map(formatRecipient) : undefined,
       text: bodyText,
       html: bodyHtml || (bodyText ? `<p>${bodyText.replace(/\n/g, "<br/>")}</p>` : undefined),
       threadId: initialData?.threadId,
@@ -561,9 +584,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 initialType="client"
                 align="start"
                 title="Select Client Email Address"
-                onSelect={(email) => {
-                  if (!toRecipients.includes(email)) {
-                    setToRecipients((prev) => [...prev, email]);
+                onSelect={(email, contact) => {
+                  const formatted = contact?.name ? `${contact.name} <${email}>` : email;
+                  if (!toRecipients.includes(formatted)) {
+                    setToRecipients((prev) => [...prev, formatted]);
                     setDraftStatus("unsaved");
                   }
                 }}
@@ -582,9 +606,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 initialType="candidate"
                 align="start"
                 title="Select Candidate Email Address"
-                onSelect={(email) => {
-                  if (!toRecipients.includes(email)) {
-                    setToRecipients((prev) => [...prev, email]);
+                onSelect={(email, contact) => {
+                  const formatted = contact?.name ? `${contact.name} <${email}>` : email;
+                  if (!toRecipients.includes(formatted)) {
+                    setToRecipients((prev) => [...prev, formatted]);
                     setDraftStatus("unsaved");
                   }
                 }}
@@ -603,9 +628,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
                 initialType="team"
                 align="start"
                 title="Select Team Member Email Address"
-                onSelect={(email) => {
-                  if (!toRecipients.includes(email)) {
-                    setToRecipients((prev) => [...prev, email]);
+                onSelect={(email, contact) => {
+                  const formatted = contact?.name ? `${contact.name} <${email}>` : email;
+                  if (!toRecipients.includes(formatted)) {
+                    setToRecipients((prev) => [...prev, formatted]);
                     setDraftStatus("unsaved");
                   }
                 }}

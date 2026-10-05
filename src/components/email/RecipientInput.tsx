@@ -18,6 +18,14 @@ interface RecipientInputProps {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const validateRecipient = (recipient: string) => {
+  if (/<(.+?)>/.test(recipient)) {
+    const match = recipient.match(/<(.+?)>/);
+    return match ? EMAIL_REGEX.test(match[1]) : false;
+  }
+  return EMAIL_REGEX.test(recipient);
+};
+
 export const RecipientInput: React.FC<RecipientInputProps> = ({
   label,
   recipients,
@@ -84,15 +92,15 @@ export const RecipientInput: React.FC<RecipientInputProps> = ({
 
       {/* Chips */}
       {recipients.map((recipient, index) => {
-        const isValid = EMAIL_REGEX.test(recipient);
+        const isValid = validateRecipient(recipient);
 
         return (
           <Badge
             key={index}
             variant="secondary"
-            className={`h-6 pl-2 pr-1 gap-1 text-[11px] font-normal rounded-lg transition-all ${
+            className={`h-6 pl-2 pr-1 gap-1 text-[11px] font-normal rounded-lg transition-all border ${
               isValid
-                ? "bg-muted text-foreground border-border/80"
+                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
                 : "bg-destructive/10 text-destructive border-destructive/30"
             }`}
           >
