@@ -334,7 +334,9 @@ export const EmailHeader: React.FC<EmailHeaderProps> = ({
               initialType={selectedEmailType || "client"}
               selectedEmail={selectedEmailAddress}
               onSelect={(email, contact) => {
-                onSelectEmailType?.(contact.type);
+                if (contact?.type) {
+                  onSelectEmailType?.(contact.type);
+                }
                 onSelectEmailAddress?.(email);
               }}
               onClear={() => onSelectEmailAddress?.(null)}
