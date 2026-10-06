@@ -107,9 +107,13 @@ export function EmailNavSidebar({
   const { signatures } = useEmailSignatures();
 
   // Contact Directory Data
-  const { data: teamContacts = [], isLoading: loadingTeam } = useEmailRecipients("team");
-  const { data: candidateContacts = [], isLoading: loadingCandidates } = useEmailRecipients("candidate");
-  const { data: clientContacts = [], isLoading: loadingClients } = useEmailRecipients("client");
+  const { data: teamData, isLoading: loadingTeam } = useEmailRecipients("team");
+  const { data: candidateData, isLoading: loadingCandidates } = useEmailRecipients("candidate");
+  const { data: clientData, isLoading: loadingClients } = useEmailRecipients("client");
+
+  const teamContacts = useMemo(() => teamData?.pages?.flatMap((p: any) => p.contacts) || [], [teamData]);
+  const candidateContacts = useMemo(() => candidateData?.pages?.flatMap((p: any) => p.contacts) || [], [candidateData]);
+  const clientContacts = useMemo(() => clientData?.pages?.flatMap((p: any) => p.contacts) || [], [clientData]);
 
   // Accordion state for contact lists
   const [expandedSection, setExpandedSection] = useState<EmailContactType | null>(null);

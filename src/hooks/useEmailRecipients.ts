@@ -1,27 +1,32 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { emailService } from "@/services/emailService";
 import { EmailContactItem, EmailContactType, MOCK_EMAIL_CONTACTS } from "@/types/emailContactTypes";
 
 export function useEmailRecipients(
   frontendType: EmailContactType,
-  searchQuery: string = ""
+  searchQuery: string = "",
+  options?: { rawClients?: boolean }
 ) {
   // Map frontend "team" to backend "user"
   const backendType = frontendType === "team" ? "user" : frontendType;
 
-  return useQuery({
-    queryKey: ["email-recipients", backendType, searchQuery],
-    queryFn: async () => {
+  return useInfiniteQuery({
+    queryKey: ["email-recipients", backendType, searchQuery, options?.rawClients],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam = 1 }) => {
       try {
         const response = await emailService.getEmailRecipients({
           type: backendType as "client" | "candidate" | "user",
           search: searchQuery.trim(),
-          limit: frontendType === "team" && !searchQuery.trim() ? 200 : 20, // Load all users if no search
+          page: pageParam,
+          limit: 20,
         });
 
-        const mappedContacts: EmailContactItem[] = [];
+        const mappedContacts: any[] = [];
+        let fetchedItemsCount = 0;
 
         if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+          fetchedItemsCount = response.data.length;
           response.data.forEach((item: any) => {
             if (backendType === "user") {
               mappedContacts.push({
@@ -42,69 +47,127 @@ export function useEmailRecipients(
                 status: item.status,
               });
             } else if (backendType === "client") {
-              if (searchQuery.trim() && item.primaryContacts && item.primaryContacts.length > 0) {
-                // Search Mode (Mode C) - Return the primary contacts
-                item.primaryContacts.forEach((contact: any) => {
-                  mappedContacts.push({
-                    id: contact._id,
-                    name: contact.name,
-                    email: contact.email,
-                    type: "client",
-                    roleOrCompany: `${item.name} • ${contact.designation || "Primary Contact"}`,
-                    status: "Active Client",
-                  });
-                });
-                // Optionally, add the company's general email as well if needed
-                if (item.emails && item.emails[0]) {
-                  mappedContacts.push({
-                    id: item._id,
-                    name: item.name,
-                    email: item.emails[0],
-                    type: "client",
-                    roleOrCompany: "Company Email",
-                    status: "Active Client",
-                  });
-                }
+              if (options?.rawClients) {
+                // Push the raw client object to allow UI to visually group company emails and primary contacts
+                mappedContacts.push(item);
               } else {
-                // Browse Mode (Mode A) - Return the company general email
-                if (item.emails && item.emails.length > 0) {
-                  mappedContacts.push({
-                    id: item._id,
-                    name: item.name,
-                    email: item.emails[0],
-                    type: "client",
-                    roleOrCompany: "Client Company",
-                    status: "Active Client",
+                if (searchQuery.trim() && item.primaryContacts && item.primaryContacts.length > 0) {
+                  // Search Mode (Mode C) - Return the primary contacts
+                  item.primaryContacts.forEach((contact: any) => {
+                    mappedContacts.push({
+                      id: contact._id,
+                      name: contact.name,
+                      email: contact.email,
+                      type: "client",
+                      roleOrCompany: `${item.name} • ${contact.designation || "Primary Contact"}`,
+                      status: "Active Client",
+                    });
                   });
+                  // Optionally, add the company's general email as well if needed
+                  if (item.emails && item.emails[0]) {
+                    mappedContacts.push({
+                      id: item._id,
+                      name: item.name,
+                      email: item.emails[0],
+                      type: "client",
+                      roleOrCompany: "Company Email",
+                      status: "Active Client",
+                    });
+                  }
+                } else {
+                  // Browse Mode (Mode A) - Return the company general email
+                  if (item.emails && item.emails.length > 0) {
+                    mappedContacts.push({
+                      id: item._id,
+                      name: item.name,
+                      email: item.emails[0],
+                      type: "client",
+                      roleOrCompany: "Client Company",
+                      status: "Active Client",
+                    });
+                  }
                 }
               }
             }
           });
 
-          if (mappedContacts.length > 0) {
-            return mappedContacts;
-          }
+          return { contacts: mappedContacts, count: fetchedItemsCount };
         }
 
-        // Fallback to MOCK_EMAIL_CONTACTS matching frontendType if API response is empty
-        const fallback = MOCK_EMAIL_CONTACTS.filter((c) => c.type === frontendType);
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          return fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+        // Fallback to MOCK_EMAIL_CONTACTS matching frontendType if API response is empty on first page
+        if (pageParam === 1) {
+          const fallback = MOCK_EMAIL_CONTACTS.filter((c) => c.type === frontendType);
+          if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            if (backendType === "client" && options?.rawClients) {
+              // For client fallback, format mock data into group shape
+              const groupedFallback = fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+                .map(c => ({
+                  _id: c.id,
+                  name: c.roleOrCompany.split(" • ")[0] || c.name,
+                  emails: [c.email],
+                  primaryContacts: []
+                }));
+              return { contacts: groupedFallback, count: fallback.length };
+            }
+            return { contacts: fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)), count: fallback.length };
+          }
+          if (backendType === "client" && options?.rawClients) {
+            const groupedFallback = fallback.map(c => ({
+              _id: c.id,
+              name: c.roleOrCompany.split(" • ")[0] || c.name,
+              emails: [c.email],
+              primaryContacts: []
+            }));
+            return { contacts: groupedFallback, count: fallback.length };
+          }
+          return { contacts: fallback, count: fallback.length };
         }
-        return fallback;
+        
+        return { contacts: [], count: 0 };
       } catch {
         // Fallback gracefully on network / server error
-        const fallback = MOCK_EMAIL_CONTACTS.filter((c) => c.type === frontendType);
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          return fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+        if (pageParam === 1) {
+          const fallback = MOCK_EMAIL_CONTACTS.filter((c) => c.type === frontendType);
+          if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            if (backendType === "client" && options?.rawClients) {
+              const groupedFallback = fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+                .map(c => ({
+                  _id: c.id,
+                  name: c.roleOrCompany.split(" • ")[0] || c.name,
+                  emails: [c.email],
+                  primaryContacts: []
+                }));
+              return { contacts: groupedFallback, count: fallback.length };
+            }
+            return { contacts: fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)), count: fallback.length };
+          }
+          if (backendType === "client" && options?.rawClients) {
+            const groupedFallback = fallback.map(c => ({
+              _id: c.id,
+              name: c.roleOrCompany.split(" • ")[0] || c.name,
+              emails: [c.email],
+              primaryContacts: []
+            }));
+            return { contacts: groupedFallback, count: fallback.length };
+          }
+          return { contacts: fallback, count: fallback.length };
         }
-        return fallback;
+        
+        return { contacts: [], count: 0 };
       }
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      // If the last page returned exactly 20 original items, there might be a next page
+      if (lastPage.count === 20) {
+        return allPages.length + 1;
+      }
+      return undefined;
     },
     // Don't refetch on window focus as this might be typed into frequently
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
+
