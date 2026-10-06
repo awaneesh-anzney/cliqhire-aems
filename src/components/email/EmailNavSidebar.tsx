@@ -107,13 +107,17 @@ export function EmailNavSidebar({
   const { signatures } = useEmailSignatures();
 
   // Contact Directory Data
-  const { data: teamData, isLoading: loadingTeam } = useEmailRecipients("team");
-  const { data: candidateData, isLoading: loadingCandidates } = useEmailRecipients("candidate");
-  const { data: clientData, isLoading: loadingClients } = useEmailRecipients("client");
+  const { data: teamData, isLoading: loadingTeam, hasNextPage: hasNextTeam, fetchNextPage: fetchNextTeam, isFetchingNextPage: fetchingNextTeam } = useEmailRecipients("team");
+  const { data: candidateData, isLoading: loadingCandidates, hasNextPage: hasNextCandidate, fetchNextPage: fetchNextCandidate, isFetchingNextPage: fetchingNextCandidate } = useEmailRecipients("candidate");
+  const { data: clientData, isLoading: loadingClients, hasNextPage: hasNextClient, fetchNextPage: fetchNextClient, isFetchingNextPage: fetchingNextClient } = useEmailRecipients("client");
 
   const teamContacts = useMemo(() => teamData?.pages?.flatMap((p: any) => p.contacts) || [], [teamData]);
   const candidateContacts = useMemo(() => candidateData?.pages?.flatMap((p: any) => p.contacts) || [], [candidateData]);
   const clientContacts = useMemo(() => clientData?.pages?.flatMap((p: any) => p.contacts) || [], [clientData]);
+
+  const teamTotal = useMemo(() => teamData?.pages?.[0]?.total ?? teamContacts.length, [teamData, teamContacts.length]);
+  const candidateTotal = useMemo(() => candidateData?.pages?.[0]?.total ?? candidateContacts.length, [candidateData, candidateContacts.length]);
+  const clientTotal = useMemo(() => clientData?.pages?.[0]?.total ?? clientContacts.length, [clientData, clientContacts.length]);
 
   // Accordion state for contact lists
   const [expandedSection, setExpandedSection] = useState<EmailContactType | null>(null);
@@ -130,9 +134,12 @@ export function EmailNavSidebar({
         id: "team" as EmailContactType,
         label: "Team Members",
         icon: PeopleAltOutlinedIcon,
-        count: teamContacts.length,
+        count: teamTotal,
         loading: loadingTeam,
         contacts: teamContacts,
+        hasNextPage: hasNextTeam,
+        fetchNextPage: fetchNextTeam,
+        isFetchingNextPage: fetchingNextTeam,
         colorClass: "text-purple-600 dark:text-purple-400",
         badgeClass: "bg-purple-500/10 text-purple-700 dark:text-purple-300",
       },
@@ -140,9 +147,12 @@ export function EmailNavSidebar({
         id: "candidate" as EmailContactType,
         label: "Candidates",
         icon: BadgeOutlinedIcon,
-        count: candidateContacts.length,
+        count: candidateTotal,
         loading: loadingCandidates,
         contacts: candidateContacts,
+        hasNextPage: hasNextCandidate,
+        fetchNextPage: fetchNextCandidate,
+        isFetchingNextPage: fetchingNextCandidate,
         colorClass: "text-emerald-600 dark:text-emerald-400",
         badgeClass: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
       },
@@ -150,14 +160,24 @@ export function EmailNavSidebar({
         id: "client" as EmailContactType,
         label: "Clients",
         icon: BusinessOutlinedIcon,
-        count: clientContacts.length,
+        count: clientTotal,
         loading: loadingClients,
         contacts: clientContacts,
+        hasNextPage: hasNextClient,
+        fetchNextPage: fetchNextClient,
+        isFetchingNextPage: fetchingNextClient,
         colorClass: "text-blue-600 dark:text-blue-400",
         badgeClass: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
       },
     ],
-    [teamContacts, candidateContacts, clientContacts, loadingTeam, loadingCandidates, loadingClients]
+    [
+      teamContacts, candidateContacts, clientContacts, 
+      loadingTeam, loadingCandidates, loadingClients,
+      teamTotal, candidateTotal, clientTotal,
+      hasNextTeam, hasNextCandidate, hasNextClient,
+      fetchNextTeam, fetchNextCandidate, fetchNextClient,
+      fetchingNextTeam, fetchingNextCandidate, fetchingNextClient
+    ]
   );
 
   return (
@@ -325,8 +345,18 @@ export function EmailNavSidebar({
                   )}
 
                   {/* Contact Items List */}
-                  <div className="max-h-44 overflow-y-auto space-y-0.5 custom-scrollbar pr-0.5">
-                    {cat.loading ? (
+                  <div 
+                    className="max-h-44 overflow-y-auto space-y-0.5 custom-scrollbar pr-0.5"
+                    onScroll={(e) => {
+                      const target = e.currentTarget;
+                      if (target.scrollHeight - target.scrollTop - target.clientHeight < 20) {
+                        if (cat.hasNextPage && !cat.isFetchingNextPage) {
+                          cat.fetchNextPage();
+                        }
+                      }
+                    }}
+                  >
+                    {cat.loading && cat.contacts.length === 0 ? (
                       <div className="flex items-center justify-center py-3 text-slate-400 gap-1.5 text-xs">
                         <CircularProgress size={12} thickness={4} />
                         <span>Loading...</span>
@@ -336,64 +366,74 @@ export function EmailNavSidebar({
                         No contacts found
                       </p>
                     ) : (
-                      filteredContacts.map((contact) => {
-                        const isFiltered = selectedContactEmail === contact.email;
-                        const avatarBg = getAvatarColor(contact.name);
+                      <>
+                        {filteredContacts.map((contact) => {
+                          const isFiltered = selectedContactEmail === contact.email;
+                          const avatarBg = getAvatarColor(contact.name);
 
-                        return (
-                          <div
-                            key={contact.id || contact.email}
-                            className={cn(
-                              "group/item flex items-center justify-between p-1.5 rounded-lg text-left transition-colors cursor-pointer",
-                              isFiltered
-                                ? "bg-blue-100/80 dark:bg-blue-900/40 text-blue-900 dark:text-blue-100 font-bold"
-                                : "hover:bg-white dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-300"
-                            )}
-                            onClick={() => {
-                              if (isFiltered) {
-                                onSelectContactFilter?.(null);
-                              } else {
-                                onSelectContactFilter?.(contact.email);
-                              }
-                            }}
-                            title={`Click to filter emails from ${contact.name}`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div
-                                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0 shadow-2xs"
-                                style={{ backgroundColor: avatarBg }}
-                              >
-                                {getUserInitials(contact.name)}
-                              </div>
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-[11.5px] truncate font-medium group-hover/item:text-[#1C252E] dark:group-hover/item:text-white leading-tight">
-                                  {contact.name}
-                                </span>
-                                <span className="text-[9.5px] text-[#919EAB] truncate leading-tight mt-0.5">
-                                  {contact.roleOrCompany || contact.email}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Actions on hover */}
-                            <div className="flex items-center gap-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity shrink-0 ml-1">
-                              {onComposeToContact && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onComposeToContact(contact.email, contact.name);
-                                  }}
-                                  className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300"
-                                  title={`Compose email to ${contact.name}`}
-                                >
-                                  <SendIcon sx={{ fontSize: 11 }} />
-                                </button>
+                          return (
+                            <div
+                              key={contact.id || contact.email}
+                              className={cn(
+                                "group/item flex items-center justify-between p-1.5 rounded-lg text-left transition-colors cursor-pointer",
+                                isFiltered
+                                  ? "bg-blue-100/80 dark:bg-blue-900/40 text-blue-900 dark:text-blue-100 font-bold"
+                                  : "hover:bg-white dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-300"
                               )}
+                              onClick={() => {
+                                if (isFiltered) {
+                                  onSelectContactFilter?.(null);
+                                } else {
+                                  onSelectContactFilter?.(contact.email);
+                                }
+                              }}
+                              title={`Click to filter emails from ${contact.name}`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0 shadow-2xs"
+                                  style={{ backgroundColor: avatarBg }}
+                                >
+                                  {getUserInitials(contact.name)}
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                  <span className="text-[11.5px] truncate font-medium group-hover/item:text-[#1C252E] dark:group-hover/item:text-white leading-tight">
+                                    {contact.name}
+                                  </span>
+                                  <span className="text-[9.5px] text-[#919EAB] truncate leading-tight mt-0.5">
+                                    {contact.roleOrCompany || contact.email}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Actions on hover */}
+                              <div className="flex items-center gap-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity shrink-0 ml-1">
+                                {onComposeToContact && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onComposeToContact(contact.email, contact.name);
+                                    }}
+                                    className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300"
+                                    title={`Compose email to ${contact.name}`}
+                                  >
+                                    <SendIcon sx={{ fontSize: 11 }} />
+                                  </button>
+                                )}
+                              </div>
                             </div>
+                          );
+                        })}
+                        
+                        {/* Loading more indicator */}
+                        {cat.isFetchingNextPage && (
+                          <div className="flex items-center justify-center py-2 text-slate-400 gap-1.5 text-[10px]">
+                            <CircularProgress size={10} thickness={4} />
+                            <span>Loading more...</span>
                           </div>
-                        );
-                      })
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

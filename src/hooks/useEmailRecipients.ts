@@ -24,9 +24,11 @@ export function useEmailRecipients(
 
         const mappedContacts: any[] = [];
         let fetchedItemsCount = 0;
+        let totalCount = 0;
 
         if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
           fetchedItemsCount = response.data.length;
+          totalCount = response.total ?? response.count ?? response.data.length;
           response.data.forEach((item: any) => {
             if (backendType === "user") {
               mappedContacts.push({
@@ -91,7 +93,7 @@ export function useEmailRecipients(
             }
           });
 
-          return { contacts: mappedContacts, count: fetchedItemsCount };
+          return { contacts: mappedContacts, count: fetchedItemsCount, total: totalCount };
         }
 
         // Fallback to MOCK_EMAIL_CONTACTS matching frontendType if API response is empty on first page
@@ -108,9 +110,10 @@ export function useEmailRecipients(
                   emails: [c.email],
                   primaryContacts: []
                 }));
-              return { contacts: groupedFallback, count: fallback.length };
+              return { contacts: groupedFallback, count: fallback.length, total: groupedFallback.length };
             }
-            return { contacts: fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)), count: fallback.length };
+            const filteredFallback = fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+            return { contacts: filteredFallback, count: fallback.length, total: filteredFallback.length };
           }
           if (backendType === "client" && options?.rawClients) {
             const groupedFallback = fallback.map(c => ({
@@ -119,12 +122,12 @@ export function useEmailRecipients(
               emails: [c.email],
               primaryContacts: []
             }));
-            return { contacts: groupedFallback, count: fallback.length };
+            return { contacts: groupedFallback, count: fallback.length, total: groupedFallback.length };
           }
-          return { contacts: fallback, count: fallback.length };
+          return { contacts: fallback, count: fallback.length, total: fallback.length };
         }
         
-        return { contacts: [], count: 0 };
+        return { contacts: [], count: 0, total: 0 };
       } catch {
         // Fallback gracefully on network / server error
         if (pageParam === 1) {
@@ -139,9 +142,10 @@ export function useEmailRecipients(
                   emails: [c.email],
                   primaryContacts: []
                 }));
-              return { contacts: groupedFallback, count: fallback.length };
+              return { contacts: groupedFallback, count: fallback.length, total: groupedFallback.length };
             }
-            return { contacts: fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)), count: fallback.length };
+            const filteredFallback = fallback.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+            return { contacts: filteredFallback, count: fallback.length, total: filteredFallback.length };
           }
           if (backendType === "client" && options?.rawClients) {
             const groupedFallback = fallback.map(c => ({
@@ -150,12 +154,12 @@ export function useEmailRecipients(
               emails: [c.email],
               primaryContacts: []
             }));
-            return { contacts: groupedFallback, count: fallback.length };
+            return { contacts: groupedFallback, count: fallback.length, total: groupedFallback.length };
           }
-          return { contacts: fallback, count: fallback.length };
+          return { contacts: fallback, count: fallback.length, total: fallback.length };
         }
         
-        return { contacts: [], count: 0 };
+        return { contacts: [], count: 0, total: 0 };
       }
     },
     getNextPageParam: (lastPage, allPages) => {
