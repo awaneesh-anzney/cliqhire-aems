@@ -76,13 +76,15 @@ export default function DashboardPage() {
     <Box
       sx={{
         width: "100%",
+        maxWidth: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: 1.75,
-        p: { xs: 1.5, sm: 2 },
+        gap: { xs: 1.5, md: 2 },
+        p: { xs: "10px 12px 16px", sm: "12px 16px 16px" },
       }}
+      className="font-sans"
     >
-      {/* ─── 1. EXECUTIVE HEADER & ACTIONS ─── */}
+      {/* ─── 1. EXECUTIVE WELCOME HEADER ─── */}
       <DashboardHeader
         userName={user?.name}
         onOpenClient={() => setOpenClientModal(true)}
@@ -119,7 +121,7 @@ export default function DashboardPage() {
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", lg: "repeat(12, 1fr)" },
-          gap: 1.75,
+          gap: { xs: 1.5, md: 2 },
           alignItems: "stretch",
         }}
       >
@@ -136,7 +138,7 @@ export default function DashboardPage() {
           />
         </Box>
 
-        {/* Row 1 Right: Operations Launchpad (4 cols on desktop) - Matched Height */}
+        {/* Row 1 Right: Operations Launchpad (4 cols on desktop) */}
         <Box sx={{ gridColumn: { xs: "span 12", lg: "span 4" }, display: "flex" }}>
           <OperationsLaunchpad
             onOpenCandidate={() => setOpenCandidateModal(true)}
@@ -145,7 +147,7 @@ export default function DashboardPage() {
           />
         </Box>
 
-        {/* Row 2 Left: Recruitment Force (8 cols on desktop) - Directly below Pipeline Velocity */}
+        {/* Row 2 Left: Recruitment Force & Staffing Capacity (8 cols on desktop) */}
         <Box sx={{ gridColumn: { xs: "span 12", lg: "span 8" }, display: "flex" }}>
           <RecruitmentForceCard
             usersTotal={usersTotal}
@@ -154,7 +156,7 @@ export default function DashboardPage() {
           />
         </Box>
 
-        {/* Row 2 Right: Legal & MSAs (4 cols on desktop) - Directly below Operations Launchpad */}
+        {/* Row 2 Right: Legal & MSAs (4 cols on desktop) */}
         <Box sx={{ gridColumn: { xs: "span 12", lg: "span 4" }, display: "flex" }}>
           <LegalAgreementsCard
             contractsTotal={contractsTotal}

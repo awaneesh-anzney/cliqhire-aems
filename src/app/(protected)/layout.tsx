@@ -14,17 +14,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <SidebarProvider
           defaultOpen={true}
           style={{
-            ["--sidebar-width" as string]: "15rem",
-            ["--sidebar-width-icon" as string]: "4.5rem",
+            ["--sidebar-width" as string]: "248px",
+            ["--sidebar-width-icon" as string]: "70px",
           }}
-          className="h-dvh max-h-dvh w-full flex bg-transparent text-foreground antialiased overflow-hidden"
+          className="h-dvh max-h-dvh w-full flex bg-[#F6F9FC] dark:bg-[#0B132B] text-foreground antialiased overflow-hidden font-sans"
         >
           {/* Main Sidebar */}
           <Sidebar />
 
           {/* Main Workspace Area */}
-          <SidebarInset className="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-hidden bg-slate-50/70 dark:bg-background text-foreground">
-            {/* Unified Glassmorphism Header */}
+          <SidebarInset className="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-hidden bg-[#F6F9FC] dark:bg-[#0F172A] text-foreground">
+            {/* Floating Navbar Header */}
             <Header />
 
             {/* Main Content Area - Primary Scrollable Viewport */}

@@ -24,16 +24,34 @@ import { QueryProvider } from "@/contexts/query-provider";
 import "@/lib/axios-config";
 
 export const metadata: Metadata = {
-  title: "CliqHire",
-  description: "Recruitment Platform",
+  title: "CliqHire - Talent Acquisition Management System",
+  description: "CliqHire - Talent Acquisition Management System",
   icons: {
-    icon: "/fluxxx.png"
+    icon: [
+      { url: "/cliqhire-f.png", sizes: "any" },
+      { url: "/cliqhire-f.png", sizes: "32x32", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "48x48", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "96x96", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "192x192", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/cliqhire-f.png",
+    apple: [
+      { url: "/cliqhire-f.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/cliqhire-f.png" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/cliqhire-f.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/cliqhire-f.png" />
+        <link rel="apple-touch-icon" href="/cliqhire-f.png" />
+      </head>
       <body className="h-full min-h-screen bg-background text-foreground antialiased selection:bg-primary-soft selection:text-primary relative font-sans" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* Subtle Ambient Background Lighting Mapped to Theme */}
