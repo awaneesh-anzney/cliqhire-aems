@@ -20,7 +20,7 @@ export function DashboardSkeleton() {
       {/* Skeleton: Welcome Header */}
       <Box className="flex items-center justify-between">
         <Box className="space-y-1.5">
-          <Skeleton variant="text" width={220} height={34} />
+          <Skeleton variant="text" width={220} height={28} />
           <Skeleton variant="text" width={320} height={18} />
         </Box>
         <Box className="hidden sm:flex items-center gap-2">

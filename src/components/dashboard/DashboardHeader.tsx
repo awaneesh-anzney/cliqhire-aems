@@ -55,14 +55,14 @@ export function DashboardHeader({
     >
       {/* Welcome Title & Subtitle */}
       <div className="flex items-center gap-3">
-        <span className="text-3xl select-none shrink-0" role="img" aria-label="Waving hand">
+        <span className="text-2xl select-none shrink-0" role="img" aria-label="Waving hand">
           👋
         </span>
         <div>
-          <h1 className="text-2xl sm:text-[28px] md:text-[30px] font-bold text-[#172033] dark:text-white tracking-tight leading-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#172033] dark:text-white tracking-tight leading-tight">
             Welcome back, {firstName}!
           </h1>
-          <p className="text-[13px] sm:text-sm text-[#64748B] dark:text-[#94A3B8] font-normal mt-0.5">
+          <p className="text-xs sm:text-[13px] text-[#64748B] dark:text-[#94A3B8] font-normal mt-0.5">
             Here&apos;s what&apos;s happening with your recruitment today.
           </p>
         </div>

@@ -268,10 +268,10 @@ export function Sidebar() {
             isCollapsed && "justify-center"
           )}
         >
-          {/* Logo Mark: 40px x 40px from /public/cliqhire-icon.png */}
+          {/* Logo Mark: 40px x 40px from /public/cliqhire-f.png */}
           <div className="relative flex shrink-0 items-center justify-center">
             <Image
-              src="/cliqhire-icon.png"
+              src="/cliqhire-f.png"
               alt="CliqHire Logo"
               width={40}
               height={40}
