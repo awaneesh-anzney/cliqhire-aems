@@ -356,39 +356,39 @@ export function Sidebar() {
                     component={Link}
                     href={item.href}
                     className={cn(
-                      "rounded-[7px] transition-all duration-150 outline-none select-none",
+                      "rounded-[8px] transition-all duration-150 outline-none select-none",
                       isCollapsed
-                        ? "w-9 h-9 p-0 mx-auto justify-center flex items-center"
+                        ? "w-[38px] h-[38px] p-0 mx-auto justify-center flex items-center"
                         : cn(
-                            "w-full px-2 justify-start gap-2 flex items-center",
-                            isActive ? "h-[38px]" : "h-[36px]"
+                            "w-full px-2.5 justify-start gap-2.5 flex items-center",
+                            isActive ? "h-[40px]" : "h-[38px]"
                           ),
                       isActive
                         ? "!bg-[#2563EB] !text-white font-semibold shadow-[0_2px_8px_rgba(37,99,235,0.16)]"
                         : "!bg-transparent text-[#334155] dark:text-slate-300 hover:!bg-[#F8FAFC] dark:hover:!bg-slate-800/80 hover:!text-[#2563EB] font-medium"
                     )}
                     sx={{
-                      minHeight: isCollapsed ? 36 : (isActive ? 38 : 36),
-                      height: isCollapsed ? 36 : (isActive ? 38 : 36),
-                      width: isCollapsed ? 36 : "100%",
+                      minHeight: isCollapsed ? 38 : (isActive ? 40 : 38),
+                      height: isCollapsed ? 38 : (isActive ? 40 : 38),
+                      width: isCollapsed ? 38 : "100%",
                       justifyContent: isCollapsed ? "center" : "flex-start",
-                      p: isCollapsed ? 0 : "0 8px",
-                      borderRadius: "7px",
+                      p: isCollapsed ? 0 : "0 10px",
+                      borderRadius: "8px",
                     }}
                   >
-                    {/* Compact Icon Container (28px x 28px, rounded-7px) */}
+                    {/* Icon Container (30px x 30px, rounded-8px, clear 18px icon) */}
                     <ListItemIcon
                       className="transition-colors flex items-center justify-center shrink-0"
                       sx={{
                         minWidth: "unset",
-                        width: isCollapsed ? "100%" : 28,
+                        width: isCollapsed ? "100%" : 30,
                         justifyContent: "center",
                         m: 0,
                       }}
                     >
                       <div
                         className={cn(
-                          "w-7 h-7 rounded-[7px] flex items-center justify-center transition-all",
+                          "w-[30px] h-[30px] rounded-[8px] flex items-center justify-center transition-all",
                           isActive ? "bg-white/18 text-white" : ""
                         )}
                         style={{
@@ -398,7 +398,7 @@ export function Sidebar() {
                       >
                         <Icon
                           sx={{
-                            fontSize: 16,
+                            fontSize: 18,
                             color: isActive ? "#FFFFFF" : theme.color,
                           }}
                         />

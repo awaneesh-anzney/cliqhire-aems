@@ -24,10 +24,21 @@ import { QueryProvider } from "@/contexts/query-provider";
 import "@/lib/axios-config";
 
 export const metadata: Metadata = {
-  title: "CliqHire - Talent Acqusition Management System",
-  description: "CliqHire - Talent Acqusition Management System",
+  title: "CliqHire - Talent Acquisition Management System",
+  description: "CliqHire - Talent Acquisition Management System",
   icons: {
-    icon: "/cliqhire-f.png",
+    icon: [
+      { url: "/cliqhire-f.png", sizes: "any" },
+      { url: "/cliqhire-f.png", sizes: "32x32", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "48x48", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "96x96", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "192x192", type: "image/png" },
+      { url: "/cliqhire-f.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/cliqhire-f.png",
+    apple: [
+      { url: "/cliqhire-f.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
