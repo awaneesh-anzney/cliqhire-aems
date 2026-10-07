@@ -152,7 +152,7 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: "OVERVIEW",
+    title: "",
     moduleKeys: ["home", "todo"],
   },
   {
@@ -253,43 +253,40 @@ export function Sidebar() {
       collapsible="icon"
       className="border-r border-[#E6EDF5] dark:border-slate-800 app-sidebar bg-[#FFFFFF] dark:bg-[#111827] font-sans select-none transition-all duration-200 h-screen max-h-screen flex flex-col overflow-hidden"
     >
-      {/* ─── 1. LOGO SECTION (h-[56px], clean brand asset, no text) ─── */}
+      {/* ─── 1. LOGO SECTION (Centered, comfortable container) ─── */}
       <Box
         component="header"
         className={cn(
-          "h-[56px] flex items-center border-b border-[#EEF2F7] dark:border-slate-800 shrink-0",
-          isCollapsed ? "justify-center px-1" : "justify-between px-3.5"
+          "h-[62px] flex items-center justify-center border-b border-[#EEF2F7] dark:border-slate-800 shrink-0",
+          isCollapsed ? "px-1.5" : "px-3"
         )}
       >
         <Link
           href="/"
-          className={cn(
-            "flex items-center no-underline outline-none group",
-            isCollapsed ? "justify-center" : "justify-start"
-          )}
+          className="flex items-center justify-center w-full no-underline outline-none group"
         >
           {isCollapsed ? (
-            /* Collapsed State: cliqhire-f icon (32px x 32px) */
+            /* Collapsed State: cliqhire-f icon (34px x 34px) */
             <div className="relative flex shrink-0 items-center justify-center">
               <Image
                 src="/cliqhire-f.png"
                 alt="CliqHire"
-                width={32}
-                height={32}
+                width={34}
+                height={34}
                 priority
-                className="w-[32px] h-[32px] object-contain rounded-lg group-hover:scale-105 active:scale-95 transition-transform duration-200"
+                className="w-[34px] h-[34px] object-contain rounded-lg group-hover:scale-105 active:scale-95 transition-transform duration-200"
               />
             </div>
           ) : (
-            /* Expanded State: cliqhire-icon brand asset */
-            <div className="relative flex items-center">
+            /* Expanded State: cliqhire-icon centered with increased container size */
+            <div className="relative flex items-center justify-center w-full px-2">
               <Image
                 src="/cliqhire-icon.png"
                 alt="CliqHire"
-                width={140}
-                height={32}
+                width={180}
+                height={40}
                 priority
-                className="h-[28px] w-auto max-w-[155px] object-contain group-hover:scale-[1.02] active:scale-98 transition-transform duration-200"
+                className="h-[36px] w-auto max-w-[185px] object-contain group-hover:scale-[1.02] active:scale-98 transition-transform duration-200"
               />
             </div>
           )}
@@ -321,7 +318,7 @@ export function Sidebar() {
               key={sIdx}
               disablePadding
               subheader={
-                !isCollapsed ? (
+                !isCollapsed && Boolean(section.title) ? (
                   <ListSubheader
                     disableSticky
                     disableGutters
