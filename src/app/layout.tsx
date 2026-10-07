@@ -24,10 +24,10 @@ import { QueryProvider } from "@/contexts/query-provider";
 import "@/lib/axios-config";
 
 export const metadata: Metadata = {
-  title: "CliqHire",
-  description: "Recruitment Platform",
+  title: "CliqHire - Talent Acqusition Management System",
+  description: "CliqHire - Talent Acqusition Management System",
   icons: {
-    icon: "/fluxxx.png"
+    icon: "/cliqhire-f.png",
   },
 };
 
