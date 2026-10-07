@@ -134,11 +134,8 @@ export function Header() {
   return (
     <Box
       component="header"
-      className="relative h-[60px] px-3 sm:px-4 md:px-5 flex items-center justify-between gap-3 shrink-0 select-none bg-white/95 dark:bg-[#161C24]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 z-30 font-sans"
+      className="relative mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-3.5 h-[54px] sm:h-[56px] px-3 sm:px-4 flex items-center justify-between gap-3 shrink-0 select-none bg-white/92 dark:bg-[#1E293B]/92 backdrop-blur-[12px] border border-[#E6EDF5] dark:border-slate-800 rounded-[14px] shadow-[0_4px_18px_rgba(15,23,42,0.04)] z-30 font-sans transition-all"
     >
-      {/* Top Subtle Brand Gradient Line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 opacity-80 pointer-events-none" />
-
       {showMobileSearch ? (
         /* Mobile Search Bar Expand Mode */
         <Box className="flex items-center w-full gap-2 animate-in fade-in duration-200">
@@ -146,8 +143,8 @@ export function Header() {
             size="small"
             onClick={() => setShowMobileSearch(false)}
             sx={{
-              color: "#919EAB",
-              "&:hover": { color: "#1C252E" },
+              color: "#64748B",
+              "&:hover": { color: "#172033" },
               borderRadius: "8px",
             }}
           >
@@ -158,7 +155,7 @@ export function Header() {
           </div>
         </Box>
       ) : (
-        /* Standard Header Mode */
+        /* Standard Floating Header Mode */
         <>
           {/* Left: Sidebar Toggle Button & Navigation Title / Back Action */}
           <Box className="flex items-center gap-2.5 min-w-0">
@@ -170,7 +167,7 @@ export function Header() {
                 popper: { sx: { zIndex: 9999 } },
                 tooltip: {
                   sx: {
-                    bgcolor: "#1C252E",
+                    bgcolor: "#172033",
                     fontSize: "11px",
                     fontWeight: 600,
                     borderRadius: "8px",
@@ -183,25 +180,25 @@ export function Header() {
                 onClick={toggleSidebar}
                 aria-label="Toggle sidebar"
                 sx={{
-                  width: 36,
-                  height: 36,
+                  width: 34,
+                  height: 34,
                   borderRadius: "10px",
-                  color: "#637381",
+                  color: "#64748B",
                   "&:hover": {
-                    color: "#1C252E",
-                    backgroundColor: "rgba(145, 158, 171, 0.08)",
+                    color: "#172033",
+                    backgroundColor: "#EFF6FF",
                   },
                 }}
               >
                 {open ? (
-                  <MenuOpenOutlinedIcon sx={{ fontSize: 20 }} />
+                  <MenuOpenOutlinedIcon sx={{ fontSize: 19 }} />
                 ) : (
-                  <MenuOutlinedIcon sx={{ fontSize: 20 }} />
+                  <MenuOutlinedIcon sx={{ fontSize: 19 }} />
                 )}
               </IconButton>
             </Tooltip>
 
-            <Divider orientation="vertical" flexItem className="hidden sm:block h-4 my-auto bg-slate-200 dark:bg-slate-700" />
+            <Divider orientation="vertical" flexItem className="hidden sm:block h-4 my-auto bg-[#E2E8F0] dark:bg-slate-700" />
 
             {isOnIdPage ? (
               <Button
@@ -211,14 +208,15 @@ export function Header() {
                 startIcon={<ArrowBackOutlinedIcon sx={{ fontSize: 16 }} />}
                 sx={{
                   textTransform: "none",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: "12px",
-                  color: "#1C252E",
+                  color: "#172033",
                   borderRadius: "10px",
                   px: 1.5,
                   py: 0.5,
                   "&:hover": {
-                    backgroundColor: "rgba(145, 158, 171, 0.08)",
+                    backgroundColor: "#EFF6FF",
+                    color: "#2563EB",
                   },
                 }}
                 className="dark:!text-white group"
@@ -227,12 +225,12 @@ export function Header() {
               </Button>
             ) : (
               <Box className="flex items-center gap-2 text-xs truncate">
-                <span className="text-slate-800 dark:text-slate-200 hidden sm:inline font-bold tracking-tight text-[13px]">
-                  Cliq<span className="text-blue-600 dark:text-blue-400 font-extrabold">Hire</span>
+                <span className="text-[#172033] dark:text-slate-200 hidden sm:inline font-bold tracking-tight text-[13px]">
+                  Cliq<span className="text-[#2563EB] font-bold">Hire</span>
                 </span>
-                <NavigateNextOutlinedIcon sx={{ fontSize: 16 }} className="text-[#919EAB] hidden sm:inline" />
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100/90 dark:bg-slate-800/80 text-[#1C252E] dark:text-white border border-slate-200/70 dark:border-slate-700/70 shadow-2xs tracking-tight">
-                  <RouteIcon sx={{ fontSize: 15, color: "#2563EB" }} className="dark:!text-blue-400" />
+                <NavigateNextOutlinedIcon sx={{ fontSize: 15 }} className="text-[#94A3B8] hidden sm:inline" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#F8FAFC] dark:bg-slate-800 text-[#172033] dark:text-white border border-[#E2E8F0] dark:border-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.02)] tracking-tight">
+                  <RouteIcon sx={{ fontSize: 15, color: "#2563EB" }} />
                   <span>{pageInfo.title}</span>
                 </div>
               </Box>
@@ -254,27 +252,27 @@ export function Header() {
               onClick={() => setShowMobileSearch(true)}
               className="flex md:hidden"
               sx={{
-                width: 34,
-                height: 34,
-                borderRadius: "10px",
-                color: "#637381",
+                width: 32,
+                height: 32,
+                borderRadius: "9px",
+                color: "#64748B",
                 "&:hover": {
-                  color: "#1C252E",
-                  backgroundColor: "rgba(145, 158, 171, 0.08)",
+                  color: "#172033",
+                  backgroundColor: "#EFF6FF",
                 },
               }}
             >
-              <SearchOutlinedIcon sx={{ fontSize: 19 }} />
+              <SearchOutlinedIcon sx={{ fontSize: 18 }} />
             </IconButton>
 
             {/* Workspace Live Status Badge */}
-            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[11px] font-semibold text-[#10B981] shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
               <span>Workspace Live</span>
             </div>
 
             {/* Utility Controls Group */}
-            <div className="flex items-center gap-0.5 p-1 rounded-xl bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+            <div className="flex items-center gap-0.5 p-1 rounded-xl bg-[#F8FAFC] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 shadow-2xs">
               <ModeToggle />
               <NotificationDropdown />
 
@@ -286,7 +284,7 @@ export function Header() {
                   popper: { sx: { zIndex: 9999 } },
                   tooltip: {
                     sx: {
-                      bgcolor: "#1C252E",
+                      bgcolor: "#172033",
                       fontSize: "11px",
                       fontWeight: 600,
                       borderRadius: "8px",
@@ -300,10 +298,10 @@ export function Header() {
                     width: 28,
                     height: 28,
                     borderRadius: "8px",
-                    color: "#637381",
+                    color: "#64748B",
                     "&:hover": {
-                      color: "#1C252E",
-                      backgroundColor: "rgba(145, 158, 171, 0.08)",
+                      color: "#172033",
+                      backgroundColor: "rgba(37, 99, 235, 0.08)",
                     },
                   }}
                 >
@@ -312,7 +310,7 @@ export function Header() {
               </Tooltip>
             </div>
 
-            <Divider orientation="vertical" flexItem className="hidden sm:block h-4 my-auto bg-slate-200 dark:bg-slate-700 mx-0.5" />
+            <Divider orientation="vertical" flexItem className="hidden sm:block h-4 my-auto bg-[#E2E8F0] dark:bg-slate-700 mx-0.5" />
 
             {/* User Profile Trigger Button */}
             <button
@@ -321,7 +319,7 @@ export function Header() {
               aria-controls={isProfileMenuOpen ? "user-profile-menu" : undefined}
               aria-haspopup="true"
               aria-expanded={isProfileMenuOpen ? "true" : undefined}
-              className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-slate-200/80 dark:hover:border-slate-700/80 outline-none cursor-pointer"
+              className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-[#F8FAFC] dark:hover:bg-slate-800 transition-all border border-transparent hover:border-[#E2E8F0] dark:hover:border-slate-700 outline-none cursor-pointer"
             >
               <Badge
                 overlap="circular"
@@ -329,8 +327,8 @@ export function Header() {
                 variant="dot"
                 sx={{
                   "& .MuiBadge-badge": {
-                    backgroundColor: "#22C55E",
-                    color: "#22C55E",
+                    backgroundColor: "#10B981",
+                    color: "#10B981",
                     boxShadow: "0 0 0 2px #FFFFFF",
                     width: 7,
                     height: 7,
@@ -350,7 +348,7 @@ export function Header() {
                       width: 30,
                       height: 30,
                       borderRadius: "9px",
-                      background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
+                      backgroundColor: "#2563EB",
                       fontSize: "11px",
                       fontWeight: 700,
                     }}
@@ -361,15 +359,15 @@ export function Header() {
               </Badge>
 
               <div className="hidden md:flex flex-col items-start leading-none">
-                <span className="text-xs font-bold text-[#1C252E] dark:text-white truncate max-w-[110px]">
-                  {user?.name || "User"}
+                <span className="text-xs font-bold text-[#172033] dark:text-white truncate max-w-[110px]">
+                  {user?.name || "Abhi Singh"}
                 </span>
-                <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/20 uppercase tracking-wider mt-0.5">
-                  {user?.role?.toLowerCase() || "member"}
+                <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-[#EFF6FF] text-[#2563EB] dark:bg-blue-950/40 dark:text-blue-400 border border-[#BFDBFE] dark:border-blue-800 uppercase tracking-wider mt-0.5">
+                  {user?.role?.toLowerCase() || "admin"}
                 </span>
               </div>
 
-              <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16 }} className="text-[#919EAB] hidden sm:block" />
+              <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16 }} className="text-[#94A3B8] hidden sm:block" />
             </button>
 
             {/* Material UI Profile Menu */}

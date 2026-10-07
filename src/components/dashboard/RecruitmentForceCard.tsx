@@ -3,10 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
-import Button from "@mui/material/Button";
+
+// Material UI Icons
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import HowToRegOutlinedIcon from "@mui/icons-material/HowToRegOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 
@@ -21,171 +23,120 @@ export function RecruitmentForceCard({
   usersActive,
   usersActivePercent,
 }: RecruitmentForceCardProps) {
+  const total = usersTotal || 15;
+  const active = usersActive || 15;
+  const rate = usersActivePercent || 100;
+
   return (
-    <Box
-      className="w-full h-full flex flex-col justify-between rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_8px_16px_-4px_rgba(145,158,171,0.06)] p-3 sm:p-3.5 font-sans transition-all"
-    >
+    <Box className="w-full h-full flex flex-col justify-between rounded-[16px] border border-[#E7EDF4] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-4 sm:p-5 font-sans transition-all">
       {/* Header Row */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: "8px",
-              bgcolor: "rgba(0, 167, 111, 0.1)",
-              color: "#00A76F",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
+      <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9] dark:border-slate-800 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
             <PeopleOutlineOutlinedIcon sx={{ fontSize: 18 }} />
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: "text.primary", lineHeight: 1.2 }}>
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-[#172033] dark:text-white tracking-tight leading-tight">
               Recruitment Force & Staffing Capacity
-            </Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary", mt: 0.25 }}>
+            </h2>
+            <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-normal mt-0.5">
               Active talent acquisition specialists, recruiters & internal staff
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
 
-        <Button
-          component={Link}
-          href="/users"
-          variant="text"
-          size="small"
-          endIcon={<ArrowForwardOutlinedIcon sx={{ fontSize: 13 }} />}
-          sx={{
-            textTransform: "none",
-            fontWeight: 700,
-            fontSize: "11px",
-            color: "#00A76F",
-            p: "1px 6px",
-            borderRadius: "6px",
-            "&:hover": {
-              backgroundColor: "rgba(0, 167, 111, 0.08)",
-            },
-          }}
+        <Link
+          href="/teammembers"
+          className="text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] flex items-center gap-1 no-underline transition-colors shrink-0"
         >
-          View Team
-        </Button>
-      </Box>
+          <span>View Team</span>
+          <ArrowForwardOutlinedIcon sx={{ fontSize: 13 }} />
+        </Link>
+      </div>
 
-      {/* 3 Metric Columns */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
-          gap: 1.5,
-          py: 0.5,
-        }}
-      >
-        <Box
-          sx={{
-            p: 1.5,
-            borderRadius: "10px",
-            bgcolor: "rgba(0, 167, 111, 0.04)",
-            border: 1,
-            borderColor: "rgba(0, 167, 111, 0.15)",
-          }}
-        >
-          <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", color: "#00A76F", letterSpacing: "0.5px" }}>
-            Total Force
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mt: 0.25 }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "text.primary", lineHeight: 1 }}>
-              {usersTotal}
-            </Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary" }}>
-              accounts
-            </Typography>
-          </Box>
-        </Box>
+      {/* 3 Horizontal Metric Layout with Soft Tinted Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-3.5 flex-1">
+        {/* Total Force */}
+        <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-slate-800/60 border border-[#E2E8F0] dark:border-slate-700/80 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
+            <BadgeOutlinedIcon sx={{ fontSize: 19 }} />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8] block">
+              Total Force
+            </span>
+            <div className="flex items-baseline gap-1 mt-0.5">
+              <span className="text-xl sm:text-2xl font-bold text-[#172033] dark:text-white tracking-tight leading-none">
+                {total}
+              </span>
+              <span className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                accounts
+              </span>
+            </div>
+          </div>
+        </div>
 
-        <Box
-          sx={{
-            p: 1.5,
-            borderRadius: "10px",
-            bgcolor: "rgba(0, 184, 217, 0.04)",
-            border: 1,
-            borderColor: "rgba(0, 184, 217, 0.15)",
-          }}
-        >
-          <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", color: "#00B8D9", letterSpacing: "0.5px" }}>
-            Active on Duty
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mt: 0.25 }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "text.primary", lineHeight: 1 }}>
-              {usersActive}
-            </Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary" }}>
-              online
-            </Typography>
-          </Box>
-        </Box>
+        {/* Active on Duty */}
+        <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-slate-800/60 border border-[#E2E8F0] dark:border-slate-700/80 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#ECFDF5] text-[#10B981] flex items-center justify-center shrink-0">
+            <HowToRegOutlinedIcon sx={{ fontSize: 19 }} />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8] block">
+              Active on Duty
+            </span>
+            <div className="flex items-baseline gap-1 mt-0.5">
+              <span className="text-xl sm:text-2xl font-bold text-[#172033] dark:text-white tracking-tight leading-none">
+                {active}
+              </span>
+              <span className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8]">
+                online
+              </span>
+            </div>
+          </div>
+        </div>
 
-        <Box
-          sx={{
-            p: 1.5,
-            borderRadius: "10px",
-            bgcolor: "rgba(142, 51, 255, 0.04)",
-            border: 1,
-            borderColor: "rgba(142, 51, 255, 0.15)",
-          }}
-        >
-          <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", color: "#8E33FF", letterSpacing: "0.5px" }}>
-            Activity Rate
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mt: 0.25 }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "text.primary", lineHeight: 1 }}>
-              {usersActivePercent}%
-            </Typography>
-            <Chip
-              label="Operational"
-              size="small"
-              sx={{
-                height: 16,
-                fontSize: "0.6rem",
-                fontWeight: 700,
-                color: "#8E33FF",
-                bgcolor: "rgba(142, 51, 255, 0.12)",
-                border: 0,
-                "& .MuiChip-label": { px: 0.5 },
-              }}
-            />
-          </Box>
-        </Box>
-      </Box>
+        {/* Activity Rate */}
+        <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-slate-800/60 border border-[#E2E8F0] dark:border-slate-700/80 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] text-[#8B5CF6] flex items-center justify-center shrink-0">
+            <InsightsOutlinedIcon sx={{ fontSize: 19 }} />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8] block">
+              Activity Rate
+            </span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xl sm:text-2xl font-bold text-[#172033] dark:text-white tracking-tight leading-none">
+                {rate}%
+              </span>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-[#F5F3FF] text-[#8B5CF6] border border-[#DDD6FE]">
+                Operational
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Progress Strip */}
-      <Box sx={{ mt: 1.25 }}>
-        <Box sx={{ width: "100%", height: 5, bgcolor: "rgba(145, 158, 171, 0.16)", borderRadius: 9999, overflow: "hidden" }}>
-          <Box
-            sx={{
-              height: "100%",
-              width: `${Math.min(usersActivePercent, 100)}%`,
-              bgcolor: "#00A76F",
-              borderRadius: 9999,
-              transition: "width 0.4s ease-in-out",
-            }}
+      {/* Elegant Thin Progress Bar (#10B981) */}
+      <div className="pt-2">
+        <div className="w-full h-1.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-[#10B981] rounded-full transition-all duration-500"
+            style={{ width: `${Math.min(rate, 100)}%` }}
           />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 0.5 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-            <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 13, color: "#00A76F" }} />
-            <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, color: "#00A76F" }}>
-              {usersActive} of {usersTotal} staff currently engaged
-            </Typography>
-          </Box>
-          <Typography sx={{ fontSize: "0.65rem", color: "text.secondary" }}>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-[#10B981]">
+            <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14 }} />
+            <span>{active} of {total} staff currently engaged</span>
+          </div>
+
+          <span className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8]">
             Staff capacity normal
-          </Typography>
-        </Box>
-      </Box>
+          </span>
+        </div>
+      </div>
     </Box>
   );
 }

@@ -9,45 +9,48 @@ export function DashboardSkeleton() {
     <Box
       sx={{
         width: "100%",
+        maxWidth: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: 1.75,
-        p: { xs: 1.5, sm: 2 },
+        gap: 3,
+        px: { xs: 2, sm: 3, md: 3.5 },
+        py: { xs: 2, sm: 2.5, md: 3 },
       }}
-      className="animate-in fade-in duration-300"
+      className="animate-in fade-in duration-300 font-sans"
     >
-      {/* Skeleton: Header Banner */}
-      <Box className="h-14 sm:h-16 w-full rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-[#1C252E]/80 p-3 flex items-center justify-between">
-        <Box className="flex items-center gap-2.5">
-          <Skeleton variant="rounded" width={36} height={36} sx={{ borderRadius: "8px" }} />
-          <Box className="space-y-1">
-            <Skeleton variant="text" width={160} height={20} />
-            <Skeleton variant="text" width={240} height={14} />
-          </Box>
+      {/* Skeleton: Welcome Header */}
+      <Box className="flex items-center justify-between">
+        <Box className="space-y-1.5">
+          <Skeleton variant="text" width={220} height={34} />
+          <Skeleton variant="text" width={320} height={18} />
         </Box>
-        <Box className="hidden sm:flex items-center gap-1.5">
-          <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: "8px" }} />
-          <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: "8px" }} />
-          <Skeleton variant="rounded" width={100} height={32} sx={{ borderRadius: "8px" }} />
+        <Box className="hidden sm:flex items-center gap-2">
+          <Skeleton variant="rounded" width={180} height={38} sx={{ borderRadius: "10px" }} />
+          <Skeleton variant="rounded" width={110} height={38} sx={{ borderRadius: "10px" }} />
         </Box>
       </Box>
 
       {/* Skeleton: 4 Primary KPI Cards */}
-      <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 shrink-0">
+      <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
         {[1, 2, 3, 4].map((i) => (
           <Box
             key={i}
-            className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-2xs space-y-2"
+            className="p-4 rounded-[16px] border border-[#E7EDF4] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.04)] space-y-3"
           >
             <Box className="flex justify-between items-center">
-              <Skeleton variant="text" width={80} height={14} />
-              <Skeleton variant="rounded" width={28} height={28} sx={{ borderRadius: "8px" }} />
+              <Box className="flex items-center gap-2">
+                <Skeleton variant="rounded" width={36} height={36} sx={{ borderRadius: "12px" }} />
+                <Skeleton variant="text" width={90} height={16} />
+              </Box>
+              <Skeleton variant="circular" width={24} height={24} />
             </Box>
-            <Skeleton variant="text" width={100} height={28} />
-            <Skeleton variant="rounded" width="100%" height={6} sx={{ borderRadius: "9999px" }} />
-            <Box className="flex justify-between">
-              <Skeleton variant="text" width={50} height={12} />
-              <Skeleton variant="text" width={50} height={12} />
+            <Box className="flex items-baseline gap-2">
+              <Skeleton variant="text" width={80} height={32} />
+              <Skeleton variant="text" width={60} height={16} />
+            </Box>
+            <Box className="flex justify-between items-center pt-2 border-t border-[#F1F5F9] dark:border-slate-800">
+              <Skeleton variant="rounded" width={60} height={20} sx={{ borderRadius: "9999px" }} />
+              <Skeleton variant="rounded" width={70} height={24} sx={{ borderRadius: "6px" }} />
             </Box>
           </Box>
         ))}
@@ -58,58 +61,59 @@ export function DashboardSkeleton() {
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", lg: "repeat(12, 1fr)" },
-          gap: 1.75,
+          gap: 2.5,
           alignItems: "stretch",
         }}
       >
         {/* Row 1 Left: Pipeline Velocity */}
-        <Box className="lg:col-span-8 p-3 sm:p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-2xs space-y-3">
-          <Box className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
-            <Skeleton variant="text" width={180} height={18} />
-            <Skeleton variant="rounded" width={90} height={22} sx={{ borderRadius: "9999px" }} />
+        <Box className="lg:col-span-8 p-4 sm:p-5 rounded-[16px] border border-[#E7EDF4] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.04)] space-y-4">
+          <Box className="flex justify-between items-center pb-3 border-b border-[#F1F5F9] dark:border-slate-800">
+            <Skeleton variant="text" width={200} height={22} />
+            <Skeleton variant="rounded" width={90} height={24} sx={{ borderRadius: "8px" }} />
           </Box>
-          <Box className="grid grid-cols-3 gap-2">
-            <Skeleton variant="rounded" height={52} sx={{ borderRadius: "8px" }} />
-            <Skeleton variant="rounded" height={52} sx={{ borderRadius: "8px" }} />
-            <Skeleton variant="rounded" height={52} sx={{ borderRadius: "8px" }} />
+          <Box className="grid grid-cols-3 gap-3">
+            <Skeleton variant="rounded" height={64} sx={{ borderRadius: "12px" }} />
+            <Skeleton variant="rounded" height={64} sx={{ borderRadius: "12px" }} />
+            <Skeleton variant="rounded" height={64} sx={{ borderRadius: "12px" }} />
           </Box>
-          <Skeleton variant="rounded" height={60} sx={{ borderRadius: "8px" }} />
-          <Skeleton variant="rounded" height={36} sx={{ borderRadius: "8px" }} />
+          <Skeleton variant="rounded" height={70} sx={{ borderRadius: "12px" }} />
+          <Skeleton variant="rounded" height={42} sx={{ borderRadius: "12px" }} />
         </Box>
 
         {/* Row 1 Right: Operations Launchpad */}
-        <Box className="lg:col-span-4 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-2xs space-y-2 flex flex-col justify-between">
-          <Box className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
-            <Skeleton variant="text" width={140} height={18} />
+        <Box className="lg:col-span-4 p-4 sm:p-5 rounded-[16px] border border-[#E7EDF4] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.04)] space-y-3 flex flex-col justify-between">
+          <Box className="flex justify-between items-center pb-3 border-b border-[#F1F5F9] dark:border-slate-800">
+            <Skeleton variant="text" width={160} height={22} />
             <Skeleton variant="rounded" width={70} height={20} sx={{ borderRadius: "9999px" }} />
           </Box>
-          <Skeleton variant="rounded" height={52} sx={{ borderRadius: "8px" }} />
-          <Skeleton variant="rounded" height={52} sx={{ borderRadius: "8px" }} />
-          <Skeleton variant="rounded" height={52} sx={{ borderRadius: "8px" }} />
+          <Skeleton variant="rounded" height={54} sx={{ borderRadius: "12px" }} />
+          <Skeleton variant="rounded" height={54} sx={{ borderRadius: "12px" }} />
+          <Skeleton variant="rounded" height={54} sx={{ borderRadius: "12px" }} />
+          <Skeleton variant="rounded" height={54} sx={{ borderRadius: "12px" }} />
         </Box>
 
         {/* Row 2 Left: Recruitment Force */}
-        <Box className="lg:col-span-8 p-3 sm:p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-2xs space-y-2.5">
-          <Box className="flex justify-between items-center">
-            <Skeleton variant="text" width={180} height={18} />
+        <Box className="lg:col-span-8 p-4 sm:p-5 rounded-[16px] border border-[#E7EDF4] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.04)] space-y-3">
+          <Box className="flex justify-between items-center pb-3 border-b border-[#F1F5F9] dark:border-slate-800">
+            <Skeleton variant="text" width={220} height={20} />
             <Skeleton variant="rounded" width={70} height={20} sx={{ borderRadius: "6px" }} />
           </Box>
-          <Box className="grid grid-cols-3 gap-2">
-            <Skeleton variant="rounded" height={48} sx={{ borderRadius: "8px" }} />
-            <Skeleton variant="rounded" height={48} sx={{ borderRadius: "8px" }} />
-            <Skeleton variant="rounded" height={48} sx={{ borderRadius: "8px" }} />
+          <Box className="grid grid-cols-3 gap-3">
+            <Skeleton variant="rounded" height={60} sx={{ borderRadius: "12px" }} />
+            <Skeleton variant="rounded" height={60} sx={{ borderRadius: "12px" }} />
+            <Skeleton variant="rounded" height={60} sx={{ borderRadius: "12px" }} />
           </Box>
-          <Skeleton variant="rounded" width="100%" height={5} sx={{ borderRadius: "9999px" }} />
+          <Skeleton variant="rounded" width="100%" height={6} sx={{ borderRadius: "9999px" }} />
         </Box>
 
         {/* Row 2 Right: Legal & MSAs */}
-        <Box className="lg:col-span-4 p-3 sm:p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-2xs space-y-2.5 flex flex-col justify-between">
-          <Box className="flex justify-between items-center">
-            <Skeleton variant="text" width={120} height={18} />
+        <Box className="lg:col-span-4 p-4 sm:p-5 rounded-[16px] border border-[#E7EDF4] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.04)] space-y-3 flex flex-col justify-between">
+          <Box className="flex justify-between items-center pb-3 border-b border-[#F1F5F9] dark:border-slate-800">
+            <Skeleton variant="text" width={140} height={20} />
             <Skeleton variant="rounded" width={70} height={20} sx={{ borderRadius: "6px" }} />
           </Box>
-          <Skeleton variant="rounded" height={48} sx={{ borderRadius: "8px" }} />
-          <Skeleton variant="text" width="60%" height={14} />
+          <Skeleton variant="rounded" height={56} sx={{ borderRadius: "12px" }} />
+          <Skeleton variant="text" width="70%" height={16} />
         </Box>
       </Box>
     </Box>

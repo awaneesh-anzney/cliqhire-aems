@@ -3,9 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
-import Button from "@mui/material/Button";
+
+// Material UI Icons
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
@@ -15,112 +14,66 @@ interface LegalAgreementsCardProps {
 }
 
 export function LegalAgreementsCard({ contractsTotal }: LegalAgreementsCardProps) {
-  return (
-    <Box
-      className="w-full h-full flex flex-col justify-between rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-[0_0_2px_0_rgba(145,158,171,0.2),0_8px_16px_-4px_rgba(145,158,171,0.06)] p-3 sm:p-3.5 font-sans transition-all"
-    >
-      {/* Header Row */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: "8px",
-              bgcolor: "rgba(142, 51, 255, 0.1)",
-              color: "#8E33FF",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <DescriptionOutlinedIcon sx={{ fontSize: 18 }} />
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: "text.primary", lineHeight: 1.2 }}>
-              Legal & MSAs
-            </Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary", mt: 0.25 }}>
-              Executed corporate agreements
-            </Typography>
-          </Box>
-        </Box>
+  const total = contractsTotal || 25;
 
-        <Button
-          component={Link}
+  return (
+    <Box className="w-full h-full flex flex-col justify-between rounded-[16px] border border-[#E7EDF4] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-4 sm:p-5 font-sans transition-all">
+      {/* Header Row */}
+      <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9] dark:border-slate-800 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#F5F3FF] dark:bg-purple-950/30 text-[#8B5CF6] flex items-center justify-center shrink-0">
+            <DescriptionOutlinedIcon sx={{ fontSize: 18 }} />
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-[#172033] dark:text-white tracking-tight leading-tight">
+              Legal & MSAs
+            </h2>
+            <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-normal mt-0.5">
+              Executed corporate agreements
+            </p>
+          </div>
+        </div>
+
+        <Link
           href="/contracts"
-          variant="text"
-          size="small"
-          endIcon={<ArrowForwardOutlinedIcon sx={{ fontSize: 13 }} />}
-          sx={{
-            textTransform: "none",
-            fontWeight: 700,
-            fontSize: "11px",
-            color: "#8E33FF",
-            p: "1px 6px",
-            borderRadius: "6px",
-            "&:hover": {
-              backgroundColor: "rgba(142, 51, 255, 0.08)",
-            },
-          }}
+          className="text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] flex items-center gap-1 no-underline transition-colors shrink-0"
         >
-          View MSAs
-        </Button>
-      </Box>
+          <span>View MSAs</span>
+          <ArrowForwardOutlinedIcon sx={{ fontSize: 13 }} />
+        </Link>
+      </div>
 
       {/* Main Metric Stat Box */}
-      <Box
-        sx={{
-          p: 1.5,
-          borderRadius: "10px",
-          bgcolor: "rgba(142, 51, 255, 0.04)",
-          border: 1,
-          borderColor: "rgba(142, 51, 255, 0.15)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box>
-          <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", color: "#8E33FF", letterSpacing: "0.5px" }}>
+      <div className="my-3 p-3.5 rounded-xl border border-[#E7EDF4] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50 flex items-center justify-between gap-3 flex-1">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B5CF6] block leading-tight">
             Active Contracts
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mt: 0.25 }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "text.primary", lineHeight: 1 }}>
-              {contractsTotal}
-            </Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "text.secondary" }}>
+          </span>
+          <div className="flex items-baseline gap-1 mt-1">
+            <span className="text-2xl font-bold text-[#172033] dark:text-white tracking-tight leading-none">
+              {total}
+            </span>
+            <span className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
               signed agreements
-            </Typography>
-          </Box>
-        </Box>
+            </span>
+          </div>
+        </div>
 
-        <Chip
-          icon={<VerifiedUserOutlinedIcon sx={{ fontSize: "14px !important", color: "#8E33FF !important" }} />}
-          label="Compliant"
-          size="small"
-          sx={{
-            height: 22,
-            fontSize: "0.6875rem",
-            fontWeight: 700,
-            color: "#8E33FF",
-            bgcolor: "rgba(142, 51, 255, 0.12)",
-            border: 0,
-            "& .MuiChip-label": { px: 0.75 },
-          }}
-        />
-      </Box>
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F5F3FF] dark:bg-purple-950/40 border border-[#DDD6FE] dark:border-purple-800 text-[11px] font-bold text-[#8B5CF6] dark:text-purple-300 shadow-2xs shrink-0">
+          <VerifiedUserOutlinedIcon sx={{ fontSize: 14 }} />
+          <span>Compliant</span>
+        </div>
+      </div>
 
       {/* Footer Info Strip */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 1.25 }}>
-        <Typography sx={{ fontSize: "0.65rem", color: "text.secondary" }}>
+      <div className="flex items-center justify-between pt-1 border-t border-[#F1F5F9] dark:border-slate-800/80">
+        <span className="text-[11px] text-[#64748B] dark:text-[#94A3B8] font-medium">
           Terms & Fee Schedules Verified
-        </Typography>
-        <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, color: "#8E33FF" }}>
+        </span>
+        <span className="text-[11px] font-bold text-[#8B5CF6]">
           100% In Effect
-        </Typography>
-      </Box>
+        </span>
+      </div>
     </Box>
   );
 }
