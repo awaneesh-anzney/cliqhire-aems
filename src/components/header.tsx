@@ -134,7 +134,7 @@ export function Header() {
   return (
     <Box
       component="header"
-      className="relative mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-3.5 h-[54px] sm:h-[56px] px-3 sm:px-4 flex items-center justify-between gap-3 shrink-0 select-none bg-white/92 dark:bg-[#1E293B]/92 backdrop-blur-[12px] border border-[#E6EDF5] dark:border-slate-800 rounded-[14px] shadow-[0_4px_18px_rgba(15,23,42,0.04)] z-30 font-sans transition-all"
+      className="relative mx-2 mt-2 h-[60px] px-4 py-0 flex items-center justify-between gap-3 shrink-0 select-none bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-[12px] border border-[#E6EDF5] dark:border-slate-800 rounded-[12px] shadow-[0_2px_12px_rgba(15,23,42,0.04)] z-30 font-sans transition-all"
     >
       {showMobileSearch ? (
         /* Mobile Search Bar Expand Mode */

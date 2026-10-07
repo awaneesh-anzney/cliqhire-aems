@@ -12,9 +12,8 @@ export function DashboardSkeleton() {
         maxWidth: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: 3,
-        px: { xs: 2, sm: 3, md: 3.5 },
-        py: { xs: 2, sm: 2.5, md: 3 },
+        gap: { xs: 1.5, md: 2 },
+        p: { xs: "10px 12px 16px", sm: "12px 16px 16px" },
       }}
       className="animate-in fade-in duration-300 font-sans"
     >
@@ -61,7 +60,7 @@ export function DashboardSkeleton() {
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", lg: "repeat(12, 1fr)" },
-          gap: 2.5,
+          gap: { xs: 1.5, md: 2 },
           alignItems: "stretch",
         }}
       >

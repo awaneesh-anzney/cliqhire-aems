@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -252,27 +253,31 @@ export function Sidebar() {
       collapsible="icon"
       className="border-r border-[#E6EDF5] dark:border-slate-800 app-sidebar bg-[#FFFFFF] dark:bg-[#111827] font-sans select-none transition-all duration-200 h-screen max-h-screen flex flex-col overflow-hidden"
     >
-      {/* ─── 1. LOGO SECTION (68px–72px, border-bottom #EEF2F7) ─── */}
+      {/* ─── 1. LOGO SECTION (64px–68px, padding: 10px 14px, border-bottom #EEF2F7) ─── */}
       <Box
         component="header"
         className={cn(
-          "h-[70px] flex items-center border-b border-[#EEF2F7] dark:border-slate-800 shrink-0",
-          isCollapsed ? "justify-center px-1" : "justify-between px-4 py-3"
+          "h-[66px] flex items-center border-b border-[#EEF2F7] dark:border-slate-800 shrink-0",
+          isCollapsed ? "justify-center p-[10px_8px]" : "justify-between p-[10px_14px]"
         )}
       >
         <Link
           href="/"
           className={cn(
-            "flex items-center gap-3 no-underline outline-none group",
+            "flex items-center gap-2.5 no-underline outline-none group",
             isCollapsed && "justify-center"
           )}
         >
-          {/* Logo Mark: 42px x 42px */}
+          {/* Logo Mark: 40px x 40px from /public/cliqhire-icon.png */}
           <div className="relative flex shrink-0 items-center justify-center">
-            <div className="w-[42px] h-[42px] rounded-xl bg-[#2563EB] flex items-center justify-center text-white shadow-sm shadow-blue-500/25 transition-transform duration-200 group-hover:scale-105 active:scale-95 font-black text-sm tracking-tight relative">
-              CH
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#10B981] ring-2 ring-white dark:ring-[#111827]" />
-            </div>
+            <Image
+              src="/cliqhire-icon.png"
+              alt="CliqHire Logo"
+              width={40}
+              height={40}
+              priority
+              className="w-[40px] h-[40px] object-contain rounded-[9px] group-hover:scale-105 active:scale-95 transition-transform duration-200"
+            />
           </div>
 
           {/* Brand Typography */}
