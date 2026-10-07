@@ -44,7 +44,7 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 
-// Multicolored icon theme mapping per module key
+// Soft pastel icon container mapping
 interface ModuleTheme {
   icon: React.ElementType;
   color: string;
@@ -54,93 +54,93 @@ interface ModuleTheme {
 const MODULE_THEMES: Record<string, ModuleTheme> = {
   home: {
     icon: HomeOutlinedIcon,
-    color: "#3B82F6",
-    bg: "rgba(59, 130, 246, 0.12)",
+    color: "#2563EB",
+    bg: "#EFF6FF",
   },
   todo: {
     icon: FormatListBulletedOutlinedIcon,
     color: "#F59E0B",
-    bg: "rgba(245, 158, 11, 0.12)",
+    bg: "#FFFBEB",
   },
   leads: {
     icon: BusinessOutlinedIcon,
     color: "#06B6D4",
-    bg: "rgba(6, 182, 212, 0.12)",
+    bg: "#ECFEFF",
   },
   clients: {
     icon: BusinessOutlinedIcon,
-    color: "#0EA5E9",
-    bg: "rgba(14, 165, 233, 0.12)",
+    color: "#0284C7",
+    bg: "#E0F2FE",
   },
   "client-groups": {
     icon: LayersOutlinedIcon,
-    color: "#14B8A6",
-    bg: "rgba(20, 184, 166, 0.12)",
+    color: "#0D9488",
+    bg: "#F0FDFA",
   },
   jobs: {
     icon: WorkOutlineOutlinedIcon,
     color: "#6366F1",
-    bg: "rgba(99, 102, 241, 0.12)",
+    bg: "#EEF2FF",
   },
   candidates: {
     icon: PersonOutlineOutlinedIcon,
     color: "#8B5CF6",
-    bg: "rgba(139, 92, 246, 0.12)",
+    bg: "#F5F3FF",
   },
   pipeline: {
     icon: AccountTreeOutlinedIcon,
-    color: "#22C55E",
-    bg: "rgba(34, 197, 94, 0.12)",
+    color: "#10B981",
+    bg: "#ECFDF5",
   },
   recruiter: {
     icon: PersonAddAlt1OutlinedIcon,
     color: "#2563EB",
-    bg: "rgba(37, 99, 235, 0.12)",
+    bg: "#EFF6FF",
   },
   headhunter: {
     icon: PersonSearchOutlinedIcon,
-    color: "#A855F7",
-    bg: "rgba(168, 85, 247, 0.12)",
+    color: "#9333EA",
+    bg: "#FAF5FF",
   },
   tem_candidates: {
     icon: ManageAccountsOutlinedIcon,
     color: "#EC4899",
-    bg: "rgba(236, 72, 153, 0.12)",
+    bg: "#FDF2F8",
   },
   teams: {
     icon: GroupsOutlinedIcon,
     color: "#10B981",
-    bg: "rgba(16, 185, 129, 0.12)",
+    bg: "#ECFDF5",
   },
   roles: {
     icon: AdminPanelSettingsOutlinedIcon,
     color: "#D97706",
-    bg: "rgba(217, 119, 6, 0.12)",
+    bg: "#FFFBEB",
   },
   settings: {
     icon: SettingsOutlinedIcon,
     color: "#64748B",
-    bg: "rgba(100, 116, 139, 0.12)",
+    bg: "#F1F5F9",
   },
   profile: {
     icon: AccountCircleOutlinedIcon,
     color: "#0284C7",
-    bg: "rgba(2, 132, 199, 0.12)",
+    bg: "#E0F2FE",
   },
   admin: {
     icon: AdminPanelSettingsOutlinedIcon,
-    color: "#F43F5E",
-    bg: "rgba(244, 63, 94, 0.12)",
+    color: "#EF4444",
+    bg: "#FEF2F2",
   },
   notifications: {
     icon: NotificationsOutlinedIcon,
-    color: "#F97316",
-    bg: "rgba(249, 115, 22, 0.12)",
+    color: "#EA580C",
+    bg: "#FFF7ED",
   },
   email: {
     icon: MailOutlineOutlinedIcon,
-    color: "#0284C7",
-    bg: "rgba(2, 132, 199, 0.12)",
+    color: "#2563EB",
+    bg: "#EFF6FF",
   },
 };
 
@@ -151,13 +151,15 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: "Overview",
+    title: "OVERVIEW",
     moduleKeys: ["home", "todo"],
   },
   {
-    title: "Recruitment",
+    title: "RECRUITMENT",
     moduleKeys: [
+      "leads",
       "clients",
+      "client-groups",
       "jobs",
       "candidates",
       "pipeline",
@@ -167,11 +169,11 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "Workspace",
+    title: "WORKSPACE",
     moduleKeys: ["teams", "email", "notifications"],
   },
   {
-    title: "System",
+    title: "SYSTEM",
     moduleKeys: ["admin", "settings", "profile"],
   },
 ];
@@ -216,14 +218,10 @@ export function Sidebar() {
       const matchedItems: SidebarModule[] = [];
       sec.moduleKeys.forEach((key) => {
         const matches = remaining.filter((m) => {
-          if (key === "clients") {
-            return (
-              m.href === "/leads" ||
-              m.href === "/clients" ||
-              m.href === "/client-groups"
-            );
-          }
-          if (key === "home") return m.href === "/";
+          if (key === "leads") return m.href === "/leads";
+          if (key === "clients") return m.href === "/clients";
+          if (key === "client-groups") return m.href === "/client-groups";
+          if (key === "home") return m.href === "/" || m.href === "/dashboard";
           if (key === "todo") return m.href === "/todo";
           return m.moduleKey === key;
         });
@@ -243,7 +241,7 @@ export function Sidebar() {
     });
 
     if (remaining.length > 0) {
-      sections.push({ title: "Other", items: remaining });
+      sections.push({ title: "OTHER", items: remaining });
     }
 
     return sections;
@@ -252,14 +250,14 @@ export function Sidebar() {
   return (
     <UISidebar
       collapsible="icon"
-      className="border-r border-[#E6EDF5] dark:border-slate-800 app-sidebar bg-[#F9FBFE] dark:bg-[#111827] font-sans select-none transition-all duration-200"
+      className="border-r border-[#E6EDF5] dark:border-slate-800 app-sidebar bg-[#FFFFFF] dark:bg-[#111827] font-sans select-none transition-all duration-200 h-screen max-h-screen flex flex-col overflow-hidden"
     >
-      {/* Brand Header */}
+      {/* ─── 1. LOGO SECTION (68px–72px, border-bottom #EEF2F7) ─── */}
       <Box
         component="header"
         className={cn(
-          "h-16 flex items-center border-b border-[#E6EDF5] dark:border-slate-800/80 shrink-0",
-          isCollapsed ? "justify-center px-1" : "justify-between px-4"
+          "h-[70px] flex items-center border-b border-[#EEF2F7] dark:border-slate-800 shrink-0",
+          isCollapsed ? "justify-center px-1" : "justify-between px-4 py-3"
         )}
       >
         <Link
@@ -269,11 +267,11 @@ export function Sidebar() {
             isCollapsed && "justify-center"
           )}
         >
-          {/* Logo Mark: Clean Primary Brand Box */}
+          {/* Logo Mark: 42px x 42px */}
           <div className="relative flex shrink-0 items-center justify-center">
-            <div className="w-9 h-9 rounded-xl bg-[#2563EB] flex items-center justify-center text-white shadow-sm shadow-blue-500/25 transition-transform duration-200 group-hover:scale-105 active:scale-95 font-black text-sm tracking-tight relative">
+            <div className="w-[42px] h-[42px] rounded-xl bg-[#2563EB] flex items-center justify-center text-white shadow-sm shadow-blue-500/25 transition-transform duration-200 group-hover:scale-105 active:scale-95 font-black text-sm tracking-tight relative">
               CH
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-[#F9FBFE] dark:ring-[#111827]" />
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#10B981] ring-2 ring-white dark:ring-[#111827]" />
             </div>
           </div>
 
@@ -281,7 +279,7 @@ export function Sidebar() {
           {!isCollapsed && (
             <div className="flex flex-col min-w-0 animate-in fade-in duration-200">
               <span className="text-[16px] font-bold tracking-tight text-[#172033] dark:text-white leading-tight">
-                Cliq<span className="text-[#2563EB] font-bold">Hire</span>
+                Cliq<span className="text-[#2563EB]">Hire</span>
               </span>
               <span className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] truncate leading-tight mt-0.5">
                 Talent & Recruitment
@@ -291,19 +289,19 @@ export function Sidebar() {
         </Link>
       </Box>
 
-      {/* Navigation List Viewport */}
+      {/* ─── 2. NAVIGATION LIST (Scrolls independently, padding: 14px 10px 10px) ─── */}
       <Box
         component="nav"
         className={cn(
-          "flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-2 transition-all",
+          "flex-1 overflow-y-auto overflow-x-hidden flex flex-col min-h-0 transition-all",
           isCollapsed
-            ? "px-1.5 py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-            : "px-3 py-3 custom-scrollbar"
+            ? "px-1.5 py-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            : "px-2.5 pt-3.5 pb-2.5 custom-scrollbar"
         )}
       >
         {loadingPerms ? (
           <Box className="flex flex-col items-center justify-center py-12 gap-2 text-slate-400">
-            <CircularProgress size={22} thickness={4} sx={{ color: "#2563EB" }} />
+            <CircularProgress size={20} thickness={4} sx={{ color: "#2563EB" }} />
             {!isCollapsed && (
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8]">
                 Loading navigation...
@@ -320,13 +318,13 @@ export function Sidebar() {
                   <ListSubheader
                     disableSticky
                     disableGutters
-                    className="bg-transparent text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] px-3 pt-3 pb-1.5 select-none leading-none"
+                    className="bg-transparent text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8] px-2.5 pb-1.5 pt-0 select-none leading-none mb-1.5"
                   >
                     {section.title}
                   </ListSubheader>
                 ) : undefined
               }
-              className="space-y-1"
+              className={cn("space-y-[3px]", sIdx > 0 ? "mt-[18px]" : "mt-0")}
             >
               {section.items.map((item, iIdx) => {
                 const isActive =
@@ -342,7 +340,7 @@ export function Sidebar() {
                 const theme = MODULE_THEMES[key] || {
                   icon: HomeOutlinedIcon,
                   color: "#2563EB",
-                  bg: "rgba(37, 99, 235, 0.08)",
+                  bg: "#EFF6FF",
                 };
                 const Icon = theme.icon;
 
@@ -351,38 +349,43 @@ export function Sidebar() {
                     component={Link}
                     href={item.href}
                     className={cn(
-                      "rounded-[11px] transition-all duration-150 outline-none select-none",
+                      "rounded-[8px] transition-all duration-150 outline-none select-none mb-[3px]",
                       isCollapsed
-                        ? "w-11 h-11 p-0 mx-auto justify-center flex items-center"
-                        : "w-full h-[42px] px-3 justify-start gap-3 flex items-center",
+                        ? "w-10 h-10 p-0 mx-auto justify-center flex items-center"
+                        : cn(
+                            "w-full px-2.5 justify-start gap-2.5 flex items-center",
+                            isActive ? "h-[42px]" : "h-[40px]"
+                          ),
                       isActive
-                        ? "!bg-[#2563EB] !text-white font-semibold shadow-[0_4px_12px_rgba(37,99,235,0.18)]"
-                        : "!bg-transparent text-[#334155] dark:text-slate-300 hover:!bg-[#EFF6FF] dark:hover:!bg-slate-800 hover:!text-[#2563EB] font-medium"
+                        ? "!bg-[#2563EB] !text-white font-semibold shadow-[0_4px_10px_rgba(37,99,235,0.16)]"
+                        : "!bg-transparent text-[#334155] dark:text-slate-300 hover:!bg-[#F8FAFC] dark:hover:!bg-slate-800/80 hover:!text-[#2563EB] font-medium"
                     )}
                     sx={{
-                      minHeight: isCollapsed ? 44 : 42,
-                      width: isCollapsed ? 44 : "100%",
+                      minHeight: isCollapsed ? 40 : (isActive ? 42 : 40),
+                      height: isCollapsed ? 40 : (isActive ? 42 : 40),
+                      width: isCollapsed ? 40 : "100%",
                       justifyContent: isCollapsed ? "center" : "flex-start",
-                      p: isCollapsed ? 0 : undefined,
+                      p: isCollapsed ? 0 : "0 10px",
+                      borderRadius: "8px",
                     }}
                   >
-                    {/* Icon Container */}
+                    {/* Compact Icon Container (32px x 32px, rounded-9px) */}
                     <ListItemIcon
                       className="transition-colors flex items-center justify-center shrink-0"
                       sx={{
                         minWidth: "unset",
-                        width: isCollapsed ? "100%" : 28,
+                        width: isCollapsed ? "100%" : 32,
                         justifyContent: "center",
                         m: 0,
                       }}
                     >
                       <div
                         className={cn(
-                          "w-7 h-7 rounded-[8px] flex items-center justify-center transition-all",
-                          isActive ? "bg-white/20 text-white" : ""
+                          "w-8 h-8 rounded-[9px] flex items-center justify-center transition-all",
+                          isActive ? "bg-white/18 text-white" : ""
                         )}
                         style={{
-                          backgroundColor: isActive ? "rgba(255, 255, 255, 0.2)" : theme.bg,
+                          backgroundColor: isActive ? "rgba(255, 255, 255, 0.18)" : theme.bg,
                           color: isActive ? "#FFFFFF" : theme.color,
                         }}
                       >
@@ -395,13 +398,13 @@ export function Sidebar() {
                       </div>
                     </ListItemIcon>
 
-                    {/* Navigation Item Label */}
+                    {/* Navigation Item Label (14px, 500 font-weight) */}
                     {!isCollapsed && (
                       <ListItemText
                         primary={
                           <span
                             className={cn(
-                              "text-[13.5px] tracking-tight truncate block",
+                              "text-[14px] tracking-tight truncate block leading-none",
                               isActive
                                 ? "font-semibold text-white"
                                 : "font-medium text-[#334155] dark:text-slate-300 group-hover:text-[#2563EB]"
@@ -434,7 +437,7 @@ export function Sidebar() {
                               fontFamily: "'Inter', sans-serif",
                               fontSize: "12px",
                               fontWeight: 600,
-                              borderRadius: "10px",
+                              borderRadius: "8px",
                               px: 1.5,
                               py: 0.6,
                               boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
@@ -464,22 +467,23 @@ export function Sidebar() {
         )}
       </Box>
 
-      {/* Upgrade Plan Widget */}
-      {!isCollapsed && (
-        <Box className="px-3 pb-2 shrink-0">
+      {/* ─── 3. FIXED BOTTOM AREA (Upgrade Plan + User Profile, padding: 8px 10px) ─── */}
+      <Box className="mt-auto shrink-0 p-[8px_10px] border-t border-[#EEF2F7] dark:border-slate-800 bg-white dark:bg-[#111827] flex flex-col gap-2">
+        {/* Compact Upgrade Plan Card (58px–64px) */}
+        {!isCollapsed && (
           <Link
             href="/settings"
-            className="p-3 rounded-xl bg-white dark:bg-slate-800/80 border border-[#E6EDF5] dark:border-slate-700/80 shadow-[0_2px_8px_rgba(15,23,42,0.03)] flex items-center justify-between gap-2.5 transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-sm no-underline group"
+            className="h-[60px] p-[10px_12px] rounded-[12px] bg-white dark:bg-slate-800/80 border border-[#E2E8F0] dark:border-slate-700/80 flex items-center justify-between gap-2.5 transition-all duration-150 hover:border-slate-300 dark:hover:border-slate-600 no-underline group mb-0.5"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-[9px] bg-[#FFF7ED] text-[#EA580C] flex items-center justify-center shrink-0">
                 <WorkspacePremiumOutlinedIcon sx={{ fontSize: 18 }} />
               </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-[#172033] dark:text-white truncate">
+              <div className="flex flex-col min-w-0 leading-tight">
+                <span className="text-[13px] font-bold text-[#172033] dark:text-white truncate">
                   Upgrade Plan
                 </span>
-                <span className="text-[10px] text-[#64748B] dark:text-[#94A3B8] truncate">
+                <span className="text-[11px] text-[#64748B] dark:text-[#94A3B8] truncate mt-0.5">
                   Get more features
                 </span>
               </div>
@@ -489,17 +493,9 @@ export function Sidebar() {
               className="text-[#94A3B8] group-hover:text-[#2563EB] group-hover:translate-x-0.5 transition-all shrink-0"
             />
           </Link>
-        </Box>
-      )}
-
-      {/* User Profile Card Footer */}
-      <Box
-        component="footer"
-        className={cn(
-          "p-2.5 border-t border-[#E6EDF5] dark:border-slate-800 shrink-0 bg-[#F9FBFE] dark:bg-[#111827]",
-          isCollapsed ? "flex justify-center" : ""
         )}
-      >
+
+        {/* Compact User Profile Section (64px–68px, padding: 8px 10px) */}
         {isCollapsed ? (
           <Tooltip
             title={user?.name || "Profile"}
@@ -517,7 +513,7 @@ export function Sidebar() {
                   fontFamily: "'Inter', sans-serif",
                   fontSize: "12px",
                   fontWeight: 600,
-                  borderRadius: "10px",
+                  borderRadius: "8px",
                   px: 1.5,
                   py: 0.6,
                   boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
@@ -536,7 +532,7 @@ export function Sidebar() {
           >
             <Link
               href="/profile"
-              className="flex items-center justify-center p-1 rounded-xl hover:bg-[#EFF6FF] dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center justify-center p-1 rounded-xl hover:bg-[#F8FAFC] dark:hover:bg-slate-800 transition-colors"
             >
               <Badge
                 overlap="circular"
@@ -557,16 +553,16 @@ export function Sidebar() {
                   <Avatar
                     src={user.avatar}
                     alt={user.name || "User"}
-                    sx={{ width: 34, height: 34, borderRadius: "10px" }}
+                    sx={{ width: 40, height: 40, borderRadius: "10px" }}
                   />
                 ) : (
                   <Avatar
                     sx={{
-                      width: 34,
-                      height: 34,
+                      width: 40,
+                      height: 40,
                       borderRadius: "10px",
                       backgroundColor: "#2563EB",
-                      fontSize: "12px",
+                      fontSize: "13px",
                       fontWeight: 700,
                     }}
                   >
@@ -577,10 +573,10 @@ export function Sidebar() {
             </Link>
           </Tooltip>
         ) : (
-          <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-[#E6EDF5] dark:border-slate-700/80 flex items-center justify-between gap-2 shadow-[0_2px_8px_rgba(15,23,42,0.02)] transition-all">
+          <div className="h-[64px] p-[8px_10px] rounded-[12px] bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700/80 flex items-center justify-between gap-2 transition-all">
             <Link
               href="/profile"
-              className="flex items-center gap-2.5 min-w-0 no-underline hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2.5 min-w-0 no-underline hover:opacity-95 transition-opacity"
             >
               <Badge
                 overlap="circular"
@@ -601,16 +597,16 @@ export function Sidebar() {
                   <Avatar
                     src={user.avatar}
                     alt={user.name || "User"}
-                    sx={{ width: 32, height: 32, borderRadius: "10px" }}
+                    sx={{ width: 40, height: 40, borderRadius: "10px" }}
                   />
                 ) : (
                   <Avatar
                     sx={{
-                      width: 32,
-                      height: 32,
+                      width: 40,
+                      height: 40,
                       borderRadius: "10px",
                       backgroundColor: "#2563EB",
-                      fontSize: "12px",
+                      fontSize: "13px",
                       fontWeight: 700,
                     }}
                   >
@@ -619,12 +615,12 @@ export function Sidebar() {
                 )}
               </Badge>
 
-              <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-[#172033] dark:text-white truncate leading-tight">
-                  {user?.name || "User"}
+              <div className="flex flex-col min-w-0 leading-tight">
+                <span className="text-[13px] font-semibold text-[#172033] dark:text-white truncate">
+                  {user?.name || "Abhi Singh"}
                 </span>
-                <span className="text-[10px] font-semibold text-[#64748B] dark:text-[#94A3B8] truncate leading-tight mt-0.5 uppercase tracking-wider">
-                  {user?.role || "Member"}
+                <span className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] truncate mt-0.5 uppercase tracking-wider">
+                  {user?.role || "ADMIN"}
                 </span>
               </div>
             </Link>
@@ -644,7 +640,7 @@ export function Sidebar() {
                 p: 0.8,
               }}
             >
-              <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
+              <LogoutOutlinedIcon sx={{ fontSize: 17 }} />
             </IconButton>
           </div>
         )}
