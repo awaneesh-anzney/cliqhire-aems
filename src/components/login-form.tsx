@@ -115,7 +115,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       {...field}
                       type="email"
                       placeholder="Enter your email address"
-                      className="pl-11 h-[52px] rounded-[12px] bg-white dark:bg-slate-900 border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-white placeholder:text-[#94A3B8] shadow-[0_2px_6px_rgba(15,23,42,0.03)] focus-visible:ring-4 focus-visible:ring-[#2563EB]/[0.08] focus-visible:border-[#2563EB] transition-all font-normal"
+                      className="pl-11 h-[52px] rounded-[12px] bg-white dark:bg-[#131E3D] border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 shadow-[0_2px_6px_rgba(15,23,42,0.03)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.25)] focus-visible:ring-4 focus-visible:ring-[#2563EB]/[0.08] dark:focus-visible:ring-[#3B82F6]/[0.25] focus-visible:border-[#2563EB] dark:focus-visible:border-[#3B82F6] transition-all font-normal"
                       disabled={isLoginLoading}
                       autoComplete="email"
                     />
@@ -137,12 +137,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                 </FormLabel>
                 <FormControl>
                   <div className="relative group">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-[#64748B] group-focus-within:text-[#2563EB] transition-colors pointer-events-none" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-[#64748B] group-focus-within:text-[#2563EB] dark:group-focus-within:text-[#38BDF8] transition-colors pointer-events-none" />
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-11 pr-11 h-[52px] rounded-[12px] bg-white dark:bg-slate-900 border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-white placeholder:text-[#94A3B8] shadow-[0_2px_6px_rgba(15,23,42,0.03)] focus-visible:ring-4 focus-visible:ring-[#2563EB]/[0.08] focus-visible:border-[#2563EB] transition-all font-normal"
+                      className="pl-11 pr-11 h-[52px] rounded-[12px] bg-white dark:bg-[#131E3D] border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 shadow-[0_2px_6px_rgba(15,23,42,0.03)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.25)] focus-visible:ring-4 focus-visible:ring-[#2563EB]/[0.08] dark:focus-visible:ring-[#3B82F6]/[0.25] focus-visible:border-[#2563EB] dark:focus-visible:border-[#3B82F6] transition-all font-normal"
                       disabled={isLoginLoading}
                       autoComplete="current-password"
                     />
@@ -179,12 +179,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       disabled={isLoginLoading}
-                      className="h-4 w-4 rounded-[4px] border-[#CBD5E1] data-[state=checked]:bg-[#2563EB] data-[state=checked]:border-[#2563EB]"
+                      className="h-4 w-4 rounded-[4px] border-[#CBD5E1] dark:border-slate-700 bg-white dark:bg-[#131E3D] data-[state=checked]:bg-[#2563EB] data-[state=checked]:border-[#2563EB]"
                     />
                   </FormControl>
                   <label
                     htmlFor="remember"
-                    className="text-[13px] font-medium text-[#475569] dark:text-slate-400 cursor-pointer select-none hover:text-[#172033] dark:hover:text-slate-200 transition-colors"
+                    className="text-[13px] font-medium text-[#475569] dark:text-slate-300 cursor-pointer select-none hover:text-[#172033] dark:hover:text-white transition-colors"
                   >
                     Remember me
                   </label>
@@ -193,7 +193,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             />
             <Link
               href="/forgot-password"
-              className="text-[13px] font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+              className="text-[13px] font-semibold text-[#2563EB] dark:text-[#38BDF8] hover:text-[#1D4ED8] dark:hover:text-[#60A5FA] transition-colors"
             >
               Forgot password?
             </Link>
@@ -202,7 +202,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
           {/* Primary Submit Button */}
           <Button
             type="submit"
-            className="w-full h-[52px] rounded-[12px] bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] active:translate-y-px text-white font-semibold text-[15px] shadow-[0_8px_20px_rgba(37,99,235,0.20)] transition-all duration-150 mt-2"
+            className="w-full h-[52px] rounded-[12px] bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] active:translate-y-px text-white font-semibold text-[15px] shadow-[0_8px_20px_rgba(37,99,235,0.20)] dark:shadow-[0_8px_20px_rgba(37,99,235,0.35)] transition-all duration-150 mt-2"
             disabled={isLoginLoading}
           >
             {isLoginLoading ? (
@@ -221,7 +221,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
           {/* Subtle Divider */}
           <div className="relative my-4 flex items-center justify-center">
             <div className="w-full border-t border-[#E2E8F0] dark:border-slate-800" />
-            <span className="absolute bg-[#F8FAFC] dark:bg-[#0B132B] px-3 text-xs font-medium text-[#94A3B8]">
+            <span className="absolute bg-[#F8FAFC] dark:bg-[#0B132B] px-3 text-xs font-medium text-[#94A3B8] dark:text-slate-400">
               or
             </span>
           </div>
@@ -231,7 +231,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             <button
               type="button"
               onClick={() => handleSocialAuth("Google")}
-              className="h-[48px] px-3.5 rounded-[12px] bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 flex items-center justify-center gap-2.5 text-xs font-semibold text-[#334155] dark:text-slate-200 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150"
+              className="h-[48px] px-3.5 rounded-[12px] bg-white dark:bg-[#131E3D] border border-[#E2E8F0] dark:border-slate-800 flex items-center justify-center gap-2.5 text-xs font-semibold text-[#334155] dark:text-slate-200 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-[#1A274E] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150"
             >
               {/* Google G SVG */}
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -258,7 +258,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             <button
               type="button"
               onClick={() => handleSocialAuth("Microsoft")}
-              className="h-[48px] px-3.5 rounded-[12px] bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 flex items-center justify-center gap-2.5 text-xs font-semibold text-[#334155] dark:text-slate-200 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150"
+              className="h-[48px] px-3.5 rounded-[12px] bg-white dark:bg-[#131E3D] border border-[#E2E8F0] dark:border-slate-800 flex items-center justify-center gap-2.5 text-xs font-semibold text-[#334155] dark:text-slate-200 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-[#1A274E] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150"
             >
               {/* Microsoft 4-square SVG */}
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 21 21">
@@ -277,7 +277,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               Need help signing in?{" "}
               <a
                 href="mailto:support@cliqhire.com"
-                className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+                className="font-semibold text-[#2563EB] dark:text-[#38BDF8] hover:text-[#1D4ED8] dark:hover:text-[#60A5FA] transition-colors"
               >
                 Contact Support
               </a>

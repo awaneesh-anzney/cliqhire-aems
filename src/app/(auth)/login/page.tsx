@@ -243,7 +243,7 @@ export default function LoginPage() {
 
             {/* Main Mockup Card Container */}
             <div
-              className="relative z-10 rounded-[18px] bg-white/[0.95] dark:bg-slate-900/95 border border-white/[0.22] shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-[8px] p-3 text-[#172033] dark:text-slate-100 flex gap-2.5 origin-bottom-left max-w-[480px]"
+              className="relative z-10 rounded-[18px] bg-white/[0.96] dark:bg-slate-900/96 border border-white/20 dark:border-slate-700/60 shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-[8px] p-3 text-[#172033] dark:text-slate-100 flex gap-2.5 origin-bottom-left max-w-[480px]"
               style={{
                 transform:
                   "perspective(1200px) rotateY(-8deg) rotateX(4deg) rotateZ(0.5deg)",
@@ -273,9 +273,9 @@ export default function LoginPage() {
                       (label, idx) => (
                         <div
                           key={idx}
-                          className="h-4 px-1.5 rounded text-slate-500 flex items-center gap-1 text-[8.5px] font-medium"
+                          className="h-4 px-1.5 rounded text-slate-500 dark:text-slate-400 flex items-center gap-1 text-[8.5px] font-medium"
                         >
-                          <span className="w-1 h-1 rounded-full bg-slate-300" />
+                          <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
                           <span>{label}</span>
                         </div>
                       )
@@ -290,69 +290,69 @@ export default function LoginPage() {
                   <span className="text-[10px] font-bold text-[#172033] dark:text-white flex items-center gap-1">
                     Welcome back, Sarah! 👋
                   </span>
-                  <span className="text-[8px] text-[#64748B] block">
+                  <span className="text-[8px] text-[#64748B] dark:text-slate-400 block">
                     Here&apos;s what&apos;s happening with recruitment today.
                   </span>
                 </div>
 
                 {/* 2 Metric Cards */}
                 <div className="grid grid-cols-2 gap-1.5">
-                  <div className="p-1.5 rounded-md bg-[#EFF6FF] border border-[#DBEAFE] space-y-0.5">
+                  <div className="p-1.5 rounded-md bg-[#EFF6FF] dark:bg-blue-950/40 border border-[#DBEAFE] dark:border-blue-900/50 space-y-0.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[8px] font-semibold text-[#2563EB]">
+                      <span className="text-[8px] font-semibold text-[#2563EB] dark:text-blue-400">
                         Candidate Pool
                       </span>
-                      <span className="text-[7px] font-bold text-[#10B981] bg-emerald-50 px-1 rounded">
+                      <span className="text-[7px] font-bold text-[#10B981] bg-emerald-50 dark:bg-emerald-950/60 px-1 rounded">
                         ↑ 12%
                       </span>
                     </div>
-                    <div className="text-[13px] font-extrabold text-[#172033] leading-none">
+                    <div className="text-[13px] font-extrabold text-[#172033] dark:text-white leading-none">
                       4,484
                     </div>
                   </div>
 
-                  <div className="p-1.5 rounded-md bg-[#F5F3FF] border border-[#EDE9FE] space-y-0.5">
+                  <div className="p-1.5 rounded-md bg-[#F5F3FF] dark:bg-purple-950/40 border border-[#EDE9FE] dark:border-purple-900/50 space-y-0.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[8px] font-semibold text-[#8B5CF6]">
+                      <span className="text-[8px] font-semibold text-[#8B5CF6] dark:text-purple-400">
                         Job Requisitions
                       </span>
-                      <span className="text-[7px] font-bold text-[#10B981] bg-emerald-50 px-1 rounded">
+                      <span className="text-[7px] font-bold text-[#10B981] bg-emerald-50 dark:bg-emerald-950/60 px-1 rounded">
                         ↑ 8%
                       </span>
                     </div>
-                    <div className="text-[13px] font-extrabold text-[#172033] leading-none">
+                    <div className="text-[13px] font-extrabold text-[#172033] dark:text-white leading-none">
                       207
                     </div>
                   </div>
                 </div>
 
                 {/* Mini Recruitment Pipeline */}
-                <div className="p-1.5 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-0.5">
+                <div className="p-1.5 rounded-md bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-0.5">
                   <span className="text-[8.5px] font-bold text-[#334155] dark:text-slate-300 block">
                     Recruitment Pipeline
                   </span>
                   <div className="grid grid-cols-3 gap-1">
-                    <div className="p-1 rounded bg-[#EFF6FF] border border-[#BFDBFE] text-center">
-                      <span className="text-[7px] font-medium text-[#2563EB] block">
+                    <div className="p-1 rounded bg-[#EFF6FF] dark:bg-blue-950/50 border border-[#BFDBFE] dark:border-blue-900/50 text-center">
+                      <span className="text-[7px] font-medium text-[#2563EB] dark:text-blue-400 block">
                         Sourcing
                       </span>
-                      <span className="text-[9px] font-bold text-[#172033]">
+                      <span className="text-[9px] font-bold text-[#172033] dark:text-white">
                         446
                       </span>
                     </div>
-                    <div className="p-1 rounded bg-[#FDF2F8] border border-[#FBCFE8] text-center">
-                      <span className="text-[7px] font-medium text-[#EC4899] block">
+                    <div className="p-1 rounded bg-[#FDF2F8] dark:bg-pink-950/50 border border-[#FBCFE8] dark:border-pink-900/50 text-center">
+                      <span className="text-[7px] font-medium text-[#EC4899] dark:text-pink-400 block">
                         Screening
                       </span>
-                      <span className="text-[9px] font-bold text-[#172033]">
+                      <span className="text-[9px] font-bold text-[#172033] dark:text-white">
                         91
                       </span>
                     </div>
-                    <div className="p-1 rounded bg-[#FFFBEB] border border-[#FDE68A] text-center">
-                      <span className="text-[7px] font-medium text-[#F59E0B] block">
+                    <div className="p-1 rounded bg-[#FFFBEB] dark:bg-amber-950/50 border border-[#FDE68A] dark:border-amber-900/50 text-center">
+                      <span className="text-[7px] font-medium text-[#F59E0B] dark:text-amber-400 block">
                         Client Scr
                       </span>
-                      <span className="text-[9px] font-bold text-[#172033]">
+                      <span className="text-[9px] font-bold text-[#172033] dark:text-white">
                         49
                       </span>
                     </div>
@@ -363,17 +363,17 @@ export default function LoginPage() {
 
             {/* Floating Badge: Hire Faster */}
             <div
-              className="absolute -bottom-3 -left-4 z-30 p-2 px-3 rounded-[12px] bg-white/[0.92] dark:bg-slate-900/92 border border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center gap-2 animate-pulse"
+              className="absolute -bottom-3 -left-4 z-30 p-2 px-3 rounded-[12px] bg-white/[0.92] dark:bg-slate-900/92 border border-white/25 dark:border-slate-700/60 shadow-[0_8px_24px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)] flex items-center gap-2 animate-pulse"
               style={{ animationDuration: "3.5s" }}
             >
-              <div className="w-7 h-7 rounded-lg bg-[#ECFDF5] text-[#10B981] flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#ECFDF5] dark:bg-emerald-950/60 text-[#10B981] flex items-center justify-center shrink-0">
                 <TrendingUp className="w-3.5 h-3.5 text-[#10B981]" />
               </div>
               <div>
                 <span className="text-[11px] font-bold text-[#172033] dark:text-white block leading-tight">
                   Hire Faster
                 </span>
-                <span className="text-[9px] text-[#64748B] block leading-tight">
+                <span className="text-[9px] text-[#64748B] dark:text-slate-400 block leading-tight">
                   Build Stronger Teams
                 </span>
               </div>
@@ -428,16 +428,13 @@ export default function LoginPage() {
       {/* ════════════════════════════════════════════════════════════════════════
           RIGHT PANEL: LOGIN FORM (46–48% width on desktop)
           ════════════════════════════════════════════════════════════════════════ */}
-      <div
-        className="flex-1 h-full flex flex-col justify-between p-6 sm:p-10 lg:p-10 xl:p-12 relative overflow-y-auto"
-        style={{
-          background:
-            "radial-gradient(circle at 85% 10%, rgba(37,99,235,0.06), transparent 24%), radial-gradient(circle at 15% 90%, rgba(6,182,212,0.04), transparent 25%), #F8FAFC",
-        }}
-      >
+      <div className="flex-1 h-full flex flex-col justify-between p-6 sm:p-10 lg:p-10 xl:p-12 relative overflow-y-auto bg-[#F8FAFC] dark:bg-[#0B132B] transition-colors duration-200">
+        {/* Soft Decorative Ambient Radial Overlay */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_85%_10%,rgba(37,99,235,0.06),transparent_24%),radial-gradient(circle_at_15%_90%,rgba(6,182,212,0.04),transparent_25%)] dark:bg-[radial-gradient(circle_at_85%_10%,rgba(59,130,246,0.12),transparent_28%),radial-gradient(circle_at_15%_90%,rgba(6,182,212,0.08),transparent_30%)]" />
+
         {/* Soft Decorative Ambient Depth on Right Side */}
-        <div className="absolute top-6 right-8 w-64 h-64 bg-blue-500/[0.05] rounded-full blur-[60px] pointer-events-none" />
-        <div className="absolute bottom-10 left-6 w-56 h-56 bg-cyan-500/[0.04] rounded-full blur-[50px] pointer-events-none" />
+        <div className="absolute top-6 right-8 w-64 h-64 bg-blue-500/[0.05] dark:bg-blue-500/[0.10] rounded-full blur-[60px] pointer-events-none" />
+        <div className="absolute bottom-10 left-6 w-56 h-56 bg-cyan-500/[0.04] dark:bg-cyan-500/[0.08] rounded-full blur-[50px] pointer-events-none" />
 
         {/* ─── TOP RIGHT CONTROLS: THEME & LANGUAGE ─── */}
         <div className="relative z-20 flex items-center justify-end gap-2.5 shrink-0">
@@ -447,7 +444,7 @@ export default function LoginPage() {
               type="button"
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="w-10 h-10 rounded-[10px] border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800 flex items-center justify-center text-[#64748B] dark:text-slate-300 transition-colors"
+              className="w-10 h-10 rounded-[10px] border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#131E3D] shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800/80 flex items-center justify-center text-[#64748B] dark:text-slate-300 transition-colors"
             >
               {isDark ? (
                 <Sun className="w-4 h-4 text-amber-400" />
@@ -462,15 +459,15 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowLangMenu((prev) => !prev)}
-              className="h-10 px-3 rounded-[10px] border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800 text-xs font-semibold text-[#334155] dark:text-slate-200 flex items-center gap-1.5 transition-colors"
+              className="h-10 px-3 rounded-[10px] border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#131E3D] shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800/80 text-xs font-semibold text-[#334155] dark:text-slate-200 flex items-center gap-1.5 transition-colors"
             >
-              <Globe className="w-3.5 h-3.5 text-[#64748B]" />
+              <Globe className="w-3.5 h-3.5 text-[#64748B] dark:text-slate-400" />
               <span>{selectedLang}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8]" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8] dark:text-slate-500" />
             </button>
 
             {showLangMenu && (
-              <div className="absolute right-0 mt-1.5 w-32 rounded-[10px] bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 shadow-lg py-1 z-50">
+              <div className="absolute right-0 mt-1.5 w-32 rounded-[10px] bg-white dark:bg-[#131E3D] border border-[#E2E8F0] dark:border-slate-800 shadow-lg py-1 z-50">
                 {languages.map((lang) => (
                   <button
                     key={lang}
@@ -481,7 +478,7 @@ export default function LoginPage() {
                     }}
                     className={`w-full px-3 py-1.5 text-left text-xs font-medium hover:bg-[#F1F5F9] dark:hover:bg-slate-800 transition-colors ${
                       selectedLang === lang
-                        ? "text-[#2563EB] font-bold"
+                        ? "text-[#2563EB] dark:text-[#38BDF8] font-bold"
                         : "text-[#334155] dark:text-slate-200"
                     }`}
                   >
@@ -525,7 +522,7 @@ export default function LoginPage() {
                 <h2 className="text-[30px] sm:text-[34px] font-extrabold text-[#172033] dark:text-white tracking-tight leading-tight">
                   Welcome back
                 </h2>
-                <p className="text-[15px] font-semibold text-[#334155] dark:text-slate-300">
+                <p className="text-[15px] font-semibold text-[#334155] dark:text-slate-200">
                   Sign in to your CliqHire account
                 </p>
                 <p className="text-[13px] text-[#64748B] dark:text-slate-400 leading-relaxed pt-0.5">
@@ -542,7 +539,7 @@ export default function LoginPage() {
 
         {/* ─── BOTTOM RIGHT SPACER / FOOTER (Subtle) ─── */}
         <div className="relative z-10 shrink-0 text-center py-1">
-          <span className="text-[11px] text-[#94A3B8]">
+          <span className="text-[11px] text-[#94A3B8] dark:text-slate-500">
             Protected by enterprise-grade 256-bit SSL encryption.
           </span>
         </div>
