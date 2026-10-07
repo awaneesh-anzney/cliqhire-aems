@@ -257,7 +257,7 @@ export function Sidebar() {
       <Box
         component="header"
         className={cn(
-          "h-[62px] flex items-center justify-center border-b border-[#EEF2F7] dark:border-slate-800 shrink-0",
+          "h-[64px] flex items-center justify-center border-b border-[#EEF2F7] dark:border-slate-800 shrink-0",
           isCollapsed ? "px-1.5" : "px-3"
         )}
       >
@@ -278,15 +278,15 @@ export function Sidebar() {
               />
             </div>
           ) : (
-            /* Expanded State: cliqhire-icon centered with increased container size */
-            <div className="relative flex items-center justify-center w-full px-2">
+            /* Expanded State: cliqhire-icon centered, zoomed in & prominent */
+            <div className="relative flex items-center justify-center w-full px-1.5">
               <Image
                 src="/cliqhire-icon.png"
                 alt="CliqHire"
-                width={180}
-                height={40}
+                width={240}
+                height={52}
                 priority
-                className="h-[36px] w-auto max-w-[185px] object-contain group-hover:scale-[1.02] active:scale-98 transition-transform duration-200"
+                className="h-[50px] w-auto max-w-[240px] object-contain scale-[1.08] group-hover:scale-[1.12] active:scale-[1.04] transition-transform duration-200"
               />
             </div>
           )}
