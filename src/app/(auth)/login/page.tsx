@@ -67,11 +67,38 @@ export default function LoginPage() {
       {/* ════════════════════════════════════════════════════════════════════════
           LEFT PANEL: BRANDING & PRODUCT EXPERIENCE (52–54% width on desktop)
           ════════════════════════════════════════════════════════════════════════ */}
-      <div className="hidden lg:flex lg:w-[52%] xl:w-[54%] h-full flex-col justify-between p-8 xl:p-11 relative overflow-hidden text-white shrink-0 bg-gradient-to-br from-[#2563EB] via-[#1D4ED8] to-[#1E40AF]">
-        {/* Subtle Ambient Radial Glows */}
-        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-[radial-gradient(circle_at_80%_20%,rgba(6,182,212,0.22),transparent_45%)] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-[radial-gradient(circle_at_20%_80%,rgba(37,99,235,0.30),transparent_50%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_75%_75%_at_50%_40%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
+      <div
+        className="hidden lg:flex lg:w-[52%] xl:w-[54%] h-full flex-col justify-between p-8 xl:p-11 relative overflow-hidden text-white shrink-0 z-20 shadow-[8px_0_30px_rgba(15,23,42,0.06)]"
+        style={{
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(6, 182, 212, 0.18), transparent 28%), radial-gradient(circle at 10% 85%, rgba(59, 130, 246, 0.16), transparent 30%), linear-gradient(135deg, #2563EB 0%, #2458D9 45%, #1D4ED8 100%)",
+        }}
+      >
+        {/* Subtle Decorative Geometric Lines, Curves & Ambient Depth */}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.06]"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <pattern
+              id="diagonal-lines"
+              width="40"
+              height="40"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <line x1="0" y1="0" x2="0" y2="40" stroke="white" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#diagonal-lines)" />
+          <circle cx="90%" cy="15%" r="220" fill="none" stroke="white" strokeWidth="1" strokeDasharray="6 8" />
+          <circle cx="85%" cy="15%" r="340" fill="none" stroke="white" strokeWidth="1" />
+          <circle cx="15%" cy="85%" r="180" fill="none" stroke="white" strokeWidth="1" strokeDasharray="4 6" />
+        </svg>
+
+        {/* Very soft blurred radial circles for depth */}
+        <div className="absolute top-1/4 -right-12 w-72 h-72 rounded-full bg-cyan-400/10 blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-1/4 -left-12 w-72 h-72 rounded-full bg-blue-400/10 blur-[80px] pointer-events-none" />
 
         {/* ─── 1. TOP BRAND HEADER ─── */}
         <div className="relative z-10 flex items-center gap-3">
@@ -98,12 +125,12 @@ export default function LoginPage() {
         </div>
 
         {/* ─── 2. MAIN HEADLINE & FEATURES GRID ─── */}
-        <div className="relative z-10 my-auto py-4 space-y-6 max-w-[620px]">
+        <div className="relative z-10 my-auto py-3 space-y-5 max-w-[620px]">
           {/* Main Headline */}
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             <h1 className="text-3xl sm:text-4xl xl:text-[46px] font-extrabold tracking-tight text-white leading-[1.08]">
               Empower Your{" "}
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] via-[#22D3EE] to-[#67E8F9]">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] via-[#22D3EE] to-[#38BDF8]">
                 Recruitment Journey
               </span>
             </h1>
@@ -114,14 +141,14 @@ export default function LoginPage() {
           </div>
 
           {/* 4 Feature Benefit Blocks (2x2 Grid) */}
-          <div className="grid grid-cols-2 gap-4 pt-1">
+          <div className="grid grid-cols-2 gap-3 pt-1">
             {/* Feature 1 */}
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-[12px] bg-white/12 border border-white/16 flex items-center justify-center text-white shrink-0 shadow-xs">
-                <Users className="w-5 h-5 text-white" />
+            <div className="flex items-start gap-3 p-2.5 rounded-[12px] bg-white/[0.08] border border-white/[0.14] shadow-[0_4px_16px_rgba(0,0,0,0.05)] transition-colors">
+              <div className="w-9 h-9 rounded-[10px] bg-white/[0.10] flex items-center justify-center text-white shrink-0">
+                <Users className="w-4.5 h-4.5 text-white" />
               </div>
               <div className="min-w-0 leading-tight">
-                <span className="text-[13.5px] font-bold text-white block">
+                <span className="text-[13px] font-semibold text-white block">
                   Manage Candidates
                 </span>
                 <span className="text-[11.5px] text-white/70 block mt-0.5 leading-snug">
@@ -131,12 +158,12 @@ export default function LoginPage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-[12px] bg-white/12 border border-white/16 flex items-center justify-center text-white shrink-0 shadow-xs">
-                <Briefcase className="w-5 h-5 text-white" />
+            <div className="flex items-start gap-3 p-2.5 rounded-[12px] bg-white/[0.08] border border-white/[0.14] shadow-[0_4px_16px_rgba(0,0,0,0.05)] transition-colors">
+              <div className="w-9 h-9 rounded-[10px] bg-white/[0.10] flex items-center justify-center text-white shrink-0">
+                <Briefcase className="w-4.5 h-4.5 text-white" />
               </div>
               <div className="min-w-0 leading-tight">
-                <span className="text-[13.5px] font-bold text-white block">
+                <span className="text-[13px] font-semibold text-white block">
                   Streamline Hiring
                 </span>
                 <span className="text-[11.5px] text-white/70 block mt-0.5 leading-snug">
@@ -146,12 +173,12 @@ export default function LoginPage() {
             </div>
 
             {/* Feature 3 */}
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-[12px] bg-white/12 border border-white/16 flex items-center justify-center text-white shrink-0 shadow-xs">
-                <BarChart3 className="w-5 h-5 text-white" />
+            <div className="flex items-start gap-3 p-2.5 rounded-[12px] bg-white/[0.08] border border-white/[0.14] shadow-[0_4px_16px_rgba(0,0,0,0.05)] transition-colors">
+              <div className="w-9 h-9 rounded-[10px] bg-white/[0.10] flex items-center justify-center text-white shrink-0">
+                <BarChart3 className="w-4.5 h-4.5 text-white" />
               </div>
               <div className="min-w-0 leading-tight">
-                <span className="text-[13.5px] font-bold text-white block">
+                <span className="text-[13px] font-semibold text-white block">
                   Real-time Insights
                 </span>
                 <span className="text-[11.5px] text-white/70 block mt-0.5 leading-snug">
@@ -161,12 +188,12 @@ export default function LoginPage() {
             </div>
 
             {/* Feature 4 */}
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-[12px] bg-white/12 border border-white/16 flex items-center justify-center text-white shrink-0 shadow-xs">
-                <ShieldCheck className="w-5 h-5 text-white" />
+            <div className="flex items-start gap-3 p-2.5 rounded-[12px] bg-white/[0.08] border border-white/[0.14] shadow-[0_4px_16px_rgba(0,0,0,0.05)] transition-colors">
+              <div className="w-9 h-9 rounded-[10px] bg-white/[0.10] flex items-center justify-center text-white shrink-0">
+                <ShieldCheck className="w-4.5 h-4.5 text-white" />
               </div>
               <div className="min-w-0 leading-tight">
-                <span className="text-[13.5px] font-bold text-white block">
+                <span className="text-[13px] font-semibold text-white block">
                   Collaborate Securely
                 </span>
                 <span className="text-[11.5px] text-white/70 block mt-0.5 leading-snug">
@@ -177,10 +204,10 @@ export default function LoginPage() {
           </div>
 
           {/* ─── FLOATING 3D PERSPECTIVE DASHBOARD PREVIEW MOCKUP ─── */}
-          <div className="relative pt-2 w-full select-none pointer-events-none hidden xl:block">
+          <div className="relative pt-1 w-full select-none pointer-events-none hidden xl:block">
             {/* Orbital Dashed Arc Line */}
             <svg
-              className="absolute -top-10 right-4 w-[340px] h-[280px] pointer-events-none z-0 opacity-30"
+              className="absolute -top-10 right-4 w-[340px] h-[280px] pointer-events-none z-0 opacity-25"
               viewBox="0 0 340 280"
             >
               <path
@@ -194,29 +221,29 @@ export default function LoginPage() {
 
             {/* Floating Orbs along the orbit */}
             <div
-              className="absolute -top-7 right-32 z-20 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/35 flex items-center justify-center text-white shadow-md animate-bounce"
+              className="absolute -top-7 right-32 z-20 w-8 h-8 rounded-full bg-white/[0.92] dark:bg-slate-900/92 border border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-[#2563EB] animate-bounce"
               style={{ animationDuration: "4s" }}
             >
-              <Users className="w-4 h-4 text-white" />
+              <Users className="w-4 h-4 text-[#2563EB]" />
             </div>
 
             <div
-              className="absolute -top-2 right-6 z-20 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/35 flex items-center justify-center text-white shadow-md animate-bounce"
+              className="absolute -top-2 right-6 z-20 w-8 h-8 rounded-full bg-white/[0.92] dark:bg-slate-900/92 border border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-[#2563EB] animate-bounce"
               style={{ animationDuration: "5s" }}
             >
-              <Briefcase className="w-4 h-4 text-white" />
+              <Briefcase className="w-4 h-4 text-[#2563EB]" />
             </div>
 
             <div
-              className="absolute top-24 -right-2 z-20 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/35 flex items-center justify-center text-white shadow-md animate-bounce"
+              className="absolute top-24 -right-2 z-20 w-8 h-8 rounded-full bg-white/[0.92] dark:bg-slate-900/92 border border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center text-[#06B6D4] animate-bounce"
               style={{ animationDuration: "4.5s" }}
             >
-              <BarChart3 className="w-4 h-4 text-white" />
+              <BarChart3 className="w-4 h-4 text-[#06B6D4]" />
             </div>
 
             {/* Main Mockup Card Container */}
             <div
-              className="relative z-10 rounded-[18px] bg-white/96 dark:bg-slate-900 border border-white/40 shadow-[0_20px_45px_rgba(15,23,42,0.25)] p-3 text-[#172033] dark:text-slate-100 flex gap-2.5 origin-bottom-left max-w-[480px]"
+              className="relative z-10 rounded-[18px] bg-white/[0.95] dark:bg-slate-900/95 border border-white/[0.22] shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-[8px] p-3 text-[#172033] dark:text-slate-100 flex gap-2.5 origin-bottom-left max-w-[480px]"
               style={{
                 transform:
                   "perspective(1200px) rotateY(-8deg) rotateX(4deg) rotateZ(0.5deg)",
@@ -336,7 +363,7 @@ export default function LoginPage() {
 
             {/* Floating Badge: Hire Faster */}
             <div
-              className="absolute -bottom-3 -left-4 z-30 p-2 px-3 rounded-[12px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.18)] flex items-center gap-2 animate-pulse"
+              className="absolute -bottom-3 -left-4 z-30 p-2 px-3 rounded-[12px] bg-white/[0.92] dark:bg-slate-900/92 border border-white/25 shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center gap-2 animate-pulse"
               style={{ animationDuration: "3.5s" }}
             >
               <div className="w-7 h-7 rounded-lg bg-[#ECFDF5] text-[#10B981] flex items-center justify-center shrink-0">
@@ -355,9 +382,9 @@ export default function LoginPage() {
         </div>
 
         {/* ─── 3. BOTTOM TRUST CARD & FOOTER ─── */}
-        <div className="relative z-10 pt-3 space-y-4">
+        <div className="relative z-10 pt-2 space-y-3.5">
           {/* Trust Social Proof Box */}
-          <div className="rounded-[14px] bg-white/10 backdrop-blur-md border border-white/15 px-3.5 py-2.5 w-fit flex items-center gap-3 shadow-xs">
+          <div className="rounded-[14px] bg-white/[0.10] backdrop-blur-md border border-white/[0.16] px-3.5 py-2.5 w-fit flex items-center gap-3 shadow-[0_4px_16px_rgba(0,0,0,0.05)]">
             {/* 4 Overlapping Avatars */}
             <div className="flex -space-x-2 shrink-0">
               <div className="w-7 h-7 rounded-full border-2 border-[#1D4ED8] bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-700">
@@ -379,18 +406,18 @@ export default function LoginPage() {
           </div>
 
           {/* Copyright & Links */}
-          <div className="flex items-center justify-between text-[11px] text-white/65 pt-1 border-t border-white/10">
+          <div className="flex items-center justify-between text-[11px] text-white/[0.65] pt-1 border-t border-white/10">
             <span>© 2026 CliqHire. All rights reserved.</span>
             <div className="flex items-center gap-3">
-              <Link href="/privacy" className="hover:text-white transition-colors">
+              <Link href="/privacy" className="text-white/[0.80] hover:text-white transition-colors">
                 Privacy
               </Link>
-              <span>•</span>
-              <Link href="/terms" className="hover:text-white transition-colors">
+              <span className="text-white/40">•</span>
+              <Link href="/terms" className="text-white/[0.80] hover:text-white transition-colors">
                 Terms
               </Link>
-              <span>•</span>
-              <Link href="/support" className="hover:text-white transition-colors">
+              <span className="text-white/40">•</span>
+              <Link href="/support" className="text-white/[0.80] hover:text-white transition-colors">
                 Support
               </Link>
             </div>
@@ -401,10 +428,16 @@ export default function LoginPage() {
       {/* ════════════════════════════════════════════════════════════════════════
           RIGHT PANEL: LOGIN FORM (46–48% width on desktop)
           ════════════════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 h-full flex flex-col justify-between p-6 sm:p-10 lg:p-10 xl:p-12 relative overflow-y-auto bg-gradient-to-br from-[#FFFFFF] to-[#F8FAFC] dark:from-[#111827] dark:to-[#0B132B]">
-        {/* Subtle Decorative Ambient Background on Right */}
-        <div className="absolute top-0 right-0 w-[380px] h-[380px] bg-blue-500/4 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/4 rounded-full blur-3xl pointer-events-none" />
+      <div
+        className="flex-1 h-full flex flex-col justify-between p-6 sm:p-10 lg:p-10 xl:p-12 relative overflow-y-auto"
+        style={{
+          background:
+            "radial-gradient(circle at 85% 10%, rgba(37,99,235,0.06), transparent 24%), radial-gradient(circle at 15% 90%, rgba(6,182,212,0.04), transparent 25%), #F8FAFC",
+        }}
+      >
+        {/* Soft Decorative Ambient Depth on Right Side */}
+        <div className="absolute top-6 right-8 w-64 h-64 bg-blue-500/[0.05] rounded-full blur-[60px] pointer-events-none" />
+        <div className="absolute bottom-10 left-6 w-56 h-56 bg-cyan-500/[0.04] rounded-full blur-[50px] pointer-events-none" />
 
         {/* ─── TOP RIGHT CONTROLS: THEME & LANGUAGE ─── */}
         <div className="relative z-20 flex items-center justify-end gap-2.5 shrink-0">

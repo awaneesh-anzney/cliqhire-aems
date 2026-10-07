@@ -115,7 +115,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       {...field}
                       type="email"
                       placeholder="Enter your email address"
-                      className="pl-11 h-[52px] rounded-[12px] bg-white dark:bg-slate-900 border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-white placeholder:text-[#94A3B8] focus-visible:ring-4 focus-visible:ring-blue-500/10 focus-visible:border-[#2563EB] shadow-xs transition-all font-normal"
+                      className="pl-11 h-[52px] rounded-[12px] bg-white dark:bg-slate-900 border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-white placeholder:text-[#94A3B8] shadow-[0_2px_6px_rgba(15,23,42,0.03)] focus-visible:ring-4 focus-visible:ring-[#2563EB]/[0.08] focus-visible:border-[#2563EB] transition-all font-normal"
                       disabled={isLoginLoading}
                       autoComplete="email"
                     />
@@ -142,7 +142,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       {...field}
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-11 pr-11 h-[52px] rounded-[12px] bg-white dark:bg-slate-900 border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-white placeholder:text-[#94A3B8] focus-visible:ring-4 focus-visible:ring-blue-500/10 focus-visible:border-[#2563EB] shadow-xs transition-all font-normal"
+                      className="pl-11 pr-11 h-[52px] rounded-[12px] bg-white dark:bg-slate-900 border border-[#DCE4EE] dark:border-slate-800 text-[14px] text-[#172033] dark:text-white placeholder:text-[#94A3B8] shadow-[0_2px_6px_rgba(15,23,42,0.03)] focus-visible:ring-4 focus-visible:ring-[#2563EB]/[0.08] focus-visible:border-[#2563EB] transition-all font-normal"
                       disabled={isLoginLoading}
                       autoComplete="current-password"
                     />
@@ -202,7 +202,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
           {/* Primary Submit Button */}
           <Button
             type="submit"
-            className="w-full h-[52px] rounded-[12px] bg-[#2563EB] hover:bg-[#1D4ED8] active:translate-y-px text-white font-semibold text-[15px] shadow-[0_6px_16px_rgba(37,99,235,0.18)] transition-all duration-150 mt-2"
+            className="w-full h-[52px] rounded-[12px] bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] active:translate-y-px text-white font-semibold text-[15px] shadow-[0_8px_20px_rgba(37,99,235,0.20)] transition-all duration-150 mt-2"
             disabled={isLoginLoading}
           >
             {isLoginLoading ? (
