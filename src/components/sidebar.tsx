@@ -156,7 +156,7 @@ const NAV_SECTIONS: NavSection[] = [
     moduleKeys: ["home", "todo"],
   },
   {
-    title: "RECRUITMENT",
+    title: "Recruitment",
     moduleKeys: [
       "leads",
       "clients",
@@ -170,11 +170,11 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "WORKSPACE",
+    title: "Workspace",
     moduleKeys: ["teams", "email", "notifications"],
   },
   {
-    title: "SYSTEM",
+    title: "System",
     moduleKeys: ["admin", "settings", "profile"],
   },
 ];
@@ -322,13 +322,16 @@ export function Sidebar() {
                   <ListSubheader
                     disableSticky
                     disableGutters
-                    className="bg-transparent text-[10px] font-bold uppercase tracking-[0.08em] text-[#94A3B8] px-2 pb-0.5 pt-0 select-none leading-none mb-0.5"
+                    className="bg-transparent px-2 pt-2 pb-1 select-none flex items-center justify-between leading-none"
                   >
-                    {section.title}
+                    <span className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] tracking-tight">
+                      {section.title}
+                    </span>
+                    <span className="h-[1px] flex-1 ml-2.5 bg-[#EEF2F7] dark:bg-slate-800" />
                   </ListSubheader>
                 ) : undefined
               }
-              className={cn("space-y-[2px]", sIdx > 0 ? "mt-2.5" : "mt-0")}
+              className={cn("space-y-[2px]", sIdx > 0 ? "mt-1.5" : "mt-0")}
             >
               {section.items.map((item, iIdx) => {
                 const isActive =
