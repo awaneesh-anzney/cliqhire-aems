@@ -1183,23 +1183,25 @@ export function EmailReplyBox({
         <div className="px-3 sm:px-4 py-2 sm:py-2.5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#1C252E] flex items-center justify-between gap-2 shrink-0 select-none">
           {/* Left Actions: Send button + Tool items */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Primary Send Button */}
+            {/* Primary Send / Submit Button */}
             <Tooltip title="Send reply (Ctrl + Enter)">
               <button
                 type="button"
+                id="email-reply-submit-button"
+                data-testid="email-reply-submit-btn"
                 onClick={handleSendReply}
                 disabled={isSending}
-                className="h-9 px-4 sm:px-5 rounded-xl bg-[#0078D4] hover:bg-[#006abc] active:bg-[#005ea6] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-[#0078D4]/25 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                className="h-9 px-4 sm:px-5 rounded-xl bg-[#0078D4] hover:bg-[#006abc] active:bg-[#005ea6] text-white font-bold text-xs sm:text-[13px] flex items-center gap-1.5 shadow-sm shadow-[#0078D4]/25 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 {isSending ? (
                   <>
-                    <CircularProgress size={13} color="inherit" />
+                    <CircularProgress size={14} color="inherit" />
                     <span>Sending...</span>
                   </>
                 ) : (
                   <>
                     <span>Send</span>
-                    <SendIcon sx={{ fontSize: 13 }} />
+                    <SendIcon sx={{ fontSize: 14 }} />
                   </>
                 )}
               </button>

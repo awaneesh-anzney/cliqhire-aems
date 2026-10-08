@@ -97,18 +97,22 @@ export function EmailDetailPane({
 }: EmailDetailPaneProps) {
   const latestMessage = messages[messages.length - 1] || null;
 
-  const [replyBoxOpen, setReplyBoxOpen] = React.useState(false);
+  const [replyBoxOpen, setReplyBoxOpen] = React.useState(true);
   const [replyBoxMode, setReplyBoxMode] = React.useState<ReplyMode>("reply");
+  const replyBoxContainerRef = React.useRef<HTMLDivElement>(null);
 
-  // Reset reply box when viewing a different thread/message
+  // Keep reply box open and reset to reply mode when viewing a thread
   React.useEffect(() => {
-    setReplyBoxOpen(false);
+    setReplyBoxOpen(true);
     setReplyBoxMode("reply");
   }, [thread?._id, latestMessage?._id]);
 
   const handleTopReplyAction = (type: ReplyMode) => {
     setReplyBoxMode(type);
     setReplyBoxOpen(true);
+    setTimeout(() => {
+      replyBoxContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 100);
   };
 
   const subject = thread?.subject || latestMessage?.subject || fallbackSubject;
@@ -351,19 +355,21 @@ export function EmailDetailPane({
         ) : (
           <p className="whitespace-pre-wrap">{fallbackSnippet || "(No content)"}</p>
         )}
-      </div>
 
-      {/* Gmail / Outlook Style Inline Reply Section */}
-      <EmailReplyBox
-        latestMessage={latestMessage}
-        thread={thread}
-        isOpen={replyBoxOpen}
-        initialMode={replyBoxMode}
-        onOpenChange={setReplyBoxOpen}
-        onSend={onSendReply}
-        isSending={isSendingReply}
-        onPopOut={onPopOutReply}
-      />
+        {/* Gmail / Outlook Style Inline Reply Section (Positioned at bottom of thread) */}
+        <div ref={replyBoxContainerRef} className="mt-6 pt-2">
+          <EmailReplyBox
+            latestMessage={latestMessage}
+            thread={thread}
+            isOpen={replyBoxOpen}
+            initialMode={replyBoxMode}
+            onOpenChange={setReplyBoxOpen}
+            onSend={onSendReply}
+            isSending={isSendingReply}
+            onPopOut={onPopOutReply}
+          />
+        </div>
+      </div>
     </div>
   );
 }
