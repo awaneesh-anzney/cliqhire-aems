@@ -3,7 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Email, EmailThread } from "@/types/email";
-import { EmailReplyBox, ReplyMode } from "./EmailReplyBox";
+import { EmailComposerDialog, ReplyMode } from "./EmailComposerDialog";
 
 // MUI Icons
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
@@ -99,9 +99,8 @@ export function EmailDetailPane({
 
   const [replyBoxOpen, setReplyBoxOpen] = React.useState(true);
   const [replyBoxMode, setReplyBoxMode] = React.useState<ReplyMode>("reply");
-  const replyBoxContainerRef = React.useRef<HTMLDivElement>(null);
 
-  // Keep reply box open and reset to reply mode when viewing a thread
+  // Reset to reply mode when viewing a new thread/message
   React.useEffect(() => {
     setReplyBoxOpen(true);
     setReplyBoxMode("reply");
@@ -110,9 +109,6 @@ export function EmailDetailPane({
   const handleTopReplyAction = (type: ReplyMode) => {
     setReplyBoxMode(type);
     setReplyBoxOpen(true);
-    setTimeout(() => {
-      replyBoxContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 100);
   };
 
   const subject = thread?.subject || latestMessage?.subject || fallbackSubject;
@@ -355,20 +351,22 @@ export function EmailDetailPane({
         ) : (
           <p className="whitespace-pre-wrap">{fallbackSnippet || "(No content)"}</p>
         )}
+      </div>
 
-        {/* Gmail / Outlook Style Inline Reply Section (Positioned at bottom of thread) */}
-        <div ref={replyBoxContainerRef} className="mt-6 pt-2">
-          <EmailReplyBox
-            latestMessage={latestMessage}
-            thread={thread}
-            isOpen={replyBoxOpen}
-            initialMode={replyBoxMode}
-            onOpenChange={setReplyBoxOpen}
-            onSend={onSendReply}
-            isSending={isSendingReply}
-            onPopOut={onPopOutReply}
-          />
-        </div>
+      {/* FIXED AT THE BOTTOM: Dynamic Unified Email Composer (Inline Reply) */}
+      <div className="shrink-0 border-t border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-sm">
+        <EmailComposerDialog
+          open={replyBoxOpen}
+          onOpenChange={setReplyBoxOpen}
+          variant="inline"
+          latestMessage={latestMessage}
+          thread={thread}
+          fallbackSender={fallbackSender}
+          initialReplyMode={replyBoxMode}
+          onSendReply={onSendReply}
+          isSendingReply={isSendingReply}
+          onPopOutReply={onPopOutReply}
+        />
       </div>
     </div>
   );
