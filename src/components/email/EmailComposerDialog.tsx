@@ -52,6 +52,7 @@ export interface ComposerInitialData {
   threadId?: string;
   inReplyTo?: string;
   text?: string;
+  html?: string;
   draftId?: string;
 }
 
@@ -159,7 +160,10 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
           setShowBcc(true);
         }
         if (initialData.subject) setSubject(initialData.subject);
-        if (initialData.text) {
+        if (initialData.html) {
+          initialHtml = initialData.html;
+          initialTxt = initialData.text || "";
+        } else if (initialData.text) {
           initialTxt = initialData.text;
           initialHtml = `<p>${initialData.text.replace(/\n/g, "<br/>")}</p>`;
         }
@@ -342,13 +346,14 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
       return;
     }
 
+    const htmlContent = bodyHtml || (bodyText ? `<p>${bodyText.replace(/\n/g, "<br/>")}</p>` : "<p></p>");
+
     const payload = {
-      to: toRecipients.map(formatRecipient),
+      to: toRecipients.length === 1 ? formatRecipient(toRecipients[0]) : toRecipients.map(formatRecipient),
       subject,
-      cc: ccRecipients.length > 0 ? ccRecipients.map(formatRecipient) : undefined,
-      bcc: bccRecipients.length > 0 ? bccRecipients.map(formatRecipient) : undefined,
-      text: bodyText,
-      html: bodyHtml || `<p>${bodyText.replace(/\n/g, "<br/>")}</p>`,
+      cc: ccRecipients.length > 0 ? (ccRecipients.length === 1 ? formatRecipient(ccRecipients[0]) : ccRecipients.map(formatRecipient)) : undefined,
+      bcc: bccRecipients.length > 0 ? (bccRecipients.length === 1 ? formatRecipient(bccRecipients[0]) : bccRecipients.map(formatRecipient)) : undefined,
+      html: htmlContent,
       threadId: initialData?.threadId,
       inReplyTo: initialData?.inReplyTo,
       attachments: files.length > 0 ? files : undefined,
@@ -370,13 +375,13 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
   // Draft Preservation
   const handleSaveDraft = () => {
+    const htmlContent = bodyHtml || (bodyText ? `<p>${bodyText.replace(/\n/g, "<br/>")}</p>` : undefined);
     const payload = {
-      to: toRecipients.length > 0 ? toRecipients.map(formatRecipient) : undefined,
+      to: toRecipients.length > 0 ? (toRecipients.length === 1 ? formatRecipient(toRecipients[0]) : toRecipients.map(formatRecipient)) : undefined,
       subject,
-      cc: ccRecipients.length > 0 ? ccRecipients.map(formatRecipient) : undefined,
-      bcc: bccRecipients.length > 0 ? bccRecipients.map(formatRecipient) : undefined,
-      text: bodyText,
-      html: bodyHtml || (bodyText ? `<p>${bodyText.replace(/\n/g, "<br/>")}</p>` : undefined),
+      cc: ccRecipients.length > 0 ? (ccRecipients.length === 1 ? formatRecipient(ccRecipients[0]) : ccRecipients.map(formatRecipient)) : undefined,
+      bcc: bccRecipients.length > 0 ? (bccRecipients.length === 1 ? formatRecipient(bccRecipients[0]) : bccRecipients.map(formatRecipient)) : undefined,
+      html: htmlContent,
       threadId: initialData?.threadId,
       inReplyTo: initialData?.inReplyTo,
       attachments: files.length > 0 ? files : undefined,

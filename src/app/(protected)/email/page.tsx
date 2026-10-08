@@ -524,10 +524,14 @@ export default function EmailPage() {
 
     try {
       const recipient = latestMessage.from || selectedListItem?.senderEmail || "";
+      const htmlBody = replyText.trim().startsWith("<")
+        ? replyText
+        : `<p>${replyText.replace(/\n/g, "<br/>")}</p>`;
+
       await sendEmailMutation.mutateAsync({
         to: recipient,
         subject: latestMessage.subject?.startsWith("Re:") ? latestMessage.subject : `Re: ${latestMessage.subject || ""}`,
-        text: replyText,
+        html: htmlBody,
         threadId: selectedThreadId,
         inReplyTo: latestMessage._id,
       });
@@ -546,10 +550,11 @@ export default function EmailPage() {
     if (!latestMessage) return;
     const subjectPrefix = type === "forward" ? "Fwd: " : "Re: ";
     const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
+    const forwardHtml = latestMessage.bodyHtml || (latestMessage.bodyText ? `<p>${latestMessage.bodyText.replace(/\n/g, "<br/>")}</p>` : undefined);
     handleCompose({
       to: type === "forward" ? "" : latestMessage.from,
       subject: `${subjectPrefix}${cleanSubject}`,
-      text: type === "forward" ? latestMessage.bodyText : undefined,
+      html: type === "forward" ? forwardHtml : undefined,
       inReplyTo: type === "forward" ? undefined : latestMessage._id,
       threadId: type === "forward" ? undefined : selectedThreadId || undefined,
     });
@@ -682,7 +687,7 @@ export default function EmailPage() {
             handleCompose({
               to: name ? `${name} <${email}>` : email,
               subject: "",
-              text: "",
+              html: "",
             });
           }}
           className={mobileView !== "folders" ? "hidden md:flex" : "flex"}
