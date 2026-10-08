@@ -35,6 +35,8 @@ import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutl
 export interface EmailEditorProps {
   value: string;
   onChange: (val: string) => void;
+  files?: File[];
+  onFilesChange?: (files: File[]) => void;
   onSend?: () => void;
   isSending?: boolean;
   placeholder?: string;
@@ -44,6 +46,8 @@ export interface EmailEditorProps {
 export function EmailEditor({
   value,
   onChange,
+  files,
+  onFilesChange,
   onSend,
   isSending = false,
   placeholder = "Write a message...",
@@ -54,7 +58,18 @@ export function EmailEditor({
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
-  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [internalFiles, setInternalFiles] = useState<File[]>([]);
+
+  const attachedFiles = files !== undefined ? files : internalFiles;
+
+  const setAttachedFiles = (updater: File[] | ((prev: File[]) => File[])) => {
+    if (onFilesChange) {
+      const next = typeof updater === "function" ? updater(attachedFiles) : updater;
+      onFilesChange(next);
+    } else {
+      setInternalFiles(updater);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);

@@ -40,6 +40,8 @@ export interface EmailDetailPaneProps {
   // Reply Composer
   replyText: string;
   onReplyTextChange: (val: string) => void;
+  replyFiles?: File[];
+  onReplyFilesChange?: (files: File[]) => void;
   onSendReply: () => void;
   isSendingReply?: boolean;
   className?: string;
@@ -86,6 +88,8 @@ export function EmailDetailPane({
   onMobileBack,
   replyText,
   onReplyTextChange,
+  replyFiles,
+  onReplyFilesChange,
   onSendReply,
   isSendingReply = false,
   className,
@@ -327,6 +331,8 @@ export function EmailDetailPane({
         <EmailEditor
           value={replyText}
           onChange={onReplyTextChange}
+          files={replyFiles}
+          onFilesChange={onReplyFilesChange}
           onSend={onSendReply}
           isSending={isSendingReply}
           placeholder="Write a message..."

@@ -259,6 +259,7 @@ export default function EmailPage() {
 
   // Reply Composer State
   const [replyText, setReplyText] = useState("");
+  const [replyFiles, setReplyFiles] = useState<File[]>([]);
 
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("list");
@@ -513,7 +514,7 @@ export default function EmailPage() {
   };
 
   const handleSendReply = async () => {
-    if (!replyText.trim()) {
+    if (!replyText.trim() && replyFiles.length === 0) {
       toast.error("Please enter a reply message");
       return;
     }
@@ -524,9 +525,9 @@ export default function EmailPage() {
 
     try {
       const recipient = latestMessage.from || selectedListItem?.senderEmail || "";
-      const htmlBody = replyText.trim().startsWith("<")
-        ? replyText
-        : `<p>${replyText.replace(/\n/g, "<br/>")}</p>`;
+      const htmlBody = replyText.trim()
+        ? (replyText.trim().startsWith("<") ? replyText : `<p>${replyText.replace(/\n/g, "<br/>")}</p>`)
+        : "<p></p>";
 
       await sendEmailMutation.mutateAsync({
         to: recipient,
@@ -534,8 +535,10 @@ export default function EmailPage() {
         html: htmlBody,
         threadId: selectedThreadId,
         inReplyTo: latestMessage._id,
+        attachments: replyFiles.length > 0 ? replyFiles : undefined,
       });
       setReplyText("");
+      setReplyFiles([]);
     } catch {
       // Error handled by mutation
     }
@@ -744,6 +747,8 @@ export default function EmailPage() {
                 onMobileBack={() => setMobileView("list")}
                 replyText={replyText}
                 onReplyTextChange={setReplyText}
+                replyFiles={replyFiles}
+                onReplyFilesChange={setReplyFiles}
                 onSendReply={handleSendReply}
                 isSendingReply={sendEmailMutation.isPending}
                 className={mobileView !== "detail" ? "hidden md:flex" : "flex"}
