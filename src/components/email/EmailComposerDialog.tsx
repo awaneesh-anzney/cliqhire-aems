@@ -47,7 +47,6 @@ import ReplyAllIcon from "@mui/icons-material/ReplyAll";
 import ForwardIcon from "@mui/icons-material/Forward";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 
 export type ReplyMode = "reply" | "replyAll" | "forward";
 
@@ -74,6 +73,7 @@ export interface EmailComposerDialogProps {
   thread?: EmailThread | null;
   fallbackSender?: { name: string; email: string };
   initialReplyMode?: ReplyMode;
+  actionTrigger?: { mode: ReplyMode; ts: number } | null;
   onSendReply?: (payload: {
     to: string | string[];
     cc?: string | string[];
@@ -85,7 +85,6 @@ export interface EmailComposerDialogProps {
     attachments?: File[];
   }) => Promise<void>;
   isSendingReply?: boolean;
-  onPopOutReply?: (initialData: any) => void;
   className?: string;
 }
 
@@ -127,9 +126,9 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   thread,
   fallbackSender,
   initialReplyMode = "reply",
+  actionTrigger,
   onSendReply,
   isSendingReply = false,
-  onPopOutReply,
   className,
 }) => {
   const isInline = variant === "inline";
@@ -158,7 +157,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
   // Display states
   const [windowMode, setWindowMode] = useState<WindowMode>("docked");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(isInline);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   // Mode state for inline reply
@@ -305,20 +304,24 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     [isInline, latestMessage, fallbackSender, computeDefaultRecipient, defaultReplySignature]
   );
 
-  // Sync inline reply data when message or mode changes
+  // Reset inline composer to collapsed state when thread/message changes
   useEffect(() => {
     if (isInline) {
-      const targetId = latestMessage?._id || fallbackSender?.email || "none";
-      const currentKey = `${targetId}-${initialReplyMode}`;
-
-      if (currentKey !== lastLoadedKeyRef.current) {
-        lastLoadedKeyRef.current = currentKey;
-        setReplyMode(initialReplyMode);
-        setIsCollapsed(false);
-        loadInlineReplyInfo(initialReplyMode);
-      }
+      setIsCollapsed(true);
+      setIsFullscreen(false);
+      lastLoadedKeyRef.current = null;
     }
-  }, [isInline, latestMessage?._id, fallbackSender?.email, initialReplyMode, loadInlineReplyInfo]);
+  }, [isInline, thread?._id, latestMessage?._id]);
+
+  // Respond to top action triggers from EmailDetailPane (Open directly in Fullscreen)
+  useEffect(() => {
+    if (isInline && actionTrigger?.ts) {
+      setReplyMode(actionTrigger.mode);
+      setIsCollapsed(false);
+      setIsFullscreen(true);
+      loadInlineReplyInfo(actionTrigger.mode);
+    }
+  }, [actionTrigger, isInline, loadInlineReplyInfo]);
 
   // Sync initialData when opened in floating mode
   useEffect(() => {
@@ -572,6 +575,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         setBodyText("");
         setFiles([]);
         setIsFullscreen(false);
+        setIsCollapsed(true);
         lastLoadedKeyRef.current = null;
       } catch {
         // Keep open on error so user's draft is preserved
@@ -698,15 +702,18 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
         (latestMessage?.ccRecipients?.length || latestMessage?.cc?.length || 0) >
         1 || (thread?.participants?.length || 0) > 2;
 
+    const handleOpenInFullscreen = (targetMode: ReplyMode) => {
+      setReplyMode(targetMode);
+      setIsCollapsed(false);
+      setIsFullscreen(true);
+      loadInlineReplyInfo(targetMode);
+    };
+
     return (
       <div className={cn("p-3 sm:p-4 bg-white dark:bg-[#1C252E]", className)}>
         <div className="rounded-xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-[#1C252E] shadow-2xs p-2 flex flex-wrap items-center justify-between gap-2">
           <div
-            onClick={() => {
-              setReplyMode("reply");
-              setIsCollapsed(false);
-              loadInlineReplyInfo("reply");
-            }}
+            onClick={() => handleOpenInFullscreen("reply")}
             className="flex-1 min-w-[200px] h-9 px-3 rounded-lg bg-slate-50/80 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 cursor-pointer transition-all"
           >
             <ReplyIcon sx={{ fontSize: 16, color: "#1877F2" }} />
@@ -716,11 +723,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => {
-                setReplyMode("reply");
-                setIsCollapsed(false);
-                loadInlineReplyInfo("reply");
-              }}
+              onClick={() => handleOpenInFullscreen("reply")}
               className="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1C252E] hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs cursor-pointer"
             >
               <ReplyIcon sx={{ fontSize: 15, color: "#1877F2" }} />
@@ -730,11 +733,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             {hasMultiple && (
               <button
                 type="button"
-                onClick={() => {
-                  setReplyMode("replyAll");
-                  setIsCollapsed(false);
-                  loadInlineReplyInfo("replyAll");
-                }}
+                onClick={() => handleOpenInFullscreen("replyAll")}
                 className="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1C252E] hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs cursor-pointer"
               >
                 <ReplyAllIcon sx={{ fontSize: 15, color: "#1877F2" }} />
@@ -744,11 +743,7 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
             <button
               type="button"
-              onClick={() => {
-                setReplyMode("forward");
-                setIsCollapsed(false);
-                loadInlineReplyInfo("forward");
-              }}
+              onClick={() => handleOpenInFullscreen("forward")}
               className="h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1C252E] hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs cursor-pointer"
             >
               <ForwardIcon sx={{ fontSize: 15, color: "#637381" }} />
@@ -813,7 +808,14 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             <Tooltip title="Close">
               <IconButton
                 size="small"
-                onClick={handleDiscard}
+                onClick={() => {
+                  if (isInline) {
+                    setIsFullscreen(false);
+                    setIsCollapsed(true);
+                  } else {
+                    handleDiscard();
+                  }
+                }}
                 sx={{ color: "#637381", "&:hover": { color: "#E11D48" } }}
               >
                 <CloseIcon sx={{ fontSize: 18 }} />
@@ -848,30 +850,6 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
             </div>
 
             <div className="flex items-center gap-1">
-              {onPopOutReply && (
-                <Tooltip title="Pop out into separate window">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      onPopOutReply({
-                        to: toRecipients,
-                        cc: ccRecipients,
-                        bcc: bccRecipients,
-                        subject,
-                        html: editorRef.current?.getHTML() || bodyHtml,
-                        text: bodyText,
-                        threadId: thread?._id || latestMessage?.threadId,
-                        inReplyTo: latestMessage?._id,
-                        attachments: files,
-                      });
-                      setIsCollapsed(true);
-                    }}
-                    sx={{ color: "#637381", "&:hover": { color: "#1C252E" } }}
-                  >
-                    <OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />
-                  </IconButton>
-                </Tooltip>
-              )}
               <Tooltip title="Fullscreen">
                 <IconButton
                   size="small"

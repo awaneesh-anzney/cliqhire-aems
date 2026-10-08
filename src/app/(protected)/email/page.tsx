@@ -536,11 +536,6 @@ export default function EmailPage() {
     });
   };
 
-  const handlePopOutReply = (initialData: any) => {
-    handleCompose(initialData);
-  };
-
-
   // Handle search input change — reset to page 1
   const handleSearchChange = useCallback((q: string) => {
     setSearchInputValue(q);
@@ -724,7 +719,6 @@ export default function EmailPage() {
                 onMobileBack={() => setMobileView("list")}
                 onSendReply={handleSendReply}
                 isSendingReply={sendEmailMutation.isPending}
-                onPopOutReply={handlePopOutReply}
                 className={mobileView !== "detail" ? "hidden md:flex" : "flex"}
               />
             ) : (

@@ -48,7 +48,6 @@ export interface EmailDetailPaneProps {
     attachments?: File[];
   }) => Promise<void>;
   isSendingReply?: boolean;
-  onPopOutReply?: (initialData: any) => void;
   className?: string;
 }
 
@@ -92,23 +91,25 @@ export function EmailDetailPane({
   onMobileBack,
   onSendReply,
   isSendingReply = false,
-  onPopOutReply,
   className,
 }: EmailDetailPaneProps) {
   const latestMessage = messages[messages.length - 1] || null;
 
   const [replyBoxOpen, setReplyBoxOpen] = React.useState(true);
   const [replyBoxMode, setReplyBoxMode] = React.useState<ReplyMode>("reply");
+  const [actionTrigger, setActionTrigger] = React.useState<{ mode: ReplyMode; ts: number } | null>(null);
 
   // Reset to reply mode when viewing a new thread/message
   React.useEffect(() => {
     setReplyBoxOpen(true);
     setReplyBoxMode("reply");
+    setActionTrigger(null);
   }, [thread?._id, latestMessage?._id]);
 
   const handleTopReplyAction = (type: ReplyMode) => {
     setReplyBoxMode(type);
     setReplyBoxOpen(true);
+    setActionTrigger({ mode: type, ts: Date.now() });
   };
 
   const subject = thread?.subject || latestMessage?.subject || fallbackSubject;
@@ -363,9 +364,9 @@ export function EmailDetailPane({
           thread={thread}
           fallbackSender={fallbackSender}
           initialReplyMode={replyBoxMode}
+          actionTrigger={actionTrigger}
           onSendReply={onSendReply}
           isSendingReply={isSendingReply}
-          onPopOutReply={onPopOutReply}
         />
       </div>
     </div>
