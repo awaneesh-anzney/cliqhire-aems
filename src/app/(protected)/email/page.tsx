@@ -257,9 +257,6 @@ export default function EmailPage() {
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  // Reply loading state for reply-info fetch
-  const [replyLoading, setReplyLoading] = useState(false);
-
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("list");
 
@@ -517,57 +514,32 @@ export default function EmailPage() {
     setComposerOpen(true);
   };
 
-  const handleQuickAction = async (type: "reply" | "replyAll" | "forward") => {
-    if (!latestMessage) return;
-
-    if (type === "forward") {
-      const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
-      const forwardHtml = latestMessage.bodyHtml || (latestMessage.bodyText ? `<p>${latestMessage.bodyText.replace(/\n/g, "<br/>")}</p>` : undefined);
-      handleCompose({
-        to: "",
-        subject: `Fwd: ${cleanSubject}`,
-        html: forwardHtml
-          ? `<p><br/></p><hr/><p><strong>---------- Forwarded message ---------</strong><br/>From: ${latestMessage.from || ""}<br/>Date: ${latestMessage.sentAt || latestMessage.receivedAt || ""}<br/>Subject: ${latestMessage.subject || ""}<br/>To: ${latestMessage.to?.join(", ") || ""}</p>${forwardHtml}`
-          : undefined,
-        inReplyTo: undefined,
-        threadId: undefined,
-      });
-      return;
-    }
-
-    // mode = "reply" | "replyAll"
-    try {
-      setReplyLoading(true);
-      const res = await emailService.getReplyInfo(latestMessage._id, type);
-      if (res?.success && res.data) {
-        const info = res.data;
-        handleCompose({
-          to: info.to.map((r) => r.address || (r.name ? `${r.name} <${r.email}>` : r.email)),
-          cc: info.cc.map((r) => r.address || (r.name ? `${r.name} <${r.email}>` : r.email)),
-          bcc: info.bcc?.map((r) => r.address || (r.name ? `${r.name} <${r.email}>` : r.email)) || [],
-          subject: info.subject,
-          threadId: info.threadId,
-          inReplyTo: info.inReplyTo,
-          html: "", // Fresh reply with signature injected
-        });
-      } else {
-        throw new Error("No data in reply-info response");
-      }
-    } catch (err: any) {
-      console.warn("Could not fetch reply-info, falling back to local email headers:", err);
-      const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
-      const recipient = latestMessage.from || selectedListItem?.senderEmail || "";
-      handleCompose({
-        to: recipient,
-        subject: `Re: ${cleanSubject}`,
-        threadId: selectedThreadId || undefined,
-        inReplyTo: latestMessage._id,
-        html: "",
-      });
-    } finally {
-      setReplyLoading(false);
-    }
+  const handleSendReply = async (payload: {
+    to: string | string[];
+    cc?: string | string[];
+    bcc?: string | string[];
+    subject: string;
+    html: string;
+    threadId?: string;
+    inReplyTo?: string;
+    attachments?: File[];
+  }) => {
+    await sendEmailMutation.mutateAsync({
+      to: payload.to,
+      cc: payload.cc,
+      bcc: payload.bcc,
+      subject: payload.subject,
+      html: payload.html,
+      threadId: payload.threadId,
+      inReplyTo: payload.inReplyTo,
+      attachments: payload.attachments,
+    });
   };
+
+  const handlePopOutReply = (initialData: any) => {
+    handleCompose(initialData);
+  };
+
 
   // Handle search input change — reset to page 1
   const handleSearchChange = useCallback((q: string) => {
@@ -744,14 +716,15 @@ export default function EmailPage() {
                 isStarred={activeThread?.isStarred ?? selectedListItem?.isStarred ?? false}
                 isImportant={activeThread?.isImportant ?? selectedListItem?.isImportant ?? false}
                 isLoading={loadingDetail}
-                isReplying={replyLoading}
                 onToggleStar={handleToggleStar}
                 onToggleImportant={handleToggleImportant}
                 onDelete={handleDelete}
                 onArchive={handleArchive}
                 onMarkUnread={handleMarkUnread}
-                onReplyQuick={handleQuickAction}
                 onMobileBack={() => setMobileView("list")}
+                onSendReply={handleSendReply}
+                isSendingReply={sendEmailMutation.isPending}
+                onPopOutReply={handlePopOutReply}
                 className={mobileView !== "detail" ? "hidden md:flex" : "flex"}
               />
             ) : (

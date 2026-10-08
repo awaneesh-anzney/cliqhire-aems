@@ -19,4 +19,5 @@ export * from "./EmailEditor";
 export * from "./EmailNavSidebar";
 export * from "./EmailConversationList";
 export * from "./EmailDetailPane";
+export * from "./EmailReplyBox";
 export * from "@/types/emailContactTypes";

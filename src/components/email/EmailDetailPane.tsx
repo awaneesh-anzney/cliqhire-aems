@@ -3,7 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Email, EmailThread } from "@/types/email";
-import { EmailEditor } from "./EmailEditor";
+import { EmailReplyBox, ReplyMode } from "./EmailReplyBox";
 
 // MUI Icons
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
@@ -30,14 +30,25 @@ export interface EmailDetailPaneProps {
   isStarred?: boolean;
   isImportant?: boolean;
   isLoading?: boolean;
-  isReplying?: boolean;
   onToggleStar: () => void;
   onToggleImportant?: () => void;
   onDelete: () => void;
   onArchive?: () => void;
   onMarkUnread?: () => void;
-  onReplyQuick?: (type: "reply" | "replyAll" | "forward") => void;
   onMobileBack?: () => void;
+  // Reply handling
+  onSendReply: (payload: {
+    to: string | string[];
+    cc?: string | string[];
+    bcc?: string | string[];
+    subject: string;
+    html: string;
+    threadId?: string;
+    inReplyTo?: string;
+    attachments?: File[];
+  }) => Promise<void>;
+  isSendingReply?: boolean;
+  onPopOutReply?: (initialData: any) => void;
   className?: string;
 }
 
@@ -73,17 +84,32 @@ export function EmailDetailPane({
   isStarred = false,
   isImportant = false,
   isLoading = false,
-  isReplying = false,
   onToggleStar,
   onToggleImportant,
   onDelete,
   onArchive,
   onMarkUnread,
-  onReplyQuick,
   onMobileBack,
+  onSendReply,
+  isSendingReply = false,
+  onPopOutReply,
   className,
 }: EmailDetailPaneProps) {
   const latestMessage = messages[messages.length - 1] || null;
+
+  const [replyBoxOpen, setReplyBoxOpen] = React.useState(false);
+  const [replyBoxMode, setReplyBoxMode] = React.useState<ReplyMode>("reply");
+
+  // Reset reply box when viewing a different thread/message
+  React.useEffect(() => {
+    setReplyBoxOpen(false);
+    setReplyBoxMode("reply");
+  }, [thread?._id, latestMessage?._id]);
+
+  const handleTopReplyAction = (type: ReplyMode) => {
+    setReplyBoxMode(type);
+    setReplyBoxOpen(true);
+  };
 
   const subject = thread?.subject || latestMessage?.subject || fallbackSubject;
   const senderEmail = latestMessage?.fromEmail || fallbackSender.email || "";
@@ -218,9 +244,8 @@ export function EmailDetailPane({
             <div className="flex items-center gap-1 text-[#637381] dark:text-[#919EAB]">
               <button
                 type="button"
-                onClick={() => onReplyQuick?.("reply")}
-                disabled={isReplying}
-                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                onClick={() => handleTopReplyAction("reply")}
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 title="Reply"
               >
                 <ReplyIcon sx={{ fontSize: 18 }} />
@@ -228,9 +253,8 @@ export function EmailDetailPane({
               {hasMultipleRecipients && (
                 <button
                   type="button"
-                  onClick={() => onReplyQuick?.("replyAll")}
-                  disabled={isReplying}
-                  className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                  onClick={() => handleTopReplyAction("replyAll")}
+                  className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   title="Reply all"
                 >
                   <ReplyAllIcon sx={{ fontSize: 18 }} />
@@ -238,9 +262,8 @@ export function EmailDetailPane({
               )}
               <button
                 type="button"
-                onClick={() => onReplyQuick?.("forward")}
-                disabled={isReplying}
-                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                onClick={() => handleTopReplyAction("forward")}
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 title="Forward"
               >
                 <ForwardIcon sx={{ fontSize: 18 }} />
@@ -330,51 +353,17 @@ export function EmailDetailPane({
         )}
       </div>
 
-      {/* Bottom Reply Action Chassis (Replaces crude editor; opens full EmailComposerDialog) */}
-      <div className="p-4 sm:p-5 pt-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 shrink-0">
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Quick clickable bar that triggers Reply */}
-          <div
-            onClick={() => onReplyQuick?.("reply")}
-            className="flex-1 min-w-[200px] h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-[#1C252E] hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-[#919EAB] flex items-center gap-2.5 cursor-pointer shadow-2xs transition-all hover:border-slate-300 dark:hover:border-slate-600 active:scale-[0.99]"
-          >
-            <ReplyIcon sx={{ fontSize: 18, color: "#1877F2" }} />
-            <span className="truncate">Reply to {senderName}...</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => onReplyQuick?.("reply")}
-            disabled={isReplying}
-            className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-[#1C252E] hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-          >
-            {isReplying ? <CircularProgress size={13} color="inherit" /> : <ReplyIcon sx={{ fontSize: 16, color: "#1877F2" }} />}
-            <span>Reply</span>
-          </button>
-
-          {hasMultipleRecipients && (
-            <button
-              type="button"
-              onClick={() => onReplyQuick?.("replyAll")}
-              disabled={isReplying}
-              className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-[#1C252E] hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-            >
-              {isReplying ? <CircularProgress size={13} color="inherit" /> : <ReplyAllIcon sx={{ fontSize: 16, color: "#1877F2" }} />}
-              <span>Reply all</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => onReplyQuick?.("forward")}
-            disabled={isReplying}
-            className="h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-[#1C252E] hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-          >
-            <ForwardIcon sx={{ fontSize: 16, color: "#637381" }} />
-            <span>Forward</span>
-          </button>
-        </div>
-      </div>
+      {/* Gmail / Outlook Style Inline Reply Section */}
+      <EmailReplyBox
+        latestMessage={latestMessage}
+        thread={thread}
+        isOpen={replyBoxOpen}
+        initialMode={replyBoxMode}
+        onOpenChange={setReplyBoxOpen}
+        onSend={onSendReply}
+        isSending={isSendingReply}
+        onPopOut={onPopOutReply}
+      />
     </div>
   );
 }
