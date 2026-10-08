@@ -3,7 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Email, EmailThread } from "@/types/email";
-import { EmailEditor } from "./EmailEditor";
+import { EmailComposerDialog, ReplyMode } from "./EmailComposerDialog";
 
 // MUI Icons
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
@@ -35,12 +35,18 @@ export interface EmailDetailPaneProps {
   onDelete: () => void;
   onArchive?: () => void;
   onMarkUnread?: () => void;
-  onReplyQuick?: (type: "reply" | "replyAll" | "forward") => void;
   onMobileBack?: () => void;
-  // Reply Composer
-  replyText: string;
-  onReplyTextChange: (val: string) => void;
-  onSendReply: () => void;
+  // Reply handling
+  onSendReply: (payload: {
+    to: string | string[];
+    cc?: string | string[];
+    bcc?: string | string[];
+    subject: string;
+    html: string;
+    threadId?: string;
+    inReplyTo?: string;
+    attachments?: File[];
+  }) => Promise<void>;
   isSendingReply?: boolean;
   className?: string;
 }
@@ -82,19 +88,34 @@ export function EmailDetailPane({
   onDelete,
   onArchive,
   onMarkUnread,
-  onReplyQuick,
   onMobileBack,
-  replyText,
-  onReplyTextChange,
   onSendReply,
   isSendingReply = false,
   className,
 }: EmailDetailPaneProps) {
   const latestMessage = messages[messages.length - 1] || null;
 
+  const [replyBoxOpen, setReplyBoxOpen] = React.useState(true);
+  const [replyBoxMode, setReplyBoxMode] = React.useState<ReplyMode>("reply");
+  const [actionTrigger, setActionTrigger] = React.useState<{ mode: ReplyMode; ts: number } | null>(null);
+
+  // Reset to reply mode when viewing a new thread/message
+  React.useEffect(() => {
+    setReplyBoxOpen(true);
+    setReplyBoxMode("reply");
+    setActionTrigger(null);
+  }, [thread?._id, latestMessage?._id]);
+
+  const handleTopReplyAction = (type: ReplyMode) => {
+    setReplyBoxMode(type);
+    setReplyBoxOpen(true);
+    setActionTrigger({ mode: type, ts: Date.now() });
+  };
+
   const subject = thread?.subject || latestMessage?.subject || fallbackSubject;
-  const senderName = latestMessage?.fromName || fallbackSender.name || "Sender";
   const senderEmail = latestMessage?.fromEmail || fallbackSender.email || "";
+  // If fromName is empty, show fromEmail (per email-update.md)
+  const senderName = latestMessage?.fromName?.trim() || latestMessage?.fromEmail || fallbackSender.name || "Sender";
   
   const formatRecipients = (recs?: any[]) => {
     if (!recs || recs.length === 0) return "";
@@ -104,6 +125,15 @@ export function EmailDetailPane({
   const toStr = formatRecipients(latestMessage?.toRecipients) || latestMessage?.to?.join(", ") || fallbackRecipients || "";
   const ccStr = formatRecipients(latestMessage?.ccRecipients);
   const displayDate = fallbackDate;
+
+  // Determine if there are multiple recipients to show "Reply all" button
+  const hasMultipleRecipients = React.useMemo(() => {
+    if (!latestMessage) return false;
+    const toCount = latestMessage.toRecipients?.length ?? latestMessage.to?.length ?? 0;
+    const ccCount = latestMessage.ccRecipients?.length ?? latestMessage.cc?.length ?? 0;
+    const participantsCount = thread?.participants?.length ?? 0;
+    return toCount + ccCount > 1 || participantsCount > 2;
+  }, [latestMessage, thread]);
 
   if (isLoading && !latestMessage) {
     return (
@@ -215,23 +245,25 @@ export function EmailDetailPane({
             <div className="flex items-center gap-1 text-[#637381] dark:text-[#919EAB]">
               <button
                 type="button"
-                onClick={() => onReplyQuick?.("reply")}
+                onClick={() => handleTopReplyAction("reply")}
                 className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 title="Reply"
               >
                 <ReplyIcon sx={{ fontSize: 18 }} />
               </button>
+              {hasMultipleRecipients && (
+                <button
+                  type="button"
+                  onClick={() => handleTopReplyAction("replyAll")}
+                  className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  title="Reply all"
+                >
+                  <ReplyAllIcon sx={{ fontSize: 18 }} />
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => onReplyQuick?.("replyAll")}
-                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title="Reply all"
-              >
-                <ReplyAllIcon sx={{ fontSize: 18 }} />
-              </button>
-              <button
-                type="button"
-                onClick={() => onReplyQuick?.("forward")}
+                onClick={() => handleTopReplyAction("forward")}
                 className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 title="Forward"
               >
@@ -322,14 +354,19 @@ export function EmailDetailPane({
         )}
       </div>
 
-      {/* Bottom Rich-Text Reply Composer */}
-      <div className="p-4 sm:p-6 pt-2 shrink-0">
-        <EmailEditor
-          value={replyText}
-          onChange={onReplyTextChange}
-          onSend={onSendReply}
-          isSending={isSendingReply}
-          placeholder="Write a message..."
+      {/* FIXED AT THE BOTTOM: Dynamic Unified Email Composer (Inline Reply) */}
+      <div className="shrink-0 border-t border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#1C252E] shadow-sm">
+        <EmailComposerDialog
+          open={replyBoxOpen}
+          onOpenChange={setReplyBoxOpen}
+          variant="inline"
+          latestMessage={latestMessage}
+          thread={thread}
+          fallbackSender={fallbackSender}
+          initialReplyMode={replyBoxMode}
+          actionTrigger={actionTrigger}
+          onSendReply={onSendReply}
+          isSendingReply={isSendingReply}
         />
       </div>
     </div>

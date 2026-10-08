@@ -20,6 +20,7 @@ import {
   SaveDraftPayload,
   AdminMailboxStatusResponse,
   Email,
+  ReplyInfoResponse,
 } from "@/types/email";
 import { EmailSignature } from "@/types/emailSignature";
 
@@ -206,6 +207,20 @@ export const emailService = {
       const response = await api.post("/api/email/send", jsonBody);
       return response.data;
     }
+  },
+
+  /**
+   * Fetch reply / reply-all recipients, threadId, inReplyTo, and prefilled subject.
+   * GET /api/email/emails/:id/reply-info?mode=reply|replyAll
+   */
+  async getReplyInfo(
+    emailId: string,
+    mode: "reply" | "replyAll" = "reply"
+  ): Promise<ReplyInfoResponse> {
+    const response = await api.get<ReplyInfoResponse>(`/api/email/emails/${emailId}/reply-info`, {
+      params: { mode },
+    });
+    return response.data;
   },
 
   /**

@@ -257,9 +257,6 @@ export default function EmailPage() {
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  // Reply Composer State
-  const [replyText, setReplyText] = useState("");
-
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("list");
 
@@ -512,46 +509,30 @@ export default function EmailPage() {
     }
   };
 
-  const handleSendReply = async () => {
-    if (!replyText.trim()) {
-      toast.error("Please enter a reply message");
-      return;
-    }
-    if (!selectedThreadId || !latestMessage) {
-      toast.error("No active email to reply to");
-      return;
-    }
-
-    try {
-      const recipient = latestMessage.from || selectedListItem?.senderEmail || "";
-      await sendEmailMutation.mutateAsync({
-        to: recipient,
-        subject: latestMessage.subject?.startsWith("Re:") ? latestMessage.subject : `Re: ${latestMessage.subject || ""}`,
-        text: replyText,
-        threadId: selectedThreadId,
-        inReplyTo: latestMessage._id,
-      });
-      setReplyText("");
-    } catch {
-      // Error handled by mutation
-    }
-  };
-
   const handleCompose = (prefill?: ComposerInitialData) => {
     setComposerInitialData(prefill);
     setComposerOpen(true);
   };
 
-  const handleQuickAction = (type: "reply" | "replyAll" | "forward") => {
-    if (!latestMessage) return;
-    const subjectPrefix = type === "forward" ? "Fwd: " : "Re: ";
-    const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
-    handleCompose({
-      to: type === "forward" ? "" : latestMessage.from,
-      subject: `${subjectPrefix}${cleanSubject}`,
-      text: type === "forward" ? latestMessage.bodyText : undefined,
-      inReplyTo: type === "forward" ? undefined : latestMessage._id,
-      threadId: type === "forward" ? undefined : selectedThreadId || undefined,
+  const handleSendReply = async (payload: {
+    to: string | string[];
+    cc?: string | string[];
+    bcc?: string | string[];
+    subject: string;
+    html: string;
+    threadId?: string;
+    inReplyTo?: string;
+    attachments?: File[];
+  }) => {
+    await sendEmailMutation.mutateAsync({
+      to: payload.to,
+      cc: payload.cc,
+      bcc: payload.bcc,
+      subject: payload.subject,
+      html: payload.html,
+      threadId: payload.threadId,
+      inReplyTo: payload.inReplyTo,
+      attachments: payload.attachments,
     });
   };
 
@@ -682,7 +663,7 @@ export default function EmailPage() {
             handleCompose({
               to: name ? `${name} <${email}>` : email,
               subject: "",
-              text: "",
+              html: "",
             });
           }}
           className={mobileView !== "folders" ? "hidden md:flex" : "flex"}
@@ -735,10 +716,7 @@ export default function EmailPage() {
                 onDelete={handleDelete}
                 onArchive={handleArchive}
                 onMarkUnread={handleMarkUnread}
-                onReplyQuick={handleQuickAction}
                 onMobileBack={() => setMobileView("list")}
-                replyText={replyText}
-                onReplyTextChange={setReplyText}
                 onSendReply={handleSendReply}
                 isSendingReply={sendEmailMutation.isPending}
                 className={mobileView !== "detail" ? "hidden md:flex" : "flex"}

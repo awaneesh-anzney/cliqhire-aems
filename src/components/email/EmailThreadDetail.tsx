@@ -32,6 +32,7 @@ interface EmailThreadDetailProps {
     threadId: string; 
     inReplyTo?: string;
     text?: string;
+    html?: string;
   }) => void;
 }
 
@@ -186,7 +187,6 @@ export const EmailThreadDetail: React.FC<EmailThreadDetailProps> = ({
         to: replyTargetEmail,
         cc: ccList && ccList.length > 0 ? ccList : undefined,
         subject: replySubject,
-        text,
         html: replyHtml,
         threadId: thread._id,
         inReplyTo: lastReceivedMessage?.messageIdHeader,
