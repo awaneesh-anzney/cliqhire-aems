@@ -237,3 +237,26 @@ export interface DraftsResponse {
   pages: number;
   data: Draft[];
 }
+
+export interface ReplyRecipient {
+  name: string;
+  email: string;
+  address: string;
+}
+
+export interface ReplyInfoData {
+  mode: "reply" | "replyAll";
+  inReplyTo: string;
+  threadId: string;
+  subject: string;
+  to: ReplyRecipient[];
+  cc: ReplyRecipient[];
+  bcc: ReplyRecipient[];
+  hasMultipleRecipients: boolean;
+}
+
+export interface ReplyInfoResponse {
+  success: boolean;
+  data: ReplyInfoData;
+}
+

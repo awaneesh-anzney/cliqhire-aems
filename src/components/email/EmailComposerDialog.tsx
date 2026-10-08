@@ -45,9 +45,9 @@ import CheckIcon from "@mui/icons-material/Check";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 
 export interface ComposerInitialData {
-  to?: string;
-  cc?: string;
-  bcc?: string;
+  to?: string | string[] | any[];
+  cc?: string | string[] | any[];
+  bcc?: string | string[] | any[];
   subject?: string;
   threadId?: string;
   inReplyTo?: string;
@@ -64,8 +64,9 @@ interface EmailComposerDialogProps {
 
 type WindowMode = "docked" | "minimized" | "fullscreen";
 
-const MAX_ATTACHMENTS = 10;
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB
+const MAX_ATTACHMENTS = 5;
+const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
+const BLOCKED_EXTENSIONS = [".exe", ".bat", ".cmd", ".sh", ".msi", ".dll", ".scr"];
 
 function formatRecipient(input: string): string {
   input = input.trim();
@@ -143,21 +144,44 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
       if (initialData) {
         if (initialData.to) {
-          const rawTo = initialData.to;
-          const match = rawTo.match(/<([^>]+)>/);
-          const emailOnly = match ? match[1] : rawTo;
-          const parsedTo = emailOnly.split(/[,;]+/).map((e) => e.trim()).filter(Boolean);
-          setToRecipients(parsedTo.length > 0 ? parsedTo : [rawTo]);
+          if (Array.isArray(initialData.to)) {
+            const parsed = initialData.to
+              .map((e: any) => (typeof e === "string" ? e : e.address || (e.name ? `${e.name} <${e.email}>` : e.email)))
+              .filter(Boolean);
+            setToRecipients(parsed);
+          } else {
+            const rawTo = initialData.to;
+            const match = rawTo.match(/<([^>]+)>/);
+            const emailOnly = match ? match[1] : rawTo;
+            const parsedTo = emailOnly.split(/[,;]+/).map((e) => e.trim()).filter(Boolean);
+            setToRecipients(parsedTo.length > 0 ? parsedTo : [rawTo]);
+          }
         }
         if (initialData.cc) {
-          const parsedCc = initialData.cc.split(/[\s,;]+/).filter(Boolean);
-          setCcRecipients(parsedCc);
-          setShowCc(true);
+          if (Array.isArray(initialData.cc)) {
+            const parsed = initialData.cc
+              .map((e: any) => (typeof e === "string" ? e : e.address || (e.name ? `${e.name} <${e.email}>` : e.email)))
+              .filter(Boolean);
+            setCcRecipients(parsed);
+            if (parsed.length > 0) setShowCc(true);
+          } else {
+            const parsedCc = initialData.cc.split(/[\s,;]+/).filter(Boolean);
+            setCcRecipients(parsedCc);
+            if (parsedCc.length > 0) setShowCc(true);
+          }
         }
         if (initialData.bcc) {
-          const parsedBcc = initialData.bcc.split(/[\s,;]+/).filter(Boolean);
-          setBccRecipients(parsedBcc);
-          setShowBcc(true);
+          if (Array.isArray(initialData.bcc)) {
+            const parsed = initialData.bcc
+              .map((e: any) => (typeof e === "string" ? e : e.address || (e.name ? `${e.name} <${e.email}>` : e.email)))
+              .filter(Boolean);
+            setBccRecipients(parsed);
+            if (parsed.length > 0) setShowBcc(true);
+          } else {
+            const parsedBcc = initialData.bcc.split(/[\s,;]+/).filter(Boolean);
+            setBccRecipients(parsedBcc);
+            if (parsedBcc.length > 0) setShowBcc(true);
+          }
         }
         if (initialData.subject) setSubject(initialData.subject);
         if (initialData.html) {
@@ -244,11 +268,16 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
 
     const validFiles: File[] = [];
     for (const file of selectedFiles) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast.error(`File "${file.name}" exceeds the 25MB limit.`);
-      } else {
-        validFiles.push(file);
+      const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
+      if (BLOCKED_EXTENSIONS.includes(ext)) {
+        toast.error(`File type ${ext} is not allowed as an email attachment.`);
+        continue;
       }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        toast.error(`File "${file.name}" exceeds the 15MB limit.`);
+        continue;
+      }
+      validFiles.push(file);
     }
 
     if (validFiles.length > 0) {
@@ -362,6 +391,11 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     if (initialData?.draftId) {
       sendDraftMutation.mutate(initialData.draftId, {
         onSuccess: () => onOpenChange(false),
+        onError: (err: any) => {
+          // Do not close compose dialog on error!
+          const msg = err.response?.data?.error || err.response?.data?.message || "Failed to send draft";
+          toast.error(msg);
+        },
       });
       return;
     }
@@ -369,6 +403,11 @@ export const EmailComposerDialog: React.FC<EmailComposerDialogProps> = ({
     sendEmailMutation.mutate(payload, {
       onSuccess: () => {
         onOpenChange(false);
+      },
+      onError: (err: any) => {
+        // Do not close compose dialog on error — user text/files preserved
+        const msg = err.response?.data?.error || err.response?.data?.message || "Email was not sent. Please try again.";
+        toast.error(msg);
       },
     });
   };

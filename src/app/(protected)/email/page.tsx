@@ -257,9 +257,8 @@ export default function EmailPage() {
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  // Reply Composer State
-  const [replyText, setReplyText] = useState("");
-  const [replyFiles, setReplyFiles] = useState<File[]>([]);
+  // Reply loading state for reply-info fetch
+  const [replyLoading, setReplyLoading] = useState(false);
 
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<"folders" | "list" | "detail">("list");
@@ -513,54 +512,61 @@ export default function EmailPage() {
     }
   };
 
-  const handleSendReply = async () => {
-    if (!replyText.trim() && replyFiles.length === 0) {
-      toast.error("Please enter a reply message");
-      return;
-    }
-    if (!selectedThreadId || !latestMessage) {
-      toast.error("No active email to reply to");
-      return;
-    }
-
-    try {
-      const recipient = latestMessage.from || selectedListItem?.senderEmail || "";
-      const htmlBody = replyText.trim()
-        ? (replyText.trim().startsWith("<") ? replyText : `<p>${replyText.replace(/\n/g, "<br/>")}</p>`)
-        : "<p></p>";
-
-      await sendEmailMutation.mutateAsync({
-        to: recipient,
-        subject: latestMessage.subject?.startsWith("Re:") ? latestMessage.subject : `Re: ${latestMessage.subject || ""}`,
-        html: htmlBody,
-        threadId: selectedThreadId,
-        inReplyTo: latestMessage._id,
-        attachments: replyFiles.length > 0 ? replyFiles : undefined,
-      });
-      setReplyText("");
-      setReplyFiles([]);
-    } catch {
-      // Error handled by mutation
-    }
-  };
-
   const handleCompose = (prefill?: ComposerInitialData) => {
     setComposerInitialData(prefill);
     setComposerOpen(true);
   };
 
-  const handleQuickAction = (type: "reply" | "replyAll" | "forward") => {
+  const handleQuickAction = async (type: "reply" | "replyAll" | "forward") => {
     if (!latestMessage) return;
-    const subjectPrefix = type === "forward" ? "Fwd: " : "Re: ";
-    const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
-    const forwardHtml = latestMessage.bodyHtml || (latestMessage.bodyText ? `<p>${latestMessage.bodyText.replace(/\n/g, "<br/>")}</p>` : undefined);
-    handleCompose({
-      to: type === "forward" ? "" : latestMessage.from,
-      subject: `${subjectPrefix}${cleanSubject}`,
-      html: type === "forward" ? forwardHtml : undefined,
-      inReplyTo: type === "forward" ? undefined : latestMessage._id,
-      threadId: type === "forward" ? undefined : selectedThreadId || undefined,
-    });
+
+    if (type === "forward") {
+      const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
+      const forwardHtml = latestMessage.bodyHtml || (latestMessage.bodyText ? `<p>${latestMessage.bodyText.replace(/\n/g, "<br/>")}</p>` : undefined);
+      handleCompose({
+        to: "",
+        subject: `Fwd: ${cleanSubject}`,
+        html: forwardHtml
+          ? `<p><br/></p><hr/><p><strong>---------- Forwarded message ---------</strong><br/>From: ${latestMessage.from || ""}<br/>Date: ${latestMessage.sentAt || latestMessage.receivedAt || ""}<br/>Subject: ${latestMessage.subject || ""}<br/>To: ${latestMessage.to?.join(", ") || ""}</p>${forwardHtml}`
+          : undefined,
+        inReplyTo: undefined,
+        threadId: undefined,
+      });
+      return;
+    }
+
+    // mode = "reply" | "replyAll"
+    try {
+      setReplyLoading(true);
+      const res = await emailService.getReplyInfo(latestMessage._id, type);
+      if (res?.success && res.data) {
+        const info = res.data;
+        handleCompose({
+          to: info.to.map((r) => r.address || (r.name ? `${r.name} <${r.email}>` : r.email)),
+          cc: info.cc.map((r) => r.address || (r.name ? `${r.name} <${r.email}>` : r.email)),
+          bcc: info.bcc?.map((r) => r.address || (r.name ? `${r.name} <${r.email}>` : r.email)) || [],
+          subject: info.subject,
+          threadId: info.threadId,
+          inReplyTo: info.inReplyTo,
+          html: "", // Fresh reply with signature injected
+        });
+      } else {
+        throw new Error("No data in reply-info response");
+      }
+    } catch (err: any) {
+      console.warn("Could not fetch reply-info, falling back to local email headers:", err);
+      const cleanSubject = latestMessage.subject?.replace(/^(Re:\s*|Fwd:\s*)+/i, "") || "";
+      const recipient = latestMessage.from || selectedListItem?.senderEmail || "";
+      handleCompose({
+        to: recipient,
+        subject: `Re: ${cleanSubject}`,
+        threadId: selectedThreadId || undefined,
+        inReplyTo: latestMessage._id,
+        html: "",
+      });
+    } finally {
+      setReplyLoading(false);
+    }
   };
 
   // Handle search input change — reset to page 1
@@ -738,6 +744,7 @@ export default function EmailPage() {
                 isStarred={activeThread?.isStarred ?? selectedListItem?.isStarred ?? false}
                 isImportant={activeThread?.isImportant ?? selectedListItem?.isImportant ?? false}
                 isLoading={loadingDetail}
+                isReplying={replyLoading}
                 onToggleStar={handleToggleStar}
                 onToggleImportant={handleToggleImportant}
                 onDelete={handleDelete}
@@ -745,12 +752,6 @@ export default function EmailPage() {
                 onMarkUnread={handleMarkUnread}
                 onReplyQuick={handleQuickAction}
                 onMobileBack={() => setMobileView("list")}
-                replyText={replyText}
-                onReplyTextChange={setReplyText}
-                replyFiles={replyFiles}
-                onReplyFilesChange={setReplyFiles}
-                onSendReply={handleSendReply}
-                isSendingReply={sendEmailMutation.isPending}
                 className={mobileView !== "detail" ? "hidden md:flex" : "flex"}
               />
             ) : (
