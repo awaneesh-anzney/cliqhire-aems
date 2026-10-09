@@ -204,6 +204,13 @@ export default function CreateCandidateForm({
         toast.error("Please fill in required fields (Name, Email, Phone)");
         return false;
       }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email)) {
+        toast.error("Please enter a valid email address");
+        return false;
+      }
+
       if (hasDuplicate) {
         toast.error("Please resolve duplicate candidate fields before proceeding");
         return false;
@@ -369,12 +376,19 @@ export default function CreateCandidateForm({
                     <div className="relative group">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                       <Input 
-                        name="email" 
+                        name="email"
+                        type="email" 
                         value={form.email} 
                         onChange={handleChange} 
                         onBlur={() => {
                           if (form.email && form.email.trim() !== "") {
-                            setEmailCheckVal(form.email);
+                            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                            if (emailRegex.test(form.email)) {
+                              setEmailCheckVal(form.email);
+                            } else {
+                              setEmailCheckVal("");
+                              toast.error("Please enter a valid email address");
+                            }
                           }
                         }}
                         placeholder="candidate@email.com" 
