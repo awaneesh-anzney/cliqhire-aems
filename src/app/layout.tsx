@@ -45,13 +45,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/cliqhire-f.png" />
-        <link rel="icon" type="image/png" sizes="48x48" href="/cliqhire-f.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/cliqhire-f.png" />
-        <link rel="apple-touch-icon" href="/cliqhire-f.png" />
-      </head>
+
       <body className="h-full min-h-screen bg-background text-foreground antialiased selection:bg-primary-soft selection:text-primary relative font-sans" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {/* Subtle Ambient Background Lighting Mapped to Theme */}
