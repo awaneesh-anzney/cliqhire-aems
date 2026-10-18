@@ -16,6 +16,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { MouseTracker } from "@/components/ui/mouse-tracker";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PermissionProvider } from "@/contexts/PermissionContext";
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AuthProvider>
               <PermissionProvider>
                 <Toaster />
+                <MouseTracker />
                 <div className="relative z-10 min-h-screen">
                   {children}
                 </div>
