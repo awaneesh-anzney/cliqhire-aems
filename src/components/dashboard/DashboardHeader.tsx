@@ -42,26 +42,22 @@ export function DashboardHeader({
     setAnchorEl(null);
   };
 
-  // Format current day and full date dynamically (e.g., "Sunday, October 18, 2026")
-  const [currentDateStr, setCurrentDateStr] = useState<string>(() => {
-    return new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+  // Format current day and full date dynamically
+  const [dateInfo, setDateInfo] = useState<{ weekday: string; fullDate: string }>(() => {
+    const now = new Date();
+    return {
+      weekday: now.toLocaleDateString("en-US", { weekday: "long" }),
+      fullDate: now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+    };
   });
 
   useEffect(() => {
     const updateDate = () => {
-      setCurrentDateStr(
-        new Date().toLocaleDateString("en-US", {
-          weekday: "long",
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        })
-      );
+      const now = new Date();
+      setDateInfo({
+        weekday: now.toLocaleDateString("en-US", { weekday: "long" }),
+        fullDate: now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+      });
     };
     updateDate();
   }, []);
@@ -88,10 +84,25 @@ export function DashboardHeader({
 
       {/* Date Selector & Primary Action */}
       <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center flex-wrap">
-        {/* Dynamic Current Date Display */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[10px] bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 text-xs font-medium text-[#172033] dark:text-slate-200 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
-          <CalendarTodayOutlinedIcon sx={{ fontSize: 14, color: "#64748B" }} />
-          <span suppressHydrationWarning>{currentDateStr}</span>
+        {/* Dynamic Colorful Current Date Display */}
+        <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-[12px] bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-purple-50/50 dark:from-slate-800/95 dark:via-blue-950/50 dark:to-slate-800/95 border border-blue-200/80 dark:border-blue-700/50 shadow-[0_2px_8px_rgba(37,99,235,0.08)] hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+          <div className="w-6 h-6 rounded-[7px] bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-[0_2px_6px_rgba(37,99,235,0.3)]">
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: "#FFFFFF" }} />
+          </div>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span
+              suppressHydrationWarning
+              className="px-1.5 py-0.5 rounded-[5px] bg-blue-500/12 dark:bg-blue-400/20 text-blue-700 dark:text-blue-300 font-bold text-[11px] tracking-tight"
+            >
+              {dateInfo.weekday}
+            </span>
+            <span
+              suppressHydrationWarning
+              className="font-semibold text-slate-700 dark:text-slate-200"
+            >
+              {dateInfo.fullDate}
+            </span>
+          </div>
         </div>
 
         {/* Primary "+ Add New" Dropdown Button */}
