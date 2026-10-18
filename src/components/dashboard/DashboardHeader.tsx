@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
@@ -42,11 +42,29 @@ export function DashboardHeader({
     setAnchorEl(null);
   };
 
-  // Format current month date range string
-  const now = new Date();
-  const monthName = now.toLocaleDateString("en-US", { month: "short" });
-  const year = now.getFullYear();
-  const dateRangeStr = `${monthName} 1, ${year} – ${monthName} 31, ${year}`;
+  // Format current day and full date dynamically (e.g., "Sunday, October 18, 2026")
+  const [currentDateStr, setCurrentDateStr] = useState<string>(() => {
+    return new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  });
+
+  useEffect(() => {
+    const updateDate = () => {
+      setCurrentDateStr(
+        new Date().toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      );
+    };
+    updateDate();
+  }, []);
 
   return (
     <Box
@@ -70,11 +88,10 @@ export function DashboardHeader({
 
       {/* Date Selector & Primary Action */}
       <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center flex-wrap">
-        {/* Date Selector Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[10px] bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 text-xs font-medium text-[#172033] dark:text-slate-200 shadow-[0_1px_3px_rgba(15,23,42,0.03)] cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+        {/* Dynamic Current Date Display */}
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[10px] bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 text-xs font-medium text-[#172033] dark:text-slate-200 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
           <CalendarTodayOutlinedIcon sx={{ fontSize: 14, color: "#64748B" }} />
-          <span>{dateRangeStr}</span>
-          <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16, color: "#94A3B8" }} />
+          <span suppressHydrationWarning>{currentDateStr}</span>
         </div>
 
         {/* Primary "+ Add New" Dropdown Button */}
