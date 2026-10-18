@@ -322,12 +322,26 @@ export function Sidebar() {
                   <ListSubheader
                     disableSticky
                     disableGutters
-                    className="bg-transparent px-2 pt-2 pb-1 select-none flex items-center justify-between leading-none"
+                    className="bg-transparent px-2.5 pt-2.5 pb-1 select-none flex items-center justify-between leading-none"
                   >
-                    <span className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] tracking-tight">
-                      {section.title}
-                    </span>
-                    <span className="h-[1px] flex-1 ml-2.5 bg-[#EEF2F7] dark:bg-slate-800" />
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full shrink-0",
+                          section.title === "Recruitment"
+                            ? "bg-blue-500 shadow-[0_0_6px_rgba(37,99,235,0.5)]"
+                            : section.title === "Workspace"
+                            ? "bg-indigo-500 shadow-[0_0_6px_rgba(99,102,241,0.5)]"
+                            : section.title === "System"
+                            ? "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]"
+                            : "bg-slate-400"
+                        )}
+                      />
+                      <span className="text-[10.5px] font-bold text-[#64748B] dark:text-[#94A3B8] tracking-wider uppercase">
+                        {section.title}
+                      </span>
+                    </div>
+                    <span className="h-[1px] flex-1 ml-2.5 bg-gradient-to-r from-[#E2E8F0] dark:from-slate-800 to-transparent" />
                   </ListSubheader>
                 ) : undefined
               }
@@ -356,7 +370,7 @@ export function Sidebar() {
                     component={Link}
                     href={item.href}
                     className={cn(
-                      "rounded-[8px] transition-all duration-150 outline-none select-none",
+                      "group rounded-[9px] transition-all duration-200 outline-none select-none relative",
                       isCollapsed
                         ? "w-[38px] h-[38px] p-0 mx-auto justify-center flex items-center"
                         : cn(
@@ -364,8 +378,8 @@ export function Sidebar() {
                             isActive ? "h-[40px]" : "h-[38px]"
                           ),
                       isActive
-                        ? "!bg-[#2563EB] !text-white font-semibold shadow-[0_2px_8px_rgba(37,99,235,0.16)]"
-                        : "!bg-transparent text-[#334155] dark:text-slate-300 hover:!bg-[#F8FAFC] dark:hover:!bg-slate-800/80 hover:!text-[#2563EB] font-medium"
+                        ? "bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] !text-white font-semibold shadow-[0_3px_10px_rgba(37,99,235,0.25)]"
+                        : "!bg-transparent text-[#334155] dark:text-slate-300 hover:!bg-slate-100/70 dark:hover:!bg-slate-800/70 hover:!text-[#0F172A] dark:hover:!text-white font-medium hover:translate-x-0.5"
                     )}
                     sx={{
                       minHeight: isCollapsed ? 38 : (isActive ? 40 : 38),
@@ -373,9 +387,14 @@ export function Sidebar() {
                       width: isCollapsed ? 38 : "100%",
                       justifyContent: isCollapsed ? "center" : "flex-start",
                       p: isCollapsed ? 0 : "0 10px",
-                      borderRadius: "8px",
+                      borderRadius: "9px",
                     }}
                   >
+                    {/* Active Left Indicator Notch */}
+                    {isActive && !isCollapsed && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-r-full bg-white shadow-sm" />
+                    )}
+
                     {/* Icon Container (30px x 30px, rounded-8px, clear 18px icon) */}
                     <ListItemIcon
                       className="transition-colors flex items-center justify-center shrink-0"
@@ -388,12 +407,16 @@ export function Sidebar() {
                     >
                       <div
                         className={cn(
-                          "w-[30px] h-[30px] rounded-[8px] flex items-center justify-center transition-all",
-                          isActive ? "bg-white/18 text-white" : ""
+                          "w-[30px] h-[30px] rounded-[8px] flex items-center justify-center transition-all duration-200",
+                          isActive
+                            ? "bg-white/20 text-white shadow-inner scale-100"
+                            : "group-hover:scale-110"
                         )}
                         style={{
-                          backgroundColor: isActive ? "rgba(255, 255, 255, 0.18)" : theme.bg,
+                          backgroundColor: isActive ? "rgba(255, 255, 255, 0.22)" : theme.bg,
                           color: isActive ? "#FFFFFF" : theme.color,
+                          border: isActive ? "1px solid rgba(255, 255, 255, 0.35)" : `1px solid ${theme.color}26`,
+                          boxShadow: isActive ? "0 2px 6px rgba(0,0,0,0.12)" : `0 1px 3px ${theme.color}18`,
                         }}
                       >
                         <Icon
@@ -401,20 +424,21 @@ export function Sidebar() {
                             fontSize: 18,
                             color: isActive ? "#FFFFFF" : theme.color,
                           }}
+                          className="transition-transform duration-200"
                         />
                       </div>
                     </ListItemIcon>
 
-                    {/* Navigation Item Label (13px) */}
+                    {/* Navigation Item Label (13px, stays crisp slate/white on hover, NEVER blue) */}
                     {!isCollapsed && (
                       <ListItemText
                         primary={
                           <span
                             className={cn(
-                              "text-[13px] tracking-tight truncate block leading-none",
+                              "text-[13px] tracking-tight truncate block leading-none transition-colors duration-150",
                               isActive
                                 ? "font-semibold text-white"
-                                : "font-medium text-[#334155] dark:text-slate-300 group-hover:text-[#2563EB]"
+                                : "font-medium text-[#334155] dark:text-slate-300 group-hover:text-[#0F172A] dark:group-hover:text-white"
                             )}
                           >
                             {item.name}
@@ -475,29 +499,36 @@ export function Sidebar() {
       </Box>
 
       {/* ─── 3. FIXED BOTTOM AREA (Upgrade Plan + User Profile, compact) ─── */}
-      <Box className="mt-auto shrink-0 p-[5px_7px] border-t border-[#EEF2F7] dark:border-slate-800 bg-white dark:bg-[#111827] flex flex-col gap-1.5">
+      <Box className="mt-auto shrink-0 p-[6px_8px] border-t border-[#EEF2F7] dark:border-slate-800 bg-white dark:bg-[#111827] flex flex-col gap-1.5">
         {/* Compact Upgrade Plan Card */}
         {!isCollapsed && (
           <Link
             href="/settings"
-            className="h-[44px] p-[5px_8px] rounded-[10px] bg-white dark:bg-slate-800/80 border border-[#E2E8F0] dark:border-slate-700/80 flex items-center justify-between gap-2 transition-all duration-150 hover:border-slate-300 dark:hover:border-slate-600 no-underline group"
+            className="h-[46px] p-[6px_10px] rounded-[10px] bg-gradient-to-r from-amber-500/10 via-orange-500/8 to-rose-500/10 dark:from-amber-500/15 dark:via-orange-500/12 dark:to-rose-500/15 border border-amber-300/60 dark:border-amber-600/40 flex items-center justify-between gap-2 transition-all duration-200 hover:shadow-md hover:border-amber-400 dark:hover:border-amber-500/60 hover:-translate-y-0.5 no-underline group relative overflow-hidden"
           >
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-6 h-6 rounded-[6px] bg-[#FFF7ED] text-[#EA580C] flex items-center justify-center shrink-0">
-                <WorkspacePremiumOutlinedIcon sx={{ fontSize: 14 }} />
+            {/* Ambient soft glow on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/10 to-orange-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="flex items-center gap-2.5 min-w-0 relative z-10">
+              <div className="w-7 h-7 rounded-[8px] bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(245,158,11,0.35)] group-hover:scale-105 transition-transform duration-200">
+                <WorkspacePremiumOutlinedIcon sx={{ fontSize: 16 }} />
               </div>
               <div className="flex flex-col min-w-0 leading-tight">
-                <span className="text-[11.5px] font-bold text-[#172033] dark:text-white truncate">
-                  Upgrade Plan
-                </span>
-                <span className="text-[9.5px] text-[#64748B] dark:text-[#94A3B8] truncate">
-                  Get more features
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[12px] font-bold text-[#172033] dark:text-white truncate">
+                    Upgrade Plan
+                  </span>
+                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 tracking-wider">
+                    PRO
+                  </span>
+                </div>
+                <span className="text-[10px] text-[#64748B] dark:text-[#94A3B8] truncate mt-0.5">
+                  Unlock enterprise tools
                 </span>
               </div>
             </div>
             <ArrowForwardOutlinedIcon
-              sx={{ fontSize: 12 }}
-              className="text-[#94A3B8] group-hover:text-[#2563EB] group-hover:translate-x-0.5 transition-all shrink-0"
+              sx={{ fontSize: 13 }}
+              className="text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform duration-200 shrink-0 relative z-10"
             />
           </Link>
         )}
@@ -539,7 +570,7 @@ export function Sidebar() {
           >
             <Link
               href="/profile"
-              className="flex items-center justify-center p-0.5 rounded-lg hover:bg-[#F8FAFC] dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center justify-center p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <Badge
                 overlap="circular"
@@ -561,6 +592,7 @@ export function Sidebar() {
                     src={user.avatar}
                     alt={user.name || "User"}
                     sx={{ width: 32, height: 32, borderRadius: "8px" }}
+                    className="hover:scale-105 transition-transform"
                   />
                 ) : (
                   <Avatar
@@ -568,10 +600,12 @@ export function Sidebar() {
                       width: 32,
                       height: 32,
                       borderRadius: "8px",
-                      backgroundColor: "#2563EB",
+                      background: "linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)",
                       fontSize: "11px",
                       fontWeight: 700,
+                      boxShadow: "0 2px 6px rgba(37,99,235,0.25)",
                     }}
+                    className="hover:scale-105 transition-transform"
                   >
                     {getUserInitials(user?.name)}
                   </Avatar>
@@ -580,10 +614,10 @@ export function Sidebar() {
             </Link>
           </Tooltip>
         ) : (
-          <div className="h-[46px] p-[5px_8px] rounded-[10px] bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700/80 flex items-center justify-between gap-1.5 transition-all">
+          <div className="h-[48px] p-[6px_10px] rounded-[10px] bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-2 transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100/70 dark:hover:bg-slate-800">
             <Link
               href="/profile"
-              className="flex items-center gap-2 min-w-0 no-underline hover:opacity-95 transition-opacity"
+              className="flex items-center gap-2.5 min-w-0 no-underline group"
             >
               <Badge
                 overlap="circular"
@@ -594,8 +628,8 @@ export function Sidebar() {
                     backgroundColor: "#10B981",
                     color: "#10B981",
                     boxShadow: "0 0 0 2px #FFFFFF",
-                    width: 6,
-                    height: 6,
+                    width: 7,
+                    height: 7,
                     borderRadius: "50%",
                   },
                 }}
@@ -604,18 +638,21 @@ export function Sidebar() {
                   <Avatar
                     src={user.avatar}
                     alt={user.name || "User"}
-                    sx={{ width: 30, height: 30, borderRadius: "8px" }}
+                    sx={{ width: 32, height: 32, borderRadius: "8px" }}
+                    className="group-hover:ring-2 ring-blue-500/30 transition-all"
                   />
                 ) : (
                   <Avatar
                     sx={{
-                      width: 30,
-                      height: 30,
+                      width: 32,
+                      height: 32,
                       borderRadius: "8px",
-                      backgroundColor: "#2563EB",
+                      background: "linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)",
                       fontSize: "11px",
                       fontWeight: 700,
+                      boxShadow: "0 2px 6px rgba(37,99,235,0.25)",
                     }}
+                    className="group-hover:scale-105 transition-transform"
                   >
                     {getUserInitials(user?.name)}
                   </Avatar>
@@ -623,10 +660,11 @@ export function Sidebar() {
               </Badge>
 
               <div className="flex flex-col min-w-0 leading-tight">
-                <span className="text-[12px] font-semibold text-[#172033] dark:text-white truncate">
+                <span className="text-[12px] font-semibold text-[#172033] dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {user?.name || "Abhi Singh"}
                 </span>
-                <span className="text-[9.5px] font-medium text-[#64748B] dark:text-[#94A3B8] truncate uppercase tracking-wider">
+                <span className="text-[9.5px] font-semibold text-[#64748B] dark:text-[#94A3B8] truncate uppercase tracking-wider flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   {user?.role || "ADMIN"}
                 </span>
               </div>
@@ -641,13 +679,15 @@ export function Sidebar() {
                 color: "#94A3B8",
                 "&:hover": {
                   color: "#EF4444",
-                  backgroundColor: "rgba(239, 68, 68, 0.08)",
+                  backgroundColor: "rgba(239, 68, 68, 0.1)",
                 },
-                borderRadius: "6px",
-                p: 0.5,
+                borderRadius: "8px",
+                p: 0.6,
+                transition: "all 0.2s ease-out",
               }}
+              className="hover:scale-110 active:scale-95"
             >
-              <LogoutOutlinedIcon sx={{ fontSize: 15 }} />
+              <LogoutOutlinedIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </div>
         )}

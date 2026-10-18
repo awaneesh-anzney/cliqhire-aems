@@ -626,4 +626,23 @@ div[contenteditable="true"] s {
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #CBD5E1 transparent;
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: #334155 transparent;
+}
+
+/* Smooth interactive micro-transitions across elements */
+button, a, [role="button"] {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
