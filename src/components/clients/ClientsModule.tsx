@@ -1032,8 +1032,38 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       <ExportDialog
         isOpen={openExportDialog}
         onClose={() => setOpenExportDialog(false)}
-        title={`Export ${entityNamePlural}`}
-        description={`Download CSV report for ${entityNamePlural.toLowerCase()}.`}
+        title={isLeads ? "Export Leads Data" : "Export Clients Data"}
+        description={
+          isLeads
+            ? "Download Excel report for leads by stage (Lead, Engaged) with optional date filters."
+            : "Download Excel report for signed client accounts."
+        }
+        filename={isLeads ? "leads_export" : "clients_export"}
+        isLeadsModule={isLeads}
+        showStageFilter={isLeads}
+        stages={
+          isLeads
+            ? [
+                {
+                  value: "Lead",
+                  label: "Lead",
+                  description: "Prospects & initial contacts",
+                  color: "blue",
+                },
+                {
+                  value: "Engaged",
+                  label: "Engaged",
+                  description: "Active discussions, meetings & proposals",
+                  color: "amber",
+                },
+              ]
+            : undefined
+        }
+        defaultStages={isLeads ? ["Lead", "Engaged"] : undefined}
+        fixedStage={isLeads ? undefined : "Signed"}
+        fixedStageLabel={
+          isLeads ? undefined : "Only signed and contracted clients will be exported."
+        }
         onExport={(params) => exportClientsMutation(params)}
       />
 

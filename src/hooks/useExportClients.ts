@@ -1,13 +1,13 @@
 
 import { useMutation } from "@tanstack/react-query";
-import { exportService, ExportCandidatesParams } from "@/services/exportService";
+import { exportService, ExportClientsParams } from "@/services/exportService";
 import { toast } from "sonner";
 
 export const useExportClients = () => {
     return useMutation({
-        mutationFn: (params?: ExportCandidatesParams) => exportService.exportClients(params),
-        onSuccess: (data) => {
-            toast.success("Data ready for download");
+        mutationFn: (params?: ExportClientsParams) => exportService.exportClients(params),
+        onSuccess: () => {
+            toast.success("Client data export prepared");
         },
         onError: (error) => {
             console.error("Export failed:", error);
