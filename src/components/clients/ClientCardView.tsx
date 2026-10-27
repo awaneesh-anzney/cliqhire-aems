@@ -28,6 +28,7 @@ export interface ClientCardItem {
   countryOfBusiness: string;
   clientStage: "Lead" | "Engaged" | "Signed";
   clientSubStage?: ClientStageStatus;
+  engagementCategory?: string;
   owner: string;
   team: string;
   createdAt: string;
@@ -233,6 +234,29 @@ export const ClientCardView: React.FC<ClientCardViewProps> = ({
                         fontWeight: 700,
                         bgcolor: "rgba(255, 171, 0, 0.1)",
                         color: "#FFAB00",
+                        border: 0,
+                        "& .MuiChip-label": { px: 0.5 },
+                      }}
+                    />
+                  )}
+                  {client.engagementCategory && (
+                    <Chip
+                      label={client.engagementCategory}
+                      size="small"
+                      sx={{
+                        height: 16,
+                        fontSize: "0.58rem",
+                        fontWeight: 700,
+                        bgcolor: client.engagementCategory.toLowerCase().includes("high")
+                          ? "rgba(16, 185, 129, 0.12)"
+                          : client.engagementCategory.toLowerCase().includes("early")
+                            ? "rgba(99, 102, 241, 0.12)"
+                            : "rgba(239, 68, 68, 0.12)",
+                        color: client.engagementCategory.toLowerCase().includes("high")
+                          ? "#10B981"
+                          : client.engagementCategory.toLowerCase().includes("early")
+                            ? "#6366F1"
+                            : "#EF4444",
                         border: 0,
                         "& .MuiChip-label": { px: 0.5 },
                       }}

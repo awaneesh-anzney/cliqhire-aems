@@ -131,6 +131,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
   const [referredByInput, setReferredByInput] = useState("");
   const [createdByInput, setCreatedByInput] = useState("");
   const [selectedClientStage, setSelectedClientStage] = useState<string>("All");
+  const [selectedEngagementCategory, setSelectedEngagementCategory] = useState<string>("All");
 
   // Debounced filters
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -184,6 +185,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     debouncedReferredBy,
     debouncedCreatedBy,
     selectedClientStage,
+    selectedEngagementCategory,
   ]);
 
   const clearAllFilters = () => {
@@ -198,6 +200,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     setReferredByInput("");
     setCreatedByInput("");
     setSelectedClientStage("All");
+    setSelectedEngagementCategory("All");
     setCurrentPage(1);
   };
 
@@ -213,6 +216,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     if (referredByInput.trim()) count++;
     if (createdByInput.trim()) count++;
     if (isLeads && selectedClientStage !== "All") count++;
+    if (isLeads && selectedEngagementCategory !== "All") count++;
     return count;
   }, [
     nameInput,
@@ -228,10 +232,14 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     selectedClientStage,
   ]);
 
+  const isCategoryActive = isLeads && selectedEngagementCategory !== "All";
+
   const fetchStage = isLeads
-    ? selectedClientStage === "All"
-      ? "Lead,Engaged"
-      : selectedClientStage
+    ? isCategoryActive
+      ? undefined
+      : selectedClientStage === "All"
+        ? "Lead,Engaged"
+        : selectedClientStage
     : "Signed";
 
   const {
@@ -253,6 +261,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     referredBy: debouncedReferredBy || undefined,
     createdBy: debouncedCreatedBy || undefined,
     clientStage: fetchStage,
+    engagementCategory: isCategoryActive ? selectedEngagementCategory : undefined,
     topLevelOnly: true,
   });
 
@@ -266,6 +275,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       countryOfBusiness: (c as any).countryOfBusiness ?? c.location ?? "",
       clientStage: (c.clientStage ?? "Lead") as Client["clientStage"],
       clientSubStage: (c.clientSubStage ?? "") as ClientStageStatus,
+      engagementCategory: (c as any).engagementCategory || "",
       owner: (c as any).owner ?? "",
       team: (c as any).team ?? "",
       createdAt: c.createdAt,
@@ -698,7 +708,10 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
             clients={allClients}
             moduleType={moduleType}
             selectedStage={selectedClientStage}
+            selectedEngagementCategory={selectedEngagementCategory}
+            engagementCounts={clientsPage?.engagementCounts}
             onSelectStage={isLeads ? setSelectedClientStage : undefined}
+            onSelectEngagementCategory={isLeads ? setSelectedEngagementCategory : undefined}
           />
 
           {(activeFiltersCount > 0 || searchInput) && (

@@ -88,6 +88,7 @@ export interface ClientResponse {
   primaryContacts?: PrimaryContact[];
   clientStage?: "Lead" | "Engaged" | "Signed";
   clientSubStage?: ClientStageStatus;
+  engagementCategory?: string;
   clientTeam?: "Enterprise" | "SMB" | "Mid-Market";
   clientRm?: string;
   clientAge?: {
@@ -568,15 +569,25 @@ const createClient = async (
   }
 };
 
+export interface EngagementCounts {
+  lowEngaged: number;
+  earlyEngaged: number;
+  highEngaged: number;
+  signed?: number;
+  total?: number;
+}
+
 export interface ClientsPage {
   clients: ClientResponse[];
   totalCount: number;
   page: number;
   limit: number;
   totalPages: number;
+  engagementCounts?: EngagementCounts;
   filters?: {
     topLevelOnly?: boolean;
     topLevelOnlyRequested?: boolean;
+    engagementCategory?: string;
     [key: string]: any;
   };
 }
@@ -593,6 +604,7 @@ const getClients = async (
     phoneNumber?: string;
     industry?: string;
     clientStage?: "Lead" | "Engaged" | "Signed" | string;
+    engagementCategory?: string;
     location?: string;
     clientTeam?: "Enterprise" | "SMB" | "Mid-Market";
   } = {},
@@ -608,7 +620,7 @@ const getClients = async (
 
     const resData = response.data;
 
-    // New API format: { success, totalCount, page, limit, data: [...] }
+    // New API format: { success, totalCount, page, limit, engagementCounts, data: [...] }
     if (resData.success && Array.isArray(resData.data)) {
       const totalCount = resData.totalCount ?? resData.results ?? resData.data.length;
       return {
@@ -617,6 +629,7 @@ const getClients = async (
         page: resData.page ?? page,
         limit: resData.limit ?? limit,
         totalPages: Math.ceil(totalCount / limit) || 1,
+        engagementCounts: resData.engagementCounts,
         filters: resData.filters,
       };
     }
@@ -630,6 +643,7 @@ const getClients = async (
         page: p ?? page,
         limit,
         totalPages: (pages ?? Math.ceil((total ?? clients.length) / limit)) || 1,
+        engagementCounts: resData.engagementCounts ?? resData.data?.engagementCounts,
         filters: resData.filters,
       };
     }
@@ -647,6 +661,7 @@ const getClients = async (
       page,
       limit,
       totalPages: Math.ceil(totalCount / limit) || 1,
+      engagementCounts: resData.engagementCounts,
       filters: resData.filters,
     };
   } catch (error: any) {
