@@ -1,5 +1,10 @@
 export { DashboardHeader } from "./DashboardHeader";
 export { ExecutiveKpiStrip } from "./ExecutiveKpiStrip";
+export { DashboardTimeframeBar } from "./DashboardTimeframeBar";
+export { RecruitmentFunnelCard } from "./RecruitmentFunnelCard";
+export { MonthlyTrendsChartCard } from "./MonthlyTrendsChartCard";
+export { DistributionCards } from "./DistributionCards";
+export { LeaderboardsCard } from "./LeaderboardsCard";
 export { PipelineVelocityCard } from "./PipelineVelocityCard";
 export { OperationsLaunchpad } from "./OperationsLaunchpad";
 export { RecruitmentForceCard } from "./RecruitmentForceCard";

@@ -13,6 +13,7 @@ import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
+import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 
 interface OperationsLaunchpadProps {
   onOpenCandidate: () => void;
@@ -29,13 +30,23 @@ export function OperationsLaunchpad({
 
   const launchActions = [
     {
-      title: "Capture Talent",
-      subtitle: "Add a candidate to system & parse resume",
-      icon: <PersonAddAlt1OutlinedIcon sx={{ fontSize: 18, color: "#10B981" }} />,
+      title: "Hired Placements",
+      subtitle: "Track probation, offer letters & team hierarchy",
+      icon: <EmojiEventsOutlinedIcon sx={{ fontSize: 18, color: "#10B981" }} />,
       bg: "#ECFDF5",
-      badge: "Intake",
+      badge: "Report",
       badgeColor: "#10B981",
       badgeBg: "#ECFDF5",
+      onClick: () => router.push("/dashboard/hired-candidate"),
+    },
+    {
+      title: "Capture Talent",
+      subtitle: "Add a candidate to system & parse resume",
+      icon: <PersonAddAlt1OutlinedIcon sx={{ fontSize: 18, color: "#2563EB" }} />,
+      bg: "#EFF6FF",
+      badge: "Intake",
+      badgeColor: "#2563EB",
+      badgeBg: "#EFF6FF",
       onClick: onOpenCandidate,
     },
     {
@@ -60,7 +71,7 @@ export function OperationsLaunchpad({
     },
     {
       title: "Create Agreement",
-      subtitle: "Generate and send contract",
+      subtitle: "Generate and send contract / MSA",
       icon: <DescriptionOutlinedIcon sx={{ fontSize: 18, color: "#F43F5E" }} />,
       bg: "#FFF1F2",
       badge: "Legal",
@@ -88,15 +99,15 @@ export function OperationsLaunchpad({
         </span>
       </div>
 
-      {/* 4 Interactive Action Cards */}
-      <div className="py-2.5 flex-1 flex flex-col justify-between gap-2.5">
+      {/* Interactive Action Cards */}
+      <div className="py-2.5 flex-1 flex flex-col justify-between gap-2">
         {launchActions.map((action, idx) => (
           <Button
             key={idx}
             onClick={action.onClick}
             sx={{
               width: "100%",
-              p: 1.5,
+              p: 1.25,
               borderRadius: "12px",
               border: "1px solid #E7EDF4",
               bgcolor: "#FFFFFF",
@@ -115,9 +126,9 @@ export function OperationsLaunchpad({
             }}
             className="group dark:!bg-slate-800/60 dark:!border-slate-700/80 dark:hover:!bg-slate-800"
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
                 style={{ backgroundColor: action.bg }}
               >
                 {action.icon}
@@ -125,11 +136,11 @@ export function OperationsLaunchpad({
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#172033", lineHeight: 1.2 }} className="dark:!text-white">
+                  <Typography sx={{ fontSize: "12.5px", fontWeight: 700, color: "#172033", lineHeight: 1.2 }} className="dark:!text-white">
                     {action.title}
                   </Typography>
                   <span
-                    className="text-[9.5px] font-bold px-1.5 py-0.2 rounded"
+                    className="text-[9px] font-bold px-1 py-0.2 rounded"
                     style={{
                       color: action.badgeColor,
                       backgroundColor: action.badgeBg,
@@ -138,14 +149,14 @@ export function OperationsLaunchpad({
                     {action.badge}
                   </span>
                 </div>
-                <Typography sx={{ fontSize: "11px", color: "#64748B", mt: 0.25 }} className="dark:!text-[#94A3B8] truncate">
+                <Typography sx={{ fontSize: "10.5px", color: "#64748B", mt: 0.2 }} className="dark:!text-[#94A3B8] truncate">
                   {action.subtitle}
                 </Typography>
               </div>
             </div>
 
             <ChevronRightOutlinedIcon
-              sx={{ fontSize: 18 }}
+              sx={{ fontSize: 16 }}
               className="text-[#94A3B8] group-hover:text-[#2563EB] group-hover:translate-x-0.5 transition-all shrink-0 ml-1"
             />
           </Button>
