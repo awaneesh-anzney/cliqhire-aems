@@ -52,17 +52,6 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  // Fallbacks for backward compatibility
-  const candidatesTotal = dashboardStats?.candidates?.total || 0;
-  const jobsTotal = dashboardStats?.jobs?.total || 0;
-  const clientsTotal = dashboardStats?.clients?.total || 0;
-  const pipelineTotal =
-    dashboardStats?.pipeline?.totalCandidatesInPipeline || 0;
-  const candidatesInProcess =
-    dashboardStats?.pipeline?.candidatesInProcess || 0;
-  const candidatesCompleted =
-    dashboardStats?.pipeline?.candidatesCompleted || 0;
-
   return (
     <Box
       sx={{
@@ -75,9 +64,10 @@ export default function DashboardPage() {
       }}
       className="font-sans"
     >
-      {/* ─── 1. EXECUTIVE WELCOME HEADER ─── */}
+      {/* ─── 1. EXECUTIVE WELCOME & COMPANY BRANDING HEADER ─── */}
       <DashboardHeader
         userName={user?.name}
+        companyName="CliqHire"
         onOpenClient={() => setOpenClientModal(true)}
         onOpenJob={() => setOpenJobModal(true)}
         onOpenCandidate={() => setOpenCandidateModal(true)}
@@ -93,16 +83,22 @@ export default function DashboardPage() {
       />
 
       {/* ─── 3. PRIMARY EXECUTIVE METRICS KPI STRIP ─── */}
-      {/* Note: Hired Candidates card links directly to /dashboard/hired-candidate */}
+      {/* Order: 1. Clients (Lead, Engaged, Signed), 2. Jobs, 3. Candidates, 4. Hired Candidates */}
       <ExecutiveKpiStrip
         kpiCards={dashboardStats?.kpiCards}
+        candidatesStats={dashboardStats?.candidates}
         timeframeLabel={dashboardStats?.timeframe?.label}
-        candidatesTotal={candidatesTotal}
-        jobsTotal={jobsTotal}
-        clientsTotal={clientsTotal}
-        candidatesCompleted={candidatesCompleted}
-        candidatesInProcess={candidatesInProcess}
-        pipelineTotal={pipelineTotal}
+        candidatesTotal={dashboardStats?.candidates?.total || 0}
+        candidatesActive={dashboardStats?.candidates?.active || 0}
+        candidatesInactive={dashboardStats?.candidates?.inactive || 0}
+        jobsTotal={dashboardStats?.jobs?.total || 0}
+        jobsActive={dashboardStats?.jobs?.active || 0}
+        jobsInactive={dashboardStats?.jobs?.inactive || 0}
+        clientsTotal={dashboardStats?.clients?.total || 0}
+        clientsLead={dashboardStats?.clients?.byStage?.lead || 0}
+        clientsEngaged={dashboardStats?.clients?.byStage?.engaged || 0}
+        clientsSigned={dashboardStats?.clients?.byStage?.signed || 0}
+        candidatesCompleted={dashboardStats?.pipeline?.candidatesCompleted || 0}
       />
 
       {/* ─── 4. ANALYTICAL WORKSPACE: FUNNEL & OPERATIONS ─── */}

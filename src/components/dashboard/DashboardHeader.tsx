@@ -15,9 +15,11 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 
 interface DashboardHeaderProps {
   userName?: string;
+  companyName?: string;
   onOpenClient: () => void;
   onOpenJob: () => void;
   onOpenCandidate: () => void;
@@ -25,11 +27,12 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({
   userName,
+  companyName = "CliqHire",
   onOpenClient,
   onOpenJob,
   onOpenCandidate,
 }: DashboardHeaderProps) {
-  const firstName = userName ? userName.split(" ")[0] : "Abhi";
+  const firstName = userName ? userName.split(" ")[0] : "Executive";
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
@@ -65,34 +68,50 @@ export function DashboardHeader({
   return (
     <Box
       component="section"
-      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-sans select-none"
+      className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans select-none p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-r from-white via-slate-50/50 to-blue-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
     >
-      {/* Welcome Title & Subtitle */}
-      <div className="flex items-center gap-3">
-        <span className="text-2xl select-none shrink-0" role="img" aria-label="Waving hand">
-          👋
-        </span>
+      {/* ─── Company & User Welcome Banner ─── */}
+      <div className="flex items-center gap-3.5">
+        {/* CliqHire Brand Logo / Icon */}
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2563EB] to-[#4F46E5] text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-blue-500/25 shrink-0 border border-white/20">
+          <span>CH</span>
+        </div>
+
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#172033] dark:text-white tracking-tight leading-tight">
+          {/* Company Badge */}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400 flex items-center gap-1">
+              <span>{companyName}</span>
+              <span className="text-slate-400 font-semibold">• AEMS</span>
+            </span>
+            <span className="inline-flex items-center gap-0.5 px-2 py-0.2 rounded-full text-[10px] font-bold bg-blue-100/70 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300">
+              <VerifiedOutlinedIcon sx={{ fontSize: 11 }} />
+              Enterprise
+            </span>
+          </div>
+
+          {/* Welcome User Heading */}
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mt-0.5">
             Welcome back, {firstName}!
           </h1>
-          <p className="text-xs sm:text-[13px] text-[#64748B] dark:text-[#94A3B8] font-normal mt-0.5">
-            Here&apos;s what&apos;s happening with your recruitment today.
+
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            {companyName} Executive Talent Intelligence & Operations Hub
           </p>
         </div>
       </div>
 
-      {/* Date Selector & Primary Action */}
-      <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center flex-wrap">
+      {/* ─── Date Selector & Add Actions ─── */}
+      <div className="flex items-center gap-2.5 shrink-0 self-start md:self-center flex-wrap">
         {/* Dynamic Colorful Current Date Display */}
-        <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-[12px] bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-purple-50/50 dark:from-slate-800/95 dark:via-blue-950/50 dark:to-slate-800/95 border border-blue-200/80 dark:border-blue-700/50 shadow-[0_2px_8px_rgba(37,99,235,0.08)] hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
-          <div className="w-6 h-6 rounded-[7px] bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-[0_2px_6px_rgba(37,99,235,0.3)]">
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: "#FFFFFF" }} />
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <div className="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
           </div>
           <div className="flex items-center gap-1.5 text-xs">
             <span
               suppressHydrationWarning
-              className="px-1.5 py-0.5 rounded-[5px] bg-blue-500/12 dark:bg-blue-400/20 text-blue-700 dark:text-blue-300 font-bold text-[11px] tracking-tight"
+              className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 font-bold text-[10.5px]"
             >
               {dateInfo.weekday}
             </span>
@@ -115,9 +134,9 @@ export function DashboardHeader({
             sx={{
               height: 38,
               px: 2,
-              borderRadius: "10px",
+              borderRadius: "11px",
               textTransform: "none",
-              fontWeight: 600,
+              fontWeight: 700,
               fontSize: "13px",
               backgroundColor: "#2563EB",
               boxShadow: "0 2px 8px rgba(37, 99, 235, 0.2)",
@@ -139,9 +158,9 @@ export function DashboardHeader({
             slotProps={{
               paper: {
                 elevation: 4,
-                className: "bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-xl shadow-lg",
+                className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg",
                 sx: {
-                  width: 210,
+                  width: 220,
                   mt: 1,
                   p: 0.5,
                   borderRadius: "12px",
@@ -159,7 +178,7 @@ export function DashboardHeader({
                 py: 1,
                 px: 1.5,
                 fontSize: "13px",
-                fontWeight: 500,
+                fontWeight: 600,
                 color: "#172033",
                 "&:hover": {
                   bgcolor: "#EFF6FF",
@@ -185,7 +204,7 @@ export function DashboardHeader({
                 py: 1,
                 px: 1.5,
                 fontSize: "13px",
-                fontWeight: 500,
+                fontWeight: 600,
                 color: "#172033",
                 "&:hover": {
                   bgcolor: "#EFF6FF",
@@ -211,7 +230,7 @@ export function DashboardHeader({
                 py: 1,
                 px: 1.5,
                 fontSize: "13px",
-                fontWeight: 500,
+                fontWeight: 600,
                 color: "#172033",
                 "&:hover": {
                   bgcolor: "#EFF6FF",
