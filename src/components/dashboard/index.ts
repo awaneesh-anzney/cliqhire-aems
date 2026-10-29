@@ -5,3 +5,4 @@ export { OperationsLaunchpad } from "./OperationsLaunchpad";
 export { RecruitmentForceCard } from "./RecruitmentForceCard";
 export { LegalAgreementsCard } from "./LegalAgreementsCard";
 export { DashboardSkeleton } from "./DashboardSkeleton";
+export { HiredCandidatesSection } from "./hired-candidates";

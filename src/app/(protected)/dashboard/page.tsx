@@ -12,6 +12,7 @@ import {
   RecruitmentForceCard,
   LegalAgreementsCard,
   DashboardSkeleton,
+  HiredCandidatesSection,
 } from "@/components/dashboard";
 import { CreateClientModal } from "@/components/create-client-modal/create-client-modal";
 import { CreateJobRequirementForm } from "@/components/new-jobs/create-jobs-form";
@@ -164,7 +165,10 @@ export default function DashboardPage() {
         </Box>
       </Box>
 
-      {/* ─── 4. MODALS PRESERVED WITH 100% REAL APIS ─── */}
+      {/* ─── 4. HIRED CANDIDATES & PLACEMENT REGISTRY ─── */}
+      <HiredCandidatesSection />
+
+      {/* ─── 5. MODALS PRESERVED WITH 100% REAL APIS ─── */}
       <CreateClientModal
         open={openClientModal}
         onOpenChange={setOpenClientModal}
