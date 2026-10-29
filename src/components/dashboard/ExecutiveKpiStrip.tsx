@@ -9,9 +9,9 @@ import {
   Users,
   Award,
   ArrowUpRight,
-  UserCheck,
+  TrendingUp,
 } from "lucide-react";
-import { DashboardKpiCards } from "@/types/dashboard";
+import { DashboardKpiCards, MonthlyTrendData } from "@/types/dashboard";
 
 interface ExecutiveKpiStripProps {
   kpiCards?: DashboardKpiCards;
@@ -20,6 +20,7 @@ interface ExecutiveKpiStripProps {
     active: number;
     inactive: number;
   };
+  monthlyTrends?: MonthlyTrendData[];
   timeframeLabel?: string;
 
   // Fallback props
@@ -38,15 +39,16 @@ interface ExecutiveKpiStripProps {
 
 /**
  * Primary Executive KPI Strip.
- * Display sequence requested:
+ * Display sequence:
  * 1. Clients (with Lead, Engaged, Signed breakdown)
- * 2. Jobs (Total, Active, Inactive)
- * 3. Candidates (Total, Active, Inactive)
+ * 2. Jobs (Total, Active, Inactive + contextual month velocity)
+ * 3. Candidates (Total, Active, Inactive + contextual month sourcing)
  * 4. Hired Candidates (Window Placements, All-Time total, link to /dashboard/hired-candidate)
  */
 export function ExecutiveKpiStrip({
   kpiCards,
   candidatesStats,
+  monthlyTrends,
   timeframeLabel,
   candidatesTotal = 0,
   candidatesActive = 0,
@@ -80,9 +82,23 @@ export function ExecutiveKpiStrip({
   const hiredVal = kpiCards?.hiredCandidates?.value ?? candidatesCompleted;
   const hiredAllTimeVal = kpiCards?.hiredCandidates?.totalAllTime;
 
+  // ─── 5. Contextual Monthly Trend Correlation ───
+  // Find if active timeframeLabel matches any month in monthlyTrends
+  const matchingMonthTrend = React.useMemo(() => {
+    if (!timeframeLabel || !monthlyTrends || monthlyTrends.length === 0) return null;
+    const cleanLabel = timeframeLabel.toLowerCase().trim();
+    return (
+      monthlyTrends.find((t) => {
+        const tLabel = t.label.toLowerCase().trim();
+        const tMonth = t.month.toLowerCase().trim();
+        return cleanLabel.includes(tLabel) || cleanLabel.includes(tMonth);
+      }) || null
+    );
+  }, [timeframeLabel, monthlyTrends]);
+
   return (
     <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 shrink-0 font-sans">
-      {/* ─── 1. CLIENTS (Amber/Gold Theme) ─── */}
+      {/* ─── 1. CLIENTS (Amber Theme) ─── */}
       <Link
         href="/clients"
         className="group relative p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_2px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_24px_rgba(245,158,11,0.08)] hover:border-amber-300 dark:hover:border-amber-700 transition-all duration-200 flex flex-col justify-between no-underline"
@@ -165,16 +181,24 @@ export function ExecutiveKpiStrip({
           </div>
         </div>
 
-        {/* Active vs Inactive Breakdown */}
+        {/* Active vs Inactive Breakdown with dynamic month velocity badge if available */}
         <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-          <span className="text-slate-600 dark:text-slate-300 font-medium">
-            <strong className="text-emerald-600 dark:text-emerald-400 font-bold">
-              {jobActiveVal}
-            </strong>{" "}
-            Active
-          </span>
+          {matchingMonthTrend ? (
+            <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold text-[11px]">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+{matchingMonthTrend.jobsOpened} opened in {matchingMonthTrend.label}</span>
+            </div>
+          ) : (
+            <span className="text-slate-600 dark:text-slate-300 font-medium">
+              <strong className="text-emerald-600 dark:text-emerald-400 font-bold">
+                {jobActiveVal}
+              </strong>{" "}
+              Active Roles
+            </span>
+          )}
+
           <span className="text-[11px] text-slate-400">
-            {jobInactiveVal} Inactive / Closed
+            {jobInactiveVal} Inactive
           </span>
         </div>
       </Link>
@@ -209,14 +233,22 @@ export function ExecutiveKpiStrip({
           </div>
         </div>
 
-        {/* Active vs Inactive Breakdown */}
+        {/* Active vs Inactive Breakdown with dynamic month sourcing badge if available */}
         <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-          <span className="text-slate-600 dark:text-slate-300 font-medium">
-            <strong className="text-indigo-600 dark:text-indigo-400 font-bold">
-              {candActiveVal.toLocaleString()}
-            </strong>{" "}
-            Active Profiles
-          </span>
+          {matchingMonthTrend ? (
+            <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px]">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+{matchingMonthTrend.candidatesSourced} sourced in {matchingMonthTrend.label}</span>
+            </div>
+          ) : (
+            <span className="text-slate-600 dark:text-slate-300 font-medium">
+              <strong className="text-indigo-600 dark:text-indigo-400 font-bold">
+                {candActiveVal.toLocaleString()}
+              </strong>{" "}
+              Active Profiles
+            </span>
+          )}
+
           <span className="text-[11px] text-slate-400">
             {candInactiveVal.toLocaleString()} Inactive
           </span>
@@ -238,7 +270,7 @@ export function ExecutiveKpiStrip({
                 <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 block leading-tight">
                   Hired Candidates
                 </span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold truncate max-w-[120px] block">
                   {timeframeLabel || "Selected Window"}
                 </span>
               </div>

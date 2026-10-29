@@ -14,19 +14,38 @@ export const getDashboardStats = async (
 ): Promise<DashboardData> => {
   try {
     const cleanParams: Record<string, any> = {};
+
     if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          cleanParams[key] = value;
-        }
-      });
+      // 1. If explicit start and end date are provided, send custom date range
+      if (params.startDate && params.endDate) {
+        cleanParams.startDate = params.startDate;
+        cleanParams.endDate = params.endDate;
+      }
+      // 2. If specific year and month are provided, send year & month
+      else if (params.month !== undefined && params.month !== null) {
+        cleanParams.year = params.year || new Date().getFullYear();
+        cleanParams.month = Number(params.month);
+      }
+      // 3. Otherwise send timeframe preset
+      else if (params.timeframe && params.timeframe !== "custom") {
+        cleanParams.timeframe = params.timeframe;
+        if (params.year) cleanParams.year = params.year;
+      }
     }
+
+    console.log("[DashboardService] Requesting stats with params:", cleanParams);
 
     const response = await api.get<DashboardResponse>("/api/dashboard/stats", {
       params: cleanParams,
     });
 
     const data = response.data.data;
+    console.log(
+      "[DashboardService] Received stats for:",
+      data.timeframe?.label,
+      "Hired:",
+      data.kpiCards?.hiredCandidates?.value
+    );
 
     // Backward compatibility calculations for older dashboard consumers
     const stageBreakdown = data.pipeline?.stageBreakdown || [];

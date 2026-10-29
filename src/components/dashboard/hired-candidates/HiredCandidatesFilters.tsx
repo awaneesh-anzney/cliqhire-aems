@@ -5,10 +5,11 @@ import {
   Search,
   X,
   Filter,
-  Calendar,
+  CalendarDays,
   RotateCcw,
   Clock,
-  Sparkles,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import {
   HiredCandidatesFilterParams,
@@ -16,6 +17,12 @@ import {
   HiredCandidatesDateField,
   ProbationStatus,
 } from "@/types/hiredCandidate";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { format, subDays } from "date-fns";
 
 interface HiredCandidatesFiltersProps {
   filters: HiredCandidatesFilterParams;
@@ -30,7 +37,6 @@ const TIMEFRAME_PRESETS: { id: HiredCandidatesTimeframePreset; label: string }[]
   { id: "3_months", label: "Past 3M" },
   { id: "6_months", label: "Past 6M" },
   { id: "year", label: "This Year" },
-  { id: "custom", label: "Custom Range" },
 ];
 
 const PROBATION_OPTIONS: { id: ProbationStatus; label: string }[] = [
@@ -54,14 +60,19 @@ export const HiredCandidatesFilters: React.FC<HiredCandidatesFiltersProps> = ({
 }) => {
   // Local state for debounced search
   const [searchInput, setSearchInput] = useState(filters.search || "");
-  const [showCustomDates, setShowCustomDates] = useState(
-    filters.timeframe === "custom" || Boolean(filters.startDate || filters.endDate)
-  );
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [localStartDate, setLocalStartDate] = useState(filters.startDate || "");
+  const [localEndDate, setLocalEndDate] = useState(filters.endDate || "");
 
   // Sync internal search input with external filters
   useEffect(() => {
     setSearchInput(filters.search || "");
   }, [filters.search]);
+
+  useEffect(() => {
+    setLocalStartDate(filters.startDate || "");
+    setLocalEndDate(filters.endDate || "");
+  }, [filters.startDate, filters.endDate]);
 
   // Debounced search trigger
   useEffect(() => {
@@ -75,20 +86,14 @@ export const HiredCandidatesFilters: React.FC<HiredCandidatesFiltersProps> = ({
   }, [searchInput]);
 
   const handleTimeframeSelect = (preset: HiredCandidatesTimeframePreset) => {
-    if (preset === "custom") {
-      setShowCustomDates(true);
-      onFilterChange({ timeframe: "custom", page: 1 });
-    } else {
-      setShowCustomDates(false);
-      onFilterChange({
-        timeframe: preset,
-        startDate: undefined,
-        endDate: undefined,
-        year: undefined,
-        month: undefined,
-        page: 1,
-      });
-    }
+    onFilterChange({
+      timeframe: preset,
+      startDate: undefined,
+      endDate: undefined,
+      year: undefined,
+      month: undefined,
+      page: 1,
+    });
   };
 
   const handleDateFieldToggle = () => {
@@ -97,7 +102,47 @@ export const HiredCandidatesFilters: React.FC<HiredCandidatesFiltersProps> = ({
     onFilterChange({ dateField: nextField, page: 1 });
   };
 
+  const handleApplyQuickDays = (days: number) => {
+    const today = new Date();
+    const start = subDays(today, days);
+    const startFormatted = format(start, "yyyy-MM-dd");
+    const endFormatted = format(today, "yyyy-MM-dd");
+
+    setLocalStartDate(startFormatted);
+    setLocalEndDate(endFormatted);
+
+    onFilterChange({
+      startDate: startFormatted,
+      endDate: endFormatted,
+      timeframe: "custom",
+      page: 1,
+    });
+    setPopoverOpen(false);
+  };
+
+  const handleApplyCustomDates = () => {
+    if (!localStartDate || !localEndDate) return;
+
+    onFilterChange({
+      startDate: localStartDate,
+      endDate: localEndDate,
+      timeframe: "custom",
+      page: 1,
+    });
+    setPopoverOpen(false);
+  };
+
+  const formatDateLabel = (isoStr?: string) => {
+    if (!isoStr) return "";
+    try {
+      return format(new Date(isoStr), "dd MMM yyyy");
+    } catch {
+      return isoStr;
+    }
+  };
+
   // Determine if active filters exist to display Reset button
+  const isCustomActive = Boolean(filters.startDate && filters.endDate);
   const hasActiveFilters = Boolean(
     (filters.timeframe && filters.timeframe !== "all") ||
       (filters.probationStatus && filters.probationStatus !== "all") ||
@@ -108,7 +153,7 @@ export const HiredCandidatesFilters: React.FC<HiredCandidatesFiltersProps> = ({
   );
 
   return (
-    <div className="flex flex-col gap-3 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+    <div className="flex flex-col gap-3 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm font-sans">
       {/* ─── Top Row: Search + Quick Toggles ─── */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Search Input */}
@@ -170,15 +215,16 @@ export const HiredCandidatesFilters: React.FC<HiredCandidatesFiltersProps> = ({
 
       {/* ─── Bottom Row: Presets & Probation Status Filters ─── */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80">
-        {/* Timeframe Presets */}
+        {/* Timeframe Presets + Custom Range Popover */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5" />
+            <Filter className="w-3.5 h-3.5" />
             Timeframe:
           </span>
+
           {TIMEFRAME_PRESETS.map((preset) => {
             const isSelected =
-              (filters.timeframe || "all") === preset.id;
+              !isCustomActive && (filters.timeframe || "all") === preset.id;
             return (
               <button
                 key={preset.id}
@@ -193,6 +239,132 @@ export const HiredCandidatesFilters: React.FC<HiredCandidatesFiltersProps> = ({
               </button>
             );
           })}
+
+          {/* Custom Date Range Popover */}
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border transition-all ${
+                  isCustomActive
+                    ? "bg-purple-600 text-white border-purple-600 shadow-sm shadow-purple-500/25 font-semibold"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"
+                }`}
+              >
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>Custom Range</span>
+                <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
+              </button>
+            </PopoverTrigger>
+
+            <PopoverContent
+              align="start"
+              className="w-80 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50"
+            >
+              <div className="space-y-3.5">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarDays className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      Custom Placement Range
+                    </span>
+                  </div>
+                  {isCustomActive && (
+                    <button
+                      onClick={() => {
+                        setLocalStartDate("");
+                        setLocalEndDate("");
+                        handleTimeframeSelect("all");
+                        setPopoverOpen(false);
+                      }}
+                      className="text-[11px] text-rose-600 hover:underline flex items-center gap-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                {/* Quick Presets */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                    Quick Preset
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleApplyQuickDays(7)}
+                      className="py-1 px-2 text-[11px] font-medium rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      Last 7 Days
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyQuickDays(30)}
+                      className="py-1 px-2 text-[11px] font-medium rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      Last 30 Days
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyQuickDays(90)}
+                      className="py-1 px-2 text-[11px] font-medium rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      Last 90 Days
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dates Input */}
+                <div className="space-y-2 pt-1">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center justify-between">
+                      <span>Start Date:</span>
+                      {localStartDate && (
+                        <span className="text-[10.5px] text-blue-600 font-semibold">
+                          {formatDateLabel(localStartDate)}
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="date"
+                      value={localStartDate}
+                      onChange={(e) => setLocalStartDate(e.target.value)}
+                      className="w-full text-xs font-medium p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center justify-between">
+                      <span>End Date:</span>
+                      {localEndDate && (
+                        <span className="text-[10.5px] text-blue-600 font-semibold">
+                          {formatDateLabel(localEndDate)}
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="date"
+                      value={localEndDate}
+                      onChange={(e) => setLocalEndDate(e.target.value)}
+                      className="w-full text-xs font-medium p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleApplyCustomDates}
+                    disabled={!localStartDate || !localEndDate}
+                    className="w-full py-1.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md shadow-purple-600/25 transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Apply Filter</span>
+                  </button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Probation Status Select */}
@@ -219,62 +391,6 @@ export const HiredCandidatesFilters: React.FC<HiredCandidatesFiltersProps> = ({
           </select>
         </div>
       </div>
-
-      {/* ─── Custom Date Range Inputs (Expandable) ─── */}
-      {showCustomDates && (
-        <div className="mt-1 pt-3 border-t border-dashed border-slate-200 dark:border-slate-800 flex items-center gap-3 flex-wrap bg-slate-50/60 dark:bg-slate-800/40 p-3 rounded-lg">
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            Custom Dates:
-          </span>
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] text-slate-500">From:</label>
-            <input
-              type="date"
-              value={filters.startDate || ""}
-              onChange={(e) =>
-                onFilterChange({
-                  startDate: e.target.value || undefined,
-                  timeframe: "custom",
-                  page: 1,
-                })
-              }
-              className="text-xs px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] text-slate-500">To:</label>
-            <input
-              type="date"
-              value={filters.endDate || ""}
-              onChange={(e) =>
-                onFilterChange({
-                  endDate: e.target.value || undefined,
-                  timeframe: "custom",
-                  page: 1,
-                })
-              }
-              className="text-xs px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100"
-            />
-          </div>
-
-          {(filters.startDate || filters.endDate) && (
-            <button
-              onClick={() =>
-                onFilterChange({
-                  startDate: undefined,
-                  endDate: undefined,
-                  page: 1,
-                })
-              }
-              className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Clear dates
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 };
-

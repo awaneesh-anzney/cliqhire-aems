@@ -23,7 +23,7 @@ import { CreateCandidateModal } from "@/components/candidates/create-candidate-m
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  // Query parameters for timeframe scoping (presets: 'all', 'month', '3_months', '6_months', 'year', 'custom')
+  // Query parameters for timeframe scoping (presets: 'all', 'month', '3_months', '6_months', 'year', or specific year/month/dates)
   const [queryParams, setQueryParams] = useState<DashboardQueryParams>({
     timeframe: "6_months",
   });
@@ -73,7 +73,7 @@ export default function DashboardPage() {
         onOpenCandidate={() => setOpenCandidateModal(true)}
       />
 
-      {/* ─── 2. TIMEFRAME FILTER TOOLBAR ─── */}
+      {/* ─── 2. TIMEFRAME FILTER TOOLBAR (Presets, Month/Year Picker, Custom Range Popover) ─── */}
       <DashboardTimeframeBar
         timeframeInfo={dashboardStats?.timeframe}
         params={queryParams}
@@ -87,6 +87,7 @@ export default function DashboardPage() {
       <ExecutiveKpiStrip
         kpiCards={dashboardStats?.kpiCards}
         candidatesStats={dashboardStats?.candidates}
+        monthlyTrends={dashboardStats?.charts?.monthlyTrends}
         timeframeLabel={dashboardStats?.timeframe?.label}
         candidatesTotal={dashboardStats?.candidates?.total || 0}
         candidatesActive={dashboardStats?.candidates?.active || 0}
