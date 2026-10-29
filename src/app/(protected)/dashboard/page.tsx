@@ -59,8 +59,8 @@ export default function DashboardPage() {
         maxWidth: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 1.5, md: 2 },
-        p: { xs: "10px 12px 16px", sm: "12px 16px 16px" },
+        gap: { xs: 1.25, md: 1.5 },
+        p: { xs: "8px 12px 14px", sm: "10px 14px 16px" },
       }}
       className="font-sans"
     >

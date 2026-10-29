@@ -186,8 +186,8 @@ export const DashboardTimeframeBar: React.FC<DashboardTimeframeBarProps> = ({
   const activePreset = isCustomActive || isSpecificMonthActive ? null : params.timeframe || "6_months";
 
   return (
-    <div className="w-full flex flex-col gap-2.5 p-3 sm:p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_2px_12px_rgba(15,23,42,0.03)] font-sans">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+    <div className="w-full flex flex-col gap-2 p-2.5 sm:p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_1px_3px_rgba(15,23,42,0.03)] font-sans">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2.5">
         {/* ─── Horizon Presets & Specific Month Picker ─── */}
         <div className="flex items-center gap-2 flex-wrap w-full lg:w-auto">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-0.5 flex items-center gap-1 shrink-0">

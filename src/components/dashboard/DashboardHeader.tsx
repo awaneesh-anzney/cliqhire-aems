@@ -32,7 +32,7 @@ export function DashboardHeader({
   onOpenJob,
   onOpenCandidate,
 }: DashboardHeaderProps) {
-  const firstName = userName ? userName.split(" ")[0] : "Executive";
+  const displayName = userName?.trim() || "Executive";
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
@@ -68,60 +68,44 @@ export function DashboardHeader({
   return (
     <Box
       component="section"
-      className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-sans select-none p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-r from-white via-slate-50/50 to-blue-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/80 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 font-sans select-none px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-[0_1px_3px_rgba(15,23,42,0.04)]"
     >
-      {/* ─── Company & User Welcome Banner ─── */}
-      <div className="flex items-center gap-3.5">
-        {/* CliqHire Brand Logo / Icon */}
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2563EB] to-[#4F46E5] text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-blue-500/25 shrink-0 border border-white/20">
-          <span>CH</span>
-        </div>
-
-        <div>
-          {/* Company Badge */}
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400 flex items-center gap-1">
-              <span>{companyName}</span>
-              <span className="text-slate-400 font-semibold">• AEMS</span>
-            </span>
-            <span className="inline-flex items-center gap-0.5 px-2 py-0.2 rounded-full text-[10px] font-bold bg-blue-100/70 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300">
-              <VerifiedOutlinedIcon sx={{ fontSize: 11 }} />
-              Enterprise
-            </span>
-          </div>
-
-          {/* Welcome User Heading */}
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mt-0.5">
-            Welcome back, {firstName}!
+      {/* ─── User Welcome & Company Info ─── */}
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+            Welcome back, <span className="text-blue-600 dark:text-blue-400 font-extrabold">{displayName}</span>!
           </h1>
-
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {companyName} Executive Talent Intelligence & Operations Hub
-          </p>
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/50">
+            <VerifiedOutlinedIcon sx={{ fontSize: 11 }} />
+            Enterprise
+          </span>
         </div>
+
+        <p className="text-[11.5px] sm:text-xs text-slate-500 dark:text-slate-400 leading-tight">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">{companyName}</span>
+          <span className="mx-1.5 text-slate-300 dark:text-slate-600">•</span>
+          Executive Talent Intelligence & Operations Hub
+        </p>
       </div>
 
-      {/* ─── Date Selector & Add Actions ─── */}
-      <div className="flex items-center gap-2.5 shrink-0 self-start md:self-center flex-wrap">
-        {/* Dynamic Colorful Current Date Display */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-          <div className="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-          </div>
-          <div className="flex items-center gap-1.5 text-xs">
-            <span
-              suppressHydrationWarning
-              className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 font-bold text-[10.5px]"
-            >
-              {dateInfo.weekday}
-            </span>
-            <span
-              suppressHydrationWarning
-              className="font-semibold text-slate-700 dark:text-slate-200"
-            >
-              {dateInfo.fullDate}
-            </span>
-          </div>
+      {/* ─── Date Display & Quick Action ─── */}
+      <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+        {/* Dynamic Compact Current Date Display */}
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/70 text-xs">
+          <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: "#2563EB" }} />
+          <span
+            suppressHydrationWarning
+            className="px-1.5 py-0.5 rounded bg-blue-100/70 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 font-bold text-[10px]"
+          >
+            {dateInfo.weekday}
+          </span>
+          <span
+            suppressHydrationWarning
+            className="font-medium text-slate-700 dark:text-slate-200 text-[11.5px]"
+          >
+            {dateInfo.fullDate}
+          </span>
         </div>
 
         {/* Primary "+ Add New" Dropdown Button */}
@@ -129,20 +113,20 @@ export function DashboardHeader({
           <Button
             variant="contained"
             onClick={handleOpenMenu}
-            startIcon={<AddOutlinedIcon sx={{ fontSize: 17 }} />}
-            endIcon={<KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16 }} />}
+            startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
+            endIcon={<KeyboardArrowDownOutlinedIcon sx={{ fontSize: 15 }} />}
             sx={{
-              height: 38,
-              px: 2,
-              borderRadius: "11px",
+              height: 32,
+              px: 1.5,
+              borderRadius: "8px",
               textTransform: "none",
-              fontWeight: 700,
-              fontSize: "13px",
+              fontWeight: 600,
+              fontSize: "12px",
               backgroundColor: "#2563EB",
-              boxShadow: "0 2px 8px rgba(37, 99, 235, 0.2)",
+              boxShadow: "0 1px 3px rgba(37, 99, 235, 0.2)",
               "&:hover": {
                 backgroundColor: "#1D4ED8",
-                boxShadow: "0 4px 12px rgba(37, 99, 235, 0.28)",
+                boxShadow: "0 2px 6px rgba(37, 99, 235, 0.25)",
               },
             }}
           >
@@ -161,9 +145,9 @@ export function DashboardHeader({
                 className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg",
                 sx: {
                   width: 220,
-                  mt: 1,
+                  mt: 0.75,
                   p: 0.5,
-                  borderRadius: "12px",
+                  borderRadius: "10px",
                 },
               },
             }}
@@ -174,10 +158,10 @@ export function DashboardHeader({
                 onOpenCandidate();
               }}
               sx={{
-                borderRadius: "8px",
-                py: 1,
-                px: 1.5,
-                fontSize: "13px",
+                borderRadius: "6px",
+                py: 0.75,
+                px: 1.25,
+                fontSize: "12.5px",
                 fontWeight: 600,
                 color: "#172033",
                 "&:hover": {
@@ -186,11 +170,11 @@ export function DashboardHeader({
                 },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 28, color: "#2563EB" }}>
-                <PersonAddAlt1OutlinedIcon sx={{ fontSize: 18 }} />
+              <ListItemIcon sx={{ minWidth: 26, color: "#2563EB" }}>
+                <PersonAddAlt1OutlinedIcon sx={{ fontSize: 17 }} />
               </ListItemIcon>
               <ListItemText
-                primary={<span className="text-[13px] font-semibold">New Candidate</span>}
+                primary={<span className="text-[12.5px] font-semibold">New Candidate</span>}
               />
             </MenuItem>
 
@@ -200,10 +184,10 @@ export function DashboardHeader({
                 onOpenJob();
               }}
               sx={{
-                borderRadius: "8px",
-                py: 1,
-                px: 1.5,
-                fontSize: "13px",
+                borderRadius: "6px",
+                py: 0.75,
+                px: 1.25,
+                fontSize: "12.5px",
                 fontWeight: 600,
                 color: "#172033",
                 "&:hover": {
@@ -212,11 +196,11 @@ export function DashboardHeader({
                 },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 28, color: "#8B5CF6" }}>
-                <WorkOutlineOutlinedIcon sx={{ fontSize: 18 }} />
+              <ListItemIcon sx={{ minWidth: 26, color: "#8B5CF6" }}>
+                <WorkOutlineOutlinedIcon sx={{ fontSize: 17 }} />
               </ListItemIcon>
               <ListItemText
-                primary={<span className="text-[13px] font-semibold">New Job Requisition</span>}
+                primary={<span className="text-[12.5px] font-semibold">New Job Requisition</span>}
               />
             </MenuItem>
 
@@ -226,10 +210,10 @@ export function DashboardHeader({
                 onOpenClient();
               }}
               sx={{
-                borderRadius: "8px",
-                py: 1,
-                px: 1.5,
-                fontSize: "13px",
+                borderRadius: "6px",
+                py: 0.75,
+                px: 1.25,
+                fontSize: "12.5px",
                 fontWeight: 600,
                 color: "#172033",
                 "&:hover": {
@@ -238,11 +222,11 @@ export function DashboardHeader({
                 },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 28, color: "#06B6D4" }}>
-                <BusinessOutlinedIcon sx={{ fontSize: 18 }} />
+              <ListItemIcon sx={{ minWidth: 26, color: "#06B6D4" }}>
+                <BusinessOutlinedIcon sx={{ fontSize: 17 }} />
               </ListItemIcon>
               <ListItemText
-                primary={<span className="text-[13px] font-semibold">New Client Account</span>}
+                primary={<span className="text-[12.5px] font-semibold">New Client Account</span>}
               />
             </MenuItem>
           </Menu>
