@@ -191,7 +191,7 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
                 <tr
                   key={c.id || index}
                   onClick={() => onViewDetails(item)}
-                  className="hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors group cursor-pointer"
+                  className="hover:bg-emerald-50/40 dark:hover:bg-slate-800/60 transition-colors group cursor-pointer"
                 >
                   {/* Candidate Info */}
                   <td className="py-2 px-3">
