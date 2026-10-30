@@ -27,7 +27,9 @@ export interface HiredCandidateCandidateInfo {
   firstName?: string;
   lastName?: string;
   email: string;
+  countryCode?: string;
   phone: string;
+  fullPhone?: string;
   gender?: string;
   nationality?: string;
   location?: string;
@@ -86,21 +88,46 @@ export interface HiredCandidatePlacementDetails {
   offerLetter: HiredCandidateOfferLetter;
 }
 
-export interface HiredCandidateTeamHierarchy {
+export interface DynamicMemberUser {
+  id?: string;
+  _id?: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  teamRole?: string;
+}
+
+export interface DynamicTeamMember {
+  position: string;
+  positionLabel: string;
+  users: DynamicMemberUser[];
+  userNames?: string[];
+  addedAt?: string;
+}
+
+export interface HiredCandidateJobTeamInfo {
   teamId?: string;
-  teamName: string;
-  hiringManagers: string[];
-  teamLeads: string[];
-  recruiters: string[];
+  teamName?: string;
+  summaryString?: string;
+  dynamicMembers?: DynamicTeamMember[];
+  hiringManagers?: string[];
+  teamLeads?: string[];
+  recruiters?: string[];
   headhunters?: string[];
 }
+
+// Backwards-compatible alias for team hierarchy
+export type HiredCandidateTeamHierarchy = HiredCandidateJobTeamInfo;
 
 export interface HiredCandidateRecord {
   candidate: HiredCandidateCandidateInfo;
   job: HiredCandidateJobInfo;
   client: HiredCandidateClientInfo;
   hiredDetails: HiredCandidatePlacementDetails;
-  teamHierarchy: HiredCandidateTeamHierarchy;
+  jobTeamInfo?: HiredCandidateJobTeamInfo;
+  jobTeam?: HiredCandidateJobTeamInfo;
+  teamHierarchy?: HiredCandidateJobTeamInfo;
 }
 
 export interface HiredCandidatesTimeframeMeta {

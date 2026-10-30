@@ -92,18 +92,18 @@ export const HiredCandidatesMetrics: React.FC<HiredCandidatesMetricsProps> = ({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
           >
             <div className="flex items-center justify-between">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-8 w-8 rounded-lg" />
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-6 w-6 rounded-md" />
             </div>
-            <Skeleton className="h-7 w-16 mt-3" />
-            <Skeleton className="h-3 w-32 mt-2" />
+            <Skeleton className="h-5 w-12 mt-2" />
+            <Skeleton className="h-2.5 w-24 mt-1" />
           </div>
         ))}
       </div>
@@ -111,45 +111,45 @@ export const HiredCandidatesMetrics: React.FC<HiredCandidatesMetricsProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
           <div
             key={card.id}
-            className={`relative p-3.5 sm:p-4 rounded-xl border bg-white dark:bg-slate-900 transition-all duration-200 shadow-[0_2px_10px_rgba(15,23,42,0.03)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.06)] flex flex-col justify-between ${
+            className={`relative p-2.5 sm:p-3 rounded-xl border bg-white dark:bg-slate-900 transition-all duration-200 shadow-[0_1px_3px_rgba(15,23,42,0.03)] hover:shadow-sm flex flex-col justify-between ${
               card.highlight
                 ? "border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40"
                 : "border-[#E7EDF4] dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {card.title}
               </span>
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                 style={{
                   backgroundColor: card.bg,
                   color: card.color,
                 }}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5" />
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+            <div className="mt-1.5">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                   {card.value.toLocaleString()}
                 </span>
                 {card.highlight && (
-                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
-                    Action Req.
+                  <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+                    Action
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">
                 {card.subtitle}
               </p>
             </div>

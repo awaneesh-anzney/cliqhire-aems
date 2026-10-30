@@ -27,7 +27,7 @@ const DEFAULT_FILTERS: HiredCandidatesFilterParams = {
   probationStatus: "all",
   dateField: "hiredAt",
   page: 1,
-  limit: 20,
+  limit: 10,
 };
 
 /**
@@ -92,40 +92,31 @@ export const HiredCandidatesSection: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-4 font-sans mt-2">
-      {/* ─── Header & Controls ─── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_16px_rgba(15,23,42,0.03)]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20">
-            <UserCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                Hired Candidates & Placement Registry
-              </h3>
-              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                <Sparkles className="w-3 h-3 text-blue-500" />
-                Live Reports
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Multi-pipeline placements, active probation lifecycles, team hierarchy, and offer contracts.
-            </p>
-          </div>
+    <div className="w-full flex flex-col gap-2.5 font-sans">
+      {/* ─── Compact Controls Bar ─── */}
+      <div className="flex items-center justify-between gap-3 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
+            Hired Candidates
+          </h2>
+          {responseData?.pagination?.total !== undefined && (
+            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/50">
+              {responseData.pagination.total} Total
+            </span>
+          )}
         </div>
 
         {/* Header Action Buttons */}
-        <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+        <div className="flex items-center gap-2">
           {/* Refresh Button */}
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm disabled:opacity-50"
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs disabled:opacity-50"
             title="Refresh Hired Candidates Data"
           >
             <RefreshCw
-              className={`w-4 h-4 ${isFetching ? "animate-spin text-blue-600" : ""}`}
+              className={`w-3.5 h-3.5 ${isFetching ? "animate-spin text-blue-600" : ""}`}
             />
           </button>
 
@@ -133,7 +124,7 @@ export const HiredCandidatesSection: React.FC = () => {
           <button
             onClick={handleExportExcel}
             disabled={exportMutation.isPending}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {exportMutation.isPending ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -141,7 +132,7 @@ export const HiredCandidatesSection: React.FC = () => {
               <FileSpreadsheet className="w-3.5 h-3.5" />
             )}
             <span>
-              {exportMutation.isPending ? "Generating..." : "Export Excel"}
+              {exportMutation.isPending ? "Exporting..." : "Export Excel"}
             </span>
           </button>
         </div>
