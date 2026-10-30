@@ -9,8 +9,6 @@ import {
   PauseCircle,
   XCircle,
   Sparkles,
-  Layers,
-  Archive,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { JobMetadata } from "@/types/job";
@@ -21,6 +19,7 @@ export interface JobStatsBarProps {
   jobs?: Array<{
     stage?: string;
     headcount?: number;
+    isActive?: boolean;
   }>;
   selectedTab?: string;
   onSelectTab?: (tab: string) => void;
@@ -30,9 +29,9 @@ export interface JobStatsBarProps {
   className?: string;
 }
 
+// Stage configuration (Active is shown as the primary status tab, so no separate "Active Stage" tab)
 const STAGES = [
   { key: "Open", label: "Open", color: "#06B6D4", icon: Clock },
-  { key: "Active", label: "Active Stage", color: "#3B82F6", icon: CheckCircle2 },
   { key: "Onboarding", label: "Onboarding", color: "#8B5CF6", icon: Sparkles },
   { key: "Hired", label: "Hired", color: "#10B981", icon: Users2 },
   { key: "On Hold", label: "On Hold", color: "#F59E0B", icon: PauseCircle },
@@ -50,24 +49,72 @@ export const JobStatsBar: React.FC<JobStatsBarProps> = ({
   className,
 }) => {
   // Sync selected tab with backward-compatible selectedStage
-  const activeKey = selectedTab || selectedStage || "ACTIVE_JOBS";
+  const activeKey = selectedTab || selectedStage || "ACTIVE";
 
   const handleSelect = (key: string) => {
     if (onSelectTab) onSelectTab(key);
     if (onSelectStage) onSelectStage(key);
   };
 
-  // Stage breakdown and counts
-  const stageBreakdown = meta?.stageBreakdown || [];
+  // Safe stage count resolution with multi-level fallbacks
+  const getStageCount = (stageKey: string): number => {
+    if (!meta) {
+      return jobs.filter((j) => (j.stage || "").toLowerCase() === stageKey.toLowerCase()).length;
+    }
 
-  // Headcount calculation from local jobs if not in meta
+    // 1. byStage direct key match
+    if (meta.byStage && meta.byStage[stageKey] !== undefined) {
+      return meta.byStage[stageKey]!;
+    }
+
+    // 2. byStage case-insensitive match
+    if (meta.byStage) {
+      const matchKey = Object.keys(meta.byStage).find(
+        (k) => k.toLowerCase() === stageKey.toLowerCase()
+      );
+      if (matchKey && meta.byStage[matchKey] !== undefined) {
+        return meta.byStage[matchKey]!;
+      }
+    }
+
+    // 3. stageBreakdown array lookup
+    if (Array.isArray(meta.stageBreakdown)) {
+      const found = meta.stageBreakdown.find(
+        (s) => s.stage?.toLowerCase() === stageKey.toLowerCase()
+      );
+      if (found && typeof found.count === "number") {
+        return found.count;
+      }
+    }
+
+    // 4. Root field fallback (e.g. meta.closed)
+    if (stageKey.toLowerCase() === "closed" && meta.closed !== undefined) {
+      return meta.closed;
+    }
+
+    // 5. Fallback to local page jobs count
+    return jobs.filter((j) => (j.stage || "").toLowerCase() === stageKey.toLowerCase()).length;
+  };
+
+  // Total and Active counts with fallbacks
+  const totalAllJobs =
+    meta?.total !== undefined
+      ? meta.total
+      : totalCount > 0
+      ? totalCount
+      : jobs.length;
+
+  const activeJobsCount =
+    meta?.active !== undefined
+      ? meta.active
+      : jobs.filter((j) => (j as any).isActive !== false).length;
+
+  // Headcount calculation from local jobs
   const totalHeadcount = React.useMemo(() => {
     return jobs.reduce((acc, j) => acc + (Number(j.headcount) || 1), 0);
   }, [jobs]);
 
-  const totalAllJobs = meta?.total ?? totalCount;
-  const activeJobsCount = meta?.active ?? 0;
-  const inactiveJobsCount = meta?.inactive ?? 0;
+  const stageBreakdown = meta?.stageBreakdown || [];
 
   return (
     <div className={cn("w-full flex flex-col gap-1.5 select-none", className)}>
@@ -98,13 +145,13 @@ export const JobStatsBar: React.FC<JobStatsBarProps> = ({
           </span>
         </button>
 
-        {/* Active Status Jobs Tab */}
+        {/* Active Jobs Tab (Status: Active) */}
         <button
           type="button"
-          onClick={() => handleSelect("ACTIVE_JOBS")}
+          onClick={() => handleSelect("ACTIVE")}
           className={cn(
             "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all duration-200 shrink-0",
-            activeKey === "ACTIVE_JOBS" || activeKey === "Active_Status"
+            activeKey === "ACTIVE" || activeKey === "ACTIVE_JOBS" || activeKey === "Active"
               ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/20"
               : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
           )}
@@ -114,7 +161,7 @@ export const JobStatsBar: React.FC<JobStatsBarProps> = ({
           <span
             className={cn(
               "px-1.5 py-0.2 rounded-md text-[10px] font-bold",
-              activeKey === "ACTIVE_JOBS" || activeKey === "Active_Status"
+              activeKey === "ACTIVE" || activeKey === "ACTIVE_JOBS" || activeKey === "Active"
                 ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                 : "bg-muted text-muted-foreground"
             )}
@@ -128,9 +175,8 @@ export const JobStatsBar: React.FC<JobStatsBarProps> = ({
 
         {/* Specific Stage Tabs */}
         {STAGES.map((st) => {
-          const count = meta?.byStage?.[st.key] ?? 0;
+          const count = getStageCount(st.key);
           const isSelected = activeKey === st.key;
-          const Icon = st.icon;
 
           return (
             <button
