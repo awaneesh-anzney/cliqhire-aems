@@ -6,6 +6,33 @@ export enum JobStatus {
 
 export type JobStage = 'Open'| 'Hired' | 'On Hold' | 'Closed' | 'Active' | 'Onboarding';
 
+export interface JobStageBreakdownItem {
+  stage: string;
+  count: number;
+  percentage: number;
+  color?: string;
+}
+
+export interface JobMetadataByStage {
+  Open?: number;
+  Active?: number;
+  Onboarding?: number;
+  Hired?: number;
+  "On Hold"?: number;
+  Closed?: number;
+  [key: string]: number | undefined;
+}
+
+export interface JobMetadata {
+  total: number;
+  active: number;
+  inactive: number;
+  closed: number;
+  open: number;
+  byStage: JobMetadataByStage;
+  stageBreakdown: JobStageBreakdownItem[];
+}
+
 
 
 export interface Job {

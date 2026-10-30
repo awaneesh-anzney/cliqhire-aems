@@ -139,6 +139,7 @@ export default function JobsPage() {
   const [headcountInput, setHeadcountInput] = useState("");
   const [jobTypeInput, setJobTypeInput] = useState("");
   const [selectedStage, setSelectedStage] = useState<string>("All");
+  const [selectedTab, setSelectedTab] = useState<string>("ACTIVE_JOBS");
   const [includeInactiveInput, setIncludeInactiveInput] = useState(false);
 
   // Debounced filters
@@ -172,6 +173,29 @@ export default function JobsPage() {
     includeInactiveInput,
   ]);
 
+  const handleSelectTab = (tab: string) => {
+    setSelectedTab(tab);
+    if (tab === "ALL") {
+      setSelectedStage("All");
+      setIncludeInactiveInput(true);
+    } else if (tab === "ACTIVE_JOBS") {
+      setSelectedStage("All");
+      setIncludeInactiveInput(false);
+    } else {
+      setSelectedStage(tab);
+      setIncludeInactiveInput(false);
+    }
+  };
+
+  const handleStageSelectFromDrawer = (stage: string) => {
+    setSelectedStage(stage);
+    if (stage === "All") {
+      setSelectedTab(includeInactiveInput ? "ALL" : "ACTIVE_JOBS");
+    } else {
+      setSelectedTab(stage);
+    }
+  };
+
   const clearAllFilters = () => {
     setSearchInput("");
     setJobTitleInput("");
@@ -181,6 +205,7 @@ export default function JobsPage() {
     setHeadcountInput("");
     setJobTypeInput("");
     setSelectedStage("All");
+    setSelectedTab("ACTIVE_JOBS");
     setIncludeInactiveInput(false);
     setCurrentPage(1);
   };
@@ -222,8 +247,14 @@ export default function JobsPage() {
     client: debouncedClient || undefined,
     headcount: debouncedHeadcount ? parseInt(debouncedHeadcount, 10) || undefined : undefined,
     jobType: debouncedJobType || undefined,
-    stage: selectedStage === "All" ? undefined : selectedStage,
-    includeInactive: includeInactiveInput || undefined,
+    stage:
+      selectedTab !== "ALL" && selectedTab !== "ACTIVE_JOBS"
+        ? selectedTab
+        : selectedStage !== "All"
+        ? selectedStage
+        : undefined,
+    isActive: selectedTab === "ACTIVE_JOBS" ? true : undefined,
+    includeInactive: selectedTab === "ALL" ? true : includeInactiveInput || undefined,
   });
 
   const allJobs: JobCardItem[] = useMemo(() => {
@@ -716,7 +747,7 @@ export default function JobsPage() {
           jobTypeInput={jobTypeInput}
           setJobTypeInput={setJobTypeInput}
           selectedStage={selectedStage}
-          setSelectedStage={setSelectedStage}
+          setSelectedStage={handleStageSelectFromDrawer}
           includeInactive={includeInactiveInput}
           setIncludeInactive={setIncludeInactiveInput}
           onClearAll={clearAllFilters}
