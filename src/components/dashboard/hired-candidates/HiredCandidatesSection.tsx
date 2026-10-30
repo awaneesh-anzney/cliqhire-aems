@@ -92,9 +92,9 @@ export const HiredCandidatesSection: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-2.5 font-sans">
-      {/* ─── Compact Controls Bar ─── */}
-      <div className="flex items-center justify-between gap-3 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
+    <div className="w-full flex-1 min-h-0 flex flex-col gap-2 font-sans overflow-hidden">
+      {/* ─── Compact Controls Bar (Fixed) ─── */}
+      <div className="shrink-0 flex items-center justify-between gap-3 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
         <div className="flex items-center gap-2">
           <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
             Hired Candidates
@@ -138,30 +138,36 @@ export const HiredCandidatesSection: React.FC = () => {
         </div>
       </div>
 
-      {/* ─── Summary Metric Cards ─── */}
-      <HiredCandidatesMetrics
-        summary={responseData?.summary}
-        isLoading={isLoading}
-        timeframeLabel={responseData?.timeframe?.label}
-      />
+      {/* ─── Summary Metric Cards (Fixed) ─── */}
+      <div className="shrink-0">
+        <HiredCandidatesMetrics
+          summary={responseData?.summary}
+          isLoading={isLoading}
+          timeframeLabel={responseData?.timeframe?.label}
+        />
+      </div>
 
-      {/* ─── Search & Filters Bar ─── */}
-      <HiredCandidatesFilters
-        filters={filterParams}
-        onFilterChange={handleFilterChange}
-        onReset={handleResetFilters}
-        isLoading={isLoading}
-      />
+      {/* ─── Search & Filters Bar (Fixed) ─── */}
+      <div className="shrink-0">
+        <HiredCandidatesFilters
+          filters={filterParams}
+          onFilterChange={handleFilterChange}
+          onReset={handleResetFilters}
+          isLoading={isLoading}
+        />
+      </div>
 
-      {/* ─── Data Table & Pagination ─── */}
-      <HiredCandidatesTable
-        data={responseData?.data || []}
-        pagination={responseData?.pagination}
-        isLoading={isLoading}
-        onPageChange={handlePageChange}
-        onLimitChange={handleLimitChange}
-        onViewDetails={handleViewDetails}
-      />
+      {/* ─── Data Table & Pagination (Only table data scrolls) ─── */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <HiredCandidatesTable
+          data={responseData?.data || []}
+          pagination={responseData?.pagination}
+          isLoading={isLoading}
+          onPageChange={handlePageChange}
+          onLimitChange={handleLimitChange}
+          onViewDetails={handleViewDetails}
+        />
+      </div>
 
       {/* ─── Candidate Dossier Detail Modal ─── */}
       <HiredCandidateDetailModal

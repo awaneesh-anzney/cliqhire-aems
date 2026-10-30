@@ -110,27 +110,25 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
   // Loading skeleton state
   if (isLoading) {
     return (
-      <div className="w-full space-y-3">
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between gap-4 py-2 border-b border-slate-100 dark:border-slate-800 last:border-b-0"
-            >
-              <div className="flex items-center gap-3">
-                <Skeleton className="w-10 h-10 rounded-full" />
-                <div className="space-y-1.5">
-                  <Skeleton className="h-4 w-36" />
-                  <Skeleton className="h-3 w-48" />
-                </div>
+      <div className="w-full flex-1 min-h-0 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 space-y-3">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between gap-4 py-2 border-b border-slate-100 dark:border-slate-800 last:border-b-0"
+          >
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <div className="space-y-1">
+                <Skeleton className="h-3.5 w-32" />
+                <Skeleton className="h-2.5 w-40" />
               </div>
-              <Skeleton className="h-4 w-28 hidden md:block" />
-              <Skeleton className="h-4 w-24 hidden lg:block" />
-              <Skeleton className="h-6 w-20 rounded-full" />
-              <Skeleton className="h-8 w-20 rounded-lg" />
             </div>
-          ))}
-        </div>
+            <Skeleton className="h-3.5 w-24 hidden md:block" />
+            <Skeleton className="h-3.5 w-20 hidden lg:block" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-6 w-16 rounded-md" />
+          </div>
+        ))}
       </div>
     );
   }
@@ -138,14 +136,14 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
   // Empty state
   if (!data || data.length === 0) {
     return (
-      <div className="w-full p-12 text-center rounded-xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col items-center justify-center">
-        <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-3">
-          <UserCheck className="w-6 h-6" />
+      <div className="w-full flex-1 min-h-0 p-6 text-center rounded-xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-2">
+          <UserCheck className="w-5 h-5" />
         </div>
-        <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">
+        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
           No hired candidates found
         </h4>
-        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-0.5">
           No placement records matched your selected timeframe, search queries, or probation filters.
         </p>
       </div>
@@ -161,19 +159,19 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
   const endRecord = Math.min(currentPage * currentLimit, totalRecords);
 
   return (
-    <div className="w-full flex flex-col gap-3">
-      {/* ─── Desktop & Tablet Table ─── */}
-      <div className="w-full overflow-x-auto rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+    <div className="w-full flex-1 min-h-0 flex flex-col gap-1.5 sm:gap-2 overflow-hidden">
+      {/* ─── Scrollable Table Container (Only rows scroll) ─── */}
+      <div className="w-full flex-1 min-h-0 overflow-auto rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm relative">
         <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10.5px]">
-              <th className="py-2.5 px-3">Candidate</th>
-              <th className="py-2.5 px-3">Job & Client</th>
-              <th className="py-2.5 px-3">Compensation</th>
-              <th className="py-2.5 px-3">Probation</th>
-              <th className="py-2.5 px-3">Job Team</th>
-              <th className="py-2.5 px-3 text-center">Offer Letter</th>
-              <th className="py-2.5 px-3 text-right">Action</th>
+          <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.05)] border-b border-slate-200 dark:border-slate-800">
+            <tr className="text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10.5px]">
+              <th className="py-2.5 px-3 bg-slate-50 dark:bg-slate-800">Candidate</th>
+              <th className="py-2.5 px-3 bg-slate-50 dark:bg-slate-800">Job & Client</th>
+              <th className="py-2.5 px-3 bg-slate-50 dark:bg-slate-800">Compensation</th>
+              <th className="py-2.5 px-3 bg-slate-50 dark:bg-slate-800">Probation</th>
+              <th className="py-2.5 px-3 bg-slate-50 dark:bg-slate-800">Job Team</th>
+              <th className="py-2.5 px-3 bg-slate-50 dark:bg-slate-800 text-center">Offer Letter</th>
+              <th className="py-2.5 px-3 bg-slate-50 dark:bg-slate-800 text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
@@ -357,7 +355,7 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
       </div>
 
       {/* ─── Pagination Footer ─── */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-600 dark:text-slate-300">
+      <div className="shrink-0 flex flex-col sm:flex-row items-center justify-between gap-1.5 p-1.5 sm:p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-600 dark:text-slate-300">
         {/* Record count info */}
         <div className="flex items-center gap-3">
           <span>

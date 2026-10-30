@@ -92,18 +92,18 @@ export const HiredCandidatesMetrics: React.FC<HiredCandidatesMetricsProps> = ({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+      <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-2 overflow-x-auto pb-1 sm:pb-0">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+            className="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 min-w-[130px] sm:min-w-0 flex-1"
           >
             <div className="flex items-center justify-between">
               <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-6 w-6 rounded-md" />
+              <Skeleton className="h-5 w-5 rounded-md" />
             </div>
-            <Skeleton className="h-5 w-12 mt-2" />
-            <Skeleton className="h-2.5 w-24 mt-1" />
+            <Skeleton className="h-5 w-12 mt-1.5" />
+            <Skeleton className="h-2.5 w-20 mt-1" />
           </div>
         ))}
       </div>
@@ -111,45 +111,45 @@ export const HiredCandidatesMetrics: React.FC<HiredCandidatesMetricsProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+    <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-2 overflow-x-auto pb-1 sm:pb-0">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
           <div
             key={card.id}
-            className={`relative p-2.5 sm:p-3 rounded-xl border bg-white dark:bg-slate-900 transition-all duration-200 shadow-[0_1px_3px_rgba(15,23,42,0.03)] hover:shadow-sm flex flex-col justify-between ${
+            className={`relative p-2 sm:p-2.5 rounded-xl border bg-white dark:bg-slate-900 transition-all duration-200 shadow-[0_1px_3px_rgba(15,23,42,0.03)] hover:shadow-sm flex flex-col justify-between shrink-0 min-w-[130px] sm:min-w-0 flex-1 ${
               card.highlight
                 ? "border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40"
                 : "border-[#E7EDF4] dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <span className="text-[10px] sm:text-[10.5px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate mr-1">
                 {card.title}
               </span>
               <div
-                className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-md flex items-center justify-center shrink-0"
                 style={{
                   backgroundColor: card.bg,
                   color: card.color,
                 }}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </div>
             </div>
 
-            <div className="mt-1.5">
+            <div className="mt-1">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+                <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                   {card.value.toLocaleString()}
                 </span>
                 {card.highlight && (
-                  <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+                  <span className="text-[8.5px] font-semibold px-1 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
                     Action
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">
+              <p className="text-[9.5px] text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">
                 {card.subtitle}
               </p>
             </div>

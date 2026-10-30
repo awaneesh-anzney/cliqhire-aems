@@ -6,8 +6,8 @@ import { HiredCandidatesSection } from "@/components/dashboard/hired-candidates"
 
 /**
  * Hired Candidates Page (`/dashboard/hired-candidate`).
- * Compact, screen-fitted layout tracking placements, dynamic team members,
- * probation lifecycles, and Excel exports.
+ * Screen-fitted responsive layout where the outer page does not scroll,
+ * and only the data table rows scroll within the available height.
  */
 export default function HiredCandidatesPage() {
   return (
@@ -15,12 +15,17 @@ export default function HiredCandidatesPage() {
       sx={{
         width: "100%",
         maxWidth: "100%",
+        height: "100%",
+        maxHeight: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 1.25, md: 1.5 },
-        p: { xs: "8px 12px 12px", sm: "10px 16px 14px" },
+        minHeight: 0,
+        overflow: "hidden",
+        gap: { xs: 1, md: 1.25 },
+        p: { xs: "8px 12px", sm: "10px 16px" },
+        boxSizing: "border-box",
       }}
-      className="font-sans"
+      className="font-sans h-full max-h-full overflow-hidden flex flex-col"
     >
       <HiredCandidatesSection />
     </Box>
