@@ -190,7 +190,8 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
               return (
                 <tr
                   key={c.id || index}
-                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group"
+                  onClick={() => onViewDetails(item)}
+                  className="hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors group cursor-pointer"
                 >
                   {/* Candidate Info */}
                   <td className="py-2 px-3">
@@ -323,7 +324,8 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
                         href={hiredDetails.offerLetter.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition-colors text-[10.5px] font-semibold"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition-colors text-[10.5px] font-semibold cursor-pointer"
                         title={hiredDetails.offerLetter.fileName || "View Offer Letter"}
                       >
                         <FileText className="w-3 h-3" />
@@ -340,8 +342,11 @@ export const HiredCandidatesTable: React.FC<HiredCandidatesTableProps> = ({
                   {/* Action */}
                   <td className="py-2 px-3 text-right">
                     <button
-                      onClick={() => onViewDetails(item)}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold text-[11px] transition-colors shadow-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onViewDetails(item);
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold text-[11px] transition-colors shadow-xs cursor-pointer"
                     >
                       <Eye className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                       <span>Details</span>
