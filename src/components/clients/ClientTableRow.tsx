@@ -206,16 +206,20 @@ const ClientTableRow: React.FC<ClientTableRowProps> = ({
                     height: 14,
                     fontSize: "0.55rem",
                     fontWeight: 700,
-                    bgcolor: (client as any).engagementCategory?.toLowerCase().includes("high")
-                      ? "rgba(16, 185, 129, 0.12)"
-                      : (client as any).engagementCategory?.toLowerCase().includes("early")
-                        ? "rgba(99, 102, 241, 0.12)"
-                        : "rgba(239, 68, 68, 0.12)",
-                    color: (client as any).engagementCategory?.toLowerCase().includes("high")
-                      ? "#10B981"
-                      : (client as any).engagementCategory?.toLowerCase().includes("early")
-                        ? "#6366F1"
-                        : "#EF4444",
+                    bgcolor:
+                      (client as any).engagementCategory?.toLowerCase().includes("signed") ||
+                      (client as any).engagementCategory?.toLowerCase().includes("high")
+                        ? "rgba(16, 185, 129, 0.12)"
+                        : (client as any).engagementCategory?.toLowerCase().includes("early")
+                          ? "rgba(99, 102, 241, 0.12)"
+                          : "rgba(239, 68, 68, 0.12)",
+                    color:
+                      (client as any).engagementCategory?.toLowerCase().includes("signed") ||
+                      (client as any).engagementCategory?.toLowerCase().includes("high")
+                        ? "#10B981"
+                        : (client as any).engagementCategory?.toLowerCase().includes("early")
+                          ? "#6366F1"
+                          : "#EF4444",
                     border: 0,
                     "& .MuiChip-label": { px: 0.4 },
                   }}

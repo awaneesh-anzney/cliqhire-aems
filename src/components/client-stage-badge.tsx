@@ -10,6 +10,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 
+const getStageColor = (s?: string) => {
+  if (!s) return "bg-muted text-foreground";
+  const normalized = s.toLowerCase();
+  if (normalized === "signed") return "bg-green-100 text-green-800";
+  if (normalized === "engaged") return "bg-yellow-100 text-foreground";
+  if (normalized === "lead") return "bg-blue-100 text-blue-800";
+  return (stageColors as any)[s] || "bg-muted text-foreground";
+};
+
 const stages: (keyof typeof stageColors)[] = ["Lead", "Engaged", "Signed"];
 
 const stageColors = {
@@ -27,7 +36,7 @@ interface ClientStageBadgeProps {
 
 export function ClientStageBadge({ id, stage, onStageChange, disabled = false }: ClientStageBadgeProps) {
   if (!onStageChange || disabled) {
-    const currentStageColor = (stageColors as any)[stage] || "bg-muted text-foreground";
+    const currentStageColor = getStageColor(stage);
     return (
       <Badge variant="secondary" className={`${currentStageColor} border-none`}>
         {stage}
@@ -48,7 +57,7 @@ export function ClientStageBadge({ id, stage, onStageChange, disabled = false }:
     };
   };
 
-  const currentStageColor = (stageColors as any)[stage] || "bg-muted text-foreground";
+  const currentStageColor = getStageColor(stage);
   return (
     <DropdownMenu modal={true}>
       <DropdownMenuTrigger asChild>
