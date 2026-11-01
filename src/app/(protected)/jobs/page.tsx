@@ -139,6 +139,7 @@ export default function JobsPage() {
   const [headcountInput, setHeadcountInput] = useState("");
   const [jobTypeInput, setJobTypeInput] = useState("");
   const [selectedStage, setSelectedStage] = useState<string>("All");
+  const [selectedTab, setSelectedTab] = useState<string>("ACTIVE");
   const [includeInactiveInput, setIncludeInactiveInput] = useState(false);
 
   // Debounced filters
@@ -172,6 +173,29 @@ export default function JobsPage() {
     includeInactiveInput,
   ]);
 
+  const handleSelectTab = (tab: string) => {
+    setSelectedTab(tab);
+    if (tab === "ALL") {
+      setSelectedStage("All");
+      setIncludeInactiveInput(true);
+    } else if (tab === "ACTIVE_JOBS" || tab === "ACTIVE") {
+      setSelectedStage("All");
+      setIncludeInactiveInput(false);
+    } else {
+      setSelectedStage(tab);
+      setIncludeInactiveInput(false);
+    }
+  };
+
+  const handleStageSelectFromDrawer = (stage: string) => {
+    setSelectedStage(stage);
+    if (stage === "All") {
+      setSelectedTab(includeInactiveInput ? "ALL" : "ACTIVE_JOBS");
+    } else {
+      setSelectedTab(stage);
+    }
+  };
+
   const clearAllFilters = () => {
     setSearchInput("");
     setJobTitleInput("");
@@ -181,6 +205,7 @@ export default function JobsPage() {
     setHeadcountInput("");
     setJobTypeInput("");
     setSelectedStage("All");
+    setSelectedTab("ACTIVE");
     setIncludeInactiveInput(false);
     setCurrentPage(1);
   };
@@ -222,8 +247,14 @@ export default function JobsPage() {
     client: debouncedClient || undefined,
     headcount: debouncedHeadcount ? parseInt(debouncedHeadcount, 10) || undefined : undefined,
     jobType: debouncedJobType || undefined,
-    stage: selectedStage === "All" ? undefined : selectedStage,
-    includeInactive: includeInactiveInput || undefined,
+    stage:
+      selectedTab !== "ALL" && selectedTab !== "ACTIVE" && selectedTab !== "ACTIVE_JOBS"
+        ? selectedTab
+        : selectedStage !== "All"
+        ? selectedStage
+        : undefined,
+    isActive: selectedTab === "ACTIVE" || selectedTab === "ACTIVE_JOBS" ? true : undefined,
+    includeInactive: selectedTab === "ALL" ? true : includeInactiveInput || undefined,
   });
 
   const allJobs: JobCardItem[] = useMemo(() => {
@@ -477,10 +508,11 @@ export default function JobsPage() {
           {/* Sub-strip: Stage Tabs & Filter Reset */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-2 border-t border-border/60">
             <JobStatsBar
-              totalCount={totalJobs}
+              meta={jobsData?.meta}
+              totalCount={jobsData?.meta?.total ?? totalJobs}
               jobs={allJobs}
-              selectedStage={selectedStage}
-              onSelectStage={setSelectedStage}
+              selectedTab={selectedTab}
+              onSelectTab={handleSelectTab}
             />
 
             {(activeFiltersCount > 0 || searchInput) && (
@@ -716,7 +748,7 @@ export default function JobsPage() {
           jobTypeInput={jobTypeInput}
           setJobTypeInput={setJobTypeInput}
           selectedStage={selectedStage}
-          setSelectedStage={setSelectedStage}
+          setSelectedStage={handleStageSelectFromDrawer}
           includeInactive={includeInactiveInput}
           setIncludeInactive={setIncludeInactiveInput}
           onClearAll={clearAllFilters}

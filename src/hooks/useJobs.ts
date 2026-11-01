@@ -17,6 +17,8 @@ export interface JobsQueryParams {
   jobId?: string;
   jobTitle?: string;
   headcount?: number;
+  isActive?: boolean | string;
+  status?: string;
   includeInactive?: any;
 }
 

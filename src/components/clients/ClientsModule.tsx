@@ -131,6 +131,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
   const [referredByInput, setReferredByInput] = useState("");
   const [createdByInput, setCreatedByInput] = useState("");
   const [selectedClientStage, setSelectedClientStage] = useState<string>("All");
+  const [selectedEngagementCategory, setSelectedEngagementCategory] = useState<string>("All");
 
   // Debounced filters
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -184,6 +185,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     debouncedReferredBy,
     debouncedCreatedBy,
     selectedClientStage,
+    selectedEngagementCategory,
   ]);
 
   const clearAllFilters = () => {
@@ -198,6 +200,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     setReferredByInput("");
     setCreatedByInput("");
     setSelectedClientStage("All");
+    setSelectedEngagementCategory("All");
     setCurrentPage(1);
   };
 
@@ -213,6 +216,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     if (referredByInput.trim()) count++;
     if (createdByInput.trim()) count++;
     if (isLeads && selectedClientStage !== "All") count++;
+    if (isLeads && selectedEngagementCategory !== "All") count++;
     return count;
   }, [
     nameInput,
@@ -228,10 +232,14 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     selectedClientStage,
   ]);
 
+  const isCategoryActive = isLeads && selectedEngagementCategory !== "All";
+
   const fetchStage = isLeads
-    ? selectedClientStage === "All"
-      ? "Lead,Engaged"
-      : selectedClientStage
+    ? isCategoryActive
+      ? undefined
+      : selectedClientStage === "All"
+        ? "Lead,Engaged"
+        : selectedClientStage
     : "Signed";
 
   const {
@@ -253,6 +261,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
     referredBy: debouncedReferredBy || undefined,
     createdBy: debouncedCreatedBy || undefined,
     clientStage: fetchStage,
+    engagementCategory: isCategoryActive ? selectedEngagementCategory : undefined,
     topLevelOnly: true,
   });
 
@@ -266,6 +275,7 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       countryOfBusiness: (c as any).countryOfBusiness ?? c.location ?? "",
       clientStage: (c.clientStage ?? "Lead") as Client["clientStage"],
       clientSubStage: (c.clientSubStage ?? "") as ClientStageStatus,
+      engagementCategory: (c as any).engagementCategory || "",
       owner: (c as any).owner ?? "",
       team: (c as any).team ?? "",
       createdAt: c.createdAt,
@@ -698,7 +708,10 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
             clients={allClients}
             moduleType={moduleType}
             selectedStage={selectedClientStage}
+            selectedEngagementCategory={selectedEngagementCategory}
+            engagementCounts={clientsPage?.engagementCounts}
             onSelectStage={isLeads ? setSelectedClientStage : undefined}
+            onSelectEngagementCategory={isLeads ? setSelectedEngagementCategory : undefined}
           />
 
           {(activeFiltersCount > 0 || searchInput) && (
@@ -1032,8 +1045,38 @@ export default function ClientsModule({ moduleType = "clients" }: ClientsModuleP
       <ExportDialog
         isOpen={openExportDialog}
         onClose={() => setOpenExportDialog(false)}
-        title={`Export ${entityNamePlural}`}
-        description={`Download CSV report for ${entityNamePlural.toLowerCase()}.`}
+        title={isLeads ? "Export Leads Data" : "Export Clients Data"}
+        description={
+          isLeads
+            ? "Download Excel report for leads by stage (Lead, Engaged) with optional date filters."
+            : "Download Excel report for signed client accounts."
+        }
+        filename={isLeads ? "leads_export" : "clients_export"}
+        isLeadsModule={isLeads}
+        showStageFilter={isLeads}
+        stages={
+          isLeads
+            ? [
+                {
+                  value: "Lead",
+                  label: "Lead",
+                  description: "Prospects & initial contacts",
+                  color: "blue",
+                },
+                {
+                  value: "Engaged",
+                  label: "Engaged",
+                  description: "Active discussions, meetings & proposals",
+                  color: "amber",
+                },
+              ]
+            : undefined
+        }
+        defaultStages={isLeads ? ["Lead", "Engaged"] : undefined}
+        fixedStage={isLeads ? undefined : "Signed"}
+        fixedStageLabel={
+          isLeads ? undefined : "Only signed and contracted clients will be exported."
+        }
         onExport={(params) => exportClientsMutation(params)}
       />
 

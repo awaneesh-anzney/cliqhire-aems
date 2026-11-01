@@ -1,5 +1,6 @@
 import axios from "axios";
 import { api } from "@/lib/axios-config";
+import type { JobMetadata } from "@/types/job";
 
 // =========================
 // Job Service (Updated for dynamic team assignment)
@@ -154,6 +155,9 @@ export interface JobsPage {
   limit: number;
   totalPages: number;
   count: number;
+  meta?: JobMetadata;
+  summary?: JobMetadata;
+  filters?: Record<string, any>;
 }
 
 export interface JobCountByClient {
@@ -249,6 +253,8 @@ const getJobs = async (params?: {
   jobId?: string;
   jobTitle?: string;
   headcount?: number;
+  isActive?: boolean | string;
+  status?: string;
   includeInactive?: any;
 }): Promise<JobsPage> => {
   const page = params?.page ?? 1;
@@ -264,16 +270,21 @@ const getJobs = async (params?: {
     };
     const response = await api.get(`/api/jobs`, { params: processedParams });
     const resData = response.data;
+    const meta: JobMetadata | undefined = resData.meta || resData.summary;
+    const filters = resData.filters;
 
     if (resData.success && Array.isArray(resData.data)) {
       const totalCount = resData.totalCount ?? resData.total ?? resData.data.length;
       return {
         jobs: resData.data,
         totalCount,
-        page: resData.page ?? page,
-        limit: resData.limit ?? limit,
-        totalPages: Math.ceil(totalCount / limit) || 1,
-        count: resData.count ?? resData.data.length,
+        page: resData.currentPage ?? resData.page ?? page,
+        limit: resData.results ?? resData.limit ?? limit,
+        totalPages: resData.totalPages ?? (Math.ceil(totalCount / limit) || 1),
+        count: resData.results ?? resData.count ?? resData.data.length,
+        meta,
+        summary: meta,
+        filters,
       };
     }
 
@@ -282,10 +293,13 @@ const getJobs = async (params?: {
       return {
         jobs: resData.jobs,
         totalCount,
-        page: resData.page ?? page,
+        page: resData.currentPage ?? resData.page ?? page,
         limit,
-        totalPages: (resData.pages ?? Math.ceil(totalCount / limit)) || 1,
-        count: resData.count ?? resData.jobs.length,
+        totalPages: (resData.totalPages ?? resData.pages ?? Math.ceil(totalCount / limit)) || 1,
+        count: resData.results ?? resData.count ?? resData.jobs.length,
+        meta,
+        summary: meta,
+        filters,
       };
     }
 
@@ -296,8 +310,11 @@ const getJobs = async (params?: {
       totalCount,
       page,
       limit,
-      totalPages: Math.ceil(totalCount / limit) || 1,
-      count: jobs.length,
+      totalPages: resData.totalPages ?? (Math.ceil(totalCount / limit) || 1),
+      count: resData.results ?? jobs.length,
+      meta,
+      summary: meta,
+      filters,
     };
   } catch (error) {
     handleApiError(error, "jobs fetching");

@@ -1,7 +1,13 @@
 export { DashboardHeader } from "./DashboardHeader";
 export { ExecutiveKpiStrip } from "./ExecutiveKpiStrip";
+export { DashboardTimeframeBar } from "./DashboardTimeframeBar";
+export { RecruitmentFunnelCard } from "./RecruitmentFunnelCard";
+export { MonthlyTrendsChartCard } from "./MonthlyTrendsChartCard";
+export { DistributionCards } from "./DistributionCards";
+export { LeaderboardsCard } from "./LeaderboardsCard";
 export { PipelineVelocityCard } from "./PipelineVelocityCard";
 export { OperationsLaunchpad } from "./OperationsLaunchpad";
 export { RecruitmentForceCard } from "./RecruitmentForceCard";
 export { LegalAgreementsCard } from "./LegalAgreementsCard";
 export { DashboardSkeleton } from "./DashboardSkeleton";
+export { HiredCandidatesSection } from "./hired-candidates";

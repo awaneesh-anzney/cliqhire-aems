@@ -3,30 +3,42 @@
 import React, { useEffect, useRef, useState } from "react";
 
 /**
- * Modern Subtle Mouse Tracking & Ambient Spotlight Effect
- * - Follows cursor with buttery-smooth linear interpolation (lerping)
- * - Illuminates cards, borders, and sidebar with a soft ambient radial light
- * - Dynamically expands when hovering interactive elements (buttons, links, inputs)
- * - Automatically disables on touch/mobile devices
- * - Zero pointer interference (`pointer-events: none`)
+ * Modern Emerald SaaS Mouse Tracker & Ambient Illumination
+ * Crafted with a luxury emerald / mint / teal green palette:
+ *
+ * 1. Pinpoint Emerald Lead Micro-Dot (Immediate, ultra-crisp tracking with radiant mint glow)
+ * 2. Fluid Magnetic Trailing Halo (Buttery smooth lerped elastic physics in emerald glass)
+ * 3. Interactive Morphing:
+ *    - Expands into an iridescent emerald-teal frosted glass halo on buttons, links, rows, & cards
+ *    - Morphs into a sleek vertical indicator on text inputs & search bars
+ * 4. Micro Click Feedback (Spring-like press compression on mousedown)
+ * 5. Ambient Emerald Radial Spotlight (Gently illuminates cards and glassy borders with cyber-emerald glow)
+ * 6. Mobile Safe & High Performance (Automatically disabled on touch devices, runs via RAF on GPU)
  */
 export function MouseTracker() {
   const [mounted, setMounted] = useState(false);
-  const followerRef = useRef<HTMLDivElement>(null);
+  const auraRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const dotInnerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
+  const rippleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only run on devices with fine pointer (mouse)
+    // Only run on devices with a fine mouse pointer
     if (typeof window === "undefined" || window.matchMedia("(pointer: coarse)").matches) {
       return;
     }
 
     setMounted(true);
 
-    const mouse = { x: -100, y: -100 };
-    const smooth = { x: -100, y: -100 };
+    const mouse = { x: -200, y: -200 };
+    const dotSmooth = { x: -200, y: -200 };
+    const auraSmooth = { x: -200, y: -200 };
+
     let isVisible = false;
     let isHovering = false;
+    let isTextInput = false;
     let isMouseDown = false;
     let rafId: number;
 
@@ -36,22 +48,44 @@ export function MouseTracker() {
 
       if (!isVisible) {
         isVisible = true;
-        if (followerRef.current) followerRef.current.style.opacity = "1";
+        if (dotRef.current) dotRef.current.style.opacity = "1";
+        if (auraRef.current) auraRef.current.style.opacity = "1";
         if (spotlightRef.current) spotlightRef.current.style.opacity = "1";
       }
 
-      // Check if hovering over an interactive element
+      // Check target element types
       const target = e.target as HTMLElement | null;
       if (target) {
-        const interactive = target.closest(
-          'a, button, [role="button"], input, select, textarea, label, [data-interactive="true"], .cursor-pointer'
+        const textElement = target.closest(
+          'input[type="text"], input[type="search"], input[type="email"], textarea, [contenteditable="true"]'
         );
-        isHovering = Boolean(interactive);
+        isTextInput = Boolean(textElement);
+
+        if (!isTextInput) {
+          const interactive = target.closest(
+            'a, button, [role="button"], select, label, [data-interactive="true"], .cursor-pointer, input[type="checkbox"], input[type="radio"]'
+          );
+          isHovering = Boolean(interactive);
+        } else {
+          isHovering = false;
+        }
       }
     };
 
     const handleMouseDown = () => {
       isMouseDown = true;
+
+      // Trigger micro ripple animation
+      if (rippleRef.current) {
+        rippleRef.current.style.transform = "scale(1.8)";
+        rippleRef.current.style.opacity = "0";
+        setTimeout(() => {
+          if (rippleRef.current) {
+            rippleRef.current.style.transform = "scale(0.8)";
+            rippleRef.current.style.opacity = "0.7";
+          }
+        }, 180);
+      }
     };
 
     const handleMouseUp = () => {
@@ -60,35 +94,65 @@ export function MouseTracker() {
 
     const handleMouseLeave = () => {
       isVisible = false;
-      if (followerRef.current) followerRef.current.style.opacity = "0";
+      if (dotRef.current) dotRef.current.style.opacity = "0";
+      if (auraRef.current) auraRef.current.style.opacity = "0";
       if (spotlightRef.current) spotlightRef.current.style.opacity = "0";
     };
 
     const handleMouseEnter = () => {
       isVisible = true;
-      if (followerRef.current) followerRef.current.style.opacity = "1";
+      if (dotRef.current) dotRef.current.style.opacity = "1";
+      if (auraRef.current) auraRef.current.style.opacity = "1";
       if (spotlightRef.current) spotlightRef.current.style.opacity = "1";
     };
 
-    // Smooth physics loop
+    // Smooth Dual-Physics RAF Loop
     const animate = () => {
-      // Lerp smooth coordinates toward mouse position
-      smooth.x += (mouse.x - smooth.x) * 0.18;
-      smooth.y += (mouse.y - smooth.y) * 0.18;
+      // 1. Fast responsive dot lerp (0.45)
+      dotSmooth.x += (mouse.x - dotSmooth.x) * 0.45;
+      dotSmooth.y += (mouse.y - dotSmooth.y) * 0.45;
 
-      if (followerRef.current) {
-        const scale = isMouseDown ? 0.82 : isHovering ? 1.45 : 1;
-        followerRef.current.style.transform = `translate3d(${smooth.x}px, ${smooth.y}px, 0) translate(-50%, -50%) scale(${scale})`;
+      // 2. Buttery smooth trailing aura lerp (0.14)
+      auraSmooth.x += (mouse.x - auraSmooth.x) * 0.14;
+      auraSmooth.y += (mouse.y - auraSmooth.y) * 0.14;
 
-        if (isHovering) {
-          followerRef.current.classList.add("cursor-hovering");
+      // Position the lead micro-dot
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${dotSmooth.x}px, ${dotSmooth.y}px, 0)`;
+      }
+
+      // Position & transform the trailing aura ring
+      if (auraRef.current) {
+        auraRef.current.style.transform = `translate3d(${auraSmooth.x}px, ${auraSmooth.y}px, 0)`;
+      }
+
+      // Update ring appearance dynamically with modern Emerald / Mint palette
+      if (ringRef.current && dotInnerRef.current) {
+        if (isTextInput) {
+          // Subtle capsule for text input
+          ringRef.current.className =
+            "w-3.5 h-6 rounded-md border border-emerald-500/50 bg-emerald-500/[0.08] shadow-[0_0_12px_rgba(16,185,129,0.25)] transition-all duration-200 ease-out";
+          dotInnerRef.current.style.transform = "scale(0.7)";
+        } else if (isHovering) {
+          // Expanded magnetic glowing halo on interactive targets
+          const scale = isMouseDown ? "scale(0.85)" : "scale(1)";
+          ringRef.current.className =
+            "w-10 h-10 rounded-full border border-emerald-400/60 dark:border-emerald-300/70 bg-gradient-to-tr from-emerald-500/[0.12] via-teal-500/[0.15] to-emerald-400/[0.1] shadow-[0_0_24px_rgba(16,185,129,0.38)] backdrop-blur-[0.5px] transition-all duration-200 ease-out";
+          ringRef.current.style.transform = scale;
+          dotInnerRef.current.style.transform = isMouseDown ? "scale(0.6)" : "scale(0.75)";
         } else {
-          followerRef.current.classList.remove("cursor-hovering");
+          // Default sleek micro-ring in subtle emerald
+          const scale = isMouseDown ? "scale(0.75)" : "scale(1)";
+          ringRef.current.className =
+            "w-6 h-6 rounded-full border border-emerald-500/40 dark:border-emerald-400/50 bg-emerald-500/[0.04] dark:bg-emerald-400/[0.06] shadow-[0_0_14px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out";
+          ringRef.current.style.transform = scale;
+          dotInnerRef.current.style.transform = isMouseDown ? "scale(0.7)" : "scale(1)";
         }
       }
 
+      // Update ambient radial spotlight illumination (Emerald-Teal subtle gradient)
       if (spotlightRef.current) {
-        spotlightRef.current.style.background = `radial-gradient(550px circle at ${mouse.x}px ${mouse.y}px, rgba(37, 99, 235, 0.05), rgba(139, 92, 246, 0.02) 40%, transparent 75%)`;
+        spotlightRef.current.style.background = `radial-gradient(620px circle at ${mouse.x}px ${mouse.y}px, rgba(16, 185, 129, 0.055), rgba(20, 184, 166, 0.02) 45%, transparent 75%)`;
       }
 
       rafId = requestAnimationFrame(animate);
@@ -116,7 +180,7 @@ export function MouseTracker() {
 
   return (
     <>
-      {/* ─── 1. AMBIENT CURSOR SPOTLIGHT ─── */}
+      {/* ─── 1. AMBIENT EMERALD RADIAL ILLUMINATION ─── */}
       <div
         ref={spotlightRef}
         aria-hidden="true"
@@ -124,19 +188,40 @@ export function MouseTracker() {
         style={{ willChange: "background" }}
       />
 
-      {/* ─── 2. REFINED CURSOR FOLLOWER AURA ─── */}
+      {/* ─── 2. FLUID MAGNETIC TRAILING AURA RING ─── */}
       <div
-        ref={followerRef}
+        ref={auraRef}
         aria-hidden="true"
         className="pointer-events-none fixed top-0 left-0 z-50 transition-opacity duration-300 opacity-0"
         style={{ willChange: "transform" }}
       >
         <div className="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2">
-          {/* Subtle Outer Glow Ring */}
-          <div className="w-6 h-6 rounded-full border border-blue-500/35 dark:border-blue-400/40 bg-blue-500/[0.04] dark:bg-blue-400/[0.06] shadow-[0_0_12px_rgba(37,99,235,0.2)] transition-all duration-200 [.cursor-hovering_&]:w-9 [.cursor-hovering_&]:h-9 [.cursor-hovering_&]:border-indigo-500/50 [.cursor-hovering_&]:bg-indigo-500/[0.12] [.cursor-hovering_&]:shadow-[0_0_18px_rgba(99,102,241,0.35)]" />
+          {/* Outer Emerald Aura */}
+          <div
+            ref={ringRef}
+            className="w-6 h-6 rounded-full border border-emerald-500/40 dark:border-emerald-400/50 bg-emerald-500/[0.04] dark:bg-emerald-400/[0.06] shadow-[0_0_14px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out"
+          />
 
-          {/* Micro Core Dot */}
-          <div className="absolute w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shadow-[0_0_6px_rgba(37,99,235,0.7)] transition-transform duration-200 [.cursor-hovering_&]:scale-125 [.cursor-hovering_&]:bg-indigo-500" />
+          {/* Micro Ripple Wave on Click */}
+          <div
+            ref={rippleRef}
+            className="absolute w-6 h-6 rounded-full border border-emerald-400/50 pointer-events-none transition-all duration-300 ease-out scale-75 opacity-0"
+          />
+        </div>
+      </div>
+
+      {/* ─── 3. PINPOINT RESPONSIVE LEAD MICRO-DOT ─── */}
+      <div
+        ref={dotRef}
+        aria-hidden="true"
+        className="pointer-events-none fixed top-0 left-0 z-50 transition-opacity duration-300 opacity-0"
+        style={{ willChange: "transform" }}
+      >
+        <div className="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2">
+          <div
+            ref={dotInnerRef}
+            className="w-1.5 h-1.5 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-green-300 dark:from-emerald-400 dark:via-teal-300 dark:to-green-200 shadow-[0_0_10px_rgba(16,185,129,0.85)] transition-transform duration-150"
+          />
         </div>
       </div>
     </>

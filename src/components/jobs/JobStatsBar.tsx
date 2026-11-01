@@ -1,148 +1,266 @@
 "use client";
 
 import React from "react";
-import { Briefcase, CheckCircle2, Clock, Users2, PauseCircle, XCircle } from "lucide-react";
+import {
+  Briefcase,
+  CheckCircle2,
+  Clock,
+  Users2,
+  PauseCircle,
+  XCircle,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { JobMetadata } from "@/types/job";
 
-interface JobStatsBarProps {
+export interface JobStatsBarProps {
+  meta?: JobMetadata;
   totalCount: number;
-  jobs: Array<{
+  jobs?: Array<{
     stage?: string;
     headcount?: number;
+    isActive?: boolean;
   }>;
+  selectedTab?: string;
+  onSelectTab?: (tab: string) => void;
+  // Backwards compatibility props
   selectedStage?: string;
   onSelectStage?: (stage: string) => void;
   className?: string;
 }
 
+// Stage configuration (Active is shown as the primary status tab, so no separate "Active Stage" tab)
+const STAGES = [
+  { key: "Open", label: "Open", color: "#06B6D4", icon: Clock },
+  { key: "Onboarding", label: "Onboarding", color: "#8B5CF6", icon: Sparkles },
+  { key: "Hired", label: "Hired", color: "#10B981", icon: Users2 },
+  { key: "On Hold", label: "On Hold", color: "#F59E0B", icon: PauseCircle },
+  { key: "Closed", label: "Closed", color: "#64748B", icon: XCircle },
+];
+
 export const JobStatsBar: React.FC<JobStatsBarProps> = ({
+  meta,
   totalCount,
   jobs = [],
-  selectedStage = "All",
+  selectedTab,
+  onSelectTab,
+  selectedStage,
   onSelectStage,
   className,
 }) => {
-  const counts = React.useMemo(() => {
-    let openCount = 0;
-    let activeCount = 0;
-    let hiredCount = 0;
-    let onHoldCount = 0;
-    let closedCount = 0;
-    let totalHeadcount = 0;
+  // Sync selected tab with backward-compatible selectedStage
+  const activeKey = selectedTab || selectedStage || "ACTIVE";
 
-    jobs.forEach((j) => {
-      if (j.stage === "Open") openCount++;
-      else if (j.stage === "Active") activeCount++;
-      else if (j.stage === "Hired") hiredCount++;
-      else if (j.stage === "On Hold") onHoldCount++;
-      else if (j.stage === "Closed") closedCount++;
-      totalHeadcount += j.headcount || 1;
-    });
+  const handleSelect = (key: string) => {
+    if (onSelectTab) onSelectTab(key);
+    if (onSelectStage) onSelectStage(key);
+  };
 
-    return { openCount, activeCount, hiredCount, onHoldCount, closedCount, totalHeadcount };
+  // Safe stage count resolution with multi-level fallbacks
+  const getStageCount = (stageKey: string): number => {
+    if (!meta) {
+      return jobs.filter((j) => (j.stage || "").toLowerCase() === stageKey.toLowerCase()).length;
+    }
+
+    // 1. byStage direct key match
+    if (meta.byStage && meta.byStage[stageKey] !== undefined) {
+      return meta.byStage[stageKey]!;
+    }
+
+    // 2. byStage case-insensitive match
+    if (meta.byStage) {
+      const matchKey = Object.keys(meta.byStage).find(
+        (k) => k.toLowerCase() === stageKey.toLowerCase()
+      );
+      if (matchKey && meta.byStage[matchKey] !== undefined) {
+        return meta.byStage[matchKey]!;
+      }
+    }
+
+    // 3. stageBreakdown array lookup
+    if (Array.isArray(meta.stageBreakdown)) {
+      const found = meta.stageBreakdown.find(
+        (s) => s.stage?.toLowerCase() === stageKey.toLowerCase()
+      );
+      if (found && typeof found.count === "number") {
+        return found.count;
+      }
+    }
+
+    // 4. Root field fallback (e.g. meta.closed)
+    if (stageKey.toLowerCase() === "closed" && meta.closed !== undefined) {
+      return meta.closed;
+    }
+
+    // 5. Fallback to local page jobs count
+    return jobs.filter((j) => (j.stage || "").toLowerCase() === stageKey.toLowerCase()).length;
+  };
+
+  // Total and Active counts with fallbacks
+  const totalAllJobs =
+    meta?.total !== undefined
+      ? meta.total
+      : totalCount > 0
+      ? totalCount
+      : jobs.length;
+
+  const activeJobsCount =
+    meta?.active !== undefined
+      ? meta.active
+      : jobs.filter((j) => (j as any).isActive !== false).length;
+
+  // Headcount calculation from local jobs
+  const totalHeadcount = React.useMemo(() => {
+    return jobs.reduce((acc, j) => acc + (Number(j.headcount) || 1), 0);
   }, [jobs]);
 
+  const stageBreakdown = meta?.stageBreakdown || [];
+
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 select-none",
-        className
-      )}
-    >
-      {/* All Jobs */}
-      <button
-        type="button"
-        onClick={() => onSelectStage && onSelectStage("All")}
-        className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-          selectedStage === "All"
-            ? "bg-primary/10 border-primary/30 text-primary shadow-xs"
-            : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-        )}
-      >
-        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-        <span className="text-[11px] font-medium">All Jobs</span>
-        <span className="px-1.5 py-0.2 rounded-md bg-primary/15 text-primary text-[10px] font-bold">
-          {totalCount}
-        </span>
-      </button>
+    <div className={cn("w-full flex flex-col gap-1.5 select-none", className)}>
+      {/* Horizontal Tabs Row */}
+      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
+        {/* All Jobs Tab */}
+        <button
+          type="button"
+          onClick={() => handleSelect("ALL")}
+          className={cn(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all duration-200 shrink-0",
+            activeKey === "ALL"
+              ? "bg-primary/10 border-primary/40 text-primary shadow-xs ring-1 ring-primary/20"
+              : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
+          )}
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+          <span className="text-[11px] font-medium">All</span>
+          <span
+            className={cn(
+              "px-1.5 py-0.2 rounded-md text-[10px] font-bold",
+              activeKey === "ALL"
+                ? "bg-primary/20 text-primary"
+                : "bg-muted text-muted-foreground"
+            )}
+          >
+            {totalAllJobs}
+          </span>
+        </button>
 
-      {/* Open */}
-      <button
-        type="button"
-        onClick={() => onSelectStage && onSelectStage("Open")}
-        className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-          selectedStage === "Open"
-            ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 shadow-xs"
-            : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-        )}
-      >
-        <Clock className="w-3.5 h-3.5 text-amber-500" />
-        <span className="text-[11px] font-medium">Open</span>
-        <span className="px-1.5 py-0.2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold">
-          {counts.openCount}
-        </span>
-      </button>
+        {/* Active Jobs Tab (Status: Active) */}
+        <button
+          type="button"
+          onClick={() => handleSelect("ACTIVE")}
+          className={cn(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all duration-200 shrink-0",
+            activeKey === "ACTIVE" || activeKey === "ACTIVE_JOBS" || activeKey === "Active"
+              ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/20"
+              : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
+          )}
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[11px] font-medium">Active</span>
+          <span
+            className={cn(
+              "px-1.5 py-0.2 rounded-md text-[10px] font-bold",
+              activeKey === "ACTIVE" || activeKey === "ACTIVE_JOBS" || activeKey === "Active"
+                ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                : "bg-muted text-muted-foreground"
+            )}
+          >
+            {activeJobsCount}
+          </span>
+        </button>
 
-      {/* Active */}
-      <button
-        type="button"
-        onClick={() => onSelectStage && onSelectStage("Active")}
-        className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-          selectedStage === "Active"
-            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-xs"
-            : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-        )}
-      >
-        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-        <span className="text-[11px] font-medium">Active</span>
-        <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-          {counts.activeCount}
-        </span>
-      </button>
+        {/* Divider */}
+        <div className="h-4 w-px bg-border/80 mx-0.5 shrink-0 hidden sm:block" />
 
-      {/* Hired */}
-      <button
-        type="button"
-        onClick={() => onSelectStage && onSelectStage("Hired")}
-        className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-          selectedStage === "Hired"
-            ? "bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400 shadow-xs"
-            : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-        )}
-      >
-        <span className="text-[11px] font-medium">Hired</span>
-        <span className="px-1.5 py-0.2 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold">
-          {counts.hiredCount}
-        </span>
-      </button>
+        {/* Specific Stage Tabs */}
+        {STAGES.map((st) => {
+          const count = getStageCount(st.key);
+          const isSelected = activeKey === st.key;
 
-      {/* On Hold */}
-      <button
-        type="button"
-        onClick={() => onSelectStage && onSelectStage("On Hold")}
-        className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-200 shrink-0",
-          selectedStage === "On Hold"
-            ? "bg-muted text-foreground border-border shadow-xs"
-            : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
-        )}
-      >
-        <PauseCircle className="w-3.5 h-3.5 text-muted-foreground" />
-        <span className="text-[11px] font-medium">On Hold</span>
-      </button>
+          return (
+            <button
+              key={st.key}
+              type="button"
+              onClick={() => handleSelect(st.key)}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all duration-200 shrink-0",
+                isSelected
+                  ? "shadow-xs ring-1"
+                  : "bg-card/70 border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-border"
+              )}
+              style={
+                isSelected
+                  ? {
+                      backgroundColor: `${st.color}15`,
+                      borderColor: `${st.color}50`,
+                      color: st.color,
+                      boxShadow: `0 0 0 1px ${st.color}30`,
+                    }
+                  : undefined
+              }
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: st.color }}
+              />
+              <span className="text-[11px] font-medium">{st.label}</span>
+              <span
+                className="px-1.5 py-0.2 rounded-md text-[10px] font-bold"
+                style={
+                  isSelected
+                    ? {
+                        backgroundColor: `${st.color}25`,
+                        color: st.color,
+                      }
+                    : {
+                        backgroundColor: "var(--muted)",
+                        color: "var(--muted-foreground)",
+                      }
+                }
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
 
-      {/* Headcount pill */}
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/70 bg-card/70 text-xs text-muted-foreground shrink-0 ml-auto hidden sm:flex">
-        <Users2 className="w-3.5 h-3.5 text-indigo-500" />
-        <span className="text-[11px] font-medium">Total Headcount:</span>
-        <span className="px-1.5 py-0.2 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold">
-          {counts.totalHeadcount}
-        </span>
+        {/* Right Info: Total Headcount */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border/70 bg-card/60 text-xs text-muted-foreground shrink-0 ml-auto hidden md:flex">
+          <Users2 className="w-3.5 h-3.5 text-indigo-500" />
+          <span className="text-[10px] font-medium">Headcount:</span>
+          <span className="px-1.5 py-0.2 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold">
+            {totalHeadcount}
+          </span>
+        </div>
       </div>
+
+      {/* Slim Stage Breakdown Progress Strip */}
+      {stageBreakdown.length > 0 && totalAllJobs > 0 && (
+        <div className="w-full flex items-center gap-1">
+          <div className="w-full h-1.5 rounded-full bg-muted/60 overflow-hidden flex">
+            {stageBreakdown.map((item) => {
+              if (item.percentage <= 0) return null;
+              const isSelected = activeKey === item.stage;
+              return (
+                <div
+                  key={item.stage}
+                  title={`${item.stage}: ${item.count} (${item.percentage}%)`}
+                  onClick={() => handleSelect(item.stage)}
+                  style={{
+                    width: `${Math.max(item.percentage, 1)}%`,
+                    backgroundColor: item.color || "#64748B",
+                  }}
+                  className={cn(
+                    "h-full cursor-pointer transition-all duration-300 hover:brightness-125",
+                    isSelected ? "brightness-125 ring-1 ring-white/50" : "opacity-90 hover:opacity-100"
+                  )}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

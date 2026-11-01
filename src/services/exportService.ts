@@ -1,12 +1,16 @@
 import { api } from "@/lib/axios-config";
 
-export interface ExportCandidatesParams {
+export interface ExportFilterParams {
     year?: number;
     month?: number;
+    stage?: string;
 }
 
+export type ExportCandidatesParams = ExportFilterParams;
+export type ExportClientsParams = ExportFilterParams;
+
 export const exportService = {
-    exportCandidates: async (params?: ExportCandidatesParams) => {
+    exportCandidates: async (params?: ExportFilterParams) => {
         try {
             const response = await api.get('/api/export/candidates', {
                 params,
@@ -18,7 +22,7 @@ export const exportService = {
             throw error;
         }
     },
-    exportClients: async (params?: ExportCandidatesParams) => {
+    exportClients: async (params?: ExportClientsParams) => {
         try {
             const response = await api.get('/api/export/clients', {
                 params,

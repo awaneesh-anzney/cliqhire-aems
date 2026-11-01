@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getClients, getClientById, ClientResponse, bulkUploadClients } from "@/services/clientService";
+import { getClients, getClientById, ClientResponse, bulkUploadClients, EngagementCounts } from "@/services/clientService";
 
 export interface ClientsQueryParams {
   page?: number;
@@ -11,6 +11,7 @@ export interface ClientsQueryParams {
   phoneNumber?: string;
   industry?: string;
   clientStage?: "Lead" | "Engaged" | "Signed" | string;
+  engagementCategory?: string;
   location?: string;
   clientTeam?: "Enterprise" | "SMB" | "Mid-Market";
   topLevelOnly?: boolean;
@@ -25,9 +26,11 @@ export interface ClientsPage {
   page: number;
   limit: number;
   totalPages: number;
+  engagementCounts?: EngagementCounts;
   filters?: {
     topLevelOnly?: boolean;
     topLevelOnlyRequested?: boolean;
+    engagementCategory?: string;
     [key: string]: any;
   };
 }
