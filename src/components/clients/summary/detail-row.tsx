@@ -86,7 +86,7 @@ export function DetailRow({
   };
 
   const displayValue = () => {
-    if (!value) return null;
+    if (value === null || value === undefined || value === "") return null;
     if (isDate) {
       try {
         const date = value instanceof Date ? value : new Date(value);
@@ -98,7 +98,11 @@ export function DetailRow({
     if (isNumber) {
       return `${value}${suffix || ""}`;
     }
-    return value.toString();
+    if (typeof value === "object") {
+      const obj = value as any;
+      return obj.name || obj.label || obj.value || obj.title || obj.priority || obj.segment || JSON.stringify(obj);
+    }
+    return String(value);
   };
 
   const rawDisplay = formattedValue || displayValue();
@@ -107,7 +111,7 @@ export function DetailRow({
   const isSegment = label.toLowerCase().includes("segment");
 
   const getPriorityBadge = (val: string) => {
-    const v = val.toLowerCase();
+    const v = (typeof val === "string" ? val : String(val || "")).toLowerCase();
     if (v === "high") {
       return <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-semibold text-xs">High</Badge>;
     }
@@ -121,7 +125,7 @@ export function DetailRow({
   };
 
   const getSegmentBadge = (val: string) => {
-    const v = val.toLowerCase();
+    const v = (typeof val === "string" ? val : String(val || "")).toLowerCase();
     if (v === "premium") {
       return <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-semibold text-xs">Premium</Badge>;
     }

@@ -33,6 +33,19 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
+const safeString = (val: any, fallback: string = ""): string => {
+  if (val === null || val === undefined || val === "") return fallback;
+  if (typeof val === "string") return val;
+  if (typeof val === "number" || typeof val === "boolean") return String(val);
+  if (typeof val === "object") {
+    if (Array.isArray(val)) {
+      return val.map((v) => safeString(v)).filter(Boolean).join(", ") || fallback;
+    }
+    return val.name || val.label || val.value || val.title || val.priority || val.segment || fallback;
+  }
+  return fallback;
+};
+
 export function SummaryContent({
   clientId,
   clientData,
@@ -249,11 +262,12 @@ export function SummaryContent({
   };
 
   // Helper values
-  const priority = clientData?.clientPriority || "Not Set";
-  const segment = clientData?.clientSegment || "Standard";
-  const industry = clientData?.industry || "Not Specified";
-  const source = clientData?.clientSource || "Direct";
-  const salesLead = clientData?.salesLead || "Unassigned";
+  const priority = safeString(clientData?.clientPriority ?? clientData?.priority, "Not Set");
+  const priorityLower = priority.toLowerCase();
+  const segment = safeString(clientData?.clientSegment ?? clientData?.segment, "Standard");
+  const industry = safeString(clientData?.industry, "Not Specified");
+  const source = safeString(clientData?.clientSource ?? clientData?.source, "Direct");
+  const salesLead = safeString(clientData?.salesLead, "Unassigned");
 
   return (
     <div className="space-y-3">
@@ -269,9 +283,9 @@ export function SummaryContent({
               variant="outline"
               className={cn(
                 "font-semibold text-xs",
-                priority.toLowerCase() === "high" && "bg-rose-500/10 text-rose-600 border-rose-500/20",
-                priority.toLowerCase() === "medium" && "bg-amber-500/10 text-amber-600 border-amber-500/20",
-                priority.toLowerCase() === "low" && "bg-slate-500/10 text-slate-600 border-slate-500/20",
+                priorityLower === "high" && "bg-rose-500/10 text-rose-600 border-rose-500/20",
+                priorityLower === "medium" && "bg-amber-500/10 text-amber-600 border-amber-500/20",
+                priorityLower === "low" && "bg-slate-500/10 text-slate-600 border-slate-500/20",
               )}
             >
               {priority}
@@ -346,14 +360,14 @@ export function SummaryContent({
             <div className="p-2 divide-y divide-border/40">
               <DetailRow
                 label="Sales Lead (Internal)"
-                value={clientData?.salesLead}
+                value={typeof clientData?.salesLead === "object" ? safeString(clientData?.salesLead) : clientData?.salesLead}
                 onUpdate={handleUpdateField("salesLead")}
                 disableInternalEdit={!canModify}
                 customEdit={() => canModify && setShowSalesLeadDialog(true)}
               />
               <DetailRow
                 label="Referred By (External)"
-                value={clientData?.referredBy}
+                value={typeof clientData?.referredBy === "object" ? safeString(clientData?.referredBy) : clientData?.referredBy}
                 onUpdate={handleUpdateField("referredBy")}
                 disableInternalEdit={!canModify}
                 customEdit={() => canModify && setShowReferredByDialog(true)}
@@ -452,7 +466,7 @@ export function SummaryContent({
               )}
               <DetailRow
                 label="Client Priority"
-                value={clientData?.clientPriority}
+                value={typeof clientData?.clientPriority === "object" ? safeString(clientData?.clientPriority) : (clientData?.clientPriority ?? clientData?.priority)}
                 onUpdate={handleUpdateField("clientPriority")}
                 options={[
                   { value: "High", label: "High" },
@@ -463,7 +477,7 @@ export function SummaryContent({
               />
               <DetailRow
                 label="Client Segment"
-                value={clientData?.clientSegment}
+                value={typeof clientData?.clientSegment === "object" ? safeString(clientData?.clientSegment) : (clientData?.clientSegment ?? clientData?.segment)}
                 onUpdate={handleUpdateField("clientSegment")}
                 options={[
                   { value: "Silver", label: "Silver" },
