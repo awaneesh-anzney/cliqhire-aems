@@ -241,24 +241,24 @@ export const ClientCardView: React.FC<ClientCardViewProps> = ({
                   )}
                   {client.engagementCategory && (
                     <Chip
-                      label={client.engagementCategory}
+                      label={String(client.engagementCategory)}
                       size="small"
                       sx={{
                         height: 16,
                         fontSize: "0.58rem",
                         fontWeight: 700,
                         bgcolor:
-                          client.engagementCategory.toLowerCase().includes("signed") ||
-                          client.engagementCategory.toLowerCase().includes("high")
+                          String(client.engagementCategory).toLowerCase().includes("signed") ||
+                          String(client.engagementCategory).toLowerCase().includes("high")
                             ? "rgba(16, 185, 129, 0.12)"
-                            : client.engagementCategory.toLowerCase().includes("early")
+                            : String(client.engagementCategory).toLowerCase().includes("early")
                               ? "rgba(99, 102, 241, 0.12)"
                               : "rgba(239, 68, 68, 0.12)",
                         color:
-                          client.engagementCategory.toLowerCase().includes("signed") ||
-                          client.engagementCategory.toLowerCase().includes("high")
+                          String(client.engagementCategory).toLowerCase().includes("signed") ||
+                          String(client.engagementCategory).toLowerCase().includes("high")
                             ? "#10B981"
-                            : client.engagementCategory.toLowerCase().includes("early")
+                            : String(client.engagementCategory).toLowerCase().includes("early")
                               ? "#6366F1"
                               : "#EF4444",
                         border: 0,
