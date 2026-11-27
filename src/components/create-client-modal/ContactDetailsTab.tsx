@@ -55,7 +55,7 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           {/* Primary Email */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-foreground/90 flex items-center gap-1">
-              Primary Email <span className="text-rose-500">*</span>
+              Primary Email
             </label>
             <div className="relative flex items-center">
               <Mail className="w-4 h-4 absolute left-3.5 text-primary/70 pointer-events-none z-10" />
@@ -99,7 +99,7 @@ export function ContactDetailsTab({ form, setField }: ContactDetailsTabProps) {
           {/* Phone */}
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-xs font-bold text-foreground/90 flex items-center gap-1">
-              Official Phone <span className="text-rose-500">*</span>
+              Official Phone
             </label>
             <div className="w-full">
               <PhoneInput
