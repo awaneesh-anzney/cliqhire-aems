@@ -90,8 +90,7 @@ function validateTab(tab: number, form: ClientForm): string | null {
       return null;
     case 1:
       if (!form.name.trim())                          return "Company name is required";
-      if (!EMAIL_REGEX.test(form.email))              return "Valid email is required";
-      if (!form.phoneNumber.trim())                   return "Phone number is required";
+      if (form.email && !EMAIL_REGEX.test(form.email)) return "Valid email is required";
       if (form.otherEmail && !EMAIL_REGEX.test(form.otherEmail))
                                                       return "Other email is invalid";
       if (form.website && !URL_REGEX.test(form.website))
@@ -165,6 +164,14 @@ export function CreateClientModal({
       // Stringify clientSourceDetails for form-data
       if (payload.clientSourceDetails && typeof payload.clientSourceDetails === 'object') {
         payload.clientSourceDetails = JSON.stringify(payload.clientSourceDetails) as any;
+      }
+
+      if (!payload.phoneNumber?.trim()) {
+        payload.phoneNumber = "";
+        payload.countryCode = "";
+      }
+      if (!payload.email?.trim()) {
+        payload.email = "";
       }
 
       const body = objectToFormData(payload, FILE_FIELDS);

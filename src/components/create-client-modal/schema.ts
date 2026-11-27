@@ -35,8 +35,8 @@ export const clientContactInfoSchema = z.object({
   name: z.string().min(1, "Client name is required"),
   emails: z
     .array(z.string().regex(emailRegex, "Please enter valid email addresses"))
-    .min(1, "At least one email is required"),
-  phoneNumber: z.string().min(1, "Client landline number is required"),
+    .optional(),
+  phoneNumber: z.string().optional(),
   address: z.string().min(1, "Client address is required"),
   // website: z
   //   .string()
